@@ -6,7 +6,7 @@
 
 | 資料夾 | 對應論文章節 | 狀態 |
 |---|---|---|
-| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.2-1.1.4 | 🟢 已下載 5 篇 |
+| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.2-1.1.5 | 🟡 已下載 7 篇，1 篇待手動下載 |
 | `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2 | ⚪ 待下載 |
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
@@ -21,8 +21,12 @@
 | `marcus-2020-next-decade-in-ai.pdf` | Marcus (2020) | arXiv:2002.06177 |
 | `garcez-lamb-2020-neurosymbolic-ai-3rd-wave.pdf` | Garcez & Lamb (2020/2023), *Artificial Intelligence Review* | arXiv:2012.05876 |
 | `morris-et-al-2023-levels-of-agi.pdf` | Morris et al. (2023/2024, Google DeepMind), ICML 2024 | arXiv:2311.02462 |
+| `ha-schmidhuber-2018-world-models.pdf` | Ha & Schmidhuber (2018) | arXiv:1803.10122 |
+| `hu-shu-2023-law-language-agent-world-models.pdf` | Hu & Shu (2023)，LAW 框架 | arXiv:2312.05230 |
 
-**未下載**：Goertzel & Pennachin (Eds.) (2007), *Artificial General Intelligence*（Springer 專書）——無公開免費 PDF，屬版權著作，不下載全文。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
+**未下載（版權，不下載全文）**：Goertzel & Pennachin (Eds.) (2007), *Artificial General Intelligence*（Springer 專書）——無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
+
+**待手動下載（自動化失敗）**：LeCun (2022), "A Path Towards Autonomous Machine Intelligence"——OpenReview（https://openreview.net/pdf?id=BZ5a1r-kVsf）擋自動化 curl 請求，需在瀏覽器手動下載後放入本資料夾，檔名建議 `lecun-2022-path-towards-autonomous-machine-intelligence.pdf`。
 
 ## 下載原則
 
