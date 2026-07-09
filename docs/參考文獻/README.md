@@ -6,7 +6,7 @@
 
 | 資料夾 | 對應論文章節 | 狀態 |
 |---|---|---|
-| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 10 篇 |
+| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 12 篇 |
 | `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2 | 🟡 已下載 2 篇 |
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
@@ -26,6 +26,8 @@
 | `hu-shu-2023-law-language-agent-world-models.pdf` | Hu & Shu (2023)，LAW 框架 | arXiv:2312.05230 |
 | `lecun-2022-path-towards-autonomous-machine-intelligence.pdf` | LeCun (2022), *A Path Towards Autonomous Machine Intelligence* | OpenReview |
 | `legg-et-al-2026-from-agi-to-asi.pdf` | Legg et al. (2026, Google DeepMind), *From AGI to ASI* | arXiv:2606.12683 |
+| `huang-et-al-2023-hallucination-survey.pdf` | Huang et al. (2023), *A Survey on Hallucination in LLMs* | arXiv:2311.05232 |
+| `dziri-et-al-2023-faith-and-fate.pdf` | Dziri et al. (2023), *Faith and Fate: Limits of Transformers on Compositionality*, NeurIPS 2024 | arXiv:2305.18654 |
 
 **未下載（版權，不下載全文）**：Goertzel & Pennachin (Eds.) (2007), *Artificial General Intelligence*（Springer 專書）——無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
 
