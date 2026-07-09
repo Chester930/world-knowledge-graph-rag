@@ -1,8 +1,8 @@
-# 智慧知識庫 v2
+# World Knowledge Graph RAG
 
 多場景知識圖譜 RAG 系統。將文件轉化為結構化 SVO 知識圖譜，透過雙層路由（ConceptNode + BFS 圖遍歷）提供精準問答。
 
-> 本專案為 [knowledge-base-ai](https://github.com/Chester930/knowledge-base-ai) 的重新架構版本，作為論文研究的實作載體。原專案驗證了核心概念的可行性；v2 目標是在架構嚴謹度、可測試性與可維護性上進行系統性提升。
+> 本專案（World Knowledge Graph RAG）是 [knowledge-base-ai](https://github.com/Chester930/knowledge-base-ai)（智慧知識庫，個人研究專案）的重新架構與品牌化版本，同時作為論文研究的實作載體。原專案驗證了核心概念的可行性；本專案的目標是在架構嚴謹度、可測試性與可維護性上系統性提升，並發展為涵蓋網頁與軟體、可支撐產品化的完整平台。
 
 ## 狀態
 

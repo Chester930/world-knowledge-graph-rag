@@ -1,16 +1,17 @@
-# CLAUDE.md — 智慧知識庫 v2 (Knowledge Base AI v2)
+# CLAUDE.md — World Knowledge Graph RAG
 
 本檔案提供 Claude Code CLI Agent 理解此專案所需的背景。
 
 ## 專案概覽
 
-**多場景知識圖譜 RAG 系統（v2 重構版）**：將文件轉化為結構化 SVO 知識圖譜，透過雙層路由（ConceptNode + BFS 圖遍歷）提供精準問答。
+**多場景知識圖譜 RAG 系統**：將文件轉化為結構化 SVO 知識圖譜，透過雙層路由（ConceptNode + BFS 圖遍歷）提供精準問答。定位為涵蓋網頁與軟體、可支撐公司產品線的完整平台，同時是論文研究的實作載體。
 
-本專案是 [knowledge-base-ai](https://github.com/Chester930/knowledge-base-ai)（v1）的重新架構版本，作為論文研究的實作載體。v1 已驗證核心概念可行；v2 的目標：
+本專案是 [knowledge-base-ai](https://github.com/Chester930/knowledge-base-ai)（智慧知識庫，個人研究專案）的重新架構與品牌化版本。原專案已驗證核心概念可行；本專案的目標：
 
 - 更嚴謹的分層架構（明確的 domain / infrastructure 邊界）
 - 更高的可測試性（依賴注入、減少隱性狀態）
 - 更完整的文件與設計紀錄，支援論文寫作所需的可追溯性
+- 從個人研究專案演進為可產品化的平台（網頁 + 軟體）
 
 - **後端**：FastAPI + Neo4j + Ollama/OpenAI/Anthropic/Gemini/Grok
 - **前端**：Vanilla JS 單頁應用（無框架）
