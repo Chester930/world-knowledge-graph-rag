@@ -1,0 +1,15 @@
+fastapi~=0.116
+uvicorn[standard]~=0.34
+neo4j~=6.0
+httpx~=0.28
+sentence-transformers~=5.2
+python-dotenv~=1.2
+pydantic~=2.12
+pydantic-settings~=2.12
+jinja2~=3.1
+python-multipart~=0.0.20
+
+# ── LLM Provider SDK（依 LLM_PROVIDER 設定選用）─────────────────
+openai~=2.29
+anthropic~=0.86
+google-generativeai~=0.8
