@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     embedding = init_providers()
     await ConceptRepository(get_driver()).create_vector_index(embedding.dim)
     logger.info(
-        f"智慧知識庫 v2 API 啟動完成 "
+        f"World Knowledge Graph RAG API 啟動完成 "
         f"[LLM={settings.llm_provider}, Embedding={settings.embedding_provider}]"
     )
     yield
@@ -35,8 +35,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="智慧知識庫 v2",
-    description="多場景知識圖譜 RAG 系統（架構重整版）",
+    title="World Knowledge Graph RAG",
+    description="多場景知識圖譜 RAG 系統",
     version="2.0.0-dev",
     lifespan=lifespan,
 )
