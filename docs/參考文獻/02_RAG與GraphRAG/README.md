@@ -7,5 +7,7 @@
 |---|---|---|
 | `lewis-et-al-2020-rag.pdf` | Lewis et al. (2020), Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks | arXiv:2005.11401 |
 | `edge-et-al-2024-graphrag.pdf` | Edge et al. (2024), From Local to Global: A Graph RAG Approach to Query-Focused Summarization | arXiv:2404.16130 |
+| `zhang-et-al-2025-graphrag-survey.pdf` | Zhang et al. (2025), A Survey of Graph Retrieval-Augmented Generation for Customized LLMs | arXiv:2501.13958 |
+| `singh-et-al-2025-agentic-rag-survey.pdf` | Singh et al. (2025), Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG | arXiv:2501.09136 |
 
 *待下載候選文獻*：Jiang et al. (2023) FLARE、Asai et al. (2024) Self-RAG。
