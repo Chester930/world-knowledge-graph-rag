@@ -28,10 +28,10 @@
 | `morris-et-al-2023-levels-of-agi.pdf` | Morris et al. (2023/2024, Google DeepMind), ICML 2024 | arXiv:2311.02462 |
 | `ha-schmidhuber-2018-world-models.pdf` | Ha & Schmidhuber (2018) | arXiv:1803.10122 |
 | `hu-shu-2023-law-language-agent-world-models.pdf` | Hu & Shu (2023)，LAW 框架 | arXiv:2312.05230 |
+| `lecun-2022-path-towards-autonomous-machine-intelligence.pdf` | LeCun (2022), *A Path Towards Autonomous Machine Intelligence* | OpenReview |
 
 **未下載（版權，不下載全文）**：Goertzel & Pennachin (Eds.) (2007), *Artificial General Intelligence*（Springer 專書）——無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
 
-**待手動下載（自動化失敗）**：LeCun (2022), "A Path Towards Autonomous Machine Intelligence"——OpenReview（https://openreview.net/pdf?id=BZ5a1r-kVsf）擋自動化 curl 請求，需在瀏覽器手動下載後放入本資料夾，檔名建議 `lecun-2022-path-towards-autonomous-machine-intelligence.pdf`。
 
 ## 02_RAG與GraphRAG 內容清單
 
