@@ -6,13 +6,8 @@
 
 | 資料夾 | 對應論文章節 | 狀態 |
 |---|---|---|
-<<<<<<< HEAD
-| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.2-1.1.4 | 🟢 已下載 5 篇 |
+| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 10 篇 |
 | `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2 | 🟡 已下載 2 篇 |
-=======
-| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.2-1.1.5 | 🟡 已下載 7 篇，1 篇待手動下載 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2 | ⚪ 待下載 |
->>>>>>> 18d40cbb817c85a2c8808fe791fa139747a42e96
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
@@ -26,12 +21,13 @@
 | `marcus-2020-next-decade-in-ai.pdf` | Marcus (2020) | arXiv:2002.06177 |
 | `garcez-lamb-2020-neurosymbolic-ai-3rd-wave.pdf` | Garcez & Lamb (2020/2023), *Artificial Intelligence Review* | arXiv:2012.05876 |
 | `morris-et-al-2023-levels-of-agi.pdf` | Morris et al. (2023/2024, Google DeepMind), ICML 2024 | arXiv:2311.02462 |
+| `morris-et-al-2023-levels-of-agi-v5.pdf` | Morris et al. (2023/2025, v5 最新修訂版) | arXiv:2311.02462v5 |
 | `ha-schmidhuber-2018-world-models.pdf` | Ha & Schmidhuber (2018) | arXiv:1803.10122 |
 | `hu-shu-2023-law-language-agent-world-models.pdf` | Hu & Shu (2023)，LAW 框架 | arXiv:2312.05230 |
 | `lecun-2022-path-towards-autonomous-machine-intelligence.pdf` | LeCun (2022), *A Path Towards Autonomous Machine Intelligence* | OpenReview |
+| `legg-et-al-2026-from-agi-to-asi.pdf` | Legg et al. (2026, Google DeepMind), *From AGI to ASI* | arXiv:2606.12683 |
 
 **未下載（版權，不下載全文）**：Goertzel & Pennachin (Eds.) (2007), *Artificial General Intelligence*（Springer 專書）——無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
-
 
 ## 02_RAG與GraphRAG 內容清單
 
