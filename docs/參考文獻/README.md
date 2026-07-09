@@ -1,0 +1,30 @@
+# 參考文獻資料夾
+
+存放論文引用文獻的原始文檔（PDF），依論文章節主題分類到子資料夾。命名規則：`第一作者-年份-關鍵詞.pdf`（小寫、連字號分隔）。
+
+## 分類與章節對應
+
+| 資料夾 | 對應論文章節 | 狀態 |
+|---|---|---|
+| `01_AGI與智慧定義/` | 01_緒論.md § 1.1.2-1.1.4 | 🟢 已下載 5 篇 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2 | ⚪ 待下載 |
+| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
+| `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
+| `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
+
+## 01_AGI與智慧定義 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `legg-hutter-2007-universal-intelligence.pdf` | Legg & Hutter (2007), *Minds and Machines* 17(4) | arXiv:0712.3329 |
+| `chollet-2019-measure-of-intelligence.pdf` | Chollet (2019) | arXiv:1911.01547 |
+| `marcus-2020-next-decade-in-ai.pdf` | Marcus (2020) | arXiv:2002.06177 |
+| `garcez-lamb-2020-neurosymbolic-ai-3rd-wave.pdf` | Garcez & Lamb (2020/2023), *Artificial Intelligence Review* | arXiv:2012.05876 |
+| `morris-et-al-2023-levels-of-agi.pdf` | Morris et al. (2023/2024, Google DeepMind), ICML 2024 | arXiv:2311.02462 |
+
+**未下載**：Goertzel & Pennachin (Eds.) (2007), *Artificial General Intelligence*（Springer 專書）——無公開免費 PDF，屬版權著作，不下載全文。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
+
+## 下載原則
+
+- 只下載**公開合法**的版本（arXiv 預印本、開放取用期刊、作者自存版）。有版權限制、需訂閱或付費的正式出版版本不下載全文，僅記錄書目資訊供引用查證。
+- 每次新增文獻，同步更新 `../論文/附錄與參考文獻.md` 的信任分級表，並在此 README 的清單中補上一列。
