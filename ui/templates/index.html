@@ -2,10 +2,37 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>智慧知識庫 v2</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
-  <h1>智慧知識庫 v2</h1>
-  <p>骨架階段 — UI 尚待實作。</p>
+  <div class="app">
+    <aside class="sidebar">
+      <h1 class="brand">智慧知識庫 v2</h1>
+      <section class="kg-panel">
+        <h2>知識圖譜</h2>
+        <ul id="kg-list" class="kg-list"><li class="muted">載入中…</li></ul>
+      </section>
+      <section class="staging-panel">
+        <h2>暫存區</h2>
+        <button id="staging-classify-btn" type="button">分析暫存文件</button>
+        <ul id="staging-results" class="staging-list"></ul>
+      </section>
+    </aside>
+
+    <main class="chat">
+      <header class="chat-header">
+        <span id="active-kg-label">全域問答</span>
+      </header>
+      <div id="chat-messages" class="chat-messages"></div>
+      <form id="chat-form" class="chat-form">
+        <input id="chat-input" type="text" placeholder="輸入問題…" autocomplete="off" required />
+        <button type="submit">送出</button>
+      </form>
+    </main>
+  </div>
+
+  <script src="/static/js/app.js"></script>
 </body>
 </html>

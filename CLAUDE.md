@@ -17,27 +17,37 @@
 
 ## 目前狀態
 
-初始骨架階段。目錄結構已依 v1 架構建立，尚未遷移實際邏輯。架構調整（如分層方式、模組邊界）將於後續逐步討論並落實，避免一次性大改動導致不可回溯。
+前後端架構骨架已建立且可啟動（`python -m uvicorn main:app` 可正常匯入）：
 
-## 目錄結構（暫定，沿用 v1 慣例）
+- `core/`（設定、Neo4j 連線與 KG 專用資料庫管理、auth、五種 LLM provider + 三種 embedding provider）**已可運作**，直接沿用 v1 驗證過的實作，屬於通用基礎設施、非本次重整範圍。
+- `routers/` → `services/` → `repositories/` 三層已建立並在 `main.py` 中掛載，`ConceptRepository.create_vector_index` 已實作；但 `services/` 內的核心演算法（SVO 抽取、ConceptNode 路由分數、BFS 圖遍歷、自我精煉迴圈）與 `repositories/document_repo.py`、`repositories/kg_repo.py`、`repositories/concept_repo.py` 的其餘方法皆為 `NotImplementedError` stub，等待架構重整後實作。
+- `ui/templates/index.html` + `ui/static/{css,js}` 已建立基本聊天室版面（KG 側欄、暫存區分類、SSE 串流聊天），採模組化 HTML/CSS/JS 分離（v1 為 1500+ 行單檔 HTML，此為 v2 嚴謹化的第一步）。
+
+架構調整（分層方式、模組邊界、演算法重新設計）將於後續逐步討論並落實，避免一次性大改動導致不可回溯。待決議事項見 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+
+## 目錄結構
 
 ```
-├── core/                    # 設定、DB 連線、Provider 工廠
-│   ├── config.py
-│   ├── database.py
-│   ├── constants.py
+├── core/
+│   ├── config.py              # 所有 .env 設定（唯一入口）
+│   ├── database.py            # Neo4j AsyncDriver 連線 + KG 專用資料庫管理
+│   ├── auth.py                 # X-API-Key 驗證中介層
+│   ├── constants.py           # 路由權重、SVO_REL_TYPES 等常數
 │   └── providers/
-│       ├── factory.py
-│       ├── llm/
-│       └── embedding/
-├── models/                  # Pydantic 資料模型
-├── repositories/            # Neo4j CRUD
-├── routers/                 # FastAPI 路由
-├── services/                # 核心業務邏輯（SVO 提取、KG 建構、問答）
-├── ui/templates/             # 前端單頁應用
-├── tests/                   # pytest 測試套件
-├── docs/                    # 架構與設計文件
-└── main.py                  # FastAPI 應用進入點
+│       ├── base.py            # LLMProvider / EmbeddingProvider 抽象介面
+│       ├── factory.py         # init_providers() 工廠
+│       ├── llm/                # ollama, openai, anthropic, gemini, grok（已實作）
+│       └── embedding/          # local, openai, ollama（已實作）
+├── models/                    # Pydantic 資料模型（document.py, knowledge_graph.py）
+├── repositories/               # Neo4j CRUD（concept_repo 部分已實作，document/kg 為 stub）
+├── routers/                   # FastAPI 路由（documents, search, agent, knowledge_graph, staging）
+├── services/                  # 核心業務邏輯（全為 stub，待架構重整後實作）
+├── ui/
+│   ├── templates/index.html   # 前端頁面骨架
+│   └── static/{css,js}        # 樣式與聊天室邏輯（模組化，非單檔）
+├── tests/                     # pytest 測試套件
+├── docs/                      # 架構與設計文件
+└── main.py                    # FastAPI 應用進入點（lifespan 連線 + 路由掛載）
 ```
 
 ## 開發慣例
