@@ -11,6 +11,8 @@
 | `singh-et-al-2025-agentic-rag-survey.pdf` | Singh et al. (2025), Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG | arXiv:2501.09136 |
 | `rashkin-et-al-2021-measuring-attribution-ais.pdf` | Rashkin et al. (2021/2023), Measuring Attribution in Natural Language Generation Models（AIS 框架，供 01_緒論.md § 1.1.4 使用） | arXiv:2112.12870 |
 | `shuster-et-al-2021-retrieval-reduces-hallucination.pdf` | Shuster et al. (2021), Retrieval Augmentation Reduces Hallucination in Conversation（供 01_緒論.md § 1.1.4 使用） | arXiv:2104.07567 |
+| `ma-et-al-2026-retrieval-drift-graphrag.pdf` | Ma et al. (2026), Toward Robust GraphRAG: Mitigating Retrieval Drift and Hallucination from Imperfect Knowledge Graphs（供 01_緒論.md § 1.1.1 使用） | arXiv:2603.14828 |
+| `zhu-et-al-2025-lost-in-retrieval.pdf` | Zhu et al. (2025), Mitigating Lost-in-Retrieval Problems in Retrieval Augmented Multi-Hop Question Answering，ACL 2025（供 01_緒論.md § 1.1.1 使用） | arXiv:2502.14245 |
 
 *待下載候選文獻*：Jiang et al. (2023) FLARE、Asai et al. (2024) Self-RAG。
 
