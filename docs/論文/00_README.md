@@ -11,6 +11,8 @@
   - `04_對標NotebookLM_不足分析與完全超越方案.md` — **產品競爭分析，非學術論文素材**，僅部分技術構想（向量引導圖剪枝等）可轉化為研究設計
   - `docs/THEORETICAL_ARCHITECTURE.md` — 完整理論架構與本體設計（T-Box/A-Box）
 - `World Knowledge Graph RAG`（本專案，重新架構並品牌化自 v1）是論文的**實作載體**，架構已重整為更嚴謹的分層（見 `../ARCHITECTURE.md`）
+- 本專案自己的 `docs/報告/`（v2 新建）：
+  - `產品競品研究.md` — 知識圖譜/GraphRAG/個人知識管理領域的競品調查（NotebookLM、Neo4j Builder、Zep、Glean、RAGFlow、Stardog、WhyHow.ai、Obsidian 生態），**產品規劃材料，非學術論文素材**，供 1.1.4 節結論引用時參考
 
 ## 章節檔案與狀態
 
