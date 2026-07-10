@@ -7,7 +7,7 @@
 | 資料夾 | 對應論文章節 | 狀態 |
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2 | 🟢 已下載 4 篇 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2，01_緒論.md § 1.1.4 | 🟢 已下載 6 篇 |
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
@@ -40,6 +40,8 @@
 | `edge-et-al-2024-graphrag.pdf` | Edge et al. (2024), *From Local to Global: A Graph RAG* | arXiv:2404.16130 |
 | `zhang-et-al-2025-graphrag-survey.pdf` | Zhang et al. (2025), *A Survey of Graph Retrieval-Augmented Generation for Customized LLMs*（原誤標為機構名「PolyU et al.」，已查證更正） | arXiv:2501.13958 |
 | `singh-et-al-2025-agentic-rag-survey.pdf` | Singh et al. (2025), *Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG* | arXiv:2501.09136 |
+| `rashkin-et-al-2021-measuring-attribution-ais.pdf` | Rashkin et al. (2021/2023), *Measuring Attribution in Natural Language Generation Models*，AIS 框架 | arXiv:2112.12870 |
+| `shuster-et-al-2021-retrieval-reduces-hallucination.pdf` | Shuster et al. (2021), *Retrieval Augmentation Reduces Hallucination in Conversation*，EMNLP 2021 Findings | arXiv:2104.07567 |
 
 ## 下載原則
 
