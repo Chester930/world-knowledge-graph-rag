@@ -7,8 +7,8 @@
 | 資料夾 | 對應論文章節 | 狀態 |
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2，01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 22 篇 |
-| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2，01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 25 篇 |
+| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3；01_緒論.md § 1.2 RQ4（預留） | 🟡 已下載 2 篇，1 篇付費未下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
 
@@ -58,6 +58,18 @@
 | `zhou-et-al-2025-graph-rag-unified-framework.pdf` | Zhou et al. (2025), *In-depth Analysis of Graph-based RAG in a Unified Framework* | arXiv:2503.04338 |
 | `dong-et-al-2025-kg-rag-evaluation-framework.pdf` | Dong et al. (2025), *Knowledge-Graph Based RAG System Evaluation Framework* | arXiv:2510.02549 |
 | `guo-et-al-2026-why-rag-fails-graph-perspective.pdf` | Guo et al. (2026), *Why Retrieval-Augmented Generation Fails: A Graph Perspective* | arXiv:2605.14192 |
+| `asai-et-al-2023-self-rag.pdf` | Asai et al. (2023), *Self-RAG*，ICLR 2024（供 1.2 節 RQ3 使用） | arXiv:2310.11511 |
+| `jiang-et-al-2023-flare.pdf` | Jiang et al. (2023), *FLARE*，EMNLP 2023（供 1.2 節 RQ3 使用） | arXiv:2305.06983 |
+| `trivedi-et-al-2022-ircot.pdf` | Trivedi et al. (2022), *IRCoT*，ACL 2023（供 1.2 節 RQ3 使用） | arXiv:2212.10509 |
+
+## 03_資訊抽取與本體設計 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `vashishth-et-al-2018-cesi-canonicalize-open-kb.pdf` | Vashishth et al. (2018), *CESI*，WWW 2018（供 1.2 節 RQ4 使用） | arXiv:1902.00172 |
+| `angeli-et-al-2015-stanford-openie.pdf` | Angeli et al. (2015), *Stanford OpenIE*，ACL 2015（供 1.2 節 RQ4 使用） | ACL Anthology P15-1034 |
+
+**未下載（付費，不下載全文）**：Guha et al. (2016), *Schema.org: Evolution of Structured Data on the Web*（*Communications of the ACM* 59(2)）——ACM 需付費/機構帳號，無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
 
 ## 下載原則
 

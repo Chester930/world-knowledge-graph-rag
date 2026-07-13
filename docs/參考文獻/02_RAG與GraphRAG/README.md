@@ -33,7 +33,13 @@
 | `dong-et-al-2025-kg-rag-evaluation-framework.pdf` | Dong et al. (2025), Knowledge-Graph Based RAG System Evaluation Framework | arXiv:2510.02549 |
 | `guo-et-al-2026-why-rag-fails-graph-perspective.pdf` | Guo et al. (2026), Why RAG Fails: A Graph Perspective | arXiv:2605.14192 |
 
-*待下載候選文獻*：Jiang et al. (2023) FLARE、Asai et al. (2024) Self-RAG。
+### RQ3 支撐文獻（2026-07-13，自我精煉迴圈）
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `asai-et-al-2023-self-rag.pdf` | Asai et al. (2023), *Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection*, ICLR 2024 | arXiv:2310.11511 |
+| `jiang-et-al-2023-flare.pdf` | Jiang et al. (2023), *Active Retrieval Augmented Generation (FLARE)*, EMNLP 2023 | arXiv:2305.06983 |
+| `trivedi-et-al-2022-ircot.pdf` | Trivedi et al. (2022), *Interleaving Retrieval with Chain-of-Thought Reasoning (IRCoT)*, ACL 2023 | arXiv:2212.10509 |
 
 *待二次核實、未下載*：Right Answer at the Right Time（arXiv:2510.16715）、VersionRAG（arXiv:2510.08109）、RAG Meets Temporal Graphs（arXiv:2510.13590）——僅確認標題/arXiv ID 存在，作者未獨立核實。
 
