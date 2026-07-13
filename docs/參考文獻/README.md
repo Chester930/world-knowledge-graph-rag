@@ -7,7 +7,7 @@
 | 資料夾 | 對應論文章節 | 狀態 |
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2，01_緒論.md § 1.1.1、1.1.4 | 🟢 已下載 8 篇 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2，01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 22 篇 |
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3 | ⚪ 待下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
@@ -42,6 +42,22 @@
 | `singh-et-al-2025-agentic-rag-survey.pdf` | Singh et al. (2025), *Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG* | arXiv:2501.09136 |
 | `rashkin-et-al-2021-measuring-attribution-ais.pdf` | Rashkin et al. (2021/2023), *Measuring Attribution in Natural Language Generation Models*，AIS 框架 | arXiv:2112.12870 |
 | `shuster-et-al-2021-retrieval-reduces-hallucination.pdf` | Shuster et al. (2021), *Retrieval Augmentation Reduces Hallucination in Conversation*，EMNLP 2021 Findings | arXiv:2104.07567 |
+| `ma-et-al-2026-retrieval-drift-graphrag.pdf` | Ma et al. (2026), *Toward Robust GraphRAG*，提出「Retrieval Drift」 | arXiv:2603.14828 |
+| `zhu-et-al-2025-lost-in-retrieval.pdf` | Zhu et al. (2025), ACL 2025，提出「Lost-in-Retrieval」 | arXiv:2502.14245 |
+| `guo-et-al-2024-lightrag.pdf` | Guo et al. (2024), *LightRAG*，EMNLP 2025（供 `04_GraphRAG深度文獻回顧.md` 使用，下同） | arXiv:2410.05779 |
+| `han-et-al-2025-rag-vs-graphrag.pdf` | Han et al. (2025), *RAG vs. GraphRAG: A Systematic Evaluation* | arXiv:2502.11371 |
+| `chen-et-al-2025-pathrag.pdf` | Chen et al. (2025), *PathRAG* | arXiv:2502.14902 |
+| `fan-et-al-2026-do-we-still-need-graphrag.pdf` | Fan et al. (2026), *Do We Still Need GraphRAG?* | arXiv:2604.09666 |
+| `hong-et-al-2025-fg-rag.pdf` | Hong et al. (2025), *FG-RAG*，CIKM 2025 | arXiv:2504.07103 |
+| `xu-et-al-2025-noderag.pdf` | Xu et al. (2025), *NodeRAG* | arXiv:2504.11544 |
+| `xiang-et-al-2025-when-to-use-graphs-in-rag.pdf` | Xiang et al. (2025), *When to use Graphs in RAG*，ICLR 2026 | arXiv:2506.05690 |
+| `lau-et-al-2026-catrag-static-graph-fallacy.pdf` | Lau et al. (2026), *Breaking the Static Graph*（CatRAG），命名「Static Graph Fallacy」 | arXiv:2602.01965 |
+| `zhang-et-al-2025-erarag.pdf` | Zhang et al. (2025), *EraRAG* | arXiv:2506.20963 |
+| `xiao-et-al-2025-graphrag-bench.pdf` | Xiao et al. (2025), *GraphRAG-Bench* | arXiv:2506.02404 |
+| `li-et-al-2025-t-grag.pdf` | Li et al. (2025), *T-GRAG*，ACM Multimedia 2025 | arXiv:2508.01680 |
+| `zhou-et-al-2025-graph-rag-unified-framework.pdf` | Zhou et al. (2025), *In-depth Analysis of Graph-based RAG in a Unified Framework* | arXiv:2503.04338 |
+| `dong-et-al-2025-kg-rag-evaluation-framework.pdf` | Dong et al. (2025), *Knowledge-Graph Based RAG System Evaluation Framework* | arXiv:2510.02549 |
+| `guo-et-al-2026-why-rag-fails-graph-perspective.pdf` | Guo et al. (2026), *Why Retrieval-Augmented Generation Fails: A Graph Perspective* | arXiv:2605.14192 |
 
 ## 下載原則
 
