@@ -55,7 +55,7 @@ async def debug_parse_url(payload: dict):
         text = await loop.run_in_executor(None, parser.parse_url, url)
         return {"filename": url, "text": text}
     except Exception as e:
-        return {"filename": url, "text": f"解析失敗: {str(e)}\n\n(若是 YouTube 字幕，請確認該影片是否有字幕；若是網頁，請確認 URL 是否有效。)"}
+        return {"filename": url, "text": f"解析失敗: {str(e)}\n\n(YouTube 連結會自動嘗試字幕與音軌備援轉譯；若兩者皆失敗，請確認影片是否為私人/受地區限制。若是一般網頁，請確認 URL 是否有效。)"}
 
 
 if __name__ == "__main__":

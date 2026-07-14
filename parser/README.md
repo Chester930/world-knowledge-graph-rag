@@ -43,6 +43,9 @@
 3. [**openai/whisper**](https://github.com/openai/whisper) (MIT, 65k★):
    * **對照分析**：原生 Whisper 通常需要強大的 GPU 與數 GB 的 PyTorch 環境來載入大模型。本專案將其限制在 `tiny` 級別的語音識別模型，並與 FastAPI 非同步執行緒池整合，實現在普通電腦 CPU 上以秒級速度完成短影音的轉譯，降低了使用門檻。
 
+4. [**yt-dlp/yt-dlp**](https://github.com/yt-dlp/yt-dlp) (Unlicense/GPLv3+, 178k★):
+   * **對照分析**：`yt-dlp` 是 `youtube-dl` 停滯後由社群接手的主流分支，維護活躍、抽取邏輯更新快，已被 Ubuntu 官方收錄。本模組僅在 YouTube 官方／社群字幕皆不存在時，才啟用 `yt-dlp` 下載最佳音軌並交由本地 Whisper 轉譯，作為「零字幕」情境下的最後備援，避免對每支影片都預設下載整條音軌造成不必要的頻寬與運算開銷。
+
 ---
 
 ## 🛠️ 架構與 Fallback 決策流程 (Behavior Tree)

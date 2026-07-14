@@ -402,7 +402,7 @@
         <!-- URL 輸入區 -->
         <div class="url-section">
             <h3 style="font-size: 1.15rem; font-weight: 600; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">或者，貼上網頁或 YouTube 連結測試</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">支援一般網頁（自動轉為 Markdown）與 YouTube 影片網址（自動抓取中文或英文字幕逐字稿）</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">支援一般網頁（自動轉為 Markdown）與 YouTube 影片網址（優先抓取中文或英文字幕逐字稿；若該影片無字幕，將自動下載音軌並以本地 Whisper 轉譯）</p>
             <div class="url-input-container">
                 <input type="text" class="url-input" id="url-input" placeholder="貼上網址 (例如: https://www.youtube.com/watch?v=... 或 https://news.ycombinator.com/)">
                 <button class="btn-parse-url" id="btn-parse-url">🔗 開始轉譯</button>
@@ -498,7 +498,7 @@
             })
             .catch(err => {
                 loading.style.display = 'none';
-                alert('解析失敗：' + err.message + '\n請確認該網址可正常存取，若為 YouTube 影片請確認其具有字幕。');
+                alert('解析失敗：' + err.message + '\n請確認該網址可正常存取；若為 YouTube 影片，系統會自動嘗試字幕與音軌備援轉譯，仍失敗請確認影片是否為私人/受地區限制。');
             });
         }
 

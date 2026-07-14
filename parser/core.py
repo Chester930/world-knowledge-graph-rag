@@ -1,5 +1,6 @@
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import List, Optional
 
@@ -57,6 +58,30 @@ try:
     import whisper
 except ImportError:
     whisper = None
+
+try:
+    import yt_dlp
+except ImportError:
+    yt_dlp = None
+
+
+_whisper_model_cache = {}
+
+
+def _transcribe_with_whisper(path: str, model_size: str = "tiny") -> str:
+    """共用的本地 Whisper 語音轉文字函式，供音檔上傳與 YouTube 音軌備援共用。
+
+    模型載入後會快取在行程記憶體中，避免重複解析時重複載入。
+    """
+    if whisper is None:
+        raise ImportError("未安裝 openai-whisper 套件，請執行 pip install openai-whisper")
+
+    if model_size not in _whisper_model_cache:
+        _whisper_model_cache[model_size] = whisper.load_model(model_size)
+    model = _whisper_model_cache[model_size]
+
+    result = model.transcribe(str(path))
+    return result.get("text", "").strip()
 
 
 class DocumentParserError(Exception):
@@ -176,14 +201,11 @@ class DocumentParser:
 
     def _parse_audio(self, path: Path) -> str:
         """使用本地 Whisper 模型進行語音轉文字"""
-        if whisper is None:
-            raise ImportError("未安裝 openai-whisper 套件，請執行 pip install openai-whisper")
-
         try:
-            # 載入 tiny 模型，以防使用者下載過久。預設對中文已堪用
-            model = whisper.load_model("tiny")
-            result = model.transcribe(str(path))
-            return result.get("text", "").strip()
+            # 使用 tiny 模型，以防使用者下載過久。預設對中文已堪用
+            return _transcribe_with_whisper(str(path), model_size="tiny")
+        except ImportError:
+            raise
         except Exception as e:
             raise DocumentParserError(f"音訊轉譯失敗: {str(e)}")
 
@@ -451,49 +473,90 @@ class URLParser:
         return bool(re.match(pattern, url, re.IGNORECASE))
 
     def _parse_youtube(self, url: str) -> str:
-        """提取 YouTube 字幕"""
-        if YouTubeTranscriptApi is None:
-            raise ImportError("未安裝 youtube-transcript-api 套件，請執行 pip install youtube-transcript-api")
-
+        """提取 YouTube 字幕；若無字幕則自動備援下載音軌並以 Whisper 轉譯"""
         video_id = self._extract_youtube_id(url)
         if not video_id:
             raise ValueError(f"無法解析 YouTube 影片 ID: {url}")
 
+        subtitle_error = None
+        if YouTubeTranscriptApi is not None:
+            try:
+                full_text = self._fetch_youtube_subtitles(video_id)
+                return f"--- [YouTube Video {video_id} 字幕逐字稿] ---\n\n" + full_text
+            except Exception as e:
+                subtitle_error = e
+        else:
+            subtitle_error = ImportError("未安裝 youtube-transcript-api 套件")
+
+        # 備援軌：該影片無字幕（或字幕抓取失敗），改為下載音軌並用本地 Whisper 轉譯
+        if yt_dlp is None:
+            raise DocumentParserError(
+                f"YouTube 字幕提取失敗: {str(subtitle_error)}\n"
+                "(且未安裝 yt-dlp 套件，無法備援下載音軌，請執行 pip install yt-dlp)"
+            )
+
         try:
-            languages = ['zh-TW', 'zh-HK', 'zh-CN', 'zh', 'en']
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            
-            transcript = None
-            for lang in languages:
-                try:
-                    transcript = transcript_list.find_transcript([lang])
-                    break
-                except Exception:
-                    continue
-
-            if not transcript:
-                try:
-                    transcript = transcript_list.find_generated_transcript(languages)
-                except Exception:
-                    # 嘗試抓取任意一個可用字幕
-                    keys = list(transcript_list._manually_created_transcripts.keys()) + list(transcript_list._generated_transcripts.keys())
-                    if keys:
-                        transcript = transcript_list.find_transcript([keys[0]])
-
-            if not transcript:
-                raise ValueError("找不到該影片的任何字幕")
-
-            parts = transcript.fetch()
-            full_text = []
-            for part in parts:
-                text = part.text.strip()
-                if text:
-                    full_text.append(text)
-            
-            return f"--- [YouTube Video {video_id} 字幕逐字稿] ---\n\n" + " ".join(full_text)
-
+            audio_text = self._transcribe_youtube_audio(url, video_id)
+            return f"--- [YouTube Video {video_id} 音軌 Whisper 逐字稿（無可用字幕，已自動備援轉譯）] ---\n\n" + audio_text
         except Exception as e:
-            raise DocumentParserError(f"YouTube 字幕提取失敗: {str(e)}\n(若該影片完全無字幕，請改以上傳音軌方式轉譯)")
+            raise DocumentParserError(
+                f"YouTube 字幕提取失敗: {str(subtitle_error)}\n音軌備援轉譯亦失敗: {str(e)}"
+            )
+
+    def _fetch_youtube_subtitles(self, video_id: str) -> str:
+        """嘗試抓取 YouTube 官方或社群字幕，找不到則拋出例外交由呼叫端處理備援"""
+        languages = ['zh-TW', 'zh-HK', 'zh-CN', 'zh', 'en']
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+
+        transcript = None
+        for lang in languages:
+            try:
+                transcript = transcript_list.find_transcript([lang])
+                break
+            except Exception:
+                continue
+
+        if not transcript:
+            try:
+                transcript = transcript_list.find_generated_transcript(languages)
+            except Exception:
+                # 嘗試抓取任意一個可用字幕
+                keys = list(transcript_list._manually_created_transcripts.keys()) + list(transcript_list._generated_transcripts.keys())
+                if keys:
+                    transcript = transcript_list.find_transcript([keys[0]])
+
+        if not transcript:
+            raise ValueError("找不到該影片的任何字幕")
+
+        parts = transcript.fetch()
+        full_text = [part.text.strip() for part in parts if part.text.strip()]
+        if not full_text:
+            raise ValueError("字幕內容為空")
+
+        return " ".join(full_text)
+
+    def _transcribe_youtube_audio(self, url: str, video_id: str) -> str:
+        """下載 YouTube 影片音軌至暫存檔，並以本地 Whisper 模型轉譯為文字"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            audio_path_template = os.path.join(tmp_dir, f"{video_id}.%(ext)s")
+            ydl_opts = {
+                "format": "bestaudio/best",
+                "outtmpl": audio_path_template,
+                "quiet": True,
+                "no_warnings": True,
+                "noprogress": True,
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+
+            downloaded_files = [
+                os.path.join(tmp_dir, f) for f in os.listdir(tmp_dir)
+                if f.startswith(video_id)
+            ]
+            if not downloaded_files:
+                raise DocumentParserError("音軌下載失敗，未產生任何音訊檔案")
+
+            return _transcribe_with_whisper(downloaded_files[0], model_size="tiny")
 
     def _extract_youtube_id(self, url: str) -> Optional[str]:
         """從網址中擷取 YouTube Video ID"""
