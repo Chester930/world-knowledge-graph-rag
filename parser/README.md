@@ -114,6 +114,38 @@
 
 ---
 
+## 🖼️ 圖文統一處理管線 (Image Understanding Pipeline)
+
+除純文字提取外，`parser/image_pipeline.py` 額外實作了 PDF / PPTX / DOCX 內嵌圖片的處理管線，
+完整設計依據見 [`文檔轉譯器 最終優化架構總結（可跨模型接續討論）.md`](./文檔轉譯器%20最終優化架構總結（可跨模型接續討論）.md)。核心原則：
+
+1. **能力解耦**：OCR 文字提取為核心基礎能力，`enable_ocr` 預設 `True`，完全不依賴圖理解模型即可運作；
+   圖理解語義模型為選配增強能力，`enable_image_understanding` 預設 `False`，需另行啟動本機 [Ollama](https://ollama.com/) 服務並安裝多模態模型（如 `llava`）才會生效。未安裝/未啟動時自動降級為保留 OCR 結果，不中斷解析流程。
+2. **算力分層**：空間去重（跳過已被原生文字覆蓋 ≥70% 的裝飾性圖片）→ 全域 OCR → 三維度加權評分
+   （文件類型 30% + OCR 置信度 40% + 輕量圖形特徵 30%，預設閾值 60 分）→ 命中「如下圖」等強制旁路規則時
+   直接跳過評分 → 分數達標才呼叫本地圖理解模型補足語義。
+3. **圖號雙序列**：原文既有圖號（如「圖3」）與系統自動補號（`自補圖-1`、`自補圖-2`）各自獨立遞增，永不互相覆蓋。
+4. **圖片不落地**：圖片僅在處理過程中存於記憶體，處理完即釋放，輸出僅保留文字描述（OCR 文字或圖理解語義描述），不寫入磁碟。
+
+### 設定方式
+
+```python
+from parser.core import DocumentParser
+from parser.image_pipeline import ImagePipelineConfig
+
+config = ImagePipelineConfig(
+    enable_image_understanding=True,       # 開啟本地圖理解模型兜底
+    ollama_base_url="http://localhost:11434",
+    ollama_vision_model="llava",
+    score_threshold=60.0,
+    force_visual_parse_doc_types=["pptx"], # 例如：PPT 全域強制圖理解
+)
+parser = DocumentParser(image_config=config)
+text = parser.parse_file("report.pdf")
+```
+
+若不提供 `image_config`，則沿用預設值（OCR 開啟、圖理解模型關閉），行為與升級前完全相容。
+
 ## 📦 系統依賴說明 (System Prerequisites)
 
 由於部分提取軌道涉及影像處理與音訊重組，請確保本機已安裝以下工具並加入系統環境變數 PATH 中：
@@ -131,3 +163,8 @@
    * *Windows (Scoop)*: `scoop install ffmpeg`
    * *Windows (Chocolatey)*: `choco install ffmpeg`
    * *macOS (Homebrew)*: `brew install ffmpeg`
+
+4. **Ollama**（選配，僅在啟用 `enable_image_understanding=True` 時需要，用於本地圖理解模型兜底）：
+   * 安裝：參考 [ollama.com/download](https://ollama.com/download)
+   * 下載多模態模型：`ollama pull llava`（或其他支援視覺輸入的模型，並對應設定 `ollama_vision_model`）
+   * 未安裝或服務未啟動時，圖片管線會自動降級為僅保留 OCR 結果，不影響其餘解析流程

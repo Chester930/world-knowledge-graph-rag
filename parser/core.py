@@ -1,8 +1,17 @@
+import io
+import logging
 import os
 import re
 import tempfile
 from pathlib import Path
 from typing import List, Optional
+
+try:
+    from parser.image_pipeline import ImagePipeline, ImagePipelineConfig
+except ImportError:
+    from image_pipeline import ImagePipeline, ImagePipelineConfig
+
+logger = logging.getLogger(__name__)
 
 # 第三方庫導入與容錯處理
 try:
@@ -12,19 +21,25 @@ except ImportError:
 
 try:
     from pdfminer.high_level import extract_pages
-    from pdfminer.layout import LTTextContainer, LTChar
+    from pdfminer.layout import LTTextContainer, LTChar, LTFigure, LTImage
 except ImportError:
     extract_pages = None
+    LTFigure = None
+    LTImage = None
 
 try:
     from docx import Document as DocxDocument
+    from docx.oxml.ns import qn as docx_qn
 except ImportError:
     DocxDocument = None
+    docx_qn = None
 
 try:
     from pptx import Presentation
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
 except ImportError:
     Presentation = None
+    MSO_SHAPE_TYPE = None
 
 try:
     from pdf2image import convert_from_path
@@ -84,6 +99,56 @@ def _transcribe_with_whisper(path: str, model_size: str = "tiny") -> str:
     return result.get("text", "").strip()
 
 
+def _iter_lt_images(item):
+    """遞迴尋找 LTFigure 容器內的所有 LTImage 元素（LTFigure 可能巢狀包含子圖形）。"""
+    if LTImage is not None and isinstance(item, LTImage):
+        yield item
+        return
+    try:
+        children = list(item)
+    except TypeError:
+        return
+    for child in children:
+        yield from _iter_lt_images(child)
+
+
+def _pil_from_ltimage(lt_image):
+    """將 pdfminer 的 LTImage 物件盡力解碼為 PIL Image。
+
+    多數內嵌影像為 JPEG（DCTDecode），pdfminer 的 get_data() 對此類濾鏡不會二次解碼，
+    可直接交給 PIL 開啟；其餘濾鏡（如未壓縮點陣圖）則嘗試以 srcsize/bits 還原像素資料。
+    無法解碼時回傳 None，呼叫端會安全略過該圖片，不影響其餘解析流程。
+    """
+    if Image is None:
+        return None
+    if getattr(lt_image, "imagemask", False):
+        return None  # 遮罩用途的裝飾性影像（如底色色塊），非內容圖片
+
+    try:
+        data = lt_image.stream.get_data()
+    except Exception:
+        return None
+
+    try:
+        img = Image.open(io.BytesIO(data))
+        img.load()
+        return img.convert("RGB")
+    except Exception:
+        pass
+
+    try:
+        width, height = lt_image.srcsize
+        bits = getattr(lt_image, "bits", 8)
+        if bits == 8 and len(data) >= width * height * 3:
+            return Image.frombytes("RGB", (width, height), data[: width * height * 3])
+        if bits == 8 and len(data) >= width * height:
+            return Image.frombytes("L", (width, height), data[: width * height]).convert("RGB")
+    except Exception:
+        pass
+
+    return None
+
+
 class DocumentParserError(Exception):
     """文件解析異常基類"""
     pass
@@ -92,11 +157,19 @@ class DocumentParserError(Exception):
 class DocumentParser:
     """統一文件解析進入點"""
 
+    def __init__(self, image_config: Optional[ImagePipelineConfig] = None):
+        """image_config 為圖文統一處理管線的設定；不提供則使用預設值
+        （OCR 核心能力預設開啟、圖理解模型預設關閉），維持向後相容。"""
+        self.image_config = image_config or ImagePipelineConfig()
+        self.image_pipeline = ImagePipeline(self.image_config)
+
     def parse_file(self, file_path: str) -> str:
         """根據檔案副檔名進行路由解析，返回純文字內容。"""
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"找不到檔案: {file_path}")
+
+        self.image_pipeline.reset_numbering()
 
         suffix = path.suffix.lower()
         if suffix in [".txt", ".md"]:
@@ -124,12 +197,15 @@ class DocumentParser:
                 return path.read_text(encoding="cp950", errors="ignore")
 
     def _parse_docx(self, path: Path) -> str:
-        """解析 Word 文件，保留表格 Markdown 格式"""
+        """解析 Word 文件，保留表格 Markdown 格式，並依段落順序抽取內嵌圖片"""
         if DocxDocument is None:
             raise ImportError("未安裝 python-docx 套件，請執行 pip install python-docx")
 
         doc = DocxDocument(path)
         content_parts = []
+
+        # DOCX 為流式版面、無座標資訊，改以文件既有段落順序作為「閱讀順序」的替代依據
+        full_doc_text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
 
         # 遍歷 docx 的所有子元素，以保留表格與段落的原始順序
         for element in doc.element.body:
@@ -140,6 +216,10 @@ class DocumentParser:
                     if p._element is element:
                         if p.text.strip():
                             content_parts.append(p.text)
+                        if self.image_config.enable_ocr:
+                            content_parts.extend(
+                                self._process_docx_paragraph_images(doc, p, full_doc_text)
+                            )
                         break
             # 如果是表格
             elif element.tag.endswith('tbl'):
@@ -152,6 +232,44 @@ class DocumentParser:
                         break
 
         return "\n\n".join(content_parts)
+
+    def _process_docx_paragraph_images(self, doc, paragraph, full_doc_text: str) -> List[str]:
+        """抽取段落中內嵌的圖片（DrawingML a:blip），逐一經圖片管線處理，
+        回傳格式化文字區塊清單；任何失敗都安全略過，不中斷整份文件解析。"""
+        if Image is None or docx_qn is None:
+            return []
+
+        try:
+            blips = paragraph._element.findall('.//' + docx_qn('a:blip'))
+        except Exception:
+            return []
+
+        if not blips:
+            return []
+
+        caption_text = paragraph.text.strip()
+        blocks = []
+        for blip in blips:
+            rId = blip.get(docx_qn('r:embed'))
+            if not rId:
+                continue
+            try:
+                image_part = doc.part.related_parts[rId]
+                pil_image = Image.open(io.BytesIO(image_part.blob)).convert("RGB")
+            except Exception:
+                continue
+
+            result = self.image_pipeline.process_image(
+                pil_image,
+                doc_type="docx",
+                nearby_caption_text=caption_text,
+                full_doc_text=full_doc_text,
+            )
+            block = result.to_text_block() if result else ""
+            if block:
+                blocks.append(block)
+
+        return blocks
 
     def _convert_table_to_markdown(self, table) -> str:
         """將 python-docx 的 Table 物件轉換為 Markdown 表格語法，保留儲存格內換行"""
@@ -182,7 +300,8 @@ class DocumentParser:
         return "\n".join(md_rows)
 
     def _parse_pptx(self, path: Path) -> str:
-        """解析 PPTX 投影片"""
+        """解析 PPTX 投影片，並依規格抽取內嵌圖片（PPTX 屬視覺導向文件類型，
+        整頁大圖/流程圖機率高，圖片管線的文件類型基礎分較高）。"""
         if Presentation is None:
             raise ImportError("未安裝 python-pptx 套件，請執行 pip install python-pptx")
 
@@ -192,12 +311,48 @@ class DocumentParser:
         for slide_idx, slide in enumerate(prs.slides):
             slide_text = []
             slide_text.append(f"--- [Slide {slide_idx + 1}] ---")
+
+            # 先收集本張投影片所有文字，供圖片的「正文明確圖號引用」比對使用
+            full_slide_text = "\n".join(
+                shape.text.strip() for shape in slide.shapes
+                if hasattr(shape, "text") and shape.text.strip()
+            )
+
+            last_text_seen = ""
             for shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.strip():
-                    slide_text.append(shape.text.strip())
+                    text = shape.text.strip()
+                    slide_text.append(text)
+                    last_text_seen = text
+                elif (
+                    self.image_config.enable_ocr
+                    and MSO_SHAPE_TYPE is not None
+                    and shape.shape_type == MSO_SHAPE_TYPE.PICTURE
+                ):
+                    image_block = self._process_pptx_picture_shape(shape, last_text_seen, full_slide_text)
+                    if image_block:
+                        slide_text.append(image_block)
+
             content_parts.append("\n".join(slide_text))
 
         return "\n\n".join(content_parts)
+
+    def _process_pptx_picture_shape(self, shape, nearby_text: str, full_slide_text: str) -> str:
+        """處理單一 PPTX 圖片 shape，回傳格式化後的文字區塊；任何失敗都安全降級為空字串略過。"""
+        if Image is None:
+            return ""
+        try:
+            pil_image = Image.open(io.BytesIO(shape.image.blob)).convert("RGB")
+        except Exception:
+            return ""
+
+        result = self.image_pipeline.process_image(
+            pil_image,
+            doc_type="pptx",
+            nearby_caption_text=nearby_text,
+            full_doc_text=full_slide_text,
+        )
+        return result.to_text_block() if result else ""
 
     def _parse_audio(self, path: Path) -> str:
         """使用本地 Whisper 模型進行語音轉文字"""
@@ -213,17 +368,27 @@ class DocumentParser:
         """三層備援 PDF 轉譯主入口"""
         # --- 軌道一：pypdf 快速文本流提取 ---
         text = self._pdf_track_pypdf(path)
-        
+        used_ocr_fallback = False
+
         # 評估是否需要 Fallback：字元數過少或疑似亂碼
         if self._is_low_quality_text(text):
             # --- 軌道二：pdfminer 佈局感知與雙欄排序提取 ---
             text = self._pdf_track_pdfminer(path)
-            
+
             # 如果依然判定為低品質（例如圖片掃描件），進入軌道三
             if self._is_low_quality_text(text):
                 # --- 軌道三：OCR 視覺區域識別解析 ---
                 text = self._pdf_track_ocr(path)
-                
+                used_ocr_fallback = True
+
+        # --- 圖文統一處理：內嵌圖片抽取（核心能力，獨立於前述文字提取軌道結果） ---
+        # 全頁已透過軌道三整頁 OCR 的情況下，內嵌圖片內容通常已被涵蓋於整頁 OCR 結果中，
+        # 故僅在軌道一/二成功時才另行處理內嵌圖片，避免重複解析同一份掃描影像。
+        if self.image_config.enable_ocr and not used_ocr_fallback:
+            image_text = self._extract_pdf_images_text(path)
+            if image_text:
+                text = text + "\n\n" + image_text
+
         return text
 
     def _pdf_track_pypdf(self, path: Path) -> str:
@@ -346,6 +511,97 @@ class DocumentParser:
             return "\n\n".join(ocr_texts)
         except Exception as e:
             raise DocumentParserError(f"PDF OCR 解析失敗: {str(e)}")
+
+    def _extract_pdf_images_text(self, path: Path) -> str:
+        """圖文統一處理管線：抽取 PDF 內嵌圖片，經空間去重、評分、編號、
+        （選配）圖理解模型後，依頁面由上到下的閱讀順序整理為文字區塊。
+
+        任何非預期錯誤都會被吞下並記錄警告，絕不讓圖片處理中斷主要的文字解析流程。
+        """
+        if extract_pages is None or Image is None:
+            return ""
+
+        page_blocks = []
+        try:
+            for page_idx, page_layout in enumerate(extract_pages(path)):
+                text_containers = []
+                figures = []
+                for element in page_layout:
+                    if isinstance(element, LTTextContainer):
+                        text_containers.append(element)
+                    elif LTFigure is not None and isinstance(element, LTFigure):
+                        figures.append(element)
+
+                if not figures:
+                    continue
+
+                text_bboxes = [(c.x0, c.y0, c.x1, c.y1) for c in text_containers]
+                page_full_text = "\n".join(c.get_text() for c in text_containers)
+                doc_type = "pdf_native" if text_containers else "pdf_scanned"
+
+                # (y1, ImageProcessResult) 供依頁面高度排序，近似閱讀順序
+                ordered_results = []
+                for fig in figures:
+                    for lt_image in _iter_lt_images(fig):
+                        bbox = (lt_image.x0, lt_image.y0, lt_image.x1, lt_image.y1)
+
+                        # 空間去重：原生文字已大面積覆蓋此區域，屬零成本可跳過
+                        if self.image_pipeline.is_covered_by_native_text(bbox, text_bboxes):
+                            continue
+
+                        pil_image = _pil_from_ltimage(lt_image)
+                        if pil_image is None:
+                            continue
+
+                        nearby_caption = self._find_nearby_pdf_caption(bbox, text_containers)
+                        result = self.image_pipeline.process_image(
+                            pil_image,
+                            doc_type=doc_type,
+                            nearby_caption_text=nearby_caption,
+                            full_doc_text=page_full_text,
+                        )
+                        if result is not None:
+                            ordered_results.append((bbox[3], result))
+
+                if not ordered_results:
+                    continue
+
+                ordered_results.sort(key=lambda item: item[0], reverse=True)  # y1 由高到低=由上到下
+                blocks = [r.to_text_block() for _, r in ordered_results if r.to_text_block()]
+                if blocks:
+                    page_blocks.append(f"--- [第 {page_idx + 1} 頁圖片解析] ---\n" + "\n\n".join(blocks))
+
+        except Exception as e:
+            logger.warning("[DocumentParser] PDF 圖片處理發生非預期錯誤，已略過圖片解析: %s", str(e))
+            return ""
+
+        return "\n\n".join(page_blocks)
+
+    def _find_nearby_pdf_caption(
+        self, image_bbox, text_containers: List[LTTextContainer], max_gap: float = 40.0
+    ) -> str:
+        """在圖片正上方或正下方、水平方向有重疊的文字區塊中尋找最接近者，作為圖說候選文字。"""
+        ix0, iy0, ix1, iy1 = image_bbox
+        best_text = ""
+        best_gap = max_gap
+
+        for c in text_containers:
+            cx0, cy0, cx1, cy1 = c.x0, c.y0, c.x1, c.y1
+            if cx1 < ix0 or cx0 > ix1:
+                continue  # 水平方向無重疊，非同一欄的圖說候選
+
+            if cy1 <= iy0:
+                gap = iy0 - cy1  # 文字在圖片下方
+            elif cy0 >= iy1:
+                gap = cy0 - iy1  # 文字在圖片上方
+            else:
+                continue  # 與圖片重疊，通常是圖片內部疊字，非圖說
+
+            if gap < best_gap:
+                best_gap = gap
+                best_text = c.get_text().strip()
+
+        return best_text
 
     def _detect_double_column(self, containers: List[LTTextContainer], mid_x: float) -> bool:
         """啟發式偵測頁面是否為雙欄排版"""

@@ -10,3 +10,5 @@ youtube-transcript-api>=1.0.0
 yt-dlp>=2024.1.0
 openai-whisper>=20231117
 soundfile>=0.12.1
+numpy>=1.26.0
+requests>=2.31.0
