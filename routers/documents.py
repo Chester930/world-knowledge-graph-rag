@@ -9,9 +9,22 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from core.database import get_driver
 from models.document import Document, DocumentCreate
 from repositories.document_repo import DocumentRepository
-from services.ingestion_service import parse_document
+from services.ingestion_service import parse_document, parse_url_service
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
+
+@router.post("/debug-parse-url")
+async def debug_parse_url(payload: dict):
+    """臨時下載並解析網頁或 YouTube 連結，返回純文字（僅供調試與前端展示）。"""
+    url = payload.get("url")
+    if not url:
+        raise HTTPException(status_code=400, detail="請提供 url 參數")
+    try:
+        text = await parse_url_service(url)
+        return {"filename": url, "text": text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"URL 解析失敗: {str(e)}")
 
 
 @router.post("/debug-parse")
@@ -32,6 +45,7 @@ async def debug_parse_document(file: UploadFile = File(...)):
         # 確保刪除暫存檔
         if os.path.exists(temp_path):
             os.remove(temp_path)
+
 
 
 @router.post("", response_model=Document, status_code=201)

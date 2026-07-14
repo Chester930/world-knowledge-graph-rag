@@ -4,11 +4,11 @@
 """
 from __future__ import annotations
 import asyncio
-from parser.core import DocumentParser
+from parser.core import DocumentParser, URLParser
 
 
 async def parse_document(file_path: str) -> str:
-    """解析文件，支援 PDF (三層備援), DOCX (表格 Markdown 化), PPTX, TXT, MD。
+    """解析文件，支援 PDF (三層備援), DOCX (表格 Markdown 化), PPTX, TXT, MD, 音訊/影片。
 
     因為實體解析與 OCR 為 CPU-bound 任務，使用 run_in_executor 於線程池中執行，避免阻塞 FastAPI 主執行緒。
     """
@@ -16,3 +16,15 @@ async def parse_document(file_path: str) -> str:
     loop = asyncio.get_running_loop()
     text = await loop.run_in_executor(None, parser.parse_file, file_path)
     return text
+
+
+async def parse_url_service(url: str) -> str:
+    """抓取 URL，支援 YouTube 字幕提取與一般網頁正文 Markdown 轉換。
+
+    非同步執行，避免阻塞主執行緒。
+    """
+    parser = URLParser()
+    loop = asyncio.get_running_loop()
+    text = await loop.run_in_executor(None, parser.parse_url, url)
+    return text
+
