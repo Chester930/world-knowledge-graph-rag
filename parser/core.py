@@ -43,6 +43,21 @@ except ImportError:
     convert_from_path = None
     pytesseract = None
 
+try:
+    import trafilatura
+except ImportError:
+    trafilatura = None
+
+try:
+    from youtube_transcript_api import YouTubeTranscriptApi
+except ImportError:
+    YouTubeTranscriptApi = None
+
+try:
+    import whisper
+except ImportError:
+    whisper = None
+
 
 class DocumentParserError(Exception):
     """文件解析異常基類"""
@@ -67,6 +82,8 @@ class DocumentParser:
             return self._parse_docx(path)
         elif suffix in [".pptx", ".ppt"]:
             return self._parse_pptx(path)
+        elif suffix in [".mp3", ".wav", ".m4a", ".ogg", ".flac", ".mp4", ".mkv", ".webm"]:
+            return self._parse_audio(path)
         else:
             raise DocumentParserError(f"不支援的檔案格式: {suffix}")
 
@@ -156,6 +173,19 @@ class DocumentParser:
             content_parts.append("\n".join(slide_text))
 
         return "\n\n".join(content_parts)
+
+    def _parse_audio(self, path: Path) -> str:
+        """使用本地 Whisper 模型進行語音轉文字"""
+        if whisper is None:
+            raise ImportError("未安裝 openai-whisper 套件，請執行 pip install openai-whisper")
+
+        try:
+            # 載入 tiny 模型，以防使用者下載過久。預設對中文已堪用
+            model = whisper.load_model("tiny")
+            result = model.transcribe(str(path))
+            return result.get("text", "").strip()
+        except Exception as e:
+            raise DocumentParserError(f"音訊轉譯失敗: {str(e)}")
 
     def _parse_pdf(self, path: Path) -> str:
         """三層備援 PDF 轉譯主入口"""
@@ -399,3 +429,112 @@ def sentence_aware_chunking(text: str, chunk_size: int = 500, chunk_overlap: int
         chunks.append("".join(current_chunk))
 
     return [c.strip() for c in chunks if c.strip()]
+
+
+class URLParser:
+    """網頁與 YouTube 連結解析器"""
+
+    def parse_url(self, url: str) -> str:
+        """解析 URL，支援一般網頁與 YouTube 影片"""
+        url = url.strip()
+        if not url:
+            raise ValueError("URL 不能為空")
+
+        if self._is_youtube_url(url):
+            return self._parse_youtube(url)
+        else:
+            return self._parse_webpage(url)
+
+    def _is_youtube_url(self, url: str) -> bool:
+        """判斷是否為 YouTube 網址"""
+        pattern = r'(https?://)?(www\.)?(youtube\.com|youtu\.be)/'
+        return bool(re.match(pattern, url, re.IGNORECASE))
+
+    def _parse_youtube(self, url: str) -> str:
+        """提取 YouTube 字幕"""
+        if YouTubeTranscriptApi is None:
+            raise ImportError("未安裝 youtube-transcript-api 套件，請執行 pip install youtube-transcript-api")
+
+        video_id = self._extract_youtube_id(url)
+        if not video_id:
+            raise ValueError(f"無法解析 YouTube 影片 ID: {url}")
+
+        try:
+            languages = ['zh-TW', 'zh-HK', 'zh-CN', 'zh', 'en']
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            
+            transcript = None
+            for lang in languages:
+                try:
+                    transcript = transcript_list.find_transcript([lang])
+                    break
+                except Exception:
+                    continue
+
+            if not transcript:
+                try:
+                    transcript = transcript_list.find_generated_transcript(languages)
+                except Exception:
+                    # 嘗試抓取任意一個可用字幕
+                    keys = list(transcript_list._manually_created_transcripts.keys()) + list(transcript_list._generated_transcripts.keys())
+                    if keys:
+                        transcript = transcript_list.find_transcript([keys[0]])
+
+            if not transcript:
+                raise ValueError("找不到該影片的任何字幕")
+
+            parts = transcript.fetch()
+            full_text = []
+            for part in parts:
+                text = part.text.strip()
+                if text:
+                    full_text.append(text)
+            
+            return f"--- [YouTube Video {video_id} 字幕逐字稿] ---\n\n" + " ".join(full_text)
+
+        except Exception as e:
+            raise DocumentParserError(f"YouTube 字幕提取失敗: {str(e)}\n(若該影片完全無字幕，請改以上傳音軌方式轉譯)")
+
+    def _extract_youtube_id(self, url: str) -> Optional[str]:
+        """從網址中擷取 YouTube Video ID"""
+        patterns = [
+            r'v=([^&#]+)',                  # youtube.com/watch?v=xxx
+            r'youtu\.be/([^&#\?]+)',        # youtu.be/xxx
+            r'embed/([^&#\?]+)',            # youtube.com/embed/xxx
+            r'shorts/([^&#\?]+)'            # youtube.com/shorts/xxx
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, url)
+            if match:
+                return match.group(1)
+        return None
+
+    def _parse_webpage(self, url: str) -> str:
+        """抓取一般網頁並轉為 Markdown"""
+        if trafilatura is None:
+            raise ImportError("未安裝 trafilatura 套件，請執行 pip install trafilatura")
+
+        try:
+            downloaded = trafilatura.fetch_url(url)
+            if downloaded is None:
+                raise ValueError(f"無法下載網頁內容: {url}")
+
+            result = trafilatura.extract(
+                downloaded,
+                output_format='markdown',
+                include_links=True,
+                include_images=False,
+                include_tables=True
+            )
+            
+            if not result:
+                result = trafilatura.extract(downloaded, output_format='txt')
+
+            if not result:
+                raise ValueError("無法提取該網頁的有效內容")
+
+            return f"--- [網頁連結: {url}] ---\n\n" + result
+
+        except Exception as e:
+            raise DocumentParserError(f"網頁內容抓取失敗: {str(e)}")
+

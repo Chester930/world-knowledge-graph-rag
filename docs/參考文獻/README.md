@@ -11,6 +11,7 @@
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3；01_緒論.md § 1.2 RQ4（預留） | 🟡 已下載 2 篇，1 篇付費未下載 |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
+| `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻） | 🟢 已下載 2 篇 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -70,6 +71,13 @@
 | `angeli-et-al-2015-stanford-openie.pdf` | Angeli et al. (2015), *Stanford OpenIE*，ACL 2015（供 1.2 節 RQ4 使用） | ACL Anthology P15-1034 |
 
 **未下載（付費，不下載全文）**：Guha et al. (2016), *Schema.org: Evolution of Structured Data on the Web*（*Communications of the ACM* 59(2)）——ACM 需付費/機構帳號，無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
+
+## 06_多模態輸入與網頁擷取 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `radford-et-al-2022-whisper-robust-speech-recognition.pdf` | Radford et al. (2022/2023), *Robust Speech Recognition via Large-Scale Weak Supervision*，ICML 2023（PMLR 202） | arXiv:2212.04356 |
+| `barbaresi-2021-trafilatura.pdf` | Barbaresi (2021), *Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction*，ACL-IJCNLP 2021 System Demonstrations, pp. 122-131 | ACL Anthology 2021.acl-demo.15 |
 
 ## 下載原則
 

@@ -313,6 +313,62 @@
         .viewer-body::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* URL 輸入區樣式 */
+        .url-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .url-input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .url-input {
+            flex: 1;
+            background: rgba(15, 17, 26, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .url-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .btn-parse-url {
+            background: var(--primary);
+            border: 1px solid var(--primary);
+            color: var(--text-primary);
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-parse-url:hover {
+            background: #4f46e5;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -325,7 +381,7 @@
     <main>
         <div class="intro">
             <h1>Ingestion Parser</h1>
-            <p>雙軌非同步建圖前置轉譯測試區。在此處上傳任何文件，即時預覽 PDF 的雙欄還原效果、Word 表格的 Markdown 化，以及字元解析品質。</p>
+            <p>非同步建圖前置轉譯測試區。在此處上傳任何文件、音訊或影片，即時預覽 PDF 的雙欄還原效果、Word 表格的 Markdown 化、音訊的語音識別，以及字元解析品質。</p>
         </div>
 
         <!-- 上傳卡片 -->
@@ -338,10 +394,21 @@
             <div class="upload-icon">📄</div>
             <div class="upload-text">
                 <h3>將檔案拖放到此處，或點擊上傳</h3>
-                <p>支援 PDF (可搜尋或掃描圖檔)、DOCX、PPTX、TXT、MD</p>
+                <p>支援 PDF、DOCX、PPTX、TXT、MD，以及音訊與影片 (.mp3, .wav, .m4a, .mp4 等)</p>
             </div>
-            <input type="file" id="file-input" accept=".pdf,.docx,.doc,.pptx,.ppt,.txt,.md">
+            <input type="file" id="file-input" accept=".pdf,.docx,.doc,.pptx,.ppt,.txt,.md,.mp3,.wav,.m4a,.ogg,.flac,.mp4,.mkv,.webm">
         </div>
+
+        <!-- URL 輸入區 -->
+        <div class="url-section">
+            <h3 style="font-size: 1.15rem; font-weight: 600; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">或者，貼上網頁或 YouTube 連結測試</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">支援一般網頁（自動轉為 Markdown）與 YouTube 影片網址（自動抓取中文或英文字幕逐字稿）</p>
+            <div class="url-input-container">
+                <input type="text" class="url-input" id="url-input" placeholder="貼上網址 (例如: https://www.youtube.com/watch?v=... 或 https://news.ycombinator.com/)">
+                <button class="btn-parse-url" id="btn-parse-url">🔗 開始轉譯</button>
+            </div>
+        </div>
+
 
         <!-- 解析結果展示 -->
         <div class="result-container" id="result-area">
@@ -389,6 +456,51 @@
         const metaTokenCount = document.getElementById('meta-token-count');
         const metaStrategy = document.getElementById('meta-strategy');
         const btnCopy = document.getElementById('btn-copy');
+        const urlInput = document.getElementById('url-input');
+        const btnParseUrl = document.getElementById('btn-parse-url');
+
+        // URL 點擊解析
+        btnParseUrl.addEventListener('click', () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('請輸入有效網址');
+                return;
+            }
+            handleUrlParse(url);
+        });
+
+        // 支援 Enter 送出
+        urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                btnParseUrl.click();
+            }
+        });
+
+        function handleUrlParse(url) {
+            loading.style.display = 'flex';
+            
+            fetch('/documents/debug-parse-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('連結轉譯服務異常');
+                }
+                return res.json();
+            })
+            .then(data => {
+                loading.style.display = 'none';
+                displayResult(data.filename, data.text);
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                alert('解析失敗：' + err.message + '\n請確認該網址可正常存取，若為 YouTube 影片請確認其具有字幕。');
+            });
+        }
 
         // 點擊上傳
         dropZone.addEventListener('click', () => fileInput.click());
