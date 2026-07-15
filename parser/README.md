@@ -120,7 +120,7 @@
 完整設計依據見 [`文檔轉譯器 最終優化架構總結（可跨模型接續討論）.md`](./文檔轉譯器%20最終優化架構總結（可跨模型接續討論）.md)。核心原則：
 
 1. **能力解耦**：OCR 文字提取為核心基礎能力，`enable_ocr` 預設 `True`，完全不依賴圖理解模型即可運作；
-   圖理解語義模型為選配增強能力，`enable_image_understanding` 預設 `False`，需另行啟動本機 [Ollama](https://ollama.com/) 服務並安裝多模態模型（如 `llava`）才會生效。未安裝/未啟動時自動降級為保留 OCR 結果，不中斷解析流程。
+   圖理解語義模型為選配增強能力，`enable_image_understanding` 預設 `False`，需另行啟動本機 [Ollama](https://ollama.com/) 服務並安裝多模態模型（預設對應 `qwen2.5vl:7b`）才會生效。未安裝/未啟動時自動降級為保留 OCR 結果，不中斷解析流程。
 2. **算力分層**：空間去重（跳過已被原生文字覆蓋 ≥70% 的裝飾性圖片）→ 全域 OCR → 三維度加權評分
    （文件類型 30% + OCR 置信度 40% + 輕量圖形特徵 30%，預設閾值 60 分）→ 命中「如下圖」等強制旁路規則時
    直接跳過評分 → 分數達標才呼叫本地圖理解模型補足語義。
@@ -136,7 +136,7 @@ from parser.image_pipeline import ImagePipelineConfig
 config = ImagePipelineConfig(
     enable_image_understanding=True,       # 開啟本地圖理解模型兜底
     ollama_base_url="http://localhost:11434",
-    ollama_vision_model="llava",
+    ollama_vision_model="qwen2.5vl:7b",    # 預設值；可換成其他已安裝的視覺模型
     score_threshold=60.0,
     force_visual_parse_doc_types=["pptx"], # 例如：PPT 全域強制圖理解
 )
@@ -145,6 +145,10 @@ text = parser.parse_file("report.pdf")
 ```
 
 若不提供 `image_config`，則沿用預設值（OCR 開啟、圖理解模型關閉），行為與升級前完全相容。
+
+> **模型選型備註**：預設採用 `qwen2.5vl:7b` 而非社群常見的 `llava`，因其對繁體中文與流程圖／架構圖等結構化圖表的
+> OCR、版面理解能力明顯較佳，7B 量化後約 6GB，可在 8GB VRAM 等級的消費級 GPU（如 RTX 4060/4070 Laptop）上順暢運行。
+> 若本機 VRAM 較小（如 4-6GB），可改用更輕量的 `minicpm-v` 或 `llava-phi3`；VRAM 充足時可升級至 `qwen2.5vl:32b` 等更大模型以取得更精確的圖表理解品質。
 
 ## 📦 系統依賴說明 (System Prerequisites)
 
@@ -165,6 +169,7 @@ text = parser.parse_file("report.pdf")
    * *macOS (Homebrew)*: `brew install ffmpeg`
 
 4. **Ollama**（選配，僅在啟用 `enable_image_understanding=True` 時需要，用於本地圖理解模型兜底）：
-   * 安裝：參考 [ollama.com/download](https://ollama.com/download)
-   * 下載多模態模型：`ollama pull llava`（或其他支援視覺輸入的模型，並對應設定 `ollama_vision_model`）
+   * *Windows (Winget)*: `winget install Ollama.Ollama`
+   * *macOS/Linux*: 參考 [ollama.com/download](https://ollama.com/download)
+   * 下載預設視覺模型：`ollama pull qwen2.5vl:7b`（或其他支援視覺輸入的模型，並對應設定 `ollama_vision_model`）
    * 未安裝或服務未啟動時，圖片管線會自動降級為僅保留 OCR 結果，不影響其餘解析流程

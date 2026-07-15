@@ -60,7 +60,9 @@ class ImagePipelineConfig:
     # 選配增強能力（預設關閉，需本機另行安裝並啟動 Ollama 服務）
     enable_image_understanding: bool = False
     ollama_base_url: str = "http://localhost:11434"
-    ollama_vision_model: str = "llava"
+    # qwen2.5vl 對繁體中文與流程圖/架構圖等結構化圖表的理解與 OCR 能力優於 llava，
+    # 且 7b 量化後約 6GB，可在 8GB VRAM 等級的消費級 GPU 上順暢運行。
+    ollama_vision_model: str = "qwen2.5vl:7b"
     ollama_timeout_seconds: int = 60
 
     # 三維度評分權重（總和應為 1.0）與升級閾值
