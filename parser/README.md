@@ -28,6 +28,28 @@
    * **APA 引用**：*Barbaresi, A. (2021). Trafilatura: A web scraping library and command-line tool for text discovery and extraction. In Proceedings of the Joint Conference of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing: System Demonstrations (pp. 122-131). Association for Computational Linguistics.*
    * **論文定位**：作為網頁連結轉譯的依據。論證了相較於傳統粗暴的 HTML2Text 轉換，利用特定的排版啟發式規則與標籤比率，能有效去除導航欄、廣告及版權資訊等「噪音（Boilerplate）」，僅保留核心正文，從而提高下游 RAG 檢索的信噪比。
 
+6. **光學字元辨識 (Optical Character Recognition, OCR)**:
+   * **APA 引用**：*Smith, R. (2007). An overview of the Tesseract OCR engine. In Proceedings of the Ninth International Conference on Document Analysis and Recognition (ICDAR 2007) (Vol. 2, pp. 629-633). IEEE.*
+   * **論文定位**：作為本模組全域 OCR 能力（PDF 軌道三整頁辨識、圖文管線所有內嵌圖片文字擷取）的理論與工程依據。Tesseract 引擎本身即是本模組實際採用的 OCR 實作，此文獻支撐「OCR 為核心基礎能力、獨立於任何圖理解模型」的設計原則。
+
+7. **視覺語言模型 (Vision-Language Model)**:
+   * **APA 引用**：*Qwen Team, Alibaba Group. (2025). Qwen2.5-VL technical report. arXiv preprint arXiv:2502.13923.*
+   * **論文定位**：作為圖文統一處理管線中「本地圖理解模型」的直接依據。本模組實際部署的視覺模型即為 Qwen2.5-VL（`qwen2.5vl:7b`），此技術報告說明其在高解析度視覺感知、文件/圖表理解與多語言（含繁體中文）任務上的架構設計，支撐「OCR 無法捕捉圖片結構關係（如流程圖箭頭指向、方框層級）時，需仰賴視覺語言模型補足語義」的核心論點。
+
+8. **文檔視覺問答與圖表理解 (Document Visual Question Answering & Chart Understanding)**:
+   * **APA 引用**：
+     - *Mathew, M., Karatzas, D., & Jawahar, C. V. (2021). DocVQA: A dataset for VQA on document images. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) (pp. 2200-2209).*
+     - *Masry, A., Long, D. X., Tan, J. Q., Joty, S., & Hoque, E. (2022). ChartQA: A benchmark for question answering about charts with visual and logical reasoning. In Findings of the Association for Computational Linguistics: ACL 2022 (pp. 2263-2279).*
+   * **論文定位**：共同支撐本模組「純文字擷取／OCR 無法完整表達圖表與流程圖語義」的核心假設。這兩篇文獻分別驗證了文檔影像與圖表問答任務需要結合視覺與邏輯推理能力，而非僅依賴文字辨識，是本模組導入圖理解模型、而非僅擴充 OCR 語言包的理論依據。
+
+9. **效率導向的大型模型推論策略 (Cost-Efficient LLM Inference / Model Cascade)**:
+   * **APA 引用**：*Chen, L., Zaharia, M., & Zou, J. (2023). FrugalGPT: How to use large language models while reducing cost and improving performance. arXiv preprint arXiv:2305.05176.*
+   * **論文定位**：作為本模組「三維度加權評分決定是否升級圖理解模型」（算力分層設計）的理論依據。FrugalGPT 提出以較低成本的模型/方法優先處理，僅在必要時才升級呼叫昂貴的大型模型，此一級聯（cascade）策略與本模組「輕量前置判斷（空間去重→OCR→評分）優先，重型視覺模型僅在評分達標或命中強制旁路規則時才觸發」的設計原則高度一致。
+
+10. **邊緣偵測 (Edge Detection)**:
+    * **APA 引用**：*Canny, J. (1986). A computational approach to edge detection. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-8(6), 679-698.*
+    * **論文定位**：作為圖形特徵評分（`_graphic_feature_score`）中邊緣密度計算的理論淵源。本模組基於效能與依賴輕量化考量，未直接實作完整 Canny 演算法，改以 PIL 的邊緣濾波搭配 numpy 統計量做輕量近似，但「邊緣密度可作為圖像結構複雜度指標，用以估計流程圖/架構圖機率」此一核心概念源自本文獻。
+
 ---
 
 ## 🔧 工業級競品與對標專案 (Open Source Projects)
