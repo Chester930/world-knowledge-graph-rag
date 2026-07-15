@@ -11,7 +11,7 @@
 1. **文件版面理解 (Document Layout Understanding)**:
    * **APA 引用**：*Li, M., Xu, Y., Lei, P., Cui, X., Wei, F., & Zhou, M. (2020). LayoutLM: Pre-training of text and layout for document image understanding. In Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining (pp. 3159-3167).*
    * **論文定位**：作為本模組設計「版面解析與閱讀順序還原（Reading Order Recovery）」的理論依據。傳統文字提取流會打亂雙欄排版，而 LayoutLM 證實了結合 2D 空間佈局與文字語意對於理解複雜排版文檔的必要性。
-   
+
 2. **版面標註與目標檢測 (Layout Detection)**:
    * **APA 引用**：*Zhong, X., Tang, J., & Yepes, A. J. (2019). PubLayNet: largest dataset for document layout analysis. In Proceedings of the 2019 International Conference on Document Analysis and Recognition (pp. 1015-1022).*
    * **論文定位**：用以支撐本模組將文檔切分為 `Text` (段落), `Title` (標題) 與 `Table` (表格) 等獨立語意區塊的合理性。
@@ -38,8 +38,8 @@
 
 8. **文檔視覺問答與圖表理解 (Document Visual Question Answering & Chart Understanding)**:
    * **APA 引用**：
-     - *Mathew, M., Karatzas, D., & Jawahar, C. V. (2021). DocVQA: A dataset for VQA on document images. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) (pp. 2200-2209).*
-     - *Masry, A., Long, D. X., Tan, J. Q., Joty, S., & Hoque, E. (2022). ChartQA: A benchmark for question answering about charts with visual and logical reasoning. In Findings of the Association for Computational Linguistics: ACL 2022 (pp. 2263-2279).*
+     * *Mathew, M., Karatzas, D., & Jawahar, C. V. (2021). DocVQA: A dataset for VQA on document images. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) (pp. 2200-2209).*
+     * *Masry, A., Long, D. X., Tan, J. Q., Joty, S., & Hoque, E. (2022). ChartQA: A benchmark for question answering about charts with visual and logical reasoning. In Findings of the Association for Computational Linguistics: ACL 2022 (pp. 2263-2279).*
    * **論文定位**：共同支撐本模組「純文字擷取／OCR 無法完整表達圖表與流程圖語義」的核心假設。這兩篇文獻分別驗證了文檔影像與圖表問答任務需要結合視覺與邏輯推理能力，而非僅依賴文字辨識，是本模組導入圖理解模型、而非僅擴充 OCR 語言包的理論依據。
 
 9. **效率導向的大型模型推論策略 (Cost-Efficient LLM Inference / Model Cascade)**:
@@ -58,7 +58,7 @@
 
 1. [**Unstructured-IO/unstructured**](https://github.com/Unstructured-IO/unstructured) (Apache-2.0, 26k★):
    * **對照分析**：`unstructured` 引進了極為龐大的依賴鏈。本專案對其進行了 **「骨架化收斂（Skeletal Streamlining）」**，將核心代碼收斂至約 300 行，並在體積小於其 10 倍的前題下，利用輕量 `pdfminer.six` 實作了專屬的「混合排版分流演算法」，在零外部重型 Java/C++ 依賴下達到了同等水準的解析精度。
-    
+
 2. [**infiniflow/ragflow (DeepDoc)**](https://github.com/infiniflow/ragflow) (Apache-2.0, 84k★):
    * **對照分析**：`RAGFlow` 透過 YOLOv8 目標檢測模型進行雙欄還原。本模組借鏡了其「先欄位分流，後高度融合」的思路，但在實作上改以純 2D 坐標幾何啟發式算法（Heuristic Spatial Partitioning）在 CPU 上完成毫秒級的雙欄還原，大幅降低了本地端延遲。
 
@@ -171,12 +171,12 @@ total_chunks: 12
 （此處為該切塊的文字內容）
 ```
 
-- **檔名安全化**：`source` 可能是檔案路徑或 URL，`_safe_filename_stem()` 會移除檔名系統不允許的
+* **檔名安全化**：`source` 可能是檔案路徑或 URL，`_safe_filename_stem()` 會移除檔名系統不允許的
   字元（`\ / : * ? " < > |`），確保產生的檔名在 Windows/macOS/Linux 上都合法。
-- **重跑自動清理**：同一 `source` 重新處理後（例如文件內容更新、分塊數變少），會先清除該來源
+* **重跑自動清理**：同一 `source` 重新處理後（例如文件內容更新、分塊數變少），會先清除該來源
   舊有的分塊檔案再寫入新的一批，避免資料夾裡殘留跟目前內容對不上的過期檔案；不影響同資料夾內其他
   來源的分塊檔案。
-- **不引入 PyYAML**：frontmatter 以手動字串組裝產生（字串值自動加雙引號並跳脫特殊字元），維持
+* **不引入 PyYAML**：frontmatter 以手動字串組裝產生（字串值自動加雙引號並跳脫特殊字元），維持
   模組輕量化定位；此 frontmatter 僅供輸出／人工與下游程式解析，不需要支援回讀。
 
 ---
@@ -287,16 +287,16 @@ text = parser.parse_file("report.pdf")
 
 以下項目曾記錄為已知限制，已於後續迭代解決：
 
-- **同頁多圖過度觸發強制旁路** → `check_forced_bypass` 現在採三層判斷：(1) 圖片自身鄰近文字命中
+* **同頁多圖過度觸發強制旁路** → `check_forced_bypass` 現在採三層判斷：(1) 圖片自身鄰近文字命中
   通用旁路關鍵字；(2) 該圖有原文圖號時，要求正文精確引用該圖號（如「如圖3所示」）才觸發，避免同頁
   其他不相關圖片被連帶誤觸發；(3) 該圖沒有原文圖號可比對（自補序列）時，才退回檢查全文通用旁路
   關鍵字作為安全網，避免「單一無編號圖片＋泛用引用語句」的情境完全漏判。
-- **DOCX 圖片與標題分屬不同段落時圖說偵測失效** → `_process_docx_paragraph_images` 現在會在圖片
+* **DOCX 圖片與標題分屬不同段落時圖說偵測失效** → `_process_docx_paragraph_images` 現在會在圖片
   所在段落本身無文字時，優先向下、其次向上搜尋一個符合圖號標註格式的鄰近段落作為圖說候選，對應
   Word「插入標題」慣例（圖片自成一段、標題另起一段）。
-- **PDF 圖片管線與軌道二重複呼叫 `extract_pages()`** → 新增 `_load_pdf_layout` 快取機制，軌道二
+* **PDF 圖片管線與軌道二重複呼叫 `extract_pages()`** → 新增 `_load_pdf_layout` 快取機制，軌道二
   與圖片管線共用同一份已載入的版面樹狀結構（`pages_layout`），同一份 PDF 不再被 pdfminer 解析兩次。
-- **裝飾性小圖過濾誤判**：原本 `min_image_dimension_px` 檢查的是解碼後圖片檔案的原始像素尺寸，
+* **裝飾性小圖過濾誤判**：原本 `min_image_dimension_px` 檢查的是解碼後圖片檔案的原始像素尺寸，
   跟圖片在頁面/投影片上「實際顯示」多大是兩件事——高解析度照片可能被縮小顯示成裝飾小圖示（誤放行、
   浪費算力），低解析度截圖也可能被放大顯示成有意義的大小（誤判為裝飾圖而濾除）。現在改為優先使用
   `process_image(display_size_px=...)` 傳入的實際顯示尺寸（PDF 用 bbox point、PPTX 用
