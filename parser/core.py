@@ -539,8 +539,10 @@ class DocumentParser:
                 page_full_text = "\n".join(c.get_text() for c in text_containers)
                 doc_type = "pdf_native" if text_containers else "pdf_scanned"
 
-                # (y1, ImageProcessResult) 供依頁面高度排序，近似閱讀順序
-                ordered_results = []
+                # 第一階段：收集所有存活圖片（通過空間去重與解碼），先依 y1 由上到下排序，
+                # 才進入圖片管線指派圖號——確保圖號指派順序與視覺閱讀順序一致，
+                # 而非依 pdfminer 內部圖形元素的（近似繪製順序的）發現順序指派。
+                candidates = []
                 for fig in figures:
                     for lt_image in _iter_lt_images(fig):
                         bbox = (lt_image.x0, lt_image.y0, lt_image.x1, lt_image.y1)
@@ -553,21 +555,27 @@ class DocumentParser:
                         if pil_image is None:
                             continue
 
-                        nearby_caption = self._find_nearby_pdf_caption(bbox, text_containers)
-                        result = self.image_pipeline.process_image(
-                            pil_image,
-                            doc_type=doc_type,
-                            nearby_caption_text=nearby_caption,
-                            full_doc_text=page_full_text,
-                        )
-                        if result is not None:
-                            ordered_results.append((bbox[3], result))
+                        candidates.append((bbox, pil_image))
 
-                if not ordered_results:
+                if not candidates:
                     continue
 
-                ordered_results.sort(key=lambda item: item[0], reverse=True)  # y1 由高到低=由上到下
-                blocks = [r.to_text_block() for _, r in ordered_results if r.to_text_block()]
+                candidates.sort(key=lambda item: item[0][3], reverse=True)  # y1 由高到低=由上到下
+
+                # 第二階段：依排序後順序逐一交給圖片管線處理（含圖號指派），
+                # 輸出區塊順序與圖號指派順序自然一致。
+                blocks = []
+                for bbox, pil_image in candidates:
+                    nearby_caption = self._find_nearby_pdf_caption(bbox, text_containers)
+                    result = self.image_pipeline.process_image(
+                        pil_image,
+                        doc_type=doc_type,
+                        nearby_caption_text=nearby_caption,
+                        full_doc_text=page_full_text,
+                    )
+                    block = result.to_text_block() if result else ""
+                    if block:
+                        blocks.append(block)
                 if blocks:
                     page_blocks.append(f"--- [第 {page_idx + 1} 頁圖片解析] ---\n" + "\n\n".join(blocks))
 

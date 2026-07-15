@@ -255,3 +255,49 @@ def test_pdf_end_to_end_extracts_embedded_image_content(tmp_path):
 
     assert "Body paragraph" in text
     assert "[圖片:" in text
+
+
+def test_pdf_image_numbering_follows_visual_order_not_draw_order(tmp_path):
+    """迴歸測試：自補圖號的指派順序應依頁面視覺由上到下排序，
+    不應受 pdfminer 內部圖形元素發現順序（近似 PDF content stream 繪製順序）影響。"""
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+
+    # 以不同尺寸區分兩張圖片，供測試辨識呼叫順序對應到哪一張
+    top_img_buf = io.BytesIO()
+    Image.new("RGB", (300, 80), (200, 200, 200)).save(top_img_buf, format="JPEG")
+    top_img_buf.seek(0)
+
+    bottom_img_buf = io.BytesIO()
+    Image.new("RGB", (300, 150), (100, 100, 100)).save(bottom_img_buf, format="JPEG")
+    bottom_img_buf.seek(0)
+
+    pdf_path = tmp_path / "order_test.pdf"
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 470, "Body text ensures native extraction passes quality thresholds for this test document reliably.")
+    c.drawString(50, 450, "Additional filler sentence to keep the readable character ratio comfortably above the cutoff.")
+    # 刻意先畫「視覺上位於下方」的圖片，模擬 pdfminer 內部發現順序與視覺閱讀順序不同的情境
+    c.drawImage(ImageReader(bottom_img_buf), 50, 80, width=300, height=150)   # y: 80~230（下方）
+    c.drawImage(ImageReader(top_img_buf), 50, 260, width=300, height=80)     # y: 260~340（上方）
+    c.save()
+
+    parser = DocumentParser()
+    call_order_sizes = []
+    original_process_image = parser.image_pipeline.process_image
+
+    def recording_process_image(pil_image, **kwargs):
+        call_order_sizes.append(pil_image.size)
+        return original_process_image(pil_image, **kwargs)
+
+    parser.image_pipeline.process_image = recording_process_image
+
+    text = parser.parse_file(str(pdf_path))
+
+    assert len(call_order_sizes) == 2
+    # 視覺上方的圖（300x80）應先被指派圖號，即使它在 content stream 中是後畫的
+    assert call_order_sizes[0] == (300, 80)
+    assert call_order_sizes[1] == (300, 150)
+
+    assert "自補圖-1" in text and "自補圖-2" in text
+    assert text.index("自補圖-1") < text.index("自補圖-2")

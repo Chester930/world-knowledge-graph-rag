@@ -120,6 +120,7 @@ class ImageProcessResult:
     ocr_text: str = ""
     ocr_confidence: float = 0.0
     score: float = 0.0
+    score_threshold: float = 60.0  # 產生本結果時實際生效的升級閾值，供 to_text_block() 判斷品質註記
     used_image_understanding: bool = False
     understanding_text: Optional[str] = None
     skipped_reason: Optional[str] = None  # 非 None 時代表此圖不應輸出任何內容
@@ -136,7 +137,7 @@ class ImageProcessResult:
         if self.understanding_text:
             lines.append(f"圖像語義描述（來源: 本地圖理解模型）: {self.understanding_text}")
         elif self.ocr_text:
-            quality_note = "，資訊可能不足" if self.score >= 60 else ""
+            quality_note = "，資訊可能不足" if self.score >= self.score_threshold else ""
             lines.append(f"圖片 OCR 文字（來源: OCR{quality_note}）: {self.ocr_text}")
         else:
             lines.append("（圖片無可辨識文字內容）")
@@ -427,6 +428,7 @@ class ImagePipeline:
             ocr_text=ocr_text,
             ocr_confidence=ocr_confidence,
             score=score,
+            score_threshold=self.config.score_threshold,
             used_image_understanding=used_understanding,
             understanding_text=understanding_text,
         )
