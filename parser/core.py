@@ -207,6 +207,10 @@ class DocumentParser:
         # DOCX 為流式版面、無座標資訊，改以文件既有段落順序作為「閱讀順序」的替代依據
         full_doc_text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
 
+        # 純文字預檢：整份文件的關聯清單只需掃描一次，即可判斷是否存在任何內嵌圖片；
+        # 純文字文件（無圖片）可完全跳過逐段落的 XML 掃描，避免對每個段落重複做無意義的查找。
+        has_images = self.image_config.enable_ocr and self._docx_has_embedded_images(doc)
+
         # 遍歷 docx 的所有子元素，以保留表格與段落的原始順序
         for element in doc.element.body:
             # 如果是段落
@@ -216,7 +220,7 @@ class DocumentParser:
                     if p._element is element:
                         if p.text.strip():
                             content_parts.append(p.text)
-                        if self.image_config.enable_ocr:
+                        if has_images:
                             content_parts.extend(
                                 self._process_docx_paragraph_images(doc, p, full_doc_text)
                             )
@@ -232,6 +236,15 @@ class DocumentParser:
                         break
 
         return "\n\n".join(content_parts)
+
+    def _docx_has_embedded_images(self, doc) -> bool:
+        """輕量預檢：掃描一次文件關聯清單（rels）判斷是否存在任何內嵌圖片，
+        取代逐段落做 XML findall 的重複查找。任何解析失敗都保守回傳 True，
+        交由後續逐段落掃描處理，避免誤判漏圖。"""
+        try:
+            return any("image" in rel.reltype.lower() for rel in doc.part.rels.values())
+        except Exception:
+            return True
 
     def _process_docx_paragraph_images(self, doc, paragraph, full_doc_text: str) -> List[str]:
         """抽取段落中內嵌的圖片（DrawingML a:blip），逐一經圖片管線處理，
@@ -384,12 +397,34 @@ class DocumentParser:
         # --- 圖文統一處理：內嵌圖片抽取（核心能力，獨立於前述文字提取軌道結果） ---
         # 全頁已透過軌道三整頁 OCR 的情況下，內嵌圖片內容通常已被涵蓋於整頁 OCR 結果中，
         # 故僅在軌道一/二成功時才另行處理內嵌圖片，避免重複解析同一份掃描影像。
-        if self.image_config.enable_ocr and not used_ocr_fallback:
+        #
+        # 純文字預檢：先用 pypdf 輕量檢查頁面資源中是否存在任何內嵌圖片 XObject，
+        # 這比 pdfminer 的 extract_pages() 完整版面重建便宜得多。純文字文件（如論文、
+        # 合約）通常完全沒有內嵌圖片，可直接跳過整套圖片管線，避免白白重新解析一次全文件版面。
+        if self.image_config.enable_ocr and not used_ocr_fallback and self._pdf_has_embedded_images(path):
             image_text = self._extract_pdf_images_text(path)
             if image_text:
                 text = text + "\n\n" + image_text
 
         return text
+
+    def _pdf_has_embedded_images(self, path: Path) -> bool:
+        """輕量預檢：僅讀取各頁 XObject 資源清單判斷是否含任何內嵌圖片，
+        不做 pdfminer 的座標/版面重建，成本遠低於 `_extract_pdf_images_text`。
+        任何解析失敗都保守回傳 True，交由後續完整管線處理，避免誤判漏圖。"""
+        if PdfReader is None:
+            return False
+        try:
+            reader = PdfReader(path)
+            for page in reader.pages:
+                try:
+                    if len(page.images) > 0:
+                        return True
+                except Exception:
+                    continue
+            return False
+        except Exception:
+            return True
 
     def _pdf_track_pypdf(self, path: Path) -> str:
         """第一軌：使用 pypdf 提取文字"""

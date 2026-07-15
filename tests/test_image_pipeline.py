@@ -301,3 +301,172 @@ def test_pdf_image_numbering_follows_visual_order_not_draw_order(tmp_path):
 
     assert "自補圖-1" in text and "自補圖-2" in text
     assert text.index("自補圖-1") < text.index("自補圖-2")
+
+
+# --- 純文字文件預檢：跳過整套圖片管線 -----------------------------------------
+
+def _make_text_only_pdf(tmp_path, filename="text_only.pdf"):
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+
+    pdf_path = tmp_path / filename
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 460, "This document contains only native text and no embedded images at all.")
+    c.drawString(50, 440, "It exists purely to validate that the cheap pre-check skips the image pipeline.")
+    c.drawString(50, 420, "A third filler line keeps the readable-character-ratio comfortably above threshold.")
+    c.save()
+    return pdf_path
+
+
+def test_pdf_has_embedded_images_false_for_text_only_pdf(tmp_path):
+    pdf_path = _make_text_only_pdf(tmp_path)
+    parser = DocumentParser()
+    assert parser._pdf_has_embedded_images(pdf_path) is False
+
+
+def test_pdf_has_embedded_images_true_when_image_present(tmp_path):
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="JPEG")
+    img_buf.seek(0)
+
+    pdf_path = tmp_path / "has_image.pdf"
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 460, "Body text plus an embedded diagram below it for this test document.")
+    c.drawImage(ImageReader(img_buf), 50, 100, width=300, height=200)
+    c.save()
+
+    parser = DocumentParser()
+    assert parser._pdf_has_embedded_images(pdf_path) is True
+
+
+def test_pdf_text_only_skips_image_pipeline_entirely(tmp_path, monkeypatch):
+    """迴歸測試：純文字 PDF 不應觸發 _extract_pdf_images_text（避免重複 extract_pages()）。"""
+    pdf_path = _make_text_only_pdf(tmp_path)
+    parser = DocumentParser()
+
+    called = []
+    original = parser._extract_pdf_images_text
+
+    def spy(path):
+        called.append(path)
+        return original(path)
+
+    monkeypatch.setattr(parser, "_extract_pdf_images_text", spy)
+
+    text = parser.parse_file(str(pdf_path))
+
+    assert called == []
+    assert "[圖片:" not in text
+    assert "This document contains only native text" in text
+
+
+def test_pdf_with_image_still_invokes_image_pipeline(tmp_path, monkeypatch):
+    """對照組：含圖片的 PDF 仍應正常觸發圖片管線，確認預檢沒有誤傷正常情境。"""
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="JPEG")
+    img_buf.seek(0)
+
+    pdf_path = tmp_path / "with_image.pdf"
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 460, "Body text plus an embedded diagram shown further below on this page.")
+    c.drawString(50, 440, "This filler line ensures native text extraction passes the quality gate.")
+    c.drawString(50, 420, "A third line keeps the readable-character-ratio comfortably above cutoff.")
+    c.drawImage(ImageReader(img_buf), 50, 100, width=300, height=200)
+    c.save()
+
+    parser = DocumentParser()
+
+    called = []
+    original = parser._extract_pdf_images_text
+
+    def spy(path):
+        called.append(path)
+        return original(path)
+
+    monkeypatch.setattr(parser, "_extract_pdf_images_text", spy)
+
+    text = parser.parse_file(str(pdf_path))
+
+    assert len(called) == 1
+    assert "[圖片:" in text
+
+
+def test_docx_has_embedded_images_false_for_text_only_docx(tmp_path):
+    docx_module = pytest.importorskip("docx")
+    from docx import Document
+
+    doc = Document()
+    doc.add_paragraph("這是一份完全沒有圖片的純文字文件。")
+    doc.add_paragraph("第二段落，用來確認純文字偵測邏輯正確運作。")
+    docx_path = tmp_path / "text_only.docx"
+    doc.save(docx_path)
+
+    parser = DocumentParser()
+    reopened = Document(docx_path)
+    assert parser._docx_has_embedded_images(reopened) is False
+
+
+def test_docx_text_only_skips_paragraph_image_scan(tmp_path, monkeypatch):
+    """迴歸測試：純文字 DOCX 不應對任何段落呼叫 _process_docx_paragraph_images。"""
+    docx_module = pytest.importorskip("docx")
+    from docx import Document
+
+    doc = Document()
+    for i in range(5):
+        doc.add_paragraph(f"第 {i + 1} 段純文字內容，沒有任何內嵌圖片。")
+    docx_path = tmp_path / "text_only_multi.docx"
+    doc.save(docx_path)
+
+    parser = DocumentParser()
+    called = []
+    original = parser._process_docx_paragraph_images
+
+    def spy(doc_obj, paragraph, full_doc_text):
+        called.append(paragraph)
+        return original(doc_obj, paragraph, full_doc_text)
+
+    monkeypatch.setattr(parser, "_process_docx_paragraph_images", spy)
+
+    text = parser.parse_file(str(docx_path))
+
+    assert called == []
+    assert "[圖片:" not in text
+    assert "第 1 段純文字內容" in text
+
+
+def test_docx_with_image_still_invokes_paragraph_image_scan(tmp_path, monkeypatch):
+    """對照組：含圖片的 DOCX 仍應正常掃描段落圖片，確認預檢沒有誤傷正常情境。"""
+    docx_module = pytest.importorskip("docx")
+    from docx import Document
+
+    doc = Document()
+    doc.add_paragraph("這段文字後面有一張圖片。")
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="PNG")
+    img_buf.seek(0)
+    doc.add_picture(img_buf)
+    docx_path = tmp_path / "with_image.docx"
+    doc.save(docx_path)
+
+    parser = DocumentParser()
+    called = []
+    original = parser._process_docx_paragraph_images
+
+    def spy(doc_obj, paragraph, full_doc_text):
+        called.append(paragraph)
+        return original(doc_obj, paragraph, full_doc_text)
+
+    monkeypatch.setattr(parser, "_process_docx_paragraph_images", spy)
+
+    text = parser.parse_file(str(docx_path))
+
+    assert len(called) >= 1
+    assert "[圖片:" in text

@@ -60,23 +60,34 @@ flowchart TD
     SRC -->|YouTube 連結| YT{官方/社群字幕存在?}
 
     EXT -->|.txt / .md| TXT["讀取文字<br/>UTF-8 → Big5 → CP950"]
-    EXT -->|.docx / .pptx| DOCX["段落/投影片文字提取<br/>+ 表格 Markdown 化"]
+    EXT -->|.docx| DOCXTXT["段落/表格文字提取"]
+    EXT -->|.pptx| PPTXTXT["投影片文字提取<br/>（逐 shape 判斷是否為圖片）"]
     EXT -->|.pdf| T1["軌道一：pypdf 快速提取"]
     EXT -->|音訊 / 影片| AUD["本地 Whisper（tiny）"]
 
     T1 --> Q1{"品質足夠?<br/>≥80字元 且 可讀字元比≥60%"}
-    Q1 -->|是| IMG
+    Q1 -->|是| CHKPDF
     Q1 -->|否| T2["軌道二：pdfminer<br/>雙欄版面重建"]
     T2 --> Q2{品質足夠?}
-    Q2 -->|是| IMG
+    Q2 -->|是| CHKPDF
     Q2 -->|否| T3["軌道三：pdf2image<br/>+ Tesseract OCR"]
     T3 --> OUT
 
+    CHKPDF{"含內嵌圖片?<br/>pypdf page.images 輕量預檢"}
+    CHKPDF -->|否，純文字| OUT
+    CHKPDF -->|是| IMG
+
+    DOCXTXT --> CHKDOCX{"含內嵌圖片?<br/>doc.part.rels 輕量預檢"}
+    CHKDOCX -->|否，純文字| OUT
+    CHKDOCX -->|是| IMG
+
+    PPTXTXT --> IMG
+
+    IMG[["圖文統一處理管線<br/>— 見下方 Behavior Tree"]]
+    IMG --> OUT((彙整文字流))
+
     YT -->|是| SUB[輸出字幕逐字稿]
     YT -->|否| YTB["yt-dlp 下載音軌<br/>→ Whisper 轉譯"]
-
-    DOCX --> IMG[["圖文統一處理管線<br/>— 見下方 Behavior Tree"]]
-    IMG --> OUT((彙整文字流))
 
     SUB --> OUT
     YTB --> OUT
@@ -87,8 +98,10 @@ flowchart TD
     OUT --> CHUNK[句子感知分塊 Chunk]
 ```
 
-> **注意**：上圖為「文字提取」路由決策樹。其中 **PDF / PPTX / DOCX** 三種格式在各自的文字提取軌道完成後，
-> 會額外並行走過下方的「圖文統一處理管線 Behavior Tree」，其輸出會併入前述文字流後才一起進入句子感知分塊；
+> **注意**：上圖為「文字提取」路由決策樹。其中 **PDF / DOCX** 在文字提取完成後，會先經過一道輕量的「是否含
+> 內嵌圖片」預檢——純文字文件（如論文、合約）直接併入輸出文字流，等同 TXT/MD 路徑，完全不進入下方較重的
+> 圖文統一處理管線。**PPTX** 因幾乎必含至少一個圖形/圖示元素，此預檢的效益甚低（既有的逐 shape 型別判斷本身
+> 已經足夠輕量），故不額外加此關卡，一律進入圖文管線由其內部的逐張圖片判斷把關。
 > 音訊/影片、純文本 (TXT/MD)、網頁 URL、YouTube 連結則不涉及內嵌圖片抽取。
 > 品質判定 `_is_low_quality_text`：文字長度 <80 字元，或中英文可讀字元比例 <60%，即判定為低品質、觸發下一軌備援。
 
@@ -133,7 +146,8 @@ flowchart TD
 
 1. **能力解耦**：OCR 文字提取為核心基礎能力，`enable_ocr` 預設 `True`，完全不依賴圖理解模型即可運作；
    圖理解語義模型為選配增強能力，`enable_image_understanding` 預設 `False`，需另行啟動本機 [Ollama](https://ollama.com/) 服務並安裝多模態模型（預設對應 `qwen2.5vl:7b`）才會生效。未安裝/未啟動時自動降級為保留 OCR 結果，不中斷解析流程。
-2. **算力分層**：空間去重（跳過已被原生文字覆蓋 ≥70% 的裝飾性圖片）→ 全域 OCR → 三維度加權評分
+2. **算力分層**：文件級輕量預檢（PDF/DOCX 先確認是否含任何內嵌圖片，純文字文件直接略過整套圖片管線）
+   → 空間去重（跳過已被原生文字覆蓋 ≥70% 的裝飾性圖片）→ 全域 OCR → 三維度加權評分
    （文件類型 30% + OCR 置信度 40% + 輕量圖形特徵 30%，預設閾值 60 分）→ 命中「如下圖」等強制旁路規則時
    直接跳過評分 → 分數達標才呼叫本地圖理解模型補足語義。
 3. **圖號雙序列**：原文既有圖號（如「圖3」）與系統自動補號（`自補圖-1`、`自補圖-2`）各自獨立遞增，永不互相覆蓋。
@@ -174,9 +188,10 @@ text = parser.parse_file("report.pdf")
    段落（該段落文字通常為空），標題文字則在緊接的下一個段落（使用「插入標題」功能產生）。目前
    `_process_docx_paragraph_images` 僅讀取圖片所在段落自身文字作為圖題候選，無法跨段落抓取標題，
    此情況下該圖片會落到「正文明確引用」或系統自補序列，而非以原文圖號呈現。
-3. **PDF 圖片管線與軌道二（pdfminer）版面解析重複呼叫 `extract_pages()`**：當文字提取走到軌道二時，
-   `_extract_pdf_images_text` 會再次呼叫 `extract_pages()` 重新解析一次頁面版面，屬效能上可優化但不
-   影響正確性的重複計算；未來可考慮合併為單次遍歷。
+3. **含內嵌圖片的 PDF，圖片管線與軌道二（pdfminer）版面解析仍會重複呼叫 `extract_pages()`**：
+   純文字 PDF 已透過 `_pdf_has_embedded_images` 輕量預檢完全跳過此問題；但若文件確實含有內嵌圖片
+   且文字提取走到軌道二，`_extract_pdf_images_text` 仍會再次呼叫 `extract_pages()` 重新解析一次頁面
+   版面，屬效能上可優化但不影響正確性的重複計算；未來可考慮合併為單次遍歷。
 4. **`_detect_double_column` 為既有未使用方法**：此輔助函式存在於 `core.py` 但目前沒有任何呼叫點
    （早於本次圖文管線改動即存在），與圖文管線無關，暫不清理以維持本次變更範圍最小化。
 
