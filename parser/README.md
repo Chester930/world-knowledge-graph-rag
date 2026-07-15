@@ -98,6 +98,7 @@ flowchart TD
     AUD --> OUT
 
     OUT --> CHUNK[句子感知分塊 Chunk]
+    CHUNK -.->|選配，需明確呼叫| WRITE[["write_chunks_as_markdown()<br/>逐塊寫成 .md 檔"]]
 ```
 
 > **注意**：上圖為「文字提取」路由決策樹。**PDF / DOCX / PPTX** 三種格式在文字提取完成後，都會先經過一道
@@ -107,6 +108,54 @@ flowchart TD
 > 關聯會導致所有含圖 PPTX 被誤判為純文字，因此預檢必須逐張投影片掃描。
 > 音訊/影片、純文本 (TXT/MD)、網頁 URL、YouTube 連結則不涉及內嵌圖片抽取。
 > 品質判定 `_is_low_quality_text`：文字長度 <80 字元，或中英文可讀字元比例 <60%，即判定為低品質、觸發下一軌備援。
+> `write_chunks_as_markdown()` 為**選配**步驟（虛線），`parse_file()`／`sentence_aware_chunking()`
+> 本身仍是無副作用的純函式，預設不寫任何檔案；只有呼叫端明確呼叫這個函式時，切塊結果才會落地存檔，
+> 詳見下方「切塊落地存檔」章節。
+
+---
+
+## 📦 切塊落地存檔 (Chunk Persistence)
+
+`parser/chunk_writer.py` 提供 `write_chunks_as_markdown()`，將 `sentence_aware_chunking()` 的輸出
+逐一寫成獨立的 `.md` 檔案，檔名與檔案內部的 YAML frontmatter 都明確標示**來源**與**序號**，確保
+下游（embedding、SVO 抽取、知識圖譜寫入）隨時可以從單一切塊檔案追溯回原始文件與其相對位置。
+
+此功能刻意獨立於 `core.py` 之外：`parse_file()`／`sentence_aware_chunking()` 本身維持無副作用的
+純函式設計，是否要落地存檔、存到哪裡，交由呼叫端透過 `chunk_writer` 明確選擇性呼叫。
+
+```python
+from parser.core import DocumentParser, sentence_aware_chunking
+from parser.chunk_writer import write_chunks_as_markdown
+
+parser = DocumentParser()
+text = parser.parse_file("report.pdf")
+chunks = sentence_aware_chunking(text)
+
+paths = write_chunks_as_markdown(chunks, source="report.pdf", output_dir="./chunks")
+# ./chunks/report__chunk-001-of-012.md
+# ./chunks/report__chunk-002-of-012.md
+# ...
+```
+
+每個檔案的內容格式：
+
+```markdown
+---
+source: "report.pdf"
+chunk_index: 1
+total_chunks: 12
+---
+
+（此處為該切塊的文字內容）
+```
+
+- **檔名安全化**：`source` 可能是檔案路徑或 URL，`_safe_filename_stem()` 會移除檔名系統不允許的
+  字元（`\ / : * ? " < > |`），確保產生的檔名在 Windows/macOS/Linux 上都合法。
+- **重跑自動清理**：同一 `source` 重新處理後（例如文件內容更新、分塊數變少），會先清除該來源
+  舊有的分塊檔案再寫入新的一批，避免資料夾裡殘留跟目前內容對不上的過期檔案；不影響同資料夾內其他
+  來源的分塊檔案。
+- **不引入 PyYAML**：frontmatter 以手動字串組裝產生（字串值自動加雙引號並跳脫特殊字元），維持
+  模組輕量化定位；此 frontmatter 僅供輸出／人工與下游程式解析，不需要支援回讀。
 
 ---
 
