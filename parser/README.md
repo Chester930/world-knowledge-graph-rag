@@ -174,7 +174,7 @@ flowchart TD
 
     EXTRACT --> DEDUP{"空間去重<br/>文字覆蓋率 ≥70%?<br/>（僅 PDF 有座標可判定）"}
     DEDUP -->|是| DROP1[捨棄・零成本]
-    DEDUP -->|否| MINDIM{寬或高 < 40px?}
+    DEDUP -->|否| MINDIM{"顯示尺寸 寬或高 < 40px?<br/>（依 96 DPI 換算，非原始像素）"}
     MINDIM -->|是| DROP2[裝飾性小圖・捨棄]
     MINDIM -->|否| SORT[依視覺閱讀順序<br/>由上到下排序]
 
@@ -184,9 +184,12 @@ flowchart TD
     SCORE --> BYPASS{"命中強制旁路<br/>或總分 ≥ 閾值?"}
 
     BYPASS -->|否| KEEPOCR[保留 OCR 文字]
-    BYPASS -->|是| VISION{"圖理解模型已啟用<br/>且 Ollama 可連線?"}
-    VISION -->|否，優雅降級| KEEPOCR
-    VISION -->|是| CALLVLM["呼叫本地視覺模型<br/>產生語義描述"]
+    BYPASS -->|是| VISION{"圖理解模型已啟用?"}
+    VISION -->|否| KEEPOCR
+    VISION -->|是| HEALTH{"Ollama 服務可連線<br/>且模型已安裝?<br/>（同一份文件內快取，僅檢查一次）"}
+    HEALTH -->|否| KEEPOCR
+    HEALTH -->|是| CALLVLM["呼叫本地視覺模型<br/>產生語義描述"]
+    CALLVLM -->|呼叫失敗，優雅降級| KEEPOCR
 
     KEEPOCR --> MERGE[依排序後順序回填至文字流]
     CALLVLM --> MERGE
@@ -196,6 +199,16 @@ flowchart TD
 > `force_visual_parse_doc_types` 清單 / 圖片自身鄰近文字命中「如下圖」「如上圖」等通用關鍵字 /
 > 該圖有原文圖號時，正文精確引用該圖號（如「如圖3所示」，避免同頁多圖時誤觸發不相關的圖）/
 > 該圖無原文圖號可比對（自補序列）時，退回檢查全文是否有通用旁路關鍵字，作為安全網。
+>
+> **Ollama 可用性檢查**：第一張需要呼叫圖理解模型的圖片會先打一次輕量的 `/api/tags`
+> （列出已安裝模型、不需載入模型進 VRAM，短逾時 `ollama_availability_check_timeout_seconds`
+> 預設 5 秒），同時確認服務可連線、且 `ollama_vision_model` 指定的模型已安裝，結果快取供
+> 同一份文件後續所有圖片共用。這是為了避免文件內每一張符合評分/強制旁路門檻的圖片都各自重新
+> 嘗試連線，各自等到完整的 `ollama_timeout_seconds`（預設 60 秒）逾時才發現服務不可用——
+> 最壞情況可能是幾十張圖片各等 60 秒。每次 `parse_file()` 處理新文件時會重置此快取，讓長時間
+> 運行的服務仍有機會重新確認 Ollama 狀態（例如使用者在處理上一份文件後才啟動 Ollama）。健康
+> 檢查通過後，實際呼叫 `/api/generate` 仍可能因其他原因失敗（如模型載入中），此時僅記錄警告、
+> 不影響後續圖片繼續嘗試。
 
 核心原則：
 
@@ -250,7 +263,7 @@ text = parser.parse_file("report.pdf")
 
 #### 已解決的歷史限制
 
-以下三項曾記錄為已知限制，已於後續迭代解決：
+以下項目曾記錄為已知限制，已於後續迭代解決：
 
 - **同頁多圖過度觸發強制旁路** → `check_forced_bypass` 現在採三層判斷：(1) 圖片自身鄰近文字命中
   通用旁路關鍵字；(2) 該圖有原文圖號時，要求正文精確引用該圖號（如「如圖3所示」）才觸發，避免同頁
@@ -261,6 +274,12 @@ text = parser.parse_file("report.pdf")
   Word「插入標題」慣例（圖片自成一段、標題另起一段）。
 - **PDF 圖片管線與軌道二重複呼叫 `extract_pages()`** → 新增 `_load_pdf_layout` 快取機制，軌道二
   與圖片管線共用同一份已載入的版面樹狀結構（`pages_layout`），同一份 PDF 不再被 pdfminer 解析兩次。
+- **裝飾性小圖過濾誤判**：原本 `min_image_dimension_px` 檢查的是解碼後圖片檔案的原始像素尺寸，
+  跟圖片在頁面/投影片上「實際顯示」多大是兩件事——高解析度照片可能被縮小顯示成裝飾小圖示（誤放行、
+  浪費算力），低解析度截圖也可能被放大顯示成有意義的大小（誤判為裝飾圖而濾除）。現在改為優先使用
+  `process_image(display_size_px=...)` 傳入的實際顯示尺寸（PDF 用 bbox point、PPTX 用
+  `shape.width/height` EMU、DOCX 用 `a:blip` 對應的 `wp:extent` EMU，統一換算成 96 DPI 基準像素），
+  取不到時才退回原始像素尺寸判斷。
 
 ## 📦 系統依賴說明 (System Prerequisites)
 

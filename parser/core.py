@@ -7,9 +7,13 @@ from pathlib import Path
 from typing import List, Optional
 
 try:
-    from parser.image_pipeline import ImagePipeline, ImagePipelineConfig, _CAPTION_PATTERNS
+    from parser.image_pipeline import (
+        ImagePipeline, ImagePipelineConfig, _CAPTION_PATTERNS, emu_to_px, points_to_px,
+    )
 except ImportError:
-    from image_pipeline import ImagePipeline, ImagePipelineConfig, _CAPTION_PATTERNS
+    from image_pipeline import (
+        ImagePipeline, ImagePipelineConfig, _CAPTION_PATTERNS, emu_to_px, points_to_px,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -293,12 +297,36 @@ class DocumentParser:
                 doc_type="docx",
                 nearby_caption_text=caption_text,
                 full_doc_text=full_doc_text,
+                display_size_px=self._docx_image_display_size_px(blip),
             )
             block = result.to_text_block() if result else ""
             if block:
                 blocks.append(block)
 
         return blocks
+
+    def _docx_image_display_size_px(self, blip):
+        """從 `a:blip` 元素往上尋找其所屬的 `wp:inline`/`wp:anchor`，取得裡面的
+        `wp:extent`（該圖片實際顯示尺寸，EMU 單位，與圖片檔案本身的原始像素解析度無關）
+        並換算成 96 DPI 基準像素。DOCX 雖然沒有頁面座標，但插入圖片時一定會指定顯示尺寸，
+        此資訊即來自這裡。找不到（結構異常）時回傳 None，由 process_image 安全退回使用
+        原始像素尺寸判斷，不影響正確性。"""
+        if docx_qn is None:
+            return None
+        try:
+            node = blip.getparent()
+            while node is not None:
+                if node.tag in (docx_qn('wp:inline'), docx_qn('wp:anchor')):
+                    extent = node.find(docx_qn('wp:extent'))
+                    if extent is not None:
+                        cx, cy = extent.get('cx'), extent.get('cy')
+                        if cx and cy:
+                            return (emu_to_px(float(cx)), emu_to_px(float(cy)))
+                    break
+                node = node.getparent()
+        except Exception:
+            pass
+        return None
 
     def _convert_table_to_markdown(self, table) -> str:
         """將 python-docx 的 Table 物件轉換為 Markdown 表格語法，保留儲存格內換行"""
@@ -435,11 +463,18 @@ class DocumentParser:
         except Exception:
             return ""
 
+        display_size_px = None
+        try:
+            display_size_px = (emu_to_px(shape.width), emu_to_px(shape.height))
+        except Exception:
+            pass  # 取不到顯示尺寸時，process_image 會安全退回原始像素尺寸判斷
+
         result = self.image_pipeline.process_image(
             pil_image,
             doc_type="pptx",
             nearby_caption_text=nearby_text,
             full_doc_text=full_slide_text,
+            display_size_px=display_size_px,
         )
         return result.to_text_block() if result else ""
 
@@ -718,11 +753,16 @@ class DocumentParser:
                 blocks = []
                 for bbox, pil_image in candidates:
                     nearby_caption = self._find_nearby_pdf_caption(bbox, text_containers)
+                    display_size_px = (
+                        points_to_px(bbox[2] - bbox[0]),
+                        points_to_px(bbox[3] - bbox[1]),
+                    )
                     result = self.image_pipeline.process_image(
                         pil_image,
                         doc_type=doc_type,
                         nearby_caption_text=nearby_caption,
                         full_doc_text=page_full_text,
+                        display_size_px=display_size_px,
                     )
                     block = result.to_text_block() if result else ""
                     if block:

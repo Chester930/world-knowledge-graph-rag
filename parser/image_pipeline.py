@@ -64,6 +64,11 @@ class ImagePipelineConfig:
     # 且 7b 量化後約 6GB，可在 8GB VRAM 等級的消費級 GPU 上順暢運行。
     ollama_vision_model: str = "qwen2.5vl:7b"
     ollama_timeout_seconds: int = 60
+    # 健康檢查用的短逾時：在文件中第一次需要呼叫圖理解模型時，先打一次輕量的
+    # /api/tags（列出已安裝模型、不需載入模型，回應快）確認服務可連線且目標模型已安裝，
+    # 結果快取供同一份文件後續所有圖片共用，避免每張圖各自等到 ollama_timeout_seconds
+    # 逾時才發現服務不可用。
+    ollama_availability_check_timeout_seconds: int = 5
 
     # 三維度評分權重（總和應為 1.0）與升級閾值
     weight_doc_type: float = 0.3
@@ -90,6 +95,21 @@ class ImagePipelineConfig:
 
     # 圖號前綴
     auto_figure_id_prefix: str = "自補圖"
+
+
+# 96 DPI 為業界慣用的螢幕像素換算基準（CSS px 定義即為 1/96 inch）。
+EMU_PER_PX = 9525.0  # 914400 EMU/inch ÷ 96 px/inch
+POINTS_TO_PX = 96.0 / 72.0  # PDF point 為 1/72 inch
+
+
+def emu_to_px(emu: float) -> float:
+    """將 OOXML（PPTX/DOCX）常用的 EMU 單位換算為 96 DPI 基準下的像素值。"""
+    return emu / EMU_PER_PX
+
+
+def points_to_px(points: float) -> float:
+    """將 PDF 常用的 point 單位換算為 96 DPI 基準下的像素值。"""
+    return points * POINTS_TO_PX
 
 
 _CAPTION_PATTERNS = [
@@ -157,12 +177,18 @@ class ImagePipeline:
         self._auto_counter = 0
         self._used_figure_ids: set = set()
         self._vision_unavailable_logged = False
+        self._vision_availability_checked = False
+        self._vision_available = False
 
     def reset_numbering(self) -> None:
-        """每份新文件開始解析前呼叫，避免跨文件的圖號序列互相汙染。"""
+        """每份新文件開始解析前呼叫，避免跨文件的圖號序列互相汙染。
+        同時重置圖理解模型的可用性快取，讓每份新文件都有機會重新確認 Ollama
+        服務狀態（例如使用者在處理上一份文件後才把 Ollama 啟動起來）。"""
         self._auto_counter = 0
         self._used_figure_ids = set()
         self._vision_unavailable_logged = False
+        self._vision_availability_checked = False
+        self._vision_available = False
 
     # -- 空間去重 -----------------------------------------------------------
 
@@ -375,6 +401,57 @@ class ImagePipeline:
 
     # -- 本地圖理解模型（Ollama，選配） -------------------------------------
 
+    def _check_vision_model_available(self) -> bool:
+        """健康檢查：確認 Ollama 服務可連線、且 `ollama_vision_model` 指定的模型已安裝。
+
+        打的是 `/api/tags`（僅列出已安裝模型，不需載入模型進 VRAM，回應快），並使用遠
+        短於 `ollama_timeout_seconds` 的逾時（`ollama_availability_check_timeout_seconds`，
+        預設 5 秒）。結果會快取在 `_vision_availability_checked`／`_vision_available`，
+        同一份文件解析過程中只會真的打一次，後續所有圖片直接讀快取結果——避免文件中
+        每一張符合條件的圖片都各自重新嘗試連線、各自等到完整逾時才發現服務不可用。
+        """
+        if self._vision_availability_checked:
+            return self._vision_available
+
+        self._vision_availability_checked = True
+
+        if requests is None:
+            self._vision_available = False
+            return False
+
+        try:
+            resp = requests.get(
+                f"{self.config.ollama_base_url}/api/tags",
+                timeout=self.config.ollama_availability_check_timeout_seconds,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            installed = [m.get("name", "") for m in data.get("models", [])]
+
+            target = self.config.ollama_vision_model
+            target_family = target.split(":")[0]
+            self._vision_available = any(
+                name == target or name.startswith(f"{target_family}:") for name in installed
+            )
+            if not self._vision_available and not self._vision_unavailable_logged:
+                logger.warning(
+                    "[ImagePipeline] Ollama 服務可連線，但未安裝指定的圖理解模型 %s"
+                    "（已安裝：%s），自動降級保留 OCR 結果。可執行 `ollama pull %s` 安裝。",
+                    target, installed, target,
+                )
+                self._vision_unavailable_logged = True
+        except Exception as e:
+            self._vision_available = False
+            if not self._vision_unavailable_logged:
+                logger.warning(
+                    "[ImagePipeline] 無法連線本地 Ollama 服務（%s），自動降級保留 OCR 結果。"
+                    "請確認服務已啟動（預設 %s）。",
+                    str(e), self.config.ollama_base_url,
+                )
+                self._vision_unavailable_logged = True
+
+        return self._vision_available
+
     def _call_ollama_vision(self, pil_image) -> Optional[str]:
         if not self.config.enable_image_understanding:
             return None
@@ -384,6 +461,8 @@ class ImagePipeline:
                     "[ImagePipeline] 未安裝 requests，圖理解模型無法呼叫，自動降級保留 OCR 結果"
                 )
                 self._vision_unavailable_logged = True
+            return None
+        if not self._check_vision_model_available():
             return None
 
         try:
@@ -411,6 +490,8 @@ class ImagePipeline:
             description = (data.get("response") or "").strip()
             return description or None
         except Exception as e:
+            # 健康檢查通過後，實際呼叫仍可能失敗（例如模型載入中、服務中途掛掉）——
+            # 這裡不覆寫 _vision_available，讓下一張圖仍會嘗試呼叫，只記錄警告一次。
             if not self._vision_unavailable_logged:
                 logger.warning(
                     "[ImagePipeline] 呼叫本地圖理解模型失敗（%s），自動降級保留 OCR 結果", str(e)
@@ -428,12 +509,23 @@ class ImagePipeline:
         nearby_caption_text: str = "",
         full_doc_text: str = "",
         force_image_understanding: bool = False,
+        display_size_px: Optional[Tuple[float, float]] = None,
     ) -> Optional[ImageProcessResult]:
-        """處理單張圖片，回傳結果；若判定為裝飾性圖片則回傳 None（不佔用圖號序列）。"""
+        """處理單張圖片，回傳結果；若判定為裝飾性圖片則回傳 None（不佔用圖號序列）。
+
+        `display_size_px` 為圖片在頁面/投影片上「實際顯示」的寬高（已換算為 96 DPI 基準像素），
+        由呼叫端依來源格式換算後傳入（PDF 用 bbox points、PPTX/DOCX 用 EMU extent）。裝飾性小圖
+        判斷優先使用這個顯示尺寸，而非解碼後圖片檔案本身的原始像素尺寸——兩者可能差異很大（例如
+        高解析度照片被縮小顯示成小圖示，或低解析度截圖被放大顯示），原始像素尺寸無法反映使用者
+        實際看到的大小。未提供時（呼叫端無法取得顯示尺寸）才退回使用原始像素尺寸判斷。"""
         if pil_image is None:
             return None
 
-        width, height = pil_image.size
+        if display_size_px is not None:
+            width, height = display_size_px
+        else:
+            width, height = pil_image.size
+
         if width < self.config.min_image_dimension_px or height < self.config.min_image_dimension_px:
             return None  # 裝飾性小圖 / icon / 項目符號，前置過濾
 

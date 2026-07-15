@@ -162,6 +162,134 @@ def test_vision_call_gracefully_degrades_when_ollama_unreachable():
     assert result.used_image_understanding is False
 
 
+class _FakeResponse:
+    def __init__(self, json_data, status_code=200):
+        self._json_data = json_data
+        self.status_code = status_code
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise Exception(f"HTTP {self.status_code}")
+
+    def json(self):
+        return self._json_data
+
+
+def test_vision_availability_checked_only_once_per_document(monkeypatch):
+    """迴歸測試：同一份文件處理多張圖片時，Ollama 可用性只應實際檢查一次
+    （打 /api/tags），不應每張符合條件的圖片都各自重新嘗試連線。"""
+    pytest.importorskip("requests")
+    import parser.image_pipeline as ip_module
+
+    get_calls = []
+
+    def fake_get(url, timeout=None):
+        get_calls.append(url)
+        return _FakeResponse({"models": [{"name": "qwen2.5vl:7b"}]})
+
+    monkeypatch.setattr(ip_module.requests, "get", fake_get)
+    monkeypatch.setattr(
+        ip_module.requests, "post",
+        lambda *a, **k: _FakeResponse({"response": "一張示意圖"}),
+    )
+
+    config = ImagePipelineConfig(enable_image_understanding=True)
+    pipeline = ImagePipeline(config)
+
+    for _ in range(3):
+        result = pipeline.process_image(
+            _make_diagram_image(), doc_type="pptx", force_image_understanding=True
+        )
+        assert result.used_image_understanding is True
+
+    assert len(get_calls) == 1  # 只打了一次 /api/tags，不是三次
+
+
+def test_vision_availability_check_detects_model_not_installed(monkeypatch):
+    """迴歸測試：Ollama 服務可連線，但指定的模型不在已安裝清單中時，
+    應判定為不可用並優雅降級，而不是直接嘗試呼叫 /api/generate 才發現失敗。"""
+    pytest.importorskip("requests")
+    import parser.image_pipeline as ip_module
+
+    post_calls = []
+    monkeypatch.setattr(
+        ip_module.requests, "get",
+        lambda url, timeout=None: _FakeResponse({"models": [{"name": "llava:latest"}]}),
+    )
+    monkeypatch.setattr(
+        ip_module.requests, "post",
+        lambda *a, **k: post_calls.append(1) or _FakeResponse({"response": "不應被呼叫"}),
+    )
+
+    config = ImagePipelineConfig(
+        enable_image_understanding=True, ollama_vision_model="qwen2.5vl:7b",
+    )
+    pipeline = ImagePipeline(config)
+    result = pipeline.process_image(
+        _make_diagram_image(), doc_type="pptx", force_image_understanding=True
+    )
+
+    assert result.used_image_understanding is False
+    assert result.understanding_text is None
+    assert post_calls == []  # 健康檢查判定不可用後，不應再嘗試呼叫 /api/generate
+
+
+def test_vision_availability_check_matches_model_family_ignoring_tag_variant(monkeypatch):
+    """模型清單裡的 tag 可能跟設定值不完全一致（如 qwen2.5vl:latest vs qwen2.5vl:7b），
+    只要模型家族名稱前綴相符，仍應判定為可用。"""
+    pytest.importorskip("requests")
+    import parser.image_pipeline as ip_module
+
+    monkeypatch.setattr(
+        ip_module.requests, "get",
+        lambda url, timeout=None: _FakeResponse({"models": [{"name": "qwen2.5vl:latest"}]}),
+    )
+    monkeypatch.setattr(
+        ip_module.requests, "post",
+        lambda *a, **k: _FakeResponse({"response": "描述文字"}),
+    )
+
+    config = ImagePipelineConfig(
+        enable_image_understanding=True, ollama_vision_model="qwen2.5vl:7b",
+    )
+    pipeline = ImagePipeline(config)
+    result = pipeline.process_image(
+        _make_diagram_image(), doc_type="pptx", force_image_understanding=True
+    )
+
+    assert result.used_image_understanding is True
+
+
+def test_reset_numbering_allows_rechecking_vision_availability(monkeypatch):
+    """迴歸測試：reset_numbering()（每份新文件開始時呼叫）應重置可用性快取，
+    讓下一份文件有機會重新確認 Ollama 狀態，不會被上一份文件的檢查結果卡住。"""
+    pytest.importorskip("requests")
+    import parser.image_pipeline as ip_module
+
+    get_calls = []
+
+    def fake_get(url, timeout=None):
+        get_calls.append(url)
+        return _FakeResponse({"models": [{"name": "qwen2.5vl:7b"}]})
+
+    monkeypatch.setattr(ip_module.requests, "get", fake_get)
+    monkeypatch.setattr(
+        ip_module.requests, "post",
+        lambda *a, **k: _FakeResponse({"response": "描述文字"}),
+    )
+
+    config = ImagePipelineConfig(enable_image_understanding=True)
+    pipeline = ImagePipeline(config)
+
+    pipeline.process_image(_make_diagram_image(), doc_type="pptx", force_image_understanding=True)
+    pipeline.process_image(_make_diagram_image(), doc_type="pptx", force_image_understanding=True)
+    assert len(get_calls) == 1
+
+    pipeline.reset_numbering()
+    pipeline.process_image(_make_diagram_image(), doc_type="pptx", force_image_understanding=True)
+    assert len(get_calls) == 2  # 重置後，新文件重新檢查了一次
+
+
 # --- 輸出格式化 ------------------------------------------------------------------
 
 def test_to_text_block_includes_figure_id_and_content():
@@ -684,3 +812,144 @@ def test_forced_bypass_auto_id_without_generic_phrase_stays_false():
         "pdf_native", "", figure_id="自補圖-1", id_type="auto",
         full_doc_text="這是一段完全沒有提到任何圖片的普通文字。",
     ) is False
+
+
+# --- 裝飾小圖過濾：改用顯示尺寸而非原始像素尺寸 -------------------------------
+
+def test_unit_conversion_helpers():
+    from parser.image_pipeline import emu_to_px, points_to_px
+
+    assert emu_to_px(914400) == pytest.approx(96.0)   # 1 inch = 914400 EMU = 96px (96 DPI)
+    assert points_to_px(72) == pytest.approx(96.0)     # 1 inch = 72 point = 96px (96 DPI)
+
+
+def test_process_image_uses_display_size_over_raw_pixel_size_high_res_small_display():
+    """迴歸測試：高解析度原圖但顯示尺寸很小（例如縮小成裝飾用小圖示），
+    應依顯示尺寸判定為裝飾性小圖並濾除，而非因原始像素夠大而誤放行。"""
+    pipeline = ImagePipeline()
+    high_res_image = Image.new("RGB", (3000, 2000), "white")  # 原始像素遠大於 40px
+
+    result = pipeline.process_image(
+        high_res_image, doc_type="pptx", display_size_px=(28.0, 28.0),  # 顯示尺寸 <40px
+    )
+    assert result is None
+
+
+def test_process_image_uses_display_size_over_raw_pixel_size_low_res_large_display():
+    """迴歸測試：原始像素很小但顯示尺寸放大到有意義的大小，
+    不應僅因原始解析度低於 40px 就被誤判為裝飾性小圖而濾除。"""
+    pipeline = ImagePipeline()
+    low_res_image = _make_plain_photo(size=(35, 35))  # 原始像素 <40px
+
+    result = pipeline.process_image(
+        low_res_image, doc_type="pptx", display_size_px=(384.0, 288.0),  # 顯示尺寸夠大
+    )
+    assert result is not None
+
+
+def test_process_image_falls_back_to_raw_pixel_size_when_display_size_unavailable():
+    """未提供 display_size_px（呼叫端無法取得顯示尺寸）時，應退回使用原始像素尺寸判斷，
+    維持向後相容，不因無法取得顯示尺寸而讓所有圖片都被濾除或都放行。"""
+    pipeline = ImagePipeline()
+    tiny_image = Image.new("RGB", (10, 10), "white")
+
+    assert pipeline.process_image(tiny_image, doc_type="pptx") is None
+    assert pipeline.process_image(_make_diagram_image(), doc_type="pptx") is not None
+
+
+def test_pdf_extraction_computes_display_size_from_bbox_in_points(tmp_path):
+    """端對端驗證：PDF 圖片的 bbox（point）會被正確換算成顯示像素，一張顯示尺寸
+    很小（雖然原始解碼像素不小）的圖應該被濾除，不出現在最終輸出中。"""
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+
+    # 原始像素 300x200（遠大於 40px），但在頁面上只用 20x20 point 顯示
+    # 20pt 換算成 96 DPI px ≈ 26.7px，低於預設門檻 40px
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="JPEG")
+    img_buf.seek(0)
+
+    pdf_path = tmp_path / "tiny_display.pdf"
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 460, "Body text long enough to satisfy the native text quality gate reliably.")
+    c.drawString(50, 440, "A second filler line keeps the readable-character-ratio above the cutoff.")
+    c.drawImage(ImageReader(img_buf), 50, 100, width=20, height=20)
+    c.save()
+
+    parser = DocumentParser()
+    text = parser.parse_file(str(pdf_path))
+
+    assert "[圖片:" not in text
+
+
+def test_pptx_extraction_computes_display_size_from_shape_emu(tmp_path):
+    """端對端驗證：PPTX 圖片 shape 的 width/height（EMU）會被正確換算成顯示像素，
+    一張原始像素很大但顯示很小的圖應該被濾除。"""
+    pptx_module = pytest.importorskip("pptx")
+    from pptx import Presentation
+    from pptx.util import Emu
+
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    img_buf = io.BytesIO()
+    Image.new("RGB", (3000, 2000), "white").save(img_buf, format="PNG")
+    img_buf.seek(0)
+    # 顯式指定顯示尺寸為 20x20 EMU px 換算下遠小於 40px（約 9525*20 EMU ≈ 20px）
+    slide.shapes.add_picture(img_buf, left=0, top=0, width=Emu(190500), height=Emu(190500))
+
+    pptx_path = tmp_path / "tiny_display.pptx"
+    prs.save(pptx_path)
+
+    parser = DocumentParser()
+    text = parser.parse_file(str(pptx_path))
+
+    assert "[圖片:" not in text
+
+
+def test_docx_extraction_computes_display_size_from_wp_extent(tmp_path):
+    """端對端驗證：DOCX 圖片的 wp:extent（EMU，顯示尺寸）會被正確換算成顯示像素，
+    一張原始像素很大但顯示很小（例如縮成裝飾用小圖示）的圖應該被濾除。"""
+    docx_module = pytest.importorskip("docx")
+    from docx import Document
+    from docx.shared import Emu
+
+    doc = Document()
+    p = doc.add_paragraph()
+    run = p.add_run()
+    img_buf = io.BytesIO()
+    Image.new("RGB", (3000, 2000), "white").save(img_buf, format="PNG")
+    img_buf.seek(0)
+    # 顯示尺寸縮小到約 20px（190500 EMU / 9525 = 20px）
+    run.add_picture(img_buf, width=Emu(190500), height=Emu(190500))
+
+    docx_path = tmp_path / "tiny_display.docx"
+    doc.save(docx_path)
+
+    parser = DocumentParser()
+    text = parser.parse_file(str(docx_path))
+
+    assert "[圖片:" not in text
+
+
+def test_docx_extraction_keeps_low_res_image_with_large_display_size(tmp_path):
+    """對照組：原始像素小但顯示尺寸放大的 DOCX 圖片不應被誤判為裝飾性小圖。"""
+    docx_module = pytest.importorskip("docx")
+    from docx import Document
+    from docx.shared import Inches
+
+    doc = Document()
+    p = doc.add_paragraph()
+    run = p.add_run()
+    img_buf = io.BytesIO()
+    _make_plain_photo(size=(35, 35)).save(img_buf, format="PNG")  # 原始像素 <40px
+    img_buf.seek(0)
+    run.add_picture(img_buf, width=Inches(3), height=Inches(3))  # 顯示尺寸夠大
+
+    docx_path = tmp_path / "large_display.docx"
+    doc.save(docx_path)
+
+    parser = DocumentParser()
+    text = parser.parse_file(str(docx_path))
+
+    assert "[圖片:" in text
