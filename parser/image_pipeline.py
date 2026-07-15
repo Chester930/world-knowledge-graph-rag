@@ -288,13 +288,48 @@ class ImagePipeline:
 
     # -- 強制旁路 ---------------------------------------------------------
 
-    def check_forced_bypass(self, doc_type: str, nearby_text: str, force: bool = False) -> bool:
+    def check_forced_bypass(
+        self,
+        doc_type: str,
+        nearby_text: str,
+        force: bool = False,
+        figure_id: str = "",
+        id_type: str = "",
+        full_doc_text: str = "",
+    ) -> bool:
+        """判斷是否應跳過評分、直接強制觸發圖理解模型。
+
+        判斷順序（由精準到寬鬆）：
+        1. 圖片自身鄰近文字命中通用旁路關鍵字（如「如下圖所示」）——最精準，僅影響該圖本身。
+        2. 該圖擁有原文既有圖號（`id_type == "original"`）時，正文中若有精確引用該圖號的句子
+           （如「如圖3所示」），才觸發——避免同頁多圖時，其中一張圖的引用連帶誤觸發其他不相關的圖。
+        3. 該圖沒有原文圖號可比對（`id_type == "auto"`，落入自補序列）時，退回檢查全文是否有
+           通用旁路關鍵字——這類圖片沒有編號可供精確比對，若仍要求精確引用只會導致「單一無編號圖片
+           ＋泛用引用語句（如僅寫「如下圖所示」而未編號）」的情境完全漏判，故保留較寬鬆的安全網。
+        """
         if force:
             return True
         if doc_type in self.config.force_visual_parse_doc_types:
             return True
+
+        # 1. 圖片自身鄰近文字命中通用旁路關鍵字
         if nearby_text and _FORCED_BYPASS_PATTERN.search(nearby_text):
             return True
+
+        # 2. 有原文圖號時，正文精確引用該圖號才觸發
+        if id_type == "original" and figure_id and full_doc_text:
+            specific_pattern = re.compile(
+                rf'(?:如|見|參[見閱]|詳)?(?:上|下)?{re.escape(figure_id)}\s*'
+                r'(?:所示|所述|說明|shows|illustrates)?',
+                re.IGNORECASE,
+            )
+            if specific_pattern.search(full_doc_text):
+                return True
+
+        # 3. 無原文圖號可比對（自補序列）時，退回檢查全文通用旁路關鍵字
+        if id_type == "auto" and full_doc_text and _FORCED_BYPASS_PATTERN.search(full_doc_text):
+            return True
+
         return False
 
     # -- 圖號雙序列編號 ----------------------------------------------------
@@ -409,7 +444,14 @@ class ImagePipeline:
         )
 
         score = self.compute_score(pil_image, doc_type, ocr_text, ocr_confidence)
-        forced = self.check_forced_bypass(doc_type, nearby_caption_text or full_doc_text, force_image_understanding)
+        forced = self.check_forced_bypass(
+            doc_type,
+            nearby_caption_text,
+            force_image_understanding,
+            figure_id=figure_id,
+            id_type=id_type,
+            full_doc_text=full_doc_text,
+        )
 
         understanding_text = None
         used_understanding = False

@@ -470,3 +470,217 @@ def test_docx_with_image_still_invokes_paragraph_image_scan(tmp_path, monkeypatc
 
     assert len(called) >= 1
     assert "[圖片:" in text
+
+
+# --- 合併另一 session 優化後的迴歸測試 -----------------------------------------
+
+def test_pptx_has_embedded_images_true_for_real_pptx_with_picture(tmp_path):
+    """迴歸測試：PPTX 圖片關聯存在於各 slide 自己的 rels，並非簡報層級的 prs.part.rels。
+    這裡直接針對真實 python-pptx 物件驗證，避免用 mock 掩蓋掉這個結構性差異。"""
+    pptx_module = pytest.importorskip("pptx")
+    from pptx import Presentation
+
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="PNG")
+    img_buf.seek(0)
+    slide.shapes.add_picture(img_buf, left=0, top=0)
+
+    parser = DocumentParser()
+    assert parser._pptx_has_embedded_images(prs) is True
+
+
+def test_pptx_has_embedded_images_false_for_text_only_pptx(tmp_path):
+    pptx_module = pytest.importorskip("pptx")
+    from pptx import Presentation
+
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.shapes.add_textbox(0, 0, 100, 100).text_frame.text = "純文字投影片，沒有任何圖片。"
+
+    parser = DocumentParser()
+    assert parser._pptx_has_embedded_images(prs) is False
+
+
+def test_pptx_text_only_skips_picture_shape_processing(tmp_path, monkeypatch):
+    pptx_module = pytest.importorskip("pptx")
+    from pptx import Presentation
+
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.shapes.add_textbox(0, 0, 100, 100).text_frame.text = "純文字投影片，完全沒有圖片。"
+    pptx_path = tmp_path / "text_only.pptx"
+    prs.save(pptx_path)
+
+    parser = DocumentParser()
+    called = []
+    original = parser._process_pptx_picture_shape
+
+    def spy(shape, nearby_text, full_slide_text):
+        called.append(shape)
+        return original(shape, nearby_text, full_slide_text)
+
+    monkeypatch.setattr(parser, "_process_pptx_picture_shape", spy)
+
+    text = parser.parse_file(str(pptx_path))
+
+    assert called == []
+    assert "[圖片:" not in text
+    assert "純文字投影片" in text
+
+
+def test_pptx_reading_order_follows_visual_position_not_z_order():
+    """迴歸測試：_pptx_reading_order 應依視覺 (top, left) 排序，
+    不受 shapes 加入順序（z-order）影響。"""
+
+    class FakeShape:
+        def __init__(self, name, top, left):
+            self.name = name
+            self.top = top
+            self.left = left
+
+    # 刻意以「視覺上在下方/右方」的形狀先加入清單，模擬 z-order 與視覺順序不同的情境
+    bottom_right = FakeShape("bottom_right", top=500000, left=500000)
+    top_left = FakeShape("top_left", top=0, left=0)
+    top_right = FakeShape("top_right", top=0, left=500000)  # 與 top_left 同列（容忍度內）
+
+    parser = DocumentParser()
+    ordered = parser._pptx_reading_order([bottom_right, top_right, top_left])
+
+    assert [s.name for s in ordered] == ["top_left", "top_right", "bottom_right"]
+
+
+def test_docx_caption_found_in_next_paragraph_when_image_paragraph_is_empty(tmp_path):
+    """迴歸測試：Word「插入標題」慣例——圖片自成一段（無文字），標題在下一段——
+    應能正確抓取原文圖號，而非落入自補序列。"""
+    docx_module = pytest.importorskip("docx")
+    from docx import Document
+
+    doc = Document()
+    doc.add_paragraph("前言段落，說明後續會有一張架構圖。")
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="PNG")
+    img_buf.seek(0)
+    doc.add_picture(img_buf)  # 圖片自成一段，本身沒有文字
+    doc.add_paragraph("圖1 系統架構圖")  # 緊接的下一段才是標題
+
+    docx_path = tmp_path / "caption_next_paragraph.docx"
+    doc.save(docx_path)
+
+    parser = DocumentParser()
+    text = parser.parse_file(str(docx_path))
+
+    assert "[圖片:圖1]" in text
+    assert "自補圖" not in text
+
+
+def test_pdf_pages_layout_shared_between_track_two_and_image_pipeline(tmp_path, monkeypatch):
+    """迴歸測試：當文字提取走到軌道二、且文件確實含有內嵌圖片時，
+    pdfminer 的版面樹狀結構應只載入一次（_load_pdf_layout 只被呼叫一次），
+    供軌道二文字重建與圖片管線共用，而非各自呼叫一次 extract_pages()。"""
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+
+    img_buf = io.BytesIO()
+    _make_diagram_image().save(img_buf, format="JPEG")
+    img_buf.seek(0)
+
+    pdf_path = tmp_path / "cache_test.pdf"
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 460, "Body text long enough to satisfy the quality gate once reconstructed by pdfminer.")
+    c.drawString(50, 440, "A second filler line keeps the readable-character-ratio comfortably above cutoff.")
+    c.drawImage(ImageReader(img_buf), 50, 100, width=300, height=200)
+    c.save()
+
+    parser = DocumentParser()
+
+    load_calls = []
+    original_load = parser._load_pdf_layout
+
+    def spy_load(path):
+        load_calls.append(path)
+        return original_load(path)
+
+    monkeypatch.setattr(parser, "_load_pdf_layout", spy_load)
+
+    quality_calls = {"n": 0}
+    original_quality = parser._is_low_quality_text
+
+    def force_track_two_only(text):
+        quality_calls["n"] += 1
+        # 第一次呼叫是軌道一（pypdf）輸出，強制判定為低品質以逼迫走軌道二；
+        # 之後的呼叫交由原始邏輯判斷，讓軌道二重建出的正常文字通過品質檢查、
+        # 不再繼續掉到軌道三（否則圖片管線會因 used_ocr_fallback 而被跳過，
+        # 就測不到「軌道二與圖片管線共用同一份版面樹」這件事了）。
+        if quality_calls["n"] == 1:
+            return True
+        return original_quality(text)
+
+    monkeypatch.setattr(parser, "_is_low_quality_text", force_track_two_only)
+
+    text = parser.parse_file(str(pdf_path))
+
+    assert len(load_calls) == 1
+    assert "[圖片:" in text
+
+
+def test_pdf_reader_none_still_falls_back_to_pdfminer_track(tmp_path, monkeypatch):
+    """迴歸測試：即使 pypdf 開檔失敗（或未安裝），仍應優雅降級走軌道二，
+    而非直接回傳空字串，中斷整個 PDF 解析。"""
+    reportlab = pytest.importorskip("reportlab")
+    from reportlab.pdfgen import canvas
+
+    pdf_path = tmp_path / "reader_none_fallback.pdf"
+    c = canvas.Canvas(str(pdf_path), pagesize=(400, 500))
+    c.drawString(50, 460, "Body text that must still be recovered via pdfminer even when pypdf is unavailable.")
+    c.drawString(50, 440, "A second filler line keeps the readable-character-ratio comfortably above cutoff.")
+    c.save()
+
+    import parser.core as core_module
+    monkeypatch.setattr(core_module, "PdfReader", None)
+
+    parser = DocumentParser()
+    text = parser.parse_file(str(pdf_path))
+
+    assert "Body text that must still be recovered" in text
+
+
+# --- check_forced_bypass 三層邏輯（精確圖號比對 + 無編號安全網） -----------------
+
+def test_forced_bypass_original_id_triggers_on_specific_reference():
+    pipeline = ImagePipeline()
+    assert pipeline.check_forced_bypass(
+        "pdf_native", "", figure_id="圖3", id_type="original",
+        full_doc_text="前文省略。如圖3所示，系統分為三層架構。",
+    ) is True
+
+
+def test_forced_bypass_original_id_does_not_cross_trigger_other_figure():
+    """迴歸測試：正文只精確引用圖2，不應連帶誤觸發圖3（避免同頁多圖過度觸發）。
+    注意：counter-example 文字刻意不得包含「圖3」這個子字串本身，
+    否則會因為比對 pattern 的前後綴皆為可選而誤判為命中。"""
+    pipeline = ImagePipeline()
+    assert pipeline.check_forced_bypass(
+        "pdf_native", "", figure_id="圖3", id_type="original",
+        full_doc_text="前文省略。如圖2所示，系統分為三層架構，此段完全沒有提到其他圖表。",
+    ) is False
+
+
+def test_forced_bypass_auto_id_falls_back_to_generic_pattern():
+    """迴歸測試：無原文圖號可比對（自補序列）時，仍應保留通用旁路關鍵字的安全網，
+    避免「單一無編號圖片＋泛用引用語句」的情境完全漏判。"""
+    pipeline = ImagePipeline()
+    assert pipeline.check_forced_bypass(
+        "pdf_native", "", figure_id="自補圖-1", id_type="auto",
+        full_doc_text="如下圖所示，系統分為三層架構，圖中未標號。",
+    ) is True
+
+
+def test_forced_bypass_auto_id_without_generic_phrase_stays_false():
+    pipeline = ImagePipeline()
+    assert pipeline.check_forced_bypass(
+        "pdf_native", "", figure_id="自補圖-1", id_type="auto",
+        full_doc_text="這是一段完全沒有提到任何圖片的普通文字。",
+    ) is False

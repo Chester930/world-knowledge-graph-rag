@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import List, Optional
 
 try:
-    from parser.image_pipeline import ImagePipeline, ImagePipelineConfig
+    from parser.image_pipeline import ImagePipeline, ImagePipelineConfig, _CAPTION_PATTERNS
 except ImportError:
-    from image_pipeline import ImagePipeline, ImagePipelineConfig
+    from image_pipeline import ImagePipeline, ImagePipelineConfig, _CAPTION_PATTERNS
 
 logger = logging.getLogger(__name__)
 
@@ -261,6 +261,22 @@ class DocumentParser:
             return []
 
         caption_text = paragraph.text.strip()
+        if not caption_text:
+            # Word「插入標題」慣例：圖片自成一段（通常無文字），標題文字在緊接的下一段。
+            # 優先向下找 1 個非空段落，其次向上找 1 個非空段落，僅在該段文字符合圖號
+            # 標註格式（如「圖1 系統架構」）時才採用，避免誤把無關段落當成圖說。
+            try:
+                p_idx = doc.paragraphs.index(paragraph)
+                for offset in (1, -1):
+                    target_idx = p_idx + offset
+                    if 0 <= target_idx < len(doc.paragraphs):
+                        candidate_text = doc.paragraphs[target_idx].text.strip()
+                        if candidate_text and any(pat.match(candidate_text) for pat in _CAPTION_PATTERNS):
+                            caption_text = candidate_text
+                            break
+            except Exception:
+                pass
+
         blocks = []
         for blip in blips:
             rId = blip.get(docx_qn('r:embed'))
@@ -319,6 +335,10 @@ class DocumentParser:
             raise ImportError("未安裝 python-pptx 套件，請執行 pip install python-pptx")
 
         prs = Presentation(path)
+        # 純文字預檢：逐張投影片掃描其自身的圖片關聯（PPTX 圖片關聯存在於各 slide
+        # 自己的 rels，並非簡報層級的 prs.part.rels），純文字投影片可完全跳過逐 shape
+        # 的圖片判斷與處理。
+        has_images = self.image_config.enable_ocr and self._pptx_has_embedded_images(prs)
         content_parts = []
 
         for slide_idx, slide in enumerate(prs.slides):
@@ -331,14 +351,19 @@ class DocumentParser:
                 if hasattr(shape, "text") and shape.text.strip()
             )
 
+            # 依 (top, left) 座標重建視覺閱讀順序，而非沿用 slide.shapes 的
+            # z-order/建立順序，確保圖片鄰近文字（last_text_seen）與最終輸出順序
+            # 符合投影片實際版面配置。
+            ordered_shapes = self._pptx_reading_order(list(slide.shapes))
+
             last_text_seen = ""
-            for shape in slide.shapes:
+            for shape in ordered_shapes:
                 if hasattr(shape, "text") and shape.text.strip():
                     text = shape.text.strip()
                     slide_text.append(text)
                     last_text_seen = text
                 elif (
-                    self.image_config.enable_ocr
+                    has_images
                     and MSO_SHAPE_TYPE is not None
                     and shape.shape_type == MSO_SHAPE_TYPE.PICTURE
                 ):
@@ -349,6 +374,57 @@ class DocumentParser:
             content_parts.append("\n".join(slide_text))
 
         return "\n\n".join(content_parts)
+
+    def _pptx_has_embedded_images(self, prs) -> bool:
+        """輕量預檢：逐張投影片掃描其自身的關聯清單（slide.part.rels）判斷是否存在任何
+        內嵌圖片。PPTX 的圖片關聯存在於各 slide 自己的 rels，並非簡報層級的
+        `prs.part.rels`（後者僅含投影片母片/版面配置/主題等簡報層級關聯，不含各投影片
+        內的圖片）。任何解析失敗都保守回傳 True，交由逐 shape 判斷處理，避免誤判漏圖。"""
+        if prs is None:
+            return True
+        try:
+            for slide in prs.slides:
+                try:
+                    for rel in slide.part.rels.values():
+                        if "image" in rel.reltype.lower():
+                            return True
+                except Exception:
+                    continue
+            return False
+        except Exception:
+            return True
+
+    def _pptx_reading_order(self, shapes: list) -> list:
+        """依 (top, left) EMU 座標重建投影片 shape 的視覺閱讀順序：先依 top 座標
+        排序後分列（容忍度內視為同一列），列內再依 left 由左到右排序。
+
+        採兩階段分桶排序而非成對比較器排序，避免「跨列容忍度」判斷在鏈式比較時
+        不滿足遞移律，導致排序結果不穩定的問題。
+        """
+        ROW_TOLERANCE_EMU = 228600  # 0.25 inch，同一橫列的垂直座標容忍範圍
+
+        items = [(getattr(s, "top", 0) or 0, getattr(s, "left", 0) or 0, s) for s in shapes]
+        items.sort(key=lambda it: it[0])
+
+        rows = []
+        current_row = []
+        current_row_top = None
+        for top, left, shape in items:
+            if current_row and abs(top - current_row_top) > ROW_TOLERANCE_EMU:
+                rows.append(current_row)
+                current_row = []
+                current_row_top = None
+            current_row.append((top, left, shape))
+            if current_row_top is None:
+                current_row_top = top
+        if current_row:
+            rows.append(current_row)
+
+        ordered = []
+        for row in rows:
+            row.sort(key=lambda it: it[1])
+            ordered.extend(shape for _, _, shape in row)
+        return ordered
 
     def _process_pptx_picture_shape(self, shape, nearby_text: str, full_slide_text: str) -> str:
         """處理單一 PPTX 圖片 shape，回傳格式化後的文字區塊；任何失敗都安全降級為空字串略過。"""
@@ -379,14 +455,27 @@ class DocumentParser:
 
     def _parse_pdf(self, path: Path) -> str:
         """三層備援 PDF 轉譯主入口"""
+        # 開啟一次 PdfReader，供軌道一與純文字預檢共用，避免重複開檔。
+        # 開啟失敗（含未安裝 pypdf）都優雅降級為 None，讓後續軌道二/三照常運作，
+        # 不因缺少 pypdf 而讓整個 PDF 解析直接失敗。
+        reader = None
+        if PdfReader is not None:
+            try:
+                reader = PdfReader(path)
+            except Exception:
+                reader = None
+
         # --- 軌道一：pypdf 快速文本流提取 ---
-        text = self._pdf_track_pypdf(path)
+        text = self._pdf_track_pypdf(reader)
         used_ocr_fallback = False
+        pages_layout = None
 
         # 評估是否需要 Fallback：字元數過少或疑似亂碼
         if self._is_low_quality_text(text):
             # --- 軌道二：pdfminer 佈局感知與雙欄排序提取 ---
-            text = self._pdf_track_pdfminer(path)
+            # 版面樹狀結構載入後會保留供圖文管線共用，避免同一份 PDF 被 extract_pages() 解析兩次。
+            pages_layout = self._load_pdf_layout(path)
+            text = self._pdf_track_pdfminer(pages_layout)
 
             # 如果依然判定為低品質（例如圖片掃描件），進入軌道三
             if self._is_low_quality_text(text):
@@ -398,40 +487,57 @@ class DocumentParser:
         # 全頁已透過軌道三整頁 OCR 的情況下，內嵌圖片內容通常已被涵蓋於整頁 OCR 結果中，
         # 故僅在軌道一/二成功時才另行處理內嵌圖片，避免重複解析同一份掃描影像。
         #
-        # 純文字預檢：先用 pypdf 輕量檢查頁面資源中是否存在任何內嵌圖片 XObject，
-        # 這比 pdfminer 的 extract_pages() 完整版面重建便宜得多。純文字文件（如論文、
-        # 合約）通常完全沒有內嵌圖片，可直接跳過整套圖片管線，避免白白重新解析一次全文件版面。
-        if self.image_config.enable_ocr and not used_ocr_fallback and self._pdf_has_embedded_images(path):
-            image_text = self._extract_pdf_images_text(path)
+        # 純文字預檢：先輕量檢查頁面資源中是否存在任何內嵌圖片 XObject，這比 pdfminer 的
+        # extract_pages() 完整版面重建便宜得多。純文字文件（如論文、合約）通常完全沒有
+        # 內嵌圖片，可直接跳過整套圖片管線，避免白白重新解析一次全文件版面。
+        if self.image_config.enable_ocr and not used_ocr_fallback and self._pdf_has_embedded_images(reader if reader is not None else path):
+            if pages_layout is None:
+                pages_layout = self._load_pdf_layout(path)
+            image_text = self._extract_pdf_images_text(pages_layout)
             if image_text:
                 text = text + "\n\n" + image_text
 
         return text
 
-    def _pdf_has_embedded_images(self, path: Path) -> bool:
+    def _pdf_has_embedded_images(self, path_or_reader) -> bool:
         """輕量預檢：僅讀取各頁 XObject 資源清單判斷是否含任何內嵌圖片，
-        不做 pdfminer 的座標/版面重建，成本遠低於 `_extract_pdf_images_text`。
+        不做 pdfminer 的座標/版面重建、也不做 pypdf 較重的影像解碼，成本遠低於
+        `_extract_pdf_images_text`。可傳入檔案路徑（會自行開啟 PdfReader）或已開啟的
+        PdfReader 實例（供 `_parse_pdf` 內部共用軌道一已開啟的 reader，避免重複開檔）。
         任何解析失敗都保守回傳 True，交由後續完整管線處理，避免誤判漏圖。"""
         if PdfReader is None:
-            return False
+            return True
         try:
-            reader = PdfReader(path)
+            reader = path_or_reader if isinstance(path_or_reader, PdfReader) else PdfReader(path_or_reader)
+        except Exception:
+            return True
+
+        try:
             for page in reader.pages:
                 try:
-                    if len(page.images) > 0:
-                        return True
+                    resources = page.get("/Resources")
+                    if not resources:
+                        continue
+                    xobjects = resources.get("/XObject")
+                    if not xobjects:
+                        continue
+                    for obj_name in xobjects:
+                        try:
+                            if xobjects[obj_name].get("/Subtype") == "/Image":
+                                return True
+                        except Exception:
+                            continue
                 except Exception:
                     continue
             return False
         except Exception:
             return True
 
-    def _pdf_track_pypdf(self, path: Path) -> str:
-        """第一軌：使用 pypdf 提取文字"""
-        if PdfReader is None:
+    def _pdf_track_pypdf(self, reader) -> str:
+        """第一軌：使用已開啟的 PdfReader 提取文字"""
+        if reader is None:
             return ""
         try:
-            reader = PdfReader(path)
             pages_text = []
             for page in reader.pages:
                 t = page.extract_text()
@@ -441,13 +547,23 @@ class DocumentParser:
         except Exception:
             return ""
 
-    def _pdf_track_pdfminer(self, path: Path) -> str:
-        """第二軌：使用 pdfminer 還原閱讀順序與雙欄解析 (混合佈局優化版)"""
+    def _load_pdf_layout(self, path: Path) -> list:
+        """載入 pdfminer 版面樹狀結構（LTPage 列表），供軌道二文字重建與圖片管線共用，
+        避免同一份 PDF 被 `extract_pages()` 重複解析兩次。"""
         if extract_pages is None:
+            return []
+        try:
+            return list(extract_pages(path))
+        except Exception:
+            return []
+
+    def _pdf_track_pdfminer(self, pages_layout: list) -> str:
+        """第二軌：使用已載入的版面樹重建閱讀順序與雙欄解析 (混合佈局優化版)"""
+        if not pages_layout:
             return ""
         try:
             pages_text = []
-            for page_layout in extract_pages(path):
+            for page_layout in pages_layout:
                 page_width = page_layout.width
                 mid_x = page_width / 2
 
@@ -547,18 +663,18 @@ class DocumentParser:
         except Exception as e:
             raise DocumentParserError(f"PDF OCR 解析失敗: {str(e)}")
 
-    def _extract_pdf_images_text(self, path: Path) -> str:
-        """圖文統一處理管線：抽取 PDF 內嵌圖片，經空間去重、評分、編號、
-        （選配）圖理解模型後，依頁面由上到下的閱讀順序整理為文字區塊。
+    def _extract_pdf_images_text(self, pages_layout: list) -> str:
+        """圖文統一處理管線：從已載入的版面樹狀結構抽取 PDF 內嵌圖片，經空間去重、評分、
+        編號、（選配）圖理解模型後，依頁面由上到下的閱讀順序整理為文字區塊。
 
         任何非預期錯誤都會被吞下並記錄警告，絕不讓圖片處理中斷主要的文字解析流程。
         """
-        if extract_pages is None or Image is None:
+        if not pages_layout or Image is None:
             return ""
 
         page_blocks = []
         try:
-            for page_idx, page_layout in enumerate(extract_pages(path)):
+            for page_idx, page_layout in enumerate(pages_layout):
                 text_containers = []
                 figures = []
                 for element in page_layout:
