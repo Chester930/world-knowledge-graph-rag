@@ -12,6 +12,7 @@
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
 | `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻） | 🟢 已下載 2 篇 |
+| `07_文件分群與知識庫自動建立/` | 03_系統設計與方法論.md § 3.1.1（暫存區 AI 自動分群建立 KG） | 🟡 已下載 2 篇，皆僅 arXiv 預印本 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -78,6 +79,13 @@
 |---|---|---|
 | `radford-et-al-2022-whisper-robust-speech-recognition.pdf` | Radford et al. (2022/2023), *Robust Speech Recognition via Large-Scale Weak Supervision*，ICML 2023（PMLR 202） | arXiv:2212.04356 |
 | `barbaresi-2021-trafilatura.pdf` | Barbaresi (2021), *Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction*，ACL-IJCNLP 2021 System Demonstrations, pp. 122-131 | ACL Anthology 2021.acl-demo.15 |
+
+## 07_文件分群與知識庫自動建立 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `grootendorst-2022-bertopic-neural-topic-modeling.pdf` | Grootendorst (2022), *BERTopic: Neural topic modeling with a class-based TF-IDF procedure* | arXiv:2203.05794 |
+| `khandelwal-2025-llm-topic-labeling.pdf` | Khandelwal (2025), *Using LLM-Based Approaches to Enhance and Automate Topic Labeling* | arXiv:2502.18469 |
 
 ## 下載原則
 
