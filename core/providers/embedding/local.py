@@ -12,6 +12,7 @@ class LocalEmbeddingProvider(EmbeddingProvider):
     def __init__(self, model_name: str):
         from sentence_transformers import SentenceTransformer
         logger.info(f"載入本地 Embedding 模型：{model_name}")
+        self._model_name = model_name
         self._model = SentenceTransformer(model_name)
         self._dim: int = self._model.get_sentence_embedding_dimension()
         logger.info(f"Embedding 模型載入完成，維度={self._dim}")
@@ -19,6 +20,10 @@ class LocalEmbeddingProvider(EmbeddingProvider):
     @property
     def dim(self) -> int:
         return self._dim
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name
 
     def encode(self, text: str) -> list[float]:
         return self._model.encode(text, normalize_embeddings=True).tolist()

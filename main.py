@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from core.auth import require_api_key
 from core.config import settings
 from core.database import connect, disconnect, get_driver
+from core.embedding_guard import check_and_register as check_embedding_consistency
 from core.providers.factory import init_providers
 from repositories.concept_repo import ConceptRepository
 from routers import agent, documents, knowledge_graph, search, staging
@@ -25,6 +26,9 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     await connect()
     embedding = init_providers()
+    await check_embedding_consistency(
+        get_driver(), settings.embedding_provider, embedding.model_name, embedding.dim
+    )
     await ConceptRepository(get_driver()).create_vector_index(embedding.dim)
     logger.info(
         f"World Knowledge Graph RAG API 啟動完成 "

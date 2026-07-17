@@ -24,6 +24,10 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
     def dim(self) -> int:
         return self._dim
 
+    @property
+    def model_name(self) -> str:
+        return self.model
+
     def encode(self, text: str) -> list[float]:
         response = self._client.embeddings.create(model=self.model, input=text)
         return response.data[0].embedding

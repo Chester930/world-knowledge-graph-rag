@@ -20,12 +20,18 @@ class LLMProvider(ABC):
 
 
 class EmbeddingProvider(ABC):
-    """Embedding 統一介面，所有 provider 必須實作 encode 與 dim。"""
+    """Embedding 統一介面，所有 provider 必須實作 encode、dim 與 model_name。"""
 
     @property
     @abstractmethod
     def dim(self) -> int:
         """向量維度，建立 Neo4j vector index 時使用。"""
+
+    @property
+    @abstractmethod
+    def model_name(self) -> str:
+        """實際使用的模型名稱，供 core.embedding_guard 記錄與比對，
+        避免執行期切換 provider/model 卻沿用舊向量索引而不自知。"""
 
     @abstractmethod
     def encode(self, text: str) -> list[float]:

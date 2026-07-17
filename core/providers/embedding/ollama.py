@@ -33,6 +33,10 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
     def dim(self) -> int:
         return self._dim
 
+    @property
+    def model_name(self) -> str:
+        return self.model
+
     def encode(self, text: str) -> list[float]:
         res = httpx.post(
             f"{self.base_url}/api/embeddings",
