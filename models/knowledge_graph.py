@@ -99,6 +99,14 @@ class DocumentRecord(BaseModel):
     document_vector: list[float] | None = None
 
 
+class StagingIngestResult(BaseModel):
+    """`POST /documents/upload`／`POST /documents/ingest-url` 的回應——文件已完成
+    解析＋切塊＋暫存區歸檔，對應 § 3.1.1 開頭「解析完成的文件資料夾」這個前提
+    狀態，尚未經過分類（見 `POST /staging/classify` 等端點）。"""
+    folder_name: str
+    record: DocumentRecord
+
+
 # ── 暫存區 AI 自動分群（HDBSCAN + LLM 命名，見 § 3.1.1 §a）──────────────────────
 
 class ClusterSuggestion(BaseModel):

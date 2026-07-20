@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -50,3 +52,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def staging_folder() -> Path:
+    """暫存區（未分配文件池）根目錄，對應 docs/論文/03_系統設計與方法論.md § 3.1.1
+    的「未分配資料夾池」。集中定義於此，避免 routers/documents.py（文件上傳/解析）
+    與 routers/staging.py（暫存區分類/分群）各自重複定義同一路徑邏輯而不同步。"""
+    return Path(settings.workspace_dir) / "_staging"

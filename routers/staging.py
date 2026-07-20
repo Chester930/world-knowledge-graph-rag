@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
-from core.config import settings
+from core.config import staging_folder as _staging_folder
 from core.database import get_driver
 from models.knowledge_graph import (
     AssignRequest,
@@ -19,11 +19,6 @@ from repositories.kg_repo import KGRepository
 from services import classify_service, cluster_service
 
 router = APIRouter(prefix="/staging", tags=["staging"])
-
-
-def _staging_folder() -> Path:
-    """暫存區（未分配文件池）根目錄，對應 § 3.1.1 的「未分配資料夾池」。"""
-    return Path(settings.workspace_dir) / "_staging"
 
 
 async def _known_kgs() -> list[classify_service.KGInfo]:

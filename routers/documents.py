@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import os
 import shutil
 import tempfile
@@ -6,12 +7,39 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
 
+from core.config import settings, staging_folder
 from core.database import get_driver
 from models.document import Document, DocumentCreate
+from models.knowledge_graph import StagingIngestResult
 from repositories.document_repo import DocumentRepository
-from services.ingestion_service import parse_document, parse_url_service
+from services.ingestion_service import chunk_and_stage, parse_document, parse_url_service
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
+_UPLOAD_CHUNK_BYTES = 1024 * 1024  # 讀取上傳檔案的串流區塊大小
+
+
+async def _save_upload_to_temp(file: UploadFile, suffix: str) -> str:
+    """把上傳檔案串流寫入暫存檔，邊寫邊檢查是否超過 `settings.max_upload_size_mb`，
+    避免不設限的檔案上傳耗盡記憶體/磁碟（單純依賴 `UploadFile.size` 不可靠，
+    部分用戶端以 chunked transfer 傳輸時該欄位可能未填）。超過上限會刪除已寫入
+    的暫存檔並拋出 HTTPException(413)。
+    """
+    max_bytes = settings.max_upload_size_mb * 1024 * 1024
+    total = 0
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        temp_path = tmp.name
+        while chunk := await file.read(_UPLOAD_CHUNK_BYTES):
+            total += len(chunk)
+            if total > max_bytes:
+                tmp.close()
+                os.remove(temp_path)
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"檔案超過上限 {settings.max_upload_size_mb}MB",
+                )
+            tmp.write(chunk)
+    return temp_path
 
 
 @router.post("/debug-parse-url")
@@ -46,6 +74,56 @@ async def debug_parse_document(file: UploadFile = File(...)):
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
+
+@router.post("/upload", response_model=StagingIngestResult, status_code=201)
+async def upload_document(file: UploadFile = File(...)):
+    """上傳文件，完成解析＋句子感知切塊＋暫存區資料夾歸檔＋記錄檔初始化。
+
+    對應 § 3.1.1 開頭「解析完成的文件資料夾（含切塊內容＋初始記錄檔）」這個
+    前提狀態——本端點只負責把文件送到這個狀態，尚未指定歸屬 KG，後續分類/
+    分群走 `POST /staging/classify` 等既有端點（見 `routers/staging.py`）。
+    """
+    suffix = os.path.splitext(file.filename)[1]
+    temp_path = await _save_upload_to_temp(file, suffix)
+
+    try:
+        text = await parse_document(temp_path)
+        loop = asyncio.get_running_loop()
+        doc_folder, record = await loop.run_in_executor(
+            None, chunk_and_stage, text, file.filename, staging_folder(),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"文件解析/歸檔失敗: {str(e)}")
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+    return StagingIngestResult(folder_name=doc_folder.name, record=record)
+
+
+@router.post("/ingest-url", response_model=StagingIngestResult, status_code=201)
+async def ingest_url(payload: dict):
+    """抓取 URL（含 YouTube 字幕），完成解析＋切塊＋暫存區歸檔＋記錄檔初始化。
+    語意與 `POST /documents/upload` 一致，差別僅在來源是 URL 而非上傳檔案。
+    """
+    url = payload.get("url")
+    if not url:
+        raise HTTPException(status_code=400, detail="請提供 url 參數")
+
+    try:
+        text = await parse_url_service(url)
+        loop = asyncio.get_running_loop()
+        doc_folder, record = await loop.run_in_executor(
+            None, chunk_and_stage, text, url, staging_folder(),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"URL 解析/歸檔失敗: {str(e)}")
+
+    return StagingIngestResult(folder_name=doc_folder.name, record=record)
 
 
 @router.post("", response_model=Document, status_code=201)
