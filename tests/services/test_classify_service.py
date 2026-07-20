@@ -141,6 +141,138 @@ class TestAssignDocumentToKg:
         assert record.assignment_history[0].method == "manual"
 
 
+class TestComputeDocumentVectorCaching:
+    def test_uses_cached_vector_from_record_without_calling_provider(self, tmp_path, monkeypatch):
+        doc_folder = tmp_path / "report"
+        _write_chunk(doc_folder, 1, 1, "內容")
+        document_record_service.init_record(doc_folder, source="report", total_chunks=1)
+        document_record_service.set_document_vector(doc_folder, [9.0, 9.0, 9.0])
+
+        def _boom():
+            raise AssertionError("不應呼叫 embedding provider，應直接使用快取")
+        monkeypatch.setattr(svc, "get_embedding_provider", _boom)
+
+        assert svc.compute_document_vector(doc_folder) == [9.0, 9.0, 9.0]
+
+    def test_computes_and_caches_when_record_exists_but_uncached(self, tmp_path, monkeypatch):
+        doc_folder = tmp_path / "report"
+        _write_chunk(doc_folder, 1, 1, "第一段")
+        document_record_service.init_record(doc_folder, source="report", total_chunks=1)
+
+        fake = FakeEmbeddingProvider({"第一段": [1.0, 0.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        result = svc.compute_document_vector(doc_folder)
+
+        assert result == pytest.approx([1.0, 0.0, 0.0])
+        assert document_record_service.read_record(doc_folder).document_vector == pytest.approx([1.0, 0.0, 0.0])
+
+    def test_no_record_file_computes_without_caching(self, tmp_path, monkeypatch):
+        doc_folder = tmp_path / "report"
+        _write_chunk(doc_folder, 1, 1, "第一段")  # 刻意不呼叫 init_record
+
+        fake = FakeEmbeddingProvider({"第一段": [1.0, 0.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        result = svc.compute_document_vector(doc_folder)
+
+        assert result == pytest.approx([1.0, 0.0, 0.0])
+        assert document_record_service.read_record(doc_folder) is None
+
+
+class TestComputeKgPrototypeCaching:
+    def test_cache_hit_skips_recomputation(self, tmp_path, monkeypatch):
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "doc1", 1, 1, "A")
+
+        fake = FakeEmbeddingProvider({"A": [1.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        first = svc.compute_kg_prototype(kg_folder)
+        assert (kg_folder / "_prototype_cache.json").exists()
+
+        def _boom():
+            raise AssertionError("成員清單未變，應直接命中快取，不應重新計算")
+        monkeypatch.setattr(svc, "get_embedding_provider", _boom)
+
+        assert svc.compute_kg_prototype(kg_folder) == first
+
+    def test_cache_invalidated_when_membership_changes(self, tmp_path, monkeypatch):
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "doc1", 1, 1, "A")
+
+        fake = FakeEmbeddingProvider({"A": [1.0, 0.0], "B": [0.0, 1.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+        svc.compute_kg_prototype(kg_folder)
+
+        _write_chunk(kg_folder / "doc2", 1, 1, "B")
+
+        assert svc.compute_kg_prototype(kg_folder) == pytest.approx([0.5, 0.5])
+
+
+class TestCountKgMembers:
+    def test_counts_only_directories(self, tmp_path):
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "doc1", 1, 1, "A")
+        _write_chunk(kg_folder / "doc2", 1, 1, "B")
+        (kg_folder / "_prototype_cache.json").write_text("{}", encoding="utf-8")
+
+        assert svc.count_kg_members(kg_folder) == 2
+
+    def test_nonexistent_folder_returns_zero(self, tmp_path):
+        assert svc.count_kg_members(tmp_path / "missing") == 0
+
+
+class TestClassifyByVectorLowConfidence:
+    def test_flags_low_confidence_when_member_count_below_min_cluster_size(self):
+        kg = svc.KGInfo(uuid4(), "KG-A", Path("/x"))
+        result = svc.classify_by_vector("doc", [1.0, 0.0], {kg: [1.0, 0.0]}, kg_member_counts={kg: 1})
+
+        assert result.candidates[0].member_count == 1
+        assert result.candidates[0].low_confidence is True
+
+    def test_no_flag_when_member_count_meets_min_cluster_size(self):
+        kg = svc.KGInfo(uuid4(), "KG-A", Path("/x"))
+        result = svc.classify_by_vector(
+            "doc", [1.0, 0.0], {kg: [1.0, 0.0]}, kg_member_counts={kg: svc.CLUSTER_MIN_SIZE},
+        )
+
+        assert result.candidates[0].low_confidence is False
+
+    def test_no_flag_when_member_counts_not_provided(self):
+        kg = svc.KGInfo(uuid4(), "KG-A", Path("/x"))
+        result = svc.classify_by_vector("doc", [1.0, 0.0], {kg: [1.0, 0.0]})
+
+        assert result.candidates[0].low_confidence is False
+
+
+class TestIncrementalPrototypeUpdate:
+    def test_first_member_returns_vector_itself(self):
+        assert svc._incremental_prototype_update(None, 0, [1.0, 2.0]) == [1.0, 2.0]
+
+    def test_averages_with_existing_prototype_weighted_by_count(self):
+        result = svc._incremental_prototype_update([0.0, 0.0], 2, [3.0, 3.0])
+        assert result == pytest.approx([1.0, 1.0])
+
+
+class TestAssignDocumentToKgRollback:
+    def test_rolls_back_move_when_record_update_fails(self, tmp_path, monkeypatch):
+        staging_doc = tmp_path / "staging" / "report"
+        _write_chunk(staging_doc, 1, 1, "內容")
+        kg_folder = tmp_path / "kg_a"
+        kg = svc.KGInfo(kg_id=uuid4(), kg_name="KG-A", folder_path=kg_folder)
+
+        def _boom(*args, **kwargs):
+            raise RuntimeError("模擬記錄檔寫入失敗")
+        monkeypatch.setattr(document_record_service, "append_assignment", _boom)
+
+        with pytest.raises(RuntimeError):
+            svc.assign_document_to_kg(staging_doc, kg, method="manual")
+
+        assert staging_doc.exists()
+        assert not (kg_folder / "report").exists()
+
+
 class TestClassifyAll:
     def test_auto_assigns_when_score_clears_threshold(self, tmp_path, monkeypatch):
         staging = tmp_path / "staging"
@@ -193,3 +325,22 @@ class TestClassifyAll:
 
     def test_empty_staging_folder_returns_empty_list(self, tmp_path):
         assert svc.classify_all(tmp_path / "does_not_exist", []) == []
+
+    def test_prototype_and_member_count_update_within_batch(self, tmp_path, monkeypatch):
+        """batch 內第一份文件自動分配後，同批次第二份文件比對時應立即看到
+        member_count 已加一，而不是拿整批共用、批次開始時算好的舊值。"""
+        staging = tmp_path / "staging"
+        _write_chunk(staging / "doc_a", 1, 1, "A")
+        _write_chunk(staging / "doc_b", 1, 1, "A")
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "seed", 1, 1, "A")
+
+        fake = FakeEmbeddingProvider({"A": [1.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        kg = svc.KGInfo(kg_id=uuid4(), kg_name="KG-A", folder_path=kg_folder)
+        results = svc.classify_all(staging, [kg], auto_assign=True, auto_threshold=0.3)
+
+        assert results[0].auto_assigned is True
+        assert results[0].candidates[0].member_count == 1
+        assert results[1].candidates[0].member_count == 2

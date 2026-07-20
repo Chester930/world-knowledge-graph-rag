@@ -45,6 +45,12 @@ class KGCandidate(BaseModel):
     kg_name: str
     score: float
     top_matched_concepts: list[str] = []
+    # 該 KG 目前的成員文件數；member_count < CLUSTER_MIN_SIZE 時 prototype 僅由
+    # 極少數文件平均而成，統計上不穩定（cold-start），low_confidence 據此標記，
+    # 供呼叫端（UI／後續判斷）提示使用者此分類分數的可信度較低，見
+    # docs/論文/03_系統設計與方法論.md § 3.1.1 優化建議 #5
+    member_count: int = 0
+    low_confidence: bool = False
 
 
 class ClassifyRequest(BaseModel):
@@ -86,6 +92,11 @@ class DocumentRecord(BaseModel):
     extraction_status: Literal["pending", "processing", "completed", "failed", "pending_upload"] = "pending"
     chunk_progress: int = 0
     total_chunks: int = 0
+    # 該文件所有 chunk 向量的平均值（分類分數計算用），計算後快取於此避免每次
+    # classify 都重新呼叫 embedding provider；total_chunks 改變（重新解析、內容
+    # 更動）時由 document_record_service.init_record() 清空此快取，見
+    # docs/論文/03_系統設計與方法論.md § 3.1.1 優化建議 #1
+    document_vector: list[float] | None = None
 
 
 # ── 暫存區 AI 自動分群（HDBSCAN + LLM 命名，見 § 3.1.1 §a）──────────────────────

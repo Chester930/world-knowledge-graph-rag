@@ -21,9 +21,18 @@ KGRepository 讀取），本模組不直接查詢 Neo4j。
 本模組所有函式皆為同步（embedding provider 與檔案 I/O 本身即為同步操作），
 FastAPI router 層呼叫時需以 `run_in_executor` 包裝，避免阻塞事件迴圈
 （做法同 services/ingestion_service.py）。
+
+2026-07-20 修正（對應 § 3.1.1 優化建議 #1／#2／#3／#5，見 03_系統設計與方法論.md）：
+文件向量快取進資料夾記錄檔（`document_record_service.set_document_vector`）、
+KG prototype 快取進 `_prototype_cache.json`（成員清單改變才失效重算）、
+`classify_all` 批次內以移動平均就地更新剛自動分配的 KG 之 prototype（不再整批
+共用同一份、可能過期的 prototype）、`assign_document_to_kg` 的資料夾搬移與記錄檔
+更新失敗時互相 rollback（不留下位置與記錄檔不一致的中間態）、`classify_by_vector`
+新增 `low_confidence` 標記成員數過少（< `CLUSTER_MIN_SIZE`）的 cold-start KG。
 """
 from __future__ import annotations
 
+import json
 import logging
 import shutil
 from dataclasses import dataclass
@@ -31,10 +40,12 @@ from pathlib import Path
 from typing import Iterable
 from uuid import UUID
 
-from core.constants import CLASSIFY_AUTO_THRESHOLD, CLASSIFY_MIN_THRESHOLD
+from core.constants import CLASSIFY_AUTO_THRESHOLD, CLASSIFY_MIN_THRESHOLD, CLUSTER_MIN_SIZE
 from core.providers.factory import get_embedding_provider
 from models.knowledge_graph import ClassifyResult, KGCandidate
 from services import document_record_service
+
+_PROTOTYPE_CACHE_FILENAME = "_prototype_cache.json"
 
 logger = logging.getLogger(__name__)
 
@@ -69,25 +80,92 @@ def mean_vector(vectors: list[list[float]]) -> list[float] | None:
 
 
 def compute_document_vector(doc_folder: Path) -> list[float] | None:
-    """計算文件代表向量：該文件所有 chunk 向量的平均。"""
+    """計算文件代表向量：該文件所有 chunk 向量的平均。
+
+    優先讀取資料夾記錄檔（`_record.json`）內快取的 `document_vector`，命中則直接
+    回傳，不重新呼叫 embedding provider；未命中（記錄檔不存在，或存在但尚未快取）
+    才實際計算，計算後若記錄檔存在則寫回快取供下次呼叫使用。快取由
+    `document_record_service.init_record()` 在切塊數改變（內容重新解析）時清空，
+    見該函式與 `models.knowledge_graph.DocumentRecord.document_vector` 註解。
+    """
+    record = document_record_service.read_record(doc_folder)
+    if record is not None and record.document_vector is not None:
+        return record.document_vector
+
     bodies = read_chunk_bodies(doc_folder)
     if not bodies:
         return None
     embedding = get_embedding_provider()
     vectors = embedding.encode_batch(bodies)
-    return mean_vector(vectors)
+    vector = mean_vector(vectors)
+    if vector is not None:
+        document_record_service.set_document_vector(doc_folder, vector)
+    return vector
+
+
+def _prototype_cache_path(kg_folder: Path) -> Path:
+    return kg_folder / _PROTOTYPE_CACHE_FILENAME
+
+
+def _read_prototype_cache(kg_folder: Path, member_folders: list[str]) -> list[float] | None:
+    """快取命中條件：快取檔存在，且記錄的成員資料夾清單與目前磁碟現況完全相同。
+
+    任何解析失敗（快取檔損毀、格式不符）都視為未命中、退回重新計算，不拋例外
+    中斷分類流程——快取只是效能優化，正確性永遠以「重新計算」為準。
+    """
+    cache_path = _prototype_cache_path(kg_folder)
+    if not cache_path.exists():
+        return None
+    try:
+        cached = json.loads(cache_path.read_text(encoding="utf-8"))
+        if cached.get("member_folders") == member_folders:
+            return cached.get("prototype")
+    except Exception as e:
+        logger.warning(f"KG prototype 快取讀取失敗，改為重新計算 [{kg_folder}]: {e}")
+    return None
+
+
+def _write_prototype_cache(kg_folder: Path, member_folders: list[str], prototype: list[float] | None) -> None:
+    try:
+        _prototype_cache_path(kg_folder).write_text(
+            json.dumps({"member_folders": member_folders, "prototype": prototype}),
+            encoding="utf-8",
+        )
+    except Exception as e:
+        logger.warning(f"KG prototype 快取寫入失敗，不影響本次分類結果 [{kg_folder}]: {e}")
 
 
 def compute_kg_prototype(kg_folder: Path) -> list[float] | None:
-    """計算 KG prototype 向量：該 KG 資料夾底下所有成員文件代表向量的平均。"""
+    """計算 KG prototype 向量：該 KG 資料夾底下所有成員文件代表向量的平均。
+
+    先比對成員資料夾清單與 `_prototype_cache.json` 快取是否一致，一致則直接回傳
+    快取值，跳過所有成員文件的向量計算；一旦任何成員文件被加入/移出該 KG 資料夾
+    （清單不再相同），快取自動失效、重新計算並覆寫快取。
+    """
     if not kg_folder.exists():
         return None
+    member_folders = sorted(p.name for p in kg_folder.iterdir() if p.is_dir())
+
+    cached = _read_prototype_cache(kg_folder, member_folders)
+    if cached is not None:
+        return cached
+
     member_vectors = []
-    for member_folder in sorted(p for p in kg_folder.iterdir() if p.is_dir()):
-        vec = compute_document_vector(member_folder)
+    for name in member_folders:
+        vec = compute_document_vector(kg_folder / name)
         if vec is not None:
             member_vectors.append(vec)
-    return mean_vector(member_vectors)
+    prototype = mean_vector(member_vectors)
+    _write_prototype_cache(kg_folder, member_folders, prototype)
+    return prototype
+
+
+def count_kg_members(kg_folder: Path) -> int:
+    """該 KG 資料夾底下的成員文件數，供分類信心判斷（見 `classify_by_vector`
+    的 `kg_member_counts` 參數）使用，與 prototype 計算邏輯分開、各自獨立。"""
+    if not kg_folder.exists():
+        return 0
+    return sum(1 for p in kg_folder.iterdir() if p.is_dir())
 
 
 # ── 純分數計算（不涉及 I/O，方便以合成向量單元測試）───────────────────────────
@@ -106,8 +184,15 @@ def classify_by_vector(
     doc_vector: list[float] | None,
     kg_prototypes: dict[KGInfo, list[float] | None],
     min_threshold: float = CLASSIFY_MIN_THRESHOLD,
+    kg_member_counts: dict[KGInfo, int] | None = None,
 ) -> ClassifyResult:
-    """給定文件代表向量與各 KG 的 prototype 向量，計算候選排名（純函式，無 I/O）。"""
+    """給定文件代表向量與各 KG 的 prototype 向量，計算候選排名（純函式，無 I/O）。
+
+    `kg_member_counts`（選填，不傳則所有候選皆視為正常信心）：各 KG 目前的成員
+    文件數，用於標記 `KGCandidate.low_confidence`——成員數低於 `CLUSTER_MIN_SIZE`
+    時，prototype 是由極少數文件平均而成的 cold-start 結果，統計上不穩定，讓呼叫
+    端能區分「高分但樣本太少」與「高分且樣本充足」兩種情況，不是靜默地一視同仁。
+    """
     if doc_vector is None:
         return ClassifyResult(filename=filename, status="unmatched")
 
@@ -118,7 +203,14 @@ def classify_by_vector(
         score = cosine_similarity(doc_vector, prototype)
         if score < min_threshold:
             continue
-        candidates.append(KGCandidate(kg_id=kg.kg_id, kg_name=kg.kg_name, score=round(score, 4)))
+        member_count = (kg_member_counts or {}).get(kg, 0)
+        candidates.append(KGCandidate(
+            kg_id=kg.kg_id,
+            kg_name=kg.kg_name,
+            score=round(score, 4),
+            member_count=member_count,
+            low_confidence=bool(kg_member_counts) and member_count < CLUSTER_MIN_SIZE,
+        ))
 
     candidates.sort(key=lambda c: c.score, reverse=True)
 
@@ -142,14 +234,23 @@ def assign_document_to_kg(doc_folder: Path, kg: KGInfo, method: str = "manual") 
     搬移是同一磁碟分割內的 rename（`shutil.move` 在來源/目的地同分割時即為
     原子操作），不是複製再刪除，不會有「搬到一半」的中間態。回傳搬移後的
     新資料夾路徑。
+
+    搬移與記錄檔更新兩步視為一個整體：若記錄檔更新失敗（例如磁碟已滿、權限
+    問題），會把資料夾移回原位再拋出例外，確保「資料夾實際位置」與「記錄檔
+    歸屬歷史」不會不一致——呼叫端看到例外時，資料夾必定還在原本呼叫前的位置，
+    不會出現「已經搬過去但記錄檔沒寫」的中間態。
     """
     kg.folder_path.mkdir(parents=True, exist_ok=True)
     dest = kg.folder_path / doc_folder.name
     shutil.move(str(doc_folder), str(dest))
 
-    document_record_service.append_assignment(
-        dest, kg_id=kg.kg_id, kg_name=kg.kg_name, method=method,
-    )
+    try:
+        document_record_service.append_assignment(
+            dest, kg_id=kg.kg_id, kg_name=kg.kg_name, method=method,
+        )
+    except Exception:
+        shutil.move(str(dest), str(doc_folder))
+        raise
     return dest
 
 
@@ -161,7 +262,21 @@ def classify_document(doc_folder: Path, known_kgs: Iterable[KGInfo]) -> Classify
     known_kgs = list(known_kgs)
     doc_vector = compute_document_vector(doc_folder)
     prototypes = {kg: compute_kg_prototype(kg.folder_path) for kg in known_kgs}
-    return classify_by_vector(doc_folder.name, doc_vector, prototypes)
+    member_counts = {kg: count_kg_members(kg.folder_path) for kg in known_kgs}
+    return classify_by_vector(doc_folder.name, doc_vector, prototypes, kg_member_counts=member_counts)
+
+
+def _incremental_prototype_update(
+    old_prototype: list[float] | None, old_count: int, new_vector: list[float],
+) -> list[float]:
+    """新文件加入 KG 後，以移動平均就地更新 prototype，不必重新掃描整個 KG
+    資料夾——`compute_kg_prototype()` 之後若被重新呼叫仍會依磁碟現況重新計算並
+    覆寫快取，此處只是讓同一批次內、緊接著的其他文件不會拿到過期的 prototype。
+    """
+    if old_prototype is None or old_count == 0:
+        return list(new_vector)
+    new_count = old_count + 1
+    return [(o * old_count + n) / new_count for o, n in zip(old_prototype, new_vector)]
 
 
 def classify_all(
@@ -170,19 +285,27 @@ def classify_all(
     auto_assign: bool = False,
     auto_threshold: float = CLASSIFY_AUTO_THRESHOLD,
 ) -> list[ClassifyResult]:
-    """對暫存區底下所有文件資料夾批次執行分類；每個 KG 的 prototype 只計算一次
-    並在整批文件間重複使用，避免對同一個 KG 重複重新嵌入其成員文件。"""
+    """對暫存區底下所有文件資料夾批次執行分類；每個 KG 的 prototype 一開始只算
+    一次（`compute_kg_prototype` 本身有跨呼叫的磁碟快取，見該函式），但批次內一旦
+    某份文件被自動分配進某個 KG，會立即以移動平均就地更新該 KG 在記憶體中的
+    prototype 與成員數，讓同一批次內排在後面的文件不會拿舊 prototype 比對
+    ——修正原本「整批共用同一份 prototype、批次內後到的文件看不到批次內先到的
+    文件已產生的變化」的問題。
+    """
     known_kgs = list(known_kgs)
     if not staging_folder.exists():
         return []
 
     prototypes = {kg: compute_kg_prototype(kg.folder_path) for kg in known_kgs}
+    member_counts = {kg: count_kg_members(kg.folder_path) for kg in known_kgs}
 
     results: list[ClassifyResult] = []
     for doc_folder in sorted(p for p in staging_folder.iterdir() if p.is_dir()):
         try:
             doc_vector = compute_document_vector(doc_folder)
-            result = classify_by_vector(doc_folder.name, doc_vector, prototypes)
+            result = classify_by_vector(
+                doc_folder.name, doc_vector, prototypes, kg_member_counts=member_counts,
+            )
         except Exception as e:
             logger.warning(f"分類失敗 [{doc_folder.name}]: {e}")
             results.append(ClassifyResult(filename=doc_folder.name, status="error"))
@@ -193,6 +316,12 @@ def classify_all(
             assign_document_to_kg(doc_folder, target, method="auto")
             result.auto_assigned = True
             result.status = "assigned"
+
+            if doc_vector is not None:
+                prototypes[target] = _incremental_prototype_update(
+                    prototypes.get(target), member_counts.get(target, 0), doc_vector,
+                )
+                member_counts[target] = member_counts.get(target, 0) + 1
 
         results.append(result)
 

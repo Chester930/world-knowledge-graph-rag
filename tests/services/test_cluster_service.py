@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -68,6 +69,81 @@ class TestClusterVectors:
         assert len({labels[0], labels[5], labels[9]}) == 3
         # 兩個離群點應被標為雜訊
         assert labels[12] == -1 and labels[13] == -1
+
+
+class TestReduceDimensionality:
+    def test_reduces_to_expected_component_count(self):
+        rng = np.random.default_rng(0)
+        vectors = rng.normal(size=(25, 384)).tolist()
+
+        reduced = svc._reduce_dimensionality(vectors)
+
+        assert len(reduced) == 25
+        assert len(reduced[0]) == min(svc.UMAP_N_COMPONENTS, 25 - 2)
+
+    def test_deterministic_across_calls(self):
+        rng = np.random.default_rng(1)
+        vectors = rng.normal(size=(25, 20)).tolist()
+
+        first = svc._reduce_dimensionality(vectors)
+        second = svc._reduce_dimensionality(vectors)
+
+        assert np.allclose(first, second)
+
+
+class TestClusterVectorsUmapGating:
+    def test_umap_not_invoked_below_threshold(self, monkeypatch):
+        def _boom(vectors):
+            raise AssertionError("點數低於 UMAP_MIN_POOL_SIZE，不應呼叫降維")
+        monkeypatch.setattr(svc, "_reduce_dimensionality", _boom)
+
+        vectors = [[0.0, 0.0], [0.1, 0.1], [0.15, 0.05]]
+        svc.cluster_vectors(vectors, min_cluster_size=3)  # 不應拋出
+
+    def test_umap_invoked_at_threshold(self, monkeypatch):
+        monkeypatch.setattr(svc, "UMAP_MIN_POOL_SIZE", 10)
+        called = {}
+        original = svc._reduce_dimensionality
+
+        def _spy(vectors):
+            called["invoked"] = True
+            return original(vectors)
+        monkeypatch.setattr(svc, "_reduce_dimensionality", _spy)
+
+        rng = np.random.default_rng(2)
+        c1 = rng.normal(loc=0.0, scale=0.1, size=(6, 10))
+        c2 = rng.normal(loc=8.0, scale=0.1, size=(6, 10))
+        vectors = np.vstack([c1, c2]).tolist()
+
+        svc.cluster_vectors(vectors, min_cluster_size=3)
+
+        assert called.get("invoked") is True
+
+
+class TestAnalyzeStagingPoolScalabilityWarning:
+    @pytest.mark.asyncio
+    async def test_logs_warning_when_pool_meets_size_threshold(self, tmp_path, monkeypatch, caplog):
+        monkeypatch.setattr(svc, "_UNASSIGNED_POOL_WARN_SIZE", 2)
+        staging = tmp_path / "staging"
+        _write_chunk(staging / "doc1", 1, 1, "A")
+        _write_chunk(staging / "doc2", 1, 1, "B")
+
+        with caplog.at_level(logging.WARNING):
+            await svc.analyze_staging_pool(staging, min_cluster_size=3)
+
+        assert any("O(n^2)" in r.message for r in caplog.records)
+
+    @pytest.mark.asyncio
+    async def test_no_warning_below_threshold(self, tmp_path, monkeypatch, caplog):
+        monkeypatch.setattr(svc, "_UNASSIGNED_POOL_WARN_SIZE", 5)
+        staging = tmp_path / "staging"
+        _write_chunk(staging / "doc1", 1, 1, "A")
+        _write_chunk(staging / "doc2", 1, 1, "B")
+
+        with caplog.at_level(logging.WARNING):
+            await svc.analyze_staging_pool(staging, min_cluster_size=3)
+
+        assert not any("O(n^2)" in r.message for r in caplog.records)
 
 
 class TestDominantSubclusterIndices:

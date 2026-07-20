@@ -20,6 +20,13 @@ CONCEPT_COARSE_TOP_K = 100
 # 暫存區 AI 自動分群（HDBSCAN，見 docs/論文/03_系統設計與方法論.md § 3.1.1 §a）
 CLUSTER_MIN_SIZE = 3  # 一個候選分群/新 KG 至少要有幾份文件，依需求由 v1 的 2 調整為 3
 
+# UMAP 降維前處理（見 docs/論文/03_系統設計與方法論.md § 3.1.1 §a「降維前處理的決策」）——
+# 僅在未分配資料夾池規模 ≥ 此值才對 HDBSCAN 的輸入做 UMAP 降維，訂在略高於 UMAP
+# 預設 n_neighbors=15 的門檻：低於此規模時 UMAP 本身的流形估計不穩定，直接對
+# VECTOR_DIM=384 維原始向量分群反而更可靠，並非「越像 BERTopic 越好」。
+UMAP_MIN_POOL_SIZE = 20
+UMAP_N_COMPONENTS = 5  # BERTopic (Grootendorst, 2022) 預設值，降維後仍保留分群所需的結構
+
 # SVO 三元組合法語意關係類型（30 種，依 CLAUDE.md 分組）
 SVO_REL_TYPES: set[str] = {
     "IS_A", "PART_OF", "CONTAINS", "INSTANCE_OF",

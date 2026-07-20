@@ -86,3 +86,36 @@ def test_write_record_is_atomic_and_does_not_leave_tmp_files(tmp_path):
 
     tmp_files = list(tmp_path.glob(".*_record.json*.tmp"))
     assert tmp_files == []
+
+
+def test_set_document_vector_caches_into_existing_record(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=1)
+
+    updated = svc.set_document_vector(tmp_path, [0.1, 0.2, 0.3])
+
+    assert updated.document_vector == [0.1, 0.2, 0.3]
+    assert svc.read_record(tmp_path).document_vector == [0.1, 0.2, 0.3]
+
+
+def test_set_document_vector_no_op_when_record_missing(tmp_path):
+    assert svc.set_document_vector(tmp_path, [0.1, 0.2, 0.3]) is None
+    assert svc.read_record(tmp_path) is None
+
+
+def test_init_record_clears_cached_vector_when_total_chunks_changes(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
+    svc.set_document_vector(tmp_path, [0.1, 0.2, 0.3])
+
+    # 模擬文件內容重新解析、切塊數改變：先前快取的向量已不代表目前內容
+    record = svc.init_record(tmp_path, source="report.pdf", total_chunks=7)
+
+    assert record.document_vector is None
+
+
+def test_init_record_keeps_cached_vector_when_total_chunks_unchanged(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
+    svc.set_document_vector(tmp_path, [0.1, 0.2, 0.3])
+
+    record = svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
+
+    assert record.document_vector == [0.1, 0.2, 0.3]

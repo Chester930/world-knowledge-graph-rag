@@ -65,10 +65,28 @@ def init_record(folder: Path, source: str, total_chunks: int = 0) -> DocumentRec
     if existing is not None:
         if existing.total_chunks != total_chunks:
             existing.total_chunks = total_chunks
+            # 切塊數改變代表文件內容已重新解析，先前快取的 document_vector 不再
+            # 代表目前內容，必須一併清空，否則分類分數會用到過期向量而不自知。
+            existing.document_vector = None
             _write_record(folder, existing)
         return existing
 
     record = DocumentRecord(source=source, total_chunks=total_chunks)
+    _write_record(folder, record)
+    return record
+
+
+def set_document_vector(folder: Path, vector: list[float]) -> DocumentRecord | None:
+    """快取文件代表向量到記錄檔，避免每次分類都重新呼叫 embedding provider。
+
+    記錄檔不存在時（例如尚未經過 init_record 的暫時性資料夾）不建立新記錄、
+    直接跳過快取，只計算不持久化——快取是效能優化，不應該讓呼叫端多一個
+    「必須先初始化記錄檔才能算向量」的隱性前提。
+    """
+    record = read_record(folder)
+    if record is None:
+        return None
+    record.document_vector = vector
     _write_record(folder, record)
     return record
 
