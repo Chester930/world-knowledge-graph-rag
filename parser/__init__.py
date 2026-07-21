@@ -14,7 +14,7 @@ from .core import (
     sentence_aware_chunking,
     split_into_sentences,
 )
-from .chunk_writer import document_folder_path, write_chunks_as_markdown
+from .chunk_writer import document_folder_path, write_chunks_as_markdown, write_original_text
 from .image_pipeline import (
     ImagePipeline,
     ImagePipelineConfig,
@@ -31,6 +31,7 @@ __all__ = [
     "split_into_sentences",
     "document_folder_path",
     "write_chunks_as_markdown",
+    "write_original_text",
     "ImagePipeline",
     "ImagePipelineConfig",
     "ImageProcessResult",

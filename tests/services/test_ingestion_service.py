@@ -21,6 +21,12 @@ class TestChunkAndStage:
         assert record.extraction_status == "pending"
         assert record.assignment_history == []
 
+        # 原始解析文字（切塊前）另存一份，供 SVO 抽取獨立的切塊/標準化流程使用，
+        # 避免需要時得重新解析原始上傳檔案。
+        original_file = doc_folder / "original.md"
+        assert original_file.exists()
+        assert text in original_file.read_text(encoding="utf-8")
+
     def test_record_file_matches_folder_state(self, tmp_path):
         staging = tmp_path / "staging"
         doc_folder, record = svc.chunk_and_stage("這是一段測試內容。另一句。", "note.md", staging)

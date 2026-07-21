@@ -2,6 +2,13 @@
 明確標示來源文件與分塊序號，確保下游（embedding、SVO 抽取、知識圖譜寫入）可以隨時
 從單一切塊檔案追溯回原始文件與其在文件中的相對位置。
 
+另提供 `write_original_text()`，將解析完成、切塊之前的原始純文字另存一份
+（`original.md`）。動機：`chunk-NNN-of-MMM.md` 是為 RAG 向量檢索切的（500 字元、
+50 字元重疊），SVO 抽取不應沿用同一份切塊（見 docs/論文/03_變更紀錄.md 對此的
+討論）；SVO 需要對原文重新設計獨立的切塊/標準化流程，若沒有原文可用，只能對
+原始上傳檔案重新跑一次解析（掃描 PDF 需重跑 OCR，成本高）。保留這份原文，
+下游可以直接讀取，不需要重新解析。
+
 每份來源文件對應一個獨立子資料夾（以其安全化檔名命名），資料夾內只放這份文件自己的
 切塊檔案——這是暫存區分類與資料夾歸檔（見 docs/論文/03_系統設計與方法論.md § 3.1.1）
 的前提：歸檔動作是把「這份文件的整個資料夾」實際搬移到目標知識圖譜的資料夾底下，而非
@@ -11,9 +18,10 @@
 本身維持無副作用的純函式設計（輸入檔案/URL，輸出字串），是否要把分塊結果落地存檔，
 交由呼叫端透過本模組明確選擇性呼叫，而非內建在解析流程中自動發生。
 
-本模組只負責切塊檔案本身；文件資料夾內的「記錄檔」（歸屬歷史／抽取進度狀態機）是
-knowledge-graph 領域的概念，由 services/document_record_service.py 獨立管理，不在此
-模組的職責範圍內，避免 parser 模組耦合到與解析無關的下游概念。
+本模組只負責文件資料夾內、與「解析輸出的文字內容」直接相關的檔案（切塊檔案、原文
+備份）；文件資料夾內的「記錄檔」（歸屬歷史／抽取進度狀態機）是 knowledge-graph 領域
+的概念，由 services/document_record_service.py 獨立管理，不在此模組的職責範圍內，
+避免 parser 模組耦合到與解析無關的下游概念。
 """
 from __future__ import annotations
 
@@ -118,3 +126,41 @@ def write_chunks_as_markdown(
         written_paths.append(file_path)
 
     return written_paths
+
+
+ORIGINAL_TEXT_FILENAME = "original.md"
+
+
+def write_original_text(
+    text: str,
+    source: str,
+    output_dir: Union[str, Path],
+) -> Path:
+    """將解析完成、切塊之前的原始純文字另存一份至該文件資料夾（`original.md`）。
+
+    與 `write_chunks_as_markdown()` 使用同一套資料夾定位規則（`document_folder_path()`），
+    確保兩者落在同一個文件資料夾內。單一固定檔名，重複呼叫同一 `source`（文件內容
+    更新後重新處理）時直接覆寫，不像分塊檔案需要清理數量變動後的殘留檔——因為
+    這裡永遠只有一個檔案。
+
+    參數：
+        text: 解析完成、尚未切塊的原始純文字。
+        source: 原始來源識別字串，通常是檔案路徑或 URL，需與
+            `write_chunks_as_markdown()` 傳入的 `source` 相同才會落在同一資料夾。
+        output_dir: 輸出根資料夾，不存在時會自動建立；實際寫入位置是
+            `output_dir / <該文件安全化檔名>/original.md`。
+
+    回傳：
+        寫入的檔案路徑。`text` 為空字串時仍會寫入一個空內容的檔案（僅含
+        frontmatter），交由呼叫端自行決定是否要在更上層擋掉空白文件
+        （`chunk_and_stage()` 已在更上層擋掉，此函式本身不重複判斷）。
+    """
+    doc_folder = document_folder_path(source, output_dir)
+    doc_folder.mkdir(parents=True, exist_ok=True)
+
+    frontmatter = _yaml_frontmatter({"source": source})
+    content = f"{frontmatter}\n\n{text}\n"
+
+    file_path = doc_folder / ORIGINAL_TEXT_FILENAME
+    file_path.write_text(content, encoding="utf-8")
+    return file_path

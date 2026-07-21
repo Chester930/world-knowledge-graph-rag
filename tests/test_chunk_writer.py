@@ -2,6 +2,7 @@ from pathlib import Path
 
 from parser.chunk_writer import (
     write_chunks_as_markdown,
+    write_original_text,
     _safe_filename_stem,
     document_folder_path,
 )
@@ -121,3 +122,39 @@ def test_digits_padding_scales_with_large_chunk_counts(tmp_path):
     assert len(paths) == 1234
     assert paths[0].name == "chunk-0001-of-1234.md"
     assert paths[-1].name == "chunk-1234-of-1234.md"
+
+
+def test_write_original_text_creates_file_in_document_folder(tmp_path):
+    original = "這是完整的原始解析文字，尚未經過切塊。"
+    path = write_original_text(original, "report.pdf", tmp_path)
+
+    assert path == tmp_path / "report" / "original.md"
+    assert path.exists()
+
+
+def test_write_original_text_preserves_full_body_in_frontmatter(tmp_path):
+    original = "第一段。\n\n第二段，含有換行與空白。"
+    path = write_original_text(original, "D:/docs/系統架構.docx", tmp_path)
+
+    content = path.read_text(encoding="utf-8")
+    assert "系統架構.docx" in content  # source 完整保留在 frontmatter
+    assert original in content
+    assert content.index("---") < content.index(original)
+
+
+def test_write_original_text_lands_in_same_folder_as_chunks(tmp_path):
+    chunk_paths = write_chunks_as_markdown(["一二三。"], "doc.txt", tmp_path)
+    original_path = write_original_text("一二三。", "doc.txt", tmp_path)
+
+    assert original_path.parent == chunk_paths[0].parent
+
+
+def test_write_original_text_overwrites_on_rerun(tmp_path):
+    write_original_text("舊版本內容", "doc.txt", tmp_path)
+    path = write_original_text("新版本內容", "doc.txt", tmp_path)
+
+    content = path.read_text(encoding="utf-8")
+    assert "新版本內容" in content
+    assert "舊版本內容" not in content
+    # 不應殘留額外檔案——固定檔名覆寫，不像分塊需要清理數量變動的殘留
+    assert len(list(path.parent.glob("original*.md"))) == 1
