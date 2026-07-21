@@ -15,8 +15,13 @@ import asyncio
 from pathlib import Path
 
 from models.knowledge_graph import DocumentRecord
-from parser.chunk_writer import document_folder_path, write_chunks_as_markdown, write_original_text
-from parser.core import DocumentParser, URLParser, sentence_aware_chunking
+from parser.chunk_writer import (
+    document_folder_path,
+    write_chunks_as_markdown,
+    write_original_text,
+    write_sentences_index,
+)
+from parser.core import DocumentParser, URLParser, sentence_aware_chunking, split_into_sentences
 from services import document_record_service
 
 
@@ -55,11 +60,16 @@ def chunk_and_stage(text: str, source: str, staging_dir: Path) -> tuple[Path, Do
     除了 RAG 用的分塊檔案，同時把切塊前的原始純文字另存一份（`original.md`，
     見 `parser.chunk_writer.write_original_text()`）——SVO 抽取不沿用這份 RAG
     切塊，需要對原文重新切塊/標準化，保留原文可避免下游需要時得重新解析原始
-    上傳檔案（掃描 PDF 重跑 OCR 成本高）。
+    上傳檔案（掃描 PDF 重跑 OCR 成本高）。同時也把句子切分結果存成
+    `sentences.json`（見 `parser.chunk_writer.write_sentences_index()`）——
+    句子切分本身雖是純規則運算、可隨時重算，但下游（3.4 §a 標準化、未來的
+    斷點續傳、SVO Chunk 與原句子的對應索引）需要一份不會因規則調整而跑掉的
+    穩定句子清單，此處一次算好存下來，避免下游各自重算導致邊界對不上。
 
     回傳 `(文件資料夾路徑, 記錄檔內容)`；重複呼叫同一 `source`（內容更新後重新
     處理）時的覆寫語意完全交由 `write_chunks_as_markdown()`／`write_original_text()`／
-    `document_record_service.init_record()` 既有行為處理，此函式不額外介入。
+    `write_sentences_index()`／`document_record_service.init_record()` 既有行為
+    處理，此函式不額外介入。
     """
     if not source.strip():
         raise ValueError("source 不可為空白")
@@ -70,6 +80,7 @@ def chunk_and_stage(text: str, source: str, staging_dir: Path) -> tuple[Path, Do
 
     write_chunks_as_markdown(chunks, source, staging_dir)
     write_original_text(text, source, staging_dir)
+    write_sentences_index(split_into_sentences(text), source, staging_dir)
     doc_folder = document_folder_path(source, staging_dir)
     record = document_record_service.init_record(doc_folder, source=source, total_chunks=len(chunks))
     return doc_folder, record

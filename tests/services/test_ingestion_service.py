@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -26,6 +27,15 @@ class TestChunkAndStage:
         original_file = doc_folder / "original.md"
         assert original_file.exists()
         assert text in original_file.read_text(encoding="utf-8")
+
+        # 句子切分結果同步存成穩定索引，供 3.4 §a 標準化與未來的斷點續傳/
+        # SVO Chunk 對應句子範圍使用，避免下游各自重算導致句子邊界對不上。
+        sentences_file = doc_folder / "sentences.json"
+        assert sentences_file.exists()
+        payload = json.loads(sentences_file.read_text(encoding="utf-8"))
+        assert payload["source"] == "report.txt"
+        assert payload["total_sentences"] == len(payload["sentences"])
+        assert "".join(payload["sentences"]) == text
 
     def test_record_file_matches_folder_state(self, tmp_path):
         staging = tmp_path / "staging"

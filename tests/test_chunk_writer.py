@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 from parser.chunk_writer import (
     write_chunks_as_markdown,
     write_original_text,
+    write_sentences_index,
     _safe_filename_stem,
     document_folder_path,
 )
@@ -158,3 +160,39 @@ def test_write_original_text_overwrites_on_rerun(tmp_path):
     assert "舊版本內容" not in content
     # 不應殘留額外檔案——固定檔名覆寫，不像分塊需要清理數量變動的殘留
     assert len(list(path.parent.glob("original*.md"))) == 1
+
+
+def test_write_sentences_index_creates_file_in_document_folder(tmp_path):
+    sentences = ["第一句。", "第二句！", "第三句？"]
+    path = write_sentences_index(sentences, "report.pdf", tmp_path)
+
+    assert path == tmp_path / "report" / "sentences.json"
+    assert path.exists()
+
+
+def test_write_sentences_index_content_matches_input(tmp_path):
+    sentences = ["第一句。", "第二句！"]
+    path = write_sentences_index(sentences, "doc.txt", tmp_path)
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["source"] == "doc.txt"
+    assert payload["total_sentences"] == 2
+    assert payload["sentences"] == sentences
+
+
+def test_write_sentences_index_lands_in_same_folder_as_chunks_and_original(tmp_path):
+    chunk_paths = write_chunks_as_markdown(["一二三。"], "doc.txt", tmp_path)
+    original_path = write_original_text("一二三。", "doc.txt", tmp_path)
+    sentences_path = write_sentences_index(["一二三。"], "doc.txt", tmp_path)
+
+    assert sentences_path.parent == chunk_paths[0].parent == original_path.parent
+
+
+def test_write_sentences_index_overwrites_on_rerun(tmp_path):
+    write_sentences_index(["舊句子。"], "doc.txt", tmp_path)
+    path = write_sentences_index(["新句子一。", "新句子二。"], "doc.txt", tmp_path)
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["sentences"] == ["新句子一。", "新句子二。"]
+    # 不應殘留額外檔案——固定檔名覆寫
+    assert len(list(path.parent.glob("sentences*.json"))) == 1

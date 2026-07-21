@@ -9,6 +9,14 @@
 原始上傳檔案重新跑一次解析（掃描 PDF 需重跑 OCR，成本高）。保留這份原文，
 下游可以直接讀取，不需要重新解析。
 
+另提供 `write_sentences_index()`，將 `parser.core.split_into_sentences()` 對原文
+切分出的句子清單存成 `sentences.json`。動機：句子切分本身雖是純規則運算、可
+隨時重算，但下游（3.4 §a 指代消解與別名前處理、未來的標準化進度斷點續傳、
+SVO Chunk 與原句子的對應索引）都需要一份**穩定不變**的句子清單可供引用——
+若每次都重新呼叫 `split_into_sentences()`，一旦切分規則日後調整，先前存的
+「第 N 句」索引就可能對不上新算出來的句子邊界。存一份固定的 `sentences.json`
+可避免這個問題。
+
 每份來源文件對應一個獨立子資料夾（以其安全化檔名命名），資料夾內只放這份文件自己的
 切塊檔案——這是暫存區分類與資料夾歸檔（見 docs/論文/03_系統設計與方法論.md § 3.1.1）
 的前提：歸檔動作是把「這份文件的整個資料夾」實際搬移到目標知識圖譜的資料夾底下，而非
@@ -25,6 +33,7 @@
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from typing import List, Union
@@ -163,4 +172,47 @@ def write_original_text(
 
     file_path = doc_folder / ORIGINAL_TEXT_FILENAME
     file_path.write_text(content, encoding="utf-8")
+    return file_path
+
+
+SENTENCES_INDEX_FILENAME = "sentences.json"
+
+
+def write_sentences_index(
+    sentences: List[str],
+    source: str,
+    output_dir: Union[str, Path],
+) -> Path:
+    """將句子切分結果（`parser.core.split_into_sentences()` 的輸出）存成該文件
+    資料夾內固定的 `sentences.json`，作為下游可重複引用、不會因重新計算而
+    跑掉的穩定句子清單。
+
+    與 `write_chunks_as_markdown()`／`write_original_text()` 使用同一套資料夾
+    定位規則（`document_folder_path()`），確保三者落在同一個文件資料夾內。
+    單一固定檔名，重複呼叫同一 `source` 時直接覆寫。
+
+    參數：
+        sentences: `split_into_sentences()` 的輸出（保留原始間距，未 strip）。
+        source: 原始來源識別字串，需與其他寫入函式傳入的 `source` 相同才會
+            落在同一資料夾。
+        output_dir: 輸出根資料夾，不存在時會自動建立；實際寫入位置是
+            `output_dir / <該文件安全化檔名>/sentences.json`。
+
+    回傳：
+        寫入的檔案路徑。
+    """
+    doc_folder = document_folder_path(source, output_dir)
+    doc_folder.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "source": source,
+        "total_sentences": len(sentences),
+        "sentences": sentences,
+    }
+
+    file_path = doc_folder / SENTENCES_INDEX_FILENAME
+    file_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     return file_path
