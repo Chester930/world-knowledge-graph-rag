@@ -854,20 +854,38 @@ class DocumentParser:
         return False
 
 
-def sentence_aware_chunking(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> List[str]:
-    """句子感知的文本切片演算法，確保句子邊界不被粗暴截斷"""
-    # 句尾結束符號規則，包含中英文標點
-    sentence_endings = re.compile(r'([。！？…\n]|\.\s|\?\s|!\s)')
-    
-    # 依句尾標點進行文本分割，保留標點符號
-    parts = []
+# 句尾邊界判定：中日文標點＋英文標點（句號/問號/驚嘆號需後接空白才視為句界），並排除常見
+# 縮寫（e.g./i.e./vs.）、單一大寫字母縮寫、小數點等已知誤判來源。與 `docs/報告/05_指代消解與
+# 前處理任務書.md` §4.1 設計的正則同源——該任務書描述的指代消解前處理管線應改為呼叫本模組的
+# split_into_sentences()，不應另外維護一份不一致的句子邊界規則。
+SENTENCE_ENDINGS = re.compile(
+    r'(?<![A-Z][a-z])(?<![A-Z])(?<!e\.g)(?<!i\.e)(?<!vs)(?<!\d)'
+    r'([。！？；…\n]|\.\s|\?\s|!\s)'
+)
+
+
+def split_into_sentences(text: str) -> List[str]:
+    """依句尾標點將文字切分為句子清單，保留結尾標點符號與原始間距。
+
+    刻意不 strip 個別句子——`sentence_aware_chunking()` 需要保留原始間距才能
+    用 "".join() 精確重組回原文。若呼叫端只需要乾淨的句子（例如逐句丟給 LLM），
+    請自行對回傳結果做 strip()／過濾空字串。
+    """
+    sentences = []
     current_pos = 0
-    for match in sentence_endings.finditer(text):
+    for match in SENTENCE_ENDINGS.finditer(text):
         end_pos = match.end()
-        parts.append(text[current_pos:end_pos])
+        sentences.append(text[current_pos:end_pos])
         current_pos = end_pos
     if current_pos < len(text):
-        parts.append(text[current_pos:])
+        sentences.append(text[current_pos:])
+    return sentences
+
+
+def sentence_aware_chunking(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> List[str]:
+    """句子感知的文本切片演算法，確保句子邊界不被粗暴截斷"""
+    # 依句尾標點進行文本分割，保留標點符號（共用 split_into_sentences()）
+    parts = split_into_sentences(text)
 
     chunks = []
     current_chunk = []

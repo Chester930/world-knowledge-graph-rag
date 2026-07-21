@@ -1,17 +1,49 @@
 import pytest
 import os
 from pathlib import Path
-from parser.core import DocumentParser, URLParser, sentence_aware_chunking
+from parser.core import DocumentParser, URLParser, sentence_aware_chunking, split_into_sentences
 from services.ingestion_service import parse_document
 
 
 def test_sentence_aware_chunking():
     text = "這是一個句子。這是有問號的句子？這是有驚嘆號的句子！這是不完整的句子"
     chunks = sentence_aware_chunking(text, chunk_size=30, chunk_overlap=5)
-    
+
     assert len(chunks) > 0
     # 確保分割出的 chunk 保留了標點
     assert "這是一個句子。" in chunks[0] or "這是一個句子。" in text
+
+
+def test_split_into_sentences_basic():
+    text = "這是第一句。這是第二句！這是第三句？"
+    sentences = split_into_sentences(text)
+
+    assert sentences == ["這是第一句。", "這是第二句！", "這是第三句？"]
+
+
+def test_split_into_sentences_preserves_exact_reconstruction():
+    # 拆分後重新 join 必須完全還原原文，供 sentence_aware_chunking() 的
+    # "".join() 重組邏輯依賴。
+    text = "第一句。  第二句，還沒結束的子句；第三句！\n第四句。"
+    sentences = split_into_sentences(text)
+
+    assert "".join(sentences) == text
+
+
+def test_split_into_sentences_avoids_abbreviation_false_positives():
+    text = "本設計參考 e.g. 案例、i.e. 定義與 vs. 對照組，數值為 3.14 不應被誤判斷句。"
+    sentences = split_into_sentences(text)
+
+    # 全文不含中文句尾標點，僅有縮寫/小數點，理應完全不觸發斷句
+    assert len(sentences) == 1
+    assert sentences[0] == text
+
+
+def test_split_into_sentences_semicolon_is_sentence_boundary():
+    text = "前半句；後半句。"
+    sentences = split_into_sentences(text)
+
+    assert sentences == ["前半句；", "後半句。"]
 
 
 def test_parser_txt(tmp_path):
