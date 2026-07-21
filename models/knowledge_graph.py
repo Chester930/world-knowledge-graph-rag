@@ -92,6 +92,13 @@ class DocumentRecord(BaseModel):
     extraction_status: Literal["pending", "processing", "completed", "failed", "pending_upload"] = "pending"
     chunk_progress: int = 0
     total_chunks: int = 0
+    # SVO 抽取有獨立於 RAG chunk 的前處理與切塊流程。normalization_* 追蹤
+    # 文件級標準化 checkpoint；svo_total_chunks 則記錄標準化後寫出的 SVO 專用
+    # chunk 數，避免把 RAG 的 total_chunks 誤當抽取佇列單位。
+    normalization_status: Literal["not_started", "processing", "completed", "failed"] = "not_started"
+    normalization_progress: int = 0
+    normalization_total_sentences: int = 0
+    svo_total_chunks: int = 0
     # 該文件所有 chunk 向量的平均值（分類分數計算用），計算後快取於此避免每次
     # classify 都重新呼叫 embedding provider；total_chunks 改變（重新解析、內容
     # 更動）時由 document_record_service.init_record() 清空此快取，見
@@ -146,6 +153,12 @@ class SVOTriple(BaseModel):
     object_type: str = "概念"
     confidence: int = 1
     source_doc_id: UUID | None = None
+    # 句子/chunk 層級來源追溯。source_doc_id 只定位到文件；以下欄位定位到
+    # SVO 專用 chunk 與 original.md 中的句子範圍（1-based，閉區間）。
+    source_svo_chunk_index: int | None = Field(default=None, ge=1)
+    source_svo_chunk_file: str | None = None
+    source_sentence_start: int | None = Field(default=None, ge=1)
+    source_sentence_end: int | None = Field(default=None, ge=1)
 
 
 class BuildGraphRequest(BaseModel):

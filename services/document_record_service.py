@@ -68,6 +68,10 @@ def init_record(folder: Path, source: str, total_chunks: int = 0) -> DocumentRec
             # 切塊數改變代表文件內容已重新解析，先前快取的 document_vector 不再
             # 代表目前內容，必須一併清空，否則分類分數會用到過期向量而不自知。
             existing.document_vector = None
+            existing.normalization_status = "not_started"
+            existing.normalization_progress = 0
+            existing.normalization_total_sentences = 0
+            existing.svo_total_chunks = 0
             _write_record(folder, existing)
         return existing
 
@@ -87,6 +91,49 @@ def set_document_vector(folder: Path, vector: list[float]) -> DocumentRecord | N
     if record is None:
         return None
     record.document_vector = vector
+    _write_record(folder, record)
+    return record
+
+
+def update_normalization_progress(
+    folder: Path,
+    *,
+    status: Literal["not_started", "processing", "completed", "failed"],
+    progress: int,
+    total_sentences: int | None = None,
+) -> DocumentRecord | None:
+    """更新標準化前處理 checkpoint。
+
+    標準化是文件級一次性前處理，與後續 SVO chunk 五態抽取佇列分開追蹤。
+    """
+    if progress < 0:
+        raise ValueError("progress 不可為負數")
+    if total_sentences is not None and total_sentences < 0:
+        raise ValueError("total_sentences 不可為負數")
+
+    record = read_record(folder)
+    if record is None:
+        return None
+
+    if total_sentences is not None:
+        record.normalization_total_sentences = total_sentences
+    if record.normalization_total_sentences and progress > record.normalization_total_sentences:
+        raise ValueError("progress 不可大於 normalization_total_sentences")
+
+    record.normalization_status = status
+    record.normalization_progress = progress
+    _write_record(folder, record)
+    return record
+
+
+def set_svo_chunk_total(folder: Path, total_chunks: int) -> DocumentRecord | None:
+    """記錄 SVO 專用 chunk 數，與 RAG total_chunks 分開保存。"""
+    if total_chunks < 0:
+        raise ValueError("total_chunks 不可為負數")
+    record = read_record(folder)
+    if record is None:
+        return None
+    record.svo_total_chunks = total_chunks
     _write_record(folder, record)
     return record
 

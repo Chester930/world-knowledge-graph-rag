@@ -105,11 +105,19 @@ def test_set_document_vector_no_op_when_record_missing(tmp_path):
 def test_init_record_clears_cached_vector_when_total_chunks_changes(tmp_path):
     svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
     svc.set_document_vector(tmp_path, [0.1, 0.2, 0.3])
+    svc.update_normalization_progress(
+        tmp_path, status="completed", progress=10, total_sentences=10,
+    )
+    svc.set_svo_chunk_total(tmp_path, 4)
 
     # 模擬文件內容重新解析、切塊數改變：先前快取的向量已不代表目前內容
     record = svc.init_record(tmp_path, source="report.pdf", total_chunks=7)
 
     assert record.document_vector is None
+    assert record.normalization_status == "not_started"
+    assert record.normalization_progress == 0
+    assert record.normalization_total_sentences == 0
+    assert record.svo_total_chunks == 0
 
 
 def test_init_record_keeps_cached_vector_when_total_chunks_unchanged(tmp_path):
@@ -119,3 +127,31 @@ def test_init_record_keeps_cached_vector_when_total_chunks_unchanged(tmp_path):
     record = svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
 
     assert record.document_vector == [0.1, 0.2, 0.3]
+
+
+def test_update_normalization_progress_persists_checkpoint(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=1)
+
+    record = svc.update_normalization_progress(
+        tmp_path, status="processing", progress=3, total_sentences=10,
+    )
+
+    assert record.normalization_status == "processing"
+    assert record.normalization_progress == 3
+    assert record.normalization_total_sentences == 10
+    assert svc.read_record(tmp_path).normalization_progress == 3
+
+
+def test_update_normalization_progress_no_op_when_record_missing(tmp_path):
+    assert svc.update_normalization_progress(
+        tmp_path, status="processing", progress=1, total_sentences=2,
+    ) is None
+
+
+def test_set_svo_chunk_total_persists_separate_from_rag_chunks(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=9)
+
+    record = svc.set_svo_chunk_total(tmp_path, 3)
+
+    assert record.total_chunks == 9
+    assert record.svo_total_chunks == 3
