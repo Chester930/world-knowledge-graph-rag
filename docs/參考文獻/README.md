@@ -13,6 +13,7 @@
 | `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
 | `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻） | 🟢 已下載 2 篇 |
 | `07_文件分群與知識庫自動建立/` | 03_系統設計與方法論.md § 3.1.1（暫存區 AI 自動分群建立 KG） | 🟡 已下載 2 篇，皆僅 arXiv 預印本 |
+| `10_跨文件實體別名消解與增量聚類/` | 03_系統設計與方法論.md § 3.4（RQ4b，跨文件增量別名聚類架構）；`docs/報告/09_實體別名登記與動態標準名提升機制設計報告.md` | 🟡 已下載 3 篇，皆待精讀方法章節 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -86,6 +87,16 @@
 |---|---|---|
 | `grootendorst-2022-bertopic-neural-topic-modeling.pdf` | Grootendorst (2022), *BERTopic: Neural topic modeling with a class-based TF-IDF procedure* | arXiv:2203.05794 |
 | `khandelwal-2025-llm-topic-labeling.pdf` | Khandelwal (2025), *Using LLM-Based Approaches to Enhance and Automate Topic Labeling* | arXiv:2502.18469 |
+
+## 10_跨文件實體別名消解與增量聚類 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `rao-et-al-2010-streaming-cross-document-coref.pdf` | Rao, McNamee & Dredze (2010), *Streaming Cross Document Entity Coreference Resolution*，COLING 2010: Posters | ACL Anthology C10-2121 |
+| `ji-et-al-2011-tac-kbp-overview.pdf` | Ji, Grishman & Dang (2011), *Overview of the TAC2011 Knowledge Base Population Track* | https://blender.cs.illinois.edu/paper/kbp2011.pdf |
+| `saeedi-et-al-2020-incremental-multi-source-er.pdf` | Saeedi, Peukert & Rahm (2020), *Incremental Multi-source Entity Resolution for Knowledge Graph Completion*，ESWC 2020 | DOI: 10.1007/978-3-030-49461-2_23 |
+
+**與 03_資訊抽取與本體設計 的交叉引用**：本資料夾 3 篇僅佐證「跨文件增量別名聚類架構」，標準名選取規則（出現頻率優先）的文獻依據仍在 `03_資訊抽取與本體設計/`（Wikidata、CESI）——完整的兩層佐證分工說明見 `10_跨文件實體別名消解與增量聚類/README.md`。
 
 ## 下載原則
 
