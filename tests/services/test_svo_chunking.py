@@ -34,6 +34,30 @@ def test_single_sentence_over_limit_stays_intact():
     assert chunks[0].text == sentence
 
 
+def test_max_sentences_cap_splits_before_char_limit_is_reached():
+    """對應 docs/論文/03_系統設計與方法論.md § 3.4 §a：最多 5 句或最多 300
+    字元，先到者為準——這裡用寬鬆的字元上限，讓句數上限先觸發。"""
+    sentences = [f"第{i}句。" for i in range(1, 8)]  # 7 個短句，字元遠低於上限
+
+    chunks = svc.build_svo_chunks(sentences, sentences, max_chars=1000, max_sentences=5)
+
+    assert len(chunks) == 2
+    assert chunks[0].source_sentence_start == 1
+    assert chunks[0].source_sentence_end == 5
+    assert chunks[1].source_sentence_start == 6
+    assert chunks[1].source_sentence_end == 7
+
+
+def test_max_sentences_must_be_positive():
+    with pytest.raises(ValueError, match="max_sentences"):
+        svc.build_svo_chunks(["句子。"], ["句子。"], max_sentences=0)
+
+
+def test_default_chunk_size_matches_paper_decision():
+    assert svc.DEFAULT_SVO_CHUNK_SIZE == 300
+    assert svc.DEFAULT_SVO_CHUNK_MAX_SENTENCES == 5
+
+
 def test_write_svo_chunks_writes_files_and_index(tmp_path):
     chunks = svc.build_svo_chunks(
         ["原句一。", "原句二。"],

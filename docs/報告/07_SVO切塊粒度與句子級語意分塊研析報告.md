@@ -1,6 +1,6 @@
 # 07：SVO 專用切塊粒度與句子級語意分塊研析報告
 
-> 狀態：🟢 定案——本檔案記錄 2026-07-21 針對 SVO 抽取管線中「SVO Chunk 切塊粒度」與「自動化語意段落建構演算法」之討論成果、文獻研析結論與落地演算法設計。
+> 狀態：🟡 暫緩，語意切塊演算法列為未來可選項（2026-07-21 初稿 → 同日查證後修訂）。本檔案原標「🟢 定案」，但依 `docs/報告/06_SVO抽取管線調整任務書.md` 第 5 節查證，多項文獻引用需要訂正，且**本節提出的語意斷點式切塊演算法（`semantic_sentence_chunking`）並非實際採用的方案**——`services/svo_chunking.py` 已落地的是本檔案「結論」段落所稱「階段一：0 成本快速工程解」的固定聚合切塊（最多 5 句或 300 字元），語意切塊因文獻支撐不足暫緩，僅保留作為第五章消融實驗的候選對照方案，不代表現行系統行為。
 
 ---
 
@@ -19,22 +19,22 @@
 
 ---
 
-## 2. 學術文獻研析與實驗數據
+## 2. 學術文獻研析與實驗數據（2026-07-21 查證後訂正，見 06 任務書第 5 節）
 
 針對「一次丟給 SVO 抽取 LLM 的文字量該多大」，彙整相關權威文獻之實證結論：
 
-### 2.1 Microsoft GraphRAG 原始論文 (*Edge et al., 2024, arXiv:2404.16130*)
-微軟團隊在論文中針對 **Chunk Size（600、1200、2400 Tokens）** 對「實體與關係抽取（Entity & Relation Extraction）」的效果進行消融實驗（Ablation Study）：
+### 2.1 Microsoft GraphRAG 原始論文 (*Edge et al., 2024, arXiv:2404.16130*)——**方向屬實，原稿有誇大，已訂正**
 
-1. **抽取密度 (Extraction Density / Recall)**：
-   * **較小 Chunk（~600 Tokens，約 400~500 中文字 / 3~6 句）**：**抽取到的關係與實體總數量最多、召回率（Recall）最高**。
-   * **原因**：LLM 在較短上下文內專注度高度集中，顯著降低了 *Lost in the Middle*（中間資訊遺漏）效能衰退現象。
-2. **較大 Chunk（1200~2400 Tokens）**：
-   * 雖能減少 API 呼叫次數，但 LLM 傾向僅抓取最顯著的 2~3 個主要關係，**大量細節 SVO 關係會被忽略**。
+實際查證附錄 A.2／Figure 3（HotPotQA 範例）後確認：**方向性發現真實存在**——600 token 切塊抽出的實體參照數約為 2400 token 的兩倍，較小 chunk 確實抽取密度較高。但需訂正三點原稿誇大之處：
+
+1. 這只是附錄裡單一資料集（HotPotQA）的示例，**不是正式消融實驗章節**的系統性結論，不能引用為「消融實驗證實」。
+2. 論文自己針對「大 chunk 抽取密度較低」這個問題提出的解法是引入 **self-reflection**（讓 LLM 自我檢查、撿回漏抽的實體），藉此可以**繼續使用大 chunk**（節省 API 成本）又不犧牲品質——原稿完全沒提這個關鍵反轉，容易讓讀者誤以為「小 chunk 是唯一解」。
+3. 「大 chunk 只抓 2-3 個主要關係」這個具體說法在原文中**找不到對應內容**，疑似加油添醋，已移除此描述。
 
 ### 2.2 檢索單位與語意切塊文獻
-* **EMNLP 2024 (*Chen et al., Dense X Retrieval*)**：實證顯示以「句子 (Sentence)」或「命題 (Proposition)」作為最細粒度原子單位，在資訊保真度與語意完整度上顯著優於粗粒度固定段落。
-* **NAACL 2025 (*Qu, Tu & Bao, Is Semantic Chunking Worth the Computational Cost?*)**：探討語意切塊的距離門檻計算，指出句子間的向量餘弦距離波峰是最自然的主題邊界。
+
+* **EMNLP 2024 (*Chen et al., Dense X Retrieval*)**：實證顯示以「句子 (Sentence)」或「命題 (Proposition)」作為最細粒度原子單位，在資訊保真度與語意完整度上顯著優於粗粒度固定段落——本論文已查證此文獻，方向屬實，供第五章消融實驗參考。
+* **NAACL 2025 (*Qu, Tu & Bao, Is Semantic Chunking Worth the Computational Cost?*)**——**⚠️ 2026-07-21 查證確認方向相反，原稿誤引**：本論文已在 `docs/參考文獻/09_SVO抽取切塊策略與指代消解/README.md` 下載全文精讀，該論文的實際核心結論是**「固定字數切塊（200 字）在檢索/生成任務上表現持平或優於語意切分」**——與本節原稿宣稱「驗證了基於 Cosine 距離的波峰斷點切分法在維持資訊完整度上的學理依據」**方向完全相反**，不可引用為語意切塊的正面佐證。這正是本報告最終決定「暫緩採用語意斷點式分組」的關鍵原因之一。
 
 ---
 
@@ -157,35 +157,29 @@ def semantic_sentence_chunking(
 ## 5. 結論與後續實作規劃
 
 1. **參數定案**：SVO 專用切塊的 Golden Zone 鎖定在 **3~8 句 / 400~600 字元**。
-2. **預設引擎**：
-   - 階段一（0 成本快速工程解）：`services/svo_chunking.py` 先採字數上限與句數限制之貪婪滑動視窗法。
-   - 階段二（高階語意解）：整合 `semantic_sentence_chunking()`，利用本地 Embedding 向量（如 `bge-small-zh`）自動精準計算主題轉折點。
-3. **論文對照與實驗**：此演算法設計已納入第五章消融實驗規劃中，供後續評估 SVO 抽取品質與 chunk size 敏感度使用。
+2. **預設引擎（2026-07-21 訂正：階段二目前非採用方案，僅列未來可選項）**：
+   - 階段一（0 成本快速工程解，**現行實作**）：`services/svo_chunking.py` 已落地，採句數上限（5 句）與字數上限（300 字元）雙重限制、先到者為準的固定聚合切塊——對應 `docs/論文/03_系統設計與方法論.md` § 3.4 §a `SVOGROUP` 節點。
+   - 階段二（高階語意解，**未採用、僅為第五章候選對照方案**）：`semantic_sentence_chunking()` 因 2.2 節查證確認其核心文獻依據（Qu, Tu & Bao 2025）方向相反，暫緩採用，若第五章消融實驗需要語意切分作為對照組，程式碼保留於本報告供未來取用，非現行系統行為。
+3. **論文對照與實驗**：固定聚合方案的參數（5 句/300 字元）是否為最優，留給第五章消融實驗校準；若消融實驗顯示語意切分確有優勢，屆時再評估是否納入正式方案。
 
 ---
 
-## 6. 權威開源專案與學術文獻佐證 (Project & Literature Citations)
+## 6. 學術文獻與專案佐證 (Project & Literature Citations)（2026-07-21 全面修訂）
 
-本報告所採用之「句子級語意切塊」與「SVO 專用切塊粒度」具備以下權威開源專案與國際學術會議論文背書：
+> **修訂說明**：本節原稿宣稱以下來源皆為「權威開源專案與國際學術會議論文背書」，經查證（過程見 `docs/報告/06_SVO抽取管線調整任務書.md` 第 5 節與對話紀錄）發現：LangChain `SemanticChunker` 的「業界廣泛驗證」措辭查無出處；GraphRAG「強烈建議依實體關係密度做語意區塊調整」的說法與本論文已直接查證的 GraphRAG 原始碼（固定 `size=1200`／`overlap=100`，無此建議）矛盾，應是誤植或編造；Qu, Tu & Bao (2025) 方向相反（見 2.2 節）。本節依查證結果重寫。
 
-### 6.1 可信任開源專案 (Trusted Open-Source Frameworks)
-1. **LangChain `SemanticChunker`**：
-   - 官方實作同款「向量距離波峰 (Embedding Distance Breakpoint)」切塊演算法，已被業界廣泛驗證為最能維持語意連貫性的切塊方法。
+### 6.1 開源專案（誠實框架後的定位）
+1. **LangChain `SemanticChunker`**（**2026-07-21 修正措辭**）：
+   - 官方文件確實提供「向量距離波峰」切塊功能，但查無「已被業界廣泛驗證為最能維持語意連貫性的切塊方法」這種強度的官方或第三方背書說法，此措辭已移除——僅能定位為「語意切塊的一種可選實作」，非成熟／已驗證的最優解。
    - 專案連結：[LangChain Experimental Semantic Chunking](https://python.langchain.com/docs/how_to/semantic_chunker/)
 2. **LlamaIndex `SemanticSplitterNodeParser`**：
-   - LlamaIndex 核心框架預設的語意段落切塊引擎，採用相鄰句子 Cosine Distance 動態百分位數斷點機制。
+   - 機制描述查證屬實（相鄰句子 cosine 相似度＋百分位數動態斷點）。**需補上官方文件自承的限制**：其斷點偵測邏輯主要針對英文句子設計（正則規則對中文等無空白分詞語言的適用性存疑，屬本論文中文語料場景的重大警語），且官方文件本身也說明需要使用者自行調校 `breakpoint_percentile_threshold` 才能有效，並非開箱即用的成熟方案。
    - 專案連結：[LlamaIndex Semantic Splitter](https://docs.llamaindex.ai/en/stable/examples/node_parsers/semantic_chunking/)
-3. **Microsoft GraphRAG**：
-   - 微軟官方 GraphRAG 框架，設定預設 `chunk_size` 為 1200 / 600 tokens，並強烈建議依據實體關係密度進行語意區塊調整。
+3. **Microsoft GraphRAG**（**2026-07-21 修正，原稿誤植**）：
+   - 本論文已直接查證 GraphRAG 原始碼（`packages/graphrag/graphrag/config/defaults.py`），確認 `ChunkingDefaults` 為固定 `size=1200`／`overlap=100`（token 為單位），**查無「強烈建議依據實體關係密度進行語意區塊調整」這種官方建議**，此說法應是誤植或編造，已移除。
    - 專案連結：[Microsoft GraphRAG Repository](https://github.com/microsoft/graphrag)
 
-### 6.2 頂級學術會議論文 (Top Academic Papers)
-1. **Microsoft GraphRAG (arXiv 2024)**：
-   - Edge, D., et al. (2024). *From Local to Global: A GraphRAG Approach to Query-Focused Summarization*. arXiv:2404.16130.
-   - **核心結論**：消融實驗證實較小 Chunk（600 tokens）在實體與關係抽取密度（Extraction Density）與召回率（Recall）上顯著優於大 Chunk（2400 tokens）。
-2. **NAACL 2025 (Findings of NAACL 2025)**：
-   - Qu, T., Tu, Z., & Bao, Y. (2025). *Is Semantic Chunking Worth the Computational Cost?*. Findings of NAACL 2025, pp. 2155–2177, ACL Anthology.
-   - **核心結論**：探討向量距離門檻與傳統切塊之效果對比，驗證了基於 Cosine 距離的波峰斷點切分法在維持資訊完整度上的學理依據。
-3. **EMNLP 2024 (EMNLP Main 2024)**：
-   - Chen, D., et al. (2024). *Dense X Retrieval: What Retrieval Granularity Should We Use?*. EMNLP 2024.
-   - **核心結論**：證實以「句子 (Sentence)」或「命題 (Proposition)」為基礎的細粒度切塊與檢索單位，在語意品質上遠優於傳統粗粒度文字段落。
+### 6.2 學術文獻（誠實框架後的定位）
+1. **Microsoft GraphRAG (arXiv 2024)**（Edge et al., 2024, arXiv:2404.16130）——見 2.1 節訂正：方向性發現真實存在（附錄單一資料集示例），但非正式消融章節結論，且論文本身推薦解法是 self-reflection 而非強制小 chunk，原稿「消融實驗證實」「顯著優於」等措辭過度肯定，已於 2.1 節訂正。
+2. **NAACL 2025**（Qu, Tu & Bao, 2025, Findings of NAACL 2025）——**⚠️ 方向與原稿宣稱相反**：該論文實證結論是固定字數切塊表現持平或優於語意切分，見 2.2 節訂正說明，不可再引用為語意切分的正面佐證。
+3. **EMNLP 2024**（Chen et al., 2024, Dense X Retrieval）——查證屬實，細粒度切塊（句子/命題級）優於粗粒度段落的結論方向正確，本論文已收錄於 `docs/參考文獻/08_向量化與語意表示/`。

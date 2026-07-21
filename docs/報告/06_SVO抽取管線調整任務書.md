@@ -49,9 +49,9 @@
 
 ---
 
-## 3. 尚未定案、待討論的設計問題（建議依此順序討論）
+## 3. 設計問題（2026-07-21 第二輪：查證＋使用者決策＋實作，見下方各小節「已定案並實作」標記）
 
-### 3.1 SVO 專用切塊的演算法與粒度（🔴 最優先，其餘待辦多半依賴此項先定案）
+### 3.1 SVO 專用切塊的演算法與粒度（✅ 已定案並實作）
 
 3.4 §a 的 `STDSENTS`／`SENTEMBED` 節點產出「依句子順序排列、已完成指代消解＋別名前處理、且逐句已算好 embedding 的標準化句子清單」之後，要怎麼組成一個一個 SVO 專用 Chunk（登記進 `task_queue.db` 的最小單位）——目前完全空白。已明確排除的做法：直接沿用「前 4 後 2」（7 句）這個數字（那是代名詞消解的上下文視窗大小，跟切塊粒度是兩個不同參數，不可混用）。需要決定：切塊依句數、字數、還是其他規則；是否需要重疊；粒度大小是否需要留給第五章消融實驗校準（比照 `CLASSIFY_AUTO_THRESHOLD` 現行做法）。
 
@@ -61,48 +61,55 @@
 
 **目前定案方向**：句子已逐句算好 embedding（`SENTEMBED`，見下方 §3.2），但「怎麼組塊」本身傾向先採**簡單固定聚合**（依句數/字數上限分組，小 chunk 為主，呼應 GraphRAG 附錄的方向性發現），語意斷點式分組（07 報告的核心演算法）因文獻支撐不足暫緩，是否採用留給第五章消融實驗實測比較，而非直接採信文獻宣稱。
 
-**組塊上限（2026-07-21 暫定，🟡 工程預設，非最終定案）**：最多 5 句或最多 300 字元，先到者為準（沿用 `sentence_aware_chunking()` 既有的句數/字數雙重上限手法，超長單句獨立成 Chunk）。300 字元沒有直接文獻依據，是比 3.1.1 現行 500 字元 RAG 切塊更小的工程判斷（方向呼應 GraphRAG 附錄「切塊越小抽取密度越高」的查證結果，GraphRAG 測試範圍為 600/1200/2400 token，與中文字元換算不精確，僅供粗略參考）。**使用者明確表示這只是暫定**，3.4 節其餘討論（是否需要重疊、與 §b 跨文件別名消解的銜接等）可能導致這個數字調整，最終數值仍留給第五章消融實驗校準。
+**組塊上限（✅ 2026-07-21 定案並實作）**：最多 5 句或最多 300 字元，先到者為準（沿用 `sentence_aware_chunking()` 既有的句數/字數雙重上限手法，超長單句獨立成 Chunk）。300 字元沒有直接文獻依據，是比 3.1.1 現行 500 字元 RAG 切塊更小的工程判斷（方向呼應 GraphRAG 附錄「切塊越小抽取密度越高」的查證結果，GraphRAG 測試範圍為 600/1200/2400 token，與中文字元換算不精確，僅供粗略參考），最終數值仍留給第五章消融實驗校準，但已是可執行的預設值。**實作**：`services/svo_chunking.py::build_svo_chunks()` 新增 `max_sentences`（預設 5）參數，與既有 `max_chars`（已改為預設 300）並行判斷，先到者觸發切分；測試見 `tests/services/test_svo_chunking.py::test_max_sentences_cap_splits_before_char_limit_is_reached` 等。
 
-### 3.2 原句子／標準化句子／SVO Chunk 的關聯索引設計（🟡 次優先，逐句 embedding 已定案）
+### 3.2 原句子／標準化句子／SVO Chunk 的關聯索引設計（✅ 已定案並實作）
 
 使用者已確認一個關鍵設計原則：**RAG 檢索查找用原句子（`original.md`／`chunk-NNN-of-MMM.md`），SVO 抽取/圖譜查找用標準化後句子**——兩者是同一份文件的不同「版本」，各自獨立可查，不是同一份文字的兩種標記。`sentences.json`（見上方第 1 節第 6 項）已把「原句子」這一半的穩定清單準備好。
 
-**新增定案（2026-07-21）**：標準化句子清單產出後，逐句計算 embedding（3.4 §a 的 `SENTEMBED` 節點，與 3.1.1 的 RAG chunk 向量分開計算、分開索引）。用途分兩層：① 作為未來 SVO 切塊分組的候選依據來源之一（不代表分組規則已定案採語意切分）；② 讓 `docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md` 提出的「標準化 RAG」檢索軌道具備可實測的基礎建設，第五章消融實驗可實際比較傳統 RAG vs. 標準化 RAG，而非僅依賴文獻宣稱。**實作現況**：3.4 §a 本身尚未實作，`SENTEMBED` 目前僅為設計定案，程式碼待 3.4 §a 動工時一併補上。
+**新增定案（2026-07-21）**：標準化句子清單產出後，逐句計算 embedding（3.4 §a 的 `SENTEMBED` 節點，與 3.1.1 的 RAG chunk 向量分開計算、分開索引）。用途分兩層：① 作為未來 SVO 切塊分組的候選依據來源之一（不代表分組規則已定案採語意切分）；② 讓 `docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md` 提出的「標準化 RAG」檢索軌道具備可實測的基礎建設，第五章消融實驗可實際比較傳統 RAG vs. 標準化 RAG，而非僅依賴文獻宣稱。
 
-仍未定案：
-- 標準化句子本身要不要落地存檔（例如 `standardized_sentences.json`），還是只存 embedding 索引、需要時回頭查詢？
-- 具體資料結構——是否比照 `chunk-NNN-of-MMM.md` 的 YAML frontmatter 模式，在 SVO Chunk 檔案裡加欄位（例如 `source_sentence_range`，對應 `sentences.json` 的索引），才能雙向追溯（從三元組找回原文、或反過來）？
+**✅ 落地存檔＋追溯欄位（2026-07-21 使用者決策：兩項皆採推薦方案）**：
+- 標準化句子/SVO Chunk 落地存檔——`services/svo_chunking.py::write_svo_chunks()` 已寫出 `svo_index.json`（含每個 SVO chunk 的 `original_sentences`／`normalized_sentences`／句子範圍），達成「標準化句子落地存檔、可隨時查詢、不需重跑 LLM」的目標，不另立與 `sentences.json` 平行的獨立檔案。
+- 雙向追溯欄位——`models/knowledge_graph.py::SVOTriple` 已新增 `source_svo_chunk_index`／`source_svo_chunk_file`／`source_sentence_start`／`source_sentence_end` 四個欄位（1-based，閉區間），`services/svo_service.py::merge_triples_to_graph()` 已將這些欄位一併寫入 Neo4j 關係邊屬性，`bfs_query()` 查詢時一併讀回，達成「從三元組找回原文句子範圍」的雙向追溯，測試見 `tests/services/test_svo_service.py::test_merge_triples_to_graph_passes_sentence_trace_fields`／`test_bfs_query_maps_records_to_triples`。
 
-### 3.3 標準化流程本身缺乏斷點續傳（🟡 次優先）
+### 3.3 標準化流程本身缺乏斷點續傳（✅ 已定案並實作）
 
-3.4 §a 的指代消解/別名前處理目前是「整份文件一次做完」才會產生 `CHUNKREADY`，中途沒有任何 checkpoint——若程式在標準化跑到一半（例如長文件跑到第 300 句）被中斷，重啟後只能整份重跑，跟 3.1.2/3.1.3/3.1.4 現有的五態斷點續傳保護等級不對等，兩者皆需要呼叫 LLM、皆有算力成本。待決定：
-- 要不要幫標準化也做一套進度追蹤（例如以句子索引為單位的 checkpoint）？
-- 追蹤資訊要記在哪——沿用同一份 `_record.json` 加欄位，還是獨立追蹤檔？（兩者生命週期不同：標準化是文件級一次性前處理，SVO 抽取可能因重新歸屬而重跑）
+3.4 §a 的指代消解/別名前處理原本是「整份文件一次做完」才會產生 `CHUNKREADY`，中途沒有任何 checkpoint。**2026-07-21 使用者決策：要做斷點續傳（推薦方案）**。實作：
+- `models/knowledge_graph.py::DocumentRecord` 新增 `normalization_status`／`normalization_progress`／`normalization_total_sentences`／`svo_total_chunks` 四個欄位，追蹤方式與現有 SVO 抽取五態狀態機分開（標準化是文件級一次性前處理，SVO 抽取因重新歸屬可能重跑，兩者生命週期不同，各自獨立追蹤）。
+- `services/document_record_service.py::update_normalization_progress()`／`set_svo_chunk_total()` 提供讀寫介面，沿用既有 `_record.json` 原子寫入模式（暫存檔＋`os.replace`），測試見 `tests/services/test_document_record_service.py`。
+- `services/entity_registry_service.py`（3.4 §a 文件內別名登記表本體，2026-07-21 新增）額外提供 `write_registry_snapshot()`／`read_registry_snapshot()`，持久化登記表狀態（`entity_registry.json`），使中斷後可從 `normalization_progress` 對應的句子索引＋已恢復的登記表繼續處理，不需整份文件重跑；`apply_registry()` 支援傳入既有 registry 與 `start_idx` 從中斷處繼續，測試見 `tests/services/test_entity_registry_service.py::test_apply_registry_resumes_from_checkpoint`。
 
-### 3.4 `SVOTriple` 追溯粒度不足（🟢 待 3.2 定案後一併處理）
+### 3.4 `SVOTriple` 追溯粒度不足（✅ 已隨 3.2 一併實作）
 
-目前 3.1.3 圖裡 `SVOTriple` 只有 `source_doc_id`（文件層級來源），若要支援「附來源標記的回答」（3.1 總覽圖問答流程已提及此功能）精確指回原文的特定句子而非整份文件，`SVOTriple` schema 需要擴充句子/chunk 層級的來源欄位——這項設計依賴 3.2 的關聯索引結構先定案，故排在其後。
-
----
-
-## 4. 待實作項目（依賴上述設計定案，目前皆未動工）
-
-- [ ] SVO 專用切塊函式（依 3.1 定案結果實作，可能落在 `parser/` 或新的 `services/svo_chunking.py`）
-- [ ] 原句子/標準化句子/Chunk 關聯索引的寫入與讀取機制（依 3.2 定案結果）
-- [ ] 標準化進度的 checkpoint 機制（依 3.3 定案結果，若決定要做）
-- [ ] `SVOTriple` schema 擴充句子/chunk 層級來源欄位（依 3.4，待 3.2 完成後處理）
-- [ ] `svo_service.py` 本體（目前仍為 stub，等待上述前置設計定案）
+`SVOTriple` schema 已擴充句子/chunk 層級來源欄位（見 3.2），`services/svo_service.py::merge_triples_to_graph()`／`bfs_query()` 皆已支援讀寫，達成「附來源標記的回答可精確指回原文特定句子範圍」的目標。
 
 ---
 
-## 5. 暫緩中的 07-10 報告與已知問題
+## 4. 實作項目狀態（2026-07-21 更新）
 
-使用者另外與 Gemini 討論產出四份報告（`docs/報告/07-10`），涵蓋 SVO 切塊粒度、三軌混合檢索、實體別名動態標準名提升、代名詞雙軌檢測，並已落地部分程式碼（`services/svo_chunking.py`、`svo_service.py`／`document_record_service.py`／`models/knowledge_graph.py` 的擴充、對應測試）。**使用者已決定 07-10 先暫緩**，這批改動未提交，暫時擱置於工作目錄。審視後記錄以下發現，供之後恢復討論時參考：
+- [x] SVO 專用切塊函式——`services/svo_chunking.py::build_svo_chunks()`，已支援 `max_sentences`／`max_chars` 雙重上限
+- [x] 原句子/標準化句子/Chunk 關聯索引的寫入與讀取機制——`svo_index.json`＋`SVOTriple` 句子層級欄位
+- [x] 標準化進度的 checkpoint 機制——`DocumentRecord.normalization_*` 欄位＋`entity_registry_service` 登記表快照
+- [x] `SVOTriple` schema 擴充句子/chunk 層級來源欄位
+- [x] 文件內實體別名登記表（3.4 §a，PK 動態提升機制）——`services/entity_registry_service.py`（新增），含頻率優先＋長度次要規則、規則式別名比對（子字串/縮寫）、LLM 仲裁 hook、斷點續傳快照，測試見 `tests/services/test_entity_registry_service.py`（17 項）
+- [x] `svo_service.py` 實體對齊/去重（3.1.4 DEDUP4／3.4 §b ESCALATE＋RECHECK）——`resolve_entity_name()`（編輯距離→cosine→LLM 仲裁三段式）、`merge_entity()`（含跨文件標準名動態更新），測試見 `tests/services/test_svo_service.py`（14 項，含 `InMemoryEntityDriver` 模擬完整 MERGE／rename 狀態）
+- [ ] `Entity.aliases` 陣列屬性的查詢介面（已寫入 `alias_counts_json`／`aliases` 屬性，尚無對外查詢 API，非阻斷性待辦）
+- [ ] `RECHECK` 效能優化（每次合併皆同步重新聚合全部邊，見 3.4 §b「效能待決策」，留給第四章/第五章評估）
 
-1. **🔴 文獻引用與本 repo 已查證結論矛盾**：07 報告引用 Qu, Tu & Bao（2025, NAACL Findings）支持「cosine 距離波峰斷點切分法」，但本 repo `docs/參考文獻/09_SVO抽取切塊策略與指代消解/README.md` 已實際下載全文查證過同一篇論文，結論是「固定 200 字切塊表現持平或優於語意切分」——方向相反，**確認矛盾，不可用**。10 報告引用 Stanford CoreNLP（ACL 2014）證實「過濾 80% 無代詞句子降低 LLM 呼叫成本」，但 2014 年的論文不太可能討論 LLM 成本這個當時不存在的應用場景，疑似編造，**尚未查證原文**。09 報告引用 CORE-KG 的期刊/會議名稱（「IEEE/ACM Transactions / arXiv」）與本 repo 已查證的正確資訊（KDD '25 Workshop SKnow-LLM）不一致。**2026-07-21 補充查證**：07 報告另引用 GraphRAG（Edge et al., 2024）消融實驗證實小 chunk 抽取密度較高——已實際下載原文查證（附錄 A.2／Figure 3），**方向性真實存在**（HotPotQA 範例：600 token 切塊抽出實體參照數約為 2400 token 的兩倍），但 07 報告有誇大：這只是附錄單一資料集示例，非正式消融實驗章節；論文自己的解法是引入 self-reflection 讓 LLM 撿回漏抽實體、藉此可繼續用大 chunk，07 報告完全沒提這個關鍵反轉；「大 chunk 只抓 2-3 個主要關係」的說法在原文中找不到對應內容。**恢復討論前，07/09/10 剩餘的文獻引用仍需逐條重新查證，不可直接採信；GraphRAG 這條已查證完畢，可用但需修正誇大之處。**
-2. **🟡 狀態標記過早**：07/09/10 標示「🟢 定案」，但皆未實作驗證、未經消融實驗，與本論文一貫的誠實分級慣例（🟢 僅給實際查證過全文的正式發表文獻）不符，應降級為 🟡 設計提案。
-3. **🟡 08 報告牽動 RQ1/RQ2 既有範圍**：08 提出在現有「雙層檢索架構」（3.2，RQ1/RQ2）之外新增第三條「標準化 RAG」檢索軌道。RQ1 現行框架是「KG-BFS vs. 純向量 RAG」的兩者比較，新增第三軌道會讓比較複雜化，可能需要重新框定 RQ1 範圍，或比照 RQ4a/RQ4b 先例拆成新研究問題——**需要獨立討論，不建議跟其他三份一起處理**。
-4. **實質內容可用部分**（撇開文獻問題）：09 的別名 PK 提升機制回答了 3.4 §a/§b 原本「尚待決策」的 `Entity.name` 選取規則；10 的 POS 雙軌檢測回應了 05 任務書已知的 `PRONOUN_PATTERN` 誤觸發限制；07 的「指代消解視窗≠SVO抽取切塊」核心區分與本論文既有結論一致。這些設計方向本身合理，只是文獻佐證需要重做。
+---
+
+## 5. 07-10 報告狀態（2026-07-21：09/07/10 文獻已修訂並解除暫緩；08 仍暫緩）
+
+使用者另外與 Gemini 討論產出四份報告（`docs/報告/07-10`），涵蓋 SVO 切塊粒度、三軌混合檢索、實體別名動態標準名提升、代名詞雙軌檢測，並已落地部分程式碼（`services/svo_chunking.py`、`svo_service.py`／`document_record_service.py`／`models/knowledge_graph.py` 的擴充、對應測試）。原先「07-10 先暫緩」的決定，經 2026-07-21 完整查證與訂正後，**09／07／10 三份報告的文獻佐證已修訂為誠實框架，機制設計本身已落地實作並通過測試，解除暫緩**；08 報告因涉及 RQ1/RQ2 範疇界定問題（非文獻問題），**仍維持暫緩**，需獨立討論。
+
+1. **✅ 文獻引用問題已修訂**：
+   - **09 報告**（實體別名動態標準名提升）：原「長度優先三規則 PK 比試」查無文獻先例（7 項原引用皆不支持，4 項明確矛盾），已改採「出現頻率優先，長度僅平手次規則」並換上真正吻合的架構層文獻（Rao 2010／TAC-KBP／Saeedi 2020，見 `docs/參考文獻/10_跨文件實體別名消解與增量聚類/`）；CORE-KG 期刊/會議名稱誤植已訂正。完整修訂見報告本身與 `docs/論文/03_變更紀錄.md` 「第三／四次調整」。
+   - **10 報告**（代名詞雙軌檢測）：Stanford CoreNLP「過濾 80% 無代詞句子降低 LLM 呼叫成本」查證確認查無出處、2014 年語境不可能討論 LLM 成本，**已整條移除**；CORE-KG 機制描述（原稿誤植為「前置 Pronoun 掃描器搭配雙向 Context-window」）已訂正為其實際方法（逐實體類型循序 LLM prompt）；fastcoref／LangChain Guardrails 兩條開源專案佐證降級措辭。
+   - **07 報告**（SVO 切塊粒度）：Qu, Tu & Bao（2025）方向相反的矛盾已於報告內訂正說明；GraphRAG 消融實驗的誇大之處（單一附錄示例非正式章節、未提 self-reflection 反轉、「2-3 個主要關係」查無出處）已訂正；LangChain `SemanticChunker`「業界廣泛驗證」與 GraphRAG「強烈建議依實體關係密度調整」兩條查無出處的宣稱已移除或降級。
+2. **✅ 狀態標記已訂正**：07／09／10 原標示「🟢 定案」，已依查證結果降級為「🟡 設計提案／部分已實作」，符合本論文誠實分級慣例（🟢 僅給實際查證過全文的正式發表文獻）。
+3. **🟡 08 報告仍暫緩**：08 提出在現有「雙層檢索架構」（3.2，RQ1/RQ2）之外新增第三條「標準化 RAG」檢索軌道，牽動 RQ1 既有範疇界定，**與文獻查證無關，需獨立討論**，本次調整不處理。
+4. **✅ 實質機制已落地**：09 的頻率優先＋長度次要提升機制已實作為 `services/entity_registry_service.py`（文件內範圍）＋`services/svo_service.py::merge_entity()`（跨文件範圍，RECHECK 真正權威層）；10 的核心區分（實體別名登記 vs. 代名詞消解，各自需要不同的觸發/省成本機制）與 07 的「指代消解視窗≠SVO 抽取切塊」核心區分，皆與本論文既有設計一致，機制設計本身合理，只是原本的文獻佐證需要重做——現已重做完畢。10 報告的雙軌 POS/正則代名詞檢測本身**尚未實作**（僅完成文獻訂正，實作仍待與 `docs/報告/05_指代消解與前處理任務書.md` 整合時一併處理，非本次範圍）。
 
 ---
 
@@ -114,9 +121,14 @@
 | `docs/論文/03_變更紀錄.md` | 逐日變更歷程與已取代設計方案（含滑動視窗草案） |
 | `docs/報告/05_指代消解與前處理任務書.md` | 代名詞消解機制的完整規格（3.4 §a 的一部分） |
 | `docs/報告/06_SVO抽取管線調整任務書.md` | 本檔案 |
-| `docs/報告/07-10_*.md` | 🟡 暫緩中，文獻待重新查證（見上方第 5 節） |
+| `docs/報告/07_*.md`／`09_*.md`／`10_*.md` | ✅ 文獻已修訂，解除暫緩（見上方第 5 節） |
+| `docs/報告/08_*.md` | 🟡 仍暫緩，涉及 RQ1/RQ2 範疇界定，需獨立討論 |
+| `docs/參考文獻/10_跨文件實體別名消解與增量聚類/` | 09 報告修訂後新增的架構層文獻（Rao 2010／TAC-KBP／Saeedi 2020） |
 | `parser/core.py` | `split_into_sentences()`／`sentence_aware_chunking()` |
 | `parser/chunk_writer.py` | `write_chunks_as_markdown()`／`write_original_text()`／`write_sentences_index()` |
 | `parser/__init__.py` | 套件公開介面 |
 | `services/ingestion_service.py` | `chunk_and_stage()`，銜接 3.1.1 前段 |
-| `services/document_record_service.py` | `_record.json` 讀寫，記錄檔真實狀態來源 |
+| `services/document_record_service.py` | `_record.json` 讀寫，記錄檔真實狀態來源；新增 `update_normalization_progress()`／`set_svo_chunk_total()` |
+| `services/svo_chunking.py` | SVO 專用切塊（`build_svo_chunks()`，5 句/300 字元雙重上限）與 `svo_index.json` 落地 |
+| `services/entity_registry_service.py` | 3.4 §a 文件內實體別名登記表（頻率優先＋長度次要，斷點續傳快照） |
+| `services/svo_service.py` | SVO 抽取／實體對齊去重（DEDUP4→ESCALATE）／跨文件標準名更新（RECHECK） |

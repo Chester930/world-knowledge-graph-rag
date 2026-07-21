@@ -27,6 +27,15 @@ CLUSTER_MIN_SIZE = 3  # 一個候選分群/新 KG 至少要有幾份文件，依
 UMAP_MIN_POOL_SIZE = 20
 UMAP_N_COMPONENTS = 5  # BERTopic (Grootendorst, 2022) 預設值，降維後仍保留分群所需的結構
 
+# 實體對齊/去重門檻（見 docs/ARCHITECTURE.md「實體對齊與去重」2026-07-10 決策，
+# docs/論文/03_系統設計與方法論.md § 3.1.4／3.4 §b）：先做字串編輯距離篩選（高度
+# 相似直接視為同一實體），未命中則做向量餘弦相似度篩選（同類型且 ≥ 此門檻則
+# MERGE）；介於 ESCALATE 門檻與 COSINE 門檻之間視為灰色地帶，交由 LLM 仲裁
+# （3.4 §b ESCALATE 節點）。⚠️ 三個數值皆為工程預設，未經校準，見第五章消融實驗。
+ENTITY_DEDUP_EDIT_RATIO_THRESHOLD = 0.70  # 校準參考：「台積電」對「台積電公司」的 SequenceMatcher ratio ≈ 0.75
+ENTITY_DEDUP_COSINE_THRESHOLD = 0.88
+ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
+
 # SVO 三元組合法語意關係類型（30 種，依 CLAUDE.md 分組）
 SVO_REL_TYPES: set[str] = {
     "IS_A", "PART_OF", "CONTAINS", "INSTANCE_OF",
