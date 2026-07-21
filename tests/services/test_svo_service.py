@@ -1,4 +1,3 @@
-import json
 from uuid import uuid4
 
 import pytest
@@ -75,11 +74,14 @@ class FakeDriver:
 
 class InMemoryEntityDriver:
     """簡化的 Neo4j driver 替身：辨識 merge_entity／merge_triples_to_graph
-    實際發出的查詢形狀，用一個 dict 模擬 Entity 節點的 MERGE／rename 狀態，
-    讓實體去重/RECHECK 邏輯可在不連線真實 Neo4j 的情況下正確驗證。"""
+    實際發出的查詢形狀，用 dict 模擬 Entity／Chunk 節點與 HAS_ENTITY 邊的
+    MERGE／rename／聚合狀態，讓實體去重/RECHECK 邏輯可在不連線真實 Neo4j
+    的情況下正確驗證，資料模型對應 3.4 §b 文字描述的
+    `(Chunk)-[:HAS_ENTITY {surface_form}]->(Entity)` 邊。"""
 
     def __init__(self):
-        self.entities: dict[tuple[str, str], dict] = {}  # (kg_id, name) -> {type, alias_counts_json}
+        self.entities: dict[tuple[str, str], dict] = {}  # (kg_id, name) -> {type}
+        self.has_entity_edges: dict[tuple, int] = {}  # (kg_id, chunk_key, entity_name, surface_form) -> count（供除錯用，非邏輯必需）
         self.relationships: list[dict] = []
         self.queries: list[str] = []
 
@@ -90,22 +92,47 @@ class InMemoryEntityDriver:
         if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id, type: $entity_type})"):
             kg_id, entity_type = params["kg_id"], params["entity_type"]
             records = [
-                {"name": name, "alias_counts_json": data["alias_counts_json"]}
-                for (kid, name), data in self.entities.items()
+                {"name": name} for (kid, name), data in self.entities.items()
                 if kid == kg_id and data["type"] == entity_type
             ]
             return FakeResult(records)
 
-        if stripped.startswith("MERGE (e:Entity {kg_id: $kg_id, name: $resolved_name})"):
+        if stripped.startswith("MERGE (e:Entity {kg_id: $kg_id, name: $name}) ON CREATE SET"):
+            key = (params["kg_id"], params["name"])
+            self.entities.setdefault(key, {"type": params["entity_type"]})
+            return FakeResult([])
+
+        if stripped.startswith("MERGE (c:Chunk"):
+            kg_id = params["kg_id"]
+            entity_key = (kg_id, params["entity_name"])
+            self.entities.setdefault(entity_key, {"type": params["entity_type"]})
+            chunk_key = (kg_id, params["source_doc_id"], params["chunk_index"])
+            edge_key = (kg_id, chunk_key, params["entity_name"], params["surface_form"])
+            self.has_entity_edges[edge_key] = self.has_entity_edges.get(edge_key, 0) + 1
+            return FakeResult([])
+
+        if stripped.startswith("MATCH (c:Chunk {kg_id: $kg_id})-[r:HAS_ENTITY]->"):
+            kg_id, entity_name = params["kg_id"], params["entity_name"]
+            counts: dict[str, int] = {}
+            for (kid, _chunk_key, ename, surface_form) in self.has_entity_edges:
+                if kid == kg_id and ename == entity_name:
+                    counts[surface_form] = counts.get(surface_form, 0) + 1
+            records = [{"alias": alias, "freq": freq} for alias, freq in counts.items()]
+            return FakeResult(records)
+
+        if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id, name: $resolved_name}) SET"):
             kg_id = params["kg_id"]
             old_key = (kg_id, params["resolved_name"])
-            existing = self.entities.get(old_key, {"type": params["entity_type"]})
+            existing = self.entities.get(old_key, {"type": None})
             self.entities.pop(old_key, None)
             new_key = (kg_id, params["final_name"])
-            self.entities[new_key] = {
-                "type": existing["type"],
-                "alias_counts_json": params["alias_counts_json"],
-            }
+            self.entities[new_key] = {"type": existing["type"], "aliases": params["aliases"]}
+            # 已記錄的 HAS_ENTITY 邊改指向新名稱，模擬節點改名後既有邊仍連著同一節點
+            for edge_key in list(self.has_entity_edges):
+                kid, chunk_key, ename, surface_form = edge_key
+                if kid == kg_id and ename == params["resolved_name"]:
+                    count = self.has_entity_edges.pop(edge_key)
+                    self.has_entity_edges[(kid, chunk_key, params["final_name"], surface_form)] = count
             return FakeResult([])
 
         if "MERGE (s)-[r:" in stripped:
@@ -242,18 +269,38 @@ async def test_resolve_entity_name_gray_zone_without_llm_creates_new_entity():
     assert resolved == "Foo Company"
 
 
-# ── merge_entity（含 RECHECK/UPDATENAME 跨文件標準名更新）───────────────────
+# ── merge_entity（含 RECORD3B／RECHECK/UPDATENAME 跨文件標準名更新）─────────
+# 每次呼叫用不同的 source_doc_id／chunk_index，模擬「不同文件/不同 chunk 各
+# 提及一次」——HAS_ENTITY 邊以 (chunk, entity, surface_form) 為 MERGE 鍵，
+# 同一 chunk 內重複提及同一別名不會累加次數，這是刻意的頻率語意（見
+# services/svo_service.py::_merge_chunk_mention 的說明）。
 
 @pytest.mark.asyncio
-async def test_merge_entity_creates_new_node_with_initial_alias_count():
+async def test_merge_entity_without_chunk_info_skips_has_entity_and_keeps_name():
+    """未提供 chunk 追溯資訊時，退化為單純 MERGE 節點，不做頻率提升判斷。"""
     driver = InMemoryEntityDriver()
     kg_id = uuid4()
 
     final_name = await svc.merge_entity(driver, kg_id, "泰國", "LOCATION", "泰國")
 
     assert final_name == "泰國"
-    entity = driver.entities[(str(kg_id), "泰國")]
-    assert json.loads(entity["alias_counts_json"]) == {"泰國": 1}
+    assert (str(kg_id), "泰國") in driver.entities
+    assert driver.has_entity_edges == {}
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_creates_new_node_with_initial_alias_count():
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    doc_id = uuid4()
+
+    final_name = await svc.merge_entity(
+        driver, kg_id, "泰國", "LOCATION", "泰國",
+        source_doc_id=doc_id, source_svo_chunk_index=1,
+    )
+
+    assert final_name == "泰國"
+    assert driver.entities[(str(kg_id), "泰國")]["aliases"] == ["泰國"]
 
 
 @pytest.mark.asyncio
@@ -269,20 +316,22 @@ async def test_merge_entity_recheck_promotes_more_frequent_surface_form():
 
     await svc.merge_entity(
         driver, kg_id, "Interstate Highway 35", "LOCATION", "Interstate Highway 35",
+        source_doc_id=uuid4(), source_svo_chunk_index=1,
         embedding_provider=embedding,
     )
     final_name = "Interstate Highway 35"
-    for _ in range(5):
+    for i in range(5):
         final_name = await svc.merge_entity(
-            driver, kg_id, "I-35", "LOCATION", "I-35", embedding_provider=embedding
+            driver, kg_id, "I-35", "LOCATION", "I-35",
+            source_doc_id=uuid4(), source_svo_chunk_index=i + 2,
+            embedding_provider=embedding,
         )
 
     assert final_name == "I-35"
     assert (str(kg_id), "Interstate Highway 35") not in driver.entities
-    entity = driver.entities[(str(kg_id), "I-35")]
-    counts = json.loads(entity["alias_counts_json"])
-    assert counts["I-35"] == 5
-    assert counts["Interstate Highway 35"] == 1
+    assert sorted(driver.entities[(str(kg_id), "I-35")]["aliases"]) == sorted(
+        ["I-35", "Interstate Highway 35"]
+    )
 
 
 @pytest.mark.asyncio
@@ -293,9 +342,15 @@ async def test_merge_entity_does_not_promote_rare_long_form_over_frequent_short_
     kg_id = uuid4()
 
     final_name = "泰國"
-    for _ in range(50):
-        final_name = await svc.merge_entity(driver, kg_id, "泰國", "LOCATION", "泰國")
-    final_name = await svc.merge_entity(driver, kg_id, "泰國", "LOCATION", "泰國全名")
+    for i in range(50):
+        final_name = await svc.merge_entity(
+            driver, kg_id, "泰國", "LOCATION", "泰國",
+            source_doc_id=uuid4(), source_svo_chunk_index=i + 1,
+        )
+    final_name = await svc.merge_entity(
+        driver, kg_id, "泰國", "LOCATION", "泰國全名",
+        source_doc_id=uuid4(), source_svo_chunk_index=51,
+    )
 
     assert final_name == "泰國"
 
@@ -304,9 +359,16 @@ async def test_merge_entity_does_not_promote_rare_long_form_over_frequent_short_
 async def test_merge_triples_to_graph_merges_alias_into_existing_entity():
     driver = InMemoryEntityDriver()
     kg_id = uuid4()
+    doc_id = uuid4()
 
-    first = SVOTriple(subject="台積電", rel_type="PRODUCES", verb="生產", object="晶片")
-    second = SVOTriple(subject="台積電公司", rel_type="PRODUCES", verb="生產", object="晶片")
+    first = SVOTriple(
+        subject="台積電", rel_type="PRODUCES", verb="生產", object="晶片",
+        source_doc_id=doc_id, source_svo_chunk_index=1,
+    )
+    second = SVOTriple(
+        subject="台積電公司", rel_type="PRODUCES", verb="生產", object="晶片",
+        source_doc_id=doc_id, source_svo_chunk_index=2,
+    )
 
     await svc.merge_triples_to_graph(driver, kg_id, [first])
     await svc.merge_triples_to_graph(driver, kg_id, [second])
@@ -321,6 +383,33 @@ async def test_merge_triples_to_graph_merges_alias_into_existing_entity():
     assert "台積電公司" in entity_names
     assert len(driver.relationships) == 2
     assert {rel["subject"] for rel in driver.relationships} <= {"台積電", "台積電公司"}
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_records_has_entity_edge_with_surface_form():
+    """對應 3.4 §b RECORD3B：HAS_ENTITY 邊需記錄本次提及的原文字面。
+
+    `name`／`surface_form` 在實際呼叫路徑（`merge_triples_to_graph`）永遠是
+    同一個字串（皆為 `triple.subject`／`triple.object`），這裡如實反映該用法；
+    不對稱的組合（`resolve_entity_name` 解析出的既有實體 vs. 這次提及的別名
+    字面不同）已由 `test_merge_entity_recheck_promotes_more_frequent_surface_form`
+    覆蓋。
+    """
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    doc_id = uuid4()
+
+    await svc.merge_entity(
+        driver, kg_id, "Richard Stone", "PERSON", "Richard Stone",
+        source_doc_id=doc_id, source_svo_chunk_index=1,
+    )
+
+    edge_keys = [k for k in driver.has_entity_edges if k[0] == str(kg_id)]
+    assert len(edge_keys) == 1
+    _, chunk_key, entity_name, surface_form = edge_keys[0]
+    assert chunk_key == (str(kg_id), str(doc_id), 1)
+    assert entity_name == "Richard Stone"
+    assert surface_form == "Richard Stone"
 
 
 @pytest.mark.asyncio

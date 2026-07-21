@@ -94,13 +94,16 @@ def _relationship_type(rel_type: str) -> str:
     return f"`{rel_type}`"
 
 
-# ── 實體對齊/去重（3.1.4 DEDUP4／3.4 §b ESCALATE＋RECHECK，2026-07-21 新增）──
+# ── 實體對齊/去重（3.1.4 DEDUP4／3.4 §b ESCALATE＋RECHECK，2026-07-21 新增；
+#    2026-07-21 再修訂：改用 (Chunk)-[:HAS_ENTITY {surface_form}]->(Entity)
+#    邊聚合頻率，取代原本存在 Entity 節點上的 alias_counts_json，與
+#    docs/論文/03_系統設計與方法論.md § 3.4 §b 的文字描述（含 RECORD3B／
+#    RECHECK 的 Cypher 範例）保持一致，不再是兩套不同的資料模型）─────────────
 
 async def _fetch_entity_candidates(driver: AsyncDriver, kg_id: UUID, entity_type: str) -> list[dict]:
-    """查詢同 KG、同類型的既有 Entity 節點（名稱＋別名頻率 JSON），供比對。"""
+    """查詢同 KG、同類型的既有 Entity 節點（僅名稱，供編輯距離/cosine 比對）。"""
     result = await driver.execute_query(
-        "MATCH (e:Entity {kg_id: $kg_id, type: $entity_type}) "
-        "RETURN e.name AS name, e.alias_counts_json AS alias_counts_json",
+        "MATCH (e:Entity {kg_id: $kg_id, type: $entity_type}) RETURN e.name AS name",
         kg_id=str(kg_id), entity_type=entity_type,
     )
     return [dict(r) for r in result.records]
@@ -163,10 +166,53 @@ async def resolve_entity_name(
     return name
 
 
-def _updated_alias_counts(existing_json: str | None, surface_form: str) -> dict[str, int]:
-    alias_counts: dict[str, int] = json.loads(existing_json) if existing_json else {}
-    alias_counts[surface_form] = alias_counts.get(surface_form, 0) + 1
-    return alias_counts
+async def _merge_chunk_mention(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    entity_name: str,
+    entity_type: str,
+    surface_form: str,
+    source_doc_id: UUID | None,
+    source_svo_chunk_index: int | None,
+    source_svo_chunk_file: str | None,
+) -> None:
+    """RECORD3B：建立/合併 `(Chunk)-[:HAS_ENTITY {surface_form}]->(Entity)` 邊。
+
+    Chunk 節點以 `(kg_id, source_doc_id, chunk_index)` 為識別鍵；`surface_form`
+    是 `HAS_ENTITY` 邊 MERGE 樣式的一部分，同一 chunk 內重複提及同一別名不會
+    產生多筆邊，跨 chunk 才會累積出不同的邊，供 `_aggregate_alias_counts()`
+    做跨文件頻率聚合（3.4 §b RECHECK 的資料來源）。
+    """
+    await driver.execute_query(
+        """
+        MERGE (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
+        ON CREATE SET c.chunk_file = $chunk_file
+        MERGE (e:Entity {kg_id: $kg_id, name: $entity_name})
+        ON CREATE SET e.type = $entity_type
+        MERGE (c)-[r:HAS_ENTITY {surface_form: $surface_form}]->(e)
+        """,
+        kg_id=str(kg_id),
+        source_doc_id=str(source_doc_id),
+        chunk_index=source_svo_chunk_index,
+        chunk_file=source_svo_chunk_file,
+        entity_name=entity_name,
+        entity_type=entity_type,
+        surface_form=surface_form,
+    )
+
+
+async def _aggregate_alias_counts(driver: AsyncDriver, kg_id: UUID, entity_name: str) -> dict[str, int]:
+    """依 3.4 §b 文字描述的 Cypher 範例，聚合該實體所有 `HAS_ENTITY` 邊的
+    `surface_form` 出現次數（`MATCH (c)-[r:HAS_ENTITY]->(e) RETURN
+    DISTINCT r.surface_form, count(*)` 的實作版本）。"""
+    result = await driver.execute_query(
+        """
+        MATCH (c:Chunk {kg_id: $kg_id})-[r:HAS_ENTITY]->(e:Entity {kg_id: $kg_id, name: $entity_name})
+        RETURN r.surface_form AS alias, count(*) AS freq
+        """,
+        kg_id=str(kg_id), entity_name=entity_name,
+    )
+    return {record["alias"]: record["freq"] for record in result.records}
 
 
 async def merge_entity(
@@ -176,33 +222,49 @@ async def merge_entity(
     entity_type: str,
     surface_form: str,
     *,
+    source_doc_id: UUID | None = None,
+    source_svo_chunk_index: int | None = None,
+    source_svo_chunk_file: str | None = None,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
 ) -> str:
     """解析並合併一個實體節點，回傳這次寫入後的最終 Entity.name。
 
-    對應 3.1.4 DEDUP4／3.4 §b ESCALATE＋RECHECK：先決定這次提及該歸屬到哪個
-    既有實體（`resolve_entity_name`，或視為新實體），再依跨文件累積的
-    `surface_form` 頻率決定是否需要把 `Entity.name` 更新為更常見的別名——
-    與 3.4 §a 文件內『暫定標準名』使用同一套頻率優先規則
-    （`entity_registry_service.should_promote`），差別只在資料來源改為跨
-    文件累積統計，兩者衡量範圍不同，權威層級也不同（§a 僅供文件內部處理參考，
-    這裡才是寫入圖譜的權威判斷）。
+    對應 3.1.4 DEDUP4／3.4 §b ESCALATE＋RECORD3B＋RECHECK：先決定這次提及該
+    歸屬到哪個既有實體（`resolve_entity_name`，或視為新實體），記錄
+    `(Chunk)-[:HAS_ENTITY {surface_form}]->(Entity)` 邊，再依跨文件累積的
+    `surface_form` 頻率（`_aggregate_alias_counts`）決定是否需要把
+    `Entity.name` 更新為更常見的別名——與 3.4 §a 文件內『暫定標準名』使用
+    同一套頻率優先規則（`entity_registry_service.should_promote`），差別只在
+    資料來源改為跨文件累積統計，兩者衡量範圍不同，權威層級也不同（§a 僅供
+    文件內部處理參考，這裡才是寫入圖譜的權威判斷）。
 
-    ⚠️ **效能待決策**：`_fetch_entity_candidates` 對每次呼叫都掃描同類型全部
-    既有實體，Hub 型 KG 規模變大後可能有效能疑慮，留待第四章實作與第五章
-    消融實驗評估，非本設計階段的阻斷性問題（比照 3.1.1 §a 未分配池 O(n²) 的
-    既有處理方式）。
+    `source_doc_id`／`source_svo_chunk_index` 缺席時（例如呼叫端尚未提供
+    chunk 追溯資訊），跳過 `HAS_ENTITY` 邊建立與頻率提升判斷，只單純
+    MERGE 實體節點——此時無法判斷是否要提升標準名，保留現狀最保守。
+
+    ⚠️ **效能待決策**：`_fetch_entity_candidates`／`_aggregate_alias_counts`
+    對每次呼叫都重新查詢，Hub 型 KG 規模變大後可能有效能疑慮，留待第四章
+    實作與第五章消融實驗評估，非本設計階段的阻斷性問題（比照 3.1.1 §a
+    未分配池 O(n²) 的既有處理方式）。
     """
     candidates = await _fetch_entity_candidates(driver, kg_id, entity_type)
     resolved_name = await resolve_entity_name(
         name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider
     )
 
-    existing = next((c for c in candidates if c["name"] == resolved_name), None)
-    alias_counts = _updated_alias_counts(
-        existing["alias_counts_json"] if existing else None, surface_form
+    if source_doc_id is None or source_svo_chunk_index is None:
+        await driver.execute_query(
+            "MERGE (e:Entity {kg_id: $kg_id, name: $name}) ON CREATE SET e.type = $entity_type",
+            kg_id=str(kg_id), name=resolved_name, entity_type=entity_type,
+        )
+        return resolved_name
+
+    await _merge_chunk_mention(
+        driver, kg_id, resolved_name, entity_type, surface_form,
+        source_doc_id, source_svo_chunk_index, source_svo_chunk_file,
     )
+    alias_counts = await _aggregate_alias_counts(driver, kg_id, resolved_name)
 
     final_name = resolved_name
     current_count = alias_counts.get(resolved_name, 0)
@@ -213,18 +275,10 @@ async def merge_entity(
         final_name = surface_form  # RECHECK/UPDATENAME：標準名隨語料持續擴增而更新
 
     await driver.execute_query(
-        """
-        MERGE (e:Entity {kg_id: $kg_id, name: $resolved_name})
-        ON CREATE SET e.type = $entity_type
-        SET e.name = $final_name,
-            e.alias_counts_json = $alias_counts_json,
-            e.aliases = $aliases
-        """,
+        "MATCH (e:Entity {kg_id: $kg_id, name: $resolved_name}) SET e.name = $final_name, e.aliases = $aliases",
         kg_id=str(kg_id),
         resolved_name=resolved_name,
-        entity_type=entity_type,
         final_name=final_name,
-        alias_counts_json=json.dumps(alias_counts, ensure_ascii=False),
         aliases=list(alias_counts.keys()),
     )
     return final_name
@@ -249,10 +303,16 @@ async def merge_triples_to_graph(
         rel_type = _relationship_type(triple.rel_type)
         subject_name = await merge_entity(
             driver, kg_id, triple.subject, triple.subject_type, triple.subject,
+            source_doc_id=triple.source_doc_id,
+            source_svo_chunk_index=triple.source_svo_chunk_index,
+            source_svo_chunk_file=triple.source_svo_chunk_file,
             embedding_provider=embedding_provider, llm_provider=llm_provider,
         )
         object_name = await merge_entity(
             driver, kg_id, triple.object, triple.object_type, triple.object,
+            source_doc_id=triple.source_doc_id,
+            source_svo_chunk_index=triple.source_svo_chunk_index,
+            source_svo_chunk_file=triple.source_svo_chunk_file,
             embedding_provider=embedding_provider, llm_provider=llm_provider,
         )
         query = f"""
