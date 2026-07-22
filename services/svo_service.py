@@ -16,7 +16,7 @@ from core.constants import (
 from core.providers.base import EmbeddingProvider, LLMProvider
 from models.knowledge_graph import SVOTriple
 from services.classify_service import cosine_similarity
-from services.entity_registry_service import should_promote
+from services.entity_registry_service import should_promote_by_frequency
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
@@ -203,12 +203,20 @@ async def _merge_chunk_mention(
 
 async def _aggregate_alias_counts(driver: AsyncDriver, kg_id: UUID, entity_name: str) -> dict[str, int]:
     """依 3.4 §b 文字描述的 Cypher 範例，聚合該實體所有 `HAS_ENTITY` 邊的
-    `surface_form` 出現次數（`MATCH (c)-[r:HAS_ENTITY]->(e) RETURN
-    DISTINCT r.surface_form, count(*)` 的實作版本）。"""
+    `surface_form` 出現次數。
+
+    **2026-07-21 修訂（使用者提出）**：計數單位是**獨立文件數**
+    （`count(DISTINCT c.source_doc_id)`），不是邊的總數（`count(*)`）——
+    §a 已把單一文件內的所有變體收斂成一個「文件內暫定標準名」，若按邊數
+    計（每個 chunk 各算一次），單一文件只要 chunk 數量多，就會讓它選中的
+    別名在跨文件頻率上被灌票，不代表真正有更多文件認同這個稱呼。改成數
+    獨立文件數，才是「一份文件一票」的跨文件共識，對應 Wikidata／CESI
+    文獻描述的頻率概念（見模組層級 docstring）。
+    """
     result = await driver.execute_query(
         """
         MATCH (c:Chunk {kg_id: $kg_id})-[r:HAS_ENTITY]->(e:Entity {kg_id: $kg_id, name: $entity_name})
-        RETURN r.surface_form AS alias, count(*) AS freq
+        RETURN r.surface_form AS alias, count(DISTINCT c.source_doc_id) AS freq
         """,
         kg_id=str(kg_id), entity_name=entity_name,
     )
@@ -233,11 +241,14 @@ async def merge_entity(
     對應 3.1.4 DEDUP4／3.4 §b ESCALATE＋RECORD3B＋RECHECK：先決定這次提及該
     歸屬到哪個既有實體（`resolve_entity_name`，或視為新實體），記錄
     `(Chunk)-[:HAS_ENTITY {surface_form}]->(Entity)` 邊，再依跨文件累積的
-    `surface_form` 頻率（`_aggregate_alias_counts`）決定是否需要把
-    `Entity.name` 更新為更常見的別名——與 3.4 §a 文件內『暫定標準名』使用
-    同一套頻率優先規則（`entity_registry_service.should_promote`），差別只在
-    資料來源改為跨文件累積統計，兩者衡量範圍不同，權威層級也不同（§a 僅供
-    文件內部處理參考，這裡才是寫入圖譜的權威判斷）。
+    `surface_form` 頻率（`_aggregate_alias_counts`，以獨立文件數計，見該函式
+    docstring）決定是否需要把 `Entity.name` 更新為更常見的別名——**主規則與
+    3.4 §a 文件內『暫定標準名』不同**（2026-07-21 使用者提出修訂）：§a
+    （`entity_registry_service.should_promote_by_length`）以長度優先為主規則，
+    這裡（`should_promote_by_frequency`）以跨文件頻率優先為主規則，兩者衡量
+    範圍不同、權威層級也不同（§a 僅供文件內部處理參考，這裡才是寫入圖譜的
+    權威判斷）；頻率優先規則的文獻依據（Wikidata／CESI）本來就是跨文件/跨
+    編者尺度的概念，套用在這一層（§b）比先前套用在單一文件內（§a）更貼切。
 
     `source_doc_id`／`source_svo_chunk_index` 缺席時（例如呼叫端尚未提供
     chunk 追溯資訊），跳過 `HAS_ENTITY` 邊建立與頻率提升判斷，只單純
@@ -269,7 +280,7 @@ async def merge_entity(
     final_name = resolved_name
     current_count = alias_counts.get(resolved_name, 0)
     candidate_count = alias_counts.get(surface_form, 0)
-    if surface_form != resolved_name and should_promote(
+    if surface_form != resolved_name and should_promote_by_frequency(
         candidate_count, current_count, surface_form, resolved_name
     ):
         final_name = surface_form  # RECHECK/UPDATENAME：標準名隨語料持續擴增而更新

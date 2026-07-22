@@ -112,12 +112,16 @@ class InMemoryEntityDriver:
             return FakeResult([])
 
         if stripped.startswith("MATCH (c:Chunk {kg_id: $kg_id})-[r:HAS_ENTITY]->"):
+            # 對應真實 Cypher 的 count(DISTINCT c.source_doc_id)：同一份文件
+            # 內多個 chunk 各自建立的邊，只算一票，避免單一文件因 chunk 數量
+            # 多而在跨文件頻率上灌票（2026-07-21 修訂）。
             kg_id, entity_name = params["kg_id"], params["entity_name"]
-            counts: dict[str, int] = {}
-            for (kid, _chunk_key, ename, surface_form) in self.has_entity_edges:
+            doc_ids_by_alias: dict[str, set] = {}
+            for (kid, chunk_key, ename, surface_form) in self.has_entity_edges:
                 if kid == kg_id and ename == entity_name:
-                    counts[surface_form] = counts.get(surface_form, 0) + 1
-            records = [{"alias": alias, "freq": freq} for alias, freq in counts.items()]
+                    source_doc_id = chunk_key[1]
+                    doc_ids_by_alias.setdefault(surface_form, set()).add(source_doc_id)
+            records = [{"alias": alias, "freq": len(doc_ids)} for alias, doc_ids in doc_ids_by_alias.items()]
             return FakeResult(records)
 
         if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id, name: $resolved_name}) SET"):
@@ -332,6 +336,36 @@ async def test_merge_entity_recheck_promotes_more_frequent_surface_form():
     assert sorted(driver.entities[(str(kg_id), "I-35")]["aliases"]) == sorted(
         ["I-35", "Interstate Highway 35"]
     )
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_frequency_counts_distinct_documents_not_chunks():
+    """對應 2026-07-21 修訂：一份文件切成再多 chunk，都只算一票——不應因為
+    單一文件的 chunk 數量多，就讓它選中的別名在跨文件頻率上灌票。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding(similar_to={"I-35": "Interstate Highway 35"})
+
+    # 文件 A：10 個 chunk 都用「I-35」（模擬 §a 已把該文件內的別名收斂成
+    # 「I-35」——例如該文件內「I-35」本身就是最長的形式）
+    doc_a = uuid4()
+    for i in range(10):
+        await svc.merge_entity(
+            driver, kg_id, "I-35", "LOCATION", "I-35",
+            source_doc_id=doc_a, source_svo_chunk_index=i + 1,
+            embedding_provider=embedding,
+        )
+
+    # 文件 B：只有 1 個 chunk，用「Interstate Highway 35」
+    final_name = await svc.merge_entity(
+        driver, kg_id, "Interstate Highway 35", "LOCATION", "Interstate Highway 35",
+        source_doc_id=uuid4(), source_svo_chunk_index=1,
+        embedding_provider=embedding,
+    )
+
+    # 若按邊數（chunk 數）計，「I-35」會以 10:1 遙遙領先；但按獨立文件數計，
+    # 兩者應打平（各 1 份文件），此時比長度，「Interstate Highway 35」較長勝出。
+    assert final_name == "Interstate Highway 35"
 
 
 @pytest.mark.asyncio

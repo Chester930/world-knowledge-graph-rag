@@ -5,7 +5,8 @@ from services.entity_registry_service import (
     Mention,
     apply_registry,
     read_registry_snapshot,
-    should_promote,
+    should_promote_by_frequency,
+    should_promote_by_length,
     write_registry_snapshot,
 )
 
@@ -26,26 +27,66 @@ class FakeLLM:
         return self.response
 
 
-# ── should_promote（PK 規則）───────────────────────────────────────────────
+# ── should_promote_by_length（§a 文件內範圍 PK 規則，2026-07-21 新增）──────
 
-def test_should_promote_prefers_higher_frequency():
-    assert should_promote(candidate_count=5, current_count=1, candidate="I-35", current="Interstate Highway 35") is True
-
-
-def test_should_promote_rejects_lower_frequency_even_if_longer():
-    assert should_promote(candidate_count=2, current_count=50, candidate="泰國全名", current="泰國") is False
-
-
-def test_should_promote_uses_length_as_tiebreak_when_frequency_equal():
-    assert should_promote(candidate_count=3, current_count=3, candidate="Richard Stone", current="Stone") is True
-    assert should_promote(candidate_count=3, current_count=3, candidate="Stone", current="Richard Stone") is False
+def test_should_promote_by_length_prefers_longer_regardless_of_frequency():
+    """長度優先是主規則——即使候選出現次數遠低於現有 Key，較長者仍勝出。"""
+    assert should_promote_by_length(
+        candidate_count=1, current_count=1000, candidate="Interstate Highway 35", current="I-35"
+    ) is True
 
 
-def test_should_promote_keeps_current_on_full_tie():
-    assert should_promote(candidate_count=1, current_count=1, candidate="Apple LLC.", current="Apple Inc.") is False
+def test_should_promote_by_length_rejects_shorter_even_if_more_frequent():
+    assert should_promote_by_length(
+        candidate_count=1000, current_count=1, candidate="I-35", current="Interstate Highway 35"
+    ) is False
 
 
-# ── EntityRegistry.resolve_mention（規則式比對＋動態提升）──────────────────
+def test_should_promote_by_length_uses_frequency_as_tiebreak_when_length_equal():
+    assert should_promote_by_length(
+        candidate_count=3, current_count=1, candidate="Apple LLC.", current="Apple Inc."
+    ) is True
+    assert should_promote_by_length(
+        candidate_count=1, current_count=3, candidate="Apple LLC.", current="Apple Inc."
+    ) is False
+
+
+def test_should_promote_by_length_keeps_current_on_full_tie():
+    assert should_promote_by_length(
+        candidate_count=1, current_count=1, candidate="Apple LLC.", current="Apple Inc."
+    ) is False
+
+
+# ── should_promote_by_frequency（§b 跨文件範圍 PK 規則，原 should_promote）──
+
+def test_should_promote_by_frequency_prefers_higher_frequency():
+    assert should_promote_by_frequency(
+        candidate_count=5, current_count=1, candidate="I-35", current="Interstate Highway 35"
+    ) is True
+
+
+def test_should_promote_by_frequency_rejects_lower_frequency_even_if_longer():
+    assert should_promote_by_frequency(
+        candidate_count=2, current_count=50, candidate="泰國全名", current="泰國"
+    ) is False
+
+
+def test_should_promote_by_frequency_uses_length_as_tiebreak_when_frequency_equal():
+    assert should_promote_by_frequency(
+        candidate_count=3, current_count=3, candidate="Richard Stone", current="Stone"
+    ) is True
+    assert should_promote_by_frequency(
+        candidate_count=3, current_count=3, candidate="Stone", current="Richard Stone"
+    ) is False
+
+
+def test_should_promote_by_frequency_keeps_current_on_full_tie():
+    assert should_promote_by_frequency(
+        candidate_count=1, current_count=1, candidate="Apple LLC.", current="Apple Inc."
+    ) is False
+
+
+# ── EntityRegistry.resolve_mention（規則式比對＋長度優先動態提升）──────────
 
 @pytest.mark.asyncio
 async def test_new_entity_becomes_initial_canonical_name():
@@ -65,34 +106,38 @@ async def test_substring_alias_matches_without_llm():
 
 
 @pytest.mark.asyncio
-async def test_frequent_abbreviation_gets_promoted_to_canonical():
-    """「Stone」與「Richard Stone」字面有子字串重疊，免 LLM 即可規則命中；
-    當「Stone」累計出現次數超過「Richard Stone」時應觸發提升。"""
+async def test_shorter_alias_never_promoted_regardless_of_frequency():
+    """長度優先為主規則（2026-07-21 修訂）：即使「Stone」累計出現次數遠超過
+    「Richard Stone」，仍不會被提升為標準名，因為它比較短。"""
     registry = EntityRegistry()
     await registry.resolve_mention(0, "Richard Stone", "PERSON")
     canonical = ""
-    for idx in range(1, 3):
+    for idx in range(1, 20):
         canonical = await registry.resolve_mention(idx, "Stone", "PERSON")
-    # 第 2 次「Stone」出現後（累計 2 次）已超過「Richard Stone」的 1 次，觸發提升
-    assert canonical == "Stone"
-    entry = registry.entry("Stone")
-    assert entry is not None
-    assert entry.alias_counts["Stone"] == 2
-    assert entry.alias_counts["Richard Stone"] == 1
-    assert registry.entry("Richard Stone") is None  # 舊 Key 已降級，不再是獨立條目
+
+    assert canonical == "Richard Stone"
+    entry = registry.entry("Richard Stone")
+    assert entry.alias_counts["Stone"] == 19
+    assert registry.entry("Stone") is None
 
 
 @pytest.mark.asyncio
-async def test_rare_long_form_does_not_outrank_frequent_short_form():
-    """對應使用者提出的「泰國 vs. 罕用正式全名」情境。"""
+async def test_longer_alias_promoted_even_with_single_occurrence():
+    """長度優先為主規則：較長的別名只出現一次，也會立即取代出現多次的
+    現有標準名——這是刻意的行為，因為「哪個名稱在整個語料庫中較常見」這類
+    跨文件共識問題，改由 §b（跨文件範圍，見 services/svo_service.py）處理，
+    不是本模組（§a，單一文件範圍）的責任；單一文件內偏好取用最完整的稱呼，
+    避免下游代名詞消解的實體接力上下文變得不夠清楚。"""
     registry = EntityRegistry()
-    await registry.resolve_mention(0, "泰國", "LOCATION")
-    for idx in range(1, 50):
-        await registry.resolve_mention(idx, "泰國", "LOCATION")
-    canonical = await registry.resolve_mention(50, "泰國全名", "LOCATION")
-    # 「泰國全名」與「泰國」需先被判定為別名（此處靠子字串規則：「泰國」⊂「泰國全名」）
-    assert canonical == "泰國"
-    assert registry.entry("泰國").alias_counts["泰國全名"] == 1
+    await registry.resolve_mention(0, "Stone", "PERSON")
+    for idx in range(1, 20):
+        await registry.resolve_mention(idx, "Stone", "PERSON")
+
+    canonical = await registry.resolve_mention(20, "Richard Stone", "PERSON")
+
+    assert canonical == "Richard Stone"
+    assert registry.entry("Stone") is None
+    assert registry.entry("Richard Stone").alias_counts["Stone"] == 20
 
 
 @pytest.mark.asyncio
@@ -114,7 +159,7 @@ async def test_llm_arbitration_merges_non_overlapping_alias():
 
     canonical = await registry.resolve_mention(1, "I-35", "LOCATION", llm_provider=llm)
 
-    assert canonical == "Interstate Highway 35"  # 併入後次數 1 vs 1 平手，比長度，I-35 較短不會升級
+    assert canonical == "Interstate Highway 35"  # 長度優先：I-35 較短，不會升級
     assert "以下是目前文件內已登記的實體標準名清單" in llm.prompts[0]
 
 
@@ -176,11 +221,12 @@ async def test_apply_registry_resumes_from_checkpoint():
 
     assert resumed_output[0] == sentences[0]  # 已完成的句子未被重新處理
     assert resumed_output[1] == sentences[1]
-    # 第三次出現「Stone」後，其累計次數（2）已超過「Richard Stone」（1），
-    # 依頻率優先規則觸發提升——這是設計本身的預期行為，不是巧合。
-    assert resumed_output[2] == "Stone 退休了。"
-    assert resumed_registry.entry("Stone").alias_counts["Stone"] == 2
-    assert resumed_registry.entry("Richard Stone") is None
+    # 長度優先為主規則：即使「Stone」第三次出現、累計次數已超過「Richard
+    # Stone」，仍不會被提升——與舊版頻率優先規則的行為不同，這是刻意修訂後
+    # 的預期結果。
+    assert resumed_output[2] == "Richard Stone 退休了。"
+    assert resumed_registry.entry("Richard Stone").alias_counts["Stone"] == 2
+    assert resumed_registry.entry("Stone") is None
 
 
 @pytest.mark.asyncio
