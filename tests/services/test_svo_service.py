@@ -1,3 +1,5 @@
+import json
+import re
 from uuid import uuid4
 
 import pytest
@@ -82,7 +84,9 @@ class InMemoryEntityDriver:
     def __init__(self):
         self.entities: dict[tuple[str, str], dict] = {}  # (kg_id, name) -> {type}
         self.has_entity_edges: dict[tuple, int] = {}  # (kg_id, chunk_key, entity_name, surface_form) -> count（供除錯用，非邏輯必需）
-        self.relationships: list[dict] = []
+        # (kg_id, rel_type, subject, object) -> {citations_json, confidence}：事實層級去重後，
+        # 同一組 (subject, rel_type, object) 只有一筆，不再依 chunk/句子區分。
+        self.relationships: dict[tuple, dict] = {}
         self.queries: list[str] = []
 
     async def execute_query(self, query: str, **params):
@@ -139,11 +143,26 @@ class InMemoryEntityDriver:
                     self.has_entity_edges[(kid, chunk_key, params["final_name"], surface_form)] = count
             return FakeResult([])
 
-        if "MERGE (s)-[r:" in stripped:
-            self.relationships.append(dict(params))
+        if "MERGE (s)-[r:" in stripped and "RETURN r.citations_json" in stripped:
+            key = self._rel_key(stripped, params)
+            existing = self.relationships.setdefault(key, {"citations_json": "[]", "confidence": 1})
+            return FakeResult([{"citations_json": existing["citations_json"]}])
+
+        if "SET r.citations_json" in stripped:
+            key = self._rel_key(stripped, params)
+            self.relationships[key] = {
+                "citations_json": params["citations_json"],
+                "confidence": params["confidence"],
+            }
             return FakeResult([])
 
         return FakeResult([])
+
+    @staticmethod
+    def _rel_key(query: str, params: dict) -> tuple:
+        rel_type_match = re.search(r"\[r:`([A-Z_]+)`", query)
+        rel_type = rel_type_match.group(1) if rel_type_match else None
+        return (params["kg_id"], rel_type, params["subject"], params["object"])
 
 
 @pytest.mark.asyncio
@@ -169,7 +188,9 @@ async def test_extract_svo_triples_without_provider_returns_empty_list():
 
 
 @pytest.mark.asyncio
-async def test_merge_triples_to_graph_passes_sentence_trace_fields():
+async def test_merge_triples_to_graph_accumulates_citation_on_edge():
+    """對應 2026-07-22 使用者確認：事實層級去重——關係邊的 MERGE 鍵不再含
+    chunk/句子欄位，來源改記錄在邊上累積的 `citations_json`。"""
     driver = FakeDriver()
     kg_id = uuid4()
     doc_id = uuid4()
@@ -187,16 +208,20 @@ async def test_merge_triples_to_graph_passes_sentence_trace_fields():
 
     await svc.merge_triples_to_graph(driver, kg_id, [triple])
 
-    rel_calls = [(q, p) for q, p in driver.calls if "`CAUSES`" in q]
-    assert len(rel_calls) == 1
-    query, params = rel_calls[0]
+    set_calls = [(q, p) for q, p in driver.calls if "SET r.citations_json = $citations_json" in q]
+    assert len(set_calls) == 1
+    _, params = set_calls[0]
     assert params["kg_id"] == str(kg_id)
     assert params["subject"] == "A"
     assert params["object"] == "B"
-    assert params["source_doc_id"] == str(doc_id)
-    assert params["source_svo_chunk_index"] == 2
-    assert params["source_sentence_start"] == 5
-    assert params["source_sentence_end"] == 7
+
+    citations = json.loads(params["citations_json"])
+    assert len(citations) == 1
+    assert citations[0]["source_doc_id"] == str(doc_id)
+    assert citations[0]["source_svo_chunk_index"] == 2
+    assert citations[0]["source_sentence_start"] == 5
+    assert citations[0]["source_sentence_end"] == 7
+    assert citations[0]["verb"] == "導致"
 
 
 # ── resolve_entity_name（DEDUP4＋ESCALATE 純邏輯）──────────────────────────
@@ -416,7 +441,36 @@ async def test_merge_triples_to_graph_merges_alias_into_existing_entity():
     assert "台積電" not in entity_names
     assert "台積電公司" in entity_names
     assert len(driver.relationships) == 2
-    assert {rel["subject"] for rel in driver.relationships} <= {"台積電", "台積電公司"}
+    assert {key[2] for key in driver.relationships if key[0] == str(kg_id)} <= {"台積電", "台積電公司"}
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_collapses_identical_fact_into_one_edge_with_citations():
+    """對應 2026-07-22 使用者確認：即使兩次抽取來自完全不重疊的 chunk
+    （這裡刻意用第 3 塊與第 50 塊模擬），只要 (subject, rel_type, object)
+    相同，就該收斂成同一條邊，來源清單累積兩筆引用，而不是產生兩條邊。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+
+    first = SVOTriple(
+        subject="馬斯克", rel_type="CREATED_BY", verb="創立", object="SpaceX",
+        source_doc_id=uuid4(), source_svo_chunk_index=3,
+        source_sentence_start=10, source_sentence_end=10,
+    )
+    second = SVOTriple(
+        subject="馬斯克", rel_type="CREATED_BY", verb="創辦", object="SpaceX",
+        source_doc_id=uuid4(), source_svo_chunk_index=50,
+        source_sentence_start=210, source_sentence_end=210,
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [first, second])
+
+    keys = [k for k in driver.relationships if k[0] == str(kg_id)]
+    assert len(keys) == 1
+    citations = json.loads(driver.relationships[keys[0]]["citations_json"])
+    assert len(citations) == 2
+    assert {c["source_svo_chunk_index"] for c in citations} == {3, 50}
+    assert {c["verb"] for c in citations} == {"創立", "創辦"}
 
 
 @pytest.mark.asyncio
@@ -446,23 +500,72 @@ async def test_merge_entity_records_has_entity_edge_with_surface_form():
     assert surface_form == "Richard Stone"
 
 
+# ── Chunk 向量化（切塊當下順便計算，2026-07-22 使用者提出）────────────────
+
 @pytest.mark.asyncio
-async def test_bfs_query_maps_records_to_triples():
+async def test_embed_svo_chunks_without_provider_is_noop():
+    driver = FakeDriver()
+    from services.svo_chunking import build_svo_chunks
+
+    chunks = build_svo_chunks(["一。", "二。"], ["一。", "二。"])
+    await svc.embed_svo_chunks(driver, uuid4(), "note.md", chunks, None)
+
+    assert driver.calls == []
+
+
+@pytest.mark.asyncio
+async def test_embed_svo_chunks_writes_one_vector_per_chunk():
+    driver = FakeDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+    from services.svo_chunking import build_svo_chunks
+
+    sentences = [f"第{i}句。" for i in range(1, 12)]
+    chunks = build_svo_chunks(sentences, sentences)  # 產生 3 個重疊 chunk
+
+    await svc.embed_svo_chunks(driver, kg_id, "note.md", chunks, embedding)
+
+    assert len(driver.calls) == len(chunks)
+    for (query, params), chunk in zip(driver.calls, chunks):
+        assert "c.embedding" in query
+        assert params["kg_id"] == str(kg_id)
+        assert params["source"] == "note.md"
+        assert params["chunk_index"] == chunk.index
+        assert params["chunk_file"] == chunk.filename
+        assert len(params["embedding"]) == embedding.dim
+
+
+@pytest.mark.asyncio
+async def test_create_chunk_vector_index_without_driver_is_noop():
+    await svc.create_chunk_vector_index(None)  # 不應拋出例外
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_maps_records_using_latest_citation():
+    """事實層級去重後，`bfs_query` 改讀 `citations_json`，取最後一筆引用
+    當作這條邊的代表來源——挑選哪幾筆最相關留給回答階段的向量篩選（不在
+    本次範圍），這裡只驗證欄位不會靜默變成 null。"""
     doc_id = uuid4()
+    citations_json = json.dumps([
+        {
+            "source_doc_id": str(doc_id),
+            "source_svo_chunk_index": 1,
+            "source_svo_chunk_file": "svo-chunk-001-of-001.md",
+            "source_sentence_start": 1,
+            "source_sentence_end": 2,
+            "verb": "導致",
+            "confidence": 3,
+        }
+    ])
     driver = FakeDriver(records=[
         FakeRecord(
             subject="A",
             subject_type="概念",
             rel_type="CAUSES",
-            verb="導致",
+            confidence=3,
+            citations_json=citations_json,
             object="B",
             object_type="概念",
-            confidence=3,
-            source_doc_id=str(doc_id),
-            source_svo_chunk_index=1,
-            source_svo_chunk_file="svo-chunk-001-of-001.md",
-            source_sentence_start=1,
-            source_sentence_end=2,
         )
     ])
 
@@ -471,3 +574,4 @@ async def test_bfs_query_maps_records_to_triples():
     assert len(triples) == 1
     assert triples[0].source_doc_id == doc_id
     assert triples[0].source_sentence_start == 1
+    assert triples[0].verb == "導致"

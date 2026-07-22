@@ -16,13 +16,18 @@ from parser.core import split_into_sentences
 
 SVO_INDEX_FILENAME = "svo_index.json"
 SVO_CHUNK_PREFIX = "svo-chunk"
-# 🟡 工程預設，非最終定案（見 docs/論文/03_系統設計與方法論.md § 3.4 §a
-# `SVOGROUP` 節點）：依序聚合句子，最多 5 句或最多 300 字元，先到者為準。
-# 300 字元沒有直接文獻依據，僅呼應 GraphRAG（Edge et al., 2024）附錄查證到的
-# 方向性發現「切塊越小、抽取密度越高」；最終數值留給第五章消融實驗校準。
-DEFAULT_SVO_CHUNK_SIZE = 300
+# 只用句數控制切塊大小（2026-07-22 使用者決策：拿掉原本的 300 字元上限，
+# 因為字元上限沒有直接文獻依據，只呼應 GraphRAG 附錄的方向性發現，改用
+# 純句數＋重疊句數這組有明確幾何論證的參數）。
 DEFAULT_SVO_CHUNK_MAX_SENTENCES = 5
-DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES = 0
+# 起始點公差 3、每塊最多 5 句（重疊 2 句）：對任一句子，其所屬的（最多兩個）
+# chunk 聯集必為包含前 2 句與後 2 句——句子在塊內偏移量 0/1/3/4（邊界位置）
+# 時，靠相鄰塊補齊；偏移量 2（塊正中央）時單一塊本身就已滿足，不需要第二個
+# 框（見 docs/論文/03_變更紀錄.md 2026-07-22 條目的逐位置驗算）。此重疊只解決
+# 「事實跨塊邊界被切斷」的問題；重疊造成的重複抽取由 svo_service.py 的
+# 事實層級去重（相同 subject/rel_type/object 收斂成一條邊、來源改用累積式
+# 引用清單）吸收，不會再產生重複邊。
+DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES = 2
 
 
 @dataclass(frozen=True)
@@ -46,54 +51,38 @@ def build_svo_chunks(
     original_sentences: Sequence[str],
     normalized_sentences: Sequence[str],
     *,
-    max_chars: int = DEFAULT_SVO_CHUNK_SIZE,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
 ) -> list[SVOChunk]:
     """依標準化句子聚合 SVO chunk，並保存對應原句範圍。
 
-    依序聚合句子，`max_sentences` 句或 `max_chars` 字元（以標準化後文字計算），
-    先到者為準。單句超過 `max_chars` 上限時仍獨立成一個 chunk，不硬切句子。
-    預設不做重疊，避免同一事實被重複抽取；若研究實驗需要，可明確傳入
-    `overlap_sentences`。
+    每塊固定最多 `max_sentences` 句；相鄰塊重疊 `overlap_sentences` 句
+    （起始點以 `max_sentences - overlap_sentences` 為公差遞增，預設值對應
+    1-5、4-8、7-11 這組序列）。最後一塊觸底（涵蓋到最後一句）後即停止，
+    不會再產生更短的尾端重複塊。
     """
     originals = [s.strip() for s in original_sentences if s.strip()]
     normalized = [s.strip() for s in normalized_sentences if s.strip()]
 
     if len(originals) != len(normalized):
         raise ValueError("原句與標準化句數量必須一致，才能建立句子層追溯索引")
-    if max_chars <= 0:
-        raise ValueError("max_chars 必須大於 0")
     if max_sentences <= 0:
         raise ValueError("max_sentences 必須大於 0")
     if overlap_sentences < 0:
         raise ValueError("overlap_sentences 不可為負數")
+    if overlap_sentences >= max_sentences:
+        raise ValueError("overlap_sentences 必須小於 max_sentences")
     if not normalized:
         return []
 
+    total_sentences = len(normalized)
     ranges: list[tuple[int, int]] = []
     start = 0
-    while start < len(normalized):
-        end = start
-        current_len = 0
-
-        while end < len(normalized):
-            sentence_len = len(normalized[end])
-            separator_len = 1 if end > start else 0
-            would_exceed_chars = current_len + separator_len + sentence_len > max_chars
-            would_exceed_sentences = (end - start) >= max_sentences
-            if (would_exceed_chars or would_exceed_sentences) and end > start:
-                break
-
-            current_len += separator_len + sentence_len
-            end += 1
-
-            if sentence_len >= max_chars:
-                break
-            if (end - start) >= max_sentences:
-                break
-
+    while start < total_sentences:
+        end = min(start + max_sentences, total_sentences)
         ranges.append((start, end))
+        if end >= total_sentences:
+            break
         next_start = end - overlap_sentences
         start = max(next_start, start + 1)
 
@@ -121,14 +110,12 @@ def build_svo_chunks_from_text(
     original_text: str,
     normalized_text: str,
     *,
-    max_chars: int = DEFAULT_SVO_CHUNK_SIZE,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
 ) -> list[SVOChunk]:
     return build_svo_chunks(
         split_and_clean_sentences(original_text),
         split_and_clean_sentences(normalized_text),
-        max_chars=max_chars,
         max_sentences=max_sentences,
         overlap_sentences=overlap_sentences,
     )
@@ -202,7 +189,6 @@ def prepare_svo_chunks(
     source: str,
     output_dir: str | Path,
     *,
-    max_chars: int = DEFAULT_SVO_CHUNK_SIZE,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
 ) -> tuple[list[Path], list[SVOChunk]]:
@@ -210,7 +196,6 @@ def prepare_svo_chunks(
     chunks = build_svo_chunks_from_text(
         original_text,
         normalized_text,
-        max_chars=max_chars,
         max_sentences=max_sentences,
         overlap_sentences=overlap_sentences,
     )

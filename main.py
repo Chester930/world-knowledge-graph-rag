@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
     )
     await ConceptRepository(get_driver()).create_vector_index(embedding.dim)
     await svo_service.create_entity_index(get_driver())
+    await svo_service.create_chunk_vector_index(get_driver(), embedding.dim)
     await _restart_task_queue()
     logger.info(
         f"World Knowledge Graph RAG API 啟動完成 "

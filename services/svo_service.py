@@ -12,11 +12,13 @@ from core.constants import (
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
     SVO_REL_TYPES,
+    VECTOR_DIM,
 )
 from core.providers.base import EmbeddingProvider, LLMProvider
 from models.knowledge_graph import SVOTriple
 from services.classify_service import cosine_similarity
 from services.entity_registry_service import should_promote_by_frequency
+from services.svo_chunking import SVOChunk
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
@@ -25,6 +27,21 @@ async def create_entity_index(driver: AsyncDriver | None = None) -> None:
         return
     await driver.execute_query(
         "CREATE INDEX entity_kg_name IF NOT EXISTS FOR (e:Entity) ON (e.kg_id, e.name)"
+    )
+
+
+async def create_chunk_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
+    """建立 Chunk 節點向量索引（app 啟動時呼叫一次），供未來回答階段的來源
+    篩選使用（見 `embed_svo_chunks` docstring）。"""
+    if driver is None:
+        return
+    await driver.execute_query(
+        """
+        CREATE VECTOR INDEX chunk_embedding_vector IF NOT EXISTS
+        FOR (c:Chunk) ON c.embedding
+        OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
+        """,
+        dim=dim,
     )
 
 
@@ -295,6 +312,19 @@ async def merge_entity(
     return final_name
 
 
+def _new_citation(triple: SVOTriple) -> dict:
+    """把一次抽取的來源追溯資訊，包成一筆可累積在邊上的引用紀錄。"""
+    return {
+        "source_doc_id": str(triple.source_doc_id) if triple.source_doc_id else None,
+        "source_svo_chunk_index": triple.source_svo_chunk_index,
+        "source_svo_chunk_file": triple.source_svo_chunk_file,
+        "source_sentence_start": triple.source_sentence_start,
+        "source_sentence_end": triple.source_sentence_end,
+        "verb": triple.verb,
+        "confidence": triple.confidence,
+    }
+
+
 async def merge_triples_to_graph(
     driver: AsyncDriver,
     kg_id: UUID,
@@ -308,6 +338,17 @@ async def merge_triples_to_graph(
     `embedding_provider`／`llm_provider` 皆為可選——未提供時，實體解析僅做
     編輯距離比對（跳過 cosine 與 LLM 仲裁兩層），行為退化為較保守的去重，
     讓離線管線與單元測試可以安全呼叫，不強制要求外部服務。
+
+    **事實層級去重（2026-07-22 使用者確認）**：關係邊的 MERGE 鍵只有
+    `(kg_id, subject, rel_type, object)`，不再含來源 chunk／句子欄位——相同
+    的 (subject, rel_type, object) 一律收斂成同一條邊，不會因為來自不同
+    chunk（例如重疊切塊、或同一事實在文件中不同段落各自被抽到一次）就產生
+    第二條邊。每次抽取的來源改記錄在邊上累積的 `citations_json`（JSON 字串
+    陣列）：先 MERGE 並讀回既有清單，在應用層附加這次的來源後整份寫回。
+    未走圖節點反正化（每個事實仍是一條直接邊，不像 HAS_ENTITY 是
+    `Chunk`→`Entity`的獨立邊），是為了不動到 `bfs_query` 既有的單層關係
+    走訪語意；把事實也節點化雖然模型上更一致，但牽動的是 BFS 走訪深度定義
+    這種更大範圍的變更，留待有實際需求時再評估。
     """
     kg_id_str = str(kg_id)
     for triple in triples:
@@ -326,37 +367,95 @@ async def merge_triples_to_graph(
             source_svo_chunk_file=triple.source_svo_chunk_file,
             embedding_provider=embedding_provider, llm_provider=llm_provider,
         )
-        query = f"""
-        MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})
-        MATCH (o:Entity {{kg_id: $kg_id, name: $object}})
-        MERGE (s)-[r:{rel_type} {{
-            kg_id: $kg_id,
-            verb: $verb,
-            source_doc_id: $source_doc_id,
-            source_svo_chunk_index: $source_svo_chunk_index,
-            source_sentence_start: $source_sentence_start,
-            source_sentence_end: $source_sentence_end
-        }}]->(o)
-        SET r.confidence = $confidence,
-            r.source_svo_chunk_file = $source_svo_chunk_file
-        """
-        await driver.execute_query(
-            query,
+
+        get_or_create = await driver.execute_query(
+            f"""
+            MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})
+            MATCH (o:Entity {{kg_id: $kg_id, name: $object}})
+            MERGE (s)-[r:{rel_type} {{kg_id: $kg_id}}]->(o)
+            ON CREATE SET r.citations_json = '[]'
+            RETURN r.citations_json AS citations_json
+            """,
             kg_id=kg_id_str,
             subject=subject_name,
             object=object_name,
-            verb=triple.verb,
-            confidence=triple.confidence,
-            source_doc_id=str(triple.source_doc_id) if triple.source_doc_id else None,
-            source_svo_chunk_index=triple.source_svo_chunk_index,
-            source_svo_chunk_file=triple.source_svo_chunk_file,
-            source_sentence_start=triple.source_sentence_start,
-            source_sentence_end=triple.source_sentence_end,
+        )
+        existing_json = get_or_create.records[0]["citations_json"] if get_or_create.records else "[]"
+        citations = json.loads(existing_json or "[]")
+        citations.append(_new_citation(triple))
+
+        await driver.execute_query(
+            f"""
+            MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})-[r:{rel_type} {{kg_id: $kg_id}}]->
+                  (o:Entity {{kg_id: $kg_id, name: $object}})
+            SET r.citations_json = $citations_json,
+                r.confidence = $confidence
+            """,
+            kg_id=kg_id_str,
+            subject=subject_name,
+            object=object_name,
+            citations_json=json.dumps(citations, ensure_ascii=False),
+            confidence=max(c["confidence"] for c in citations),
+        )
+
+
+async def embed_svo_chunks(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    source: str,
+    chunks: list[SVOChunk],
+    embedding_provider: EmbeddingProvider | None,
+) -> None:
+    """切塊當下把每個 SVO chunk 的向量算好存進 `Chunk` 節點的 `embedding`
+    屬性（2026-07-22 使用者提出）。
+
+    目的是供未來（不在本次範圍內）回答階段做來源篩選：把候選來源 chunk 的
+    向量與問題向量做相似度比對，只挑分數最高的幾筆作為實際引用內容，而非
+    直接吐出事實累積的全部來源原文。本函式只負責「切塊當下算好存起來」，
+    比對／排序邏輯留給後續設計（沿用現有 `EmbeddingProvider`／
+    `ConceptRepository.vector_search_concept_ids` 那套向量檢索模式，非學習式
+    attention）。
+
+    `embedding_provider` 未提供時安全跳過，比照 `merge_entity` 對可選
+    provider 的既有慣例。
+
+    ⚠️ **誠實侷限**：本函式以 `(kg_id, source, chunk_index)` 為 `Chunk` 節點
+    識別鍵（`source` 為檔案系統路徑字串），`_merge_chunk_mention()`
+    （`HAS_ENTITY` 邊）則以 `(kg_id, source_doc_id: UUID, chunk_index)` 為鍵。
+    兩者鍵值不同不是本次疏漏，而是既有缺口的延伸——`source_doc_id` 這個
+    UUID 目前沒有任何實際產生邏輯（尚無 Worker 把文件解析賦予真正的文件
+    UUID，只有測試程式碼會自行塞入 `uuid4()`），而向量化發生在 SVO 抽取
+    之前，此時唯一可靠的文件識別就是 `source` 字串。兩套鍵值如何收斂成
+    同一份 `Chunk` 節點，待文件 UUID 指派機制實際實作（第四章）時一併
+    處理，非本次範圍。
+    """
+    if embedding_provider is None or not chunks:
+        return
+
+    vectors = embedding_provider.encode_batch([chunk.text for chunk in chunks])
+    for chunk, vector in zip(chunks, vectors):
+        await driver.execute_query(
+            """
+            MERGE (c:Chunk {kg_id: $kg_id, source: $source, chunk_index: $chunk_index})
+            SET c.embedding = $embedding, c.chunk_file = $chunk_file
+            """,
+            kg_id=str(kg_id),
+            source=source,
+            chunk_index=chunk.index,
+            embedding=vector,
+            chunk_file=chunk.filename,
         )
 
 
 async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], hops: int = 2) -> list[SVOTriple]:
-    """從 seed entity 做 bounded BFS，回傳路徑上的去重 SVO triples。"""
+    """從 seed entity 做 bounded BFS，回傳路徑上的去重 SVO triples。
+
+    每條邊可能累積多筆來源引用（見 `merge_triples_to_graph` 的事實層級
+    去重說明）；`SVOTriple` 的 `source_*` 欄位是單筆值，這裡先取
+    `citations_json` 清單中「最後一筆」（最近一次抽取到這個事實）作為代表
+    值——挑選哪一筆／哪幾筆來源最適合呈現，是回答階段的向量篩選設計
+    （不在本次範圍），這裡只是先確保欄位不會靜默變成 null。
+    """
     seeds = [entity.strip() for entity in seed_entities if entity.strip()]
     if not seeds:
         return []
@@ -374,15 +473,10 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
             s.name AS subject,
             coalesce(s.type, "概念") AS subject_type,
             type(rel) AS rel_type,
-            coalesce(rel.verb, type(rel)) AS verb,
-            o.name AS object,
-            coalesce(o.type, "概念") AS object_type,
             coalesce(rel.confidence, 1) AS confidence,
-            rel.source_doc_id AS source_doc_id,
-            rel.source_svo_chunk_index AS source_svo_chunk_index,
-            rel.source_svo_chunk_file AS source_svo_chunk_file,
-            rel.source_sentence_start AS source_sentence_start,
-            rel.source_sentence_end AS source_sentence_end
+            rel.citations_json AS citations_json,
+            o.name AS object,
+            coalesce(o.type, "概念") AS object_type
         """,
         kg_id=str(kg_id),
         seed_entities=seeds,
@@ -391,7 +485,14 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
     triples: list[SVOTriple] = []
     for record in result.records:
         payload = dict(record)
-        if payload.get("source_doc_id"):
-            payload["source_doc_id"] = UUID(payload["source_doc_id"])
+        citations_json = payload.pop("citations_json", None)
+        citations = json.loads(citations_json) if citations_json else []
+        latest = citations[-1] if citations else {}
+        payload["verb"] = latest.get("verb", payload["rel_type"])
+        payload["source_doc_id"] = UUID(latest["source_doc_id"]) if latest.get("source_doc_id") else None
+        payload["source_svo_chunk_index"] = latest.get("source_svo_chunk_index")
+        payload["source_svo_chunk_file"] = latest.get("source_svo_chunk_file")
+        payload["source_sentence_start"] = latest.get("source_sentence_start")
+        payload["source_sentence_end"] = latest.get("source_sentence_end")
         triples.append(SVOTriple(**payload))
     return triples

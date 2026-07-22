@@ -61,7 +61,9 @@
 
 **目前定案方向**：句子已逐句算好 embedding（`SENTEMBED`，見下方 §3.2），但「怎麼組塊」本身傾向先採**簡單固定聚合**（依句數/字數上限分組，小 chunk 為主，呼應 GraphRAG 附錄的方向性發現），語意斷點式分組（07 報告的核心演算法）因文獻支撐不足暫緩，是否採用留給第五章消融實驗實測比較，而非直接採信文獻宣稱。
 
-**組塊上限（✅ 2026-07-21 定案並實作）**：最多 5 句或最多 300 字元，先到者為準（沿用 `sentence_aware_chunking()` 既有的句數/字數雙重上限手法，超長單句獨立成 Chunk）。300 字元沒有直接文獻依據，是比 3.1.1 現行 500 字元 RAG 切塊更小的工程判斷（方向呼應 GraphRAG 附錄「切塊越小抽取密度越高」的查證結果，GraphRAG 測試範圍為 600/1200/2400 token，與中文字元換算不精確，僅供粗略參考），最終數值仍留給第五章消融實驗校準，但已是可執行的預設值。**實作**：`services/svo_chunking.py::build_svo_chunks()` 新增 `max_sentences`（預設 5）參數，與既有 `max_chars`（已改為預設 300）並行判斷，先到者觸發切分；測試見 `tests/services/test_svo_chunking.py::test_max_sentences_cap_splits_before_char_limit_is_reached` 等。
+**組塊上限（✅ 2026-07-21 定案並實作句數上限；2026-07-22 拿掉字元上限、改用純句數＋重疊）**：最多 5 句，相鄰塊重疊 2 句（起始點公差 3：1-5、4-8、7-11……）。原本另有 300 字元上限，但這個數字沒有直接文獻依據，只是比 3.1.1 現行 500 字元 RAG 切塊更小的工程判斷（方向呼應 GraphRAG 附錄「切塊越小抽取密度越高」的查證結果，GraphRAG 測試範圍為 600/1200/2400 token，與中文字元換算不精確，僅供粗略參考），使用者決策拿掉，只保留有清楚語意的句數上限。重疊 2 句是為了解決「事實跨塊邊界被切斷」的問題——經逐位置驗算，任一句子透過其所屬（最多兩個）chunk 的聯集，皆能取得前 2 句與後 2 句上下文（文件開頭/結尾例外）。重疊造成的重複抽取由事實層級去重吸收（見下方新增段落），不會產生重複邊。**實作**：`services/svo_chunking.py::build_svo_chunks()` 的 `max_sentences`（預設 5）／`overlap_sentences`（預設 2）參數；測試見 `tests/services/test_svo_chunking.py`（含逐句覆蓋驗證）。
+
+**事實層級去重＋切塊向量化（✅ 2026-07-22 使用者提出並實作）**：`svo_service.py::merge_triples_to_graph()` 的關係 MERGE 鍵拿掉來源 chunk／句子欄位，相同 (subject, rel_type, object) 收斂成一條邊，來源改記錄在邊上累積的 `citations_json`。另新增 `embed_svo_chunks()`／`create_chunk_vector_index()`，切塊當下把每個 SVO chunk 算成向量存進 `Chunk.embedding`，供未來回答階段的來源篩選使用（比對/排序邏輯本身不在此範圍）。完整設計理由見 `docs/論文/03_變更紀錄.md` 2026-07-22 條目。
 
 ### 3.2 原句子／標準化句子／SVO Chunk 的關聯索引設計（✅ 已定案並實作）
 
@@ -86,9 +88,11 @@
 
 ---
 
-## 4. 實作項目狀態（2026-07-21 更新）
+## 4. 實作項目狀態（2026-07-22 更新）
 
-- [x] SVO 專用切塊函式——`services/svo_chunking.py::build_svo_chunks()`，已支援 `max_sentences`／`max_chars` 雙重上限
+- [x] SVO 專用切塊函式——`services/svo_chunking.py::build_svo_chunks()`，句數上限＋重疊（`max_sentences`／`overlap_sentences`，300 字元上限已拿掉）
+- [x] 事實層級去重——`svo_service.py::merge_triples_to_graph()` 的關係 MERGE 鍵改為 `(kg_id, subject, rel_type, object)`，來源改用邊上累積的 `citations_json`
+- [x] 切塊向量化——`svo_service.py::embed_svo_chunks()`／`create_chunk_vector_index()`，接線於 `routers/staging.py::_trigger_extraction()`
 - [x] 原句子/標準化句子/Chunk 關聯索引的寫入與讀取機制——`svo_index.json`＋`SVOTriple` 句子層級欄位
 - [x] 標準化進度的 checkpoint 機制——`DocumentRecord.normalization_*` 欄位＋`entity_registry_service` 登記表快照
 - [x] `SVOTriple` schema 擴充句子/chunk 層級來源欄位
@@ -137,7 +141,7 @@
 | `parser/__init__.py` | 套件公開介面 |
 | `services/ingestion_service.py` | `chunk_and_stage()`，銜接 3.1.1 前段 |
 | `services/document_record_service.py` | `_record.json` 讀寫，記錄檔真實狀態來源；新增 `update_normalization_progress()`／`set_svo_chunk_total()` |
-| `services/svo_chunking.py` | SVO 專用切塊（`build_svo_chunks()`，5 句/300 字元雙重上限）與 `svo_index.json` 落地 |
+| `services/svo_chunking.py` | SVO 專用切塊（`build_svo_chunks()`，5 句上限＋重疊 2 句）與 `svo_index.json` 落地 |
 | `services/entity_registry_service.py` | 3.4 §a 文件內實體別名登記表（頻率優先＋長度次要，斷點續傳快照） |
 | `services/svo_service.py` | SVO 抽取／實體對齊去重（DEDUP4→ESCALATE）／`Chunk`＋`HAS_ENTITY` 邊聚合＋跨文件標準名更新（RECORD3B＋RECHECK） |
 | `services/pronoun_resolution_service.py` | 代名詞雙軌偵測（POS＋正則）＋前 4 後 2 消解＋背景詞庫審核（3.4 §a `PRONCHECK`／`PRONLLM`） |

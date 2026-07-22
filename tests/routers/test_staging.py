@@ -46,3 +46,61 @@ async def test_trigger_extraction_is_noop_when_record_missing(tmp_path, monkeypa
     empty_folder.mkdir()
 
     await _trigger_extraction(empty_folder, uuid4())  # 不應拋出例外
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_skips_embedding_when_provider_not_initialized(tmp_path, monkeypatch):
+    """對應誠實侷限：測試環境未呼叫 `init_providers()`，`get_embedding_provider()`
+    會拋出 RuntimeError，應優雅跳過向量化，不影響切塊與排隊本身。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage("單句無代名詞。", "note.md", kg_folder)
+
+    await _trigger_extraction(doc_folder, uuid4())  # 不應拋出例外
+
+    pending = task_queue_service.next_pending(config.task_queue_db_path())
+    assert pending is not None
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path, monkeypatch):
+    """對應 2026-07-22 使用者確認：切塊當下順便向量化，供未來來源篩選使用。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", kg_folder,
+    )
+
+    class FakeEmbedding:
+        dim = 4
+        model_name = "fake-embedding"
+
+        def encode(self, text: str) -> list[float]:
+            return [0.0] * self.dim
+
+        def encode_batch(self, texts: list[str]) -> list[list[float]]:
+            return [self.encode(t) for t in texts]
+
+    class FakeResult:
+        records: list = []
+
+    class FakeDriver:
+        def __init__(self):
+            self.calls = []
+
+        async def execute_query(self, query, **params):
+            self.calls.append((query, params))
+            return FakeResult()
+
+    fake_driver = FakeDriver()
+    monkeypatch.setattr("routers.staging.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("routers.staging.get_driver", lambda: fake_driver)
+
+    await _trigger_extraction(doc_folder, uuid4())
+
+    embed_calls = [c for c in fake_driver.calls if "c.embedding" in c[0]]
+    assert len(embed_calls) >= 1

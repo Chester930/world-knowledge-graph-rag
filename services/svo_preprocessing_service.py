@@ -17,7 +17,7 @@ from services.ingestion_service import get_or_rebuild_sentences
 from services.pronoun_resolution_service import PosTagger, resolve_coreference_pipeline
 from services.svo_chunking import (
     DEFAULT_SVO_CHUNK_MAX_SENTENCES,
-    DEFAULT_SVO_CHUNK_SIZE,
+    DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
     SVOChunk,
     build_svo_chunks,
     write_svo_chunks,
@@ -37,8 +37,8 @@ async def prepare_svo_ready_chunks(
     pos_tagger: PosTagger | None = None,
     lexicon_auditor_provider: LLMProvider | None = None,
     custom_lexicon_path: Path | None = None,
-    max_chars: int = DEFAULT_SVO_CHUNK_SIZE,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
+    overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
 ) -> tuple[list[Path], list[SVOChunk]]:
     """`CHUNKREADY`：取得句子清單 → （若提供 `mentions`）套用文件內別名登記表
     → 代名詞消解 → SVO 專用切塊並落地。
@@ -85,7 +85,7 @@ async def prepare_svo_ready_chunks(
 
     chunks = build_svo_chunks(
         original_sentences, normalized_sentences,
-        max_chars=max_chars, max_sentences=max_sentences,
+        max_sentences=max_sentences, overlap_sentences=overlap_sentences,
     )
     paths = write_svo_chunks(chunks, source, output_dir)
     return paths, chunks
