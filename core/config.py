@@ -59,3 +59,10 @@ def staging_folder() -> Path:
     的「未分配資料夾池」。集中定義於此，避免 routers/documents.py（文件上傳/解析）
     與 routers/staging.py（暫存區分類/分群）各自重複定義同一路徑邏輯而不同步。"""
     return Path(settings.workspace_dir) / "_staging"
+
+
+def task_queue_db_path() -> Path:
+    """`task_queue.db` 的存放位置，對應 § 3.1.2 `ENQUEUE`／`RESTART` 節點——
+    單一本地 SQLite 檔案，服務全部 KG 共用的抽取佇列效能索引，不隨個別 KG
+    資料夾搬移。"""
+    return Path(settings.workspace_dir) / "task_queue.db"
