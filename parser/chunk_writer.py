@@ -36,7 +36,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 def _safe_filename_stem(source: str, max_length: int = 80) -> str:
@@ -175,6 +175,25 @@ def write_original_text(
     return file_path
 
 
+_FRONTMATTER_PATTERN = re.compile(r"^---\n.*?\n---\n\n?", re.DOTALL)
+
+
+def read_original_text(source: str, base_dir: Union[str, Path]) -> Optional[str]:
+    """讀回 `write_original_text()` 寫入的原文（去除 YAML frontmatter），
+    對應 docs/論文/03_系統設計與方法論.md § 3.1.2 `GETSENT` 三層判斷的第二層
+    （`sentences.json` 缺席、但 `original.md` 存在時，重新對其呼叫
+    `split_into_sentences()` 補回句子清單）。資料夾或檔案不存在時回傳 `None`。
+    """
+    doc_folder = document_folder_path(source, base_dir)
+    path = doc_folder / ORIGINAL_TEXT_FILENAME
+    if not path.exists():
+        return None
+    raw = path.read_text(encoding="utf-8")
+    body = _FRONTMATTER_PATTERN.sub("", raw, count=1)
+    # write_original_text() 在正文結尾多加了一個 "\n"，此處還原成呼叫時傳入的原始字串
+    return body[:-1] if body.endswith("\n") else body
+
+
 SENTENCES_INDEX_FILENAME = "sentences.json"
 
 
@@ -216,3 +235,17 @@ def write_sentences_index(
         encoding="utf-8",
     )
     return file_path
+
+
+def read_sentences_index(source: str, base_dir: Union[str, Path]) -> Optional[List[str]]:
+    """讀回 `write_sentences_index()` 寫入的句子清單，對應 § 3.1.2 `GETSENT`
+    三層判斷的第一層（優先讀取，不重新切分）。資料夾或檔案不存在時回傳
+    `None`，交由呼叫端（`services/ingestion_service.py::get_or_rebuild_sentences()`）
+    決定下一層判斷。
+    """
+    doc_folder = document_folder_path(source, base_dir)
+    path = doc_folder / SENTENCES_INDEX_FILENAME
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return payload["sentences"]

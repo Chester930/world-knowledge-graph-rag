@@ -10,6 +10,8 @@ jinja2~=3.1
 python-multipart~=0.0.20
 hdbscan~=0.8   # 暫存區 AI 自動分群（McInnes, Healy, Astels, 2017, JOSS），見 3.1.1 §a
 umap-learn~=0.5   # HDBSCAN 前置降維（大規模未分配池，仿 BERTopic 管線），見 3.1.1 §a
+spacy~=3.8   # 代名詞雙軌偵測之 POS 標註（Universal Dependencies PRON/DET），見 3.4 §a PRONCHECK
+             # 中文模型需另外下載：python -m spacy download zh_core_web_sm（非 pip 套件，requirements.txt 無法宣告）
 
 # ── LLM Provider SDK（依 LLM_PROVIDER 設定選用）─────────────────
 openai~=2.29

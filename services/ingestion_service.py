@@ -17,6 +17,8 @@ from pathlib import Path
 from models.knowledge_graph import DocumentRecord
 from parser.chunk_writer import (
     document_folder_path,
+    read_original_text,
+    read_sentences_index,
     write_chunks_as_markdown,
     write_original_text,
     write_sentences_index,
@@ -84,4 +86,44 @@ def chunk_and_stage(text: str, source: str, staging_dir: Path) -> tuple[Path, Do
     doc_folder = document_folder_path(source, staging_dir)
     record = document_record_service.init_record(doc_folder, source=source, total_chunks=len(chunks))
     return doc_folder, record
+
+
+async def get_or_rebuild_sentences(source: str, base_dir: Path) -> list[str]:
+    """§ 3.1.2 `GETSENT` 三層判斷：取得這份文件的句子清單，供 3.4 §a 標準化
+    前處理使用。
+
+    優先序：① `sentences.json` 存在就直接讀，最快；② 只有 `original.md`
+    沒有 `sentences.json` 時，對其重新呼叫 `split_into_sentences()` 補回來
+    （純規則運算，不需要 LLM 或重新解析文件，成本很低），並補寫
+    `sentences.json` 供下次直接命中；③ 兩者皆不存在，只有 URL 來源（`source`
+    本身是可重新請求的網址）能靠重新抓取＋解析復原，檔案上傳來源的暫存檔已在
+    `routers/documents.py::upload_document()` 的 `finally` 區塊被刪除，這個
+    分支對檔案上傳來源而言資料已無法復原，屬於需要人工介入的異常狀態，
+    非正常運作路徑，直接拋出例外。
+
+    `base_dir` 是這份文件目前所在的資料夾（暫存區或已歸檔的 KG 資料夾皆可，
+    與 `document_folder_path()` 的通用參數命名一致）。
+    """
+    sentences = read_sentences_index(source, base_dir)
+    if sentences is not None:
+        return sentences
+
+    original_text = read_original_text(source, base_dir)
+    if original_text is not None:
+        sentences = split_into_sentences(original_text)
+        write_sentences_index(sentences, source, base_dir)
+        return sentences
+
+    if not source.startswith(("http://", "https://")):
+        raise RuntimeError(
+            f"文件「{source}」缺少 sentences.json 與 original.md，且非 URL 來源"
+            "（檔案上傳的暫存檔已刪除，無法重新解析）——資料已無法復原，"
+            "需人工介入，非正常運作路徑。"
+        )
+
+    text = await parse_url_service(source)
+    sentences = split_into_sentences(text)
+    write_original_text(text, source, base_dir)
+    write_sentences_index(sentences, source, base_dir)
+    return sentences
 

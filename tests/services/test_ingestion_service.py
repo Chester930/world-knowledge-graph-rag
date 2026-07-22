@@ -75,3 +75,53 @@ class TestChunkAndStage:
         assert len(updated_record.assignment_history) == 1
         assert updated_record.assignment_history[0].kg_name == "KG-A"
         assert updated_record.total_chunks > 1
+
+
+class TestGetOrRebuildSentences:
+    """§ 3.1.2 GETSENT 三層判斷。"""
+
+    @pytest.mark.asyncio
+    async def test_reads_sentences_index_directly_when_present(self, tmp_path):
+        doc_folder, _ = svc.chunk_and_stage("第一句。第二句！", "report.txt", tmp_path)
+
+        sentences = await svc.get_or_rebuild_sentences("report.txt", tmp_path)
+
+        assert sentences == ["第一句。", "第二句！"]
+
+    @pytest.mark.asyncio
+    async def test_resplits_from_original_when_sentences_index_missing(self, tmp_path):
+        doc_folder, _ = svc.chunk_and_stage("第一句。第二句！第三句？", "report.txt", tmp_path)
+        (doc_folder / "sentences.json").unlink()
+
+        sentences = await svc.get_or_rebuild_sentences("report.txt", tmp_path)
+
+        assert sentences == ["第一句。", "第二句！", "第三句？"]
+        # 補寫回 sentences.json，下次呼叫可直接命中第一層
+        assert (doc_folder / "sentences.json").exists()
+
+    @pytest.mark.asyncio
+    async def test_raises_for_non_url_source_when_both_files_missing(self, tmp_path):
+        doc_folder, _ = svc.chunk_and_stage("第一句。", "report.txt", tmp_path)
+        (doc_folder / "sentences.json").unlink()
+        (doc_folder / "original.md").unlink()
+
+        with pytest.raises(RuntimeError, match="無法復原"):
+            await svc.get_or_rebuild_sentences("report.txt", tmp_path)
+
+    @pytest.mark.asyncio
+    async def test_reparses_url_source_when_both_files_missing(self, tmp_path, monkeypatch):
+        url = "https://example.com/article"
+
+        async def fake_parse_url_service(source: str) -> str:
+            assert source == url
+            return "重新抓取的第一句。重新抓取的第二句！"
+
+        monkeypatch.setattr(svc, "parse_url_service", fake_parse_url_service)
+
+        sentences = await svc.get_or_rebuild_sentences(url, tmp_path)
+
+        assert sentences == ["重新抓取的第一句。", "重新抓取的第二句！"]
+        from parser.chunk_writer import document_folder_path
+        doc_folder = document_folder_path(url, tmp_path)
+        assert (doc_folder / "original.md").exists()
+        assert (doc_folder / "sentences.json").exists()

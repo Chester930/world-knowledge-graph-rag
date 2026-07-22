@@ -93,9 +93,15 @@
 - [x] 標準化進度的 checkpoint 機制——`DocumentRecord.normalization_*` 欄位＋`entity_registry_service` 登記表快照
 - [x] `SVOTriple` schema 擴充句子/chunk 層級來源欄位
 - [x] 文件內實體別名登記表（3.4 §a，PK 動態提升機制）——`services/entity_registry_service.py`（新增），含頻率優先＋長度次要規則、規則式別名比對（子字串/縮寫）、LLM 仲裁 hook、斷點續傳快照，測試見 `tests/services/test_entity_registry_service.py`（17 項）
-- [x] `svo_service.py` 實體對齊/去重（3.1.4 DEDUP4／3.4 §b ESCALATE＋RECHECK）——`resolve_entity_name()`（編輯距離→cosine→LLM 仲裁三段式）、`merge_entity()`（含跨文件標準名動態更新），測試見 `tests/services/test_svo_service.py`（14 項，含 `InMemoryEntityDriver` 模擬完整 MERGE／rename 狀態）
-- [ ] `Entity.aliases` 陣列屬性的查詢介面（已寫入 `alias_counts_json`／`aliases` 屬性，尚無對外查詢 API，非阻斷性待辦）
-- [ ] `RECHECK` 效能優化（每次合併皆同步重新聚合全部邊，見 3.4 §b「效能待決策」，留給第四章/第五章評估）
+- [x] `svo_service.py` 實體對齊/去重（3.1.4 DEDUP4／3.4 §b ESCALATE＋RECORD3B＋RECHECK）——`resolve_entity_name()`（編輯距離→cosine→LLM 仲裁三段式）、`_merge_chunk_mention()`／`_aggregate_alias_counts()`（`Chunk`／`HAS_ENTITY` 邊聚合，2026-07-21 修正取代初版的 `alias_counts_json` 節點屬性做法）、`merge_entity()`（含跨文件標準名動態更新），測試見 `tests/services/test_svo_service.py`（16 項，含 `InMemoryEntityDriver` 模擬 Entity／Chunk 節點與邊的完整聚合狀態）
+- [x] 3.1.2 `GETSENT` 讀取端三層判斷——`parser/chunk_writer.py::read_sentences_index()`／`read_original_text()`＋`services/ingestion_service.py::get_or_rebuild_sentences()`，測試見 `tests/test_chunk_writer.py`／`tests/services/test_ingestion_service.py::TestGetOrRebuildSentences`（9 項）
+- [x] `task_queue.db`（3.1.2 `ENQUEUE`／`RESTART`／`TRUST`／`SCAN`／`REBUILD`）——新增 `services/task_queue_service.py`，測試見 `tests/services/test_task_queue_service.py`（16 項）；跨 KG 排程政策未定案，見論文正文說明
+- [x] 代名詞消解（3.4 §a `PRONCHECK`／`PRONLLM`，2026-07-21 決策改用 10 報告 POS＋正則雙軌偵測取代 05 任務書單一正則）——新增 `services/pronoun_resolution_service.py`，含雙軌三路分流、背景 LLM 詞庫審核（`custom_pronoun_lexicon.txt`）、前 4 後 2 雙向上下文消解主體；新增 `spacy` 依賴（`requirements.txt`，中文模型 `zh_core_web_sm` 需另外下載，本專案環境尚未安裝，`SpacyPosTagger` 本身未經實測，僅測試過其依賴注入介面），測試見 `tests/services/test_pronoun_resolution_service.py`（18 項）
+- [x] `CHUNKREADY` 端到端串接——新增 `services/svo_preprocessing_service.py::prepare_svo_ready_chunks()`，串連 `GETSENT`→（可選）`REGISTRY`→`PRONCHECK`/`PRONLLM`→`SVOGROUP`，測試見 `tests/services/test_svo_preprocessing_service.py`（3 項）；**具名提及抽取（NER）仍是未解決的上游依賴**，`mentions=None` 時跳過整個別名登記表階段
+- [ ] `Entity.aliases` 對外查詢 API（已寫入 `aliases` 屬性作為聚合快取，尚無對外查詢 API，非阻斷性待辦）
+- [ ] `RECHECK` 效能優化（每次合併皆同步重新聚合全部 `HAS_ENTITY` 邊，見 3.4 §b「效能待決策」，留給第四章/第五章評估）
+- [ ] 具名提及抽取（NER）——`entity_registry_service.apply_registry()` 與 `svo_preprocessing_service.prepare_svo_ready_chunks()` 的 `mentions` 參數目前無任何模組產生，是別名登記表真正啟用前的最後一塊拼圖
+- [ ] 代名詞消解的句子級 checkpoint（3.4 §a 標準化流程整體已有 `normalization_progress` 追蹤，但代名詞消解本身跑到一半中斷時，目前仍是整份句子清單重跑，未細分到句子層級）
 
 ---
 
@@ -119,7 +125,7 @@
 |---|---|
 | `docs/論文/03_系統設計與方法論.md` § 3.1.1–3.1.4、3.4 | 本次調整的主要正文 |
 | `docs/論文/03_變更紀錄.md` | 逐日變更歷程與已取代設計方案（含滑動視窗草案） |
-| `docs/報告/05_指代消解與前處理任務書.md` | 代名詞消解機制的完整規格（3.4 §a 的一部分） |
+| `docs/報告/05_指代消解與前處理任務書.md` | 代名詞消解機制的雙向上下文視窗規格（3.4 §a 的一部分，偵測機制已改用 10 報告） |
 | `docs/報告/06_SVO抽取管線調整任務書.md` | 本檔案 |
 | `docs/報告/07_*.md`／`09_*.md`／`10_*.md` | ✅ 文獻已修訂，解除暫緩（見上方第 5 節） |
 | `docs/報告/08_*.md` | 🟡 仍暫緩，涉及 RQ1/RQ2 範疇界定，需獨立討論 |
@@ -131,4 +137,7 @@
 | `services/document_record_service.py` | `_record.json` 讀寫，記錄檔真實狀態來源；新增 `update_normalization_progress()`／`set_svo_chunk_total()` |
 | `services/svo_chunking.py` | SVO 專用切塊（`build_svo_chunks()`，5 句/300 字元雙重上限）與 `svo_index.json` 落地 |
 | `services/entity_registry_service.py` | 3.4 §a 文件內實體別名登記表（頻率優先＋長度次要，斷點續傳快照） |
-| `services/svo_service.py` | SVO 抽取／實體對齊去重（DEDUP4→ESCALATE）／跨文件標準名更新（RECHECK） |
+| `services/svo_service.py` | SVO 抽取／實體對齊去重（DEDUP4→ESCALATE）／`Chunk`＋`HAS_ENTITY` 邊聚合＋跨文件標準名更新（RECORD3B＋RECHECK） |
+| `services/pronoun_resolution_service.py` | 代名詞雙軌偵測（POS＋正則）＋前 4 後 2 消解＋背景詞庫審核（3.4 §a `PRONCHECK`／`PRONLLM`） |
+| `services/task_queue_service.py` | `task_queue.db` 效能索引（3.1.2 `ENQUEUE`／`RESTART`／`TRUST`／`SCAN`／`REBUILD`） |
+| `services/svo_preprocessing_service.py` | `CHUNKREADY` 端到端串接（`GETSENT`→`REGISTRY`(可選)→`PRONCHECK`→`SVOGROUP`） |

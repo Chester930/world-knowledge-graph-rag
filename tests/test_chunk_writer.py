@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 
 from parser.chunk_writer import (
+    read_original_text,
+    read_sentences_index,
     write_chunks_as_markdown,
     write_original_text,
     write_sentences_index,
@@ -196,3 +198,32 @@ def test_write_sentences_index_overwrites_on_rerun(tmp_path):
     assert payload["sentences"] == ["新句子一。", "新句子二。"]
     # 不應殘留額外檔案——固定檔名覆寫
     assert len(list(path.parent.glob("sentences*.json"))) == 1
+
+
+# ── read_original_text／read_sentences_index（§ 3.1.2 GETSENT 讀取端）──────
+
+def test_read_original_text_round_trips_exact_body(tmp_path):
+    original = "第一段。\n\n第二段，含有換行與空白。"
+    write_original_text(original, "report.pdf", tmp_path)
+
+    assert read_original_text("report.pdf", tmp_path) == original
+
+
+def test_read_original_text_round_trips_empty_string(tmp_path):
+    write_original_text("", "empty.txt", tmp_path)
+    assert read_original_text("empty.txt", tmp_path) == ""
+
+
+def test_read_original_text_returns_none_when_missing(tmp_path):
+    assert read_original_text("missing.txt", tmp_path) is None
+
+
+def test_read_sentences_index_round_trips_list(tmp_path):
+    sentences = ["第一句。", "第二句！", "第三句？"]
+    write_sentences_index(sentences, "report.pdf", tmp_path)
+
+    assert read_sentences_index("report.pdf", tmp_path) == sentences
+
+
+def test_read_sentences_index_returns_none_when_missing(tmp_path):
+    assert read_sentences_index("missing.txt", tmp_path) is None
