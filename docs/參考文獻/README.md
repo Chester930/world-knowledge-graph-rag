@@ -4,16 +4,20 @@
 
 ## 分類與章節對應
 
-| 資料夾 | 對應論文章節 | 狀態 |
+> **2026-07-23 更新**：`02_文獻探討.md` 已重新架構（先依 RQ 彙整核心文獻，再依第三章系統流程階段逐一補充方法層級佐證），下表章節對應已同步校正；同時補上先前遺漏的 `08_`／`09_` 兩個資料夾（皆已有實際下載內容，此前僅未列入本索引，非文獻本身有缺）。
+
+| 資料夾 | 對應論文章節（2026-07-23 起） | 狀態 |
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.1.1-2.1.2，01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 25 篇 |
-| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.1.3；01_緒論.md § 1.2 RQ4（預留） | 🟡 已下載 2 篇，1 篇付費未下載 |
-| `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.1.4 | ⚪ 待下載 |
-| `05_評估方法論/` | 02_文獻探討.md § 2.1.5 | ⚪ 待下載 |
-| `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻） | 🟢 已下載 2 篇 |
-| `07_文件分群與知識庫自動建立/` | 03_系統設計與方法論.md § 3.1.1（暫存區 AI 自動分群建立 KG） | 🟡 已下載 2 篇，皆僅 arXiv 預印本 |
-| `10_跨文件實體別名消解與增量聚類/` | 03_系統設計與方法論.md § 3.4（RQ4b，跨文件增量別名聚類架構）；`docs/報告/09_實體別名登記與動態標準名提升機制設計報告.md` | 🟡 已下載 3 篇，皆待精讀方法章節 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）；01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 25 篇 |
+| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留） | 🟡 已下載 2 篇，1 篇付費未下載 |
+| `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.4.8（RQ6） | ⚪ 待下載 |
+| `05_評估方法論/` | 02_文獻探討.md § 2.5（評估方法論的橫向文獻回顧） | ⚪ 待下載 |
+| `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻）；02_文獻探討.md § 2.6.1 摘要收錄 | 🟢 已下載 2 篇 |
+| `07_文件分群與知識庫自動建立/` | 03_系統設計與方法論.md § 3.1.1（暫存區 AI 自動分群建立 KG）；02_文獻探討.md § 2.4.1 | 🟡 已下載 2 篇，皆僅 arXiv 預印本 |
+| `08_向量化與語意表示/` | `core/providers/embedding/README.md`（向量化模組工程實作支撐文獻）；02_文獻探討.md § 2.6.2 摘要收錄 | 🟢 已下載 5 篇 |
+| `09_SVO抽取切塊策略與指代消解/` | 02_文獻探討.md § 2.4.5（RQ4b，切塊策略與指代消解前置）；03_系統設計與方法論.md § 3.4 | 🟢 已下載 4 篇 |
+| `10_跨文件實體別名消解與增量聚類/` | 02_文獻探討.md § 2.4.5（RQ4b，跨文件增量別名聚類架構）；03_系統設計與方法論.md § 3.4；`docs/報告/09_實體別名登記與動態標準名提升機制設計報告.md` | 🟡 已下載 3 篇，皆待精讀方法章節 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -87,6 +91,25 @@
 |---|---|---|
 | `grootendorst-2022-bertopic-neural-topic-modeling.pdf` | Grootendorst (2022), *BERTopic: Neural topic modeling with a class-based TF-IDF procedure* | arXiv:2203.05794 |
 | `khandelwal-2025-llm-topic-labeling.pdf` | Khandelwal (2025), *Using LLM-Based Approaches to Enhance and Automate Topic Labeling* | arXiv:2502.18469 |
+
+## 08_向量化與語意表示 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `reimers-gurevych-2019-sentence-bert.pdf` | Reimers & Gurevych (2019), *Sentence-BERT*，EMNLP-IJCNLP 2019 | arXiv:1908.10084 |
+| `chen-et-al-2023-dense-x-retrieval.pdf` | Chen et al. (2023/2024), *Dense X Retrieval*，EMNLP 2024 | arXiv:2312.06648 |
+| `bhat-et-al-2025-rethinking-chunk-size.pdf` | Bhat et al. (2025), *Rethinking Chunk Size for Long-Document Retrieval* | arXiv:2505.21700 |
+| `muennighoff-et-al-2023-mteb.pdf` | Muennighoff et al. (2022/2023), *MTEB*，EACL 2023 | arXiv:2210.07316 |
+| `khattab-zaharia-2020-colbert.pdf` | Khattab & Zaharia (2020), *ColBERT*，SIGIR 2020 | arXiv:2004.12832 |
+
+## 09_SVO抽取切塊策略與指代消解 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `qu-et-al-2025-semantic-chunking-cost.pdf` | Qu, Tu & Bao (2025), Findings of NAACL 2025，固定字數切塊 vs. 語意切分實證比較 | ACL Anthology 2025.findings-naacl.114 |
+| `mihindukulasooriya-et-al-2023-text2kgbench.pdf` | Mihindukulasooriya et al. (2023), *Text2KGBench*，ISWC 2023 | arXiv:2308.02357 |
+| `meher-et-al-2025-core-kg.pdf` | Meher, Domeniconi & Correa-Cabrera (2025), *CORE-KG*，KDD '25 Workshop SKnow-LLM | arXiv:2506.21607 |
+| `meher-domeniconi-2025-core-kg-ablation.pdf` | Meher & Domeniconi (2025), CORE-KG 消融研究 | arXiv:2510.26512 |
 
 ## 10_跨文件實體別名消解與增量聚類 內容清單
 
