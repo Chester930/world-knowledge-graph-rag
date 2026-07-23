@@ -18,11 +18,11 @@
 - **細節**：本地模型分三檔（`Qwen-2.5-1.5B` 輕量 / `Qwen-2.5-7B` 平衡 / `GLiNER`+`REBEL` 極致低配）；Electron 主行程作為背景 Daemon，SQLite 任務隊列（`pending`/`processing`/`completed`/`failed`/`pending_upload`）支援斷點續傳。
 - **完整規格**：見 `docs/報告/01_本地抽取與混合架構評估.md`
 
-### 知識圖譜 Schema：雙層圖結構（Lexical + Entity Graph）（2026-07-10）
+### 知識圖譜 Schema：雙層圖結構（Lexical + Entity Graph）（2026-07-10；2026-07-23 補齊佐證熱度指標）
 
 - **決策**：Neo4j 中新增 `:Chunk` 節點與 `(Chunk)-[:HAS_ENTITY]->(Entity)` 邊，讓每個抽取出的實體都能反向追溯到原始文字片段。
 - **理由**：解決「回答無法標明來源」的可解釋性缺口，對應論文 1.1.4 節「可解釋知識問答」的產品目標。
-- **學術支撐**：Gutiérrez et al. (2024) *HippoRAG*，NeurIPS'24（詳見 `docs/報告/技術導入評估.md` 第一項）。
+- **學術支撐**：Gutiérrez et al. (2024) *HippoRAG*，NeurIPS'24（詳見 `docs/報告/技術導入評估.md` 第一項）。**熱度佐證（2026-07-23 查證）**：官方程式碼 `OSU-NLP-Group/HippoRAG` 3,882★（GitHub API 查證）；正式出版版本（NeurIPS 2024 Proceedings）被引用 54 次（OpenAlex 查證，可能低估——多篇後續論文引用的是 arXiv 預印本而非正式出版版本，兩者在部分資料庫中分開計數）。**⚠️ 誠實侷限**：這是熱度指標，不等於全文已核實——本專案至今仍未下載 HippoRAG 全文，此處的「學術支撐」僅止於摘要/後設資料層級的引用，與 Guha et al. (2016) Schema.org 同樣未全文核實的處理方式不一致（後者已誠實標註 ⚠️，前者先前未標註），此次一併補上警語，寫作定稿前仍需精讀全文核實 HippoRAG 的雙層圖設計與本專案 `(Chunk)-[:HAS_ENTITY]->(Entity)` 是否真正對應。
 - **完整規格**：見 `docs/報告/02_競品借鏡與技術導入藍圖.md` 第二節之 1
 
 ### 實體對齊與去重（2026-07-10）
