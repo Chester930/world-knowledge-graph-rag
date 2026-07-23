@@ -93,6 +93,7 @@
 - [x] SVO 專用切塊函式——`services/svo_chunking.py::build_svo_chunks()`，句數上限＋重疊（`max_sentences`／`overlap_sentences`，300 字元上限已拿掉）
 - [x] 事實層級去重——`svo_service.py::merge_triples_to_graph()` 的關係 MERGE 鍵改為 `(kg_id, subject, rel_type, object)`，來源改用邊上累積的 `citations_json`
 - [x] 切塊向量化——`svo_service.py::embed_svo_chunks()`／`create_chunk_vector_index()`，接線於 `routers/staging.py::_trigger_extraction()`
+- [x] 逐句 embedding（`SENTEMBED`）——`svo_preprocessing_service.py::write_sentence_embeddings()`／`read_sentence_embeddings()`，`prepare_svo_ready_chunks()` 新增 `embedding_provider` 參數，與 `EMBEDCHUNK` 共用同一個 provider 實例
 - [x] 原句子/標準化句子/Chunk 關聯索引的寫入與讀取機制——`svo_index.json`＋`SVOTriple` 句子層級欄位
 - [x] 標準化進度的 checkpoint 機制——`DocumentRecord.normalization_*` 欄位＋`entity_registry_service` 登記表快照
 - [x] `SVOTriple` schema 擴充句子/chunk 層級來源欄位

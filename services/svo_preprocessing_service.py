@@ -1,5 +1,5 @@
 """3.4 §a 端到端前處理管線：句子清單 → 文件內別名登記（可選）→ 代名詞消解
-→ SVO 專用切塊並落地。
+→ 逐句 embedding（可選）→ SVO 專用切塊並落地。
 
 對應 docs/論文/03_系統設計與方法論.md § 3.1.2 `CHUNKREADY` 節點——把先前
 各自獨立實作、獨立測試的模組（`services/ingestion_service.py::
@@ -9,9 +9,11 @@ get_or_rebuild_sentences()`／`services/entity_registry_service.py`／
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
-from core.providers.base import LLMProvider
+from core.providers.base import EmbeddingProvider, LLMProvider
+from parser.chunk_writer import document_folder_path
 from services.entity_registry_service import EntityRegistry, Mention, apply_registry
 from services.ingestion_service import get_or_rebuild_sentences
 from services.pronoun_resolution_service import PosTagger, resolve_coreference_pipeline
@@ -22,6 +24,47 @@ from services.svo_chunking import (
     build_svo_chunks,
     write_svo_chunks,
 )
+
+SENTENCE_EMBEDDINGS_FILENAME = "sentence_embeddings.json"
+
+
+def write_sentence_embeddings(
+    vectors: list[list[float]],
+    source: str,
+    output_dir: str | Path,
+) -> Path:
+    """`SENTEMBED`：把標準化句子清單（STDSENTS）逐句算好的向量存成該文件
+    資料夾內固定的 `sentence_embeddings.json`，比照
+    `parser/chunk_writer.py::write_sentences_index()` 的落地模式——這裡只
+    負責「算好存起來」，向未來（不在本次範圍）08 報告的「標準化 RAG」檢索
+    軌道提供基礎建設，不在此實作任何檢索/查詢邏輯。
+    """
+    doc_folder = document_folder_path(source, output_dir)
+    doc_folder.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "source": source,
+        "total_sentences": len(vectors),
+        "embeddings": vectors,
+    }
+
+    file_path = doc_folder / SENTENCE_EMBEDDINGS_FILENAME
+    file_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return file_path
+
+
+def read_sentence_embeddings(source: str, base_dir: str | Path) -> list[list[float]] | None:
+    """讀回 `write_sentence_embeddings()` 寫入的逐句向量；檔案不存在時回傳
+    `None`。"""
+    doc_folder = document_folder_path(source, base_dir)
+    path = doc_folder / SENTENCE_EMBEDDINGS_FILENAME
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return payload["embeddings"]
 
 
 async def prepare_svo_ready_chunks(
@@ -37,16 +80,24 @@ async def prepare_svo_ready_chunks(
     pos_tagger: PosTagger | None = None,
     lexicon_auditor_provider: LLMProvider | None = None,
     custom_lexicon_path: Path | None = None,
+    embedding_provider: EmbeddingProvider | None = None,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
 ) -> tuple[list[Path], list[SVOChunk]]:
     """`CHUNKREADY`：取得句子清單 → （若提供 `mentions`）套用文件內別名登記表
-    → 代名詞消解 → SVO 專用切塊並落地。
+    → 代名詞消解 → （若提供 `embedding_provider`）逐句 embedding → SVO 專用
+    切塊並落地。
 
     對應 3.4 §a 完整 Behavior Tree：`REGISTRY`／`ALIASCHECK`／`PROMOTE`
     （`entity_registry_service`，`mentions` 為 `None` 時跳過，見下方誠實
     侷限）→ `PRONCHECK`／`PRONLLM`（`pronoun_resolution_service`）→
-    `STDSENTS` → `SVOGROUP`（`svo_chunking`）。
+    `STDSENTS` → `SENTEMBED`（`write_sentence_embeddings()`，`embedding_provider`
+    為 `None` 時跳過）→ `SVOGROUP`（`svo_chunking`）。
+
+    `SENTEMBED` 只是標準化句子清單的一個平行輸出（供未來 08 報告的「標準化
+    RAG」檢索軌道使用），不影響、也不依賴別名登記或代名詞消解本身——即使
+    跳過（`embedding_provider=None`），下游 `build_svo_chunks()` 收到的
+    `normalized_sentences` 完全不受影響。
 
     `entity_registry`／`entity_registry_start_idx` 支援斷點續傳：傳入既有
     登記表快照與中斷處的句子索引即可從中斷處繼續別名登記，不需整份文件
@@ -82,6 +133,10 @@ async def prepare_svo_ready_chunks(
         lexicon_auditor_provider=lexicon_auditor_provider,
         custom_lexicon_path=custom_lexicon_path,
     )
+
+    if embedding_provider is not None:
+        vectors = embedding_provider.encode_batch(normalized_sentences)
+        write_sentence_embeddings(vectors, source, output_dir)
 
     chunks = build_svo_chunks(
         original_sentences, normalized_sentences,

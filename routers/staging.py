@@ -27,35 +27,39 @@ router = APIRouter(prefix="/staging", tags=["staging"])
 
 async def _trigger_extraction(doc_folder: Path, kg_id: UUID) -> None:
     """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
-    不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋SVO 專用切塊）
-    → 切塊向量化（2026-07-22 使用者提出，見 `svo_service.embed_svo_chunks`）
-    → `ENQUEUE`（登記進 `task_queue.db`）。同步直接呼叫（2026-07-21 使用者
-    決策），而非背景排程或延後執行。
+    不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
+    SVO 專用切塊）→ 切塊向量化（`svo_service.embed_svo_chunks`）→ `ENQUEUE`
+    （登記進 `task_queue.db`）。同步直接呼叫（2026-07-21 使用者決策），而非
+    背景排程或延後執行。
 
     ⚠️ 誠實侷限：`prepare_svo_ready_chunks()` 目前以 `mentions=None` 呼叫，
     跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決的上游依賴），也
     未提供 LLM provider，代名詞消解與實體去重皆退化為最保守版本（見
     `services/svo_preprocessing_service.py`／`services/svo_service.py`
     docstring）——這部分的 Provider 注入待第四章實作時再處理。這裡只補上
-    切塊向量化所需的 embedding provider；`get_embedding_provider()` 在尚未
-    呼叫 `init_providers()` 的情境（例如測試）會拋出 `RuntimeError`，此時
-    視為向量化不可用，優雅跳過，不影響切塊與排隊本身。
+    `SENTEMBED`／`EMBEDCHUNK` 兩處都要用的同一個 embedding provider；
+    `get_embedding_provider()` 在尚未呼叫 `init_providers()` 的情境（例如
+    測試）會拋出 `RuntimeError`，此時視為向量化不可用，優雅跳過，不影響
+    切塊與排隊本身。
     """
     record = document_record_service.read_record(doc_folder)
     if record is None:
         return
 
+    try:
+        embedding_provider = get_embedding_provider()
+    except RuntimeError:
+        embedding_provider = None
+
     kg_folder = doc_folder.parent
-    _paths, chunks = await prepare_svo_ready_chunks(record.source, kg_folder, kg_folder)
+    _paths, chunks = await prepare_svo_ready_chunks(
+        record.source, kg_folder, kg_folder, embedding_provider=embedding_provider,
+    )
     if not chunks:
         return
 
     document_record_service.set_svo_chunk_total(doc_folder, len(chunks))
 
-    try:
-        embedding_provider = get_embedding_provider()
-    except RuntimeError:
-        embedding_provider = None
     if embedding_provider is not None:
         await svo_service.embed_svo_chunks(get_driver(), kg_id, record.source, chunks, embedding_provider)
 

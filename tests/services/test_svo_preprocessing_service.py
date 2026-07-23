@@ -2,7 +2,7 @@ import pytest
 
 from services import ingestion_service
 from services.entity_registry_service import Mention
-from services.svo_preprocessing_service import prepare_svo_ready_chunks
+from services.svo_preprocessing_service import prepare_svo_ready_chunks, read_sentence_embeddings
 
 
 class FakeLLM:
@@ -90,3 +90,42 @@ async def test_pipeline_persists_svo_index_to_disk(tmp_path):
     index = read_svo_index(output / "note")
     assert index is not None
     assert index["total_svo_chunks"] == len(chunks)
+
+
+# ── SENTEMBED（逐句 embedding，2026-07-22 補齊）──────────────────────────────
+
+class FakeEmbedding:
+    dim = 4
+    model_name = "fake-embedding"
+
+    def encode(self, text: str) -> list[float]:
+        return [float(len(text))] * self.dim
+
+    def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self.encode(t) for t in texts]
+
+
+@pytest.mark.asyncio
+async def test_pipeline_writes_sentence_embeddings_when_provider_given(tmp_path):
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    ingestion_service.chunk_and_stage("馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", staging)
+
+    paths, chunks = await prepare_svo_ready_chunks(
+        "note.md", staging, output, embedding_provider=FakeEmbedding(),
+    )
+
+    vectors = read_sentence_embeddings("note.md", output)
+    assert vectors is not None
+    assert len(vectors) == len(chunks[0].normalized_sentences)
+
+
+@pytest.mark.asyncio
+async def test_pipeline_skips_sentence_embeddings_without_provider(tmp_path):
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    ingestion_service.chunk_and_stage("單句無代名詞。", "note.md", staging)
+
+    await prepare_svo_ready_chunks("note.md", staging, output)
+
+    assert read_sentence_embeddings("note.md", output) is None

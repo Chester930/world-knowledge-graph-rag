@@ -75,6 +75,8 @@ async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path
         "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", kg_folder,
     )
 
+    call_count = {"n": 0}
+
     class FakeEmbedding:
         dim = 4
         model_name = "fake-embedding"
@@ -96,11 +98,20 @@ async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path
             self.calls.append((query, params))
             return FakeResult()
 
+    def _get_fake_embedding_provider():
+        call_count["n"] += 1
+        return FakeEmbedding()
+
     fake_driver = FakeDriver()
-    monkeypatch.setattr("routers.staging.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("routers.staging.get_embedding_provider", _get_fake_embedding_provider)
     monkeypatch.setattr("routers.staging.get_driver", lambda: fake_driver)
 
     await _trigger_extraction(doc_folder, uuid4())
 
     embed_calls = [c for c in fake_driver.calls if "c.embedding" in c[0]]
     assert len(embed_calls) >= 1
+    # SENTEMBED（prepare_svo_ready_chunks 內部）也應該收到同一個 provider 實例，
+    # 而非各自重新 fetch 一次
+    assert call_count["n"] == 1
+    from services.svo_preprocessing_service import read_sentence_embeddings
+    assert read_sentence_embeddings("note.md", kg_folder) is not None
