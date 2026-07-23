@@ -79,6 +79,55 @@ async def test_pipeline_with_mentions_applies_registry_before_pronoun_resolution
 
 
 @pytest.mark.asyncio
+async def test_pipeline_uses_ner_tagger_to_populate_registry_when_no_explicit_mentions(tmp_path):
+    """`ner_tagger` 是 `mentions` 的替代輸入來源（2026-07-23 新增）：呼叫端
+    不必自行先跑 NER 組出 `mentions`，只要傳入 `ner_tagger`，本函式會用
+    `entity_extraction_service.extract_mentions()` 對原始句子現場抽取。"""
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    text = "理查·史東創立了太空公司。史東隨後研發了獵鷹火箭。"
+    ingestion_service.chunk_and_stage(text, "report.txt", staging)
+
+    class FakeNerTagger:
+        def entities(self, sentence: str):
+            if sentence == "理查·史東創立了太空公司。":
+                return [("理查·史東", "人物")]
+            if sentence == "史東隨後研發了獵鷹火箭。":
+                return [("史東", "人物")]
+            return []
+
+    paths, chunks = await prepare_svo_ready_chunks(
+        "report.txt", staging, output, ner_tagger=FakeNerTagger(),
+    )
+
+    normalized = chunks[0].normalized_sentences
+    assert normalized[0] == "理查·史東創立了太空公司。"
+    # 「史東」透過登記表子字串規則併入「理查·史東」，就地替換為文件內暫定標準名，
+    # 證實 ner_tagger 產生的 mentions 確實有餵進 §a REGISTRY／ALIASCHECK。
+    assert normalized[1] == "理查·史東隨後研發了獵鷹火箭。"
+
+
+@pytest.mark.asyncio
+async def test_pipeline_explicit_mentions_take_priority_over_ner_tagger(tmp_path):
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    text = "馬斯克創立了太空公司。"
+    ingestion_service.chunk_and_stage(text, "report.txt", staging)
+
+    class ExplodingNerTagger:
+        def entities(self, sentence: str):
+            raise AssertionError("mentions 已明確提供時不應呼叫 ner_tagger")
+
+    paths, chunks = await prepare_svo_ready_chunks(
+        "report.txt", staging, output,
+        mentions=[[]],
+        ner_tagger=ExplodingNerTagger(),
+    )
+
+    assert len(chunks) == 1
+
+
+@pytest.mark.asyncio
 async def test_pipeline_persists_svo_index_to_disk(tmp_path):
     staging = tmp_path / "staging"
     output = tmp_path / "output"

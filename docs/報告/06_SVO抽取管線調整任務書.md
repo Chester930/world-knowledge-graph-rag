@@ -88,7 +88,7 @@
 
 ---
 
-## 4. 實作項目狀態（2026-07-22 更新）
+## 4. 實作項目狀態（2026-07-23 更新）
 
 - [x] SVO 專用切塊函式——`services/svo_chunking.py::build_svo_chunks()`，句數上限＋重疊（`max_sentences`／`overlap_sentences`，300 字元上限已拿掉）
 - [x] 事實層級去重——`svo_service.py::merge_triples_to_graph()` 的關係 MERGE 鍵改為 `(kg_id, subject, rel_type, object)`，來源改用邊上累積的 `citations_json`
@@ -102,12 +102,14 @@
 - [x] 3.1.2 `GETSENT` 讀取端三層判斷——`parser/chunk_writer.py::read_sentences_index()`／`read_original_text()`＋`services/ingestion_service.py::get_or_rebuild_sentences()`，測試見 `tests/test_chunk_writer.py`／`tests/services/test_ingestion_service.py::TestGetOrRebuildSentences`（9 項）
 - [x] `task_queue.db`（3.1.2 `ENQUEUE`／`RESTART`／`TRUST`／`SCAN`／`REBUILD`）——新增 `services/task_queue_service.py`，測試見 `tests/services/test_task_queue_service.py`（16 項）；跨 KG 排程政策未定案，見論文正文說明
 - [x] 代名詞消解（3.4 §a `PRONCHECK`／`PRONLLM`，2026-07-21 決策改用 10 報告 POS＋正則雙軌偵測取代 05 任務書單一正則）——新增 `services/pronoun_resolution_service.py`，含雙軌三路分流、背景 LLM 詞庫審核（`custom_pronoun_lexicon.txt`）、前 4 後 2 雙向上下文消解主體；新增 `spacy` 依賴（`requirements.txt`，中文模型 `zh_core_web_sm` 需另外下載，本專案環境尚未安裝，`SpacyPosTagger` 本身未經實測，僅測試過其依賴注入介面），測試見 `tests/services/test_pronoun_resolution_service.py`（18 項）
-- [x] `CHUNKREADY` 端到端串接——新增 `services/svo_preprocessing_service.py::prepare_svo_ready_chunks()`，串連 `GETSENT`→（可選）`REGISTRY`→`PRONCHECK`/`PRONLLM`→`SVOGROUP`，測試見 `tests/services/test_svo_preprocessing_service.py`（3 項）；**具名提及抽取（NER）仍是未解決的上游依賴**，`mentions=None` 時跳過整個別名登記表階段
+- [x] `CHUNKREADY` 端到端串接——新增 `services/svo_preprocessing_service.py::prepare_svo_ready_chunks()`，串連 `GETSENT`→（可選）`REGISTRY`→`PRONCHECK`/`PRONLLM`→`SVOGROUP`，測試見 `tests/services/test_svo_preprocessing_service.py`
+- [x] **具名提及抽取（NER，2026-07-23 新增）**——`services/entity_extraction_service.py`：混合式抽取（`SpacyNerTagger`＋正則代號兜底，2026-07-23 使用者決策，理由見下方誠實侷限段落），`NerTagger` Protocol 依賴注入（比照 `pronoun_resolution_service.PosTagger`），`extract_mentions()` 產出 `entity_registry_service.apply_registry()` 所需的 `mentions`；`prepare_svo_ready_chunks()` 新增 `ner_tagger` 參數，`mentions=None` 但提供 `ner_tagger` 時自動對原始句子現場抽取，`mentions` 明確提供時優先採用（互斥）。測試見 `tests/services/test_entity_extraction_service.py`（5 項）／`tests/services/test_svo_preprocessing_service.py` 新增 2 項。**⚠️ 尚未在 `_trigger_extraction()` 接上**：與 `SpacyPosTagger` 同樣的既有風險，本專案環境 spaCy／`zh_core_web_sm` 仍未安裝驗證，`routers/staging.py::_trigger_extraction()` 目前仍以 `ner_tagger=None` 呼叫，§a 別名登記表整體仍是跳過狀態，行為未變——NER 介面/上游模組已就緒，缺的只剩「production 環境接上真的 spaCy」這最後一步（第四章實作範圍）。
 - [x] **系統接線（2026-07-21）**：`routers/staging.py::_trigger_extraction()` 在 `assign()`／`confirm_cluster()`／`classify()`（自動分配）三個端點呼叫 `assign_document_to_kg()` 之後，同步觸發 `CHUNKREADY`（`prepare_svo_ready_chunks()`）＋`ENQUEUE`（`task_queue_service.enqueue()`）；`main.py` 的 `lifespan` 新增呼叫 `svo_service.create_entity_index()`（原本從未被呼叫）與 `task_queue_service.ensure_ready()`（`RESTART` 進入點，`KGRepository` 為 stub 時降級為空 KG 清單、不讓 app 啟動失敗）。測試見 `tests/routers/test_staging.py`（3 項）。
 - [ ] `MIGRATEVEC`（向量化結果隨重新歸屬遷移至新 KG）——**結構性阻斷，非 3.1.2 範圍缺口**：`repositories/concept_repo.py` 目前連寫入 ConceptNode 的方法都不存在，只有索引 schema 與 KNN 查詢；此節點依賴 3.2 §a（RQ2，ConceptNode 路由層）先實作，本次不處理，詳見論文 3.1.2「MIGRATEVEC 誠實侷限」註記
 - [ ] `Entity.aliases` 對外查詢 API（已寫入 `aliases` 屬性作為聚合快取，尚無對外查詢 API，非阻斷性待辦）
 - [ ] `RECHECK` 效能優化（每次合併皆同步重新聚合全部 `HAS_ENTITY` 邊，見 3.4 §b「效能待決策」，留給第四章/第五章評估）
-- [ ] 具名提及抽取（NER）——`entity_registry_service.apply_registry()` 與 `svo_preprocessing_service.prepare_svo_ready_chunks()` 的 `mentions` 參數目前無任何模組產生，是別名登記表真正啟用前的最後一塊拼圖
+- [ ] NER 於 `_trigger_extraction()` 正式接線——待 spaCy／`zh_core_web_sm` 於第四章實作環境安裝驗證後，把 `entity_extraction_service.SpacyNerTagger()` 接進 `routers/staging.py::_trigger_extraction()` 的 `prepare_svo_ready_chunks()` 呼叫，§a 別名登記表才會在正式流程中真正啟用（目前模組與測試已就緒，只缺這一步接線）
+- [ ] **3.1.3 `STRUCT`／`SEMANTIC` 兩步驗證（設計提案，尚未實作）**——`REJECT` 分支的落差（不合法 rel_type 應退回 `RELATED_TO` 兜底而非丟棄整條三元組）已於 2026-07-23 修補（`extract_svo_triples()`），但 `STRUCT`（結構驗證）／`SEMANTIC`（語意驗證，決定 `MAPEXIST` 或 `EXPAND`）兩層本身仍是空白；`EXPAND`（動態擴充 `SVO_REL_TYPES` 詞彙表）牽動的 runtime 併發寫入/持久化問題尚未討論，實作前需先定案「受控詞彙表要不要真的動態擴充」，非單純的抽取驗證問題，留待與 3.3（RQ4a）一併決策
 - [ ] 代名詞消解的句子級 checkpoint（3.4 §a 標準化流程整體已有 `normalization_progress` 追蹤，但代名詞消解本身跑到一半中斷時，目前仍是整份句子清單重跑，未細分到句子層級）
 
 ---

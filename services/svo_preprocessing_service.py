@@ -14,6 +14,7 @@ from pathlib import Path
 
 from core.providers.base import EmbeddingProvider, LLMProvider
 from parser.chunk_writer import document_folder_path
+from services.entity_extraction_service import NerTagger, extract_mentions
 from services.entity_registry_service import EntityRegistry, Mention, apply_registry
 from services.ingestion_service import get_or_rebuild_sentences
 from services.pronoun_resolution_service import PosTagger, resolve_coreference_pipeline
@@ -73,6 +74,7 @@ async def prepare_svo_ready_chunks(
     output_dir: Path,
     *,
     mentions: list[list[Mention]] | None = None,
+    ner_tagger: NerTagger | None = None,
     entity_llm_provider: LLMProvider | None = None,
     entity_registry: EntityRegistry | None = None,
     entity_registry_start_idx: int = 0,
@@ -84,15 +86,23 @@ async def prepare_svo_ready_chunks(
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
 ) -> tuple[list[Path], list[SVOChunk]]:
-    """`CHUNKREADY`：取得句子清單 → （若提供 `mentions`）套用文件內別名登記表
+    """`CHUNKREADY`：取得句子清單 → （若有 `mentions` 可用）套用文件內別名登記表
     → 代名詞消解 → （若提供 `embedding_provider`）逐句 embedding → SVO 專用
     切塊並落地。
 
     對應 3.4 §a 完整 Behavior Tree：`REGISTRY`／`ALIASCHECK`／`PROMOTE`
-    （`entity_registry_service`，`mentions` 為 `None` 時跳過，見下方誠實
-    侷限）→ `PRONCHECK`／`PRONLLM`（`pronoun_resolution_service`）→
+    （`entity_registry_service`，`mentions` 與 `ner_tagger` 皆為 `None` 時
+    跳過，見下方誠實侷限）→ `PRONCHECK`／`PRONLLM`（`pronoun_resolution_service`）→
     `STDSENTS` → `SENTEMBED`（`write_sentence_embeddings()`，`embedding_provider`
     為 `None` 時跳過）→ `SVOGROUP`（`svo_chunking`）。
+
+    `mentions`／`ner_tagger` 兩者是「已知具名提及」與「交給本函式現場抽取」
+    的兩種輸入方式，互斥使用：明確傳入 `mentions` 時優先採用（呼叫端已自行
+    跑過 NER 或有其他來源）；`mentions=None` 但傳入 `ner_tagger` 時，改用
+    `entity_extraction_service.extract_mentions()` 對 `original_sentences`
+    現場抽取（見 `services/entity_extraction_service.py`，spaCy NER＋正則
+    代號兜底的混合式抽取）；兩者皆為 `None` 時退化為現行行為，整個 §a 別名
+    登記表階段被跳過。
 
     `SENTEMBED` 只是標準化句子清單的一個平行輸出（供未來 08 報告的「標準化
     RAG」檢索軌道使用），不影響、也不依賴別名登記或代名詞消解本身——即使
@@ -106,15 +116,19 @@ async def prepare_svo_ready_chunks(
     第 3.3 節，尚待決定是否要做），本函式呼叫代名詞消解時一律處理完整的
     句子清單。
 
-    ⚠️ **誠實侷限**：`mentions`（具名提及清單，每句一份候選別名列表）目前
-    沒有任何模組產生——具名提及抽取（NER）不在本函式或任何既有模組的職責
-    範圍內，是尚待補齊的上游依賴。`mentions=None`（現行唯一可行的呼叫方式）
-    時，本函式跳過整個 §a 文件內別名登記表階段，直接從句子清單進入代名詞
-    消解，此時輸出的「標準化句子」只完成代名詞消解、未完成別名收斂——這是
-    目前系統的真實狀態，非本函式刻意簡化，待 NER 模組就緒後才能真正啟用
-    別名登記表整合。
+    ⚠️ **誠實侷限（2026-07-23 部分解除）**：`services/entity_extraction_service.py`
+    已補上 NER 模組（`SpacyNerTagger`＋正則代號兜底），介面已就緒可傳入
+    `ner_tagger` 啟用；但 spaCy／`zh_core_web_sm` 在本專案環境仍未安裝驗證
+    （與 `pronoun_resolution_service.SpacyPosTagger` 同樣的既有風險），
+    `_trigger_extraction()`（`routers/staging.py`）目前仍以 `mentions=None`／
+    `ner_tagger=None` 呼叫本函式——此時 §a 別名登記表階段整個跳過，行為與
+    NER 模組補上之前相同，非本函式刻意簡化，待 spaCy 依賴於第四章實際安裝
+    驗證後才會在 `_trigger_extraction()` 接上 `ner_tagger`。
     """
     original_sentences = await get_or_rebuild_sentences(source, base_dir)
+
+    if mentions is None and ner_tagger is not None:
+        mentions = extract_mentions(original_sentences, ner_tagger)
 
     normalized_sentences = original_sentences
     if mentions is not None:
