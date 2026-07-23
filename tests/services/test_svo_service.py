@@ -166,7 +166,9 @@ class InMemoryEntityDriver:
 
 
 @pytest.mark.asyncio
-async def test_extract_svo_triples_parses_valid_json_and_filters_invalid_rel_type():
+async def test_extract_svo_triples_parses_valid_json_and_downgrades_invalid_rel_type():
+    """3.1.3 REJECT：不合法 rel_type 退回 RELATED_TO 兜底，三元組本身保留
+    （不可靜默丟棄整條事實），見 03_系統設計與方法論.md § 3.1.3。"""
     llm = FakeLLM("""
     {"triples":[
       {"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":4},
@@ -176,9 +178,12 @@ async def test_extract_svo_triples_parses_valid_json_and_filters_invalid_rel_typ
 
     triples = await svc.extract_svo_triples("A 導致 B。", llm)
 
-    assert len(triples) == 1
+    assert len(triples) == 2
     assert triples[0].subject == "A"
     assert triples[0].rel_type == "CAUSES"
+    assert triples[1].subject == "X"
+    assert triples[1].rel_type == "RELATED_TO"
+    assert triples[1].verb == "關係"
     assert "合法 rel_type" in llm.prompts[0]
 
 

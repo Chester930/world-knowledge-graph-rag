@@ -95,9 +95,9 @@ async def extract_svo_triples(text: str, llm_provider: LLMProvider | None = None
     triples: list[SVOTriple] = []
     for item in _parse_triples_payload(raw):
         rel_type = str(item.get("rel_type", "RELATED_TO")).strip()
-        if rel_type not in SVO_REL_TYPES:
-            continue
-        item["rel_type"] = rel_type
+        # 3.1.3 REJECT：不在受控詞彙表內的 rel_type 退回 RELATED_TO 兜底，
+        # 三元組本身保留（不可靜默丟棄整條事實），原始語意仍留在 verb 欄位。
+        item["rel_type"] = rel_type if rel_type in SVO_REL_TYPES else "RELATED_TO"
         try:
             triples.append(SVOTriple(**item))
         except Exception:
