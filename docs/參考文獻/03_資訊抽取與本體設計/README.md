@@ -4,6 +4,8 @@
 本資料夾支撐 **RQ4a（預留）**：受控關係詞彙的具體內容依據（實體類型／關係類型），以及查詢時「使用者措辭→canonical 類型」的關係連結機制。
 
 > **2026-07-24 範疇擴充說明**：本資料夾原本只涵蓋「Schema.org 為錨點的受控關係詞彙標準化」這個較窄的主題；因應 3.1.3 節設計討論（實體類型改為選填/多值、關係類型收斂為扁平的 ConceptNet 36 類、新增查詢時關係連結機制），本次新增 6 篇文獻，分兩組：① 公用類型庫的具體內容依據（OntoNotes、ConceptNet）與其結構性佐證（ACE、Aguilar et al.）；② 查詢時關係連結（Relation Linking）機制依據（STAGG、Falcon 2.0、SLING）。
+>
+> **2026-07-26 再擴充**：因應「LLM 抽取當下該不該把原始三元組抽取、實體型別提案、關係型別收斂拆成多階段處理」的分工討論，新增 2 篇討論「抽取流程分階段設計」的文獻（KGGen、AutoRE）。
 
 ## 內容清單
 
@@ -18,7 +20,9 @@
 | `aguilar-et-al-2014-ace-ere-tackbp-framenet-comparison.pdf` | Aguilar, Beller, McNamee, Van Durme, Strassel, Song & Ellis (2014), *A Comparison of the Events and Relations Across ACE, ERE, TAC-KBP, and FrameNet Annotation Standards*, Proceedings of the 2nd Workshop on EVENTS (ACL 2014), pp.45-53 | ACL Anthology [W14-2907](https://aclanthology.org/W14-2907/) | ✅ 🟢 已下載（2026-07-24） |
 | `yih-et-al-2015-staged-query-graph-generation.pdf` | Yih, Chang, He & Gao (2015), *Semantic Parsing via Staged Query Graph Generation: Question Answering with Knowledge Base*, ACL-IJCNLP 2015, pp.1321-1331 | ACL Anthology [P15-1128](https://aclanthology.org/P15-1128/)；官方程式碼 [scottyih/STAGG](https://github.com/scottyih/STAGG)（111★，2026-07-24 查證） | ✅ 🟢 已下載（2026-07-24） |
 | `sakor-et-al-2020-falcon2.pdf` | Sakor, Singh, Patel & Vidal (2020), *Falcon 2.0: An Entity and Relation Linking Tool over Wikidata*, CIKM '20 | arXiv:[1912.11270](https://arxiv.org/abs/1912.11270)；官方程式碼 [SDM-TIB/falcon2.0](https://github.com/SDM-TIB/falcon2.0)（120★，2026-07-24 查證） | ✅ 🟢 已下載（2026-07-24） |
-| `mihindukulasooriya-et-al-2020-sling-relation-linking.pdf` | Mihindukulasooriya et al. (2020), *Leveraging Semantic Parsing for Relation Linking over Knowledge Bases*, ISWC 2020 (LNCS 12506) | arXiv:[2009.07726](https://arxiv.org/abs/2009.07726)；程式碼收錄於 [IBM/neuro-symbolic-ai](https://github.com/IBM/neuro-symbolic-ai)（123★，2026-07-24 查證） | ✅ 🟢 已下載（2026-07-24） |
+| `mihindukulasooriya-et-al-2020-sling-relation-linking.pdf` | Mihindukulasooriya et al. (2020), *Leveraging Semantic Parsing for Relation Linking over Knowledge Bases*, ISWC 2020 (LNCS 12506) | arXiv:[2009.07726](https://arxiv.org/abs/2009.07726)；官方程式碼 [IBM/kbqa-relation-linking](https://github.com/IBM/kbqa-relation-linking)（22★，2026-07-26 查證訂正） | ✅ 🟢 已下載（2026-07-24）；⚠️ **2026-07-26 訂正參考專案連結**：原記錄的 `IBM/neuro-symbolic-ai`（123★）是 IBM 通用神經符號 AI 工具箱，不是 SLING 本身的程式碼，查證有誤，已更正為正確倉庫 `IBM/kbqa-relation-linking` |
+| `xue-et-al-2024-autore-doc-level-re.pdf` | Xue, Zhang, Dong & Tang (2024), *AutoRE: Document-Level Relation Extraction with Large Language Models*, ACL 2024 System Demonstrations | ACL Anthology [2024.acl-demos.20](https://aclanthology.org/2024.acl-demos.20/)；arXiv:[2403.14888](https://arxiv.org/abs/2403.14888)；官方程式碼 [THUDM/AutoRE](https://github.com/THUDM/AutoRE)（85★，2026-07-26 查證） | ✅ 🟢 已下載（2026-07-26） |
+| `mo-et-al-2025-kggen.pdf` | Mo, Yu, Kazdan, Cabezas, Mpala, Yu, Cundy, Kanatsoulis & Koyejo (2025), *KGGen: Extracting Knowledge Graphs from Plain Text with Language Models*, NeurIPS 2025 | arXiv:[2502.09956](https://arxiv.org/abs/2502.09956)；官方程式碼 [stair-lab/kg-gen](https://github.com/stair-lab/kg-gen)（1,233★，2026-07-26 查證） | ✅ 🟢 已下載（2026-07-26） |
 
 **未下載（標註規範非期刊論文，僅記書目）**：ACE 2005（Automatic Content Extraction）Relation Extraction Task 標註規範，Linguistic Data Consortium（LDC）發布——⚠️ 誠實聲明：這是 LDC 的任務標註規範文件（annotation guideline），性質上是標註標準/spec，不是同行評審出版品，不適用 🟢/🟡 信任分級；6 個粗類（`PART-WHOLE`／`PHYSICAL`／`PERSONAL-SOCIAL`／`ORG-AFFILIATION`／`AGENT-ARTIFACT`／`GEN-AFFILIATION`）、總計 18 個細類這個事實，透過上方 Aguilar et al. (2014) 這篇正式發表的比較論文查證存在性，未另外取得 LDC 原始標註規範全文。
 
@@ -36,6 +40,8 @@
 | **Yih et al. (2015) STAGG**（2026-07-24 新增） | 查詢時「使用者動詞措辭→canonical 關係類型」比對機制的**核心文獻**——原文以神經網路模型將問題與 predicate 序列投影到同一向量空間、以相似度比對，與本論文 3.2 §b 設計的「query 動詞 embedding vs. 36 個 canonical 類型 embedding，算 cosine 相似度」機制精神一致，差別僅在本論文不需重新訓練模型、直接用現成 embedding provider 即可 |
 | **Sakor et al. (2020) Falcon 2.0**（2026-07-24 新增） | 佐證「Relation Linking／關係連結」是 KBQA 領域被廣泛研究的既定任務，非本論文獨創的孤立問題。⚠️ **誠實聲明**：Falcon 2.0 本身是**規則式**（rule-based）系統，非 embedding 相似度比對，與本論文機制不同，僅能佐證任務重要性，不能當作 cosine 機制本身的直接依據 |
 | **Mihindukulasooriya et al. (2020) SLING**（2026-07-24 新增） | 補充佐證——結合語意剖析（AMR）＋遠端監督＋語意相似度多訊號的混合式關係連結系統，比 Falcon 2.0 更接近本論文機制（含相似度訊號），但仍是混合式，非純 cosine，角色同樣是佐證任務領域的成熟度 |
+| **Xue et al. (2024) AutoRE**（2026-07-26 新增） | 佐證「把關係型別判斷從原始三元組抽取中拆開處理」這個分工方向——提出 RHF（Relation-Head-Facts）三階段拆解：先判斷關係候選、再找主詞實體、最後才產出完整三元組。⚠️ **誠實聲明**：AutoRE 的拆解動機是微調模型的訓練資料量失衡問題（關係判斷 2.8%／主詞辨識 24.23%／事實抽取 72.97%，三個 QLoRA 子模組各自訓練），是微調場景，非本論文採用的 prompting 場景，**具體機制不可直接套用**，僅能佐證「拆開處理避免困難子任務被簡單子任務淹沒」這個大方向 |
+| **Mo et al. (2025) KGGen**（2026-07-26 新增） | 目前查到與本論文「抽取分工」決策**最直接對應**的先例——採用「先抽實體、再抽關係」兩階段 LLM 呼叫設計，作者明確指出目的是「降低單次呼叫的認知負荷、減少錯誤傳播」，與本論文 3.1.3 節「原始抽取＋實體型別提案（同一次呼叫）」與「關係型別比對 `SIM`／`ESCALATE3`／`EXPAND`（分階段、多為非 LLM 或條件式 LLM 呼叫）」的分工方向一致。⚠️ **誠實聲明**：KGGen 的兩階段拆分軸是「實體 vs. 關係」，本論文的拆分軸是「原始抽取 vs. 型別收斂比對」，兩者拆分的維度不完全相同，不宣稱機制等價，僅佐證「分階段處理可降低認知負荷、減少錯誤傳播」這個原則本身有文獻支持 |
 
 ## 待辦
 
@@ -45,3 +51,5 @@
 - [ ] 確認 Schema.org 屬性的覆蓋率：在本系統語料中，公用實體類型庫（OntoNotes 18 類）有多少比例能直接映射到 schema: Type？（2026-07-24 更正：此問題原本問「30 種 SVO 關係」，但 Schema.org 的 property 是綁定特定 Type 的具體屬性，與本論文抽象語意關係領域不合，此覆蓋率查核應改問**實體類型**而非關係，見 3.1.3 節「公用類型庫是否需要 Schema.org 補充」討論）
 - [ ] （2026-07-24 新增）STAGG／Falcon 2.0／SLING 三篇皆僅查證存在性與角色定位，尚未逐篇精讀方法章節細節，寫作定稿前需比照其餘核心對照文獻補齊
 - [ ] （2026-07-24 新增）BYOKG-RAG（Mavromatis et al., 2025, AWS Labs，🟡 僅 arXiv，未確認正式發表）曾在查證過程中被提及為當代 LLM 時代的補充線索，但 PDF 摘錄未能確認其是否真的採用「cosine 先篩、不確定再交給 LLM 仲裁」的具體流程，本次未正式採用，若需要更貼近 LLM 時代的佐證可再評估是否精讀全文
+- [ ] （2026-07-26 新增）**ConceptNet 36 個核心關係的完整名稱清單、OntoNotes 18 類的完整名稱清單，目前論文正文與本 README 皆只有總數描述＋少數範例，從未逐一列出**——`core/constants.py::SVO_REL_TYPES` 要真正改版、`ENTITY_TYPES` 常數要新增之前，需先去 ConceptNet 5.5／OntoNotes 原文把完整清單列出來，這是程式碼落地前的最後一塊拼圖
+- [ ] （2026-07-26 新增）AutoRE／KGGen 僅查證摘要與方法概述層級（透過 WebSearch/WebFetch 查證，非逐篇精讀全文 PDF），寫作定稿前需比照其餘核心對照文獻補齊精讀
