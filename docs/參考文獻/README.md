@@ -10,7 +10,7 @@
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
 | `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）；01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 25 篇 |
-| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留）；03_系統設計與方法論.md § 3.1.3／3.1.4／3.2 §b（2026-07-24 擴充；2026-07-26 補充抽取分工文獻） | 🟡 已下載 10 篇，1 篇付費未下載，另有 1 篇標註規範非論文（僅記書目） |
+| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留）；03_系統設計與方法論.md § 3.1.3／3.1.4／3.2 §b（2026-07-24 擴充；2026-07-26 補充抽取分工文獻與 cascade deferral 文獻） | 🟡 已下載 18 篇，1 篇付費未下載，另有數篇標註規範/社群方針頁面非論文（僅記書目） |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.4.8（RQ6） | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.5（評估方法論的橫向文獻回顧） | ⚪ 待下載 |
 | `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻）；02_文獻探討.md § 2.6.1 摘要收錄 | 🟢 已下載 2 篇 |
@@ -89,6 +89,8 @@
 | `mo-et-al-2025-kggen.pdf` | Mo et al. (2025), *KGGen*，NeurIPS 2025（抽取分工設計佐證，供 3.1.3 使用） | [arXiv:2502.09956](https://arxiv.org/abs/2502.09956)；[GitHub stair-lab/kg-gen](https://github.com/stair-lab/kg-gen)（1,233★） |
 | `bloodgood-vijay-shanker-2009-stopping-active-learning.pdf` | Bloodgood & Vijay-Shanker (2009), *Stabilizing Predictions 停止 AL 方法*，CoNLL 2009（3.1.3 §a 人機一致率畢業機制的支持文獻，2026-07-26 新增） | [ACL Anthology W09-1107](https://aclanthology.org/W09-1107/)；[arXiv:1409.5165](https://arxiv.org/abs/1409.5165) |
 | `bloodgood-grothendieck-2013-analysis-stopping-active-learning.pdf` | Bloodgood & Grothendieck (2013), *Analysis of Stopping Active Learning*，CoNLL 2013（上述方法的理論分析，2026-07-26 新增） | [ACL Anthology W13-3502](https://aclanthology.org/W13-3502/)；[arXiv:1504.06329](https://arxiv.org/abs/1504.06329) |
+| `jitkrittum-et-al-2023-confidence-cascade-deferral.pdf` | Jitkrittum et al. (2023, Google Research), *When Does Confidence-Based Cascade Deferral Suffice?*，NeurIPS 2023（3.1.3 主圖 `SIM`／`ESCALATE3` 機制核心理論依據，2026-07-26 新增） | [arXiv:2307.02764](https://arxiv.org/abs/2307.02764) |
+| `madras-et-al-2018-learning-to-defer.pdf` | Madras, Pitassi & Zemel (2018), *Predict Responsibly: Learning to Defer*，NeurIPS 2018（learning-to-defer 術語與理論定位，2026-07-26 新增） | [arXiv:1711.06664](https://arxiv.org/abs/1711.06664) |
 
 **未下載（付費，不下載全文）**：Guha et al. (2016), *Schema.org: Evolution of Structured Data on the Web*（*Communications of the ACM* 59(2)）——ACM 需付費/機構帳號，無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
 
