@@ -10,10 +10,12 @@ from uuid import UUID
 from neo4j import AsyncDriver
 
 from core.constants import (
+    COMPARE_COSINE_THRESHOLD,
     ENTITY_DEDUP_COSINE_THRESHOLD,
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
     ENTITY_TYPES,
+    SVO_REL_TYPE_DESCRIPTIONS,
     SVO_REL_TYPES,
     VECTOR_DIM,
 )
@@ -147,11 +149,94 @@ def _svo_prompt(text: str) -> str:
 """
 
 
-async def extract_svo_triples(text: str, llm_provider: LLMProvider | None = None) -> list[SVOTriple]:
+# SIM 節點的型別描述句 embedding 快取——依 embedding_provider.model_name 為 key，
+# 33 個型別的描述句 embedding 在同一個 provider/model 底下固定不變，避免每次
+# extract_svo_triples() 呼叫都重新對全部 33 筆描述句呼叫一次 embedding provider。
+_TYPE_DESCRIPTION_EMBEDDING_CACHE: dict[str, dict[str, list[float]]] = {}
+
+
+def _type_description_embeddings(embedding_provider: EmbeddingProvider) -> dict[str, list[float]]:
+    cache = _TYPE_DESCRIPTION_EMBEDDING_CACHE.get(embedding_provider.model_name)
+    if cache is None:
+        rel_types = sorted(SVO_REL_TYPE_DESCRIPTIONS)
+        vectors = embedding_provider.encode_batch([SVO_REL_TYPE_DESCRIPTIONS[t] for t in rel_types])
+        cache = dict(zip(rel_types, vectors))
+        _TYPE_DESCRIPTION_EMBEDDING_CACHE[embedding_provider.model_name] = cache
+    return cache
+
+
+def classify_relation_by_embedding(
+    verb: str, embedding_provider: EmbeddingProvider
+) -> tuple[str, float]:
+    """SIM：`verb` embedding 與 33 個關係型別**描述句**（非識別碼字串本身，見
+    `SVO_REL_TYPE_DESCRIPTIONS` docstring）embedding 算 cosine 相似度，取最相似者。
+    回傳 (最相似的型別, 該型別的相似度分數)。"""
+    type_vectors = _type_description_embeddings(embedding_provider)
+    verb_vec = embedding_provider.encode(verb)
+    best_type = ""
+    best_score = -1.0
+    for rel_type, vec in type_vectors.items():
+        score = cosine_similarity(verb_vec, vec)
+        if score > best_score:
+            best_score = score
+            best_type = rel_type
+    return best_type, best_score
+
+
+async def _reconcile_rel_type(
+    verb: str,
+    llm_rel_type: str,
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    llm_provider: LLMProvider | None,
+) -> str:
+    """COMPARE＋ESCALATE3：`SIM` 判斷是否與 LLM 自報的 rel_type 一致，見
+    docs/論文/03_系統設計與方法論.md § 3.1.3 主圖。
+
+    無 `embedding_provider` 時直接採信 LLM 自報值，不強行比對。`COMPARE` 一致
+    （embedding 最相似型別＝LLM 自報值，且分數 ≥ `COMPARE_COSINE_THRESHOLD`）時，
+    兩個獨立訊號互相驗證，直接採用 LLM 自報值；不一致（含分數不足門檻，視為
+    embedding 對所有型別都不夠相似）時，交由 `ESCALATE3` 第二次 LLM 呼叫仲裁
+    「究竟是原答案、embedding 建議的候選，還是兩者皆非」。**兩者皆非**（判定為
+    候選新類別）目前退回 `RELATED_TO` 兜底——3.1.3 §a `EXPAND` 候選池／治理機制
+    尚未實作，此為明確標註的暫時限制，非漏未處理。
+    """
+    if embedding_provider is None:
+        return llm_rel_type
+
+    best_type, best_score = classify_relation_by_embedding(verb, embedding_provider)
+    if best_type == llm_rel_type and best_score >= COMPARE_COSINE_THRESHOLD:
+        return llm_rel_type
+
+    if llm_provider is None:
+        return llm_rel_type
+
+    prompt = (
+        f"動詞片語「{verb}」在知識圖譜三元組中最貼切的關係型別，"
+        f"應該是「{llm_rel_type}」還是「{best_type}」？"
+        "若兩者皆不貼切，回答「皆非」。只回答其中一個型別名稱或「皆非」，不要有其他文字。"
+    )
+    answer = (await llm_provider.generate(prompt)).strip()
+    if answer == best_type:
+        return best_type
+    if answer == llm_rel_type:
+        return llm_rel_type
+    # ESCALATE3 判定兩者皆非（候選新類別）：EXPAND 候選池／治理機制尚未實作，
+    # 暫時退回 RELATED_TO，比照 REJECT 兜底邏輯，三元組本身仍保留、不靜默丟棄。
+    return "RELATED_TO"
+
+
+async def extract_svo_triples(
+    text: str,
+    llm_provider: LLMProvider | None = None,
+    embedding_provider: EmbeddingProvider | None = None,
+) -> list[SVOTriple]:
     """用 LLM 抽取受控關係 SVO triples。
 
     未提供 provider 時回傳空清單，讓離線管線與單元測試可以安全呼叫；實際抽取
-    Worker 應明確傳入本地或雲端 LLMProvider。
+    Worker 應明確傳入本地或雲端 LLMProvider。`embedding_provider` 為選填——
+    提供時才會執行 `SIM`／`COMPARE`／`ESCALATE3` 事後驗證（見 `_reconcile_rel_type`），
+    未提供時直接採用 LLM 自報的 rel_type，行為與先前版本一致。
     """
     if not text.strip() or llm_provider is None:
         return []
@@ -162,7 +247,16 @@ async def extract_svo_triples(text: str, llm_provider: LLMProvider | None = None
         rel_type = str(item.get("rel_type", "RELATED_TO")).strip()
         # 3.1.3 REJECT：不在受控詞彙表內的 rel_type 退回 RELATED_TO 兜底，
         # 三元組本身保留（不可靜默丟棄整條事實），原始語意仍留在 verb 欄位。
-        item["rel_type"] = rel_type if rel_type in SVO_REL_TYPES else "RELATED_TO"
+        rel_type = rel_type if rel_type in SVO_REL_TYPES else "RELATED_TO"
+        verb = str(item.get("verb", "")).strip()
+        if verb and embedding_provider is not None:
+            rel_type = await _reconcile_rel_type(
+                verb,
+                rel_type,
+                embedding_provider=embedding_provider,
+                llm_provider=llm_provider,
+            )
+        item["rel_type"] = rel_type
         # 核心庫優先、查不到才查擴充庫的正規化——見 resolve_entity_type() docstring。
         if item.get("subject_type"):
             item["subject_type"] = resolve_entity_type(str(item["subject_type"]))

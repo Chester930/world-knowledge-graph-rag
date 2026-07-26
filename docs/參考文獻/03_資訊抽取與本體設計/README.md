@@ -35,7 +35,7 @@
 
 ## 33 個核心關係型別的描述句／範例句彙整表（2026-07-27 新增）
 
-> 供 `SIM` 節點日後改採「型別描述句 embedding」而非「型別識別碼字串 embedding」時直接取用；32 筆取自 ConceptNet 官方 GitHub wiki `commonsense/conceptnet5/wiki/Relations`（即時查詢版本），`SENSE_OF` 一筆取自 Speer et al. (2017) 論文正文，詳見上方查證說明。
+> 供 `SIM` 節點比對「型別描述句 embedding」（而非「型別識別碼字串 embedding」）直接取用，已於 `core/constants.py::SVO_REL_TYPE_DESCRIPTIONS` 程式碼落地（2026-07-27，見下方 TODO）；32 筆取自 ConceptNet 官方 GitHub wiki `commonsense/conceptnet5/wiki/Relations`（即時查詢版本），`SENSE_OF` 一筆取自 Speer et al. (2017) 論文正文，詳見上方查證說明。
 
 **對稱關係（7）**
 
@@ -156,4 +156,4 @@
 - [ ] （2026-07-26 新增）FrugalGPT（Chen, Zaharia & Zou, 2023）原始論文尚未下載精讀全文，僅透過搜尋確認存在與方向相符，若後續需要更貼近 LLM 系統場景（而非 Jitkrittum et al. 的影像分類實驗）的佐證，可補齊全文查證
 - [x] （2026-07-27 完成）**ConceptNet 官方現行 wiki 查證：`ENTAILS`／`INSTANCE_OF` 已棄用**——`commonsense/conceptnet5/wiki/Relations` 官方頁面明確將兩者列為已棄用（分別建議併入 `MannerOf`/`HasPrerequisite` 與 `IsA`），本論文選擇跟進官方現行建議而非凍結於 2017 年論文快照，`SVO_REL_TYPES` 由 35 個訂正為 33 個，`core/constants.py` 程式碼已同步更正，完整記錄見 `docs/論文/03_變更紀錄.md`「第三十二次調整」
 - [x] （2026-07-27 完成）**33 個型別的官方描述句/範例句彙整**——32 個取自 ConceptNet 官方 GitHub wiki，剩餘 `SENSE_OF` 取自 Speer et al. (2017) 論文正文，兩者合計 33／33 全數覆蓋，彙整表見本檔案上方
-- [ ] （2026-07-27 新增）`SIM` 節點目前的程式碼實作（`services/svo_service.py`）仍是比對型別**識別碼字串**的 embedding，尚未改為比對本檔案彙整的**描述句** embedding——ZS-BERT／AutoRE 佐證的是「應該改」這個方向，具體程式碼改動（是否快取描述句 embedding、如何處理 `SENSE_OF` 這種非 wiki 來源的描述句）留待後續實作階段一併處理，非本輪文獻查證範圍
+- [x] （2026-07-27 完成）**`SIM`／`COMPARE`／`ESCALATE3` 程式碼落地**——`services/svo_service.py` 新增 `classify_relation_by_embedding()`（比對本檔案彙整的 33 個型別**描述句** embedding，取代原本比對型別識別碼字串的疑慮，`core/constants.py::SVO_REL_TYPE_DESCRIPTIONS` 即為描述句來源，含 model_name 快取避免每次呼叫重算 33 筆 embedding）與 `_reconcile_rel_type()`（`COMPARE`＋`ESCALATE3`，比照 `resolve_entity_name()` 既有 ESCALATE 模式），並接線進 `extract_svo_triples()` 新增的選填 `embedding_provider` 參數（未提供時行為與先前版本相同，向後相容）。⚠️ `ESCALATE3` 判定「兩者皆非」時，因 `EXPAND` 候選池／治理機制尚未實作，暫時退回 `RELATED_TO` 兜底，此為明確標註的暫時限制。新增 7 項單元測試，全套 299 passed。子問題 A（LLM 仲裁準確度是否均勻）與 `COMPARE_COSINE_THRESHOLD` 未經校準這兩項既有限制不受本次實作影響，完整記錄見 `docs/論文/03_變更紀錄.md`「第三十三次調整」

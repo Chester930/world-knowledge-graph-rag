@@ -64,6 +64,59 @@ SVO_REL_TYPES: set[str] = {
     "RECEIVES_ACTION", "SENSE_OF", "SYMBOL_OF", "USED_FOR",
 }
 
+# `SIM` 節點比對門檻——見 docs/論文/03_系統設計與方法論.md § 3.1.3 主圖 `COMPARE`
+# 節點：embedding 最相似的型別是否與 LLM 自報的 rel_type 一致，且最高分需 ≥ 此門檻，
+# 兩者皆成立才視為兩個獨立訊號互相驗證、直接放行；否則交由 `ESCALATE3` 仲裁。
+# ⚠️ 暫定值，未經校準：類比 `ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD`（同為 0.75），
+# 非從文獻直接推導，第五章消融實驗需依本論文實際資料重新校準（見
+# docs/參考文獻/03_資訊抽取與本體設計/README.md「第三十一次調整」查證記錄）。
+COMPARE_COSINE_THRESHOLD = 0.75
+
+# `SIM` 節點的比對目標——33 個關係型別各自的自然語言描述句／範例句（而非型別
+# 識別碼字串本身），依據 Chen & Li (2021) ZS-BERT 的描述句 embedding 設計與
+# Xue et al. (2024) AutoRE 消融實驗（劣質描述句甚至不如不用描述句），見
+# docs/參考文獻/03_資訊抽取與本體設計/README.md「第三十二次調整」。32 筆取自
+# ConceptNet 官方 GitHub wiki（commonsense/conceptnet5/wiki/Relations，即時查詢
+# 版本），`SENSE_OF` 一筆取自 Speer et al. (2017) 論文正文（現行 wiki 未列出此隱含
+# 關係）。key 需與 `SVO_REL_TYPES` 完全一致，兩者以測試互相校驗。
+SVO_REL_TYPE_DESCRIPTIONS: dict[str, str] = {
+    # 對稱關係（7）
+    "RELATED_TO": "A 與 B 有某種一般性的正向關聯，找不到更精確關係時使用，例如 learn 與 erudition",
+    "SYNONYM": "A 與 B 是意義幾乎相同的詞，例如 sunlight 與 sunshine",
+    "ANTONYM": "A 與 B 意義相反，例如 black 與 white",
+    "DISTINCT_FROM": "A 與 B 是互斥、不可能同時成立的對照概念，例如 red 與 blue",
+    "SIMILAR_TO": "A 與 B 相似但不完全相同，例如 mixer 與 food processor",
+    "LOCATED_NEAR": "A 與 B 通常在彼此附近被發現，例如 chair 與 table",
+    "ETYMOLOGICALLY_RELATED_TO": "A 與 B 有共同的字源，例如 folkmusiikki 與 folk music",
+    # 非對稱關係（26）
+    "FORM_OF": "A 是 B 的一個屈折或變化形式，例如 slept 是 sleep 的過去式",
+    "IS_A": "A 是 B 的一個子類型或實例，例如 car 是一種 vehicle",
+    "PART_OF": "A 是 B 的一部分，例如 gearshift 是 car 的一部分",
+    "HAS_A": "B 屬於 A，或 A 擁有 B 作為部件，例如 bird 有 wing",
+    "USED_FOR": "A 被用來做 B，例如 bridge 被用來 cross water",
+    "CAPABLE_OF": "A 能夠做 B，例如 knife 能夠 cut",
+    "AT_LOCATION": "A 是可以找到 B 的地方，例如 butter 通常在 refrigerator 找到",
+    "CAUSES": "A 的發生會導致 B 發生，例如 exercise 導致 sweat",
+    "HAS_FIRST_SUBEVENT": "A 是一個事件，B 是其開始時發生的動作，例如 sleep 從 close eyes 開始",
+    "HAS_LAST_SUBEVENT": "A 是一個事件，B 是其結束時發生的動作，例如 cook 以 clean up kitchen 結束",
+    "HAS_PREREQUISITE": "若要 A 發生，B 必須先發生或存在，例如 dream 的前提是 sleep",
+    "HAS_PROPERTY": "A 具有 B 這個性質，例如 ice 是 cold 的",
+    "MOTIVATED_BY_GOAL": "做 A 是為了達成目標 B，例如 compete 是為了 win",
+    "OBSTRUCTED_BY": "A 會被 B 阻礙或妨礙，例如 sleep 會被 noise 妨礙",
+    "DESIRES": "A 是一個會渴望 B 的實體，例如 person 渴望 love",
+    "CREATED_BY": "B 是產生 A 的過程或行為，例如 cake 由 bake 這個動作產生",
+    "DERIVED_FROM": "A 這個詞是由 B 這個詞衍生而來，例如 pocketbook 衍生自 book",
+    "SYMBOL_OF": "A 象徵或代表 B，例如 red 象徵 fervor",
+    "DEFINED_AS": "A 與 B 意義幾乎相同，但 B 提供更正式或百科式的定義，例如 peace 被定義為 absence of war",
+    "MANNER_OF": "A 是 B 這個較一般行為的特定實現方式，例如 auction 是一種 sale",
+    "HAS_CONTEXT": "A 在特定領域或情境 B 下才使用此意義，例如 astern 在 nautical 情境下使用",
+    "CAUSES_DESIRE": "A 會讓人產生想做 B 的欲望，例如 having no food 會讓人想 go to a store",
+    "MADE_OF": "A 由物質 B 構成，例如 bottle 由 plastic 構成",
+    "RECEIVES_ACTION": "B 是可以對 A 做的動作，例如 button 可以被 push",
+    "EXTERNAL_URL": "A 對應到外部資源的 URL B，例如 knowledge 對應到一個 dbpedia URL",
+    "SENSE_OF": "A 是詞條 B 的一個特定詞義或語意，例如 lead 的名詞義是 lead 這個字的一個 SenseOf",
+}
+
 # 公用實體類型庫——採 schema.org 經實證驗證的最常見類型（2026-07-26 改版，取代原
 # OntoNotes 18 類方案；同日再擴充至 52 類，見下方「2026-07-26 擴充」）。原方案的
 # 「18」總數雖經 Pradhan et al. (2013, CoNLL) 與 Weischedel et al. (2011, Springer

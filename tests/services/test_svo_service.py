@@ -55,6 +55,56 @@ class FakeEmbedding:
         return [self.encode(t) for t in texts]
 
 
+class SequencedFakeLLM:
+    """依呼叫順序回傳不同回應的 LLM 替身——用於同時涉及「LLM_SVO 抽取」與
+    「ESCALATE3 仲裁」兩次獨立呼叫的測試情境；`FakeLLM` 的單一 `payload`
+    無法讓 `generate_json`（抽取）與 `generate`（仲裁）回傳不同內容。"""
+
+    def __init__(self, responses: list[str]):
+        self._responses = list(responses)
+        self.prompts: list[str] = []
+
+    async def generate(self, prompt: str) -> str:
+        self.prompts.append(prompt)
+        return self._responses.pop(0)
+
+    async def stream(self, prompt: str):
+        yield self._responses[0]
+
+    async def generate_json(self, prompt: str) -> str:
+        self.prompts.append(prompt)
+        return self._responses.pop(0)
+
+
+class TypeDescriptionFakeEmbedding:
+    """供 SIM／COMPARE／ESCALATE3 測試使用：只精確控制指定文字的向量方向，
+    其餘（未列出的）文字一律回傳 `default` 向量。刻意不沿用 `FakeEmbedding`
+    的雜湊索引方式——33 個真實描述句彼此雜湊碰撞（`idx % dim`）的機率不可忽略，
+    會讓「哪個型別是最相似者」的測試斷言變得不可靠。
+
+    `model_name` 每個實例各自不同（遞增計數器）——`classify_relation_by_embedding()`
+    以 `model_name` 為 key 快取型別描述句 embedding（見 svo_service.py
+    `_type_description_embeddings` docstring），若多個測試共用同一個
+    `model_name` 字串，會讀到前一個測試殘留的快取內容，測試彼此汙染。
+    """
+
+    _counter = 0
+
+    dim = 3
+
+    def __init__(self, vectors: dict[str, list[float]], default: list[float]):
+        self._vectors = vectors
+        self._default = default
+        TypeDescriptionFakeEmbedding._counter += 1
+        self.model_name = f"fake-type-desc-embedding-{TypeDescriptionFakeEmbedding._counter}"
+
+    def encode(self, text: str) -> list[float]:
+        return self._vectors.get(text, self._default)
+
+    def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self.encode(t) for t in texts]
+
+
 class FakeResult:
     def __init__(self, records=None):
         self.records = records or []
@@ -190,6 +240,119 @@ async def test_extract_svo_triples_parses_valid_json_and_downgrades_invalid_rel_
 @pytest.mark.asyncio
 async def test_extract_svo_triples_without_provider_returns_empty_list():
     assert await svc.extract_svo_triples("A 導致 B。") == []
+
+
+# ── SIM／COMPARE／ESCALATE3（3.1.3 主圖，`SVO_REL_TYPE_DESCRIPTIONS` 描述句比對）──
+
+def test_svo_rel_type_descriptions_keys_match_svo_rel_types():
+    """`SVO_REL_TYPE_DESCRIPTIONS` 的 key 需與 `SVO_REL_TYPES` 完全一致
+    （見 core/constants.py 兩者的 docstring 互相校驗承諾）。"""
+    assert set(svc.SVO_REL_TYPE_DESCRIPTIONS) == svc.SVO_REL_TYPES
+
+
+def test_classify_relation_by_embedding_returns_top_cosine_match():
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+
+    best_type, score = svc.classify_relation_by_embedding("導致", embedding)
+
+    assert best_type == "CAUSES"
+    assert score == pytest.approx(1.0)
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_compare_agrees_skips_escalation():
+    """COMPARE 一致（embedding 最相似型別＝LLM 自報值，且分數 ≥ 門檻）時，
+    直接採用 LLM 自報值，不觸發 ESCALATE3 第二次呼叫。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":4}]}'
+    ])
+
+    triples = await svc.extract_svo_triples("A 導致 B。", llm, embedding_provider=embedding)
+
+    assert triples[0].rel_type == "CAUSES"
+    assert len(llm.prompts) == 1  # 沒有觸發 ESCALATE3
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_compare_disagrees_escalates_and_adopts_embedding_candidate():
+    """COMPARE 不一致（embedding 最相似型別≠LLM 自報值）時交由 ESCALATE3 仲裁，
+    LLM 確認 embedding 建議的候選則採用該候選。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"RELATED_TO","verb":"導致","object":"B","confidence":2}]}',
+        "CAUSES",
+    ])
+
+    triples = await svc.extract_svo_triples("A 導致 B。", llm, embedding_provider=embedding)
+
+    assert triples[0].rel_type == "CAUSES"
+    assert len(llm.prompts) == 2
+    assert "RELATED_TO" in llm.prompts[1] and "CAUSES" in llm.prompts[1]
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_escalate3_confirms_original_llm_answer():
+    """ESCALATE3 仲裁後確認原答案（而非 embedding 建議的候選）時，維持 LLM 自報值。"""
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],  # 33 個型別描述句皆與 verb 不相似，分數低於門檻
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":3}]}',
+        "CAUSES",
+    ])
+
+    triples = await svc.extract_svo_triples("A 導致 B。", llm, embedding_provider=embedding)
+
+    assert triples[0].rel_type == "CAUSES"
+    assert len(llm.prompts) == 2
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_escalate3_neither_falls_back_to_related_to():
+    """ESCALATE3 判定「皆非」（候選新類別）時，EXPAND 候選池／治理機制尚未實作，
+    暫時退回 RELATED_TO 兜底，三元組本身仍保留（見 `_reconcile_rel_type` docstring）。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"MANNER_OF","verb":"導致","object":"B","confidence":2}]}',
+        "皆非",
+    ])
+
+    triples = await svc.extract_svo_triples("A 導致 B。", llm, embedding_provider=embedding)
+
+    assert triples[0].rel_type == "RELATED_TO"
+    assert triples[0].subject == "A"  # 三元組本身保留，不因型別降級而丟棄
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_without_embedding_provider_skips_reconciliation():
+    """未提供 `embedding_provider` 時，維持先前版本行為——直接採用 LLM 自報值，
+    不執行 SIM／COMPARE／ESCALATE3（向後相容）。"""
+    llm = FakeLLM(
+        '{"triples":[{"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":4}]}'
+    )
+
+    triples = await svc.extract_svo_triples("A 導致 B。", llm)
+
+    assert triples[0].rel_type == "CAUSES"
+    assert len(llm.prompts) == 1
 
 
 # ── resolve_entity_type：核心庫（52 類）優先，查不到才查擴充庫（939 類）───────
