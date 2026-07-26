@@ -86,6 +86,8 @@
 | `mihindukulasooriya-et-al-2020-sling-relation-linking.pdf` | Mihindukulasooriya et al. (2020), *SLING*，ISWC 2020（關係連結任務佐證，供 3.2 §b 使用） | [arXiv:2009.07726](https://arxiv.org/abs/2009.07726)；[GitHub IBM/kbqa-relation-linking](https://github.com/IBM/kbqa-relation-linking)（22★，2026-07-26 訂正原誤植的 `IBM/neuro-symbolic-ai`） |
 | `xue-et-al-2024-autore-doc-level-re.pdf` | Xue et al. (2024), *AutoRE*，ACL 2024 System Demonstrations（抽取分工設計佐證，供 3.1.3 使用） | [ACL Anthology 2024.acl-demos.20](https://aclanthology.org/2024.acl-demos.20/)；[GitHub THUDM/AutoRE](https://github.com/THUDM/AutoRE)（85★） |
 | `mo-et-al-2025-kggen.pdf` | Mo et al. (2025), *KGGen*，NeurIPS 2025（抽取分工設計佐證，供 3.1.3 使用） | [arXiv:2502.09956](https://arxiv.org/abs/2502.09956)；[GitHub stair-lab/kg-gen](https://github.com/stair-lab/kg-gen)（1,233★） |
+| `bloodgood-vijay-shanker-2009-stopping-active-learning.pdf` | Bloodgood & Vijay-Shanker (2009), *Stabilizing Predictions 停止 AL 方法*，CoNLL 2009（3.1.3 §a 人機一致率畢業機制的支持文獻，2026-07-26 新增） | [ACL Anthology W09-1107](https://aclanthology.org/W09-1107/)；[arXiv:1409.5165](https://arxiv.org/abs/1409.5165) |
+| `bloodgood-grothendieck-2013-analysis-stopping-active-learning.pdf` | Bloodgood & Grothendieck (2013), *Analysis of Stopping Active Learning*，CoNLL 2013（上述方法的理論分析，2026-07-26 新增） | [ACL Anthology W13-3502](https://aclanthology.org/W13-3502/)；[arXiv:1504.06329](https://arxiv.org/abs/1504.06329) |
 
 **未下載（付費，不下載全文）**：Guha et al. (2016), *Schema.org: Evolution of Structured Data on the Web*（*Communications of the ACM* 59(2)）——ACM 需付費/機構帳號，無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
 
