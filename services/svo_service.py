@@ -60,6 +60,18 @@ def _parse_triples_payload(raw: str) -> list[dict]:
     return [item for item in payload if isinstance(item, dict)]
 
 
+# 實體型別參考清單（2026-07-26 新增）：OntoNotes 18 類 NER 標籤（Hovy, Marcus,
+# Palmer, Ramshaw & Weischedel, 2006，HLT-NAACL 2006），業界最廣泛採用的實體
+# 類型集合，見 docs/論文/02_文獻探討.md § 2.4.4。僅供 LLM 判斷參考，不強制
+# 驗證——subject_type/object_type 選填、可多值（見 3.1.4），清單中找不到
+# 合適選項時，可參考 schema.org 命名慣例自訂，或留空字串。
+_ENTITY_TYPE_GUIDE = """PERSON（人物）、NORP（民族/宗教/政治團體）、FAC（設施）、ORG（組織）、
+GPE（地緣政治實體：國家/城市/州）、LOC（非地緣政治地點：山脈/水域）、PRODUCT（產品）、
+EVENT（事件）、WORK_OF_ART（作品）、LAW（法律/法規）、LANGUAGE（語言）、
+DATE（日期）、TIME（時間）、PERCENT（百分比）、MONEY（金額）、QUANTITY（數量）、
+ORDINAL（序數）、CARDINAL（基數）"""
+
+
 def _svo_prompt(text: str) -> str:
     rel_types = ", ".join(sorted(SVO_REL_TYPES))
     return f"""你是知識圖譜 SVO 抽取器。
@@ -68,14 +80,18 @@ def _svo_prompt(text: str) -> str:
 合法 rel_type：
 {rel_types}
 
+實體型別參考清單（非強制，僅供判斷參考）：
+{_ENTITY_TYPE_GUIDE}
+
 輸出格式：
-{{"triples":[{{"subject":"", "subject_type":"概念", "rel_type":"RELATED_TO", "verb":"", "object":"", "object_type":"概念", "confidence":1}}]}}
+{{"triples":[{{"subject":"", "subject_type":"", "rel_type":"RELATED_TO", "verb":"", "object":"", "object_type":"", "confidence":1}}]}}
 
 規則：
 1. rel_type 必須完全等於合法清單中的一個值。
 2. verb 保留原文中的自然語言關係描述。
 3. confidence 使用 1 到 5 的整數。
-4. 沒有可判定三元組時輸出 {{"triples":[]}}。
+4. subject_type／object_type 優先從參考清單挑選最貼切的一個；同時符合多個時用逗號分隔（如「ORG,GPE」）；清單中無合適選項時可自訂名稱，或留空字串代表無法判斷；不強制驗證。
+5. 沒有可判定三元組時輸出 {{"triples":[]}}。
 
 文本：
 {text}
@@ -117,13 +133,32 @@ def _relationship_type(rel_type: str) -> str:
 #    docs/論文/03_系統設計與方法論.md § 3.4 §b 的文字描述（含 RECORD3B／
 #    RECHECK 的 Cypher 範例）保持一致，不再是兩套不同的資料模型）─────────────
 
+def _type_set(type_str: str | None) -> set[str]:
+    """把型別欄位拆成集合——型別選填、可多值（逗號分隔），見 3.1.4。"""
+    if not type_str:
+        return set()
+    return {t.strip() for t in type_str.split(",") if t.strip()}
+
+
 async def _fetch_entity_candidates(driver: AsyncDriver, kg_id: UUID, entity_type: str) -> list[dict]:
-    """查詢同 KG、同類型的既有 Entity 節點（僅名稱，供編輯距離/cosine 比對）。"""
+    """查詢同 KG 的既有 Entity 節點，依型別集合交集篩選（僅名稱，供編輯距離/cosine 比對）。
+
+    對應 3.4 §b `DEDUP3`：型別集合有交集，或查詢/既有節點任一方型別缺席，
+    皆視為候選（不強行排除）；只有雙方都有型別、且集合無交集時才排除——
+    型別選填/可多值的定案下，完全相等篩選會誤刪本該比對的候選（見 3.1.4）。
+    """
     result = await driver.execute_query(
-        "MATCH (e:Entity {kg_id: $kg_id, type: $entity_type}) RETURN e.name AS name",
-        kg_id=str(kg_id), entity_type=entity_type,
+        "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name, e.type AS type",
+        kg_id=str(kg_id),
     )
-    return [dict(r) for r in result.records]
+    query_types = _type_set(entity_type)
+    if not query_types:
+        return [{"name": r["name"]} for r in result.records]
+    return [
+        {"name": r["name"]}
+        for r in result.records
+        if not _type_set(r["type"]) or query_types & _type_set(r["type"])
+    ]
 
 
 def _edit_ratio(a: str, b: str) -> float:

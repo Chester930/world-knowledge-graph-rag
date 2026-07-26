@@ -93,11 +93,11 @@ class InMemoryEntityDriver:
         self.queries.append(query)
         stripped = query.strip()
 
-        if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id, type: $entity_type})"):
-            kg_id, entity_type = params["kg_id"], params["entity_type"]
+        if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name"):
+            kg_id = params["kg_id"]
             records = [
-                {"name": name} for (kid, name), data in self.entities.items()
-                if kid == kg_id and data["type"] == entity_type
+                {"name": name, "type": data["type"]} for (kid, name), data in self.entities.items()
+                if kid == kg_id
             ]
             return FakeResult(records)
 
