@@ -58,40 +58,89 @@ SVO_REL_TYPES: set[str] = {
 }
 
 # 公用實體類型庫——採 schema.org 經實證驗證的最常見類型（2026-07-26 改版，取代原
-# OntoNotes 18 類方案）。原方案的「18」總數雖經 Pradhan et al. (2013, CoNLL) 與
-# Weischedel et al. (2011, Springer Handbook) 兩篇正式出版文獻交叉確認，但具體 18
-# 個標籤名稱始終查無同行評審論文逐一列出，只能靠 spaCy／HuggingFace 等次級來源佐證
-# ——查證缺口見 docs/參考文獻/03_資訊抽取與本體設計/README.md。改採 Brinkmann,
-# Primpeli & Bizer (2023, WWW '23 Companion)《The Web Data Commons Schema.org Data
-# Set Series》Table 1：基於 Common Crawl 實際抓取的 1,068 億筆 RDF quads／31 億個
-# 實體／1,280 萬個網站，逐一列出使用量最高的 schema.org 類型——這份清單直接對應同
-# 行評審論文的表格數據，不再有「總數有文獻、具體名稱無文獻」的落差。
+# OntoNotes 18 類方案；同日再擴充至 52 類，見下方「2026-07-26 擴充」）。原方案的
+# 「18」總數雖經 Pradhan et al. (2013, CoNLL) 與 Weischedel et al. (2011, Springer
+# Handbook) 兩篇正式出版文獻交叉確認，但具體 18 個標籤名稱始終查無同行評審論文逐一
+# 列出，只能靠 spaCy／HuggingFace 等次級來源佐證——查證缺口見
+# docs/參考文獻/03_資訊抽取與本體設計/README.md。改採 Brinkmann, Primpeli & Bizer
+# (2023, WWW '23 Companion)《The Web Data Commons Schema.org Data Set Series》：
+# 基於 Common Crawl 實際抓取的 1,068 億筆 RDF quads／31 億個實體／1,280 萬個網站，
+# 列出使用量最高的 schema.org 類型——每個類型名稱都能追溯到同一份同行評審論文的實測
+# 數據，不再有「總數有文獻、具體名稱無文獻」的落差。
 # ⚠️ **誠實聲明（使用者已知悉此取捨並選擇採用）**：此排名反映的是網站為了讓 Google／
-# Bing 顯示 rich snippet 而標註的**商業/行銷導向**分布（Product／Offer／
-# LocalBusiness／Review／JobPosting 排名靠前，是因為這些類型能觸發搜尋結果圖文卡片，
-# 論文原文明確指出這是站長標註的主要動機），與 OntoNotes 18 類「為新聞/廣播/任意領域
-# 文本設計的通用 NER 類型」出發點不同；本專案 SVO 抽取對象含學術/技術文件等非電商網頁
-# 內容，此清單未必是語意最貼切的參考類型，但换取的是「每個類型名稱都能追溯到同一份
-# 同行評審論文的實測表格」這個更紮實的文獻基礎。
+# Bing 顯示 rich snippet 而標註的**商業/行銷導向**分布，與 OntoNotes 18 類「為新聞/
+# 廣播/任意領域文本設計的通用 NER 類型」出發點不同；本專案 SVO 抽取對象含學術/技術
+# 文件等非電商網頁內容，此清單未必是語意最貼切的參考類型，換取的是文獻可追溯性。
+#
+# **2026-07-26 擴充（同日，11→52 類）**：使用者認為原本 11 類（僅論文 Table 1「精選
+# 展示」子集）數量偏少，要求以量化依據判斷是否足夠、如何擴充。查證發現同一個 2022
+# release 官方統計頁（`webdatacommons.org/structureddata/2022-12/stats/
+# schema_org_subsets.html`）另外公開了 48 個類型的完整實測數字（Hosts／URLs／
+# Quads），且此頁面與 Table 1 的統計角度不同（Table 1 是全語料庫直接計數，統計頁只
+# 收錄 WDC 特意建了獨立下載子集的類型），兩者聯集去重後（48 個官方統計頁類型 +
+# Table 1 獨有的 4 個：Offer／BlogPosting／AggregateRating／Review）共 **52 個**
+# 不重複類型，依 Hosts（使用網站數）由高到低排序，每個都有官方精確數字佐證，非隨意
+# 篩選。完整數字見 docs/參考文獻/03_資訊抽取與本體設計/README.md。
 # 對應 § 3.1.4「實體型別選填、可多值、不做強制驗證」定案——本常數僅供 LLM 抽取時的
 # 參考清單（見 services/svo_service.py::_svo_prompt()），不像 SVO_REL_TYPES 那樣
 # 用於白名單驗證/退回機制，key 為受控標籤、value 為中文語意說明。
 ENTITY_TYPES: dict[str, str] = {
+    "ORGANIZATION": "組織",
     "PERSON": "人物",
     "PRODUCT": "產品",
     "OFFER": "報價/優惠（銷售提案）",
     "LOCAL_BUSINESS": "本地商家",
+    "CREATIVE_WORK": "創作作品（廣義內容作品）",
     "BLOG_POSTING": "部落格文章",
     "AGGREGATE_RATING": "綜合評分",
+    "GEO_COORDINATES": "地理座標",
+    "PLACE": "地點",
     "REVIEW": "評論",
     "EVENT": "事件",
     "QUESTION": "提問",
     "ANSWER": "回答",
+    "FAQ_PAGE": "常見問答頁",
+    "RESTAURANT": "餐廳",
     "JOB_POSTING": "職缺公告",
+    "RECIPE": "食譜",
+    "MUSIC_RECORDING": "音樂錄音",
+    "COUNTRY": "國家",
+    "HOTEL": "飯店",
+    "BOOK": "書籍",
+    "MUSIC_ALBUM": "音樂專輯",
+    "CITY": "城市",
+    "QA_PAGE": "問答頁",
+    "LANGUAGE": "語言",
+    "EDUCATIONAL_ORGANIZATION": "教育機構",
+    "MOVIE": "電影",
+    "SPORTS_EVENT": "體育賽事",
+    "SPORTS_TEAM": "運動隊伍",
+    "COLLEGE_OR_UNIVERSITY": "大專院校",
+    "ADMINISTRATIVE_AREA": "行政區域",
+    "HOSPITAL": "醫院",
+    "SCHOOL": "學校",
+    "DATASET": "資料集",
+    "GOVERNMENT_ORGANIZATION": "政府機構",
+    "TV_EPISODE": "電視劇集",
+    "SHOPPING_CENTER": "購物中心",
+    "RADIO_STATION": "廣播電台",
+    "LIBRARY": "圖書館",
+    "MUSEUM": "博物館",
+    "AIRPORT": "機場",
+    "PAINTING": "繪畫作品",
+    "LANDMARKS_OR_HISTORICAL_BUILDINGS": "地標/歷史建築",
+    "PARK": "公園",
+    "STADIUM_OR_ARENA": "體育場館",
+    "SKI_RESORT": "滑雪度假村",
+    "LAKE_BODY_OF_WATER": "湖泊水體",
+    "TELEVISION_STATION": "電視台",
+    "CONTINENT": "洲",
+    "MOUNTAIN": "山",
+    "RIVER_BODY_OF_WATER": "河流水體",
 }
 
 # 實體型別擴充庫（2026-07-26 新增，尚未接線使用）——上方 ENTITY_TYPES 是文獻佐證的
-# 核心 11 類，比對不上時的較大備援池改直接以 schema.org 官方詞彙表本身為權威來源
+# 核心 52 類，比對不上時的較大備援池改直接以 schema.org 官方詞彙表本身為權威來源
 # （不需另尋論文佐證：schema.org 官網即是第一手權威）。實際清單存於
 # `data/schema_org_entity_types.json`（939 個 Type/class 節點，逐字下載自
 # schema.org 官方 GitHub 倉庫 release 30.0 的 types.csv，已排除純列舉值實例，如
