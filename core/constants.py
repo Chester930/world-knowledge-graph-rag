@@ -36,15 +36,50 @@ ENTITY_DEDUP_EDIT_RATIO_THRESHOLD = 0.70  # 校準參考：「台積電」對「
 ENTITY_DEDUP_COSINE_THRESHOLD = 0.88
 ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
 
-# SVO 三元組合法語意關係類型（30 種，依 CLAUDE.md 分組）
+# SVO 三元組合法語意關係類型——採 ConceptNet 5.5 核心關係集合（Speer, Chin &
+# Havasi, 2017, AAAI 2017；逐字查證清單見 docs/參考文獻/03_資訊抽取與本體設計/README.md），
+# 取代原本自行擬定的 30 類，對應 docs/論文/03_系統設計與方法論.md § 3.1.3「關係類型
+# 收斂為扁平單一層」定案。⚠️ 論文正文自稱「36 個核心關係」，但逐字核對其明確列出
+# 的清單實際只有 35 個（7 對稱＋28 非對稱）——此為原始論文自身的數字不一致，已在
+# 上述查證文件誠實記錄，本清單採其列出的 35 個為準，不臆測缺漏的第 36 個是什麼。
+# 命名採 Neo4j 關係型別慣例（UPPER_SNAKE_CASE），對應改寫 ConceptNet 原始 CamelCase
+# 命名（如 IsA → IS_A）；語意不變。
 SVO_REL_TYPES: set[str] = {
-    "IS_A", "PART_OF", "CONTAINS", "INSTANCE_OF",
-    "CAUSES", "PREVENTS", "ENABLES", "IMPROVES", "INHIBITS",
-    "USES", "REQUIRES", "PRODUCES", "IMPLEMENTS", "REPLACES", "EXTENDS",
-    "CONTRASTS", "SIMILAR_TO", "OUTPERFORMS",
-    "DEFINED_AS", "HAS_PROPERTY", "MEASURED_BY", "APPLIES_TO",
-    "PRECEDES", "FOLLOWS", "CO_OCCURS",
-    "INPUTS", "TRANSFORMS",
-    "CREATED_BY", "SOLVES",
-    "RELATED_TO",
+    # 對稱關係（7）
+    "ANTONYM", "DISTINCT_FROM", "ETYMOLOGICALLY_RELATED_TO", "LOCATED_NEAR",
+    "RELATED_TO", "SIMILAR_TO", "SYNONYM",
+    # 非對稱關係（28）
+    "AT_LOCATION", "CAPABLE_OF", "CAUSES", "CAUSES_DESIRE", "CREATED_BY",
+    "DEFINED_AS", "DERIVED_FROM", "DESIRES", "ENTAILS", "EXTERNAL_URL",
+    "FORM_OF", "HAS_A", "HAS_CONTEXT", "HAS_FIRST_SUBEVENT", "HAS_LAST_SUBEVENT",
+    "HAS_PREREQUISITE", "HAS_PROPERTY", "INSTANCE_OF", "IS_A", "MADE_OF",
+    "MANNER_OF", "MOTIVATED_BY_GOAL", "OBSTRUCTED_BY", "PART_OF",
+    "RECEIVES_ACTION", "SENSE_OF", "SYMBOL_OF", "USED_FOR",
+}
+
+# 公用實體類型庫——OntoNotes 18 類 NER 標籤（Pradhan et al., 2013, CoNLL 2013 §2.1.4／
+# §4.4 確認數字；具體標籤名稱之原始權威來源為 Weischedel & Brunstein, 2005,
+# LDC2005T33，未直接取得全文，本清單經次級公開來源交叉核對，見上述查證文件）。
+# 對應 § 3.1.4「實體型別選填、可多值、不做強制驗證」定案——本常數僅供 LLM 抽取時的
+# 參考清單（見 services/svo_service.py::_svo_prompt()），不像 SVO_REL_TYPES 那樣
+# 用於白名單驗證/退回機制，key 為受控標籤、value 為中文語意說明。
+ENTITY_TYPES: dict[str, str] = {
+    "PERSON": "人物",
+    "NORP": "民族/宗教/政治團體",
+    "FAC": "設施",
+    "ORG": "組織",
+    "GPE": "地緣政治實體（國家/城市/州）",
+    "LOC": "非地緣政治地點（山脈/水域）",
+    "PRODUCT": "產品",
+    "EVENT": "事件",
+    "WORK_OF_ART": "作品",
+    "LAW": "法律/法規",
+    "LANGUAGE": "語言",
+    "DATE": "日期",
+    "TIME": "時間",
+    "PERCENT": "百分比",
+    "MONEY": "金額",
+    "QUANTITY": "數量",
+    "ORDINAL": "序數",
+    "CARDINAL": "基數",
 }

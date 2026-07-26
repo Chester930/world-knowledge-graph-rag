@@ -11,6 +11,7 @@ from core.constants import (
     ENTITY_DEDUP_COSINE_THRESHOLD,
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
+    ENTITY_TYPES,
     SVO_REL_TYPES,
     VECTOR_DIM,
 )
@@ -60,16 +61,11 @@ def _parse_triples_payload(raw: str) -> list[dict]:
     return [item for item in payload if isinstance(item, dict)]
 
 
-# 實體型別參考清單（2026-07-26 新增）：OntoNotes 18 類 NER 標籤（Hovy, Marcus,
-# Palmer, Ramshaw & Weischedel, 2006，HLT-NAACL 2006），業界最廣泛採用的實體
-# 類型集合，見 docs/論文/02_文獻探討.md § 2.4.4。僅供 LLM 判斷參考，不強制
-# 驗證——subject_type/object_type 選填、可多值（見 3.1.4），清單中找不到
-# 合適選項時，可參考 schema.org 命名慣例自訂，或留空字串。
-_ENTITY_TYPE_GUIDE = """PERSON（人物）、NORP（民族/宗教/政治團體）、FAC（設施）、ORG（組織）、
-GPE（地緣政治實體：國家/城市/州）、LOC（非地緣政治地點：山脈/水域）、PRODUCT（產品）、
-EVENT（事件）、WORK_OF_ART（作品）、LAW（法律/法規）、LANGUAGE（語言）、
-DATE（日期）、TIME（時間）、PERCENT（百分比）、MONEY（金額）、QUANTITY（數量）、
-ORDINAL（序數）、CARDINAL（基數）"""
+# 實體型別參考清單——由 core.constants.ENTITY_TYPES（OntoNotes 18 類，見該常數
+# docstring 的文獻依據）動態組出，避免與該常數重複維護兩份清單。僅供 LLM 判斷
+# 參考，不強制驗證——subject_type/object_type 選填、可多值（見 3.1.4），清單中
+# 找不到合適選項時，可參考 schema.org 命名慣例自訂，或留空字串。
+_ENTITY_TYPE_GUIDE = "、".join(f"{tag}（{desc}）" for tag, desc in ENTITY_TYPES.items())
 
 
 def _svo_prompt(text: str) -> str:

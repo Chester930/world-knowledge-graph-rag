@@ -426,11 +426,11 @@ async def test_merge_triples_to_graph_merges_alias_into_existing_entity():
     doc_id = uuid4()
 
     first = SVOTriple(
-        subject="台積電", rel_type="PRODUCES", verb="生產", object="晶片",
+        subject="台積電", rel_type="CAUSES", verb="生產", object="晶片",
         source_doc_id=doc_id, source_svo_chunk_index=1,
     )
     second = SVOTriple(
-        subject="台積電公司", rel_type="PRODUCES", verb="生產", object="晶片",
+        subject="台積電公司", rel_type="CAUSES", verb="生產", object="晶片",
         source_doc_id=doc_id, source_svo_chunk_index=2,
     )
 
