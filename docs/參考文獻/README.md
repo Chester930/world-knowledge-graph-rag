@@ -18,6 +18,7 @@
 | `08_向量化與語意表示/` | `core/providers/embedding/README.md`（向量化模組工程實作支撐文獻）；02_文獻探討.md § 2.6.2 摘要收錄 | 🟢 已下載 5 篇 |
 | `09_SVO抽取切塊策略與指代消解/` | 02_文獻探討.md § 2.4.5（RQ4b，切塊策略與指代消解前置）；03_系統設計與方法論.md § 3.4 | 🟢 已下載 4 篇 |
 | `10_跨文件實體別名消解與增量聚類/` | 02_文獻探討.md § 2.4.5（RQ4b，跨文件增量別名聚類架構）；03_系統設計與方法論.md § 3.4；`docs/報告/09_實體別名登記與動態標準名提升機制設計報告.md` | 🟡 已下載 3 篇，皆待精讀方法章節 |
+| `11_事實層級去重與知識融合/` | 02_文獻探討.md § 2.6.3（事實層級去重，工程實作合理性佐證）；03_系統設計與方法論.md § 3.1.4「事實層級去重」 | 🟢 已下載 1 篇，另交叉引用 03 資料夾既有文獻 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -135,6 +136,14 @@
 | `saeedi-et-al-2020-incremental-multi-source-er.pdf` | Saeedi, Peukert & Rahm (2020), *Incremental Multi-source Entity Resolution for Knowledge Graph Completion*，ESWC 2020 | DOI: 10.1007/978-3-030-49461-2_23 |
 
 **與 03_資訊抽取與本體設計 的交叉引用**：本資料夾 3 篇僅佐證「跨文件增量別名聚類架構」，標準名選取規則（出現頻率優先）的文獻依據仍在 `03_資訊抽取與本體設計/`（Wikidata、CESI）——完整的兩層佐證分工說明見 `10_跨文件實體別名消解與增量聚類/README.md`。
+
+## 11_事實層級去重與知識融合 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `dong-et-al-2014-knowledge-vault.pdf` | Dong et al. (2014, Google), *Knowledge Vault: A Web-Scale Approach to Probabilistic Knowledge Fusion*，KDD 2014 | https://www.cs.ubc.ca/~murphyk/papers/kv-kdd14.pdf |
+
+**與 03_資訊抽取與本體設計 的交叉引用**：本資料夾同時引用已存於 `03_資訊抽取與本體設計/vrandecic-krotzsch-2014-wikidata.pdf` 的 Wikidata 論文「Citation Needed」段落——完整查證與兩篇文獻各自的誠實適配度分析見 `11_事實層級去重與知識融合/README.md`。
 
 ## 下載原則
 
