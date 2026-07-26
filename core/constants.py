@@ -89,3 +89,12 @@ ENTITY_TYPES: dict[str, str] = {
     "ANSWER": "回答",
     "JOB_POSTING": "職缺公告",
 }
+
+# 實體型別擴充庫（2026-07-26 新增，尚未接線使用）——上方 ENTITY_TYPES 是文獻佐證的
+# 核心 11 類，比對不上時的較大備援池改直接以 schema.org 官方詞彙表本身為權威來源
+# （不需另尋論文佐證：schema.org 官網即是第一手權威）。實際清單存於
+# `data/schema_org_entity_types.json`（939 個 Type/class 節點，逐字下載自
+# schema.org 官方 GitHub 倉庫 release 30.0 的 types.csv，已排除純列舉值實例，如
+# ActiveActionStatus 這類 enumerationtype 底下的具體值，僅保留真正的型別階層節點），
+# 資料量過大不適合當 Python 常數維護，也不適合塞進每次 LLM prompt——留待需要型別
+# 正規化/驗證（如 3.1.4 節 Type 節點建模）時再讀取查閱，具體讀取與比對邏輯尚未實作。
