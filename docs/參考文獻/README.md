@@ -75,8 +75,10 @@
 |---|---|---|
 | `vashishth-et-al-2018-cesi-canonicalize-open-kb.pdf` | Vashishth et al. (2018), *CESI*，WWW 2018（供 1.2 節 RQ4 使用） | arXiv:1902.00172 |
 | `angeli-et-al-2015-stanford-openie.pdf` | Angeli et al. (2015), *Stanford OpenIE*，ACL 2015（供 1.2 節 RQ4 使用） | ACL Anthology P15-1034 |
-| `hovy-et-al-2006-ontonotes.pdf` | Hovy et al. (2006), *OntoNotes: The 90% Solution*，NAACL 2006（OntoNotes 計畫背景書目——⚠️ 2026-07-26 訂正：全文不涉及 NER，不再作為實體類型庫依據，見下方 Pradhan et al. 2013） | [ACL Anthology N06-2015](https://aclanthology.org/N06-2015/) |
-| `pradhan-et-al-2013-conll-ontonotes.pdf` | Pradhan et al. (2013), *Towards Robust Linguistic Analysis Using OntoNotes*，CoNLL 2013（公用實體類型庫的正確依據，18 類 NER 標籤，供 3.1.3／3.1.4 使用，2026-07-26 新增） | [ACL Anthology W13-3516](https://aclanthology.org/W13-3516/) |
+| `hovy-et-al-2006-ontonotes.pdf` | Hovy et al. (2006), *OntoNotes: The 90% Solution*，NAACL 2006（OntoNotes 計畫背景書目——⚠️ 2026-07-26 訂正：全文不涉及 NER，不再作為實體類型庫依據） | [ACL Anthology N06-2015](https://aclanthology.org/N06-2015/) |
+| `pradhan-et-al-2013-conll-ontonotes.pdf` | Pradhan et al. (2013), *Towards Robust Linguistic Analysis Using OntoNotes*，CoNLL 2013（歷史記錄——曾短暫作為 18 類 NER 標籤依據，因未列出具體標籤名稱，2026-07-26 同日改採 Brinkmann et al. 2023） | [ACL Anthology W13-3516](https://aclanthology.org/W13-3516/) |
+| `weischedel-et-al-2011-ontonotes-handbook-chapter.pdf` | Weischedel et al. (2011), *OntoNotes: A Large Training Corpus for Enhanced Processing*，Springer Handbook chapter（歷史記錄，理由同上） | Eduard Hovy 個人網站開放取用 |
+| `brinkmann-et-al-2023-wdc-schemaorg-dataset-series.pdf` | Brinkmann, Primpeli & Bizer (2023), *The Web Data Commons Schema.org Data Set Series*，WWW '23 Companion（公用實體類型庫現行依據——schema.org 實測排名前 11 類，供 3.1.3／3.1.4 使用，2026-07-26 新增，取代 OntoNotes 18 類） | DOI: [10.1145/3543873.3587331](https://doi.org/10.1145/3543873.3587331) |
 | `speer-et-al-2017-conceptnet.pdf` | Speer, Chin & Havasi (2017), *ConceptNet 5.5*，AAAI 2017（公用關係庫依據，供 3.1.3 使用；論文正文自稱 36 個核心關係，逐字核對實際列出 35 個，`core/constants.py::SVO_REL_TYPES` 已按 35 個落地，誠實聲明見子資料夾 README） | [arXiv:1612.03975](https://arxiv.org/abs/1612.03975) |
 | `aguilar-et-al-2014-ace-ere-tackbp-framenet-comparison.pdf` | Aguilar et al. (2014)，ACL 2014 EVENTS workshop（ACE/ERE/TAC-KBP/FrameNet 關係本體比較，供 3.1.3 使用） | [ACL Anthology W14-2907](https://aclanthology.org/W14-2907/) |
 | `yih-et-al-2015-staged-query-graph-generation.pdf` | Yih et al. (2015), *STAGG*，ACL-IJCNLP 2015（查詢時關係連結核心文獻，供 3.2 §b 使用） | [ACL Anthology P15-1128](https://aclanthology.org/P15-1128/)；[GitHub scottyih/STAGG](https://github.com/scottyih/STAGG)（111★） |

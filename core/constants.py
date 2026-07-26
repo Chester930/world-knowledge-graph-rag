@@ -57,29 +57,35 @@ SVO_REL_TYPES: set[str] = {
     "RECEIVES_ACTION", "SENSE_OF", "SYMBOL_OF", "USED_FOR",
 }
 
-# 公用實體類型庫——OntoNotes 18 類 NER 標籤（Pradhan et al., 2013, CoNLL 2013 §2.1.4／
-# §4.4 確認數字；具體標籤名稱之原始權威來源為 Weischedel & Brunstein, 2005,
-# LDC2005T33，未直接取得全文，本清單經次級公開來源交叉核對，見上述查證文件）。
+# 公用實體類型庫——採 schema.org 經實證驗證的最常見類型（2026-07-26 改版，取代原
+# OntoNotes 18 類方案）。原方案的「18」總數雖經 Pradhan et al. (2013, CoNLL) 與
+# Weischedel et al. (2011, Springer Handbook) 兩篇正式出版文獻交叉確認，但具體 18
+# 個標籤名稱始終查無同行評審論文逐一列出，只能靠 spaCy／HuggingFace 等次級來源佐證
+# ——查證缺口見 docs/參考文獻/03_資訊抽取與本體設計/README.md。改採 Brinkmann,
+# Primpeli & Bizer (2023, WWW '23 Companion)《The Web Data Commons Schema.org Data
+# Set Series》Table 1：基於 Common Crawl 實際抓取的 1,068 億筆 RDF quads／31 億個
+# 實體／1,280 萬個網站，逐一列出使用量最高的 schema.org 類型——這份清單直接對應同
+# 行評審論文的表格數據，不再有「總數有文獻、具體名稱無文獻」的落差。
+# ⚠️ **誠實聲明（使用者已知悉此取捨並選擇採用）**：此排名反映的是網站為了讓 Google／
+# Bing 顯示 rich snippet 而標註的**商業/行銷導向**分布（Product／Offer／
+# LocalBusiness／Review／JobPosting 排名靠前，是因為這些類型能觸發搜尋結果圖文卡片，
+# 論文原文明確指出這是站長標註的主要動機），與 OntoNotes 18 類「為新聞/廣播/任意領域
+# 文本設計的通用 NER 類型」出發點不同；本專案 SVO 抽取對象含學術/技術文件等非電商網頁
+# 內容，此清單未必是語意最貼切的參考類型，但换取的是「每個類型名稱都能追溯到同一份
+# 同行評審論文的實測表格」這個更紮實的文獻基礎。
 # 對應 § 3.1.4「實體型別選填、可多值、不做強制驗證」定案——本常數僅供 LLM 抽取時的
 # 參考清單（見 services/svo_service.py::_svo_prompt()），不像 SVO_REL_TYPES 那樣
 # 用於白名單驗證/退回機制，key 為受控標籤、value 為中文語意說明。
 ENTITY_TYPES: dict[str, str] = {
     "PERSON": "人物",
-    "NORP": "民族/宗教/政治團體",
-    "FAC": "設施",
-    "ORG": "組織",
-    "GPE": "地緣政治實體（國家/城市/州）",
-    "LOC": "非地緣政治地點（山脈/水域）",
     "PRODUCT": "產品",
+    "OFFER": "報價/優惠（銷售提案）",
+    "LOCAL_BUSINESS": "本地商家",
+    "BLOG_POSTING": "部落格文章",
+    "AGGREGATE_RATING": "綜合評分",
+    "REVIEW": "評論",
     "EVENT": "事件",
-    "WORK_OF_ART": "作品",
-    "LAW": "法律/法規",
-    "LANGUAGE": "語言",
-    "DATE": "日期",
-    "TIME": "時間",
-    "PERCENT": "百分比",
-    "MONEY": "金額",
-    "QUANTITY": "數量",
-    "ORDINAL": "序數",
-    "CARDINAL": "基數",
+    "QUESTION": "提問",
+    "ANSWER": "回答",
+    "JOB_POSTING": "職缺公告",
 }

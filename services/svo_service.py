@@ -61,10 +61,10 @@ def _parse_triples_payload(raw: str) -> list[dict]:
     return [item for item in payload if isinstance(item, dict)]
 
 
-# 實體型別參考清單——由 core.constants.ENTITY_TYPES（OntoNotes 18 類，見該常數
-# docstring 的文獻依據）動態組出，避免與該常數重複維護兩份清單。僅供 LLM 判斷
-# 參考，不強制驗證——subject_type/object_type 選填、可多值（見 3.1.4），清單中
-# 找不到合適選項時，可參考 schema.org 命名慣例自訂，或留空字串。
+# 實體型別參考清單——由 core.constants.ENTITY_TYPES（schema.org 實測最常見類型，
+# 見該常數 docstring 的文獻依據）動態組出，避免與該常數重複維護兩份清單。僅供 LLM
+# 判斷參考，不強制驗證——subject_type/object_type 選填、可多值（見 3.1.4），清單中
+# 找不到合適選項時可自訂名稱，或留空字串代表無法判斷。
 _ENTITY_TYPE_GUIDE = "、".join(f"{tag}（{desc}）" for tag, desc in ENTITY_TYPES.items())
 
 
@@ -86,7 +86,7 @@ def _svo_prompt(text: str) -> str:
 1. rel_type 必須完全等於合法清單中的一個值。
 2. verb 保留原文中的自然語言關係描述。
 3. confidence 使用 1 到 5 的整數。
-4. subject_type／object_type 優先從參考清單挑選最貼切的一個；同時符合多個時用逗號分隔（如「ORG,GPE」）；清單中無合適選項時可自訂名稱，或留空字串代表無法判斷；不強制驗證。
+4. subject_type／object_type 優先從參考清單挑選最貼切的一個；同時符合多個時用逗號分隔（如「PERSON,PRODUCT」）；清單中無合適選項時可自訂名稱，或留空字串代表無法判斷；不強制驗證。
 5. 沒有可判定三元組時輸出 {{"triples":[]}}。
 
 文本：
