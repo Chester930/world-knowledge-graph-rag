@@ -3,6 +3,8 @@ from __future__ import annotations
 import difflib
 import json
 import re
+from functools import lru_cache
+from pathlib import Path
 from uuid import UUID
 
 from neo4j import AsyncDriver
@@ -67,6 +69,57 @@ def _parse_triples_payload(raw: str) -> list[dict]:
 # 找不到合適選項時可自訂名稱，或留空字串代表無法判斷。
 _ENTITY_TYPE_GUIDE = "、".join(f"{tag}（{desc}）" for tag, desc in ENTITY_TYPES.items())
 
+# 實體型別擴充庫（schema.org 官方完整清單，939 類）的讀取/比對邏輯——核心庫
+# （ENTITY_TYPES，52 類）優先比對，查不到才查這裡；兩者皆查無對應時保留 LLM
+# 原始輸出，不拋出例外、不拒絕，對應 3.1.4「實體型別選填、不做強制驗證」定案。
+_EXTENDED_ENTITY_TYPES_PATH = Path(__file__).resolve().parent.parent / "data" / "schema_org_entity_types.json"
+
+
+def _normalize_type_key(value: str) -> str:
+    """把型別字串正規化成不分大小寫、不分空白/底線/駝峰的比對 key，
+    讓「Local Business」「local_business」「LOCAL_BUSINESS」都能對到同一個候選。"""
+    return re.sub(r"[^A-Z0-9]", "", value.upper())
+
+
+_CORE_TYPE_LOOKUP: dict[str, str] = {_normalize_type_key(key): key for key in ENTITY_TYPES}
+
+
+@lru_cache(maxsize=1)
+def _load_extended_entity_type_lookup() -> dict[str, str]:
+    """讀取 data/schema_org_entity_types.json，回傳 {正規化 key: schema.org 官方
+    CamelCase id} 供核心庫查不到時查閱。讀取失敗（檔案缺失/格式錯誤）時回傳空
+    dict，讓呼叫端安全退回保留原始字串，不影響抽取流程本身。"""
+    try:
+        with open(_EXTENDED_ENTITY_TYPES_PATH, encoding="utf-8") as f:
+            payload = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {_normalize_type_key(t["label"]): t["id"] for t in payload.get("types", [])}
+
+
+def resolve_entity_type(raw_type: str) -> str:
+    """正規化 LLM 抽取出的 subject_type／object_type：核心庫（52 類）優先比對，
+    查不到才查擴充庫（939 類）；可多值（逗號分隔，見 3.1.3 § LLM_SVO 節點），
+    逐一正規化後以逗號重組；兩者皆查無對應的 token 保留原始字串——選填、不強制
+    驗證，任何一步查無結果都不拋出例外或拒絕整條三元組。"""
+    if not raw_type or not raw_type.strip():
+        return raw_type
+
+    extended_lookup = _load_extended_entity_type_lookup()
+    resolved_tokens = []
+    for token in raw_type.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        key = _normalize_type_key(token)
+        if key in _CORE_TYPE_LOOKUP:
+            resolved_tokens.append(_CORE_TYPE_LOOKUP[key])
+        elif key in extended_lookup:
+            resolved_tokens.append(extended_lookup[key])
+        else:
+            resolved_tokens.append(token)
+    return ",".join(resolved_tokens)
+
 
 def _svo_prompt(text: str) -> str:
     rel_types = ", ".join(sorted(SVO_REL_TYPES))
@@ -110,6 +163,11 @@ async def extract_svo_triples(text: str, llm_provider: LLMProvider | None = None
         # 3.1.3 REJECT：不在受控詞彙表內的 rel_type 退回 RELATED_TO 兜底，
         # 三元組本身保留（不可靜默丟棄整條事實），原始語意仍留在 verb 欄位。
         item["rel_type"] = rel_type if rel_type in SVO_REL_TYPES else "RELATED_TO"
+        # 核心庫優先、查不到才查擴充庫的正規化——見 resolve_entity_type() docstring。
+        if item.get("subject_type"):
+            item["subject_type"] = resolve_entity_type(str(item["subject_type"]))
+        if item.get("object_type"):
+            item["object_type"] = resolve_entity_type(str(item["object_type"]))
         try:
             triples.append(SVOTriple(**item))
         except Exception:

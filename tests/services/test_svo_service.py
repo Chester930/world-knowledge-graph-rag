@@ -192,6 +192,53 @@ async def test_extract_svo_triples_without_provider_returns_empty_list():
     assert await svc.extract_svo_triples("A 導致 B。") == []
 
 
+# ── resolve_entity_type：核心庫（52 類）優先，查不到才查擴充庫（939 類）───────
+
+def test_resolve_entity_type_matches_core_case_and_spacing_insensitive():
+    assert svc.resolve_entity_type("local business") == "LOCAL_BUSINESS"
+    assert svc.resolve_entity_type("Local_Business") == "LOCAL_BUSINESS"
+
+
+def test_resolve_entity_type_exact_core_key_passthrough():
+    assert svc.resolve_entity_type("PERSON") == "PERSON"
+
+
+def test_resolve_entity_type_falls_back_to_extended_pool_when_not_in_core():
+    """SoftwareApplication 不在核心 52 類，但是 schema.org 官方型別，
+    應能從 data/schema_org_entity_types.json 擴充庫查到並回傳官方 CamelCase id。"""
+    assert svc.resolve_entity_type("softwareapplication") == "SoftwareApplication"
+
+
+def test_resolve_entity_type_unknown_value_passes_through_unchanged():
+    assert svc.resolve_entity_type("TotallyMadeUpType") == "TotallyMadeUpType"
+
+
+def test_resolve_entity_type_multi_value_comma_separated():
+    assert svc.resolve_entity_type("Person, product") == "PERSON,PRODUCT"
+
+
+def test_resolve_entity_type_empty_or_blank_passthrough():
+    assert svc.resolve_entity_type("") == ""
+    assert svc.resolve_entity_type("   ") == "   "
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_normalizes_entity_types_via_two_tier_lookup():
+    """subject_type／object_type 選填、可多值、不強制驗證（見 3.1.4），但仍應
+    正規化大小寫變體：核心庫優先，查不到才查擴充庫，皆查無對應時保留原值。"""
+    llm = FakeLLM("""
+    {"triples":[
+      {"subject":"A","subject_type":"local business","rel_type":"CAUSES","verb":"導致",
+       "object":"B","object_type":"softwareapplication","confidence":4}
+    ]}
+    """)
+
+    triples = await svc.extract_svo_triples("A 導致 B。", llm)
+
+    assert triples[0].subject_type == "LOCAL_BUSINESS"
+    assert triples[0].object_type == "SoftwareApplication"
+
+
 @pytest.mark.asyncio
 async def test_merge_triples_to_graph_accumulates_citation_on_edge():
     """對應 2026-07-22 使用者確認：事實層級去重——關係邊的 MERGE 鍵不再含
