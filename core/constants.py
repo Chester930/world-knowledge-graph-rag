@@ -41,18 +41,25 @@ ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
 # 取代原本自行擬定的 30 類，對應 docs/論文/03_系統設計與方法論.md § 3.1.3「關係類型
 # 收斂為扁平單一層」定案。⚠️ 論文正文自稱「36 個核心關係」，但逐字核對其明確列出
 # 的清單實際只有 35 個（7 對稱＋28 非對稱）——此為原始論文自身的數字不一致，已在
-# 上述查證文件誠實記錄，本清單採其列出的 35 個為準，不臆測缺漏的第 36 個是什麼。
+# 上述查證文件誠實記錄。
+# ⚠️ 2026-07-27 再訂正為 33 個：查證 ConceptNet 官方 GitHub wiki
+# （commonsense/conceptnet5/wiki/Relations，即時查詢版本）發現 ENTAILS／
+# INSTANCE_OF 已被 ConceptNet 專案自己列為「已棄用」——官方原文建議 ENTAILS 應併入
+# MANNER_OF 或 HAS_PREREQUISITE，INSTANCE_OF 應併入 IS_A，理由是自然語言鮮少能明確
+# 區分這兩者與其目標關係的差異。本論文選擇跟進 ConceptNet 官方現行建議，移除這 2
+# 個型別，改為 35-2=33 個，取代 2017 年論文快照版本（此為 2026-07-27 使用者確認的
+# 訂正，非疏漏）。完整查證見 docs/參考文獻/03_資訊抽取與本體設計/README.md。
 # 命名採 Neo4j 關係型別慣例（UPPER_SNAKE_CASE），對應改寫 ConceptNet 原始 CamelCase
 # 命名（如 IsA → IS_A）；語意不變。
 SVO_REL_TYPES: set[str] = {
     # 對稱關係（7）
     "ANTONYM", "DISTINCT_FROM", "ETYMOLOGICALLY_RELATED_TO", "LOCATED_NEAR",
     "RELATED_TO", "SIMILAR_TO", "SYNONYM",
-    # 非對稱關係（28）
+    # 非對稱關係（26，已依 ConceptNet 官方現行建議移除 ENTAILS／INSTANCE_OF）
     "AT_LOCATION", "CAPABLE_OF", "CAUSES", "CAUSES_DESIRE", "CREATED_BY",
-    "DEFINED_AS", "DERIVED_FROM", "DESIRES", "ENTAILS", "EXTERNAL_URL",
+    "DEFINED_AS", "DERIVED_FROM", "DESIRES", "EXTERNAL_URL",
     "FORM_OF", "HAS_A", "HAS_CONTEXT", "HAS_FIRST_SUBEVENT", "HAS_LAST_SUBEVENT",
-    "HAS_PREREQUISITE", "HAS_PROPERTY", "INSTANCE_OF", "IS_A", "MADE_OF",
+    "HAS_PREREQUISITE", "HAS_PROPERTY", "IS_A", "MADE_OF",
     "MANNER_OF", "MOTIVATED_BY_GOAL", "OBSTRUCTED_BY", "PART_OF",
     "RECEIVES_ACTION", "SENSE_OF", "SYMBOL_OF", "USED_FOR",
 }
