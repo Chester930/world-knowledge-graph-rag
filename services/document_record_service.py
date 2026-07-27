@@ -138,6 +138,22 @@ def set_svo_chunk_total(folder: Path, total_chunks: int) -> DocumentRecord | Non
     return record
 
 
+def reset_extraction_progress(folder: Path) -> DocumentRecord | None:
+    """重設抽取狀態機為初始值（`pending`／`chunk_progress=0`），供
+    `knowledge_graph_service.build_graph(force_rebuild=True)` 重建圖譜前使用。
+
+    與 `append_assignment()` 的重設邏輯相同，但不追加歸屬歷史——這是同一 KG
+    內的重建，不是重新歸屬到另一個 KG。
+    """
+    record = read_record(folder)
+    if record is None:
+        return None
+    record.extraction_status = "pending"
+    record.chunk_progress = 0
+    _write_record(folder, record)
+    return record
+
+
 def append_assignment(
     folder: Path,
     kg_id: UUID,

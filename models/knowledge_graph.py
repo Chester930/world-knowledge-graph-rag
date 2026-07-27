@@ -165,5 +165,8 @@ class SVOTriple(BaseModel):
 
 
 class BuildGraphRequest(BaseModel):
-    doc_ids: list[UUID] | None = None
+    # 文件資料夾目前以檔名（DocumentRecord.source）為唯一識別，尚無獨立 UUID
+    # （見 services/svo_service.py::embed_svo_chunks docstring 的「誠實侷限」
+    # 說明）；doc_ids 型別故為 list[str]，None 代表 KG 底下所有文件資料夾。
+    doc_ids: list[str] | None = None
     force_rebuild: bool = False

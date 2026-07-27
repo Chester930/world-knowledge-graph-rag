@@ -19,12 +19,15 @@ from core.constants import (
     SVO_REL_TYPES,
     VECTOR_DIM,
 )
+from core.config import task_queue_db_path
 from core.providers.base import EmbeddingProvider, LLMProvider
+from core.providers.factory import get_embedding_provider
 from models.knowledge_graph import SVOTriple
-from services import sim_calibration_service
+from services import document_record_service, sim_calibration_service, task_queue_service
 from services.classify_service import cosine_similarity
 from services.entity_registry_service import should_promote_by_frequency
 from services.svo_chunking import SVOChunk
+from services.svo_preprocessing_service import prepare_svo_ready_chunks
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
@@ -857,6 +860,55 @@ async def embed_svo_chunks(
             embedding=vector,
             chunk_file=chunk.filename,
         )
+
+
+async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID) -> None:
+    """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
+    不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
+    SVO 專用切塊）→ 切塊向量化（`embed_svo_chunks`）→ `ENQUEUE`（登記進
+    `task_queue.db`）。同步直接呼叫（2026-07-21 使用者決策），而非背景排程
+    或延後執行。
+
+    原本是 `routers/staging.py` 的私有函式，遷移至此供
+    `services/knowledge_graph_service.py::build_graph()` 共用同一套
+    CHUNKREADY→EMBEDCHUNK→ENQUEUE 邏輯，避免 router 層與 service 層各自
+    維護一份（見 `docs/報告/11_抽取管線完整實作任務書.md` P0-2）。`driver`
+    改為明確參數（而非函式內自行呼叫 `get_driver()`），比照本模組其餘函式
+    的依賴注入慣例，也讓測試不需要 monkeypatch 全域函式。
+
+    ⚠️ 誠實侷限：`prepare_svo_ready_chunks()` 目前以 `mentions=None` 呼叫，
+    跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決的上游依賴），也
+    未提供 LLM provider，代名詞消解與實體去重皆退化為最保守版本（見
+    `services/svo_preprocessing_service.py` docstring）——這部分的 Provider
+    注入待第四章實作時再處理。這裡只補上 `SENTEMBED`／`EMBEDCHUNK` 兩處都要
+    用的同一個 embedding provider；`get_embedding_provider()` 在尚未呼叫
+    `init_providers()` 的情境（例如測試）會拋出 `RuntimeError`，此時視為向量化
+    不可用，優雅跳過，不影響切塊與排隊本身。
+    """
+    record = document_record_service.read_record(doc_folder)
+    if record is None:
+        return
+
+    try:
+        embedding_provider = get_embedding_provider()
+    except RuntimeError:
+        embedding_provider = None
+
+    kg_folder = doc_folder.parent
+    _paths, chunks = await prepare_svo_ready_chunks(
+        record.source, kg_folder, kg_folder, embedding_provider=embedding_provider,
+    )
+    if not chunks:
+        return
+
+    document_record_service.set_svo_chunk_total(doc_folder, len(chunks))
+
+    if embedding_provider is not None:
+        await embed_svo_chunks(driver, kg_id, record.source, chunks, embedding_provider)
+
+    task_queue_service.enqueue(
+        task_queue_db_path(), str(kg_id), record.source, list(range(1, len(chunks) + 1)),
+    )
 
 
 async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], hops: int = 2) -> list[SVOTriple]:

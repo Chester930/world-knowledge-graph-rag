@@ -120,10 +120,10 @@ async def prepare_svo_ready_chunks(
     已補上 NER 模組（`SpacyNerTagger`＋正則代號兜底），介面已就緒可傳入
     `ner_tagger` 啟用；但 spaCy／`zh_core_web_sm` 在本專案環境仍未安裝驗證
     （與 `pronoun_resolution_service.SpacyPosTagger` 同樣的既有風險），
-    `_trigger_extraction()`（`routers/staging.py`）目前仍以 `mentions=None`／
+    `trigger_extraction()`（`services/svo_service.py`）目前仍以 `mentions=None`／
     `ner_tagger=None` 呼叫本函式——此時 §a 別名登記表階段整個跳過，行為與
     NER 模組補上之前相同，非本函式刻意簡化，待 spaCy 依賴於第四章實際安裝
-    驗證後才會在 `_trigger_extraction()` 接上 `ner_tagger`。
+    驗證後才會在 `trigger_extraction()` 接上 `ner_tagger`。
     """
     original_sentences = await get_or_rebuild_sentences(source, base_dir)
 

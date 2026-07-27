@@ -23,7 +23,7 @@ async def list_kgs():
 
 @router.post("", response_model=KnowledgeGraph, status_code=201)
 async def create_kg(payload: KnowledgeGraphCreate):
-    return await knowledge_graph_service.create_kg(payload)
+    return await knowledge_graph_service.create_kg(get_driver(), payload)
 
 
 @router.get("/{kg_id}", response_model=KnowledgeGraph)
@@ -41,10 +41,12 @@ async def update_kg(kg_id: UUID, patch: KnowledgeGraphUpdate):
 
 @router.delete("/{kg_id}", status_code=204)
 async def delete_kg(kg_id: UUID):
-    await knowledge_graph_service.delete_kg(kg_id)
+    await knowledge_graph_service.delete_kg(get_driver(), kg_id)
 
 
 @router.post("/{kg_id}/build-graph", status_code=202)
 async def build_graph(kg_id: UUID, payload: BuildGraphRequest):
-    await knowledge_graph_service.build_graph(kg_id, payload.force_rebuild)
+    await knowledge_graph_service.build_graph(
+        get_driver(), kg_id, payload.doc_ids, payload.force_rebuild,
+    )
     return {"status": "accepted"}
