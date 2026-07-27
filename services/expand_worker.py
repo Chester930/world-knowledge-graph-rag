@@ -8,11 +8,14 @@
 `cluster_service.py` 的 HDBSCAN 分群、`svo_service.py` 的 backfill 函式）
 皆已存在，本模組只負責把它們串成完整判斷流程。
 
-背景 Worker 迴圈本體（P2-3，定期呼叫本模組的 `run_governance_cycle()`）尚未
-接上，`main.py::lifespan` 目前只掛了抽取 Worker（P0-3）。
+背景 Worker 迴圈本體（`run_governance_worker()`，P2-3）定期呼叫本模組的
+`run_governance_cycle()`，隨 `main.py::lifespan` 與抽取 Worker（P0-3）一起
+啟動。
 """
 from __future__ import annotations
 
+import asyncio
+import logging
 import re
 from uuid import UUID
 
@@ -24,10 +27,15 @@ from core.constants import (
     EXPAND_GATE_WINDOW,
     EXPAND_POOL_MIN_SIZE,
     EXPAND_REGCHECK_THRESHOLD,
+    EXPAND_WORKER_POLL_INTERVAL,
 )
 from core.providers.base import EmbeddingProvider, LLMProvider
+from core.providers.factory import get_embedding_provider, get_llm_provider
+from repositories.kg_repo import KGRepository
 from services import expand_governance_service
 from services.cluster_service import cluster_vectors
+
+logger = logging.getLogger(__name__)
 from services.svo_service import backfill_related_to_edges
 
 
@@ -180,3 +188,37 @@ async def run_governance_cycle(
                 type_name=final_type_name, description=description,
                 member_verbs=member_verbs, reused_from_registry=reused,
             )
+
+
+async def run_governance_worker(
+    driver: AsyncDriver,
+    poll_interval: float = EXPAND_WORKER_POLL_INTERVAL,
+) -> None:
+    """常駐背景任務（P2-3）：對應 § 3.1.2／3.1.3 §a『WORKER 執行模型定案』
+    的治理 Worker 分支——**寬鬆迴圈**，每隔 `poll_interval` 秒巡視一次所有
+    KG，對每個 KG 呼叫 `run_governance_cycle()`。由 `main.py::lifespan` 以
+    `asyncio.create_task()` 啟動，`task.cancel()` 優雅關閉，與抽取 Worker
+    （P0-3，`services/extraction_worker.py::run_extraction_worker()`）是同一
+    宿主行程內兩個獨立的背景任務，節奏不同：抽取 Worker 緊湊迴圈、治理
+    Worker 寬鬆迴圈（見決策脈絡第 5 點）。
+
+    單一 KG 的治理週期失敗（LLM 逾時、Neo4j 連線問題等）只記錄例外並繼續
+    處理下一個 KG，不會讓整個背景迴圈跟著中斷——比照抽取 Worker 對單一
+    chunk 失敗的隔離處理精神。
+    """
+    while True:
+        try:
+            embedding_provider = get_embedding_provider()
+            llm_provider = get_llm_provider()
+        except RuntimeError:
+            await asyncio.sleep(poll_interval)
+            continue
+
+        kgs = await KGRepository(driver).list_all()
+        for kg in kgs:
+            try:
+                await run_governance_cycle(driver, kg.id, embedding_provider, llm_provider)
+            except Exception:
+                logger.exception("[GovernanceWorker] KG %s 治理週期失敗", kg.id)
+
+        await asyncio.sleep(poll_interval)

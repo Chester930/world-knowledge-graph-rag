@@ -1,9 +1,20 @@
+import asyncio
+from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
 
 from core import config
+from models.knowledge_graph import KnowledgeGraph
 from services import expand_governance_service, expand_worker as worker
+
+
+def _make_kg(name: str) -> KnowledgeGraph:
+    now = datetime.now(timezone.utc)
+    return KnowledgeGraph(
+        id=uuid4(), name=name, description="", folder_path=f"/tmp/{name}",
+        is_public=True, created_at=now, updated_at=now,
+    )
 
 
 class FakeLLM:
@@ -237,3 +248,99 @@ async def test_run_governance_cycle_auto_approves_and_commits_when_graduated(tmp
     # BACKFILL 已觸發
     assert len(backfill_calls) == 1
     assert backfill_calls[0] == (kg_id, "INVESTS_IN", "A 投入資金支持 B")
+
+
+# ── run_governance_worker：背景迴圈（P2-3）─────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_run_governance_worker_processes_every_kg_then_idles_until_cancelled(monkeypatch):
+    kg_a = _make_kg("kg-a")
+    kg_b = _make_kg("kg-b")
+
+    class FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def list_all(self):
+            return [kg_a, kg_b]
+
+    monkeypatch.setattr("services.expand_worker.KGRepository", FakeRepo)
+    monkeypatch.setattr("services.expand_worker.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("services.expand_worker.get_llm_provider", lambda: FakeLLM("判斷：否"))
+
+    processed = []
+
+    async def _fake_cycle(driver, kg_id, embedding_provider, llm_provider):
+        processed.append(kg_id)
+
+    monkeypatch.setattr("services.expand_worker.run_governance_cycle", _fake_cycle)
+
+    task = asyncio.create_task(worker.run_governance_worker(SpyDriver(), poll_interval=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert kg_a.id in processed
+    assert kg_b.id in processed
+
+
+@pytest.mark.asyncio
+async def test_run_governance_worker_one_kg_failure_does_not_block_others(monkeypatch):
+    kg_a = _make_kg("kg-a")
+    kg_b = _make_kg("kg-b")
+
+    class FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def list_all(self):
+            return [kg_a, kg_b]
+
+    monkeypatch.setattr("services.expand_worker.KGRepository", FakeRepo)
+    monkeypatch.setattr("services.expand_worker.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("services.expand_worker.get_llm_provider", lambda: FakeLLM("判斷：否"))
+
+    processed = []
+
+    async def _fake_cycle(driver, kg_id, embedding_provider, llm_provider):
+        if kg_id == kg_a.id:
+            raise RuntimeError("模擬 LLM 逾時")
+        processed.append(kg_id)
+
+    monkeypatch.setattr("services.expand_worker.run_governance_cycle", _fake_cycle)
+
+    task = asyncio.create_task(worker.run_governance_worker(SpyDriver(), poll_interval=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert kg_b.id in processed  # kg_a 失敗不應阻擋 kg_b 被處理
+
+
+@pytest.mark.asyncio
+async def test_run_governance_worker_idles_when_providers_not_initialized(monkeypatch):
+    def _raise_runtime_error():
+        raise RuntimeError("provider 尚未初始化")
+
+    monkeypatch.setattr("services.expand_worker.get_embedding_provider", _raise_runtime_error)
+    list_all_calls = []
+
+    class FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def list_all(self):
+            list_all_calls.append(True)
+            return []
+
+    monkeypatch.setattr("services.expand_worker.KGRepository", FakeRepo)
+
+    task = asyncio.create_task(worker.run_governance_worker(SpyDriver(), poll_interval=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert list_all_calls == []  # provider 未就緒時不應繼續查詢 KG 清單

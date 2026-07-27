@@ -89,6 +89,12 @@ EXPAND_REGCHECK_THRESHOLD = 0.75
 EXPAND_GATE_WINDOW = 10
 EXPAND_GATE_THRESHOLD = 0.9
 
+# 治理 Worker 巡視候選池的排程節奏（P2-3，見 § 3.1.3 §a 決策脈絡第 5 點
+# 「治理 Worker 的實際排程機制」）——寬鬆迴圈，5 分鐘（暫定，未驗證，理由：
+# 候選池要累積到 EXPAND_POOL_MIN_SIZE 才會真的觸發分群，不需要像抽取
+# Worker 那樣緊盯），單位為秒。
+EXPAND_WORKER_POLL_INTERVAL = 300
+
 # `SIM` 節點的比對目標——33 個關係型別各自的自然語言描述句／範例句（而非型別
 # 識別碼字串本身），依據 Chen & Li (2021) ZS-BERT 的描述句 embedding 設計與
 # Xue et al. (2024) AutoRE 消融實驗（劣質描述句甚至不如不用描述句），見

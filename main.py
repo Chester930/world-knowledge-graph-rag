@@ -20,6 +20,7 @@ from repositories.concept_repo import ConceptRepository
 from repositories.kg_repo import KGRepository
 from routers import agent, documents, expand, knowledge_graph, search, staging
 from services import svo_service, task_queue_service
+from services.expand_worker import run_governance_worker
 from services.extraction_worker import run_extraction_worker
 
 logging.basicConfig(
@@ -55,14 +56,20 @@ async def lifespan(app: FastAPI):
     # § 3.1.2「WORKER 執行模型定案」：常駐背景 asyncio 任務，隨宿主行程啟動，
     # 消費 task_queue_service.next_pending()（見 services/extraction_worker.py）。
     app.state.extraction_worker_task = asyncio.create_task(run_extraction_worker(get_driver()))
+    # § 3.1.3 §a「治理 Worker 的實際排程機制」：同一宿主行程內第二個獨立
+    # 背景任務，寬鬆迴圈巡視各 KG 候選池（見 services/expand_worker.py）。
+    app.state.governance_worker_task = asyncio.create_task(run_governance_worker(get_driver()))
     logger.info(
         f"World Knowledge Graph RAG API 啟動完成 "
         f"[LLM={settings.llm_provider}, Embedding={settings.embedding_provider}]"
     )
     yield
     app.state.extraction_worker_task.cancel()
+    app.state.governance_worker_task.cancel()
     with contextlib.suppress(asyncio.CancelledError):
         await app.state.extraction_worker_task
+    with contextlib.suppress(asyncio.CancelledError):
+        await app.state.governance_worker_task
     await disconnect()
 
 
