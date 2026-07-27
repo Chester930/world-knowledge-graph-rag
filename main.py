@@ -18,7 +18,7 @@ from core.embedding_guard import check_and_register as check_embedding_consisten
 from core.providers.factory import init_providers
 from repositories.concept_repo import ConceptRepository
 from repositories.kg_repo import KGRepository
-from routers import agent, documents, knowledge_graph, search, staging
+from routers import agent, documents, expand, knowledge_graph, search, staging
 from services import svo_service, task_queue_service
 from services.extraction_worker import run_extraction_worker
 
@@ -80,6 +80,7 @@ app.include_router(search.router, dependencies=_protected)
 app.include_router(agent.router, dependencies=_protected)
 app.include_router(knowledge_graph.router, dependencies=_protected)
 app.include_router(staging.router, dependencies=_protected)
+app.include_router(expand.router, dependencies=_protected)
 
 app.mount("/static", StaticFiles(directory="ui/static"), name="static")
 templates = Jinja2Templates(directory="ui/templates")

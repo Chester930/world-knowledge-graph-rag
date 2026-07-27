@@ -240,6 +240,21 @@ def _row_to_proposal(row: tuple) -> dict:
     }
 
 
+def get_proposal(db_path: Path, proposal_id: int) -> dict | None:
+    """單筆提案查詢，供 `HUMANCHECK` 核准端點在呼叫 `resolve_proposal()`
+    （只更新狀態、不回傳內容）之前，先取得觸發 `COMMIT`／`BACKFILL` 所需的
+    完整內容（`kg_id`／`member_verbs`／`suggested_type_name` 等）。查無資料
+    回傳 `None`，不拋例外，比照 `KGRepository.get()` 既有慣例。"""
+    with closing(_connect(db_path)) as conn:
+        row = conn.execute(
+            "SELECT id, kg_id, member_verbs, suggested_type_name, suggested_description, "
+            "reused_from_registry, status, llm_judged_at, resolved_at "
+            "FROM expand_cluster_proposal WHERE id = ?",
+            (proposal_id,),
+        ).fetchone()
+    return _row_to_proposal(row) if row else None
+
+
 def list_awaiting_review(db_path: Path, kg_id: str | None = None) -> list[dict]:
     """`HUMANCHECK` 審核介面的資料來源：所有 `status='awaiting_review'` 的
     提案，依判定時間由舊到新排序（先產生的先審）。`kg_id` 省略時查詢所有

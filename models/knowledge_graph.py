@@ -170,3 +170,25 @@ class BuildGraphRequest(BaseModel):
     # 說明）；doc_ids 型別故為 list[str]，None 代表 KG 底下所有文件資料夾。
     doc_ids: list[str] | None = None
     force_rebuild: bool = False
+
+
+# ── EXPAND 治理機制 HUMANCHECK（見 docs/報告/11_抽取管線完整實作任務書.md P2-2）──
+
+class ExpandProposal(BaseModel):
+    """`expand_governance_service.py` 提案表的 API 回應形狀（見該模組
+    `_row_to_proposal()`）。`llm_judged_at`／`resolved_at` 保留 SQLite
+    `datetime('now')` 的原始字串格式（無時區、空格分隔），不轉型為
+    `datetime`，避免不必要的格式相容性風險。"""
+    id: int
+    kg_id: UUID
+    member_verbs: list[str]
+    suggested_type_name: str
+    suggested_description: str
+    reused_from_registry: bool
+    status: str
+    llm_judged_at: str
+    resolved_at: str | None = None
+
+
+class ExpandProposalResolveRequest(BaseModel):
+    decision: Literal["approved", "rejected"]

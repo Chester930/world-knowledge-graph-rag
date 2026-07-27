@@ -72,7 +72,7 @@ def _parse_llmjudge_response(raw: str) -> tuple[bool, str, str]:
     return True, type_name, description
 
 
-async def _commit_and_backfill(
+async def commit_and_backfill(
     driver: AsyncDriver,
     kg_id: UUID,
     embedding_provider: EmbeddingProvider,
@@ -86,8 +86,9 @@ async def _commit_and_backfill(
     """`COMMIT`＋`BACKFILL`：核准新型別後把候選標記為 `committed`、（若非沿用
     既有登記）寫入跨 KG 登記表，並在同一輪流程內接著觸發回溯重分類（見
     3.1.3 §a-1）。由 `run_governance_cycle()` 的 `AUTOAPPROVE` 分支呼叫，也
-    供 P2-2 的 `HUMANCHECK` 端點在人工核准後呼叫——兩條路徑最終都走到同一個
-    `COMMIT`／`BACKFILL` 邏輯，不重複實作。回傳實際升級的邊數。
+    供 `routers/expand.py` 的 `HUMANCHECK` 端點在人工核准後呼叫（P2-2）——
+    兩條路徑最終都走到同一個 `COMMIT`／`BACKFILL` 邏輯，不重複實作，公開
+    （無底線前綴）供 router 層直接匯入。回傳實際升級的邊數。
     """
     db_path = task_queue_db_path()
     kg_id_str = str(kg_id)
@@ -174,7 +175,7 @@ async def run_governance_cycle(
         )
 
         if graduated:
-            await _commit_and_backfill(
+            await commit_and_backfill(
                 driver, kg_id, embedding_provider, llm_provider,
                 type_name=final_type_name, description=description,
                 member_verbs=member_verbs, reused_from_registry=reused,

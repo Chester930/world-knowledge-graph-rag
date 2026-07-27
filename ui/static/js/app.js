@@ -4,6 +4,8 @@ const chatFormEl = document.getElementById("chat-form");
 const chatInputEl = document.getElementById("chat-input");
 const stagingBtnEl = document.getElementById("staging-classify-btn");
 const stagingResultsEl = document.getElementById("staging-results");
+const expandRefreshBtnEl = document.getElementById("expand-refresh-btn");
+const expandProposalsEl = document.getElementById("expand-proposals");
 
 let activeKgId = null;
 
@@ -107,6 +109,68 @@ async function classifyStaging() {
   }
 }
 
+async function loadExpandProposals() {
+  expandProposalsEl.innerHTML = '<li class="muted">載入中…</li>';
+  try {
+    const res = await fetch("/expand/proposals");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const proposals = await res.json();
+    expandProposalsEl.innerHTML = "";
+    if (proposals.length === 0) {
+      expandProposalsEl.innerHTML = '<li class="muted">目前沒有待審核提案</li>';
+      return;
+    }
+    proposals.forEach((p) => {
+      const li = document.createElement("li");
+      li.className = "expand-proposal";
+
+      const summary = document.createElement("div");
+      summary.className = "expand-proposal-summary";
+      const reuseTag = p.reused_from_registry ? "（沿用既有型別）" : "（全新型別）";
+      summary.textContent = `${p.suggested_type_name}${reuseTag}：${p.suggested_description}`;
+      li.appendChild(summary);
+
+      const verbs = document.createElement("div");
+      verbs.className = "expand-proposal-verbs muted";
+      verbs.textContent = `候選動詞：${p.member_verbs.join("、")}`;
+      li.appendChild(verbs);
+
+      const actions = document.createElement("div");
+      actions.className = "expand-proposal-actions";
+      const approveBtn = document.createElement("button");
+      approveBtn.type = "button";
+      approveBtn.textContent = "核准";
+      approveBtn.onclick = () => resolveExpandProposal(p.id, "approved");
+      const rejectBtn = document.createElement("button");
+      rejectBtn.type = "button";
+      rejectBtn.className = "reject";
+      rejectBtn.textContent = "駁回";
+      rejectBtn.onclick = () => resolveExpandProposal(p.id, "rejected");
+      actions.appendChild(approveBtn);
+      actions.appendChild(rejectBtn);
+      li.appendChild(actions);
+
+      expandProposalsEl.appendChild(li);
+    });
+  } catch (err) {
+    expandProposalsEl.innerHTML = `<li class="muted">尚未實作（${err.message}）</li>`;
+  }
+}
+
+async function resolveExpandProposal(proposalId, decision) {
+  try {
+    const res = await fetch(`/expand/proposals/${proposalId}/resolve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await loadExpandProposals();
+  } catch (err) {
+    expandProposalsEl.innerHTML = `<li class="muted">審核失敗（${err.message}）</li>`;
+  }
+}
+
 chatFormEl.addEventListener("submit", (e) => {
   e.preventDefault();
   const question = chatInputEl.value.trim();
@@ -116,5 +180,6 @@ chatFormEl.addEventListener("submit", (e) => {
 });
 
 stagingBtnEl.addEventListener("click", classifyStaging);
+expandRefreshBtnEl.addEventListener("click", loadExpandProposals);
 
 loadKnowledgeGraphs();

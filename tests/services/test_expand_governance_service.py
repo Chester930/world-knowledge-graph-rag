@@ -193,6 +193,36 @@ class TestCreateProposalAndListAwaitingReview:
         assert len(svc.list_awaiting_review(db_path)) == 2
 
 
+class TestGetProposal:
+    def test_get_proposal_returns_full_content(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        proposal_id = svc.create_proposal(
+            db_path, "kg-1", ["導致惡化", "加劇因果"], "AGGRAVATES", "A 使 B 的情況惡化",
+        )
+
+        proposal = svc.get_proposal(db_path, proposal_id)
+
+        assert proposal["id"] == proposal_id
+        assert proposal["kg_id"] == "kg-1"
+        assert proposal["member_verbs"] == ["導致惡化", "加劇因果"]
+        assert proposal["suggested_type_name"] == "AGGRAVATES"
+        assert proposal["status"] == "awaiting_review"
+
+    def test_get_proposal_returns_none_when_not_found(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        assert svc.get_proposal(db_path, 999) is None
+
+    def test_get_proposal_reflects_resolved_status(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        proposal_id = svc.create_proposal(db_path, "kg-1", ["導致惡化"], "AGGRAVATES", "描述")
+        svc.resolve_proposal(db_path, proposal_id, "approved")
+
+        proposal = svc.get_proposal(db_path, proposal_id)
+
+        assert proposal["status"] == "approved"
+        assert proposal["resolved_at"] is not None
+
+
 class TestResolveProposal:
     def test_resolve_proposal_approved_sets_status_and_resolved_at(self, tmp_path):
         db_path = _db_path(tmp_path)
