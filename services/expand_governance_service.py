@@ -254,7 +254,9 @@ def list_awaiting_review(db_path: Path, kg_id: str | None = None) -> list[dict]:
     if kg_id is not None:
         query += " AND kg_id = ?"
         params = (kg_id,)
-    query += " ORDER BY llm_judged_at ASC"
+    # 用 id 而非 llm_judged_at 排序——同一秒內產生多筆提案時，id 才能可靠
+    # 反映真正的產生順序（見 recent_agreement_rate() 同一類修正的說明）。
+    query += " ORDER BY id ASC"
 
     with closing(_connect(db_path)) as conn:
         rows = conn.execute(query, params).fetchall()
@@ -289,9 +291,11 @@ def recent_agreement_rate(db_path: Path, kg_id: str, window: int) -> float | Non
     """
     with closing(_connect(db_path)) as conn:
         rows = conn.execute(
+            # 用 id 而非 resolved_at 排序——resolved_at 只有秒級精度，短時間內
+            # 連續審核多筆提案會撞期，id（自增主鍵）才能可靠反映真正的處理順序。
             "SELECT status FROM expand_cluster_proposal "
             "WHERE kg_id = ? AND status IN ('approved', 'rejected') "
-            "ORDER BY resolved_at DESC LIMIT ?",
+            "ORDER BY id DESC LIMIT ?",
             (kg_id, window),
         ).fetchall()
     if len(rows) < window:

@@ -21,6 +21,7 @@ from core.constants import (
 )
 from core.providers.base import EmbeddingProvider, LLMProvider
 from models.knowledge_graph import SVOTriple
+from services import sim_calibration_service
 from services.classify_service import cosine_similarity
 from services.entity_registry_service import should_promote_by_frequency
 from services.svo_chunking import SVOChunk
@@ -189,6 +190,8 @@ async def _reconcile_rel_type(
     *,
     embedding_provider: EmbeddingProvider | None,
     llm_provider: LLMProvider | None,
+    kg_id: str | None = None,
+    calibration_db_path: Path | None = None,
 ) -> str:
     """COMPARE＋ESCALATE3：`SIM` 判斷是否與 LLM 自報的 rel_type 一致，見
     docs/論文/03_系統設計與方法論.md § 3.1.3 主圖。
@@ -200,6 +203,14 @@ async def _reconcile_rel_type(
     「究竟是原答案、embedding 建議的候選，還是兩者皆非」。**兩者皆非**（判定為
     候選新類別）目前退回 `RELATED_TO` 兜底——3.1.3 §a `EXPAND` 候選池／治理機制
     尚未實作，此為明確標註的暫時限制，非漏未處理。
+
+    **`SIM` 學習/校正機制（2026-07-27 新增，見設計文件同名段落）**：`kg_id`
+    與 `calibration_db_path` 皆提供時，每次真正觸發 `ESCALATE3`（COMPARE 不
+    一致）就記錄一筆仲裁事件（`sim_calibration_service.log_escalation()`），
+    供未來逐型別計算 `SIM` 建議與最終判定的一致率，校正對 `SIM` 的信任度。
+    只記錄真正升級仲裁的事件——`COMPARE` 一致、未觸發 `ESCALATE3` 的情況
+    沒有「最終仲裁結果」可比對，不需要記錄。任一參數缺席時完全跳過記錄，
+    行為與先前版本一致（向後相容）。
     """
     if embedding_provider is None:
         return llm_rel_type
@@ -218,25 +229,39 @@ async def _reconcile_rel_type(
     )
     answer = (await llm_provider.generate(prompt)).strip()
     if answer == best_type:
-        return best_type
-    if answer == llm_rel_type:
-        return llm_rel_type
-    # ESCALATE3 判定兩者皆非（候選新類別）：EXPAND 候選池／治理機制尚未實作，
-    # 暫時退回 RELATED_TO，比照 REJECT 兜底邏輯，三元組本身仍保留、不靜默丟棄。
-    return "RELATED_TO"
+        final = best_type
+    elif answer == llm_rel_type:
+        final = llm_rel_type
+    else:
+        # ESCALATE3 判定兩者皆非（候選新類別）：EXPAND 候選池／治理機制尚未
+        # 實作，暫時退回 RELATED_TO，比照 REJECT 兜底邏輯，三元組本身仍保留、
+        # 不靜默丟棄。
+        final = "RELATED_TO"
+
+    if kg_id is not None and calibration_db_path is not None:
+        sim_calibration_service.log_escalation(
+            calibration_db_path, kg_id, llm_rel_type, best_type, best_score, final,
+        )
+    return final
 
 
 async def extract_svo_triples(
     text: str,
     llm_provider: LLMProvider | None = None,
     embedding_provider: EmbeddingProvider | None = None,
+    *,
+    kg_id: str | None = None,
+    calibration_db_path: Path | None = None,
 ) -> list[SVOTriple]:
     """用 LLM 抽取受控關係 SVO triples。
 
     未提供 provider 時回傳空清單，讓離線管線與單元測試可以安全呼叫；實際抽取
     Worker 應明確傳入本地或雲端 LLMProvider。`embedding_provider` 為選填——
     提供時才會執行 `SIM`／`COMPARE`／`ESCALATE3` 事後驗證（見 `_reconcile_rel_type`），
-    未提供時直接採用 LLM 自報的 rel_type，行為與先前版本一致。
+    未提供時直接採用 LLM 自報的 rel_type，行為與先前版本一致。`kg_id`／
+    `calibration_db_path` 皆提供時，`ESCALATE3` 觸發的仲裁事件會記錄進
+    `SIM` 學習/校正機制的持久化層（見 `_reconcile_rel_type` docstring），
+    皆為選填、預設不記錄，向後相容。
     """
     if not text.strip() or llm_provider is None:
         return []
@@ -255,6 +280,8 @@ async def extract_svo_triples(
                 rel_type,
                 embedding_provider=embedding_provider,
                 llm_provider=llm_provider,
+                kg_id=kg_id,
+                calibration_db_path=calibration_db_path,
             )
         item["rel_type"] = rel_type
         # 3.1.3 §a-1 BACKFILL：僅 RELATED_TO 兜底的三元組才需要保留 verb embedding，

@@ -84,6 +84,8 @@
 
 > **2026-07-27 新增查證——`BACKFILL` 的 LLM 確認關卡**：使用者指出 `backfill_related_to_edges()` 原始設計是純 cosine 分數決定改寫，沒有二次確認，比 `ESCALATE3` 更粗糙，要求先查文獻與專案佐證再定案。查證結果：① **既有引用的 Jitkrittum et al.（2023，🟢 NeurIPS 2023）**其 Appendix F 已明確把 cascade deferral 框架推廣至 K>2 階段，本次延伸屬於這篇論文自己預留的範圍，非全新主張。② **Fellegi & Sunter（1969）**《A Theory for Record Linkage》，*JASA* 64(328)——機率式紀錄比對領域的奠基論文，正式提出「相似度達門檻才自動判定、中間地帶交人工複核」的三區間框架，是本論文「信心夠高才自動處理，不確定交人工/LLM複核」整套設計精神（含既有的 `ENTITY_DEDUP_COSINE_THRESHOLD`／`ESCALATE_LOW_THRESHOLD`）的理論源頭；⚠️ 誠實聲明：查證多個管道皆為付費牆（JSTOR／Taylor & Francis），未能取得合法免費全文，僅透過多個獨立次級來源交叉確認核心主張，不符合本論文一貫全文精讀才正式引用的標準，列為背景性佐證、不算 🟢 等級。③ **開源專案 `dedupeio/dedupe`**（🟢 已用 `gh api` 查證 4,487★）——生產級專案的實際運作方式正是「相似度找候選 → 人工/主動學習驗證 → 才合併」，佐證「候選須經驗證才動手」在業界已被廣泛驗證可行。完整記錄見 `docs/論文/03_變更紀錄.md`「第三十九次調整」。
 
+> **2026-07-27 `SIM` 學習/校正機制定案（沿用既有引用，未新增文獻）**：延續問題 7（子問題 A：LLM 對 33 型別仲裁準確度是否均勻，尚無驗證計畫）的討論，使用者要求先把「`SIM` 學習/校正機制」的具體設計定案。查證確認**不需要新查文獻**——`SIM`／`ESCALATE3`／`BACKFILL` 已引用的 **Jitkrittum et al.（2023，🟢 NeurIPS 2023）**論文本身已提出「用歷史仲裁結果訓練輕量 post-hoc deferral rule，取代單純信心門檻」的具體解法（Table 1：`Diff-01`／`Diff-Prob`／`MaxProb`），與本次設計方向精神一致；`GATE` 節點已引用的 **Bloodgood & Vijay-Shanker（2009）**／**Bloodgood & Grothendieck（2013）**Kappa 穩定度停止準則同樣適用於「`SIM` 逐型別一致率穩定後畢業」這個情境。完整設計見 `docs/論文/03_系統設計與方法論.md` 3.1.3 節「`SIM` 的學習/校正機制與畢業路徑」，完整記錄見 `docs/論文/03_變更紀錄.md`「第四十次調整」。
+
 ## 內容清單
 
 | 檔案 | 文獻 | 來源 | 狀態 |

@@ -360,6 +360,74 @@ async def test_extract_svo_triples_without_embedding_provider_skips_reconciliati
     assert triples[0].verb_embedding is None
 
 
+# ── SIM 學習/校正機制：ESCALATE3 仲裁事件記錄 ────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_logs_escalation_when_kg_id_and_db_path_provided(tmp_path):
+    """真正觸發 ESCALATE3 時，提供 kg_id／calibration_db_path 應記錄一筆仲裁
+    事件，供 SIM 學習/校正機制計算一致率。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"RELATED_TO","verb":"導致","object":"B","confidence":2}]}',
+        "CAUSES",
+    ])
+    db_path = tmp_path / "task_queue.db"
+
+    triples = await svc.extract_svo_triples(
+        "A 導致 B。", llm, embedding_provider=embedding,
+        kg_id="kg-1", calibration_db_path=db_path,
+    )
+
+    assert triples[0].rel_type == "CAUSES"
+    from services import sim_calibration_service
+    assert sim_calibration_service.sim_agreement_rate(db_path, "CAUSES", window=1) == pytest.approx(1.0)
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_does_not_log_without_kg_id_and_db_path(tmp_path):
+    """未提供 kg_id／calibration_db_path 時完全不記錄，向後相容。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"RELATED_TO","verb":"導致","object":"B","confidence":2}]}',
+        "CAUSES",
+    ])
+    db_path = tmp_path / "task_queue.db"
+
+    await svc.extract_svo_triples("A 導致 B。", llm, embedding_provider=embedding)
+
+    assert not db_path.exists()
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_does_not_log_when_compare_agrees(tmp_path):
+    """COMPARE 一致、未觸發 ESCALATE3 時不記錄——沒有「最終仲裁結果」可比對。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":4}]}'
+    ])
+    db_path = tmp_path / "task_queue.db"
+
+    await svc.extract_svo_triples(
+        "A 導致 B。", llm, embedding_provider=embedding,
+        kg_id="kg-1", calibration_db_path=db_path,
+    )
+
+    from services import sim_calibration_service
+    assert sim_calibration_service.sim_agreement_rate(db_path, "CAUSES", window=1) is None
+
+
 # ── 3.1.3 §a-1 BACKFILL：verb_embedding 持久化與回溯重分類 ───────────────────
 
 @pytest.mark.asyncio
