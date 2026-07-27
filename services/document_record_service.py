@@ -154,6 +154,33 @@ def reset_extraction_progress(folder: Path) -> DocumentRecord | None:
     return record
 
 
+def record_chunk_completed(folder: Path, chunk_index: int) -> DocumentRecord | None:
+    """抽取 Worker（§ 3.1.3／3.1.4）完成單一 SVO chunk 後回寫真實狀態來源：
+    `chunk_progress` 單調遞增（`max()` 而非直接覆寫，容忍失敗重試造成的
+    非嚴格遞增呼叫順序）；達到總 chunk 數時整份文件才轉為 `completed`，
+    否則維持 `processing`（供 `task_queue_service.rebuild_from_records()`
+    推算尚未完成的 chunk_index 範圍）。
+    """
+    record = read_record(folder)
+    if record is None:
+        return None
+    record.chunk_progress = max(record.chunk_progress, chunk_index)
+    total = record.svo_total_chunks or record.total_chunks
+    record.extraction_status = "completed" if total and record.chunk_progress >= total else "processing"
+    _write_record(folder, record)
+    return record
+
+
+def mark_extraction_failed(folder: Path) -> DocumentRecord | None:
+    """抽取 Worker 單一 chunk 失敗（`FAIL` 節點）時回寫真實狀態來源。"""
+    record = read_record(folder)
+    if record is None:
+        return None
+    record.extraction_status = "failed"
+    _write_record(folder, record)
+    return record
+
+
 def append_assignment(
     folder: Path,
     kg_id: UUID,

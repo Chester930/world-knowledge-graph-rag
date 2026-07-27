@@ -1,3 +1,5 @@
+import asyncio
+import contextlib
 import logging
 from contextlib import asynccontextmanager
 
@@ -18,6 +20,7 @@ from repositories.concept_repo import ConceptRepository
 from repositories.kg_repo import KGRepository
 from routers import agent, documents, knowledge_graph, search, staging
 from services import svo_service, task_queue_service
+from services.extraction_worker import run_extraction_worker
 
 logging.basicConfig(
     level=logging.INFO,
@@ -49,11 +52,17 @@ async def lifespan(app: FastAPI):
     await svo_service.create_chunk_vector_index(get_driver(), embedding.dim)
     await svo_service.create_related_to_vector_index(get_driver(), embedding.dim)
     await _restart_task_queue()
+    # § 3.1.2「WORKER 執行模型定案」：常駐背景 asyncio 任務，隨宿主行程啟動，
+    # 消費 task_queue_service.next_pending()（見 services/extraction_worker.py）。
+    app.state.extraction_worker_task = asyncio.create_task(run_extraction_worker(get_driver()))
     logger.info(
         f"World Knowledge Graph RAG API 啟動完成 "
         f"[LLM={settings.llm_provider}, Embedding={settings.embedding_provider}]"
     )
     yield
+    app.state.extraction_worker_task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await app.state.extraction_worker_task
     await disconnect()
 
 
