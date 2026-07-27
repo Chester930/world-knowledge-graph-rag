@@ -778,6 +778,66 @@ async def test_merge_triples_to_graph_accumulates_citation_on_edge():
     assert citations[0]["verb"] == "導致"
 
 
+# ── _fetch_entity_candidates（DEDUP3／DEDUP4 型別集合篩選，見
+# docs/報告/11_抽取管線完整實作任務書.md P1-1）：型別選填、可多值，篩選規則
+# 為「集合有交集，或查詢/既有節點任一方型別缺席」皆視為候選，只有雙方都有
+# 型別且集合無交集才排除——這裡補齊先前只間接透過 resolve_entity_name／
+# merge_entity 測試覆蓋、從未直接測過的候選篩選函式本身。─────────────────
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_returns_all_when_query_type_empty():
+    driver = FakeDriver(records=[
+        FakeRecord(name="台積電", type="組織"),
+        FakeRecord(name="張忠謀", type="人物"),
+    ])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "")
+
+    assert {c["name"] for c in candidates} == {"台積電", "張忠謀"}
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_excludes_disjoint_type():
+    driver = FakeDriver(records=[FakeRecord(name="新竹", type="地點")])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "人物")
+
+    assert candidates == []
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_includes_partial_type_overlap():
+    """查詢型別「人物,組織」與既有節點型別「組織,地點」有交集（組織），
+    即使非完全相等也應視為候選——完全相等篩選會誤刪本該比對的候選。"""
+    driver = FakeDriver(records=[FakeRecord(name="台積電", type="組織,地點")])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "人物,組織")
+
+    assert {c["name"] for c in candidates} == {"台積電"}
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_includes_candidate_with_missing_type():
+    """既有節點型別缺席（None／空字串）時視為不設限，直接納入候選。"""
+    driver = FakeDriver(records=[
+        FakeRecord(name="無型別實體", type=None),
+        FakeRecord(name="空字串型別實體", type=""),
+    ])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "人物")
+
+    assert {c["name"] for c in candidates} == {"無型別實體", "空字串型別實體"}
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_includes_exact_type_match():
+    driver = FakeDriver(records=[FakeRecord(name="台積電", type="組織")])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "組織")
+
+    assert {c["name"] for c in candidates} == {"台積電"}
+
+
 # ── resolve_entity_name（DEDUP4＋ESCALATE 純邏輯）──────────────────────────
 
 @pytest.mark.asyncio
