@@ -326,8 +326,8 @@ async def test_extract_svo_triples_escalate3_confirms_original_llm_answer():
 
 @pytest.mark.asyncio
 async def test_extract_svo_triples_escalate3_neither_falls_back_to_related_to():
-    """ESCALATE3 判定「皆非」（候選新類別）時，EXPAND 候選池／治理機制尚未實作，
-    暫時退回 RELATED_TO 兜底，三元組本身仍保留（見 `_reconcile_rel_type` docstring）。"""
+    """ESCALATE3 判定「皆非」（候選新類別）時，先退回 RELATED_TO 兜底，
+    三元組本身仍保留（見 `_reconcile_rel_type` docstring）。"""
     causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
     embedding = TypeDescriptionFakeEmbedding(
         vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
@@ -345,6 +345,75 @@ async def test_extract_svo_triples_escalate3_neither_falls_back_to_related_to():
     # 3.1.3 §a-1 BACKFILL：降級為 RELATED_TO 時應保留 verb embedding，
     # 供日後 EXPAND 核准新型別時的回溯重分類使用。
     assert triples[0].verb_embedding == [1.0, 0.0, 0.0]
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_escalate3_neither_adds_candidate_to_expand_pool(tmp_path):
+    """對應 P2-1（2026-07-27）：ESCALATE3 判定「皆非」時，提供 kg_id／
+    calibration_db_path 應把該動詞連同其 embedding 記入 EXPAND 候選池，
+    供治理 Worker（services/expand_worker.py）之後判斷是否構成新類別。"""
+    from services import expand_governance_service
+
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"MANNER_OF","verb":"導致","object":"B","confidence":2}]}',
+        "皆非",
+    ])
+    db_path = tmp_path / "task_queue.db"
+
+    await svc.extract_svo_triples(
+        "A 導致 B。", llm, embedding_provider=embedding, kg_id="kg-1", calibration_db_path=db_path,
+    )
+
+    candidates = expand_governance_service.pending_candidates(db_path, "kg-1")
+    assert len(candidates) == 1
+    assert candidates[0]["verb"] == "導致"
+    assert candidates[0]["verb_embedding"] == [1.0, 0.0, 0.0]
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_escalate3_neither_skips_expand_pool_without_kg_id(tmp_path):
+    """未提供 kg_id／calibration_db_path 時完全不記錄，向後相容。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"A","rel_type":"MANNER_OF","verb":"導致","object":"B","confidence":2}]}',
+        "皆非",
+    ])
+    db_path = tmp_path / "task_queue.db"
+
+    await svc.extract_svo_triples("A 導致 B。", llm, embedding_provider=embedding)
+
+    assert not db_path.exists()
+
+
+# ── _relationship_type（Cypher 注入防護，見 P2-1 docstring）─────────────────
+
+def test_relationship_type_accepts_svo_rel_types_member():
+    assert svc._relationship_type("CAUSES") == "`CAUSES`"
+
+
+def test_relationship_type_accepts_safe_dynamic_type_name():
+    """對應 EXPAND 治理機制動態核准的新型別（不在 SVO_REL_TYPES 內，但格式安全）。"""
+    assert svc._relationship_type("INVESTS_IN") == "`INVESTS_IN`"
+
+
+def test_relationship_type_rejects_unsafe_characters():
+    """Neo4j 關係型別無法參數化，格式不安全的字串必須拒絕，避免 Cypher 注入。"""
+    with pytest.raises(ValueError):
+        svc._relationship_type("CAUSES`]-() MATCH (n) DETACH DELETE n //")
+
+
+def test_relationship_type_rejects_lowercase():
+    with pytest.raises(ValueError):
+        svc._relationship_type("invests_in")
 
 
 @pytest.mark.asyncio

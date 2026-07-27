@@ -72,6 +72,23 @@ SVO_REL_TYPES: set[str] = {
 # docs/參考文獻/03_資訊抽取與本體設計/README.md「第三十一次調整」查證記錄）。
 COMPARE_COSINE_THRESHOLD = 0.75
 
+# `EXPAND` 治理機制（見 docs/論文/03_系統設計與方法論.md § 3.1.3 §a Behavior
+# Tree；docs/報告/11_抽取管線完整實作任務書.md P2-1）——以下四個常數皆為
+# ⚠️ 暫定值，未經校準，第五章消融實驗需依實際候選池／登記表資料重新校準：
+# `EXPAND_POOL_MIN_SIZE`＝10 為類比 3.1.1 §a 文件分群 `CLUSTER_MIN_SIZE`＝3
+# 抓高的暫定值（候選池是單一動詞 embedding、未經聚合，噪訊比例預期高於
+# 3.1.1 §a 已聚合的文件向量，故抓比 3 更高的門檻，見設計文件同名段落誠實
+# 聲明）；`EXPAND_REGCHECK_THRESHOLD`＝0.75 類比 `COMPARE_COSINE_THRESHOLD`
+# （同為描述句 embedding 的 cosine 比對）；`EXPAND_GATE_WINDOW`／
+# `EXPAND_GATE_THRESHOLD` 是設計文件本身尚未釘出具體數字的兩個滾動窗口
+# 一致率參數（Bloodgood & Vijay-Shanker, 2009／Bloodgood & Grothendieck,
+# 2013 的 Kappa 穩定窗口精神，見 § 3.1.3 §a 文獻依據），此處先訂與
+# `EXPAND_POOL_MIN_SIZE` 同量級的窗口＋高一致率門檻。
+EXPAND_POOL_MIN_SIZE = 10
+EXPAND_REGCHECK_THRESHOLD = 0.75
+EXPAND_GATE_WINDOW = 10
+EXPAND_GATE_THRESHOLD = 0.9
+
 # `SIM` 節點的比對目標——33 個關係型別各自的自然語言描述句／範例句（而非型別
 # 識別碼字串本身），依據 Chen & Li (2021) ZS-BERT 的描述句 embedding 設計與
 # Xue et al. (2024) AutoRE 消融實驗（劣質描述句甚至不如不用描述句），見

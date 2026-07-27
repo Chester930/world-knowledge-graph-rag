@@ -23,7 +23,7 @@ from core.config import task_queue_db_path
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider
 from models.knowledge_graph import SVOTriple
-from services import document_record_service, sim_calibration_service, task_queue_service
+from services import document_record_service, expand_governance_service, sim_calibration_service, task_queue_service
 from services.classify_service import cosine_similarity
 from services.entity_registry_service import should_promote_by_frequency
 from services.svo_chunking import SVOChunk
@@ -204,8 +204,11 @@ async def _reconcile_rel_type(
     兩個獨立訊號互相驗證，直接採用 LLM 自報值；不一致（含分數不足門檻，視為
     embedding 對所有型別都不夠相似）時，交由 `ESCALATE3` 第二次 LLM 呼叫仲裁
     「究竟是原答案、embedding 建議的候選，還是兩者皆非」。**兩者皆非**（判定為
-    候選新類別）目前退回 `RELATED_TO` 兜底——3.1.3 §a `EXPAND` 候選池／治理機制
-    尚未實作，此為明確標註的暫時限制，非漏未處理。
+    候選新類別）先退回 `RELATED_TO` 兜底（三元組本身不因型別未定案而遺失），
+    `kg_id`／`calibration_db_path` 皆提供時同步把該動詞記入 `EXPAND` 候選池
+    （`expand_governance_service.add_candidate()`），供治理 Worker
+    （`services/expand_worker.py::run_governance_cycle()`，P2-1，2026-07-27
+    實作）判斷是否構成新關係類型。
 
     **`SIM` 學習/校正機制（2026-07-27 新增，見設計文件同名段落）**：`kg_id`
     與 `calibration_db_path` 皆提供時，每次真正觸發 `ESCALATE3`（COMPARE 不
@@ -236,10 +239,14 @@ async def _reconcile_rel_type(
     elif answer == llm_rel_type:
         final = llm_rel_type
     else:
-        # ESCALATE3 判定兩者皆非（候選新類別）：EXPAND 候選池／治理機制尚未
-        # 實作，暫時退回 RELATED_TO，比照 REJECT 兜底邏輯，三元組本身仍保留、
-        # 不靜默丟棄。
+        # ESCALATE3 判定兩者皆非（候選新類別）：比照 REJECT 兜底邏輯先退回
+        # RELATED_TO，三元組本身仍保留、不靜默丟棄；同步記入 EXPAND 候選池，
+        # 供治理 Worker 之後判斷是否真的構成新類別。
         final = "RELATED_TO"
+        if kg_id is not None and calibration_db_path is not None:
+            expand_governance_service.add_candidate(
+                calibration_db_path, kg_id, verb, embedding_provider.encode(verb),
+            )
 
     if kg_id is not None and calibration_db_path is not None:
         sim_calibration_service.log_escalation(
@@ -304,8 +311,22 @@ async def extract_svo_triples(
     return triples
 
 
+_SAFE_REL_TYPE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
+
+
 def _relationship_type(rel_type: str) -> str:
-    if rel_type not in SVO_REL_TYPES:
+    """把 `rel_type` 準備成可安全內插進 Cypher 查詢的關係型別字面值。
+
+    Neo4j 關係型別無法參數化（只能字面內插），這裡是唯一的注入防線。允許
+    靜態受控詞彙表 `SVO_REL_TYPES` 內的值，也允許格式合法（大寫字母／數字／
+    底線）但不在表內的值——後者對應 3.1.3 §a `EXPAND` 治理機制動態核准的新
+    型別（`services/expand_worker.py`，P2-1，2026-07-27 實作）：其語意合法性
+    已由 `LLMJUDGE`／`GATE`／`HUMANCHECK` 流程把關，這裡只再做一層格式層級
+    的注入防護，不重複語意判斷。一般抽取路徑（`extract_svo_triples()` 的
+    `REJECT` 邏輯）本來就只會產生 `SVO_REL_TYPES` 內的值，這裡放寬的格式
+    分支只有 `backfill_related_to_edges()` 的動態新型別會實際用到。
+    """
+    if rel_type not in SVO_REL_TYPES and not _SAFE_REL_TYPE_PATTERN.match(rel_type):
         raise ValueError(f"不合法的 SVO rel_type: {rel_type}")
     return f"`{rel_type}`"
 
