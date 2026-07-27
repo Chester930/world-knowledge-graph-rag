@@ -280,6 +280,7 @@ async def test_extract_svo_triples_compare_agrees_skips_escalation():
 
     assert triples[0].rel_type == "CAUSES"
     assert len(llm.prompts) == 1  # 沒有觸發 ESCALATE3
+    assert triples[0].verb_embedding is None  # 3.1.3 §a-1：已有明確型別不需存 verb embedding
 
 
 @pytest.mark.asyncio
@@ -339,6 +340,9 @@ async def test_extract_svo_triples_escalate3_neither_falls_back_to_related_to():
 
     assert triples[0].rel_type == "RELATED_TO"
     assert triples[0].subject == "A"  # 三元組本身保留，不因型別降級而丟棄
+    # 3.1.3 §a-1 BACKFILL：降級為 RELATED_TO 時應保留 verb embedding，
+    # 供日後 EXPAND 核准新型別時的回溯重分類使用。
+    assert triples[0].verb_embedding == [1.0, 0.0, 0.0]
 
 
 @pytest.mark.asyncio
@@ -353,6 +357,144 @@ async def test_extract_svo_triples_without_embedding_provider_skips_reconciliati
 
     assert triples[0].rel_type == "CAUSES"
     assert len(llm.prompts) == 1
+    assert triples[0].verb_embedding is None
+
+
+# ── 3.1.3 §a-1 BACKFILL：verb_embedding 持久化與回溯重分類 ───────────────────
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_stores_verb_embedding_for_related_to_edges():
+    """RELATED_TO 兜底的邊需存 verb_embedding，供日後 EXPAND 核准新型別時的
+    向量索引查詢使用（見 backfill_related_to_edges）。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+    triple = SVOTriple(
+        subject="A", rel_type="RELATED_TO", verb="有點像",
+        object="B", verb_embedding=[0.1, 0.2, 0.3],
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple])
+
+    set_calls = [(q, p) for q, p in driver.calls if "SET r.citations_json = $citations_json" in q]
+    assert len(set_calls) == 1
+    query, params = set_calls[0]
+    assert "r.verb_embedding" in query
+    assert params["verb_embedding"] == [0.1, 0.2, 0.3]
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_skips_verb_embedding_for_typed_edges():
+    """已有明確型別的邊不需要 verb_embedding，省下多餘的儲存。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+    triple = SVOTriple(subject="A", rel_type="CAUSES", verb="導致", object="B")
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple])
+
+    set_calls = [(q, p) for q, p in driver.calls if "SET r.citations_json = $citations_json" in q]
+    query, params = set_calls[0]
+    assert "r.verb_embedding" not in query
+    assert "verb_embedding" not in params
+
+
+@pytest.mark.asyncio
+async def test_create_related_to_vector_index_without_driver_is_noop():
+    await svc.create_related_to_vector_index(None)  # 不應拋出例外
+
+
+@pytest.mark.asyncio
+async def test_create_related_to_vector_index_issues_create_vector_index_query():
+    driver = FakeDriver()
+
+    await svc.create_related_to_vector_index(driver, dim=384)
+
+    assert len(driver.calls) == 1
+    query, params = driver.calls[0]
+    assert "CREATE VECTOR INDEX related_to_verb_embedding" in query
+    assert "FOR ()-[r:RELATED_TO]-() ON r.verb_embedding" in query
+    assert params["dim"] == 384
+
+
+class BackfillFakeDriver:
+    """模擬 `db.index.vector.queryRelationships` 查詢結果，並記錄所有呼叫
+    （含向量查詢本身與後續 DELETE／CREATE），供 `backfill_related_to_edges()`
+    測試使用。"""
+
+    def __init__(self, vector_query_records):
+        self._vector_query_records = vector_query_records
+        self.vector_query_calls: list[dict] = []
+        self.delete_calls: list[dict] = []
+        self.create_calls: list[tuple] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "db.index.vector.queryRelationships" in stripped:
+            self.vector_query_calls.append(params)
+            return FakeResult(self._vector_query_records)
+        if "DELETE r" in stripped:
+            self.delete_calls.append(params)
+            return FakeResult([])
+        if stripped.startswith("MATCH (s:Entity") and "CREATE (s)-[r:" in stripped:
+            self.create_calls.append((query, params))
+            return FakeResult([])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_backfill_related_to_edges_rewrites_matched_edges_to_new_type():
+    driver = BackfillFakeDriver(
+        vector_query_records=[
+            {"subject": "A", "object": "B", "citations_json": '[{"verb":"有點像"}]', "confidence": 3}
+        ]
+    )
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.2, 0.4, 0.6])
+    kg_id = uuid4()
+
+    count = await svc.backfill_related_to_edges(
+        driver, kg_id, "MANNER_OF", "A 是 B 這個較一般行為的特定實現方式", embedding
+    )
+
+    assert count == 1
+    assert len(driver.delete_calls) == 1
+    assert driver.delete_calls[0]["subject"] == "A"
+    assert driver.delete_calls[0]["object"] == "B"
+    assert len(driver.create_calls) == 1
+    create_query, create_params = driver.create_calls[0]
+    assert "r:`MANNER_OF`" in create_query
+    assert create_params["citations_json"] == '[{"verb":"有點像"}]'
+    assert create_params["confidence"] == 3
+
+
+@pytest.mark.asyncio
+async def test_backfill_related_to_edges_returns_zero_when_no_matches():
+    driver = BackfillFakeDriver(vector_query_records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.2, 0.4, 0.6])
+    kg_id = uuid4()
+
+    count = await svc.backfill_related_to_edges(
+        driver, kg_id, "MANNER_OF", "A 是 B 這個較一般行為的特定實現方式", embedding
+    )
+
+    assert count == 0
+    assert driver.delete_calls == []
+    assert driver.create_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_related_to_edges_passes_threshold_and_kg_id_to_query():
+    driver = BackfillFakeDriver(vector_query_records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.2, 0.4, 0.6])
+    kg_id = uuid4()
+
+    await svc.backfill_related_to_edges(
+        driver, kg_id, "MANNER_OF", "A 是 B 這個較一般行為的特定實現方式", embedding
+    )
+
+    assert len(driver.vector_query_calls) == 1
+    params = driver.vector_query_calls[0]
+    assert params["kg_id"] == str(kg_id)
+    assert params["threshold"] == svc.COMPARE_COSINE_THRESHOLD
+    assert params["query_vector"] == [0.2, 0.4, 0.6]
 
 
 # ── resolve_entity_type：核心庫（52 類）優先，查不到才查擴充庫（939 類）───────

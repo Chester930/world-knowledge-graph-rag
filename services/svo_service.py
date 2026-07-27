@@ -257,6 +257,11 @@ async def extract_svo_triples(
                 llm_provider=llm_provider,
             )
         item["rel_type"] = rel_type
+        # 3.1.3 §a-1 BACKFILL：僅 RELATED_TO 兜底的三元組才需要保留 verb embedding，
+        # 供 EXPAND 核准新型別後的回溯重分類向量索引查詢使用；已有明確型別的
+        # 三元組不需要，省下多餘的儲存。
+        if rel_type == "RELATED_TO" and verb and embedding_provider is not None:
+            item["verb_embedding"] = embedding_provider.encode(verb)
         # 核心庫優先、查不到才查擴充庫的正規化——見 resolve_entity_type() docstring。
         if item.get("subject_type"):
             item["subject_type"] = resolve_entity_type(str(item["subject_type"]))
@@ -567,19 +572,114 @@ async def merge_triples_to_graph(
         citations = json.loads(existing_json or "[]")
         citations.append(_new_citation(triple))
 
+        set_clause = "SET r.citations_json = $citations_json, r.confidence = $confidence"
+        set_params = {
+            "kg_id": kg_id_str,
+            "subject": subject_name,
+            "object": object_name,
+            "citations_json": json.dumps(citations, ensure_ascii=False),
+            "confidence": max(c["confidence"] for c in citations),
+        }
+        # 3.1.3 §a-1 BACKFILL：RELATED_TO 兜底的邊順便存 verb_embedding，
+        # 供日後 EXPAND 核准新型別時的向量索引查詢使用（見 backfill_related_to_edges）。
+        if triple.rel_type == "RELATED_TO" and triple.verb_embedding is not None:
+            set_clause += ", r.verb_embedding = $verb_embedding"
+            set_params["verb_embedding"] = triple.verb_embedding
+
         await driver.execute_query(
             f"""
             MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})-[r:{rel_type} {{kg_id: $kg_id}}]->
                   (o:Entity {{kg_id: $kg_id, name: $object}})
-            SET r.citations_json = $citations_json,
-                r.confidence = $confidence
+            {set_clause}
+            """,
+            **set_params,
+        )
+
+
+async def create_related_to_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
+    """建立 `RELATED_TO` 邊的 `verb_embedding` 向量索引（app 啟動時呼叫一次），
+    供 3.1.3 §a-1 `EXPAND` 核准新型別後的 `BACKFILL` 回溯重分類使用。"""
+    if driver is None:
+        return
+    await driver.execute_query(
+        """
+        CREATE VECTOR INDEX related_to_verb_embedding IF NOT EXISTS
+        FOR ()-[r:RELATED_TO]-() ON r.verb_embedding
+        OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
+        """,
+        dim=dim,
+    )
+
+
+async def backfill_related_to_edges(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    new_rel_type: str,
+    new_type_description: str,
+    embedding_provider: EmbeddingProvider,
+    *,
+    top_k: int = 100,
+) -> int:
+    """3.1.3 §a-1 BACKFILL：`EXPAND` 核准新型別後，對該 KG 既有的 `RELATED_TO`
+    邊做一次向量索引查詢，把 `verb_embedding` 與新型別描述句夠相似
+    （≥ `COMPARE_COSINE_THRESHOLD`）的邊，從 `RELATED_TO` 升級為新型別。
+
+    Neo4j 的邊型別建立後不能原地改名，做法是刪除舊邊、把 `citations_json`／
+    `confidence` 搬到新型別的邊上。回傳實際升級的邊數。
+
+    ⚠️ 查無直接對應的學術文獻或開源專案精確處理「型別詞彙擴充後回溯重分類既有
+    資料」這個問題（誠實聲明與查證過程見
+    docs/論文/03_系統設計與方法論.md § 3.1.3 §a-1），本函式是自行設計的工程
+    方案：預先計算並存於邊上的 `verb_embedding` 避免重複呼叫 embedding
+    provider（比照 3.1.4 SVO chunk 向量化慣例），改用 Neo4j 原生 relationship
+    向量索引做一次查詢取代逐條 Python 迴圈掃描。此功能上線前既有的 `RELATED_TO`
+    邊沒有 `verb_embedding`，不會被向量索引收錄，backfill 對這些邊無效
+    （已知限制，見設計文件）。
+    """
+    query_vector = embedding_provider.encode(new_type_description)
+    result = await driver.execute_query(
+        """
+        CALL db.index.vector.queryRelationships('related_to_verb_embedding', $top_k, $query_vector)
+        YIELD relationship AS r, score
+        WHERE score >= $threshold AND r.kg_id = $kg_id
+        MATCH (s)-[r]->(o)
+        RETURN s.name AS subject, o.name AS object,
+               r.citations_json AS citations_json, r.confidence AS confidence
+        """,
+        kg_id=str(kg_id),
+        top_k=top_k,
+        query_vector=query_vector,
+        threshold=COMPARE_COSINE_THRESHOLD,
+    )
+
+    new_type = _relationship_type(new_rel_type)
+    kg_id_str = str(kg_id)
+    count = 0
+    for record in result.records:
+        await driver.execute_query(
+            f"""
+            MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})-[r:RELATED_TO {{kg_id: $kg_id}}]->
+                  (o:Entity {{kg_id: $kg_id, name: $object}})
+            DELETE r
             """,
             kg_id=kg_id_str,
-            subject=subject_name,
-            object=object_name,
-            citations_json=json.dumps(citations, ensure_ascii=False),
-            confidence=max(c["confidence"] for c in citations),
+            subject=record["subject"],
+            object=record["object"],
         )
+        await driver.execute_query(
+            f"""
+            MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})
+            MATCH (o:Entity {{kg_id: $kg_id, name: $object}})
+            CREATE (s)-[r:{new_type} {{kg_id: $kg_id, citations_json: $citations_json, confidence: $confidence}}]->(o)
+            """,
+            kg_id=kg_id_str,
+            subject=record["subject"],
+            object=record["object"],
+            citations_json=record["citations_json"],
+            confidence=record["confidence"],
+        )
+        count += 1
+    return count
 
 
 async def embed_svo_chunks(

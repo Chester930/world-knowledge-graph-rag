@@ -159,6 +159,9 @@ class SVOTriple(BaseModel):
     source_svo_chunk_file: str | None = None
     source_sentence_start: int | None = Field(default=None, ge=1)
     source_sentence_end: int | None = Field(default=None, ge=1)
+    # 3.1.3 §a-1 BACKFILL：僅在 rel_type 為 RELATED_TO 時才會填入，供 EXPAND
+    # 核准新型別後的回溯重分類向量索引查詢使用，避免重複呼叫 embedding provider。
+    verb_embedding: list[float] | None = None
 
 
 class BuildGraphRequest(BaseModel):
