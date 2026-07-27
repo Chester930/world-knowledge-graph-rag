@@ -611,6 +611,28 @@ async def create_related_to_vector_index(driver: AsyncDriver | None = None, dim:
     )
 
 
+async def _confirm_backfill_candidate(
+    subject: str,
+    verb: str,
+    object_: str,
+    new_rel_type: str,
+    new_type_description: str,
+    llm_provider: LLMProvider,
+) -> bool:
+    """BACKFILL 的 LLM 確認關卡（2026-07-27 新增，比照 `ESCALATE3` 精神，見
+    docs/論文/03_系統設計與方法論.md § 3.1.3 §a-1）：cosine 分數達門檻只代表
+    候選，`backfill` 只看得到孤立的 `verb` 字串（不像抽取當下能看到完整句子），
+    風險比 `ESCALATE3` 更高，因此改寫前一律需要 LLM 用三元組本身做最後把關。
+    """
+    prompt = (
+        f"三元組「{subject}」－「{verb}」－「{object_}」，"
+        f"是否真的屬於關係型別「{new_rel_type}」（{new_type_description}）？"
+        "只回答「是」或「否」，不要有其他文字。"
+    )
+    answer = (await llm_provider.generate(prompt)).strip()
+    return answer.startswith("是")
+
+
 async def backfill_related_to_edges(
     driver: AsyncDriver,
     kg_id: UUID,
@@ -618,11 +640,13 @@ async def backfill_related_to_edges(
     new_type_description: str,
     embedding_provider: EmbeddingProvider,
     *,
+    llm_provider: LLMProvider | None = None,
     top_k: int = 100,
 ) -> int:
     """3.1.3 §a-1 BACKFILL：`EXPAND` 核准新型別後，對該 KG 既有的 `RELATED_TO`
     邊做一次向量索引查詢，把 `verb_embedding` 與新型別描述句夠相似
-    （≥ `COMPARE_COSINE_THRESHOLD`）的邊，從 `RELATED_TO` 升級為新型別。
+    （≥ `COMPARE_COSINE_THRESHOLD`）、且經 `llm_provider` 二次確認的邊，從
+    `RELATED_TO` 升級為新型別。
 
     Neo4j 的邊型別建立後不能原地改名，做法是刪除舊邊、把 `citations_json`／
     `confidence` 搬到新型別的邊上。回傳實際升級的邊數。
@@ -635,6 +659,14 @@ async def backfill_related_to_edges(
     向量索引做一次查詢取代逐條 Python 迴圈掃描。此功能上線前既有的 `RELATED_TO`
     邊沒有 `verb_embedding`，不會被向量索引收錄，backfill 對這些邊無效
     （已知限制，見設計文件）。
+
+    **`llm_provider` 為必要的二次確認關卡（2026-07-27 新增）**：cosine 分數
+    只是候選篩選，實際改寫前一律需要 `_confirm_backfill_candidate()` 用
+    subject／verb／object 三元組本身向 LLM 確認——backfill 比對的是孤立的
+    `verb` 字串，沒有原句上下文，比 `ESCALATE3` 風險更高，不能只憑單一
+    embedding 訊號就直接動手改寫。**未提供 `llm_provider` 時，為安全起見一律
+    不改寫任何邊（回傳 0）**，不會退回「純 cosine 分數即可改寫」的舊行為——
+    這是刻意的保守預設，不是遺漏。
     """
     query_vector = embedding_provider.encode(new_type_description)
     result = await driver.execute_query(
@@ -652,10 +684,22 @@ async def backfill_related_to_edges(
         threshold=COMPARE_COSINE_THRESHOLD,
     )
 
+    if llm_provider is None:
+        return 0
+
     new_type = _relationship_type(new_rel_type)
     kg_id_str = str(kg_id)
     count = 0
     for record in result.records:
+        citations = json.loads(record["citations_json"] or "[]")
+        verb = citations[-1]["verb"] if citations else ""
+        confirmed = await _confirm_backfill_candidate(
+            record["subject"], verb, record["object"],
+            new_rel_type, new_type_description, llm_provider,
+        )
+        if not confirmed:
+            continue
+
         await driver.execute_query(
             f"""
             MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})-[r:RELATED_TO {{kg_id: $kg_id}}]->

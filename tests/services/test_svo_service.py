@@ -442,6 +442,38 @@ class BackfillFakeDriver:
 
 @pytest.mark.asyncio
 async def test_backfill_related_to_edges_rewrites_matched_edges_to_new_type():
+    """LLM 確認關卡回答「是」時，候選邊才真的升級為新型別。"""
+    driver = BackfillFakeDriver(
+        vector_query_records=[
+            {"subject": "A", "object": "B", "citations_json": '[{"verb":"有點像"}]', "confidence": 3}
+        ]
+    )
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.2, 0.4, 0.6])
+    llm = FakeLLM("是")
+    kg_id = uuid4()
+
+    count = await svc.backfill_related_to_edges(
+        driver, kg_id, "MANNER_OF", "A 是 B 這個較一般行為的特定實現方式", embedding,
+        llm_provider=llm,
+    )
+
+    assert count == 1
+    assert len(driver.delete_calls) == 1
+    assert driver.delete_calls[0]["subject"] == "A"
+    assert driver.delete_calls[0]["object"] == "B"
+    assert len(driver.create_calls) == 1
+    create_query, create_params = driver.create_calls[0]
+    assert "r:`MANNER_OF`" in create_query
+    assert create_params["citations_json"] == '[{"verb":"有點像"}]'
+    assert create_params["confidence"] == 3
+    assert "A" in llm.prompts[0] and "有點像" in llm.prompts[0] and "B" in llm.prompts[0]
+    assert "MANNER_OF" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_related_to_edges_without_llm_provider_never_rewrites():
+    """未提供 llm_provider 時，為安全起見一律不改寫任何邊——即使有候選命中，
+    也不會退回「純 cosine 分數即可改寫」的舊行為。"""
     driver = BackfillFakeDriver(
         vector_query_records=[
             {"subject": "A", "object": "B", "citations_json": '[{"verb":"有點像"}]', "confidence": 3}
@@ -454,15 +486,30 @@ async def test_backfill_related_to_edges_rewrites_matched_edges_to_new_type():
         driver, kg_id, "MANNER_OF", "A 是 B 這個較一般行為的特定實現方式", embedding
     )
 
-    assert count == 1
-    assert len(driver.delete_calls) == 1
-    assert driver.delete_calls[0]["subject"] == "A"
-    assert driver.delete_calls[0]["object"] == "B"
-    assert len(driver.create_calls) == 1
-    create_query, create_params = driver.create_calls[0]
-    assert "r:`MANNER_OF`" in create_query
-    assert create_params["citations_json"] == '[{"verb":"有點像"}]'
-    assert create_params["confidence"] == 3
+    assert count == 0
+    assert driver.delete_calls == []
+    assert driver.create_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_related_to_edges_skips_candidate_when_llm_rejects():
+    driver = BackfillFakeDriver(
+        vector_query_records=[
+            {"subject": "A", "object": "B", "citations_json": '[{"verb":"有點像"}]', "confidence": 3}
+        ]
+    )
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.2, 0.4, 0.6])
+    llm = FakeLLM("否")
+    kg_id = uuid4()
+
+    count = await svc.backfill_related_to_edges(
+        driver, kg_id, "MANNER_OF", "A 是 B 這個較一般行為的特定實現方式", embedding,
+        llm_provider=llm,
+    )
+
+    assert count == 0
+    assert driver.delete_calls == []
+    assert driver.create_calls == []
 
 
 @pytest.mark.asyncio
