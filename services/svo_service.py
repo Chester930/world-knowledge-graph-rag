@@ -753,6 +753,64 @@ async def backfill_related_to_edges(
     return count
 
 
+async def backfill_missing_verb_embeddings(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    embedding_provider: EmbeddingProvider,
+    *,
+    limit: int = 100,
+) -> int:
+    """3.1.3 §a-1：補齊缺漏 `verb_embedding` 的既有 `RELATED_TO` 邊——**不做任何
+    型別判斷**，純粹把邊上已有的 `verb` 文字（`citations_json` 最後一筆）算成
+    embedding 存回去，讓這些邊能被 `related_to_verb_embedding` 向量索引收錄，
+    未來 `backfill_related_to_edges()` 才找得到它們。與該函式是兩個不同層級
+    的操作——本函式只補向量、不涉及任何判斷，因此不需要 LLM 確認關卡。
+
+    涵蓋兩種成因（見 docs/論文/03_系統設計與方法論.md § 3.1.3 §a-1 誠實聲明）：
+    ① 此功能上線前既有的歷史資料；② `embedding_provider` 選填，任何一次
+    `extract_svo_triples()` 呼叫沒帶入時持續產生的新缺口——成因 ② 會反覆
+    發生，不是一次性的。因此本函式設計為**冪等、可重複執行**，不是一次性
+    遷移腳本——用意是排進治理 Worker 既有的定期巡視週期，跟 `POOLSIZE`
+    檢查同一套排程機制，而非另外開一套維運流程。
+
+    `citations_json` 為空或缺少 `verb` 欄位的邊會被跳過（沒有可供 embedding
+    的原始文字，理論上不該發生，防禦性處理）。回傳實際補上 `verb_embedding`
+    的邊數。
+    """
+    result = await driver.execute_query(
+        """
+        MATCH (s)-[r:RELATED_TO {kg_id: $kg_id}]->(o)
+        WHERE r.verb_embedding IS NULL
+        RETURN s.name AS subject, o.name AS object, r.citations_json AS citations_json
+        LIMIT $limit
+        """,
+        kg_id=str(kg_id),
+        limit=limit,
+    )
+
+    kg_id_str = str(kg_id)
+    count = 0
+    for record in result.records:
+        citations = json.loads(record["citations_json"] or "[]")
+        verb = citations[-1]["verb"] if citations else ""
+        if not verb:
+            continue
+        verb_embedding = embedding_provider.encode(verb)
+        await driver.execute_query(
+            """
+            MATCH (s:Entity {kg_id: $kg_id, name: $subject})-[r:RELATED_TO {kg_id: $kg_id}]->
+                  (o:Entity {kg_id: $kg_id, name: $object})
+            SET r.verb_embedding = $verb_embedding
+            """,
+            kg_id=kg_id_str,
+            subject=record["subject"],
+            object=record["object"],
+            verb_embedding=verb_embedding,
+        )
+        count += 1
+    return count
+
+
 async def embed_svo_chunks(
     driver: AsyncDriver,
     kg_id: UUID,

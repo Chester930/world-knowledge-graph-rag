@@ -612,6 +612,86 @@ async def test_backfill_related_to_edges_passes_threshold_and_kg_id_to_query():
     assert params["query_vector"] == [0.2, 0.4, 0.6]
 
 
+class MissingEmbeddingFakeDriver:
+    """模擬「查詢缺漏 verb_embedding 的 RELATED_TO 邊」結果，並記錄查詢本身與
+    後續 SET 呼叫，供 `backfill_missing_verb_embeddings()` 測試使用。"""
+
+    def __init__(self, records):
+        self._records = records
+        self.query_calls: list[dict] = []
+        self.set_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "WHERE r.verb_embedding IS NULL" in stripped:
+            self.query_calls.append(params)
+            return FakeResult(self._records)
+        if "SET r.verb_embedding" in stripped:
+            self.set_calls.append(params)
+            return FakeResult([])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_backfill_missing_verb_embeddings_fills_in_missing_embedding():
+    driver = MissingEmbeddingFakeDriver(
+        records=[
+            {"subject": "A", "object": "B", "citations_json": '[{"verb":"有點像"}]'}
+        ]
+    )
+    embedding = TypeDescriptionFakeEmbedding(vectors={"有點像": [0.5, 0.5, 0.0]}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    count = await svc.backfill_missing_verb_embeddings(driver, kg_id, embedding)
+
+    assert count == 1
+    assert len(driver.set_calls) == 1
+    assert driver.set_calls[0]["subject"] == "A"
+    assert driver.set_calls[0]["object"] == "B"
+    assert driver.set_calls[0]["verb_embedding"] == [0.5, 0.5, 0.0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_missing_verb_embeddings_returns_zero_when_no_gaps():
+    driver = MissingEmbeddingFakeDriver(records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    count = await svc.backfill_missing_verb_embeddings(driver, kg_id, embedding)
+
+    assert count == 0
+    assert driver.set_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_missing_verb_embeddings_skips_edges_without_verb():
+    """citations_json 為空陣列時（理論上不該發生）應跳過，不呼叫 embedding
+    provider 或 SET，防禦性處理。"""
+    driver = MissingEmbeddingFakeDriver(
+        records=[{"subject": "A", "object": "B", "citations_json": "[]"}]
+    )
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    count = await svc.backfill_missing_verb_embeddings(driver, kg_id, embedding)
+
+    assert count == 0
+    assert driver.set_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_missing_verb_embeddings_passes_kg_id_and_limit_to_query():
+    driver = MissingEmbeddingFakeDriver(records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    await svc.backfill_missing_verb_embeddings(driver, kg_id, embedding, limit=50)
+
+    assert len(driver.query_calls) == 1
+    assert driver.query_calls[0]["kg_id"] == str(kg_id)
+    assert driver.query_calls[0]["limit"] == 50
+
+
 # ── resolve_entity_type：核心庫（52 類）優先，查不到才查擴充庫（939 類）───────
 
 def test_resolve_entity_type_matches_core_case_and_spacing_insensitive():
