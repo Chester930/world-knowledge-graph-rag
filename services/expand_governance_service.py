@@ -35,6 +35,19 @@ CREATE TABLE IF NOT EXISTS expand_registry (
     approved_by_kg_id TEXT NOT NULL,
     approved_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS expand_cluster_proposal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kg_id TEXT NOT NULL,
+    member_verbs TEXT NOT NULL,
+    suggested_type_name TEXT NOT NULL,
+    suggested_description TEXT NOT NULL,
+    reused_from_registry INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'awaiting_review',
+    llm_judged_at TEXT NOT NULL DEFAULT (datetime('now')),
+    resolved_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_expand_proposal_status ON expand_cluster_proposal (kg_id, status);
 """
 
 
@@ -164,3 +177,124 @@ def find_similar_registered_type(
     if best_type is not None and best_score >= threshold:
         return best_type, best_score
     return None
+
+
+def create_proposal(
+    db_path: Path,
+    kg_id: str,
+    member_verbs: list[str],
+    suggested_type_name: str,
+    suggested_description: str,
+    *,
+    reused_from_registry: bool = False,
+    auto_approved: bool = False,
+) -> int:
+    """`LLMJUDGE`／`REGCHECK` 判定出候選型別後，寫入一筆提案，回傳其 `id`。
+
+    `GATE` 已畢業（`auto_approved=True`）時，狀態直接以 `auto_approved`
+    建立、`resolved_at` 立刻蓋上時間戳——不進入 `awaiting_review`，因為根本
+    沒有人工審核這一步，`recent_agreement_rate()` 也因此不會把這類提案納入
+    一致率計算（見該函式 docstring）。否則預設 `awaiting_review`，等待
+    `HUMANCHECK` 介面呼叫 `resolve_proposal()`。
+    """
+    with closing(_connect(db_path)) as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO expand_cluster_proposal
+                (kg_id, member_verbs, suggested_type_name, suggested_description,
+                 reused_from_registry, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                kg_id,
+                json.dumps(member_verbs, ensure_ascii=False),
+                suggested_type_name,
+                suggested_description,
+                1 if reused_from_registry else 0,
+                "auto_approved" if auto_approved else "awaiting_review",
+            ),
+        )
+        proposal_id = cursor.lastrowid
+        if auto_approved:
+            conn.execute(
+                "UPDATE expand_cluster_proposal SET resolved_at = datetime('now') WHERE id = ?",
+                (proposal_id,),
+            )
+        conn.commit()
+        return proposal_id
+
+
+def _row_to_proposal(row: tuple) -> dict:
+    (proposal_id, kg_id, member_verbs, suggested_type_name, suggested_description,
+     reused_from_registry, status, llm_judged_at, resolved_at) = row
+    return {
+        "id": proposal_id,
+        "kg_id": kg_id,
+        "member_verbs": json.loads(member_verbs),
+        "suggested_type_name": suggested_type_name,
+        "suggested_description": suggested_description,
+        "reused_from_registry": bool(reused_from_registry),
+        "status": status,
+        "llm_judged_at": llm_judged_at,
+        "resolved_at": resolved_at,
+    }
+
+
+def list_awaiting_review(db_path: Path, kg_id: str | None = None) -> list[dict]:
+    """`HUMANCHECK` 審核介面的資料來源：所有 `status='awaiting_review'` 的
+    提案，依判定時間由舊到新排序（先產生的先審）。`kg_id` 省略時查詢所有
+    KG（比照 `task_queue_service.next_pending()` 省略 `kg_id` 的既有慣例）。
+    """
+    query = (
+        "SELECT id, kg_id, member_verbs, suggested_type_name, suggested_description, "
+        "reused_from_registry, status, llm_judged_at, resolved_at "
+        "FROM expand_cluster_proposal WHERE status = 'awaiting_review'"
+    )
+    params: tuple = ()
+    if kg_id is not None:
+        query += " AND kg_id = ?"
+        params = (kg_id,)
+    query += " ORDER BY llm_judged_at ASC"
+
+    with closing(_connect(db_path)) as conn:
+        rows = conn.execute(query, params).fetchall()
+    return [_row_to_proposal(row) for row in rows]
+
+
+def resolve_proposal(db_path: Path, proposal_id: int, decision: str) -> None:
+    """人工核准／駁回一筆待審提案（`HUMANCHECK` 的 `核准`／`駁回` 分支）。
+
+    `decision` 必須是 `"approved"` 或 `"rejected"`——這兩個值本身就是
+    `GATE` 滾動窗口人機一致率的原始資料，不需要額外欄位記錄「LLM 判斷結果」
+    （提案存在即代表 `LLMJUDGE` 已判定為「是」，`DISCARD` 分支從不建立提案）。
+    """
+    if decision not in ("approved", "rejected"):
+        raise ValueError(f"decision 必須是 'approved' 或 'rejected'，收到：{decision}")
+    with closing(_connect(db_path)) as conn:
+        conn.execute(
+            "UPDATE expand_cluster_proposal SET status = ?, resolved_at = datetime('now') "
+            "WHERE id = ?",
+            (decision, proposal_id),
+        )
+        conn.commit()
+
+
+def recent_agreement_rate(db_path: Path, kg_id: str, window: int) -> float | None:
+    """`GATE`：該 KG 最近 `window` 筆**人工已審核**提案中，核准的比例
+    （= 人機一致率，因為提案存在即代表 LLM 判斷為「是」，人工核准就是與
+    LLM 一致）。只計入 `status IN ('approved', 'rejected')`，`auto_approved`
+    的提案未經人工審核、不計入一致率的分子分母——這也是為什麼一旦某類判斷
+    真的畢業自動核准，`GATE` 不會因為「全部自動核准」而讓一致率虛高失真。
+    候選數不足 `window` 時回傳 `None`，代表尚無法計算穩定的一致率。
+    """
+    with closing(_connect(db_path)) as conn:
+        rows = conn.execute(
+            "SELECT status FROM expand_cluster_proposal "
+            "WHERE kg_id = ? AND status IN ('approved', 'rejected') "
+            "ORDER BY resolved_at DESC LIMIT ?",
+            (kg_id, window),
+        ).fetchall()
+    if len(rows) < window:
+        return None
+    approved = sum(1 for (status,) in rows if status == "approved")
+    return approved / window
