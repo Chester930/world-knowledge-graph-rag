@@ -80,6 +80,8 @@
 | `EXTERNAL_URL` | ExternalURL | A 對應到外部資源（如 DBpedia）的 URL B | knowledge → dbpedia URL |
 | `SENSE_OF` | SenseOf（隱含關係，未列於現行 wiki，取自論文正文） | A 是詞條 B 的一個特定詞義/語意 | lead/n（名詞義）→ lead |
 
+> **2026-07-27 新增查證——3.1.3 §a「背景任務執行模型」決策**：使用者發現 §a 的 `POOLSIZE`／`CLUSTER`／`LLMJUDGE` 等治理判斷橫跨多次抽取呼叫，不可能綁在單一 chunk 的抽取流程裡同步跑完，要求討論背景任務執行模型並找文獻/專案佐證。定案為：抽取 Worker 只做便宜的候選池 `INSERT`，真正的治理判斷交給一個獨立的治理 Worker（背景迴圈，定期巡視）。查證結果：① **Zaharia et al. (2013, 🟢 SOSP 2013)**《Discretized Streams》（即 Spark Streaming 原始論文，已下載並逐字精讀全文）——核心主張是把連續到達的資料流切成確定性小批次，與持續接收資料的路徑解耦，論文以同行評審驗證了這個架構原則在容錯/一致性上的優勢；⚠️ 誠實適配度：此文解決的是分散式跨百台機器、次秒級延遲的串流運算問題，其平行恢復機制與固定時間間隔批次觸發，與本節單一進程、閾值觸發、候選池通常僅個位數到數十筆的規模完全不同，具體機制不可直接套用，只借用其最基礎的通用架構原則。② **`celery/celery`**（🟢 已用 `gh api` 查證 28,726★）——Python 生態系最廣為採用的「生產者寫入持久化佇列、獨立 Worker 非同步取出執行」框架，作為此類分工架構已被業界廣泛驗證、大規模採用的存在性佐證；⚠️ 本論文並未真的採用 Celery 本身。**主要依據仍是本專案 3.1.2 節 `task_queue.db` 的雙層追蹤機制自身**（記錄檔為真實狀態來源＋SQLite 為效能索引，索引遺失可重建）——候選池與跨 KG 登記表併入同一份 SQLite 檔案，直接沿用此既有慣例，外部佐證只用來確認方向不是向壁虛造。完整記錄見 `docs/論文/03_變更紀錄.md`「第三十五次調整」。
+
 ## 內容清單
 
 | 檔案 | 文獻 | 來源 | 狀態 |
@@ -104,6 +106,7 @@
 | `jitkrittum-et-al-2023-confidence-cascade-deferral.pdf` | Jitkrittum, Gupta, Menon, Narasimhan, Rawat & Kumar (2023, Google Research), *When Does Confidence-Based Cascade Deferral Suffice?*, NeurIPS 2023 | arXiv:[2307.02764](https://arxiv.org/abs/2307.02764) | ✅ 🟢 已下載並精讀全文（2026-07-26，3.1.3 主圖 `SIM`／`ESCALATE3` cosine+LLM 仲裁機制的核心理論依據） |
 | `madras-et-al-2018-learning-to-defer.pdf` | Madras, Pitassi & Zemel (2018), *Predict Responsibly: Improving Fairness and Accuracy by Learning to Defer*, NeurIPS 2018 | arXiv:[1711.06664](https://arxiv.org/abs/1711.06664) | ✅ 🟢 已下載並精讀全文（2026-07-26，learning-to-defer 術語與理論框架來源，補充定位用途） |
 | `chen-li-2021-zs-bert.pdf` | Chen & Li (2021), *ZS-BERT: Towards Zero-Shot Relation Extraction with Attribute Representation Learning*, NAACL 2021 | arXiv:[2104.04697](https://arxiv.org/abs/2104.04697) | ✅ 🟢 已下載並精讀全文（2026-07-27，`SIM` 節點應比對型別描述句 embedding、而非型別識別碼字串本身的設計依據） |
+| `zaharia-et-al-2013-discretized-streams-spark-streaming.pdf` | Zaharia, Das, Li, Hunter, Shenker & Stoica (2013), *Discretized Streams: Fault-Tolerant Streaming Computation at Scale*, SOSP 2013 | 開放取用全文：https://people.eecs.berkeley.edu/~matei/papers/2013/sosp_spark_streaming.pdf | ✅ 🟢 已下載並精讀全文（2026-07-27，3.1.3 §a「背景任務執行模型」決策的通用架構原則佐證） |
 
 **未下載（標註規範非期刊論文，僅記書目）**：ACE 2005（Automatic Content Extraction）Relation Extraction Task 標註規範，Linguistic Data Consortium（LDC）發布——⚠️ 誠實聲明：這是 LDC 的任務標註規範文件（annotation guideline），性質上是標註標準/spec，不是同行評審出版品，不適用 🟢/🟡 信任分級；6 個粗類（`PART-WHOLE`／`PHYSICAL`／`PERSONAL-SOCIAL`／`ORG-AFFILIATION`／`AGENT-ARTIFACT`／`GEN-AFFILIATION`）、總計 18 個細類這個事實，透過上方 Aguilar et al. (2014) 這篇正式發表的比較論文查證存在性，未另外取得 LDC 原始標註規範全文。
 
@@ -137,6 +140,8 @@
 | **Jitkrittum et al. (2023) When Does Confidence-Based Cascade Deferral Suffice?**（2026-07-26 新增，3.1.3 主圖 `SIM`／`ESCALATE3` 機制的核心理論依據） | 目前查到與本論文「向量相似度先篩、灰色地帶才交 LLM 仲裁」機制**最直接對應**的文獻——正式命名此類機制為 confidence-based cascade，證明其最佳性條件（下游模型錯誤率需對所有輸入大致均勻）與失效條件（下游模型是「專才」時會系統性失效），並提出用驗證集訓練輕量 post-hoc deferral rule 取代單純信心門檻的具體解法，直接對應使用者提出的「LLM 判斷回頭校正 embedding 信心」構想。⚠️ **誠實聲明**：原文實驗場景為影像分類（ImageNet／CIFAR），本論文情境是「動詞 embedding vs. 33 個 ConceptNet 型別」的分類任務，論域不同但機制與理論框架直接適用；本論文尚未驗證 LLM 對 33 個型別的仲裁準確度是否均勻（若不均勻，依此文理論預測簡單信心門檻會失效），此為 3.1.3 節實作前須優先釐清的驗證項目 |
 | **Madras, Pitassi & Zemel (2018) Learning to Defer**（2026-07-26 新增，術語與理論定位補充） | 提供 learning-to-defer（適應性拒絕學習）這個成熟研究方向的框架與命名，確認本論文機制非孤立自創，而是這個研究方向的一個實例；具體演算法設計以上方 Jitkrittum et al. (2023) 為準。⚠️ **誠實聲明**：原文核心演算法是端對端聯合訓練（需要 ground-truth 標籤），沒有「用被轉交對象過去的判斷持續線上校正」這個回饋迴圈，此部分機制仍以 Jitkrittum et al. (2023) 的 post-hoc deferral rule 為準 |
 | **Chen & Li (2021) ZS-BERT**（2026-07-27 新增，`SIM` 描述句 embedding 設計依據） | 佐證 `SIM` 節點應比對「型別自然語言描述句 embedding」而非「型別識別碼字串 embedding」——ZS-BERT 用 Sentence-BERT 編碼關係型別的描述句、以最近鄰比對輸入句子 embedding 完成分類，結構與 `SIM` 幾乎一致，且此需求由 AutoRE 自身消融實驗（描述句品質是關鍵變因，劣質描述句甚至不如不用）與使用者觀察到「目前 `SIM` 比對的是識別碼字串本身」共同促成。⚠️ **誠實聲明**：原文採內積近似最近鄰而非單純 cosine，應用場景為零樣本關係抽取（訓練/測試型別互斥），與本論文封閉式 33 型別分類場景不完全相同，具體演算法不可直接套用，僅佐證「比對目標應為描述句 embedding」這個方向本身有嚴謹文獻先例 |
+| **Zaharia et al. (2013) Discretized Streams（Spark Streaming）**（2026-07-27 新增，3.1.3 §a「背景任務執行模型」決策脈絡第 5 點的通用架構原則佐證） | 佐證「抽取 Worker 只做便宜的入列動作、真正的判斷交給獨立背景流程批次處理」這個原則，是資料系統領域已被同行評審驗證的通用架構模式——論文核心主張把連續到達的資料流切成確定性小批次，使批次處理與持續接收資料的路徑天然解耦，並以此獲得比 continuous operator 模型更好的容錯/一致性特性（§3、§3.4、§5）。⚠️ **誠實適配度聲明**：此文解決的是分散式、跨百台機器、次秒級延遲的串流運算問題，恢復機制（RDD lineage、平行恢復、線性擴展至 100 節點）與批次觸發方式（固定時間間隔）皆為此規模量身打造，與本論文單一進程、閾值觸發、候選池通常僅個位數到數十筆的規模完全不同，**具體機制不可直接套用**，僅借用其最基礎、通用層次的論證——「生產端與批次化重運算解耦是經驗證有效的架構原則」——本身站得住腳 |
+| **`celery/celery`（開源專案，2026-07-27 新增，🟢 已用 `gh api` 查證 28,726★）** | 作為「生產者將工作項目寫入持久化佇列、獨立 Worker 非同步取出執行」這類分工架構已被業界廣泛驗證、大規模採用的存在性佐證，其角色分工（呼叫端快速返回、真正執行交給獨立 Worker）與本節「抽取 Worker 只 `INSERT` 候選池、治理 Worker 獨立巡視執行」的分工精神一致。⚠️ **誠實聲明**：本論文並未真的採用 Celery 本身（持久化採 SQLite，非 Celery 慣用的 Redis/RabbitMQ broker），僅列為存在性佐證，不是逐項比對其内部機制；具體設計仍以本專案 3.1.2 節 `task_queue.db` 既有慣例為主要依據 |
 
 ## 待辦
 

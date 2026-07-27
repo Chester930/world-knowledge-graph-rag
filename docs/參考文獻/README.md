@@ -10,7 +10,7 @@
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
 | `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）；01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 25 篇 |
-| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留）；03_系統設計與方法論.md § 3.1.3／3.1.4／3.2 §b（2026-07-24 擴充；2026-07-26 補充抽取分工文獻與 cascade deferral 文獻；2026-07-27 補充描述句 embedding 文獻） | 🟡 已下載 19 篇，1 篇付費未下載，另有數篇標註規範/社群方針頁面非論文（僅記書目） |
+| `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留）；03_系統設計與方法論.md § 3.1.3／3.1.4／3.2 §b（2026-07-24 擴充；2026-07-26 補充抽取分工文獻與 cascade deferral 文獻；2026-07-27 補充描述句 embedding 文獻與背景任務執行模型文獻） | 🟡 已下載 20 篇，1 篇付費未下載，另有數篇標註規範/社群方針頁面非論文（僅記書目） |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.4.8（RQ6） | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.5（評估方法論的橫向文獻回顧） | ⚪ 待下載 |
 | `06_多模態輸入與網頁擷取/` | `parser/README.md`（Ingestion Parser 模組工程實作支撐文獻）；02_文獻探討.md § 2.6.1 摘要收錄 | 🟢 已下載 2 篇 |
@@ -82,6 +82,7 @@
 | `brinkmann-et-al-2023-wdc-schemaorg-dataset-series.pdf` | Brinkmann, Primpeli & Bizer (2023), *The Web Data Commons Schema.org Data Set Series*，WWW '23 Companion（公用實體類型庫現行依據——與同一 2022 release 官方統計頁聯集去重後共 52 個 schema.org 實測類型，供 3.1.3／3.1.4 使用，2026-07-26 新增並擴充，取代 OntoNotes 18 類） | DOI: [10.1145/3543873.3587331](https://doi.org/10.1145/3543873.3587331) |
 | `speer-et-al-2017-conceptnet.pdf` | Speer, Chin & Havasi (2017), *ConceptNet 5.5*，AAAI 2017（公用關係庫依據，供 3.1.3 使用；論文正文自稱 36 個核心關係，逐字核對實際列出 35 個；2026-07-27 再查證官方 wiki 發現 `Entails`／`InstanceOf` 已棄用，`core/constants.py::SVO_REL_TYPES` 已改按 33 個落地，誠實聲明見子資料夾 README） | [arXiv:1612.03975](https://arxiv.org/abs/1612.03975) |
 | `chen-li-2021-zs-bert.pdf` | Chen & Li (2021), *ZS-BERT*，NAACL 2021（`SIM` 描述句 embedding 設計依據，2026-07-27 新增） | [arXiv:2104.04697](https://arxiv.org/abs/2104.04697) |
+| `zaharia-et-al-2013-discretized-streams-spark-streaming.pdf` | Zaharia et al. (2013), *Discretized Streams*，SOSP 2013（3.1.3 §a 背景任務執行模型通用架構原則佐證，2026-07-27 新增） | [開放取用全文](https://people.eecs.berkeley.edu/~matei/papers/2013/sosp_spark_streaming.pdf) |
 | `aguilar-et-al-2014-ace-ere-tackbp-framenet-comparison.pdf` | Aguilar et al. (2014)，ACL 2014 EVENTS workshop（ACE/ERE/TAC-KBP/FrameNet 關係本體比較，供 3.1.3 使用） | [ACL Anthology W14-2907](https://aclanthology.org/W14-2907/) |
 | `yih-et-al-2015-staged-query-graph-generation.pdf` | Yih et al. (2015), *STAGG*，ACL-IJCNLP 2015（查詢時關係連結核心文獻，供 3.2 §b 使用） | [ACL Anthology P15-1128](https://aclanthology.org/P15-1128/)；[GitHub scottyih/STAGG](https://github.com/scottyih/STAGG)（111★） |
 | `sakor-et-al-2020-falcon2.pdf` | Sakor et al. (2020), *Falcon 2.0*，CIKM '20（關係連結任務佐證，供 3.2 §b 使用） | [arXiv:1912.11270](https://arxiv.org/abs/1912.11270)；[GitHub SDM-TIB/falcon2.0](https://github.com/SDM-TIB/falcon2.0)（120★） |
