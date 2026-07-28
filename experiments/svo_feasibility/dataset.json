@@ -1,0 +1,26 @@
+{
+  "documents": [
+    {
+      "doc_id": "doc_rag_kg_001",
+      "title": "RAG 與知識圖譜示例",
+      "sentences": [
+        {
+          "sentence_id": "s1",
+          "text": "RAG retrieves source passages before the language model writes an answer."
+        },
+        {
+          "sentence_id": "s2",
+          "text": "A knowledge graph stores entities and explicit relationships between them."
+        },
+        {
+          "sentence_id": "s3",
+          "text": "GraphRAG can traverse graph relationships and then return supporting source text."
+        },
+        {
+          "sentence_id": "s4",
+          "text": "If a relation has no source sentence, users cannot verify whether the graph edge is trustworthy."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "triples": [
+    {
+      "id": "g1",
+      "subject": "RAG",
+      "rel_type": "RETRIEVES",
+      "object": "source passages",
+      "verb": "retrieves",
+      "evidence_doc_id": "doc_rag_kg_001",
+      "evidence_sentence_ids": ["s1"]
+    },
+    {
+      "id": "g2",
+      "subject": "knowledge graph",
+      "rel_type": "STORES",
+      "object": "entities and explicit relationships",
+      "verb": "stores",
+      "evidence_doc_id": "doc_rag_kg_001",
+      "evidence_sentence_ids": ["s2"]
+    },
+    {
+      "id": "g3",
+      "subject": "GraphRAG",
+      "rel_type": "TRAVERSES",
+      "object": "graph relationships",
+      "verb": "traverse",
+      "evidence_doc_id": "doc_rag_kg_001",
+      "evidence_sentence_ids": ["s3"]
+    },
+    {
+      "id": "g4",
+      "subject": "GraphRAG",
+      "rel_type": "RETURNS_EVIDENCE",
+      "object": "supporting source text",
+      "verb": "return",
+      "evidence_doc_id": "doc_rag_kg_001",
+      "evidence_sentence_ids": ["s3"]
+    }
+  ]
+}

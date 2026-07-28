@@ -66,9 +66,9 @@ flowchart LR
 
 三軌架構為論文第五章的消融實驗提供了非常嚴謹且具說服力的對照組規劃：
 
-* **實驗組 A (Baseline)**：僅開啟【軌道 1：傳統 RAG】。
-* **實驗組 B (前處理增強)**：開啟【軌道 2：標準化 RAG】（驗證指代消解與標準化切句對檢索準確率的獨立貢獻）。
-* **實驗組 C (完整體)**：開啟【軌道 2 + 軌道 3：混合 RAG】（驗證知識圖譜對多跳推理與綜合性問題的額外貢獻）。
+- **實驗組 A (Baseline)**：僅開啟【軌道 1：傳統 RAG】。
+- **實驗組 B (前處理增強)**：開啟【軌道 2：標準化 RAG】（驗證指代消解與標準化切句對檢索準確率的獨立貢獻）。
+- **實驗組 C (完整體)**：開啟【軌道 2 + 軌道 3：混合 RAG】（驗證知識圖譜對多跳推理與綜合性問題的額外貢獻）。
 
 ---
 
@@ -92,6 +92,7 @@ flowchart LR
 本報告提出之「三軌混合檢索」與「標準化句子雙階檢索」具備以下頂級會議論文與知名開源專案背書：
 
 ### 6.1 可信任開源專案 (Trusted Open-Source Frameworks)
+
 1. **HippoRAG (NeurIPS 2024 官方開源)**：
    - 俄亥俄州立大學開源之圖文混合 RAG 框架（GitHub 2.5k+ Stars），實現了以「單句 / 片語 (Phrase / Sentence)」作為索引單位的兩階圖文檢索機制。
    - 專案連結：[HippoRAG Official Repository](https://github.com/OSU-NLP-Group/HippoRAG)
@@ -103,6 +104,7 @@ flowchart LR
    - 專案連結：[LlamaIndex Auto-Merging Retriever](https://docs.llamaindex.ai/en/stable/examples/retrievers/auto_merging_retriever/)
 
 ### 6.2 頂級學術會議論文 (Top Academic Papers)
+
 1. **HippoRAG (NeurIPS 2024 Main)**：
    - Gutierrez, B. J., et al. (2024). *HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models*. NeurIPS 2024 (arXiv:2405.14831).
    - **核心結論**：提出了「雙階（Two-Stage）檢索機制」，證實以細粒度語意單元建索引並結合圖遍歷（Personalized PageRank），在多跳推理與事實檢索上顯著超越單一粗粒度向量 RAG。

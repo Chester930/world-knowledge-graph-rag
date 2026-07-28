@@ -7,7 +7,8 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from parser.core import DocumentParser, sentence_aware_chunking
 
-def test_file_parsing(parser: DocumentParser, file_path: str, label: str):
+
+def run_file_parsing(parser: DocumentParser, file_path: str, label: str):
     print(f"\n==================================================")
     print(f"🔍 測試檔案類型: {label}")
     print(f"📂 檔案路徑: {file_path}")
@@ -54,4 +55,4 @@ if __name__ == "__main__":
     
     for path, label in test_cases:
         test_file_path = os.path.normpath(path)
-        test_file_parsing(parser, test_file_path, label)
+        run_file_parsing(parser, test_file_path, label)
