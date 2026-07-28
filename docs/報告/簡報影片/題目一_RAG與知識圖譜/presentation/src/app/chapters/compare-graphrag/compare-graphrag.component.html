@@ -1,0 +1,44 @@
+<div class="scene cg-scene">
+  <div class="scene-pad cg-pad">
+    <section class="cg-block cg-open" [class.cg-active]="step() === 0">
+      <p class="cg-kicker mono">RAG vs KG</p>
+      <h2 class="serif-cn">不是同一層的技術。</h2>
+      <div class="cg-equation"><span>文字證據</span><b>≠</b><span>關係知識</span></div>
+    </section>
+
+    <section class="cg-block" [class.cg-active]="step() >= 1 && step() <= 3">
+      <p class="cg-kicker mono">具體攤開來看</p>
+      <div class="cg-table">
+        <div class="cg-row cg-head"><span></span><strong>RAG</strong><strong>KG</strong></div>
+        <div *ngFor="let row of rows; let i = index" class="cg-row" [attr.data-active]="step() - 1 === i">
+          <span>{{ row[0] }}</span><p>{{ row[1] }}</p><p>{{ row[2] }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cg-block cg-shift" [class.cg-active]="step() === 4">
+      <p class="cg-kicker mono">GraphRAG</p>
+      <h2 class="serif-cn">不是丟掉 RAG，<br />是改變檢索對象。</h2>
+      <div class="cg-switch"><span>chunk</span><b></b><span>fact / triple / path</span></div>
+    </section>
+
+    <section class="cg-block" [class.cg-active]="step() === 5">
+      <p class="cg-kicker mono">檢索路徑改變</p>
+      <div class="cg-pipes">
+        <div class="cg-pipe">
+          <strong class="mono">RAG</strong>
+          <span>query</span><span>chunk</span><span>LLM</span><span>answer</span>
+        </div>
+        <div class="cg-pipe cg-pipe-graph">
+          <strong class="mono">GraphRAG</strong>
+          <span>query</span><span>KG</span><span>triple/path</span><span>citation</span><span>answer</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cg-block cg-close" [class.cg-active]="step() === 6">
+      <p class="cg-kicker mono">任務分流</p>
+      <h2 class="serif-cn">簡單走文本，<br />多跳走圖，全局走社群摘要。</h2>
+    </section>
+  </div>
+</div>

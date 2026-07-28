@@ -1,0 +1,58 @@
+<div class="scene nr-scene">
+  <div class="scene-pad nr-pad">
+    <section class="nr-block" [class.nr-active]="step() === 0">
+      <p class="nr-kicker mono">共同經驗入口</p>
+      <h2 class="nr-hero serif-cn">先從 NotebookLM 講起</h2>
+      <div class="nr-notebook">
+        <div class="nr-page"></div>
+        <div class="nr-page"></div>
+        <div class="nr-page nr-page-front">
+          <span class="mono">source-grounded answer</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="nr-block nr-disclaimer" [class.nr-active]="step() === 1">
+      <p class="nr-kicker mono">不宣稱內部實作</p>
+      <h2 class="serif-cn">它只是共同經驗，<br />不是 pipeline 證據。</h2>
+      <p>Google 沒公開完整做法；這裡只抽象出「放入來源、根據來源回答、附引用」這個使用者能觀察到的結構。</p>
+    </section>
+
+    <section class="nr-block" [class.nr-active]="step() >= 2 && step() <= 3">
+      <p class="nr-kicker mono">RAG 的共同架構</p>
+      <div class="nr-flow">
+        <ng-container *ngFor="let item of flow; let i = index">
+          <div class="nr-flow-node" [attr.data-active]="activeFlow(i)">
+            <span class="mono">0{{ i + 1 }}</span>
+            <strong>{{ item }}</strong>
+          </div>
+          <div *ngIf="i < flow.length - 1" class="nr-arrow" [attr.data-active]="activeFlow(i + 1)"></div>
+        </ng-container>
+      </div>
+      <p class="nr-flow-caption" *ngIf="step() === 3">
+        參數記憶接上非參數記憶：模型不只靠訓練時記住的內容，而是先查外部資料。
+      </p>
+    </section>
+
+    <section class="nr-block" [class.nr-active]="step() === 4">
+      <p class="nr-kicker mono">完整流程</p>
+      <div class="nr-pipeline">
+        <div *ngFor="let p of pipeline; let i = index" class="nr-pipe-node">
+          <span class="mono">{{ i + 1 }}</span>
+          <strong>{{ p }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="nr-block nr-control" [class.nr-active]="step() === 5">
+      <p class="nr-kicker mono">核心不是生成，是檢索控制</p>
+      <h2 class="serif-cn">查什麼、怎麼排、<br />怎麼組上下文。</h2>
+      <div class="nr-control-bars">
+        <span>資料怎麼切</span>
+        <span>索引怎麼建</span>
+        <span>問題怎麼查</span>
+        <span>證據怎麼排</span>
+      </div>
+    </section>
+  </div>
+</div>

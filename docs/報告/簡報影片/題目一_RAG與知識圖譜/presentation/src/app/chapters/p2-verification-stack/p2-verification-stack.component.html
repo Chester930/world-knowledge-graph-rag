@@ -1,0 +1,34 @@
+<div class="scene p2v-scene">
+  <div class="scene-pad p2v-pad">
+    <section class="p2v-block p2v-open" [class.p2v-active]="step() === 0">
+      <p class="p2v-kicker mono">驗證閉環</p>
+      <h2 class="serif-cn">一條邊要進圖，<br />至少通過六層檢查。</h2>
+    </section>
+
+    <section class="p2v-block p2v-stack" [class.p2v-active]="step() >= 1 && step() <= 6">
+      <div class="p2v-rail">
+        <article *ngFor="let check of checks; let i = index" [attr.data-state]="state(i)">
+          <span class="mono">0{{ i + 1 }}</span>
+          <strong>{{ check.title }}</strong>
+        </article>
+      </div>
+      <div class="p2v-focus">
+        <p class="p2v-kicker mono">validation layer</p>
+        <h2>{{ activeCheck().title }}</h2>
+        <p>{{ activeCheck().detail }}</p>
+      </div>
+    </section>
+
+    <section class="p2v-block p2v-arch" [class.p2v-active]="step() === 7">
+      <p class="p2v-kicker mono">本專案落點</p>
+      <div class="p2v-flow">
+        <span>候選 SVO</span>
+        <b>SIM</b>
+        <b>COMPARE</b>
+        <b>ESCALATE</b>
+        <span>Neo4j edge + citations_json</span>
+      </div>
+      <p class="p2v-note">不通過驗證的三元組，只能當候選關係，不直接當可信事實。</p>
+    </section>
+  </div>
+</div>

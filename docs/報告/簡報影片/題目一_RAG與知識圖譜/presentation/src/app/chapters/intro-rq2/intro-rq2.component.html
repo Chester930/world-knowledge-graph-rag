@@ -1,0 +1,32 @@
+<div class="scene r2-scene">
+  <div class="scene-pad r2-pad">
+
+    <section class="r2-block" [class.r2-active]="step() === 0">
+      <div class="r2-badge mono">RQ2</div>
+      <p class="r2-kicker mono">核心研究問題</p>
+      <h2 class="serif-cn">「輕量路由層加 BFS 知識層」，<br />能不能改善查詢延遲跟可擴展性？</h2>
+      <p class="r2-simplified">簡化說法：多個知識庫的時候，先路由再查圖，是不是比較有效？</p>
+    </section>
+
+    <section class="r2-block" [class.r2-active]="step() >= 1">
+      <div class="r2-badge mono">RQ2</div>
+      <div class="r2-stack">
+        <div class="r2-row" [attr.data-state]="step() >= 1 ? 'active' : 'hidden'">
+          <span class="r2-row-label mono">理論基礎</span>
+          <span class="r2-row-text serif-it">Peng et al. (2026) — GraphRAG 綜述</span>
+        </div>
+        <div class="r2-row" [attr.data-state]="step() >= 2 ? 'active' : 'hidden'">
+          <span class="r2-row-label mono">實踐基礎</span>
+          <span class="r2-row-text">LlamaIndex RouterQueryEngine / RouterRetriever</span>
+        </div>
+        <div class="r2-row" [attr.data-state]="step() >= 3 ? 'active' : 'hidden'">
+          <span class="r2-row-label mono">本專案落點</span>
+          <span class="r2-row-text">kg_id 命名空間隔離 ＋ 概念節點路由 ＋ 分類/分群</span>
+        </div>
+      </div>
+      <p class="r2-note" [class.r2-visible]="step() === 2">
+        它們不是知識圖譜產品，是從多個候選引擎中選目標的路由實作。
+      </p>
+    </section>
+  </div>
+</div>

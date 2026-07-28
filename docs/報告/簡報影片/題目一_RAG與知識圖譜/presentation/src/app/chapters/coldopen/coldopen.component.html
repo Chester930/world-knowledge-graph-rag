@@ -1,0 +1,68 @@
+<div class="scene co-scene">
+  <div class="scene-pad co-pad">
+
+    <!-- Step 0: title -->
+    <div class="co-block co-title-block" [class.co-active]="showTitle()">
+      <p class="co-kicker mono">SVO 知識圖譜 · 題目一</p>
+      <h1 class="co-hero serif-cn">為什麼要用<br />知識圖譜</h1>
+      <div class="co-hero-rule" [class.co-draw]="showTitle()"></div>
+      <p class="co-subtitle">2026 年的 RAG，已經很成熟了。</p>
+    </div>
+
+    <!-- Step 1: the real question -->
+    <div class="co-block co-question-block" [class.co-active]="showQuestion()">
+      <p class="co-kicker mono">這一題，藏著一個更根本的問題</p>
+      <div class="co-venn" [class.co-active]="showQuestion()">
+        <div class="co-venn-circle co-venn-rag">
+          <span class="co-venn-label mono">RAG</span>
+        </div>
+        <div class="co-venn-circle co-venn-kg">
+          <span class="co-venn-label mono">知識圖譜</span>
+        </div>
+        <span class="co-venn-mark serif-it">?</span>
+      </div>
+      <p class="co-question serif-cn">到底是在解決同一件事，<br />還是不同層次的事？</p>
+    </div>
+
+    <!-- Steps 2-4: three definition rows, revealed one at a time -->
+    <div class="co-block co-rows-block" [class.co-active]="showRows()">
+      <p class="co-kicker mono">我的答案是：不同層次</p>
+      <div class="co-rows">
+        <div
+          *ngFor="let row of rows; let i = index"
+          class="co-row"
+          [attr.data-state]="rowState(i)"
+        >
+          <span class="co-row-ord serif-it">{{ row.ord }}</span>
+          <div class="co-row-rule"></div>
+          <div class="co-row-body">
+            <span class="co-row-label serif-cn">{{ row.label }}</span>
+            <span class="co-row-def">{{ row.def }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: positioning statement -->
+    <div class="co-block co-close-block" [class.co-active]="showClose()">
+      <p class="co-kicker mono">先講清楚</p>
+      <p class="co-close-lead serif-cn">不是 RAG 不好，也不是知識圖譜要取代 RAG。</p>
+      <div class="co-close-cols">
+        <div class="co-close-col">
+          <span class="co-close-tag mono">RAG 解決的是</span>
+          <p class="co-close-text">「我該參考哪些內容」</p>
+        </div>
+        <div class="co-close-divider"></div>
+        <div class="co-close-col">
+          <span class="co-close-tag mono">知識圖譜解決的是</span>
+          <p class="co-close-text">「內容裡的關係，怎麼被整理、怎麼被重複使用」</p>
+        </div>
+      </div>
+      <hr class="rule co-close-rule" />
+      <p class="co-close-final">
+        兩者不衝突。知識圖譜能改變 RAG 檢索的單位——從原始文字，提升到事實跟關係。
+      </p>
+    </div>
+
+  </div>
+</div>

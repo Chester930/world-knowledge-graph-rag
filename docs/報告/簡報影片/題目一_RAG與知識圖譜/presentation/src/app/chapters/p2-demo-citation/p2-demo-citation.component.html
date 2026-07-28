@@ -1,0 +1,48 @@
+<div class="scene p2c-scene">
+  <div class="scene-pad p2c-pad">
+    <section class="p2c-block p2c-open" [class.p2c-active]="step() === 0">
+      <p class="p2c-kicker mono">Demo 1</p>
+      <h2 class="serif-cn">先證明：<br />圖上的邊不是憑空來的。</h2>
+    </section>
+
+    <section class="p2c-block p2c-query" [class.p2c-active]="step() === 1">
+      <p class="p2c-kicker mono">Neo4j Browser</p>
+      <pre><code>MATCH (s:Entity {{ '{' }}name: "勞動基準法第三十六條第四項指定行業"{{ '}' }})-[r]-&gt;(o:Entity)
+RETURN s.name AS 主詞, type(r) AS 關係, o.name AS 受詞, r.citations_json AS 來源追溯</code></pre>
+    </section>
+
+    <section class="p2c-block p2c-triple" [class.p2c-active]="step() === 2">
+      <p class="p2c-kicker mono">查到的圖譜事實</p>
+      <div class="p2c-chain">
+        <span>{{ triple.subject }}</span>
+        <b>{{ triple.relation }}</b>
+        <span>{{ triple.object }}</span>
+      </div>
+    </section>
+
+    <section class="p2c-block p2c-citation" [class.p2c-active]="step() === 3">
+      <p class="p2c-kicker mono">citations_json</p>
+      <div class="p2c-json">
+        <span>source_svo_chunk_file</span>
+        <strong>svo-chunk-003-of-004.md</strong>
+        <span>source_sentence_start</span>
+        <strong>7</strong>
+        <span>source_sentence_end</span>
+        <strong>11</strong>
+      </div>
+    </section>
+
+    <section class="p2c-block p2c-source" [class.p2c-active]="step() === 4">
+      <p class="p2c-kicker mono">對照原文 7-11</p>
+      <blockquote>
+        經目的事業主管機關同意與勞動部指定之行業，得於每七日週期內調整例假（最長連續工作12天）：1. 配合重要年節、活動疏運期間之客運及貨運運輸業。2. 出國執行職務之旅行業、新聞出版與廣播電視業。
+      </blockquote>
+    </section>
+
+    <section class="p2c-block p2c-close" [class.p2c-active]="step() === 5">
+      <p class="p2c-kicker mono">這個 Demo 證明什麼</p>
+      <h2 class="serif-cn">邊、來源、句子範圍，<br />可以被逐條對照。</h2>
+      <p>因此三元組不是只存在圖上，而是能回到原文被驗證。</p>
+    </section>
+  </div>
+</div>

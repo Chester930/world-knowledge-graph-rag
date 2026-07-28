@@ -1,0 +1,63 @@
+/* intro-rq4-future — prefix: r4- */
+
+.r4-scene { background: var(--surface); }
+.r4-pad { position: absolute; inset: 0; }
+
+.r4-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.r4-block.r4-active { opacity: 1; pointer-events: auto; }
+
+.r4-badge {
+  align-self: flex-start;
+  font-size: 20px;
+  letter-spacing: var(--track-caps);
+  color: var(--accent);
+  border: var(--bw-1) solid var(--accent);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.r4-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.r4-block h2 { margin: 0; font-size: 52px; color: var(--text); }
+
+.r4-question {
+  margin: 0 0 var(--space-7) 0;
+  font-family: var(--font-display-cn);
+  font-size: 36px;
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 1500px;
+}
+
+.r4-stack { display: flex; flex-direction: column; gap: var(--space-4); max-width: 1500px; }
+.r4-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-6);
+  padding: var(--space-3) 0;
+  border-bottom: var(--bw-1) solid var(--rule);
+}
+.r4-row span:first-child { width: 160px; flex: none; color: var(--text-mute); letter-spacing: var(--track-caps); }
+.r4-row span:last-child { font-size: 24px; color: var(--text-2); }
+
+.r4-future-cols { display: flex; align-items: stretch; gap: var(--space-9); max-width: 1600px; }
+.r4-future-col { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); }
+.r4-future-badge {
+  align-self: flex-start;
+  font-size: 18px;
+  letter-spacing: var(--track-caps);
+  color: var(--text-faint);
+  border: var(--bw-1) solid var(--rule);
+  padding: var(--space-2) var(--space-4);
+}
+.r4-future-q { margin: 0; font-family: var(--font-display-cn); font-size: 32px; line-height: 1.4; color: var(--text); }
+.r4-future-theory { margin: 0; font-size: 22px; color: var(--text-mute); }
+.r4-future-divider { width: var(--bw-1); background: var(--rule); flex: none; }

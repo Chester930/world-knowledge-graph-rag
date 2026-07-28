@@ -1,0 +1,28 @@
+<div class="scene p2l-scene">
+  <div class="scene-pad p2l-pad">
+    <section class="p2l-block p2l-open" [class.p2l-active]="step() === 0">
+      <p class="p2l-kicker mono">文獻定位</p>
+      <h2 class="serif-cn">三元組不是我自創的格式，<br />品質驗證也不是加分項。</h2>
+    </section>
+
+    <section class="p2l-block p2l-board" [class.p2l-active]="step() >= 1 && step() <= 5">
+      <div class="p2l-list">
+        <article *ngFor="let source of sources; let i = index" [attr.data-state]="sourceState(i)">
+          <span class="mono">0{{ i + 1 }}</span>
+          <strong>{{ source.name }}</strong>
+        </article>
+      </div>
+      <div class="p2l-detail">
+        <p class="p2l-kicker mono">evidence {{ step() }} / 5</p>
+        <h2>{{ activeSource().name }}</h2>
+        <p>{{ activeSource().proof }}</p>
+      </div>
+    </section>
+
+    <section class="p2l-block p2l-close" [class.p2l-active]="step() === 6">
+      <p class="p2l-kicker mono">共同結論</p>
+      <h2 class="serif-cn">LLM 抽出的三元組，<br />必須先被檢查，才適合進入可信圖譜。</h2>
+      <div class="p2l-danger">錯邊會被 GraphRAG 拿去繼續走圖</div>
+    </section>
+  </div>
+</div>

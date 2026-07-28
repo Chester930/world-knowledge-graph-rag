@@ -1,0 +1,25 @@
+<div class="scene ib-scene">
+  <div class="scene-pad ib-pad">
+
+    <section class="ib-block" [class.ib-active]="step() <= 2">
+      <p class="ib-kicker mono">研究背景，分三層說</p>
+      <div class="ib-layers">
+        <div *ngFor="let l of layers; let i = index" class="ib-layer" [attr.data-state]="layerState(i)">
+          <span class="ib-layer-ord serif-it">{{ l.ord }}</span>
+          <div class="ib-layer-rule"></div>
+          <div class="ib-layer-body">
+            <span class="ib-layer-label serif-cn">{{ l.label }}</span>
+            <span class="ib-layer-detail">{{ l.detail }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ib-block ib-close" [class.ib-active]="showClose()">
+      <p class="ib-kicker mono">所以我的研究不是做一個聊天系統</p>
+      <h2 class="serif-cn">是要驗證：把文件轉成<br />可追溯的三元組知識圖譜之後，</h2>
+      <p class="ib-close-line">能不能讓 RAG 在多跳推理跟可解釋性上，更可靠。</p>
+    </section>
+
+  </div>
+</div>

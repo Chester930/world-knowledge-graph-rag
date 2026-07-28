@@ -1,0 +1,36 @@
+<div class="scene sp-scene">
+  <div class="scene-pad sp-pad">
+    <section class="sp-block sp-open" [class.sp-active]="step() === 0">
+      <p class="sp-kicker mono">GraphRAG 的核心</p>
+      <h2 class="serif-cn">不是圖形介面，<br />是每一條可查詢的關係。</h2>
+    </section>
+
+    <section class="sp-block" [class.sp-active]="step() === 1">
+      <p class="sp-kicker mono">SVO / Triple</p>
+      <div class="sp-triple">
+        <span>Subject</span>
+        <b>Relation</b>
+        <span>Object</span>
+      </div>
+      <p class="sp-example">Neo4j <b>儲存</b> 知識圖譜</p>
+    </section>
+
+    <section class="sp-block sp-claim" [class.sp-active]="step() >= 2 && step() <= 3">
+      <p class="sp-kicker mono">為什麼要用知識圖譜</p>
+      <h2 class="serif-cn">讓 RAG 不只檢索文字，<br />也能檢索可驗證的關係。</h2>
+      <div class="sp-badges">
+        <span>抽得對</span><span>類型一致</span><span>來源追得回</span>
+      </div>
+    </section>
+
+    <section class="sp-block" [class.sp-active]="step() === 4">
+      <p class="sp-kicker mono">下一題要驗證的事</p>
+      <div class="sp-checks">
+        <div *ngFor="let c of checks; let i = index" class="sp-check" [style.--i]="i">
+          <span class="mono">0{{ i + 1 }}</span>
+          <strong>{{ c }}</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

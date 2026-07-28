@@ -1,0 +1,23 @@
+<div class="scene igo-scene">
+  <div class="scene-pad igo-pad">
+
+    <section class="igo-block" [class.igo-active]="showIntro()">
+      <p class="igo-kicker mono">研究目標</p>
+      <h2 class="serif-cn">不是泛稱「GraphRAG 比 RAG 好」，<br />是界定它在特定任務上的成立條件。</h2>
+    </section>
+
+    <section class="igo-block" [class.igo-active]="step() >= 1">
+      <p class="igo-kicker mono">四個目標</p>
+      <div class="igo-goals">
+        <div *ngFor="let g of goals; let i = index" class="igo-goal" [attr.data-state]="goalState(i)">
+          <span class="igo-goal-ord serif-it">目標{{ i + 1 }}</span>
+          <span class="igo-goal-text">{{ g }}</span>
+        </div>
+      </div>
+      <p class="igo-close-line" [class.igo-visible]="showClose()">
+        重點不是宣稱 GraphRAG 全面勝過 RAG，是找出它在哪些問題類型上真的有用、代價是什麼。
+      </p>
+    </section>
+
+  </div>
+</div>

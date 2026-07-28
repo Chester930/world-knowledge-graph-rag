@@ -1,0 +1,8 @@
+{
+  "notes": [
+    "用 GraphRAG pipeline 作開場，再逐項顯示五個缺陷。",
+    "缺陷要明確導向 SVO/edge quality。",
+    "最後收束到不能只說有圖，必須證明邊可信。"
+  ],
+  "steps": {}
+}

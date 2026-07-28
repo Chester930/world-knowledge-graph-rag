@@ -1,0 +1,13 @@
+<div class="scene ig-scene">
+  <div class="scene-pad ig-pad">
+    <p class="ig-kicker mono">本專案承接六個研究缺口</p>
+    <div class="ig-rows">
+      <div *ngFor="let g of gaps; let i = index" class="ig-row" [attr.data-state]="rowState(i)">
+        <span class="ig-row-num mono">0{{ i + 1 }}</span>
+        <span class="ig-row-gap serif-cn">{{ g.gap }}</span>
+        <span class="ig-row-arrow">→</span>
+        <span class="ig-row-direction">{{ g.direction }}</span>
+      </div>
+    </div>
+  </div>
+</div>

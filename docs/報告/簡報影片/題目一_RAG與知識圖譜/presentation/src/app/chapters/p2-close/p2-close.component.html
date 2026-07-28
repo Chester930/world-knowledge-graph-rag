@@ -1,0 +1,36 @@
+<div class="scene p2z-scene">
+  <div class="scene-pad p2z-pad">
+    <section class="p2z-block p2z-open" [class.p2z-active]="step() === 0">
+      <p class="p2z-kicker mono">題目二總結</p>
+      <h2 class="serif-cn">驗證三元組，<br />不是只看 S / R / O。</h2>
+    </section>
+
+    <section class="p2z-block p2z-six" [class.p2z-active]="step() === 1">
+      <p class="p2z-kicker mono">可信關係的條件</p>
+      <div class="p2z-list">
+        <span>格式完整</span>
+        <span>關係一致</span>
+        <span>方向正確</span>
+        <span>來源支持</span>
+        <span>事實去重</span>
+        <span>路徑可查</span>
+      </div>
+    </section>
+
+    <section class="p2z-block p2z-demo" [class.p2z-active]="step() === 2">
+      <p class="p2z-kicker mono">Demo 證明鏈</p>
+      <div class="p2z-chain">
+        <span>Neo4j 邊</span>
+        <b>citations_json</b>
+        <span>原文句範圍</span>
+        <b>10 題問答</b>
+        <span>限制案例</span>
+      </div>
+    </section>
+
+    <section class="p2z-block p2z-final" [class.p2z-active]="step() === 3">
+      <p class="p2z-kicker mono">轉入專案介紹</p>
+      <h2 class="serif-cn">只有能回到原文、能被一致查詢、能支撐答案的關係，<br />才是對 GraphRAG 有價值的關係。</h2>
+    </section>
+  </div>
+</div>

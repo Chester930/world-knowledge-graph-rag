@@ -1,0 +1,22 @@
+<div class="scene pc-scene">
+  <div class="scene-pad pc-pad">
+    <section class="pc-block" [class.pc-active]="step() === 0">
+      <p class="pc-kicker mono">題目一答案</p>
+      <h2 class="serif-cn">RAG 仍然重要，<br />但核心是文字證據。</h2>
+    </section>
+    <section class="pc-block" [class.pc-active]="step() === 1">
+      <p class="pc-kicker mono">KG 的價值</p>
+      <h2 class="serif-cn">把關係本身，變成知識單位。</h2>
+      <div class="pc-units"><span>可查詢</span><span>可驗證</span><span>可重複使用</span></div>
+    </section>
+    <section class="pc-block" [class.pc-active]="step() === 2">
+      <p class="pc-kicker mono">GraphRAG 的風險</p>
+      <h2 class="serif-cn">邊不可信，<br />圖會放大錯誤。</h2>
+    </section>
+    <section class="pc-block pc-final" [class.pc-active]="step() === 3">
+      <p class="pc-kicker mono">Next</p>
+      <h2 class="serif-cn">下一題：<br />怎麼證明三元組關係可信？</h2>
+      <p>驗證 · 來源追溯 · 去重治理 · 有邊界圖遍歷</p>
+    </section>
+  </div>
+</div>

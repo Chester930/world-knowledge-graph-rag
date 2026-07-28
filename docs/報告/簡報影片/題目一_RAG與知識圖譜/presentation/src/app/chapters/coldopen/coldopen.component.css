@@ -1,0 +1,266 @@
+/* coldopen — chapter 1: 為什麼要用知識圖譜 (prefix: co-) */
+
+.co-scene {
+  background: var(--surface);
+}
+
+.co-pad {
+  justify-content: center;
+  position: absolute;
+  inset: 0;
+}
+
+/* every step-block stacks in the same area; only the active one shows */
+.co-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.co-block.co-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.co-kicker {
+  color: var(--text-mute);
+  margin: 0 0 var(--space-5) 0;
+}
+
+/* ── Step 0: title ───────────────────────────────────────────────── */
+.co-title-block .co-hero {
+  margin: 0;
+  font-size: 132px;
+  line-height: 1.06;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.co-hero-rule {
+  width: 0;
+  height: var(--bw-2);
+  background: var(--accent);
+  margin: var(--space-5) 0;
+  transition: width var(--dur-cinematic) var(--ease-quart);
+}
+.co-hero-rule.co-draw {
+  width: 320px;
+}
+
+.co-subtitle {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 46px;
+  color: var(--text-2);
+  font-weight: 400;
+}
+
+/* ── Step 1: the tension question ──────────────────────────────── */
+.co-question-block {
+  align-items: flex-start;
+}
+
+.co-venn {
+  position: relative;
+  width: 560px;
+  height: 260px;
+  margin: var(--space-5) 0 var(--space-7) 0;
+  opacity: 0;
+  transform: scale(0.92);
+  transition:
+    opacity var(--dur-cinematic) var(--ease-quart),
+    transform var(--dur-cinematic) var(--ease-overshoot);
+}
+.co-venn.co-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.co-venn-circle {
+  position: absolute;
+  top: 0;
+  width: 340px;
+  height: 260px;
+  border-radius: 50%;
+  border: var(--bw-1) solid var(--accent);
+  mix-blend-mode: multiply;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.co-venn-rag {
+  left: 0;
+  background: var(--accent-soft);
+}
+.co-venn-kg {
+  right: 0;
+  background: var(--accent-soft);
+}
+.co-venn-label {
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: var(--track-caps);
+}
+.co-venn-rag .co-venn-label { transform: translateX(-64px); }
+.co-venn-kg .co-venn-label { transform: translateX(64px); }
+
+.co-venn-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 64px;
+  color: var(--accent);
+  animation: co-pulse 2.2s var(--ease-soft) infinite;
+}
+@keyframes co-pulse {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.12); }
+}
+
+.co-question {
+  margin: 0;
+  font-size: 76px;
+  line-height: 1.28;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 1100px;
+}
+
+/* ── Steps 2-4: definition rows, revealed one at a time ───────────── */
+.co-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  max-width: 1440px;
+}
+
+.co-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity var(--dur-slow) var(--ease-quart),
+    transform var(--dur-slow) var(--ease-quart);
+}
+.co-row[data-state="hidden"] {
+  opacity: 0;
+}
+.co-row[data-state="active"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.co-row[data-state="dim"] {
+  opacity: 0.32;
+  transform: translateY(0);
+}
+
+.co-row-ord {
+  font-size: 40px;
+  color: var(--text-faint);
+  width: 72px;
+  flex: none;
+}
+.co-row[data-state="active"] .co-row-ord {
+  color: var(--accent);
+}
+
+.co-row-rule {
+  width: var(--bw-2);
+  height: 64px;
+  background: var(--rule);
+  flex: none;
+  transition: background var(--dur-base) var(--ease-quart);
+}
+.co-row[data-state="active"] .co-row-rule {
+  background: var(--accent);
+}
+
+.co-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.co-row-label {
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--text);
+}
+.co-row-def {
+  font-family: var(--font-body);
+  font-size: 22px;
+  color: var(--text-mute);
+}
+
+/* ── Step 5: positioning statement ─────────────────────────────── */
+.co-close-lead {
+  margin: 0 0 var(--space-7) 0;
+  font-size: 54px;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 1400px;
+}
+
+.co-close-cols {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-9);
+  max-width: 1600px;
+}
+.co-close-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--dur-slow) var(--ease-quart),
+    transform var(--dur-slow) var(--ease-quart);
+}
+.co-close-block.co-active .co-close-col {
+  opacity: 1;
+  transform: translateY(0);
+}
+.co-close-block.co-active .co-close-col:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+.co-close-tag {
+  color: var(--accent);
+  letter-spacing: var(--track-caps);
+}
+.co-close-text {
+  margin: 0;
+  font-family: var(--font-display-cn);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.co-close-divider {
+  width: var(--bw-1);
+  background: var(--rule);
+  flex: none;
+}
+
+.co-close-rule {
+  margin: var(--space-7) 0 var(--space-5) 0;
+  max-width: 1600px;
+}
+
+.co-close-final {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 24px;
+  color: var(--text-mute);
+  max-width: 1300px;
+  line-height: 1.6;
+}

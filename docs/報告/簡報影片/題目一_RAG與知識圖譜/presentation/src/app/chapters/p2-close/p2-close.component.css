@@ -1,0 +1,62 @@
+/* p2-close — prefix: p2z- */
+.p2z-scene { background: var(--surface); }
+.p2z-pad { position: absolute; inset: 0; }
+.p2z-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.p2z-block.p2z-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.p2z-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.p2z-open h2, .p2z-final h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 82px;
+  line-height: 1.16;
+}
+.p2z-final h2 { font-size: 66px; }
+.p2z-list {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-3);
+}
+.p2z-list span {
+  min-height: 440px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-display-cn);
+  font-size: 38px;
+  writing-mode: vertical-rl;
+}
+.p2z-chain {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1.2fr 1fr 1fr;
+  gap: var(--space-3);
+}
+.p2z-chain span, .p2z-chain b {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: center;
+  font-size: 29px;
+  line-height: 1.35;
+}
+.p2z-chain b {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 23px;
+}

@@ -1,0 +1,60 @@
+<div class="scene p2q-scene">
+  <div class="scene-pad p2q-pad">
+    <section class="p2q-block p2q-open" [class.p2q-active]="step() === 0">
+      <p class="p2q-kicker mono">Demo 2</p>
+      <h2 class="serif-cn">再證明：<br />圖譜可以直接拿來問答。</h2>
+      <p>暫時版本：字面比對找種子實體，尚未接正式 ConceptNode 路由。</p>
+    </section>
+
+    <section class="p2q-block p2q-board" [class.p2q-active]="step() === 1">
+      <p class="p2q-kicker mono">10 種 HR / 合規情境</p>
+      <div class="p2q-grid">
+        <article *ngFor="let s of scenarios" [attr.data-result]="s.result">
+          <span class="mono">#{{ s.id }}</span>
+          <strong>{{ s.topic }}</strong>
+          <em>{{ s.kg }} KG · {{ resultLabel(s.result) }}</em>
+        </article>
+      </div>
+    </section>
+
+    <section class="p2q-block p2q-success" [class.p2q-active]="step() === 2">
+      <p class="p2q-kicker mono">乾淨命中案例</p>
+      <h2 class="serif-cn">同一條 Demo 1 事實，<br />也能支撐自然語言回答。</h2>
+      <div class="p2q-answer">
+        <span>問題</span>
+        <p>勞動基準法第三十六條第四項指定行業，可以在什麼條件下調整例假？</p>
+        <span>答案依據</span>
+        <p>最長連續工作 12 天；客運貨運運輸業、旅行業、新聞出版與廣播電視業等。</p>
+      </div>
+    </section>
+
+    <section class="p2q-block p2q-source" [class.p2q-active]="step() === 3">
+      <p class="p2q-kicker mono">題庫不是只有問題</p>
+      <h2 class="serif-cn">每題都附上對應原文來源。</h2>
+      <div class="p2q-source-row">
+        <strong>#9 全勤獎金在產假期間是否可以被扣除？</strong>
+        <p>來源：勞動部_勞動條2字第1060130230號函 / svo-chunk-004-of-004.md / 10-12</p>
+      </div>
+    </section>
+
+    <section class="p2q-block p2q-limit" [class.p2q-active]="step() === 4">
+      <p class="p2q-kicker mono">誠實展示限制</p>
+      <div class="p2q-limit-grid">
+        <article>
+          <strong>#3 保全 84-1</strong>
+          <p>圖上有精確數字，但問題措辭與實體名稱不完全一致，字面路由可能退回一般規定。</p>
+        </article>
+        <article>
+          <strong>#9 產假全勤獎金</strong>
+          <p>語料有明確答案；若 UI 找不到依據，代表資料存在但檢索沒有命中。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="p2q-block p2q-close" [class.p2q-active]="step() === 5">
+      <p class="p2q-kicker mono">Demo 2 定位</p>
+      <h2 class="serif-cn">它證明圖可用，<br />也暴露正式路由層為什麼必要。</h2>
+      <p>下一版應由 ConceptNode 語意路由接 BFS 圖遍歷，再回原文補 citation。</p>
+    </section>
+  </div>
+</div>

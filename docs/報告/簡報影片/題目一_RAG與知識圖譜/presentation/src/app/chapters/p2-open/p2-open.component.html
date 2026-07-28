@@ -1,0 +1,45 @@
+<div class="scene p2o-scene">
+  <div class="scene-pad p2o-pad">
+    <section class="p2o-block p2o-title" [class.p2o-active]="step() === 0">
+      <p class="p2o-kicker mono">題目二</p>
+      <h2 class="serif-cn">如何驗證<br />三元組的關聯？</h2>
+      <span class="p2o-mark serif-it">SVO</span>
+    </section>
+
+    <section class="p2o-block p2o-triple" [class.p2o-active]="step() === 1">
+      <p class="p2o-kicker mono">先釐清問題</p>
+      <div class="p2o-row">
+        <span>Subject</span>
+        <b>Relation</b>
+        <span>Object</span>
+      </div>
+      <p class="p2o-line">抽到三個欄位，只代表格式存在。</p>
+    </section>
+
+    <section class="p2o-block p2o-question" [class.p2o-active]="step() === 2">
+      <p class="p2o-kicker mono">真正要驗證的是</p>
+      <h2 class="serif-cn">這條關係，<br />是否真的被原文支持？</h2>
+      <div class="p2o-contrast">
+        <span>JSON 合法</span>
+        <b class="mono">≠</b>
+        <span>事實成立</span>
+      </div>
+    </section>
+
+    <section class="p2o-block p2o-demo" [class.p2o-active]="step() === 3">
+      <p class="p2o-kicker mono">本題搭配 Demo</p>
+      <div class="p2o-demo-grid">
+        <article>
+          <strong class="mono">DEMO 1</strong>
+          <h3>邊可追溯</h3>
+          <p>Neo4j 中每條關係保留來源文件、chunk 與句子範圍。</p>
+        </article>
+        <article>
+          <strong class="mono">DEMO 2</strong>
+          <h3>圖可問答</h3>
+          <p>自然語言問題先取圖上事實，再根據事實回答。</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>

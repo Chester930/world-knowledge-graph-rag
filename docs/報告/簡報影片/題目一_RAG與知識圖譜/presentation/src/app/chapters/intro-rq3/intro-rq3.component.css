@@ -1,0 +1,51 @@
+/* intro-rq3 — prefix: r3- */
+
+.r3-scene { background: var(--surface); }
+.r3-pad { position: absolute; inset: 0; }
+
+.r3-badge {
+  align-self: flex-end;
+  font-size: 22px;
+  letter-spacing: var(--track-caps);
+  color: var(--accent);
+  border: var(--bw-1) solid var(--accent);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.r3-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.r3-block.r3-active { opacity: 1; pointer-events: auto; }
+
+.r3-kicker { margin: 0 0 var(--space-7); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.r3-block h2 { margin: 0; font-size: 54px; line-height: 1.35; color: var(--text); max-width: 1500px; }
+.r3-simplified {
+  margin: var(--space-7) 0 0;
+  font-family: var(--font-body);
+  font-size: 28px;
+  color: var(--accent);
+  max-width: 1300px;
+}
+
+.r3-stack { display: flex; flex-direction: column; gap: var(--space-6); max-width: 1500px; }
+.r3-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-7);
+  padding: var(--space-5) 0;
+  border-bottom: var(--bw-1) solid var(--rule);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.r3-row[data-state="active"] { opacity: 1; transform: translateY(0); }
+.r3-row-label { width: 180px; flex: none; color: var(--text-mute); letter-spacing: var(--track-caps); }
+.r3-row-text { font-size: 32px; color: var(--text); }

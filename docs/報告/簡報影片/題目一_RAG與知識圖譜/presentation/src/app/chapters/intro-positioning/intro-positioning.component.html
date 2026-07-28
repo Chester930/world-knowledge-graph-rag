@@ -1,0 +1,51 @@
+<div class="scene ip-scene">
+  <div class="scene-pad ip-pad">
+
+    <!-- step 0: two answers recap -->
+    <section class="ip-block" [class.ip-active]="step() === 0">
+      <p class="ip-kicker mono">前面兩題，已經回答了兩件事</p>
+      <div class="ip-recap">
+        <div class="ip-recap-col">
+          <span class="ip-recap-q serif-it">為什麼不能只用 RAG？</span>
+          <span class="ip-recap-a serif-cn">因為需要可驗證的關係結構。</span>
+        </div>
+        <div class="ip-recap-divider"></div>
+        <div class="ip-recap-col">
+          <span class="ip-recap-q serif-it">為什麼要驗證三元組？</span>
+          <span class="ip-recap-a serif-cn">因為 GraphRAG 的可信度，取決於圖上的邊是否正確。</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- step 1: introduction order -->
+    <section class="ip-block" [class.ip-active]="step() === 1">
+      <p class="ip-kicker mono">接下來介紹專案，用緒論的方式說</p>
+      <div class="ip-outline">
+        <ng-container *ngFor="let item of outline; let i = index">
+          <div class="ip-outline-node">
+            <span class="mono">0{{ i + 1 }}</span>
+            <strong>{{ item }}</strong>
+          </div>
+          <div *ngIf="i < outline.length - 1" class="ip-outline-arrow"></div>
+        </ng-container>
+      </div>
+    </section>
+
+    <!-- step 2: one-line positioning -->
+    <section class="ip-block ip-hero-block" [class.ip-active]="step() === 2">
+      <p class="ip-kicker mono">專案一句話定位</p>
+      <h1 class="ip-hero serif-cn">World Knowledge Graph RAG</h1>
+      <p class="ip-hero-sub">以論文研究為目標的 GraphRAG 系統實作</p>
+      <div class="ip-keywords">
+        <div *ngFor="let k of keywords" class="ip-keyword">
+          <span class="ip-keyword-ord serif-it">{{ k.ord }}</span>
+          <span class="ip-keyword-label">{{ k.label }}</span>
+        </div>
+      </div>
+      <p class="ip-hero-goal">
+        補足當代 RAG 與 2024 GraphRAG，在多跳問答、可追溯性、查詢效率上的不足。
+      </p>
+    </section>
+
+  </div>
+</div>

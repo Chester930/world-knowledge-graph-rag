@@ -1,0 +1,8 @@
+{
+  "notes": [
+    "先比較 RAG/KG 的 timing、unit、strength。",
+    "再轉成 GraphRAG 不是替代，而是改變檢索對象。",
+    "用 pipeline 動畫展示 chunk retrieval 到 graph retrieval 的差異。"
+  ],
+  "steps": {}
+}

@@ -1,0 +1,52 @@
+<div class="scene kc-scene">
+  <div class="scene-pad kc-pad">
+    <section class="kc-block kc-claim" [class.kc-active]="step() <= 1">
+      <p class="kc-kicker mono">Knowledge Graph</p>
+      <h2 class="serif-cn">事前提煉<br />關係知識</h2>
+      <div class="kc-triple" [class.kc-live]="step() === 1">
+        <span>實體</span><b>-- 關係 --></b><span>實體</span>
+      </div>
+    </section>
+
+    <section class="kc-block" [class.kc-active]="step() === 2">
+      <p class="kc-kicker mono">資料進來後，先整理成圖</p>
+      <div class="kc-flow">
+        <div *ngFor="let f of flow; let i = index" class="kc-flow-node" [style.--i]="i">
+          <span class="mono">{{ i + 1 }}</span>
+          <strong>{{ f }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="kc-block kc-split" [class.kc-active]="step() >= 3 && step() <= 4">
+      <div class="kc-side">
+        <p class="kc-kicker mono">RAG</p>
+        <h3 class="serif-cn">查詢時才篩</h3>
+        <div class="kc-chunks">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <p>回傳 chunk / 句子，關係交給模型臨時理解。</p>
+      </div>
+      <div class="kc-side kc-side-kg">
+        <p class="kc-kicker mono">KG</p>
+        <h3 class="serif-cn">事前先建關係</h3>
+        <svg class="kc-mini-graph" viewBox="0 0 520 260">
+          <line x1="120" y1="130" x2="260" y2="70"/>
+          <line x1="260" y1="70" x2="400" y2="130"/>
+          <line x1="120" y1="130" x2="400" y2="130"/>
+          <circle cx="120" cy="130" r="46"/><circle cx="260" cy="70" r="46"/><circle cx="400" cy="130" r="46"/>
+          <text x="120" y="136" text-anchor="middle">S</text><text x="260" y="76" text-anchor="middle">R</text><text x="400" y="136" text-anchor="middle">O</text>
+        </svg>
+        <p>回傳實體、關係、三元組與路徑。</p>
+      </div>
+    </section>
+
+    <section class="kc-block kc-close" [class.kc-active]="step() === 5">
+      <p class="kc-kicker mono">不是資訊量高低，而是結構差異</p>
+      <h2 class="serif-cn">文字片段可以很豐富，<br />但關係結構仍然鬆散。</h2>
+      <div class="kc-bottom-line">
+        <span>chunk</span><b>→</b><span>fact</span><b>→</b><span>relation</span><b>→</b><span>path</span>
+      </div>
+    </section>
+  </div>
+</div>

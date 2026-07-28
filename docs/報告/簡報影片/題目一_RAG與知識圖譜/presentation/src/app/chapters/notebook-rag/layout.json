@@ -1,0 +1,8 @@
+{
+  "notes": [
+    "以 NotebookLM 作為共同經驗入口，但不宣稱內部實作。",
+    "用資料流動畫把 RAG 抽象成 source -> retrieval -> LLM -> cited answer。",
+    "強調 RAG 的本質是檢索控制，不是生成本身。"
+  ],
+  "steps": {}
+}

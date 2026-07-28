@@ -1,0 +1,74 @@
+/* intro-carrier-status — prefix: cs- */
+
+.cs-scene { background: var(--surface); }
+.cs-pad { position: absolute; inset: 0; }
+
+.cs-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.cs-block.cs-active { opacity: 1; pointer-events: auto; }
+
+.cs-kicker { margin: 0 0 var(--space-6); color: var(--text-mute); letter-spacing: var(--track-caps); }
+
+.cs-rows { display: flex; flex-direction: column; gap: var(--space-4); max-width: 1600px; }
+.cs-row {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: var(--bw-1) solid var(--rule);
+  opacity: 0;
+  transform: translateX(-16px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart), border-color var(--dur-base) var(--ease-quart);
+}
+.cs-row[data-state="active"] { opacity: 1; transform: translateX(0); border-color: var(--accent); }
+.cs-row[data-state="dim"] { opacity: 0.36; transform: translateX(0); }
+.cs-row-label { font-size: 30px; color: var(--text); }
+.cs-row-arrow { color: var(--text-faint); text-align: center; }
+.cs-row-rq { font-family: var(--font-body); font-size: 22px; color: var(--text-mute); }
+.cs-row[data-state="active"] .cs-row-rq { color: var(--accent); }
+
+.cs-block h2 { margin: 0 0 var(--space-7) 0; font-size: 52px; line-height: 1.35; color: var(--text); }
+.cs-facts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 1500px;
+}
+.cs-facts li {
+  font-family: var(--font-body);
+  font-size: 24px;
+  color: var(--text-2);
+  padding-left: var(--space-6);
+  position: relative;
+}
+.cs-facts li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.cs-close { align-items: center; text-align: center; }
+.cs-quote {
+  margin: 0;
+  font-size: 46px;
+  line-height: 1.55;
+  color: var(--text);
+  max-width: 1500px;
+}

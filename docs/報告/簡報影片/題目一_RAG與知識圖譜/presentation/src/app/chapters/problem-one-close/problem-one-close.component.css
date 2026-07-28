@@ -1,0 +1,36 @@
+/* problem-one-close — prefix: pc- */
+.pc-scene { background: var(--surface); }
+.pc-pad { position: absolute; inset: 0; }
+.pc-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.pc-block.pc-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.pc-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.pc-block h2 { margin: 0; font-size: 94px; line-height: 1.1; color: var(--text); }
+.pc-units {
+  margin-top: var(--space-7);
+  display: flex;
+  gap: var(--space-5);
+}
+.pc-units span {
+  padding: var(--space-5) var(--space-7);
+  background: var(--surface-2);
+  border-top: var(--bw-2) solid var(--accent);
+  font-family: var(--font-mono);
+  letter-spacing: var(--track-caps);
+  color: var(--text-2);
+}
+.pc-final p:not(.pc-kicker) {
+  margin: var(--space-7) 0 0;
+  font-family: var(--font-body);
+  font-size: 34px;
+  color: var(--text-mute);
+}

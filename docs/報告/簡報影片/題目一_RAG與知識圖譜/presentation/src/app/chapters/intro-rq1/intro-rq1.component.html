@@ -1,0 +1,29 @@
+<div class="scene r1-scene">
+  <div class="scene-pad r1-pad">
+
+    <section class="r1-block" [class.r1-active]="step() === 0">
+      <div class="r1-badge mono">RQ1</div>
+      <p class="r1-kicker mono">核心研究問題</p>
+      <h2 class="serif-cn">KG-BFS 相較當代強化版 RAG，<br />在多跳推理任務上是否仍有顯著優勢？</h2>
+      <p class="r1-simplified">簡化說法：圖結構到底在哪些問題上，真的比 RAG 有幫助？</p>
+    </section>
+
+    <section class="r1-block" [class.r1-active]="step() >= 1">
+      <div class="r1-badge mono">RQ1</div>
+      <div class="r1-stack">
+        <div class="r1-row" [attr.data-state]="step() >= 1 ? 'active' : 'hidden'">
+          <span class="r1-row-label mono">理論基礎</span>
+          <span class="r1-row-text serif-it">Han et al. (2025) — RAG vs. GraphRAG</span>
+        </div>
+        <div class="r1-row" [attr.data-state]="step() >= 2 ? 'active' : 'hidden'">
+          <span class="r1-row-label mono">實踐基礎</span>
+          <span class="r1-row-text">Neo4j 官方 GraphRAG Python 套件</span>
+        </div>
+        <div class="r1-row" [attr.data-state]="step() >= 2 ? 'active' : 'hidden'">
+          <span class="r1-row-label mono">本專案落點</span>
+          <span class="r1-row-text">SVO / BFS service ＋ 對應測試</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,53 @@
+<div class="scene ro-scene">
+  <div class="scene-pad ro-pad">
+
+    <section class="ro-block" [class.ro-active]="step() === 0">
+      <p class="ro-kicker mono">一個核心貢獻，六個研究問題</p>
+      <div class="ro-pills">
+        <span *ngFor="let rq of rqs" class="ro-pill" [attr.data-tier]="rq.tier">{{ rq.id }}</span>
+      </div>
+      <p class="ro-legend">
+        <span class="ro-legend-item"><i class="ro-dot" data-tier="core"></i>RQ1~RQ3 核心承諾</span>
+        <span class="ro-legend-item"><i class="ro-dot" data-tier="bridge"></i>RQ4~RQ6 延伸研究問題</span>
+      </p>
+    </section>
+
+    <section class="ro-block" [class.ro-active]="step() === 1">
+      <p class="ro-kicker mono">今天的報告深度分配</p>
+      <div class="ro-depth">
+        <div class="ro-depth-col ro-depth-deep">
+          <span class="ro-depth-bar"></span>
+          <strong>RQ1 ~ RQ3</strong>
+          <span>主線・核心</span>
+        </div>
+        <div class="ro-depth-col ro-depth-mid">
+          <span class="ro-depth-bar"></span>
+          <strong>RQ4</strong>
+          <span>鋪墊・與三元組驗證直接相關</span>
+        </div>
+        <div class="ro-depth-col ro-depth-shallow">
+          <span class="ro-depth-bar"></span>
+          <strong>RQ5 ~ RQ6</strong>
+          <span>未來工作</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ro-block" [class.ro-active]="step() === 2">
+      <p class="ro-kicker mono">每個 RQ，放三種資訊</p>
+      <div class="ro-framework">
+        <ng-container *ngFor="let f of framework; let i = index">
+          <div class="ro-framework-node">
+            <span class="mono">0{{ i + 1 }}</span>
+            <strong>{{ f }}</strong>
+          </div>
+          <div *ngIf="i < framework.length - 1" class="ro-framework-arrow"></div>
+        </ng-container>
+      </div>
+      <p class="ro-framework-caption">
+        本專案的程式不是理論來源，是說明怎麼把外部理論跟實踐模式，落到自己的系統。
+      </p>
+    </section>
+
+  </div>
+</div>

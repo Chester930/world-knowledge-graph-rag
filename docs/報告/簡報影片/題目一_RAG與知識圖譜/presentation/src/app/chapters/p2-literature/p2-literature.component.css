@@ -1,0 +1,84 @@
+/* p2-literature — prefix: p2l- */
+.p2l-scene { background: var(--surface); }
+.p2l-pad { position: absolute; inset: 0; }
+.p2l-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.p2l-block.p2l-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.p2l-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.p2l-open h2, .p2l-close h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 76px;
+  line-height: 1.18;
+}
+.p2l-board {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-8);
+}
+.p2l-list {
+  width: 610px;
+  display: grid;
+  gap: var(--space-3);
+}
+.p2l-list article {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  align-items: center;
+  min-height: 86px;
+  padding: 0 var(--space-5);
+  border-top: var(--rule-w) var(--rule-style) var(--rule);
+  background: transparent;
+  opacity: 0.3;
+  transition: opacity var(--dur-base) var(--ease-quart), transform var(--dur-base) var(--ease-quart), background var(--dur-base) var(--ease-quart);
+}
+.p2l-list article[data-state="active"] {
+  opacity: 1;
+  transform: translateX(22px);
+  background: var(--surface-2);
+}
+.p2l-list article[data-state="past"] { opacity: 0.55; }
+.p2l-list span { color: var(--text-faint); }
+.p2l-list strong { color: var(--text); font-family: var(--font-display-en); font-size: 34px; }
+.p2l-detail {
+  flex: 1;
+  min-height: 520px;
+  padding: var(--space-7);
+  border-left: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  box-shadow: var(--card-shadow);
+}
+.p2l-detail h2 {
+  margin: 0 0 var(--space-6);
+  color: var(--accent);
+  font-family: var(--font-display-en);
+  font-size: 88px;
+  line-height: 0.95;
+}
+.p2l-detail p:not(.p2l-kicker) {
+  margin: 0;
+  max-width: 760px;
+  color: var(--text-2);
+  font-size: 34px;
+  line-height: 1.55;
+}
+.p2l-danger {
+  margin-top: var(--space-7);
+  width: fit-content;
+  padding: var(--space-4) var(--space-5);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  letter-spacing: var(--track-caps);
+}

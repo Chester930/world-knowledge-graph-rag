@@ -1,0 +1,44 @@
+/* intro-gaps — prefix: ig- */
+
+.ig-scene { background: var(--surface); }
+.ig-pad {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ig-kicker { margin: 0 0 var(--space-7); color: var(--text-mute); letter-spacing: var(--track-caps); }
+
+.ig-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ig-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 40px 1fr;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: var(--bw-1) solid var(--rule);
+  opacity: 0;
+  transform: translateX(-16px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart), border-color var(--dur-base) var(--ease-quart);
+}
+.ig-row[data-state="active"] { opacity: 1; transform: translateX(0); border-color: var(--accent); }
+.ig-row[data-state="dim"] { opacity: 0.36; transform: translateX(0); }
+
+.ig-row-num { color: var(--text-faint); font-size: 18px; }
+.ig-row[data-state="active"] .ig-row-num { color: var(--accent); }
+
+.ig-row-gap { font-size: 32px; color: var(--text); }
+.ig-row-arrow { color: var(--text-faint); font-size: 24px; text-align: center; }
+.ig-row-direction {
+  font-family: var(--font-body);
+  font-size: 24px;
+  color: var(--text-mute);
+}
+.ig-row[data-state="active"] .ig-row-direction { color: var(--accent); }

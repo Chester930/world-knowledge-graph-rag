@@ -1,0 +1,58 @@
+/* intro-goals — prefix: igo- */
+
+.igo-scene { background: var(--surface); }
+.igo-pad { position: absolute; inset: 0; }
+
+.igo-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.igo-block.igo-active { opacity: 1; pointer-events: auto; }
+
+.igo-kicker { margin: 0 0 var(--space-7); color: var(--text-mute); letter-spacing: var(--track-caps); }
+
+.igo-block h2 { margin: 0; font-size: 58px; line-height: 1.35; color: var(--text); }
+
+.igo-goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 1500px;
+}
+.igo-goal {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-6);
+  padding: var(--space-4) 0;
+  border-bottom: var(--bw-1) solid var(--rule);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.igo-goal[data-state="active"] { opacity: 1; transform: translateY(0); }
+.igo-goal[data-state="dim"] { opacity: 0.34; transform: translateY(0); }
+
+.igo-goal-ord { font-size: 26px; color: var(--accent); width: 120px; flex: none; }
+.igo-goal[data-state="dim"] .igo-goal-ord { color: var(--text-faint); }
+.igo-goal-text {
+  font-family: var(--font-body);
+  font-size: 28px;
+  color: var(--text-2);
+}
+
+.igo-close-line {
+  margin: var(--space-7) 0 0;
+  font-family: var(--font-body);
+  font-size: 26px;
+  color: var(--accent);
+  max-width: 1400px;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.igo-close-line.igo-visible { opacity: 1; }

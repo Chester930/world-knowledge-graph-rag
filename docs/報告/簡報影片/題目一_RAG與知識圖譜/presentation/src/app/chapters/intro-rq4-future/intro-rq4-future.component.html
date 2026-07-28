@@ -1,0 +1,44 @@
+<div class="scene r4-scene">
+  <div class="scene-pad r4-pad">
+
+    <section class="r4-block" [class.r4-active]="step() === 0">
+      <div class="r4-badge mono">RQ4</div>
+      <p class="r4-kicker mono">跟三元組驗證直接相關</p>
+      <h2 class="serif-cn">簡短說明。</h2>
+    </section>
+
+    <section class="r4-block" [class.r4-active]="step() === 1">
+      <div class="r4-badge mono">RQ4</div>
+      <p class="r4-question">
+        受控關係詞彙標準化，跟實體指代、別名消解，對語意一致性、多跳推理正確率、可追溯性，有什麼影響？
+      </p>
+      <div class="r4-stack">
+        <div class="r4-row"><span class="mono">理論基礎</span><span class="serif-it">Text2KGBench</span></div>
+        <div class="r4-row"><span class="mono">實踐基礎</span><span>Stanford OpenIE ／ Neo4j KG Builder Pipeline</span></div>
+        <div class="r4-row"><span class="mono">本專案落點</span><span>SVO service ／ entity registry service</span></div>
+      </div>
+    </section>
+
+    <section class="r4-block" [class.r4-active]="step() === 2">
+      <p class="r4-kicker mono">RQ5 與 RQ6</p>
+      <h2 class="serif-cn">是未來工作，一句話帶過。</h2>
+    </section>
+
+    <section class="r4-block" [class.r4-active]="step() === 3">
+      <div class="r4-future-cols">
+        <div class="r4-future-col">
+          <span class="r4-future-badge mono">RQ5</span>
+          <p class="r4-future-q">舊事實要刪掉，還是保留成歷史？</p>
+          <p class="r4-future-theory serif-it">時序知識圖譜相關研究</p>
+        </div>
+        <div class="r4-future-divider"></div>
+        <div class="r4-future-col">
+          <span class="r4-future-badge mono">RQ6</span>
+          <p class="r4-future-q">超大節點，怎麼避免 BFS 爆炸？</p>
+          <p class="r4-future-theory serif-it">PathRAG — 查詢引導的路徑剪枝</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

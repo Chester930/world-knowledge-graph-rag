@@ -1,0 +1,80 @@
+/* svo-proof — prefix: sp- */
+.sp-scene { background: var(--surface); }
+.sp-pad { position: absolute; inset: 0; }
+.sp-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.sp-block.sp-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.sp-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.sp-open h2, .sp-claim h2 { margin: 0; font-size: 88px; line-height: 1.12; color: var(--text); }
+.sp-triple {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-5);
+  align-items: center;
+  max-width: 1500px;
+}
+.sp-triple span, .sp-triple b {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  border: var(--bw-1) solid var(--rule);
+  background: var(--surface-2);
+  font-family: var(--font-display-en);
+  font-size: 48px;
+  color: var(--text);
+}
+.sp-triple b {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-style: italic;
+  animation: sp-relate var(--dur-cinematic) var(--ease-soft) infinite;
+}
+@keyframes sp-relate { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-18px);} }
+.sp-example {
+  margin: var(--space-7) 0 0;
+  font-family: var(--font-body);
+  font-size: 34px;
+  color: var(--text-2);
+}
+.sp-example b { color: var(--accent); }
+.sp-badges { margin-top: var(--space-7); display: flex; gap: var(--space-4); }
+.sp-badges span {
+  padding: var(--space-4) var(--space-5);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  color: var(--text-2);
+  letter-spacing: var(--track-caps);
+}
+.sp-checks {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-3);
+}
+.sp-check {
+  min-height: 420px;
+  padding: var(--space-5) var(--space-3);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  animation: sp-check-in var(--dur-slow) var(--ease-quart) both;
+  animation-delay: calc(var(--i) * 90ms);
+}
+.sp-check span { color: var(--text-faint); }
+.sp-check strong {
+  display: block;
+  margin-top: var(--space-9);
+  writing-mode: vertical-rl;
+  font-family: var(--font-display-cn);
+  font-size: 40px;
+  color: var(--text);
+}
+@keyframes sp-check-in { from{opacity:0; transform: translateY(26px);} to{opacity:1; transform: translateY(0);} }

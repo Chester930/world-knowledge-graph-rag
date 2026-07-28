@@ -1,0 +1,31 @@
+<div class="scene kgv-scene">
+  <div class="scene-pad kgv-pad">
+    <section class="kgv-block kgv-open" [class.kgv-active]="step() <= 1">
+      <p class="kgv-kicker mono">2026 版知識圖譜</p>
+      <h2 class="serif-cn" *ngIf="step() === 0">不是回到<br />完全人工建圖。</h2>
+      <h2 class="serif-cn" *ngIf="step() === 1">是把治理機制<br />接進建圖流程。</h2>
+      <div class="kgv-stack">
+        <span>LLM</span><span>Embedding</span><span>Dedup</span><span>Citation</span><span>Incremental</span>
+      </div>
+    </section>
+
+    <section class="kgv-block kgv-grid-block" [class.kgv-active]="step() >= 2 && step() <= 8">
+      <p class="kgv-kicker mono">七個治理方向</p>
+      <div class="kgv-grid">
+        <div *ngFor="let item of items; let i = index" class="kgv-card" [attr.data-state]="state(i)">
+          <span class="mono">0{{ i + 1 }}</span>
+          <strong>{{ item[0] }}</strong>
+          <p>{{ item[1] }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="kgv-block kgv-close" [class.kgv-active]="step() === 9">
+      <p class="kgv-kicker mono">重點</p>
+      <h2 class="serif-cn">不是漂亮的圖，<br />是可治理的關係單位。</h2>
+      <div class="kgv-final">
+        <span>可查詢</span><span>可驗證</span><span>可重複使用</span>
+      </div>
+    </section>
+  </div>
+</div>

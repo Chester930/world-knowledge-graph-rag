@@ -1,0 +1,33 @@
+<div class="scene cs-scene">
+  <div class="scene-pad cs-pad">
+
+    <section class="cs-block" [class.cs-active]="step() <= 5">
+      <p class="cs-kicker mono">專案作為研究載體</p>
+      <div class="cs-rows">
+        <div *ngFor="let c of carriers; let i = index" class="cs-row" [attr.data-state]="rowState(i)">
+          <span class="cs-row-label serif-cn">{{ c.label }}</span>
+          <span class="cs-row-arrow">→</span>
+          <span class="cs-row-rq">{{ c.rq }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cs-block" [class.cs-active]="showStatus()">
+      <p class="cs-kicker mono">誠實說明目前狀態</p>
+      <h2 class="serif-cn">v2 重構與論文實作載體，<br />不是已經完成的產品。</h2>
+      <ul class="cs-facts">
+        <li *ngFor="let f of facts">{{ f }}</li>
+      </ul>
+    </section>
+
+    <section class="cs-block cs-close" [class.cs-active]="showClose()">
+      <p class="cs-kicker mono">收尾</p>
+      <blockquote class="cs-quote serif-cn">
+        目前專案的價值，不是宣稱已經完成完整產品，<br />
+        是把研究問題，落到可實驗、可比較、可追溯的<br />
+        系統架構上。
+      </blockquote>
+    </section>
+
+  </div>
+</div>

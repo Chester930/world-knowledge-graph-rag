@@ -1,0 +1,57 @@
+/* graphrag-limits — prefix: gl- */
+.gl-scene { background: var(--surface); }
+.gl-pad { position: absolute; inset: 0; }
+.gl-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.gl-block.gl-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.gl-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.gl-block h2 { margin: var(--space-7) 0 0; font-size: 82px; line-height: 1.12; color: var(--text); }
+.gl-pipeline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.gl-pipeline span, .gl-edge {
+  padding: var(--space-5) var(--space-7);
+  background: var(--surface-2);
+  border: var(--bw-1) solid var(--rule);
+  font-size: 30px;
+  color: var(--text-2);
+}
+.gl-pipeline b { width: 90px; height: var(--bw-2); background: var(--accent); animation: gl-flow var(--dur-cinematic) var(--ease-quart) both; }
+@keyframes gl-flow { from{ transform: scaleX(0); } to{ transform: scaleX(1); } }
+.gl-limit-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+}
+.gl-limit {
+  min-height: 500px;
+  padding: var(--space-7) var(--space-5);
+  border-top: var(--bw-2) solid var(--rule);
+  background: var(--surface-2);
+  opacity: 0.24;
+  transition: opacity var(--dur-base) var(--ease-quart), transform var(--dur-base) var(--ease-quart), border-color var(--dur-base) var(--ease-quart);
+}
+.gl-limit[data-state="active"] { opacity: 1; transform: translateY(-26px); border-color: var(--accent); }
+.gl-limit[data-state="past"] { opacity: 0.42; }
+.gl-limit span { color: var(--text-faint); }
+.gl-limit strong {
+  display: block;
+  margin-top: var(--space-9);
+  font-family: var(--font-display-cn);
+  writing-mode: vertical-rl;
+  font-size: 44px;
+  color: var(--text);
+}
+.gl-edge { margin-top: var(--space-7); max-width: max-content; font-family: var(--font-mono); }
+.gl-edge b { color: var(--accent); }

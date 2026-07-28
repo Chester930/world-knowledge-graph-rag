@@ -1,0 +1,40 @@
+<div class="scene rf-scene">
+  <div class="scene-pad rf-pad">
+    <section class="rf-block rf-intro" [class.rf-active]="step() === 0">
+      <p class="rf-kicker mono">2026 RAG</p>
+      <h2 class="serif-cn">成熟，不代表<br />沒有失敗點。</h2>
+      <div class="rf-scanline"></div>
+    </section>
+
+    <section class="rf-block rf-diagnostics" [class.rf-active]="step() >= 1 && step() <= 7">
+      <div class="rf-left">
+        <p class="rf-kicker mono">檢索流程診斷</p>
+        <div class="rf-list">
+          <div *ngFor="let f of failures; let i = index" class="rf-item" [attr.data-state]="itemState(i)">
+            <span class="mono">0{{ i + 1 }}</span>
+            <strong>{{ f.title }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="rf-right">
+        <span class="rf-active-index serif-it">0{{ step() }}</span>
+        <h2 class="serif-cn">{{ activeFailure().title }}</h2>
+        <p class="mono">{{ activeFailure().short }}</p>
+        <div class="rf-meter">
+          <div class="rf-meter-fill" [style.width.%]="step() * 12 + 12"></div>
+        </div>
+        <p class="rf-detail">{{ activeFailure().detail }}</p>
+      </div>
+    </section>
+
+    <section class="rf-block rf-close" [class.rf-active]="step() === 8">
+      <p class="rf-kicker mono">結論</p>
+      <h2 class="serif-cn">RAG 能縮小搜尋範圍，<br />但不會自然形成關係結構。</h2>
+      <div class="rf-contrast">
+        <span>找到相關文字</span>
+        <b class="mono">≠</b>
+        <span>知道關係成立</span>
+      </div>
+    </section>
+  </div>
+</div>

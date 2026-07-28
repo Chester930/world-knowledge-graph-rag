@@ -1,0 +1,69 @@
+/* kg-governance — prefix: kgv- */
+.kgv-scene { background: var(--surface); }
+.kgv-pad { position: absolute; inset: 0; }
+.kgv-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.kgv-block.kgv-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.kgv-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.kgv-open h2, .kgv-close h2 { margin: 0; font-size: 92px; line-height: 1.1; color: var(--text); }
+.kgv-stack {
+  margin-top: var(--space-7);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  max-width: 1180px;
+}
+.kgv-stack span, .kgv-final span {
+  padding: var(--space-4) var(--space-5);
+  border: var(--bw-1) solid var(--rule);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  letter-spacing: var(--track-caps);
+}
+.kgv-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-3);
+}
+.kgv-card {
+  min-height: 460px;
+  padding: var(--space-5) var(--space-4);
+  background: var(--surface-2);
+  border-top: var(--bw-2) solid var(--rule);
+  opacity: 0.2;
+  transform: translateY(18px);
+  transition: opacity var(--dur-base) var(--ease-quart), transform var(--dur-base) var(--ease-quart), border-color var(--dur-base) var(--ease-quart);
+}
+.kgv-card[data-state="active"] { opacity: 1; transform: translateY(0); border-color: var(--accent); }
+.kgv-card[data-state="past"] { opacity: 0.46; transform: translateY(0); }
+.kgv-card span { color: var(--text-faint); }
+.kgv-card strong {
+  display: block;
+  margin-top: var(--space-7);
+  writing-mode: vertical-rl;
+  font-family: var(--font-display-cn);
+  font-size: 34px;
+  color: var(--text);
+}
+.kgv-card p {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--text-mute);
+  line-height: 1.4;
+}
+.kgv-final {
+  margin-top: var(--space-7);
+  display: flex;
+  gap: var(--space-5);
+}

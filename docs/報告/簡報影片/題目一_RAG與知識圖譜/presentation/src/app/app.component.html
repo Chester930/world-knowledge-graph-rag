@@ -1,0 +1,151 @@
+<div class="main-layout" [class.editing-layout]="editor.isEditing()">
+  
+  <!-- 頂部觸發熱區（當控制列收起時，滑鼠移到最上方即可觸發顯示） -->
+  <div class="top-nav-trigger" (mouseenter)="onNavMouseEnter()"></div>
+
+  <!-- 頂部高質感控制列 -->
+  <div 
+    class="top-nav" 
+    [class.nav-hidden]="!topNavVisible() && !editor.isEditing()"
+    (mouseenter)="onNavMouseEnter()"
+    (mouseleave)="onNavMouseLeave()"
+    data-no-advance
+  >
+    <div class="nav-brand">
+      <span class="pulse-dot"></span>
+      <h3>Web Presenter Studio</h3>
+    </div>
+    
+    <div class="nav-controls">
+      <!-- 播放模式切換 (攤平選擇) -->
+      <div class="playback-mode-group" *ngIf="!editor.isEditing()">
+        <button 
+          class="btn-mode-tab" 
+          [class.active]="audio.mode() === 'manual'"
+          (click)="audio.mode.set('manual')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          手動模式
+        </button>
+        <button 
+          class="btn-mode-tab" 
+          [class.active]="audio.mode() === 'audio'"
+          (click)="audio.mode.set('audio')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          音訊引導
+        </button>
+        <button 
+          class="btn-mode-tab" 
+          [class.active]="audio.mode() === 'auto'"
+          (click)="audio.mode.set('auto')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/><path d="M19 12a10 10 0 0 1-10 10"/></svg>
+          自動播放
+        </button>
+      </div>
+
+
+
+      <!-- 講師模式 -->
+      <button class="btn btn-secondary" (click)="openPresenterMode()" *ngIf="!sync.isPresenter() && !editor.isEditing()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        講師模式
+      </button>
+
+      <!-- 全螢幕切換 -->
+      <button class="btn btn-secondary" (click)="toggleFullscreen()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        全螢幕
+      </button>
+
+      <!-- 編輯模式切換 -->
+      <button 
+        class="btn" 
+        [class.btn-accent]="editor.isEditing()"
+        [class.btn-secondary]="!editor.isEditing()"
+        (click)="toggleEditMode()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        {{ editor.isEditing() ? '放映模式' : '編輯模式' }}
+      </button>
+
+      <!-- 儲存按鈕 -->
+      <button *ngIf="editor.isEditing()" class="btn btn-save" (click)="editor.save()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        儲存變更
+      </button>
+    </div>
+  </div>
+
+  <div class="content-body">
+    <!-- 左側編輯面板 -->
+    <div class="editor-sidebar" *ngIf="editor.isEditing()" data-no-advance>
+      <div class="sidebar-header">
+        <h4>PPT 編輯控制台</h4>
+        <p>編輯此 Step 的口播與備註，點擊畫面區塊可進行拖曳與縮放</p>
+      </div>
+
+      <div class="sidebar-section">
+        <label>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          口播台詞 (當前步驟 {{ stepper.currentStep() + 1 }})
+        </label>
+        <textarea 
+          [value]="editor.currentNarration()"
+          (input)="onNarrationInput($event)"
+          placeholder="輸入該步的語音口播台詞..."
+        ></textarea>
+        <span class="hint-text">口播字數: {{ editor.currentNarration().length }} 字 (預估時長約 {{ (editor.currentNarration().length * 0.25 + 1).toFixed(1) }}s)</span>
+      </div>
+
+      <div class="sidebar-section">
+        <label>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          講者備註
+        </label>
+        <textarea 
+          [value]="editor.currentNote()"
+          (input)="onNoteInput($event)"
+          placeholder="輸入講者備忘錄、教學提示..."
+        ></textarea>
+      </div>
+
+      <div class="sidebar-section-info">
+        <div class="info-row">
+          <span>當前章節:</span>
+          <strong>{{ stepper.currentChapter()?.title }}</strong>
+        </div>
+        <div class="info-row">
+          <span>章節步數:</span>
+          <strong>{{ stepper.currentStep() + 1 }} / {{ stepper.chapterTotalSteps() }}</strong>
+        </div>
+        <div class="info-row">
+          <span>全局進度:</span>
+          <strong>{{ stepper.globalIndex() + 1 }} / {{ stepper.totalGlobal() }}</strong>
+        </div>
+      </div>
+      
+
+    </div>
+
+    <!-- 右側/主舞台區 (支援講師分欄) -->
+    <div class="stage-container" [class.presenter-layout]="sync.isPresenter()">
+      <div class="stage-viewport">
+        <app-stage>
+          <ng-container *ngComponentOutlet="stepper.currentChapter().component; inputs: { step: stepper.currentStep() }"></ng-container>
+        </app-stage>
+      </div>
+
+      <!-- 講師主控面板 -->
+      <div class="presenter-sidebar" *ngIf="sync.isPresenter()">
+        <app-presenter-console></app-presenter-console>
+      </div>
+      
+      <app-progress-bar></app-progress-bar>
+    </div>
+  </div>
+</div>
+
+<!-- 浮動文字格式工具列（選取文字後顯示） -->
+<app-text-format-toolbar></app-text-format-toolbar>

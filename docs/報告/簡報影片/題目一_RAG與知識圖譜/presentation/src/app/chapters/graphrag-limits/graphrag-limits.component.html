@@ -1,0 +1,27 @@
+<div class="scene gl-scene">
+  <div class="scene-pad gl-pad">
+    <section class="gl-block" [class.gl-active]="step() === 0">
+      <p class="gl-kicker mono">2024 Microsoft GraphRAG</p>
+      <div class="gl-pipeline">
+        <span>文本</span><b></b><span>實體/關係</span><b></b><span>圖</span><b></b><span>社群摘要</span>
+      </div>
+      <h2 class="serif-cn">能處理全局問題，<br />也帶來新的代價。</h2>
+    </section>
+
+    <section class="gl-block gl-limits" [class.gl-active]="step() >= 1 && step() <= 5">
+      <p class="gl-kicker mono">GraphRAG 的五個缺陷</p>
+      <div class="gl-limit-list">
+        <div *ngFor="let limit of limits; let i = index" class="gl-limit" [attr.data-state]="state(i)">
+          <span class="mono">0{{ i + 1 }}</span>
+          <strong>{{ limit }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="gl-block gl-close" [class.gl-active]="step() === 6">
+      <p class="gl-kicker mono">真正的關鍵</p>
+      <h2 class="serif-cn">圖不是答案。<br />可信的邊，才是答案的骨架。</h2>
+      <div class="gl-edge">Subject <b>-- Relation --></b> Object</div>
+    </section>
+  </div>
+</div>

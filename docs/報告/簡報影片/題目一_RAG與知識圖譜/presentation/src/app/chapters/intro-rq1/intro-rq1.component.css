@@ -1,0 +1,55 @@
+/* intro-rq1 — prefix: r1- */
+
+.r1-scene { background: var(--surface); }
+.r1-pad { position: absolute; inset: 0; }
+
+.r1-badge {
+  align-self: flex-end;
+  font-size: 22px;
+  letter-spacing: var(--track-caps);
+  color: var(--accent);
+  border: var(--bw-1) solid var(--accent);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.r1-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-quart);
+}
+.r1-block.r1-active { opacity: 1; pointer-events: auto; }
+
+.r1-kicker { margin: 0 0 var(--space-7); color: var(--text-mute); letter-spacing: var(--track-caps); }
+
+.r1-block h2 { margin: 0; font-size: 54px; line-height: 1.35; color: var(--text); max-width: 1500px; }
+
+.r1-simplified {
+  margin: var(--space-7) 0 0;
+  font-family: var(--font-body);
+  font-size: 28px;
+  color: var(--accent);
+  max-width: 1300px;
+}
+
+.r1-stack { display: flex; flex-direction: column; gap: var(--space-6); max-width: 1500px; }
+
+.r1-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-7);
+  padding: var(--space-5) 0;
+  border-bottom: var(--bw-1) solid var(--rule);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.r1-row[data-state="active"] { opacity: 1; transform: translateY(0); }
+
+.r1-row-label { width: 180px; flex: none; color: var(--text-mute); letter-spacing: var(--track-caps); }
+.r1-row-text { font-size: 32px; color: var(--text); }

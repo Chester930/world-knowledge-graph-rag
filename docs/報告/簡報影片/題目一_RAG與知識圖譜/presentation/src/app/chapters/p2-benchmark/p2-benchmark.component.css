@@ -1,0 +1,90 @@
+/* p2-benchmark — prefix: p2b- */
+.p2b-scene { background: var(--surface); }
+.p2b-pad { position: absolute; inset: 0; }
+.p2b-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.p2b-block.p2b-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.p2b-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.p2b-open h2, .p2b-close h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 80px;
+  line-height: 1.15;
+}
+.p2b-cards, .p2b-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+.p2b-cards article, .p2b-metric-grid article {
+  min-height: 320px;
+  padding: var(--space-6);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  box-shadow: var(--card-shadow);
+}
+.p2b-cards strong, .p2b-metric-grid strong {
+  display: block;
+  color: var(--accent);
+  font-family: var(--font-display-en);
+  font-size: 44px;
+  line-height: 1.05;
+}
+.p2b-cards span, .p2b-metric-grid p {
+  display: block;
+  margin: var(--space-6) 0 0;
+  color: var(--text-2);
+  font-size: 30px;
+  line-height: 1.45;
+}
+.p2b-table { justify-content: center; }
+.p2b-row {
+  display: grid;
+  grid-template-columns: 0.9fr 0.9fr 1.8fr 0.8fr;
+  gap: var(--space-4);
+  align-items: center;
+  min-height: 104px;
+  padding: 0 var(--space-5);
+  border-top: var(--rule-w) var(--rule-style) var(--rule);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 25px;
+}
+.p2b-head {
+  min-height: 70px;
+  background: transparent;
+  color: var(--text-mute);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: var(--track-caps);
+}
+.p2b-row strong {
+  color: var(--text);
+  font-family: var(--font-display-cn);
+  font-size: 31px;
+}
+.p2b-row b {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 22px;
+}
+.p2b-metric-grid { grid-template-columns: repeat(4, 1fr); }
+.p2b-metric-grid article { min-height: 360px; }
+.p2b-metric-grid strong { font-size: 36px; }
+.p2b-metric-grid p { font-size: 25px; }
+.p2b-close p:not(.p2b-kicker) {
+  margin: var(--space-6) 0 0;
+  max-width: 1180px;
+  color: var(--text-2);
+  font-size: 32px;
+  line-height: 1.5;
+}

@@ -1,0 +1,44 @@
+<div class="scene p2b-scene">
+  <div class="scene-pad p2b-pad">
+    <section class="p2b-block p2b-open" [class.p2b-active]="step() === 0">
+      <p class="p2b-kicker mono">簡化成果</p>
+      <h2 class="serif-cn">Demo 之外，<br />還需要可重複評估的格式。</h2>
+    </section>
+
+    <section class="p2b-block p2b-design" [class.p2b-active]="step() === 1">
+      <p class="p2b-kicker mono">micro-benchmark</p>
+      <div class="p2b-cards">
+        <article><strong>5-8 句文本</strong><span>小型可控語料</span></article>
+        <article><strong>gold triples</strong><span>研究者先制定示範標準答案</span></article>
+        <article><strong>三種輸出</strong><span>純 RAG / 未驗證 SVO / 驗證後 SVO</span></article>
+      </div>
+    </section>
+
+    <section class="p2b-block p2b-table" [class.p2b-active]="step() === 2">
+      <p class="p2b-kicker mono">比較對象</p>
+      <div class="p2b-row p2b-head"><span>版本</span><span>單位</span><span>主要風險 / 證明點</span><span>示範狀態</span></div>
+      <div class="p2b-row" *ngFor="let row of rows">
+        <strong>{{ row.mode }}</strong>
+        <span>{{ row.structure }}</span>
+        <span>{{ row.risk }}</span>
+        <b>{{ row.status }}</b>
+      </div>
+    </section>
+
+    <section class="p2b-block p2b-metrics" [class.p2b-active]="step() === 3">
+      <p class="p2b-kicker mono">評估指標</p>
+      <div class="p2b-metric-grid">
+        <article><strong>Precision</strong><p>抽對的三元組 / 系統抽出的三元組</p></article>
+        <article><strong>Recall</strong><p>抽對的三元組 / gold triples 總數</p></article>
+        <article><strong>F1</strong><p>Precision 與 Recall 的平衡</p></article>
+        <article><strong>Traceability</strong><p>可追溯來源句的三元組 / 系統抽出的三元組</p></article>
+      </div>
+    </section>
+
+    <section class="p2b-block p2b-close" [class.p2b-active]="step() === 4">
+      <p class="p2b-kicker mono">誠實邊界</p>
+      <h2 class="serif-cn">目前證明的是「可驗證」，<br />不是宣稱大規模穩定。</h2>
+      <p>正式實驗再擴大資料、人工標註、錯誤類型與主系統真實 SVO 輸出。</p>
+    </section>
+  </div>
+</div>

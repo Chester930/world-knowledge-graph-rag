@@ -1,0 +1,94 @@
+/* p2-demo-citation — prefix: p2c- */
+.p2c-scene { background: var(--surface); }
+.p2c-pad { position: absolute; inset: 0; }
+.p2c-block {
+  position: absolute;
+  inset: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-quart), transform var(--dur-slow) var(--ease-quart);
+}
+.p2c-block.p2c-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.p2c-kicker { margin: 0 0 var(--space-5); color: var(--text-mute); letter-spacing: var(--track-caps); }
+.p2c-open h2, .p2c-close h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 86px;
+  line-height: 1.12;
+}
+.p2c-query pre {
+  margin: 0;
+  padding: var(--space-6);
+  max-width: 1450px;
+  background: var(--text);
+  color: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 25px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  box-shadow: var(--card-shadow);
+}
+.p2c-chain {
+  display: grid;
+  grid-template-columns: 1.35fr 0.7fr 1.55fr;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+.p2c-chain span, .p2c-chain b {
+  min-height: 340px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.45;
+}
+.p2c-chain b {
+  color: var(--accent);
+  font-family: var(--font-display-en);
+  font-size: 34px;
+  font-style: italic;
+}
+.p2c-json {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  max-width: 1100px;
+  border-top: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  box-shadow: var(--card-shadow);
+}
+.p2c-json span, .p2c-json strong {
+  min-height: 102px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-5);
+  border-bottom: var(--rule-w) var(--rule-style) var(--rule);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 26px;
+}
+.p2c-json strong { color: var(--accent); }
+.p2c-source blockquote {
+  margin: 0;
+  max-width: 1380px;
+  padding: var(--space-7);
+  border-left: var(--bw-2) solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-display-cn);
+  font-size: 38px;
+  line-height: 1.62;
+  box-shadow: var(--card-shadow);
+}
+.p2c-close p:not(.p2c-kicker) {
+  margin: var(--space-6) 0 0;
+  color: var(--text-2);
+  font-size: 34px;
+}
