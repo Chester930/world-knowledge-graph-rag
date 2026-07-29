@@ -19,6 +19,7 @@
 | `09_SVO抽取切塊策略與指代消解/` | 02_文獻探討.md § 2.4.5（RQ4b，切塊策略與指代消解前置）；03_系統設計與方法論.md § 3.4 | 🟢 已下載 4 篇 |
 | `10_跨文件實體別名消解與增量聚類/` | 02_文獻探討.md § 2.4.5（RQ4b，跨文件增量別名聚類架構）；03_系統設計與方法論.md § 3.4；`docs/報告/09_實體別名登記與動態標準名提升機制設計報告.md` | 🟡 已下載 3 篇，皆待精讀方法章節 |
 | `11_事實層級去重與知識融合/` | 02_文獻探討.md § 2.6.3（事實層級去重，工程實作合理性佐證）；03_系統設計與方法論.md § 3.1.4「事實層級去重」 | 🟢 已下載 1 篇，另交叉引用 03 資料夾既有文獻 |
+| `12_三元組事實層級向量化與檢索/` | 03_系統設計與方法論.md § 3.1.4 §a（事實層級向量化，RQ1/RQ3，設計提案） | 🟢 已下載 3 篇，另交叉引用 02 資料夾既有的 LightRAG，四篇皆已全文精讀 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -148,6 +149,16 @@
 | `dong-et-al-2014-knowledge-vault.pdf` | Dong et al. (2014, Google), *Knowledge Vault: A Web-Scale Approach to Probabilistic Knowledge Fusion*，KDD 2014 | https://www.cs.ubc.ca/~murphyk/papers/kv-kdd14.pdf |
 
 **與 03_資訊抽取與本體設計 的交叉引用**：本資料夾同時引用已存於 `03_資訊抽取與本體設計/vrandecic-krotzsch-2014-wikidata.pdf` 的 Wikidata 論文「Citation Needed」段落——完整查證與兩篇文獻各自的誠實適配度分析見 `11_事實層級去重與知識融合/README.md`。
+
+## 12_三元組事實層級向量化與檢索 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `baek-et-al-2023-kaping.pdf` | Baek, Aji & Saffari (2023), *KAPING*，NLRSE workshop @ ACL 2023 | arXiv:2306.04136 |
+| `gutierrez-et-al-2024-hipporag.pdf` | Gutiérrez et al. (2024), *HippoRAG*，NeurIPS 2024 | arXiv:2405.14831 |
+| `he-et-al-2024-g-retriever.pdf` | He et al. (2024), *G-Retriever*，NeurIPS 2024 | arXiv:2402.07630 |
+
+**與 02_RAG與GraphRAG 的交叉引用**：本資料夾同時引用已存於 `02_RAG與GraphRAG/guo-et-al-2024-lightrag.pdf` 的 LightRAG 論文 §3.1/§3.2 relation 向量化機制——完整查證見 `12_三元組事實層級向量化與檢索/README.md`。
 
 ## 下載原則
 
