@@ -61,6 +61,10 @@ class SpyDriver:
         return None
 
 
+async def _noop(*args, **kwargs) -> None:
+    return None
+
+
 def _seed_pool(db_path, kg_id: str, count: int, prefix: str = "候選動詞") -> list[str]:
     verbs = [f"{prefix}{i}" for i in range(count)]
     for i, verb in enumerate(verbs):
@@ -344,3 +348,118 @@ async def test_run_governance_worker_idles_when_providers_not_initialized(monkey
         await task
 
     assert list_all_calls == []  # provider 未就緒時不應繼續查詢 KG 清單
+
+
+# ── run_governance_worker：Entity name_embedding 批次回填接線
+# （2026-08-03，見 3.1.4 DEDUP4 節點向量化效能改造）───────────────────────
+
+@pytest.mark.asyncio
+async def test_run_governance_worker_backfills_entity_embeddings_for_every_kg(monkeypatch):
+    kg_a = _make_kg("kg-a")
+    kg_b = _make_kg("kg-b")
+
+    class FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def list_all(self):
+            return [kg_a, kg_b]
+
+    monkeypatch.setattr("services.expand_worker.KGRepository", FakeRepo)
+    monkeypatch.setattr("services.expand_worker.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("services.expand_worker.get_llm_provider", lambda: FakeLLM("判斷：否"))
+    monkeypatch.setattr("services.expand_worker.run_governance_cycle", _noop)
+
+    backfilled = []
+
+    async def _fake_backfill(driver, kg_id, embedding_provider):
+        backfilled.append(kg_id)
+
+    monkeypatch.setattr("services.expand_worker.backfill_entity_name_embeddings", _fake_backfill)
+
+    task = asyncio.create_task(worker.run_governance_worker(SpyDriver(), poll_interval=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert kg_a.id in backfilled
+    assert kg_b.id in backfilled
+
+
+@pytest.mark.asyncio
+async def test_run_governance_worker_entity_backfill_failure_does_not_block_governance_cycle(monkeypatch):
+    """Entity name_embedding 回填失敗（例如 embedding provider 逾時），
+    不應阻擋同一個 KG 接著跑 EXPAND 治理週期——兩者職責獨立、各自隔離。"""
+    kg_a = _make_kg("kg-a")
+
+    class FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def list_all(self):
+            return [kg_a]
+
+    monkeypatch.setattr("services.expand_worker.KGRepository", FakeRepo)
+    monkeypatch.setattr("services.expand_worker.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("services.expand_worker.get_llm_provider", lambda: FakeLLM("判斷：否"))
+
+    async def _failing_backfill(driver, kg_id, embedding_provider):
+        raise RuntimeError("模擬 embedding provider 逾時")
+
+    monkeypatch.setattr("services.expand_worker.backfill_entity_name_embeddings", _failing_backfill)
+
+    cycle_processed = []
+
+    async def _fake_cycle(driver, kg_id, embedding_provider, llm_provider):
+        cycle_processed.append(kg_id)
+
+    monkeypatch.setattr("services.expand_worker.run_governance_cycle", _fake_cycle)
+
+    task = asyncio.create_task(worker.run_governance_worker(SpyDriver(), poll_interval=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert kg_a.id in cycle_processed  # 回填失敗不應阻擋治理週期繼續執行
+
+
+@pytest.mark.asyncio
+async def test_run_governance_worker_governance_cycle_failure_does_not_block_entity_backfill(monkeypatch):
+    """反向隔離：EXPAND 治理週期失敗，不應阻擋下一輪／下一個 KG 的 Entity
+    name_embedding 回填繼續執行。"""
+    kg_a = _make_kg("kg-a")
+    kg_b = _make_kg("kg-b")
+
+    class FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def list_all(self):
+            return [kg_a, kg_b]
+
+    monkeypatch.setattr("services.expand_worker.KGRepository", FakeRepo)
+    monkeypatch.setattr("services.expand_worker.get_embedding_provider", lambda: FakeEmbedding())
+    monkeypatch.setattr("services.expand_worker.get_llm_provider", lambda: FakeLLM("判斷：否"))
+
+    async def _failing_cycle(driver, kg_id, embedding_provider, llm_provider):
+        raise RuntimeError("模擬 LLM 逾時")
+
+    monkeypatch.setattr("services.expand_worker.run_governance_cycle", _failing_cycle)
+
+    backfilled = []
+
+    async def _fake_backfill(driver, kg_id, embedding_provider):
+        backfilled.append(kg_id)
+
+    monkeypatch.setattr("services.expand_worker.backfill_entity_name_embeddings", _fake_backfill)
+
+    task = asyncio.create_task(worker.run_governance_worker(SpyDriver(), poll_interval=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert kg_a.id in backfilled
+    assert kg_b.id in backfilled
