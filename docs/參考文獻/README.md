@@ -20,6 +20,7 @@
 | `10_跨文件實體別名消解與增量聚類/` | 02_文獻探討.md § 2.4.5（RQ4b，跨文件增量別名聚類架構）；03_系統設計與方法論.md § 3.4；`docs/報告/09_實體別名登記與動態標準名提升機制設計報告.md` | 🟡 已下載 3 篇，皆待精讀方法章節 |
 | `11_事實層級去重與知識融合/` | 02_文獻探討.md § 2.6.3（事實層級去重，工程實作合理性佐證）；03_系統設計與方法論.md § 3.1.4「事實層級去重」 | 🟢 已下載 1 篇，另交叉引用 03 資料夾既有文獻 |
 | `12_三元組事實層級向量化與檢索/` | 03_系統設計與方法論.md § 3.1.4 §a（事實層級向量化，RQ1/RQ3，設計提案） | 🟢 已下載 3 篇，另交叉引用 02 資料夾既有的 LightRAG，四篇皆已全文精讀 |
+| `13_實體節點向量化去重開源專案/` | 03_系統設計與方法論.md § 3.1.4「實體對齊/去重」（`DEDUP4`／`resolve_entity_name()`，Entity 節點 `name_embedding` 設計選項，尚未定案） | 🟡 已下載 2 篇，另查證 3 個 1000★+ 開源專案，皆僅初步查證未全文精讀 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -159,6 +160,15 @@
 | `he-et-al-2024-g-retriever.pdf` | He et al. (2024), *G-Retriever*，NeurIPS 2024 | arXiv:2402.07630 |
 
 **與 02_RAG與GraphRAG 的交叉引用**：本資料夾同時引用已存於 `02_RAG與GraphRAG/guo-et-al-2024-lightrag.pdf` 的 LightRAG 論文 §3.1/§3.2 relation 向量化機制——完整查證見 `12_三元組事實層級向量化與檢索/README.md`。
+
+## 13_實體節點向量化去重開源專案 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `enamorado-fifield-imai-2019-fastlink.pdf` | Enamorado, Fifield & Imai (2019), *Using a Probabilistic Model to Assist Merging of Large-Scale Administrative Records*，American Political Science Review 113(2) | https://imai.fas.harvard.edu/research/files/linkage.pdf |
+| `linacre-et-al-2022-splink.pdf` | Linacre et al. (2022), *Splink: Free software for probabilistic record linkage at scale*，International Journal of Population Data Science 7(3) | DOI: 10.23889/ijpds.v7i3.1794 |
+
+**開源專案查證（不下載全文，僅 `gh api` 驗證真實性）**：`neo4j-labs/llm-graph-builder`（4,979★，Entity 節點 embedding+向量索引+去重機制，同構於本專案 DEDUP4 設計選項）、`moj-analytical-services/splink`（2,310★，上列兩篇文獻的生產級落地）、`zinggAI/zingg`（1,233★，查無學術文獻依據，僅工程參考價值）——完整查證細節與誠實限制見 `13_實體節點向量化去重開源專案/README.md`。
 
 ## 下載原則
 
