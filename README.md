@@ -64,7 +64,7 @@ cp .env.example .env
 # 編輯 .env，至少填入 NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD 與 LLM_PROVIDER
 
 pip install -r requirements.txt
-python -m uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --port 8010 --log-level info
 ```
 
 ## 授權

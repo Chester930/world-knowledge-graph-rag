@@ -18,7 +18,7 @@
 
 ## 目前狀態
 
-前後端架構骨架已建立且可啟動（`python -m uvicorn main:app` 可正常匯入）：
+前後端架構骨架已建立且可啟動（`python -m uvicorn main:app --port 8010 --log-level info` 可正常啟動）：
 
 - `core/`（設定、Neo4j 連線與 KG 專用資料庫管理、auth、五種 LLM provider + 三種 embedding provider）**已可運作**，直接沿用 v1 驗證過的實作，屬於通用基礎設施、非本次重整範圍。
 - `routers/` → `services/` → `repositories/` 三層已建立並在 `main.py` 中掛載，`ConceptRepository.create_vector_index` 已實作；但 `services/` 內的核心演算法（SVO 抽取、ConceptNode 路由分數、BFS 圖遍歷、自我精煉迴圈）與 `repositories/document_repo.py`、`repositories/kg_repo.py`、`repositories/concept_repo.py` 的其餘方法皆為 `NotImplementedError` stub，等待架構重整後實作。
