@@ -148,20 +148,25 @@ class InMemoryEntityDriver:
         if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name"):
             kg_id = params["kg_id"]
             records = [
-                {"name": name, "type": data["type"]} for (kid, name), data in self.entities.items()
+                {"name": name, "type": data["type"], "name_embedding": data.get("name_embedding")}
+                for (kid, name), data in self.entities.items()
                 if kid == kg_id
             ]
             return FakeResult(records)
 
         if stripped.startswith("MERGE (e:Entity {kg_id: $kg_id, name: $name}) ON CREATE SET"):
             key = (params["kg_id"], params["name"])
-            self.entities.setdefault(key, {"type": params["entity_type"]})
+            self.entities.setdefault(
+                key, {"type": params["entity_type"], "name_embedding": params.get("name_embedding")}
+            )
             return FakeResult([])
 
         if stripped.startswith("MERGE (c:Chunk"):
             kg_id = params["kg_id"]
             entity_key = (kg_id, params["entity_name"])
-            self.entities.setdefault(entity_key, {"type": params["entity_type"]})
+            self.entities.setdefault(
+                entity_key, {"type": params["entity_type"], "name_embedding": params.get("name_embedding")}
+            )
             chunk_key = (kg_id, params["source_doc_id"], params["chunk_index"])
             edge_key = (kg_id, chunk_key, params["entity_name"], params["surface_form"])
             self.has_entity_edges[edge_key] = self.has_entity_edges.get(edge_key, 0) + 1
@@ -186,7 +191,11 @@ class InMemoryEntityDriver:
             existing = self.entities.get(old_key, {"type": None})
             self.entities.pop(old_key, None)
             new_key = (kg_id, params["final_name"])
-            self.entities[new_key] = {"type": existing["type"], "aliases": params["aliases"]}
+            self.entities[new_key] = {
+                "type": existing["type"],
+                "aliases": params["aliases"],
+                "name_embedding": existing.get("name_embedding"),
+            }
             # 已記錄的 HAS_ENTITY 邊改指向新名稱，模擬節點改名後既有邊仍連著同一節點
             for edge_key in list(self.has_entity_edges):
                 kid, chunk_key, ename, surface_form = edge_key
@@ -907,6 +916,23 @@ async def test_fetch_entity_candidates_includes_exact_type_match():
     assert {c["name"] for c in candidates} == {"台積電"}
 
 
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_passes_through_persisted_name_embedding():
+    """2026-08-03 節點向量化效能改造：已回填的既有節點應原樣帶回
+    `name_embedding`，供 `resolve_entity_name` 直接沿用不必重新編碼；尚未
+    回填的舊節點（無此屬性）回傳 `None`，兩者混存不影響候選篩選邏輯本身。"""
+    driver = FakeDriver(records=[
+        FakeRecord(name="台積電", type="組織", name_embedding=[1.0, 0.0]),
+        FakeRecord(name="鴻海", type="組織", name_embedding=None),
+    ])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "組織")
+
+    by_name = {c["name"]: c["name_embedding"] for c in candidates}
+    assert by_name["台積電"] == [1.0, 0.0]
+    assert by_name["鴻海"] is None
+
+
 # ── resolve_entity_name（DEDUP4＋ESCALATE 純邏輯）──────────────────────────
 
 @pytest.mark.asyncio
@@ -966,6 +992,42 @@ async def test_resolve_entity_name_escalates_gray_zone_to_llm():
 
 
 @pytest.mark.asyncio
+async def test_resolve_entity_name_uses_stored_embedding_without_reencoding_candidate():
+    """2026-08-03 節點向量化效能改造：候選已帶 `name_embedding` 時，直接
+    沿用比對，不應再對該候選名稱呼叫 `encode()`——判斷結果應與即時編碼完全
+    一致（同一 provider、同一段文字，向量數值相同），純粹省去重複編碼。"""
+    embedding = FakeEmbedding(similar_to={"I-35": "Interstate Highway 35"})
+    encoded_calls: list[str] = []
+    original_encode = embedding.encode
+
+    def tracking_encode(text: str) -> list[float]:
+        encoded_calls.append(text)
+        return original_encode(text)
+
+    embedding.encode = tracking_encode  # type: ignore[method-assign]
+    stored_vector = original_encode("Interstate Highway 35")
+    candidates = [{"name": "Interstate Highway 35", "name_embedding": stored_vector}]
+
+    resolved = await svc.resolve_entity_name("I-35", candidates, embedding_provider=embedding)
+
+    assert resolved == "Interstate Highway 35"
+    assert "Interstate Highway 35" not in encoded_calls  # 候選不應被重新編碼
+    assert encoded_calls == ["I-35"]  # 只有查詢名稱本身需要即時編碼
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_falls_back_to_encoding_when_candidate_missing_embedding():
+    """候選缺漏 `name_embedding`（舊資料尚未回填）時，行為應退化為即時編碼
+    比對——維持改造前的正確性，不因缺漏而漏比對或報錯。"""
+    embedding = FakeEmbedding(similar_to={"I-35": "Interstate Highway 35"})
+    candidates = [{"name": "Interstate Highway 35", "name_embedding": None}]
+
+    resolved = await svc.resolve_entity_name("I-35", candidates, embedding_provider=embedding)
+
+    assert resolved == "Interstate Highway 35"
+
+
+@pytest.mark.asyncio
 async def test_resolve_entity_name_gray_zone_without_llm_creates_new_entity():
     import math
 
@@ -998,6 +1060,60 @@ async def test_merge_entity_without_chunk_info_skips_has_entity_and_keeps_name()
     assert final_name == "泰國"
     assert (str(kg_id), "泰國") in driver.entities
     assert driver.has_entity_edges == {}
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_persists_name_embedding_on_new_node():
+    """2026-08-03 節點向量化效能改造：`embedding_provider` 提供時，新建節點
+    的 `ON CREATE` 應順便存 `name_embedding`，供未來比對直接沿用。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+
+    await svc.merge_entity(
+        driver, kg_id, "台積電", "組織", "台積電",
+        source_doc_id=uuid4(), source_svo_chunk_index=1,
+        embedding_provider=embedding,
+    )
+
+    assert driver.entities[(str(kg_id), "台積電")]["name_embedding"] == embedding.encode("台積電")
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_without_chunk_info_also_persists_name_embedding():
+    """未提供 chunk 追溯資訊的退化路徑（純 MERGE 節點）同樣應存 `name_embedding`，
+    兩條建立節點的路徑行為一致，不留下其中一條沒有 embedding 的缺口。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+
+    await svc.merge_entity(driver, kg_id, "泰國", "LOCATION", "泰國", embedding_provider=embedding)
+
+    assert driver.entities[(str(kg_id), "泰國")]["name_embedding"] == embedding.encode("泰國")
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_does_not_overwrite_embedding_of_existing_node():
+    """既有節點（`MERGE` 命中、非新建）不應被覆寫 `name_embedding`——
+    `ON CREATE SET` 語意本就只在建立當下生效，這裡驗證改造沒有意外破壞
+    既有節點的資料。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+    doc_id = uuid4()
+
+    await svc.merge_entity(
+        driver, kg_id, "台積電", "組織", "台積電",
+        source_doc_id=doc_id, source_svo_chunk_index=1, embedding_provider=embedding,
+    )
+    original_vector = driver.entities[(str(kg_id), "台積電")]["name_embedding"]
+
+    await svc.merge_entity(
+        driver, kg_id, "台積電", "組織", "台積電",
+        source_doc_id=doc_id, source_svo_chunk_index=2, embedding_provider=embedding,
+    )
+
+    assert driver.entities[(str(kg_id), "台積電")]["name_embedding"] == original_vector
 
 
 @pytest.mark.asyncio

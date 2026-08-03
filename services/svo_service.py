@@ -345,21 +345,26 @@ def _type_set(type_str: str | None) -> set[str]:
 
 
 async def _fetch_entity_candidates(driver: AsyncDriver, kg_id: UUID, entity_type: str) -> list[dict]:
-    """查詢同 KG 的既有 Entity 節點，依型別集合交集篩選（僅名稱，供編輯距離/cosine 比對）。
+    """查詢同 KG 的既有 Entity 節點，依型別集合交集篩選（名稱＋已持久化的
+    `name_embedding`，供編輯距離/cosine 比對）。
 
     對應 3.4 §b `DEDUP3`：型別集合有交集，或查詢/既有節點任一方型別缺席，
     皆視為候選（不強行排除）；只有雙方都有型別、且集合無交集時才排除——
     型別選填/可多值的定案下，完全相等篩選會誤刪本該比對的候選（見 3.1.4）。
+
+    一併撈出 `name_embedding`（2026-08-03 新增，見 3.1.4 `DEDUP4` 節點向量化
+    效能改造）：舊資料尚未回填時此欄位為 `None`，`resolve_entity_name()` 會
+    針對缺漏者 fallback 即時 `encode()`，新舊資料混存不影響正確性。
     """
     result = await driver.execute_query(
-        "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name, e.type AS type",
+        "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding",
         kg_id=str(kg_id),
     )
     query_types = _type_set(entity_type)
     if not query_types:
-        return [{"name": r["name"]} for r in result.records]
+        return [{"name": r["name"], "name_embedding": r.get("name_embedding")} for r in result.records]
     return [
-        {"name": r["name"]}
+        {"name": r["name"], "name_embedding": r.get("name_embedding")}
         for r in result.records
         if not _type_set(r["type"]) or query_types & _type_set(r["type"])
     ]
@@ -383,6 +388,11 @@ async def resolve_entity_name(
     未提供時視為新實體，不強行比對）；③ cosine 落在 ESCALATE 灰色地帶
     （既有門檻與更低下限之間）時，若有 `llm_provider` 則呼叫 LLM 仲裁；
     皆未命中則回傳原名，代表應建立新節點。門檻定義見 core/constants.py。
+
+    **2026-08-03 效能改造（見 3.1.4 `DEDUP4` 節點向量化定案）**：候選若已在
+    `_fetch_entity_candidates()` 帶回持久化的 `name_embedding`，直接沿用，
+    不重新呼叫 `embedding_provider.encode()`；只有尚未回填的舊候選才
+    fallback 即時編碼——比對邏輯與門檻本身不變，純粹省去重複編碼成本。
     """
     if not candidates:
         return name
@@ -400,7 +410,8 @@ async def resolve_entity_name(
     best_name: str | None = None
     best_score = 0.0
     for c in candidates:
-        score = cosine_similarity(name_vec, embedding_provider.encode(c["name"]))
+        candidate_vec = c.get("name_embedding") or embedding_provider.encode(c["name"])
+        score = cosine_similarity(name_vec, candidate_vec)
         if score > best_score:
             best_score = score
             best_name = c["name"]
@@ -431,6 +442,8 @@ async def _merge_chunk_mention(
     source_doc_id: UUID | None,
     source_svo_chunk_index: int | None,
     source_svo_chunk_file: str | None,
+    *,
+    embedding_provider: EmbeddingProvider | None = None,
 ) -> None:
     """RECORD3B：建立/合併 `(Chunk)-[:HAS_ENTITY {surface_form}]->(Entity)` 邊。
 
@@ -438,22 +451,36 @@ async def _merge_chunk_mention(
     是 `HAS_ENTITY` 邊 MERGE 樣式的一部分，同一 chunk 內重複提及同一別名不會
     產生多筆邊，跨 chunk 才會累積出不同的邊，供 `_aggregate_alias_counts()`
     做跨文件頻率聚合（3.4 §b RECHECK 的資料來源）。
+
+    **2026-08-03 新增（見 3.1.4 `DEDUP4` 節點向量化定案）**：`embedding_provider`
+    提供時，新建（`ON CREATE`）的 Entity 節點順便存 `name_embedding`，供未來
+    `resolve_entity_name()` 比對時直接沿用、不必重新編碼；既有節點（已存在，
+    只是 `MERGE` 命中）不會被覆寫。`embedding_provider` 未提供時維持原行為
+    （不寫入該屬性，行為與改造前完全一致）。
     """
+    entity_set_clause = "e.type = $entity_type"
+    params = {
+        "kg_id": str(kg_id),
+        "source_doc_id": str(source_doc_id),
+        "chunk_index": source_svo_chunk_index,
+        "chunk_file": source_svo_chunk_file,
+        "entity_name": entity_name,
+        "entity_type": entity_type,
+        "surface_form": surface_form,
+    }
+    if embedding_provider is not None:
+        entity_set_clause += ", e.name_embedding = $name_embedding"
+        params["name_embedding"] = embedding_provider.encode(entity_name)
+
     await driver.execute_query(
-        """
-        MERGE (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
+        f"""
+        MERGE (c:Chunk {{kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index}})
         ON CREATE SET c.chunk_file = $chunk_file
-        MERGE (e:Entity {kg_id: $kg_id, name: $entity_name})
-        ON CREATE SET e.type = $entity_type
-        MERGE (c)-[r:HAS_ENTITY {surface_form: $surface_form}]->(e)
+        MERGE (e:Entity {{kg_id: $kg_id, name: $entity_name}})
+        ON CREATE SET {entity_set_clause}
+        MERGE (c)-[r:HAS_ENTITY {{surface_form: $surface_form}}]->(e)
         """,
-        kg_id=str(kg_id),
-        source_doc_id=str(source_doc_id),
-        chunk_index=source_svo_chunk_index,
-        chunk_file=source_svo_chunk_file,
-        entity_name=entity_name,
-        entity_type=entity_type,
-        surface_form=surface_form,
+        **params,
     )
 
 
@@ -521,15 +548,21 @@ async def merge_entity(
     )
 
     if source_doc_id is None or source_svo_chunk_index is None:
+        entity_set_clause = "e.type = $entity_type"
+        params = {"kg_id": str(kg_id), "name": resolved_name, "entity_type": entity_type}
+        if embedding_provider is not None:
+            entity_set_clause += ", e.name_embedding = $name_embedding"
+            params["name_embedding"] = embedding_provider.encode(resolved_name)
         await driver.execute_query(
-            "MERGE (e:Entity {kg_id: $kg_id, name: $name}) ON CREATE SET e.type = $entity_type",
-            kg_id=str(kg_id), name=resolved_name, entity_type=entity_type,
+            f"MERGE (e:Entity {{kg_id: $kg_id, name: $name}}) ON CREATE SET {entity_set_clause}",
+            **params,
         )
         return resolved_name
 
     await _merge_chunk_mention(
         driver, kg_id, resolved_name, entity_type, surface_form,
         source_doc_id, source_svo_chunk_index, source_svo_chunk_file,
+        embedding_provider=embedding_provider,
     )
     alias_counts = await _aggregate_alias_counts(driver, kg_id, resolved_name)
 
