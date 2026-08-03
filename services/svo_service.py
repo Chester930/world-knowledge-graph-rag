@@ -648,6 +648,26 @@ def _new_citation(triple: SVOTriple) -> dict:
     }
 
 
+def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, object_type: str) -> str:
+    """3.1.4 §a `VERBALIZE`：三元組文字化（linear verbalization），比照 KAPING
+    （Baek et al., 2023）triple-to-text 模式——subject（＋型別）＋原始 verb＋
+    object（＋型別）直接串接，不引入額外的 graph-to-text 轉換模型（KAPING
+    Appendix B.5 消融實驗顯示簡單串接檢索表現優於訓練過的轉換模型，見
+    docs/參考文獻/12_三元組事實層級向量化與檢索/README.md）。
+
+    `subject`／`object` 使用 DEDUP4 解析後的**canonical Entity 名稱**（而非
+    這次提及的原始字串），`verb` 則保留這筆 citation 的原始措辭——兩者取捨
+    不同：canonical 名稱讓 `(Fact)-[:HAS_SUBJECT]->(Entity)` 連結與 `fact_text`
+    描述的對象一致，`verb` 沒有對應的「解析後版本」（動詞只被歸類到
+    `rel_type`，不像實體有 canonical 名稱可用），保留原始措辭才能反映這筆
+    citation 的實際語意細節。`subject_type`／`object_type` 缺席時（型別選填）
+    省略括號，不留空括號。
+    """
+    subj = f"{subject}（{subject_type}）" if subject_type else subject
+    obj = f"{object_}（{object_type}）" if object_type else object_
+    return f"{subj} {verb} {obj}"
+
+
 async def merge_triples_to_graph(
     driver: AsyncDriver,
     kg_id: UUID,
@@ -672,6 +692,16 @@ async def merge_triples_to_graph(
     `Chunk`→`Entity`的獨立邊），是為了不動到 `bfs_query` 既有的單層關係
     走訪語意；把事實也節點化雖然模型上更一致，但牽動的是 BFS 走訪深度定義
     這種更大範圍的變更，留待有實際需求時再評估。
+
+    **事實層級向量化（2026-08-03 實作，見 3.1.4 §a）**：`embedding_provider`
+    提供時，每筆 citation 額外產生一個獨立的 `Fact` 節點＋`fact_embedding`
+    （`_verbalize_fact()` 三元組文字化後呼叫 embedding provider），供查詢時
+    語意檢索使用——**與上方事實層級去重的 MERGE 邊平行存在，不取代、不
+    影響**（`Fact` 以每筆 citation 為粒度，MERGE 邊仍以 `(subject, rel_type,
+    object)` 為粒度收斂）。僅在 `triple.source_doc_id`／
+    `triple.source_svo_chunk_index` 皆存在時才建立（需要靠這兩者 MATCH 到
+    `merge_entity()` 剛建立的 `Chunk` 節點才能連結 `SUPPORTED_BY`；兩者缺席
+    時無法連結，直接跳過，不建立不完整的 `Fact` 節點）。
     """
     kg_id_str = str(kg_id)
     for triple in triples:
@@ -729,6 +759,95 @@ async def merge_triples_to_graph(
             """,
             **set_params,
         )
+
+        # 3.1.4 §a：事實層級向量化——每筆 citation 各自產生一個 Fact 節點，
+        # 永不相互覆蓋或平均（與上方的邊 MERGE／citations_json 累積是不同粒度）。
+        if (
+            embedding_provider is not None
+            and triple.source_doc_id is not None
+            and triple.source_svo_chunk_index is not None
+        ):
+            fact_text = _verbalize_fact(
+                subject_name, triple.subject_type, triple.verb, object_name, triple.object_type
+            )
+            await driver.execute_query(
+                """
+                MATCH (s:Entity {kg_id: $kg_id, name: $subject})
+                MATCH (o:Entity {kg_id: $kg_id, name: $object})
+                MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
+                CREATE (f:Fact {
+                    kg_id: $kg_id, fact_text: $fact_text, fact_embedding: $fact_embedding,
+                    verb: $verb, confidence: $confidence,
+                    source_doc_id: $source_doc_id, source_svo_chunk_index: $chunk_index
+                })
+                CREATE (f)-[:HAS_SUBJECT]->(s)
+                CREATE (f)-[:HAS_OBJECT]->(o)
+                CREATE (f)-[:SUPPORTED_BY]->(c)
+                """,
+                kg_id=kg_id_str,
+                subject=subject_name,
+                object=object_name,
+                source_doc_id=str(triple.source_doc_id),
+                chunk_index=triple.source_svo_chunk_index,
+                fact_text=fact_text,
+                fact_embedding=embedding_provider.encode(fact_text),
+                verb=triple.verb,
+                confidence=triple.confidence,
+            )
+
+
+async def create_fact_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
+    """建立 `Fact` 節點的 `fact_embedding` 向量索引（app 啟動時呼叫一次），
+    供 3.1.4 §a 事實層級語意檢索使用。單一 `Fact` label＋單一 `fact_embedding`
+    屬性，不受 Neo4j relationship 向量索引過去「僅能綁定單一 relationship
+    type」的版本限制（這正是選擇獨立節點而非直接在 33 種 `SVO_REL_TYPES`
+    邊上加向量屬性的技術理由，見 3.1.4 §a 文獻查證段落）。"""
+    if driver is None:
+        return
+    await driver.execute_query(
+        """
+        CREATE VECTOR INDEX fact_embedding_vector IF NOT EXISTS
+        FOR (f:Fact) ON f.fact_embedding
+        OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
+        """,
+        dim=dim,
+    )
+
+
+async def vector_search_facts(
+    driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
+) -> list[dict]:
+    """3.1.4 §a `RETRIEVE`：`fact_embedding_vector` 向量索引 KNN 查詢，
+    比照 `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳
+    最相近的 `Fact` 候選（`fact_text`／`verb`／`confidence`／來源追溯欄位
+    ／`score`）。
+
+    ⚠️ **已知限制（KG 範圍過濾為查詢後 post-filter，非索引原生 pre-filter）**：
+    Neo4j 向量索引的 KNN 查詢是對**全部** `Fact` 節點（跨所有 KG）做近似
+    最近鄰，`WHERE node.kg_id = $kg_id` 是拿到 `top_k` 筆候選後才篩選——
+    若某次查詢的前 `top_k` 名近似鄰居剛好大多來自其他 KG，篩選後回傳筆數
+    可能少於 `top_k`，甚至為空，即使該 KG 內其實有語意相關的 Fact 只是
+    排名較後面。比照 3.2 §a `ConceptNode` 路由層「粗篩 Top-K 再精算」的
+    設計語言，這是同一類「先寬後窄」查詢共有的已知取捨，非本函式獨有的
+    缺陷；若要保證命中，需加大 `top_k` 或改用 pre-filter（若 Neo4j 版本
+    支援），留待第五章消融實驗評估合適的 `top_k` 值。**扁平相似度檢索
+    本身、未利用圖結構鄰接關係的侷限**，見 3.1.4 §a 與 G-Retriever 對照
+    討論，非本函式範圍。
+    """
+    result = await driver.execute_query(
+        """
+        CALL db.index.vector.queryNodes('fact_embedding_vector', $top_k, $vector)
+        YIELD node, score
+        WHERE node.kg_id = $kg_id
+        RETURN node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
+               node.source_doc_id AS source_doc_id,
+               node.source_svo_chunk_index AS source_svo_chunk_index, score
+        """,
+        kg_id=str(kg_id),
+        top_k=top_k,
+        vector=query_vector,
+    )
+    return [dict(r) for r in result.records]
 
 
 async def create_related_to_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:

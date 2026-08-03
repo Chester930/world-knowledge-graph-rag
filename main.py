@@ -52,6 +52,7 @@ async def lifespan(app: FastAPI):
     await svo_service.create_entity_index(get_driver())
     await svo_service.create_chunk_vector_index(get_driver(), embedding.dim)
     await svo_service.create_related_to_vector_index(get_driver(), embedding.dim)
+    await svo_service.create_fact_vector_index(get_driver(), embedding.dim)
     await _restart_task_queue()
     # § 3.1.2「WORKER 執行模型定案」：常駐背景 asyncio 任務，隨宿主行程啟動，
     # 消費 task_queue_service.next_pending()（見 services/extraction_worker.py）。

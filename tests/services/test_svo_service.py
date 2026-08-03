@@ -139,11 +139,16 @@ class InMemoryEntityDriver:
         # (kg_id, rel_type, subject, object) -> {citations_json, confidence}：事實層級去重後，
         # 同一組 (subject, rel_type, object) 只有一筆，不再依 chunk/句子區分。
         self.relationships: dict[tuple, dict] = {}
+        self.facts: list[dict] = []  # 3.1.4 §a：每筆 CREATE (f:Fact ...) 呼叫的 params，供斷言用
         self.queries: list[str] = []
 
     async def execute_query(self, query: str, **params):
         self.queries.append(query)
         stripped = query.strip()
+
+        if "CREATE (f:Fact" in stripped:
+            self.facts.append(params)
+            return FakeResult([])
 
         if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name"):
             kg_id = params["kg_id"]
@@ -1564,3 +1569,141 @@ async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path
     assert call_count["n"] == 1
     from services.svo_preprocessing_service import read_sentence_embeddings
     assert read_sentence_embeddings("note.md", kg_folder) is not None
+
+
+# ── 3.1.4 §a：事實層級向量化（Fact 節點，2026-08-03）────────────────────────
+
+def test_verbalize_fact_includes_types_when_present():
+    text = svc._verbalize_fact("台積電", "組織", "生產", "晶片", "產品")
+    assert text == "台積電（組織） 生產 晶片（產品）"
+
+
+def test_verbalize_fact_omits_parens_when_type_missing():
+    """型別選填，缺席時不留空括號。"""
+    text = svc._verbalize_fact("A", "", "導致", "B", "")
+    assert text == "A 導致 B"
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_provider_given():
+    """3.1.4 §a：`embedding_provider` 提供且有 chunk 追溯資訊時，應為這筆
+    citation 建立一個 Fact 節點，`fact_text` 用 verbalize 後的三元組文字，
+    連結 subject/object/chunk。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    doc_id = uuid4()
+    embedding = FakeEmbedding()
+    triple = SVOTriple(
+        subject="台積電", subject_type="組織", rel_type="CAUSES", verb="生產",
+        object="晶片", object_type="產品",
+        source_doc_id=doc_id, source_svo_chunk_index=1,
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], embedding_provider=embedding)
+
+    assert len(driver.facts) == 1
+    fact = driver.facts[0]
+    assert fact["kg_id"] == str(kg_id)
+    assert fact["subject"] == "台積電"
+    assert fact["object"] == "晶片"
+    assert fact["verb"] == "生產"
+    assert fact["confidence"] == 1
+    assert fact["source_doc_id"] == str(doc_id)
+    assert fact["chunk_index"] == 1
+    expected_text = svc._verbalize_fact("台積電", "組織", "生產", "晶片", "產品")
+    assert fact["fact_text"] == expected_text
+    assert fact["fact_embedding"] == embedding.encode(expected_text)
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_skips_fact_creation_without_embedding_provider():
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    triple = SVOTriple(
+        subject="A", rel_type="CAUSES", verb="導致", object="B",
+        source_doc_id=uuid4(), source_svo_chunk_index=1,
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple])
+
+    assert driver.facts == []
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_skips_fact_creation_without_chunk_info():
+    """缺少 `source_doc_id`／`source_svo_chunk_index` 時無法連結 `SUPPORTED_BY`
+    對應的 `Chunk` 節點（`merge_entity` 也不會建立該 Chunk），應跳過，不建立
+    不完整的 Fact 節點。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+    triple = SVOTriple(subject="A", rel_type="CAUSES", verb="導致", object="B")
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], embedding_provider=embedding)
+
+    assert driver.facts == []
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_creates_separate_fact_per_citation_even_when_edge_collapses():
+    """對應 3.1.4 §a『Fact 節點一律以每筆 citation 為粒度，永不相互覆蓋或
+    平均』——即使兩筆抽取收斂成同一條 MERGE 邊（同一 (subject, rel_type,
+    object)，見既有事實層級去重行為），仍應各自產生獨立的 Fact 節點。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+
+    first = SVOTriple(
+        subject="馬斯克", rel_type="CREATED_BY", verb="創立", object="SpaceX",
+        source_doc_id=uuid4(), source_svo_chunk_index=3,
+    )
+    second = SVOTriple(
+        subject="馬斯克", rel_type="CREATED_BY", verb="創辦", object="SpaceX",
+        source_doc_id=uuid4(), source_svo_chunk_index=50,
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [first, second], embedding_provider=embedding)
+
+    assert len(driver.relationships) == 1  # 邊仍收斂成一條（既有行為不變）
+    assert len(driver.facts) == 2  # Fact 節點各自獨立，不相互覆蓋
+    assert {f["verb"] for f in driver.facts} == {"創立", "創辦"}
+
+
+@pytest.mark.asyncio
+async def test_create_fact_vector_index_without_driver_is_noop():
+    await svc.create_fact_vector_index(None)  # 不應拋出例外
+
+
+@pytest.mark.asyncio
+async def test_create_fact_vector_index_issues_create_vector_index_query():
+    driver = FakeDriver()
+
+    await svc.create_fact_vector_index(driver, dim=384)
+
+    assert len(driver.calls) == 1
+    query, params = driver.calls[0]
+    assert "CREATE VECTOR INDEX fact_embedding_vector" in query
+    assert "FOR (f:Fact) ON f.fact_embedding" in query
+    assert params["dim"] == 384
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
+    driver = FakeDriver(records=[
+        {"fact_text": "台積電 生產 晶片", "verb": "生產", "confidence": 3,
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.92},
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert results == [
+        {"fact_text": "台積電 生產 晶片", "verb": "生產", "confidence": 3,
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.92},
+    ]
+    query, params = driver.calls[0]
+    assert "fact_embedding_vector" in query
+    assert "WHERE node.kg_id = $kg_id" in query
+    assert params["kg_id"] == str(kg_id)
+    assert params["top_k"] == 5
+    assert params["vector"] == [0.1, 0.2]
