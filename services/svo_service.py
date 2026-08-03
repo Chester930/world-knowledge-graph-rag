@@ -584,6 +584,57 @@ async def merge_entity(
     return final_name
 
 
+async def backfill_entity_name_embeddings(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    embedding_provider: EmbeddingProvider,
+    *,
+    limit: int = 1000,
+) -> int:
+    """3.1.4 `DEDUP4` 節點向量化效能改造：補齊缺漏 `name_embedding` 的既有
+    `Entity` 節點——把節點上已有的 `name` 文字算成 embedding 存回去，讓這些
+    節點在 `resolve_entity_name()` 比對時能直接沿用持久化向量，不必再
+    fallback 即時 `encode()`。**不做任何去重判斷**，純粹補向量，因此不需要
+    `BACKFILL`（3.1.3 §a-1）那種 LLM 確認關卡——沒有判斷就沒有判斷錯誤的
+    風險，跟該函式是不同層級的操作，比照同一套設計精神。
+
+    涵蓋兩種成因（比照 `backfill_missing_verb_embeddings()` 同一套「歷史缺口
+    ＋持續產生的新缺口」推理）：① 此改造上線前既有的歷史節點；② 任何一次
+    `merge_entity()`／`_merge_chunk_mention()` 呼叫沒帶入 `embedding_provider`
+    時持續產生的新缺口——成因 ② 會反覆發生，不是一次性事件。因此本函式
+    設計為**冪等、可重複執行**，可排進治理 Worker 既有的定期巡視週期，不需
+    另開一套維運流程。
+
+    `limit`（預設 1000）批次大小比 `backfill_missing_verb_embeddings()`（100）
+    大，因為單筆 `Entity.name` 通常遠短於 `RELATED_TO` 邊累積的完整
+    `citations_json`，單次呼叫成本較低。回傳實際補上 `name_embedding` 的
+    節點數。
+    """
+    result = await driver.execute_query(
+        """
+        MATCH (e:Entity {kg_id: $kg_id})
+        WHERE e.name_embedding IS NULL AND e.name IS NOT NULL
+        RETURN e.name AS name
+        LIMIT $limit
+        """,
+        kg_id=str(kg_id),
+        limit=limit,
+    )
+
+    kg_id_str = str(kg_id)
+    count = 0
+    for record in result.records:
+        name_embedding = embedding_provider.encode(record["name"])
+        await driver.execute_query(
+            "MATCH (e:Entity {kg_id: $kg_id, name: $name}) SET e.name_embedding = $name_embedding",
+            kg_id=kg_id_str,
+            name=record["name"],
+            name_embedding=name_embedding,
+        )
+        count += 1
+    return count
+
+
 def _new_citation(triple: SVOTriple) -> dict:
     """把一次抽取的來源追溯資訊，包成一筆可累積在邊上的引用紀錄。"""
     return {

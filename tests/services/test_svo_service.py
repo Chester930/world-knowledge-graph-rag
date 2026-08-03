@@ -772,6 +772,95 @@ async def test_backfill_missing_verb_embeddings_passes_kg_id_and_limit_to_query(
     assert driver.query_calls[0]["limit"] == 50
 
 
+# ── backfill_entity_name_embeddings（3.1.4 DEDUP4 節點向量化，2026-08-03）──
+
+class MissingEntityEmbeddingFakeDriver:
+    """模擬「查詢缺漏 name_embedding 的 Entity 節點」結果，並記錄查詢本身與
+    後續 SET 呼叫，供 `backfill_entity_name_embeddings()` 測試使用。"""
+
+    def __init__(self, records):
+        self._records = records
+        self.query_calls: list[dict] = []
+        self.set_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "WHERE e.name_embedding IS NULL" in stripped:
+            self.query_calls.append(params)
+            return FakeResult(self._records)
+        if "SET e.name_embedding" in stripped:
+            self.set_calls.append(params)
+            return FakeResult([])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_backfill_entity_name_embeddings_fills_in_missing_embedding():
+    driver = MissingEntityEmbeddingFakeDriver(records=[{"name": "台積電"}])
+    embedding = TypeDescriptionFakeEmbedding(vectors={"台積電": [0.5, 0.5, 0.0]}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    count = await svc.backfill_entity_name_embeddings(driver, kg_id, embedding)
+
+    assert count == 1
+    assert len(driver.set_calls) == 1
+    assert driver.set_calls[0]["name"] == "台積電"
+    assert driver.set_calls[0]["name_embedding"] == [0.5, 0.5, 0.0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_entity_name_embeddings_handles_multiple_nodes():
+    driver = MissingEntityEmbeddingFakeDriver(records=[{"name": "台積電"}, {"name": "鴻海"}])
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"台積電": [1.0, 0.0, 0.0], "鴻海": [0.0, 1.0, 0.0]}, default=[0.0, 0.0, 1.0]
+    )
+    kg_id = uuid4()
+
+    count = await svc.backfill_entity_name_embeddings(driver, kg_id, embedding)
+
+    assert count == 2
+    names_written = {call["name"] for call in driver.set_calls}
+    assert names_written == {"台積電", "鴻海"}
+
+
+@pytest.mark.asyncio
+async def test_backfill_entity_name_embeddings_returns_zero_when_no_gaps():
+    driver = MissingEntityEmbeddingFakeDriver(records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    count = await svc.backfill_entity_name_embeddings(driver, kg_id, embedding)
+
+    assert count == 0
+    assert driver.set_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_entity_name_embeddings_passes_kg_id_and_limit_to_query():
+    driver = MissingEntityEmbeddingFakeDriver(records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    await svc.backfill_entity_name_embeddings(driver, kg_id, embedding, limit=50)
+
+    assert len(driver.query_calls) == 1
+    assert driver.query_calls[0]["kg_id"] == str(kg_id)
+    assert driver.query_calls[0]["limit"] == 50
+
+
+@pytest.mark.asyncio
+async def test_backfill_entity_name_embeddings_default_limit_is_1000():
+    """batch size 比 `backfill_missing_verb_embeddings()`（100）大，見函式
+    docstring：單筆 Entity.name 遠短於 RELATED_TO 邊的完整 citations_json。"""
+    driver = MissingEntityEmbeddingFakeDriver(records=[])
+    embedding = TypeDescriptionFakeEmbedding(vectors={}, default=[0.0, 0.0, 1.0])
+    kg_id = uuid4()
+
+    await svc.backfill_entity_name_embeddings(driver, kg_id, embedding)
+
+    assert driver.query_calls[0]["limit"] == 1000
+
+
 # ── resolve_entity_type：核心庫（52 類）優先，查不到才查擴充庫（939 類）───────
 
 def test_resolve_entity_type_matches_core_case_and_spacing_insensitive():
