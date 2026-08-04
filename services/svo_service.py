@@ -632,6 +632,9 @@ async def backfill_entity_name_embeddings(
             name_embedding=name_embedding,
         )
         count += 1
+        # 每筆 encode 為同步阻塞呼叫，完成後主動讓出 event loop，
+        # 確保 extraction_worker 等其他 asyncio task 能被調度。
+        await asyncio.sleep(0)
     return count
 
 
