@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Literal
 
 from services import document_record_service
+from services.svo_chunking import read_svo_index
 
 TaskStatus = Literal["pending", "processing", "completed", "failed", "pending_upload"]
 
@@ -123,11 +124,14 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
     重建索引，取代原本可能已損毀的索引檔案。
 
     `kg_folders` 為 `{kg_id: KG 資料夾路徑}`。重建規則：`extraction_status`
-    為 `completed` 的文件不需要登記任何 pending chunk；其餘依
-    `chunk_progress`／`svo_total_chunks` 推算尚未完成的 chunk_index 範圍，
-    一律登記為 `pending`（`processing` 狀態的 chunk 在記錄檔真實狀態來源
-    裡本來就無法與「已中斷」區分，直接視為未完成，與 `reset_stuck_processing`
-    對同一問題的處理精神一致）。
+    為 `completed` 的文件不需要登記任何 pending chunk；其餘直接讀取
+    `svo_index.json` 裡實際存在的 chunk_index 清單（而非用
+    `chunk_progress+1..total` 推算連續範圍——部份文件的 svo chunk index
+    並非從 1 開始連續編號，用推算範圍會查到不存在的 index，導致
+    worker 的 `_find_chunk()` 誤判為失敗，2026-08-04 實測發現），過濾出
+    尚未完成（index > chunk_progress）的部份登記為 `pending`（`processing`
+    狀態的 chunk 在記錄檔真實狀態來源裡本來就無法與「已中斷」區分，直接
+    視為未完成，與 `reset_stuck_processing` 對同一問題的處理精神一致）。
     """
     if db_path.exists():
         db_path.unlink()
@@ -142,10 +146,15 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
                 record = document_record_service.read_record(doc_folder)
                 if record is None or record.extraction_status == "completed":
                     continue
-                total = record.svo_total_chunks or record.total_chunks
-                if total <= 0:
+                svo_index = read_svo_index(doc_folder)
+                if svo_index is None:
                     continue
-                pending_indices = range(record.chunk_progress + 1, total + 1)
+                pending_indices = [
+                    chunk["index"] for chunk in svo_index["chunks"]
+                    if chunk["index"] > record.chunk_progress
+                ]
+                if not pending_indices:
+                    continue
                 conn.executemany(
                     "INSERT OR IGNORE INTO task_queue (kg_id, source, chunk_index, status) "
                     "VALUES (?, ?, ?, 'pending')",
