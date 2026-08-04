@@ -22,11 +22,11 @@ class FakeEmbeddingProvider:
     def dim(self) -> int:
         return 2
 
-    def encode(self, text: str) -> list[float]:
+    async def encode(self, text: str) -> list[float]:
         return self.mapping.get(text, [0.0, 0.0])
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        return [self.encode(t) for t in texts]
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self.mapping.get(t, [0.0, 0.0]) for t in texts]
 
 
 class FakeLLMProvider:

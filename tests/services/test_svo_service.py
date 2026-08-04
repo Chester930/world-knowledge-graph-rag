@@ -44,7 +44,7 @@ class FakeEmbedding:
     def model_name(self) -> str:
         return "fake-embedding"
 
-    def encode(self, text: str) -> list[float]:
+    async def encode(self, text: str) -> list[float]:
         key = self._similar_to.get(text, text)
         if key not in self._index:
             self._index[key] = len(self._index)
@@ -53,8 +53,8 @@ class FakeEmbedding:
         vec[idx] = 1.0
         return vec
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        return [self.encode(t) for t in texts]
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [await self.encode(t) for t in texts]
 
 
 class SequencedFakeLLM:
@@ -100,11 +100,11 @@ class TypeDescriptionFakeEmbedding:
         TypeDescriptionFakeEmbedding._counter += 1
         self.model_name = f"fake-type-desc-embedding-{TypeDescriptionFakeEmbedding._counter}"
 
-    def encode(self, text: str) -> list[float]:
+    async def encode(self, text: str) -> list[float]:
         return self._vectors.get(text, self._default)
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        return [self.encode(t) for t in texts]
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self._vectors.get(t, self._default) for t in texts]
 
 
 class FakeResult:
@@ -266,14 +266,15 @@ def test_svo_rel_type_descriptions_keys_match_svo_rel_types():
     assert set(svc.SVO_REL_TYPE_DESCRIPTIONS) == svc.SVO_REL_TYPES
 
 
-def test_classify_relation_by_embedding_returns_top_cosine_match():
+@pytest.mark.asyncio
+async def test_classify_relation_by_embedding_returns_top_cosine_match():
     causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
     embedding = TypeDescriptionFakeEmbedding(
         vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
         default=[0.0, 1.0, 0.0],
     )
 
-    best_type, score = svc.classify_relation_by_embedding("導致", embedding)
+    best_type, score = await svc.classify_relation_by_embedding("導致", embedding)
 
     assert best_type == "CAUSES"
     assert score == pytest.approx(1.0)
@@ -1066,13 +1067,16 @@ async def test_resolve_entity_name_escalates_gray_zone_to_llm():
     # 確保不會被編輯距離規則捷徑攔截，真正走到 cosine／LLM 仲裁這一段。
     import math
 
-    def fake_encode(text: str) -> list[float]:
+    async def fake_encode(text: str) -> list[float]:
         angle = 0.6 if text == "Foo Company" else 0.0  # cos(0.6) ≈ 0.825，落在灰色地帶
         return [math.cos(angle), math.sin(angle)] + [0.0] * 6
 
+    async def fake_encode_batch(texts: list[str]) -> list[list[float]]:
+        return [await fake_encode(t) for t in texts]
+
     embedding = FakeEmbedding()
     embedding.encode = fake_encode  # type: ignore[method-assign]
-    embedding.encode_batch = lambda texts: [fake_encode(t) for t in texts]  # type: ignore[method-assign]
+    embedding.encode_batch = fake_encode_batch  # type: ignore[method-assign]
 
     candidates = [{"name": "XYZ Corp", "alias_counts_json": "{}"}]
     llm = FakeLLM("是")
@@ -1094,12 +1098,12 @@ async def test_resolve_entity_name_uses_stored_embedding_without_reencoding_cand
     encoded_calls: list[str] = []
     original_encode = embedding.encode
 
-    def tracking_encode(text: str) -> list[float]:
+    async def tracking_encode(text: str) -> list[float]:
         encoded_calls.append(text)
-        return original_encode(text)
+        return await original_encode(text)
 
     embedding.encode = tracking_encode  # type: ignore[method-assign]
-    stored_vector = original_encode("Interstate Highway 35")
+    stored_vector = await original_encode("Interstate Highway 35")
     candidates = [{"name": "Interstate Highway 35", "name_embedding": stored_vector}]
 
     resolved = await svc.resolve_entity_name("I-35", candidates, embedding_provider=embedding)
@@ -1125,7 +1129,7 @@ async def test_resolve_entity_name_falls_back_to_encoding_when_candidate_missing
 async def test_resolve_entity_name_gray_zone_without_llm_creates_new_entity():
     import math
 
-    def fake_encode(text: str) -> list[float]:
+    async def fake_encode(text: str) -> list[float]:
         angle = 0.6 if text == "Foo Company" else 0.0
         return [math.cos(angle), math.sin(angle)] + [0.0] * 6
 
@@ -1170,7 +1174,7 @@ async def test_merge_entity_persists_name_embedding_on_new_node():
         embedding_provider=embedding,
     )
 
-    assert driver.entities[(str(kg_id), "台積電")]["name_embedding"] == embedding.encode("台積電")
+    assert driver.entities[(str(kg_id), "台積電")]["name_embedding"] == await embedding.encode("台積電")
 
 
 @pytest.mark.asyncio
@@ -1183,7 +1187,7 @@ async def test_merge_entity_without_chunk_info_also_persists_name_embedding():
 
     await svc.merge_entity(driver, kg_id, "泰國", "LOCATION", "泰國", embedding_provider=embedding)
 
-    assert driver.entities[(str(kg_id), "泰國")]["name_embedding"] == embedding.encode("泰國")
+    assert driver.entities[(str(kg_id), "泰國")]["name_embedding"] == await embedding.encode("泰國")
 
 
 @pytest.mark.asyncio
@@ -1547,11 +1551,11 @@ async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path
         dim = 4
         model_name = "fake-embedding"
 
-        def encode(self, text: str) -> list[float]:
+        async def encode(self, text: str) -> list[float]:
             return [0.0] * self.dim
 
-        def encode_batch(self, texts: list[str]) -> list[list[float]]:
-            return [self.encode(t) for t in texts]
+        async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+            return [[0.0] * self.dim for _ in texts]
 
     def _get_fake_embedding_provider():
         call_count["n"] += 1
@@ -1612,7 +1616,7 @@ async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_prov
     assert fact["chunk_index"] == 1
     expected_text = svc._verbalize_fact("台積電", "組織", "生產", "晶片", "產品")
     assert fact["fact_text"] == expected_text
-    assert fact["fact_embedding"] == embedding.encode(expected_text)
+    assert fact["fact_embedding"] == await embedding.encode(expected_text)
 
 
 @pytest.mark.asyncio

@@ -147,11 +147,11 @@ class FakeEmbedding:
     dim = 4
     model_name = "fake-embedding"
 
-    def encode(self, text: str) -> list[float]:
+    async def encode(self, text: str) -> list[float]:
         return [float(len(text))] * self.dim
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        return [self.encode(t) for t in texts]
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [[float(len(t))] * self.dim for t in texts]
 
 
 @pytest.mark.asyncio

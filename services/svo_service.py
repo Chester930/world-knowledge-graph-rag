@@ -159,24 +159,24 @@ def _svo_prompt(text: str) -> str:
 _TYPE_DESCRIPTION_EMBEDDING_CACHE: dict[str, dict[str, list[float]]] = {}
 
 
-def _type_description_embeddings(embedding_provider: EmbeddingProvider) -> dict[str, list[float]]:
+async def _type_description_embeddings(embedding_provider: EmbeddingProvider) -> dict[str, list[float]]:
     cache = _TYPE_DESCRIPTION_EMBEDDING_CACHE.get(embedding_provider.model_name)
     if cache is None:
         rel_types = sorted(SVO_REL_TYPE_DESCRIPTIONS)
-        vectors = embedding_provider.encode_batch([SVO_REL_TYPE_DESCRIPTIONS[t] for t in rel_types])
+        vectors = await embedding_provider.encode_batch([SVO_REL_TYPE_DESCRIPTIONS[t] for t in rel_types])
         cache = dict(zip(rel_types, vectors))
         _TYPE_DESCRIPTION_EMBEDDING_CACHE[embedding_provider.model_name] = cache
     return cache
 
 
-def classify_relation_by_embedding(
+async def classify_relation_by_embedding(
     verb: str, embedding_provider: EmbeddingProvider
 ) -> tuple[str, float]:
     """SIM：`verb` embedding 與 33 個關係型別**描述句**（非識別碼字串本身，見
     `SVO_REL_TYPE_DESCRIPTIONS` docstring）embedding 算 cosine 相似度，取最相似者。
     回傳 (最相似的型別, 該型別的相似度分數)。"""
-    type_vectors = _type_description_embeddings(embedding_provider)
-    verb_vec = embedding_provider.encode(verb)
+    type_vectors = await _type_description_embeddings(embedding_provider)
+    verb_vec = await embedding_provider.encode(verb)
     best_type = ""
     best_score = -1.0
     for rel_type, vec in type_vectors.items():
@@ -221,7 +221,7 @@ async def _reconcile_rel_type(
     if embedding_provider is None:
         return llm_rel_type
 
-    best_type, best_score = classify_relation_by_embedding(verb, embedding_provider)
+    best_type, best_score = await classify_relation_by_embedding(verb, embedding_provider)
     if best_type == llm_rel_type and best_score >= COMPARE_COSINE_THRESHOLD:
         return llm_rel_type
 
@@ -245,7 +245,7 @@ async def _reconcile_rel_type(
         final = "RELATED_TO"
         if kg_id is not None and calibration_db_path is not None:
             expand_governance_service.add_candidate(
-                calibration_db_path, kg_id, verb, embedding_provider.encode(verb),
+                calibration_db_path, kg_id, verb, await embedding_provider.encode(verb),
             )
 
     if kg_id is not None and calibration_db_path is not None:
@@ -298,7 +298,7 @@ async def extract_svo_triples(
         # 供 EXPAND 核准新型別後的回溯重分類向量索引查詢使用；已有明確型別的
         # 三元組不需要，省下多餘的儲存。
         if rel_type == "RELATED_TO" and verb and embedding_provider is not None:
-            item["verb_embedding"] = embedding_provider.encode(verb)
+            item["verb_embedding"] = await embedding_provider.encode(verb)
         # 核心庫優先、查不到才查擴充庫的正規化——見 resolve_entity_type() docstring。
         if item.get("subject_type"):
             item["subject_type"] = resolve_entity_type(str(item["subject_type"]))
@@ -406,11 +406,11 @@ async def resolve_entity_name(
     if embedding_provider is None:
         return name
 
-    name_vec = embedding_provider.encode(name)
+    name_vec = await embedding_provider.encode(name)
     best_name: str | None = None
     best_score = 0.0
     for c in candidates:
-        candidate_vec = c.get("name_embedding") or embedding_provider.encode(c["name"])
+        candidate_vec = c.get("name_embedding") or (await embedding_provider.encode(c["name"]))
         score = cosine_similarity(name_vec, candidate_vec)
         if score > best_score:
             best_score = score
@@ -470,7 +470,7 @@ async def _merge_chunk_mention(
     }
     if embedding_provider is not None:
         entity_set_clause += ", e.name_embedding = $name_embedding"
-        params["name_embedding"] = embedding_provider.encode(entity_name)
+        params["name_embedding"] = await embedding_provider.encode(entity_name)
 
     await driver.execute_query(
         f"""
@@ -552,7 +552,7 @@ async def merge_entity(
         params = {"kg_id": str(kg_id), "name": resolved_name, "entity_type": entity_type}
         if embedding_provider is not None:
             entity_set_clause += ", e.name_embedding = $name_embedding"
-            params["name_embedding"] = embedding_provider.encode(resolved_name)
+            params["name_embedding"] = await embedding_provider.encode(resolved_name)
         await driver.execute_query(
             f"MERGE (e:Entity {{kg_id: $kg_id, name: $name}}) ON CREATE SET {entity_set_clause}",
             **params,
@@ -624,7 +624,12 @@ async def backfill_entity_name_embeddings(
     kg_id_str = str(kg_id)
     count = 0
     for record in result.records:
-        name_embedding = embedding_provider.encode(record["name"])
+        # 2026-08-04：embedding_provider.encode() 已改為真正的 async（見
+        # core/providers/base.py EmbeddingProvider docstring），await 本身
+        # 就會在底層 I/O／執行緒池等待期間正常讓出 event loop，不再需要
+        # 額外插入 asyncio.sleep(0) 手動讓出（原本用於緩解同步阻塞呼叫佔滿
+        # event loop 導致 extraction_worker 無法排程的問題，見 EXTRACTION_LOG.md）。
+        name_embedding = await embedding_provider.encode(record["name"])
         await driver.execute_query(
             "MATCH (e:Entity {kg_id: $kg_id, name: $name}) SET e.name_embedding = $name_embedding",
             kg_id=kg_id_str,
@@ -632,9 +637,6 @@ async def backfill_entity_name_embeddings(
             name_embedding=name_embedding,
         )
         count += 1
-        # 每筆 encode 為同步阻塞呼叫，完成後主動讓出 event loop，
-        # 確保 extraction_worker 等其他 asyncio task 能被調度。
-        await asyncio.sleep(0)
     return count
 
 
@@ -793,7 +795,7 @@ async def merge_triples_to_graph(
                 source_doc_id=str(triple.source_doc_id),
                 chunk_index=triple.source_svo_chunk_index,
                 fact_text=fact_text,
-                fact_embedding=embedding_provider.encode(fact_text),
+                fact_embedding=await embedding_provider.encode(fact_text),
                 verb=triple.verb,
                 confidence=triple.confidence,
             )
@@ -925,7 +927,7 @@ async def backfill_related_to_edges(
     不改寫任何邊（回傳 0）**，不會退回「純 cosine 分數即可改寫」的舊行為——
     這是刻意的保守預設，不是遺漏。
     """
-    query_vector = embedding_provider.encode(new_type_description)
+    query_vector = await embedding_provider.encode(new_type_description)
     result = await driver.execute_query(
         """
         CALL db.index.vector.queryRelationships('related_to_verb_embedding', $top_k, $query_vector)
@@ -1025,7 +1027,7 @@ async def backfill_missing_verb_embeddings(
         verb = citations[-1]["verb"] if citations else ""
         if not verb:
             continue
-        verb_embedding = embedding_provider.encode(verb)
+        verb_embedding = await embedding_provider.encode(verb)
         await driver.execute_query(
             """
             MATCH (s:Entity {kg_id: $kg_id, name: $subject})-[r:RELATED_TO {kg_id: $kg_id}]->
@@ -1074,7 +1076,7 @@ async def embed_svo_chunks(
     if embedding_provider is None or not chunks:
         return
 
-    vectors = embedding_provider.encode_batch([chunk.text for chunk in chunks])
+    vectors = await embedding_provider.encode_batch([chunk.text for chunk in chunks])
     for chunk, vector in zip(chunks, vectors):
         await driver.execute_query(
             """

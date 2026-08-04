@@ -102,7 +102,7 @@ async def commit_and_backfill(
     kg_id_str = str(kg_id)
 
     if not reused_from_registry:
-        description_embedding = embedding_provider.encode(description)
+        description_embedding = await embedding_provider.encode(description)
         expand_governance_service.register_type(
             db_path, type_name, description, description_embedding, kg_id_str,
         )
@@ -166,7 +166,7 @@ async def run_governance_cycle(
         # 見 SIM 節點；REUSE 情境下直接沿用既有描述句作 BACKFILL 查詢向量，
         # 因為 REGCHECK 命中本身就代表兩份描述已足夠語意相近，不另外查回
         # 登記表原始描述文字）
-        description_embedding = embedding_provider.encode(description)
+        description_embedding = await embedding_provider.encode(description)
         existing = expand_governance_service.find_similar_registered_type(
             db_path, description_embedding, EXPAND_REGCHECK_THRESHOLD,
         )

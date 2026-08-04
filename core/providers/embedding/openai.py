@@ -15,8 +15,8 @@ _DIM_MAP: dict[str, int] = {
 
 class OpenAIEmbeddingProvider(EmbeddingProvider):
     def __init__(self, api_key: str, model: str):
-        from openai import OpenAI
-        self._client = OpenAI(api_key=api_key)
+        from openai import AsyncOpenAI
+        self._client = AsyncOpenAI(api_key=api_key)
         self.model = model
         self._dim = _DIM_MAP.get(model, 1536)
 
@@ -28,10 +28,10 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
     def model_name(self) -> str:
         return self.model
 
-    def encode(self, text: str) -> list[float]:
-        response = self._client.embeddings.create(model=self.model, input=text)
+    async def encode(self, text: str) -> list[float]:
+        response = await self._client.embeddings.create(model=self.model, input=text)
         return response.data[0].embedding
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        response = self._client.embeddings.create(model=self.model, input=texts)
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        response = await self._client.embeddings.create(model=self.model, input=texts)
         return [item.embedding for item in response.data]

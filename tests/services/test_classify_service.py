@@ -17,11 +17,11 @@ class FakeEmbeddingProvider:
     def dim(self) -> int:
         return 3
 
-    def encode(self, text: str) -> list[float]:
+    async def encode(self, text: str) -> list[float]:
         return self.mapping.get(text, [0.0, 0.0, 0.0])
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        return [self.encode(t) for t in texts]
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self.mapping.get(t, [0.0, 0.0, 0.0]) for t in texts]
 
 
 def _write_chunk(doc_folder: Path, idx: int, total: int, body: str) -> None:

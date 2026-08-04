@@ -18,9 +18,16 @@ RQ2 範圍，尚未實作）——KG prototype 直接從該 KG 資料夾底下�
 實作與測試。呼叫端（router）需自行組裝 `KGInfo` 清單（例如從尚未實作的
 KGRepository 讀取），本模組不直接查詢 Neo4j。
 
-本模組所有函式皆為同步（embedding provider 與檔案 I/O 本身即為同步操作），
-FastAPI router 層呼叫時需以 `run_in_executor` 包裝，避免阻塞事件迴圈
-（做法同 services/ingestion_service.py）。
+本模組所有函式皆為同步（檔案 I/O 本身即為同步操作），FastAPI router 層呼叫
+時需以 `run_in_executor` 包裝，避免阻塞事件迴圈（做法同
+services/ingestion_service.py）。**2026-08-04 更新**：`EmbeddingProvider.encode`／
+`encode_batch` 已改為 `async def`（見 core/providers/base.py docstring），本模組
+`compute_document_vector()` 內用 `asyncio.run()` 橋接——安全前提是本模組所有
+呼叫路徑最終都經由 `run_in_executor` 在獨立執行緒執行、該執行緒沒有自己的
+執行中 event loop（見下方 `compute_document_vector` docstring）；若未來新增
+直接在 FastAPI 事件迴圈上呼叫本模組函式的路徑，`asyncio.run()` 會拋出
+`RuntimeError`，屆時需改走真正的 `await`／`run_in_executor` 包裝，不能沿用
+這個橋接寫法。
 
 2026-07-20 修正（對應 § 3.1.1 優化建議 #1／#2／#3／#5，見 03_系統設計與方法論.md）：
 文件向量快取進資料夾記錄檔（`document_record_service.set_document_vector`）、
@@ -32,6 +39,7 @@ KG prototype 快取進 `_prototype_cache.json`（成員清單改變才失效重�
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import shutil
@@ -87,6 +95,12 @@ def compute_document_vector(doc_folder: Path) -> list[float] | None:
     才實際計算，計算後若記錄檔存在則寫回快取供下次呼叫使用。快取由
     `document_record_service.init_record()` 在切塊數改變（內容重新解析）時清空，
     見該函式與 `models.knowledge_graph.DocumentRecord.document_vector` 註解。
+
+    **`asyncio.run()` 橋接（2026-08-04）**：`EmbeddingProvider.encode_batch()`
+    已改為 `async def`（見 core/providers/base.py），本函式維持同步簽名（模組
+    docstring「本模組所有函式皆為同步」的設計不變），用 `asyncio.run()` 呼叫
+    非同步的 encode_batch——僅在本函式保證永遠透過 `run_in_executor`（獨立
+    執行緒、無執行中的 event loop）呼叫時才安全，見模組 docstring 的警示。
     """
     record = document_record_service.read_record(doc_folder)
     if record is not None and record.document_vector is not None:
@@ -96,7 +110,7 @@ def compute_document_vector(doc_folder: Path) -> list[float] | None:
     if not bodies:
         return None
     embedding = get_embedding_provider()
-    vectors = embedding.encode_batch(bodies)
+    vectors = asyncio.run(embedding.encode_batch(bodies))
     vector = mean_vector(vectors)
     if vector is not None:
         document_record_service.set_document_vector(doc_folder, vector)

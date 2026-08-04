@@ -37,11 +37,11 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
     def model_name(self) -> str:
         return self.model
 
-    def encode(self, text: str) -> list[float]:
-        res = httpx.post(
-            f"{self.base_url}/api/embeddings",
-            json={"model": self.model, "prompt": text},
-            timeout=60.0,
-        )
-        res.raise_for_status()
-        return res.json()["embedding"]
+    async def encode(self, text: str) -> list[float]:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            res = await client.post(
+                f"{self.base_url}/api/embeddings",
+                json={"model": self.model, "prompt": text},
+            )
+            res.raise_for_status()
+            return res.json()["embedding"]

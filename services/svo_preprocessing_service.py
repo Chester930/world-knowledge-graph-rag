@@ -149,7 +149,7 @@ async def prepare_svo_ready_chunks(
     )
 
     if embedding_provider is not None:
-        vectors = embedding_provider.encode_batch(normalized_sentences)
+        vectors = await embedding_provider.encode_batch(normalized_sentences)
         write_sentence_embeddings(vectors, source, output_dir)
 
     chunks = build_svo_chunks(

@@ -45,11 +45,11 @@ class FakeEmbedding:
         self._vectors = vectors or {}
         self._default = default or [0.0, 0.0, 0.0, 1.0]
 
-    def encode(self, text: str) -> list[float]:
+    async def encode(self, text: str) -> list[float]:
         return self._vectors.get(text, self._default)
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
-        return [self.encode(t) for t in texts]
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self._vectors.get(t, self._default) for t in texts]
 
 
 class SpyDriver:

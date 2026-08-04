@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import logging
 
 from core.providers.base import EmbeddingProvider
@@ -25,8 +26,16 @@ class LocalEmbeddingProvider(EmbeddingProvider):
     def model_name(self) -> str:
         return self._model_name
 
-    def encode(self, text: str) -> list[float]:
+    def _encode_sync(self, text: str) -> list[float]:
         return self._model.encode(text, normalize_embeddings=True).tolist()
 
-    def encode_batch(self, texts: list[str]) -> list[list[float]]:
+    def _encode_batch_sync(self, texts: list[str]) -> list[list[float]]:
         return self._model.encode(texts, normalize_embeddings=True).tolist()
+
+    async def encode(self, text: str) -> list[float]:
+        """本地模型推論為 CPU-bound（非 I/O），改用執行緒池讓出 event loop
+        （見 core/providers/base.py `EmbeddingProvider` docstring 的改造說明）。"""
+        return await asyncio.get_running_loop().run_in_executor(None, self._encode_sync, text)
+
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return await asyncio.get_running_loop().run_in_executor(None, self._encode_batch_sync, texts)

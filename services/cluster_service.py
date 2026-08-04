@@ -48,6 +48,7 @@ HDBSCAN 的距離計算皆為 O(n²)，而未分配資料夾池會隨時間持�
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from collections import Counter
@@ -227,6 +228,14 @@ async def analyze_staging_pool(
     similarity()` 與 HDBSCAN 距離計算皆為 O(n^2)，此為觀測性警告，不是演算法
     複雜度本身的修正；若第五章實驗語料規模達到此門檻，需評估導入近似最近鄰
     （如 FAISS）作為未來工作，見模組 docstring「擴展性上限的決策」。
+
+    **2026-08-04 修正**：`compute_document_vector()` 逐一計算文件向量原本在本
+    函式（`async def`，直接掛在 FastAPI 事件迴圈上執行）內直接同步呼叫，會
+    阻塞事件迴圈；且該函式內部現在用 `asyncio.run()` 橋接 `EmbeddingProvider`
+    的 `async encode_batch()`，若不透過 `run_in_executor` 改在獨立執行緒執行，
+    會因為當下已存在執行中的 event loop 而直接拋出 `RuntimeError`。改為透過
+    `run_in_executor` 呼叫，與 `routers/staging.py` 既有對 `classify_service.*`
+    函式的處理方式一致。
     """
     if not staging_folder.exists():
         return ClusterAnalyzeResult()
@@ -240,7 +249,10 @@ async def analyze_staging_pool(
     if len(doc_folders) < min_cluster_size:
         return ClusterAnalyzeResult(unclustered_folders=[p.name for p in doc_folders])
 
-    vectors: list[list[float] | None] = [compute_document_vector(p) for p in doc_folders]
+    loop = asyncio.get_running_loop()
+    vectors: list[list[float] | None] = await loop.run_in_executor(
+        None, lambda: [compute_document_vector(p) for p in doc_folders]
+    )
     valid_idx = [i for i, v in enumerate(vectors) if v is not None]
     valid_vectors = [vectors[i] for i in valid_idx]
     valid_folders = [doc_folders[i] for i in valid_idx]
