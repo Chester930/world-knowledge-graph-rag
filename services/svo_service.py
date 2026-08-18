@@ -673,6 +673,66 @@ def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, ob
     return f"{subj} {verb} {obj}"
 
 
+async def _create_fact_node(
+    driver: AsyncDriver,
+    kg_id_str: str,
+    *,
+    subject: str,
+    object_: str,
+    rel_type: str,
+    source_doc_id: str,
+    chunk_index: int,
+    fact_text: str,
+    fact_embedding: list[float],
+    verb: str,
+    confidence: float,
+) -> bool:
+    """3.1.4 §a／§b 共用：建立一個 Fact 節點並連結 `HAS_SUBJECT`／`HAS_OBJECT`／
+    `SUPPORTED_BY`。即時路徑（`merge_triples_to_graph`）與回填路徑
+    （`backfill_fact_nodes`）共用同一段 Cypher，避免兩邊 schema 各自漂移。
+
+    `subject`／`object`／`rel_type` 三個屬性同時存成 Fact 節點自身的扁平屬性
+    （denormalized，而非只靠 `HAS_SUBJECT`／`HAS_OBJECT` 邊間接推得）——這是
+    §b 回填批次任務能做到文件描述的冪等比對鍵（`source_doc_id`＋
+    `source_svo_chunk_index`＋`subject`＋`rel_type`＋`object`）的前提，也讓
+    `vector_search_facts()` 不必額外 traversal 就能回傳完整三元組（2026-08-18
+    追加，原始即時路徑上線時漏了這三個屬性，只在 Cypher 查詢參數裡用來
+    MATCH，未真正寫進節點）。
+
+    `MATCH (s)/(o)/(c)` 任一方不存在時（例如 Chunk 尚未向量化，見既有誠實
+    侷限段落）整條鏈不會建立任何節點；回傳值依 `RETURN f` 是否有記錄判斷
+    這次呼叫是否真的建立了節點，供 `backfill_fact_nodes()` 準確計數。
+    """
+    result = await driver.execute_query(
+        """
+        MATCH (s:Entity {kg_id: $kg_id, name: $subject})
+        MATCH (o:Entity {kg_id: $kg_id, name: $object})
+        MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
+        CREATE (f:Fact {
+            kg_id: $kg_id, fact_text: $fact_text, fact_embedding: $fact_embedding,
+            verb: $verb, confidence: $confidence,
+            source_doc_id: $source_doc_id, source_svo_chunk_index: $chunk_index,
+            subject: $subject, object: $object, rel_type: $rel_type
+        })
+        CREATE (f)-[:HAS_SUBJECT]->(s)
+        CREATE (f)-[:HAS_OBJECT]->(o)
+        CREATE (f)-[:SUPPORTED_BY]->(c)
+        RETURN f
+        """,
+        kg_id=kg_id_str,
+        subject=subject,
+        object=object_,
+        rel_type=rel_type,
+        source_doc_id=source_doc_id,
+        chunk_index=chunk_index,
+        fact_text=fact_text,
+        fact_embedding=fact_embedding,
+        verb=verb,
+        confidence=confidence,
+    )
+    return bool(result.records)
+
+
 async def merge_triples_to_graph(
     driver: AsyncDriver,
     kg_id: UUID,
@@ -706,7 +766,9 @@ async def merge_triples_to_graph(
     object)` 為粒度收斂）。僅在 `triple.source_doc_id`／
     `triple.source_svo_chunk_index` 皆存在時才建立（需要靠這兩者 MATCH 到
     `merge_entity()` 剛建立的 `Chunk` 節點才能連結 `SUPPORTED_BY`；兩者缺席
-    時無法連結，直接跳過，不建立不完整的 `Fact` 節點）。
+    時無法連結，直接跳過，不建立不完整的 `Fact` 節點）。實際建立交給
+    `_create_fact_node()`（見該函式 docstring，2026-08-18 補上 `subject`／
+    `object`／`rel_type` 扁平屬性，供 §b 回填批次任務比對鍵使用）。
     """
     kg_id_str = str(kg_id)
     for triple in triples:
@@ -775,23 +837,11 @@ async def merge_triples_to_graph(
             fact_text = _verbalize_fact(
                 subject_name, triple.subject_type, triple.verb, object_name, triple.object_type
             )
-            await driver.execute_query(
-                """
-                MATCH (s:Entity {kg_id: $kg_id, name: $subject})
-                MATCH (o:Entity {kg_id: $kg_id, name: $object})
-                MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
-                CREATE (f:Fact {
-                    kg_id: $kg_id, fact_text: $fact_text, fact_embedding: $fact_embedding,
-                    verb: $verb, confidence: $confidence,
-                    source_doc_id: $source_doc_id, source_svo_chunk_index: $chunk_index
-                })
-                CREATE (f)-[:HAS_SUBJECT]->(s)
-                CREATE (f)-[:HAS_OBJECT]->(o)
-                CREATE (f)-[:SUPPORTED_BY]->(c)
-                """,
-                kg_id=kg_id_str,
+            await _create_fact_node(
+                driver, kg_id_str,
                 subject=subject_name,
-                object=object_name,
+                object_=object_name,
+                rel_type=triple.rel_type,
                 source_doc_id=str(triple.source_doc_id),
                 chunk_index=triple.source_svo_chunk_index,
                 fact_text=fact_text,
@@ -824,8 +874,10 @@ async def vector_search_facts(
 ) -> list[dict]:
     """3.1.4 §a `RETRIEVE`：`fact_embedding_vector` 向量索引 KNN 查詢，
     比照 `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳
-    最相近的 `Fact` 候選（`fact_text`／`verb`／`confidence`／來源追溯欄位
-    ／`score`）。
+    最相近的 `Fact` 候選（`fact_text`／`verb`／`confidence`／`subject`／
+    `object`／`rel_type`／來源追溯欄位／`score`；2026-08-18 追加後三者——
+    `_create_fact_node()` 補上這三個扁平屬性後，呼叫端不必再額外 traversal
+    `HAS_SUBJECT`／`HAS_OBJECT` 邊就能取得完整三元組）。
 
     ⚠️ **已知限制（KG 範圍過濾為查詢後 post-filter，非索引原生 pre-filter）**：
     Neo4j 向量索引的 KNN 查詢是對**全部** `Fact` 節點（跨所有 KG）做近似
@@ -845,6 +897,7 @@ async def vector_search_facts(
         YIELD node, score
         WHERE node.kg_id = $kg_id
         RETURN node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
+               node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
                node.source_doc_id AS source_doc_id,
                node.source_svo_chunk_index AS source_svo_chunk_index, score
         """,
@@ -853,6 +906,116 @@ async def vector_search_facts(
         vector=query_vector,
     )
     return [dict(r) for r in result.records]
+
+
+async def backfill_fact_nodes(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    embedding_provider: EmbeddingProvider,
+    *,
+    batch_size: int = 100,
+) -> int:
+    """3.1.4 §b 回填批次任務：掃描該 KG 內所有既有 `Entity--[REL_TYPE]-->Entity`
+    邊累積的 `citations_json`，把尚未有對應 `Fact` 節點的歷史 citation 補建成
+    `Fact` 節點——`Fact` 向量化功能是**抽取管線跑完之後**（2026-08-03）才上線
+    的（見 3.1.4 §a 時機選擇段落），這之前完成的抽取只留下 `citations_json`，
+    沒有對應 `Fact` 節點；本函式與即時路徑（`merge_triples_to_graph` →
+    `_create_fact_node`）共用同一套 verbalize／embedding／建節點邏輯，不重複
+    實作兩套。
+
+    **人工觸發的一次性腳本，非常駐背景 Worker**（與 `backfill_related_to_edges`／
+    `backfill_missing_verb_embeddings`／`backfill_entity_name_embeddings` 三個
+    接線進治理 Worker 週期的函式不同類，見 03_系統設計與方法論.md § 3.1.4 §b
+    `START5` 節點）——因此本函式在單次呼叫內部自行分頁掃完整個 KG（`skip`／
+    `batch_size` 循環直到取不到下一批邊），不像那三個函式只吃外部傳入的單一
+    `limit` 批次、依賴呼叫端反覆呼叫。
+
+    **冪等性（EXIST5）**：每筆 citation 建立前，先用
+    `(kg_id, source_doc_id, source_svo_chunk_index, subject, rel_type, object)`
+    六個欄位查詢是否已有對應 `Fact` 節點——已存在就跳過，不重複呼叫
+    `embedding_provider`、不產生重複節點。這個比對鍵之所以能查得到，是因為
+    `_create_fact_node()` 已把 `subject`／`object`／`rel_type` 存成 Fact 節點
+    自身的扁平屬性（2026-08-18 追加，見該函式 docstring）；若沒有這三個屬性，
+    §b 無法做到文件描述的原生 Neo4j 比對，只能退化成不精確的 traversal 猜測。
+
+    citation 缺少 `source_doc_id`／`source_svo_chunk_index` 時直接跳過（理論上
+    `_new_citation()` 一律會填，此處防禦性處理；即使有值，`_create_fact_node()`
+    底層的 `MATCH (c:Chunk ...)` 找不到對應節點時仍會整條鏈不建立任何東西，
+    繼承 3.1.4 §a／SVO chunk 向量化既有記錄的 `Chunk` 雙鍵值缺口，非本函式
+    新引入）。回傳實際新建立的 `Fact` 節點數。
+    """
+    kg_id_str = str(kg_id)
+    created = 0
+    skip = 0
+    while True:
+        result = await driver.execute_query(
+            """
+            MATCH (s:Entity {kg_id: $kg_id})-[r]->(o:Entity {kg_id: $kg_id})
+            WHERE r.kg_id = $kg_id AND r.citations_json IS NOT NULL
+            RETURN type(r) AS rel_type, s.name AS subject, o.name AS object,
+                   s.type AS subject_type, o.type AS object_type,
+                   r.citations_json AS citations_json
+            SKIP $skip LIMIT $batch_size
+            """,
+            kg_id=kg_id_str,
+            skip=skip,
+            batch_size=batch_size,
+        )
+        edges = result.records
+        if not edges:
+            break
+
+        for edge in edges:
+            citations = json.loads(edge["citations_json"] or "[]")
+            for citation in citations:
+                source_doc_id = citation.get("source_doc_id")
+                chunk_index = citation.get("source_svo_chunk_index")
+                if source_doc_id is None or chunk_index is None:
+                    continue
+
+                exists = await driver.execute_query(
+                    """
+                    MATCH (f:Fact {
+                        kg_id: $kg_id, source_doc_id: $source_doc_id,
+                        source_svo_chunk_index: $chunk_index,
+                        subject: $subject, rel_type: $rel_type, object: $object
+                    })
+                    RETURN count(f) AS cnt
+                    """,
+                    kg_id=kg_id_str,
+                    source_doc_id=source_doc_id,
+                    chunk_index=chunk_index,
+                    subject=edge["subject"],
+                    rel_type=edge["rel_type"],
+                    object=edge["object"],
+                )
+                if exists.records and exists.records[0]["cnt"] > 0:
+                    continue  # EXIST5：已有對應 Fact 節點，略過
+
+                fact_text = _verbalize_fact(
+                    edge["subject"], edge["subject_type"], citation.get("verb", ""),
+                    edge["object"], edge["object_type"],
+                )
+                created_now = await _create_fact_node(
+                    driver, kg_id_str,
+                    subject=edge["subject"],
+                    object_=edge["object"],
+                    rel_type=edge["rel_type"],
+                    source_doc_id=source_doc_id,
+                    chunk_index=chunk_index,
+                    fact_text=fact_text,
+                    fact_embedding=await embedding_provider.encode(fact_text),
+                    verb=citation.get("verb", ""),
+                    confidence=citation.get("confidence", 1),
+                )
+                if created_now:
+                    created += 1
+
+        if len(edges) < batch_size:
+            break
+        skip += batch_size
+
+    return created
 
 
 async def create_related_to_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
