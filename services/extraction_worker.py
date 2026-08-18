@@ -70,7 +70,12 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
             chunk["text"], llm_provider, embedding_provider,
             kg_id=kg_id, calibration_db_path=db_path,
         )
+        # § 3.1.4 §c（2026-08-18 定案）：source_doc_id 先前從未被賦值，導致
+        # HAS_ENTITY 邊／Fact 節點在正式環境從未真正建立過。document_uuid()
+        # 對穩定的 source 決定性推導出 UUID，同一份文件每次都得到相同的值。
+        source_doc_id = document_record_service.document_uuid(source)
         for triple in triples:
+            triple.source_doc_id = source_doc_id
             triple.source_svo_chunk_index = chunk["index"]
             triple.source_svo_chunk_file = chunk["filename"]
             triple.source_sentence_start = chunk["source_sentence_start"]

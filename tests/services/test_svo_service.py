@@ -1423,10 +1423,12 @@ async def test_embed_svo_chunks_writes_one_vector_per_chunk():
     await svc.embed_svo_chunks(driver, kg_id, "note.md", chunks, embedding)
 
     assert len(driver.calls) == len(chunks)
+    expected_doc_id = str(document_record_service.document_uuid("note.md"))
     for (query, params), chunk in zip(driver.calls, chunks):
         assert "c.embedding" in query
         assert params["kg_id"] == str(kg_id)
-        assert params["source"] == "note.md"
+        assert params["source_doc_id"] == expected_doc_id  # 2026-08-18：與 _merge_chunk_mention() 共用同一把 MERGE 鍵
+        assert params["source"] == "note.md"  # 仍保留為一般屬性，供除錯／回溯
         assert params["chunk_index"] == chunk.index
         assert params["chunk_file"] == chunk.filename
         assert len(params["embedding"]) == embedding.dim

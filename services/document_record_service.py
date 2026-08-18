@@ -19,9 +19,30 @@ from pathlib import Path
 from typing import Literal
 from uuid import UUID
 
+from uuid import uuid5
+
+from core.constants import DOCUMENT_ID_NAMESPACE
 from models.knowledge_graph import AssignmentHistoryEntry, DocumentRecord
 
 _RECORD_FILENAME = "_record.json"
+
+
+def document_uuid(source: str) -> UUID:
+    """§ 3.1.4 §c 定案：對 `source`（文件的穩定自然鍵，見該節查證——`init_record()`／
+    `append_assignment()` 皆不會改寫既有的 `source`，重新解析／重新歸屬到別的 KG
+    皆不影響）決定性推導出一個 UUID，取代先前 `SVOTriple.source_doc_id` 從未真正
+    被賦值過的缺口。
+
+    刻意只用 `source`、不含 `kg_id`——本系統的設計語意是「同一份文件跨 KG 搬移仍是
+    同一份文件」（`append_assignment()` 累加歸屬歷史而非重置），文件識別碼理應對應
+    文件本身，不是文件在某個 KG 裡的身分；下游查詢（`HAS_ENTITY`／`Fact`／`Chunk`）
+    本來就一律搭配 `kg_id` 一起組成複合鍵，`source_doc_id` 本身不需要獨自承擔跨 KG
+    唯一性。
+
+    同一個 `source` 每次呼叫都得到相同的 UUID（`uuid.uuid5`，RFC 4122 §4.3 命名式
+    UUID），不需要額外持久化欄位就能讓既有文件回填時「算出」正確的 ID。
+    """
+    return uuid5(DOCUMENT_ID_NAMESPACE, source)
 
 
 def _record_path(folder: Path) -> Path:

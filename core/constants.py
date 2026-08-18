@@ -1,3 +1,5 @@
+from uuid import UUID
+
 VECTOR_DIM = 384  # paraphrase-multilingual-MiniLM-L12-v2
 
 # KG 路由門檻（v1 舊公式遺留值，見 docs/論文/03_系統設計與方法論.md § 3.2 §a 注意事項——
@@ -94,6 +96,19 @@ EXPAND_GATE_THRESHOLD = 0.9
 # 候選池要累積到 EXPAND_POOL_MIN_SIZE 才會真的觸發分群，不需要像抽取
 # Worker 那樣緊盯），單位為秒。
 EXPAND_WORKER_POLL_INTERVAL = 300
+
+# 文件識別碼命名空間（見 docs/論文/03_系統設計與方法論.md § 3.1.4 §c，2026-08-18
+# 定案並實作）——`services/document_record_service.py::document_uuid()` 用
+# `uuid.uuid5(DOCUMENT_ID_NAMESPACE, source)` 對任一文件的 `source`（穩定不變的
+# 自然鍵，見該節查證）決定性推導出 UUID，取代先前從未真正被賦值過的
+# `SVOTriple.source_doc_id`。比照 RFC 4122（Leach, Mealling & Salz, 2005）§4.3
+# 「為命名空間本身另外產生一個 UUID」的建議，以及 langchain-ai/langchain
+# （🟢 已用 gh api 查證 144,437★，2026-08-18）`langchain_core/indexing/api.py`
+# 同一套 `uuid.uuid5(NAMESPACE_UUID, sha1(...))` 機制的生產級先例。
+# ⚠️ **此值一旦定案不可再改**——改變它會讓所有已推導過的文件 UUID 全部跟著
+# 改變，等於讓既有的 HAS_ENTITY／Fact 資料與新推導的 ID 對不上，回填機制
+# 也會因此失去意義。
+DOCUMENT_ID_NAMESPACE = UUID("e5884159-825d-4822-93d4-331972dc326b")
 
 # `SIM` 節點的比對目標——33 個關係型別各自的自然語言描述句／範例句（而非型別
 # 識別碼字串本身），依據 Chen & Li (2021) ZS-BERT 的描述句 embedding 設計與

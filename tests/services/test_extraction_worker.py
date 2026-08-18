@@ -111,6 +111,8 @@ async def test_process_one_success_merges_triples_and_marks_completed(tmp_path, 
     assert triples[0].source_svo_chunk_index == chunk_index
     assert triples[0].source_svo_chunk_file
     assert triples[0].source_sentence_start == 1
+    # § 3.1.4 §c（2026-08-18）：source_doc_id 先前從未被賦值，現應決定性推導
+    assert triples[0].source_doc_id == document_record_service.document_uuid(source)
 
     assert _read_status(config.task_queue_db_path(), str(kg_id), source, chunk_index) == "completed"
 

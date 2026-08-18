@@ -1226,27 +1226,33 @@ async def embed_svo_chunks(
     `embedding_provider` 未提供時安全跳過，比照 `merge_entity` 對可選
     provider 的既有慣例。
 
-    ⚠️ **誠實侷限**：本函式以 `(kg_id, source, chunk_index)` 為 `Chunk` 節點
-    識別鍵（`source` 為檔案系統路徑字串），`_merge_chunk_mention()`
-    （`HAS_ENTITY` 邊）則以 `(kg_id, source_doc_id: UUID, chunk_index)` 為鍵。
-    兩者鍵值不同不是本次疏漏，而是既有缺口的延伸——`source_doc_id` 這個
-    UUID 目前沒有任何實際產生邏輯（尚無 Worker 把文件解析賦予真正的文件
-    UUID，只有測試程式碼會自行塞入 `uuid4()`），而向量化發生在 SVO 抽取
-    之前，此時唯一可靠的文件識別就是 `source` 字串。兩套鍵值如何收斂成
-    同一份 `Chunk` 節點，待文件 UUID 指派機制實際實作（第四章）時一併
-    處理，非本次範圍。
+    ✅ **雙鍵值缺口已收斂（2026-08-18，見 § 3.1.4 §c）**：本函式原以
+    `(kg_id, source, chunk_index)` 為 `Chunk` 節點識別鍵（`source` 為檔案系統
+    路徑字串），`_merge_chunk_mention()`（`HAS_ENTITY` 邊）則以
+    `(kg_id, source_doc_id: UUID, chunk_index)` 為鍵——`source_doc_id` 先前
+    從未真正被賦值，導致兩者形成兩個彼此不相連的 `Chunk` 節點群。現改為
+    `document_record_service.document_uuid(source)` 決定性推導出
+    `source_doc_id`，與 `_merge_chunk_mention()` 共用同一個 MERGE 鍵——本函式
+    在 CHUNKREADY 階段先建立節點並存 `embedding`，`_merge_chunk_mention()`
+    在抽取階段接著 MERGE 到同一個節點補上 `HAS_ENTITY` 邊，`_create_fact_node()`
+    的 `SUPPORTED_BY` 才真正連得到有向量的節點。`source` 字串仍保留為節點的
+    一般屬性（除錯／回溯用），只是不再是識別鍵的一部分。**僅對此修正上線後
+    新產生的資料生效**——既有資料（例如已用舊鍵值寫入的既有 KG）仍是兩群
+    分離的 `Chunk` 節點，回填／補充抽取留待後續獨立討論，非本次範圍。
     """
     if embedding_provider is None or not chunks:
         return
 
+    source_doc_id = document_record_service.document_uuid(source)
     vectors = await embedding_provider.encode_batch([chunk.text for chunk in chunks])
     for chunk, vector in zip(chunks, vectors):
         await driver.execute_query(
             """
-            MERGE (c:Chunk {kg_id: $kg_id, source: $source, chunk_index: $chunk_index})
-            SET c.embedding = $embedding, c.chunk_file = $chunk_file
+            MERGE (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
+            SET c.embedding = $embedding, c.chunk_file = $chunk_file, c.source = $source
             """,
             kg_id=str(kg_id),
+            source_doc_id=str(source_doc_id),
             source=source,
             chunk_index=chunk.index,
             embedding=vector,

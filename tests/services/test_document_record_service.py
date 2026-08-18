@@ -1,6 +1,37 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from services import document_record_service as svc
+
+
+# ── document_uuid（§ 3.1.4 §c 文件識別碼決定性推導，2026-08-18）────────────
+
+def test_document_uuid_is_deterministic_for_same_source():
+    assert svc.document_uuid("report.pdf") == svc.document_uuid("report.pdf")
+
+
+def test_document_uuid_differs_for_different_sources():
+    assert svc.document_uuid("report.pdf") != svc.document_uuid("other.pdf")
+
+
+def test_document_uuid_returns_version_5_uuid():
+    """RFC 4122 §4.3 命名式 UUID——version 欄位須為 5，與 langchain-ai/langchain
+    `uuid.uuid5(NAMESPACE_UUID, ...)` 同一套機制。"""
+    result = svc.document_uuid("report.pdf")
+
+    assert isinstance(result, UUID)
+    assert result.version == 5
+
+
+def test_document_uuid_stable_across_kg_reassignment():
+    """§ 3.1.4 §c 定案：刻意不把 kg_id 納入雜湊輸入——同一份文件重新歸屬到
+    別的 KG 時，`source` 不變，推導出的 UUID 也應該不變（同一份文件本身的
+    識別碼，不是「文件在某個 KG 裡的身分」）。"""
+    doc_id_in_kg_a = svc.document_uuid("report.pdf")
+    # 重新歸屬只搬移資料夾、append_assignment() 不改寫 source，因此呼叫端
+    # 傳入的 source 字串跨 KG 前後完全相同——此處直接模擬同一次呼叫。
+    doc_id_in_kg_b = svc.document_uuid("report.pdf")
+
+    assert doc_id_in_kg_a == doc_id_in_kg_b
 
 
 def test_init_record_creates_fresh_record_when_missing(tmp_path):
