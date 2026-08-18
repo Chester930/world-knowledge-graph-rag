@@ -1610,6 +1610,7 @@ async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_prov
     assert fact["kg_id"] == str(kg_id)
     assert fact["subject"] == "台積電"
     assert fact["object"] == "晶片"
+    assert fact["rel_type"] == "CAUSES"  # 2026-08-18 追加：§b 回填批次任務的冪等比對鍵需要
     assert fact["verb"] == "生產"
     assert fact["confidence"] == 1
     assert fact["source_doc_id"] == str(doc_id)
@@ -1695,6 +1696,7 @@ async def test_create_fact_vector_index_issues_create_vector_index_query():
 async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
     driver = FakeDriver(records=[
         {"fact_text": "台積電 生產 晶片", "verb": "生產", "confidence": 3,
+         "subject": "台積電", "object": "晶片", "rel_type": "CAUSES",
          "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.92},
     ])
     kg_id = uuid4()
@@ -1703,11 +1705,194 @@ async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
 
     assert results == [
         {"fact_text": "台積電 生產 晶片", "verb": "生產", "confidence": 3,
+         "subject": "台積電", "object": "晶片", "rel_type": "CAUSES",
          "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.92},
     ]
     query, params = driver.calls[0]
     assert "fact_embedding_vector" in query
     assert "WHERE node.kg_id = $kg_id" in query
+    assert "node.subject AS subject" in query
+    assert "node.rel_type AS rel_type" in query
     assert params["kg_id"] == str(kg_id)
     assert params["top_k"] == 5
     assert params["vector"] == [0.1, 0.2]
+
+
+# ── backfill_fact_nodes（3.1.4 §b 回填批次任務，2026-08-18）─────────────────
+
+class BackfillFactFakeDriver:
+    """模擬「掃描既有邊＋citations_json → 存在性檢查 → 建立 Fact 節點」的
+    完整鏈路，供 `backfill_fact_nodes()` 測試使用。`edges` 為固定的既有邊
+    清單（模擬分頁掃描來源）；`existing_fact_keys` 模擬已經有對應 Fact 節點
+    的 citation（比對鍵：source_doc_id/chunk_index/subject/rel_type/object）；
+    `missing_chunk_keys` 模擬 `_create_fact_node()` 內 `MATCH (c:Chunk...)`
+    找不到對應節點、整條鏈不建立任何東西的情境（(source_doc_id, chunk_index)）。"""
+
+    def __init__(self, edges, existing_fact_keys=None, missing_chunk_keys=None):
+        self._edges = edges
+        self.existing_fact_keys = existing_fact_keys or set()
+        self.missing_chunk_keys = missing_chunk_keys or set()
+        self.scan_calls: list[dict] = []
+        self.exist_calls: list[dict] = []
+        self.create_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "WHERE r.kg_id = $kg_id AND r.citations_json IS NOT NULL" in stripped:
+            self.scan_calls.append(params)
+            skip, batch_size = params["skip"], params["batch_size"]
+            return FakeResult(self._edges[skip: skip + batch_size])
+        if "RETURN count(f) AS cnt" in stripped:
+            self.exist_calls.append(params)
+            key = (
+                params["source_doc_id"], params["chunk_index"],
+                params["subject"], params["rel_type"], params["object"],
+            )
+            return FakeResult([{"cnt": 1 if key in self.existing_fact_keys else 0}])
+        if "CREATE (f:Fact" in stripped:
+            self.create_calls.append(params)
+            chunk_key = (params["source_doc_id"], params["chunk_index"])
+            if chunk_key in self.missing_chunk_keys:
+                return FakeResult([])  # MATCH (c:Chunk...) 找不到，整條鏈不執行
+            return FakeResult([{"f": params}])
+        return FakeResult([])
+
+
+def _fact_edge(subject="A", object_="B", rel_type="CAUSES", citations=None):
+    return {
+        "rel_type": rel_type, "subject": subject, "object": object_,
+        "subject_type": "概念", "object_type": "概念",
+        "citations_json": json.dumps(citations or []),
+    }
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_creates_fact_for_uncovered_citation():
+    doc_id = str(uuid4())
+    edge = _fact_edge(citations=[
+        {"source_doc_id": doc_id, "source_svo_chunk_index": 1, "verb": "導致", "confidence": 3},
+    ])
+    driver = BackfillFactFakeDriver(edges=[edge])
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 1
+    assert len(driver.create_calls) == 1
+    call = driver.create_calls[0]
+    assert call["subject"] == "A"
+    assert call["object"] == "B"
+    assert call["rel_type"] == "CAUSES"
+    assert call["source_doc_id"] == doc_id
+    assert call["chunk_index"] == 1
+    assert call["verb"] == "導致"
+    assert call["confidence"] == 3
+    assert call["fact_text"] == svc._verbalize_fact("A", "概念", "導致", "B", "概念")
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_skips_citation_already_covered():
+    """EXIST5：已有對應 Fact 節點時略過，不重複呼叫 embedding provider。"""
+    doc_id = str(uuid4())
+    edge = _fact_edge(citations=[
+        {"source_doc_id": doc_id, "source_svo_chunk_index": 1, "verb": "導致", "confidence": 3},
+    ])
+    driver = BackfillFactFakeDriver(
+        edges=[edge],
+        existing_fact_keys={(doc_id, 1, "A", "CAUSES", "B")},
+    )
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 0
+    assert driver.create_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_skips_citation_missing_source_info():
+    edge = _fact_edge(citations=[
+        {"source_doc_id": None, "source_svo_chunk_index": None, "verb": "導致", "confidence": 3},
+    ])
+    driver = BackfillFactFakeDriver(edges=[edge])
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 0
+    assert driver.exist_calls == []
+    assert driver.create_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_does_not_count_when_chunk_missing():
+    """`_create_fact_node()` 底層 MATCH (c:Chunk...) 找不到節點時整條鏈不建立
+    任何東西——繼承既有 Chunk 雙鍵值缺口，backfill 不應計為成功建立。"""
+    doc_id = str(uuid4())
+    edge = _fact_edge(citations=[
+        {"source_doc_id": doc_id, "source_svo_chunk_index": 1, "verb": "導致", "confidence": 3},
+    ])
+    driver = BackfillFactFakeDriver(edges=[edge], missing_chunk_keys={(doc_id, 1)})
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 0
+    assert len(driver.create_calls) == 1  # 有嘗試過，只是未真正建立
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_handles_multiple_citations_on_same_edge():
+    """對應『同一邊累積多筆 citation，各自獨立產生 Fact 節點』（3.1.4 §a 的
+    『永不相互覆蓋或平均』設計意圖，延伸到回填路徑）。"""
+    doc_id_1, doc_id_2 = str(uuid4()), str(uuid4())
+    edge = _fact_edge(citations=[
+        {"source_doc_id": doc_id_1, "source_svo_chunk_index": 1, "verb": "創立", "confidence": 3},
+        {"source_doc_id": doc_id_2, "source_svo_chunk_index": 5, "verb": "創辦", "confidence": 2},
+    ])
+    driver = BackfillFactFakeDriver(edges=[edge])
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 2
+    assert {c["verb"] for c in driver.create_calls} == {"創立", "創辦"}
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_paginates_across_multiple_batches():
+    """一次性腳本內部自行分頁掃完整個 KG，不依賴外部反覆呼叫（見 §b `START5`
+    節點：與接線進治理 Worker 的另外三個 backfill_* 函式不同類）。"""
+    edges = [
+        _fact_edge(subject=f"S{i}", object_=f"O{i}", citations=[
+            {"source_doc_id": str(uuid4()), "source_svo_chunk_index": 1, "verb": "關係", "confidence": 1},
+        ])
+        for i in range(3)
+    ]
+    driver = BackfillFactFakeDriver(edges=edges)
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding, batch_size=2)
+
+    assert count == 3
+    assert len(driver.scan_calls) == 2  # 第一批 2 筆、第二批 1 筆（不足 batch_size 即停止）
+    assert driver.scan_calls[0]["skip"] == 0
+    assert driver.scan_calls[1]["skip"] == 2
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_returns_zero_when_no_edges():
+    driver = BackfillFactFakeDriver(edges=[])
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 0
+    assert len(driver.scan_calls) == 1
