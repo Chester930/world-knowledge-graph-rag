@@ -10,7 +10,7 @@ from core.database import get_driver
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
-from services.svo_service import bfs_query, vector_search_facts
+from services.svo_service import bfs_query, resolve_query_relation_type, vector_search_facts
 
 router = APIRouter(prefix="/agent", tags=["agent"])
 
@@ -43,6 +43,18 @@ async def _find_seed_entities(driver: AsyncDriver, kg_id: UUID, question: str) -
     matched = [name for name in names if name in question]
     matched.sort(key=len, reverse=True)
     return matched[:_SEED_ENTITY_LIMIT]
+
+
+def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | None) -> list[SVOTriple]:
+    """§ 3.2 §c `QFILTER`（2026-08-18 定案）：對 `bfs_query()` 已回傳的三元組
+    做**後篩選**，只保留 `rel_type` 型別——不改變 BFS 走訪路徑本身的語意，
+    避免漏掉需先經過其他型別的邊才能抵達目標型別的路徑（見設計文件同名
+    段落的 recall 風險說明）。`rel_type` 為 `None`（`QNOMATCH`）時原樣回傳，
+    不篩選——優雅降級，不因型別解析失敗就讓查詢端拿不到任何結果。
+    """
+    if rel_type is None:
+        return triples
+    return [t for t in triples if t.rel_type == rel_type]
 
 
 def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> list[str]:
@@ -111,16 +123,27 @@ def _build_prompt(
 async def chat(payload: ChatRequest):
     """SSE 串流問答。
 
-    ⚠️ **暫時方案（2026-07-28；2026-08-18 補上語意 Fact 檢索）**：正式的雙層
-    RAG 流程（`ConceptNode` 路由 → `BFS` 圖遍歷 → 圖譜驅動文件取回 → 自我精煉
-    迴圈 → LLM 串流）待 3.2 §a（RQ2）設計討論完成後才會實作。這裡先接一個
-    跳過路由層的堪用版本：BFS 種子仍是字面比對（`_find_seed_entities`），
-    但額外接上 3.1.4 §a 已完成的 `vector_search_facts()`——問題向量化後在
-    已選定的 `kg_id` 內做語意檢索，補足字面比對找不到、但語意相關的事實
-    （例如問題用「資遣」、圖譜存的是「解僱」）。仍然沒有語意排序、沒有
+    ⚠️ **暫時方案（2026-07-28；2026-08-18 補上語意 Fact 檢索與查詢時關係
+    連結）**：正式的雙層 RAG 流程（`ConceptNode` 路由 → `BFS` 圖遍歷 → 圖譜
+    驅動文件取回 → 自我精煉迴圈 → LLM 串流）待 3.2 §a（RQ2）設計討論完成
+    後才會實作。這裡先接一個跳過路由層的堪用版本：BFS 種子仍是字面比對
+    （`_find_seed_entities`），但額外接上 3.1.4 §a 已完成的
+    `vector_search_facts()`——問題向量化後在已選定的 `kg_id` 內做語意檢索，
+    補足字面比對找不到、但語意相關的事實（例如問題用「資遣」、圖譜存的是
+    「解僱」）；並接上 3.2 §c `resolve_query_relation_type()`——把整個問題
+    文字（非額外抽取出的動詞片語，見下方誠實侷限）解析為對應的 canonical
+    關係型別，對 `bfs_query()` 的結果做後篩選。仍然沒有語意排序、沒有
     自我精煉，檢索品質不代表正式版本的水準；`ConceptNode` 跨 KG 路由本身
-    （RQ2）仍未實作，此處的語意檢索侷限在使用者已手動指定的單一 `kg_id`
-    範圍內。
+    （RQ2）仍未實作，此處的語意檢索與關係連結皆侷限在使用者已手動指定的
+    單一 `kg_id` 範圍內。
+
+    ⚠️ **誠實侷限（關係連結的輸入）**：3.2 §c 設計文件的 Behavior Tree 以
+    「使用者查詢中的動詞措辭」為 `QSIM` 輸入，但沒有指定如何從問題全文中
+    抽取出這個動詞措辭——本次接線選擇最小改動：直接把整個問題字串餵給
+    `resolve_query_relation_type()`（而非另外呼叫 LLM 抽取核心動詞），代價
+    是問題裡的實體/名詞也會混進比對的 embedding、可能稀釋比對精準度；好處
+    是不多一次 LLM 呼叫、不增加延遲與成本。是否要改為先抽取動詞片語再比對，
+    留待第五章消融實驗評估是否值得多一次 LLM 呼叫的代價，非本次範圍。
     """
 
     async def _stream():
@@ -130,6 +153,7 @@ async def chat(payload: ChatRequest):
             return
 
         driver = get_driver()
+        llm_provider = get_llm_provider()
         triples: list[SVOTriple] = []
         fact_results: list[dict] = []
         if payload.use_svo:
@@ -137,13 +161,17 @@ async def chat(payload: ChatRequest):
             triples = await bfs_query(driver, payload.kg_id, seeds, hops=payload.svo_hops)
 
             embedding_provider = get_embedding_provider()
+            resolved_rel_type = await resolve_query_relation_type(
+                payload.question, embedding_provider, llm_provider=llm_provider
+            )
+            triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
+
             question_vector = await embedding_provider.encode(payload.question)
             fact_results = await vector_search_facts(
                 driver, payload.kg_id, question_vector, top_k=payload.top_k
             )
 
         prompt = _build_prompt(payload.question, triples, fact_results, payload.history)
-        llm_provider = get_llm_provider()
         async for token in llm_provider.stream(prompt):
             data = json.dumps({"token": token})
             yield f"data: {data}\n\n"

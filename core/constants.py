@@ -74,6 +74,20 @@ SVO_REL_TYPES: set[str] = {
 # docs/參考文獻/03_資訊抽取與本體設計/README.md「第三十一次調整」查證記錄）。
 COMPARE_COSINE_THRESHOLD = 0.75
 
+# `QSIM` 節點門檻——見 docs/論文/03_系統設計與方法論.md § 3.2 §c「查詢時關係
+# 連結」（2026-08-18 定案）：查詢動詞措辭與 33 個 canonical 型別描述句
+# embedding 算 cosine，屬**三區分類**（高門檻直接採信／灰色地帶交 LLM
+# 仲裁／低於低門檻直接判無 match），與 `COMPARE_COSINE_THRESHOLD`（LLM
+# 自報值與 embedding 建議值的二元一致性檢查）判斷結構不同，故不共用同一個
+# 常數。⚠️ 皆為暫定值，未經校準：`QSIM_ASSIGN_THRESHOLD` 直接借用
+# `COMPARE_COSINE_THRESHOLD` 的數值（同為描述句 embedding 的 cosine 比對，
+# 語意上等同「有信心判定為此型別」）；`QSIM_ESCALATE_LOW_THRESHOLD` 比照
+# `ENTITY_DEDUP_COSINE_THRESHOLD`／`ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD`
+# 約 0.13 的高低門檻間距抓一個灰色地帶下界，非從文獻直接推導，第五章消融
+# 實驗需依本論文實際查詢語料重新校準。
+QSIM_ASSIGN_THRESHOLD = 0.75
+QSIM_ESCALATE_LOW_THRESHOLD = 0.60
+
 # `EXPAND` 治理機制（見 docs/論文/03_系統設計與方法論.md § 3.1.3 §a Behavior
 # Tree；docs/報告/11_抽取管線完整實作任務書.md P2-1）——以下四個常數皆為
 # ⚠️ 暫定值，未經校準，第五章消融實驗需依實際候選池／登記表資料重新校準：

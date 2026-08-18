@@ -15,6 +15,8 @@ from core.constants import (
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
     ENTITY_TYPES,
+    QSIM_ASSIGN_THRESHOLD,
+    QSIM_ESCALATE_LOW_THRESHOLD,
     SVO_REL_TYPE_DESCRIPTIONS,
     SVO_REL_TYPES,
     VECTOR_DIM,
@@ -185,6 +187,46 @@ async def classify_relation_by_embedding(
             best_score = score
             best_type = rel_type
     return best_type, best_score
+
+
+async def resolve_query_relation_type(
+    verb_phrase: str,
+    embedding_provider: EmbeddingProvider,
+    *,
+    llm_provider: LLMProvider | None = None,
+) -> str | None:
+    """§ 3.2 §c `QSIM`／`QESCALATE`／`QNOMATCH`（2026-08-18 定案）：把查詢端的
+    動詞措辭解析為對應的 canonical 關係型別，供呼叫端對 `bfs_query()` 的結果
+    做後篩選（§ 3.2 §c `QFILTER`，本函式不做篩選，只負責解析型別）。
+
+    重用 3.1.3 `classify_relation_by_embedding()`（`SIM`）——與 33 個型別描述句
+    的 embedding 比對，同一顆 cache 之後不必重算。三區判斷（與 `COMPARE`／
+    `ESCALATE3` 的二元一致性檢查不同，見設計文件同名段落誠實訂正）：
+
+    - 最高分 ≥ `QSIM_ASSIGN_THRESHOLD`：直接採用該型別。
+    - 最高分介於 `QSIM_ESCALATE_LOW_THRESHOLD` 與 `QSIM_ASSIGN_THRESHOLD` 之間
+      （灰色地帶）：`llm_provider` 提供時交由 LLM 仲裁「此查詢措辭是否對應
+      候選型別」；未提供 `llm_provider` 時視為無法確認，直接回傳 `None`。
+    - 最高分 ＜ `QSIM_ESCALATE_LOW_THRESHOLD`：直接判定為無 match，不浪費一次
+      LLM 呼叫。
+
+    `QNOMATCH`（回傳 `None`）由呼叫端決定後續處理——設計定案為退回不篩選，
+    本函式本身不內建這個退回邏輯，只負責解析。
+    """
+    best_type, best_score = await classify_relation_by_embedding(verb_phrase, embedding_provider)
+
+    if best_score >= QSIM_ASSIGN_THRESHOLD:
+        return best_type
+
+    if best_score < QSIM_ESCALATE_LOW_THRESHOLD or llm_provider is None:
+        return None
+
+    prompt = (
+        f"使用者查詢中的措辭「{verb_phrase}」，是否對應關係類型「{best_type}」"
+        f"（{SVO_REL_TYPE_DESCRIPTIONS[best_type]}）？只回答「是」或「否」，不要有其他文字。"
+    )
+    answer = (await llm_provider.generate(prompt)).strip()
+    return best_type if answer.startswith("是") else None
 
 
 async def _reconcile_rel_type(

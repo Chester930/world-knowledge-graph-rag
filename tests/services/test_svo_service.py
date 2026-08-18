@@ -409,6 +409,91 @@ async def test_extract_svo_triples_escalate3_neither_skips_expand_pool_without_k
     assert not db_path.exists()
 
 
+# ── resolve_query_relation_type（§ 3.2 §c 查詢時關係連結，2026-08-18 定案）──
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_high_score_assigns_directly():
+    """最高分 ≥ QSIM_ASSIGN_THRESHOLD 時直接採用，不呼叫 LLM。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致 B": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    llm = FakeLLM("不應被呼叫")
+
+    result = await svc.resolve_query_relation_type("導致 B", embedding, llm_provider=llm)
+
+    assert result == "CAUSES"
+    assert llm.prompts == []
+
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_gray_zone_llm_confirms():
+    """灰色地帶且 LLM 確認候選型別時採用該型別。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    gray_zone_score = (svc.QSIM_ASSIGN_THRESHOLD + svc.QSIM_ESCALATE_LOW_THRESHOLD) / 2
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [gray_zone_score, (1 - gray_zone_score**2) ** 0.5, 0.0],
+                 causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 0.0, 1.0],
+    )
+    llm = FakeLLM("是")
+
+    result = await svc.resolve_query_relation_type("導致", embedding, llm_provider=llm)
+
+    assert result == "CAUSES"
+    assert len(llm.prompts) == 1
+    assert "CAUSES" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_gray_zone_llm_rejects_returns_none():
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    gray_zone_score = (svc.QSIM_ASSIGN_THRESHOLD + svc.QSIM_ESCALATE_LOW_THRESHOLD) / 2
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"某措辭": [gray_zone_score, (1 - gray_zone_score**2) ** 0.5, 0.0],
+                 causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 0.0, 1.0],
+    )
+    llm = FakeLLM("否")
+
+    result = await svc.resolve_query_relation_type("某措辭", embedding, llm_provider=llm)
+
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_gray_zone_without_llm_provider_returns_none():
+    """灰色地帶但沒有 llm_provider 時視為無法確認，直接回傳 None，不猜測。"""
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    gray_zone_score = (svc.QSIM_ASSIGN_THRESHOLD + svc.QSIM_ESCALATE_LOW_THRESHOLD) / 2
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"某措辭": [gray_zone_score, (1 - gray_zone_score**2) ** 0.5, 0.0],
+                 causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 0.0, 1.0],
+    )
+
+    result = await svc.resolve_query_relation_type("某措辭", embedding, llm_provider=None)
+
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_below_low_threshold_skips_llm_call():
+    """低於 QSIM_ESCALATE_LOW_THRESHOLD 時直接判無 match，不浪費一次 LLM 呼叫
+    （即使有提供 llm_provider）。所有 33 個型別描述句皆未指定、共用 default
+    向量，與查詢措辭的向量正交（cosine=0），確保分數低於門檻。"""
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"完全不相關的措辭": [0.0, 0.0, 1.0]}, default=[1.0, 0.0, 0.0]
+    )
+    llm = FakeLLM("不應被呼叫")
+
+    result = await svc.resolve_query_relation_type("完全不相關的措辭", embedding, llm_provider=llm)
+
+    assert result is None
+    assert llm.prompts == []
+
+
 # ── _relationship_type（Cypher 注入防護，見 P2-1 docstring）─────────────────
 
 def test_relationship_type_accepts_svo_rel_types_member():

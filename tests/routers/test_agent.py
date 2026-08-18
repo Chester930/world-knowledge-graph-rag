@@ -85,6 +85,9 @@ class _FakeEmbeddingProvider:
         self.encoded_texts.append(text)
         return self._vector
 
+    async def encode_batch(self, texts: list[str]):
+        return [self._vector for _ in texts]
+
 
 class _FakeStreamLLM:
     def __init__(self):
@@ -117,9 +120,13 @@ async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
     llm = _FakeStreamLLM()
 
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None  # 本測試聚焦 Fact 檢索接線，不驗證關係連結（見專屬測試）
+
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
     monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
     monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
     monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
@@ -172,3 +179,107 @@ async def test_chat_yields_error_event_when_kg_id_missing():
 
     assert len(chunks) == 1
     assert "event: error" in chunks[0]
+
+
+# ── _filter_triples_by_relation_type：§ 3.2 §c QFILTER（2026-08-18）─────────
+
+def test_filter_triples_by_relation_type_keeps_only_matching_type():
+    triples = [_triple("A", "CAUSES", "B"), _triple("C", "PART_OF", "D")]
+
+    filtered = agent._filter_triples_by_relation_type(triples, "CAUSES")
+
+    assert len(filtered) == 1
+    assert filtered[0].subject == "A"
+
+
+def test_filter_triples_by_relation_type_none_passes_through_unfiltered():
+    """QNOMATCH（None）時原樣回傳，不篩選——優雅降級。"""
+    triples = [_triple("A", "CAUSES", "B"), _triple("C", "PART_OF", "D")]
+
+    filtered = agent._filter_triples_by_relation_type(triples, None)
+
+    assert filtered == triples
+
+
+def test_filter_triples_by_relation_type_empty_input():
+    assert agent._filter_triples_by_relation_type([], "CAUSES") == []
+
+
+# ── chat()：驗證查詢時關係連結（QSIM/QFILTER）確實接線（2026-08-18）─────────
+
+@pytest.mark.asyncio
+async def test_chat_filters_bfs_triples_by_resolved_relation_type(monkeypatch):
+    kg_id = uuid4()
+    resolve_calls = []
+    all_triples = [_triple("A", "CAUSES", "B"), _triple("C", "PART_OF", "D")]
+
+    async def fake_find_seeds(driver, kg_id_arg, question):
+        return ["A", "C"]
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return all_triples
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return []
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        resolve_calls.append((question, embedding_provider, llm_provider))
+        return "CAUSES"
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM()
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="是什麼導致 B 的？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    await _drain(response)
+
+    assert len(resolve_calls) == 1
+    assert resolve_calls[0][0] == "是什麼導致 B 的？"
+    assert resolve_calls[0][2] is llm  # llm_provider 有正確傳入
+    assert "A（概念）導致B（概念）" in llm.prompt
+    assert "C（概念）導致D（概念）" not in llm.prompt  # PART_OF 三元組已被篩掉
+
+
+@pytest.mark.asyncio
+async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch):
+    """QNOMATCH：解析不到型別時，兩個來源的三元組都應該保留。"""
+    kg_id = uuid4()
+    all_triples = [_triple("A", "CAUSES", "B"), _triple("C", "PART_OF", "D")]
+
+    async def fake_find_seeds(driver, kg_id_arg, question):
+        return ["A", "C"]
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return all_triples
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return []
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM()
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="隨便問點什麼", kg_id=kg_id)
+    response = await agent.chat(payload)
+    await _drain(response)
+
+    assert "A（概念）導致B（概念）" in llm.prompt
+    assert "C（概念）導致D（概念）" in llm.prompt
