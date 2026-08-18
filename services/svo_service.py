@@ -1366,11 +1366,21 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
     if hops < 1 or hops > 5:
         raise ValueError("hops 必須介於 1 到 5")
 
+    # 2026-08-19 修復：走訪必須限定在 SVO_REL_TYPES（Entity--[REL_TYPE]-->Entity
+    # 知識層邊）——先前的 [*1..{hops}] 未限定關係型別，一旦圖譜內同時存在
+    # § 3.1.4 §a 的 HAS_ENTITY／HAS_SUBJECT／HAS_OBJECT／SUPPORTED_BY 等結構性
+    # 邊（連到 Chunk／Fact 節點），BFS 就可能行經這些邊、把 startNode/endNode
+    # 解析成沒有 .name 屬性的 Chunk／Fact 節點，導致 SVOTriple(subject=None)
+    # 驗證失敗直接拋例外。此問題先前從未在正式環境重現過，因為所有既有 KG
+    # 的 source_doc_id 一律為 None（見 § 3.1.4 §c），HAS_ENTITY／Fact 從未
+    # 真正建立過，圖上根本沒有這些結構性邊可供誤走——直到今天才第一次有
+    # KG 同時具備知識層與結構層邊，暴露出這個潛藏 bug。
+    rel_types = "|".join(sorted(SVO_REL_TYPES))
     result = await driver.execute_query(
         f"""
         MATCH (seed:Entity {{kg_id: $kg_id}})
         WHERE seed.name IN $seed_entities
-        MATCH path = (seed)-[*1..{hops}]-(neighbor:Entity {{kg_id: $kg_id}})
+        MATCH path = (seed)-[:{rel_types}*1..{hops}]-(neighbor:Entity {{kg_id: $kg_id}})
         UNWIND relationships(path) AS rel
         WITH DISTINCT startNode(rel) AS s, rel, endNode(rel) AS o
         RETURN

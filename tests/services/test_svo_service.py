@@ -5,6 +5,7 @@ from uuid import uuid4
 import pytest
 
 from core import config
+from core.constants import SVO_REL_TYPES
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
@@ -1559,6 +1560,26 @@ async def test_bfs_query_maps_records_using_latest_citation():
     assert triples[0].source_doc_id == doc_id
     assert triples[0].source_sentence_start == 1
     assert triples[0].verb == "導致"
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_restricts_traversal_to_svo_rel_types():
+    """2026-08-19 迴歸測試：走訪必須限定在 SVO_REL_TYPES（知識層邊），不能
+    是不限型別的 `[*1..{hops}]`——否則圖上同時存在 § 3.1.4 §a 的
+    HAS_ENTITY／HAS_SUBJECT／HAS_OBJECT／SUPPORTED_BY 結構性邊時，BFS 可能
+    行經這些邊、把 startNode/endNode 解析成沒有 `.name` 的 Chunk／Fact
+    節點，導致 `SVOTriple(subject=None)` 驗證失敗直接拋例外（真實對新建立
+    的 3.1.4 驗證 KG 執行時重現過一次，見 docs/報告/15_...md）。"""
+    driver = FakeDriver(records=[])
+
+    await svc.bfs_query(driver, uuid4(), ["A"], hops=2)
+
+    assert len(driver.calls) == 1
+    query, _params = driver.calls[0]
+    assert "[*1..2]" not in query  # 不應該再出現不限關係型別的走訪模式
+    assert "HAS_ENTITY" not in query
+    for rel_type in SVO_REL_TYPES:
+        assert rel_type in query
 
 
 # ── trigger_extraction（原 routers/staging.py::_trigger_extraction，遷移自
