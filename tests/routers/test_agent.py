@@ -1,3 +1,4 @@
+import json
 from uuid import uuid4
 
 import pytest
@@ -283,3 +284,81 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
 
     assert "A（概念）導致B（概念）" in llm.prompt
     assert "C（概念）導致D（概念）" in llm.prompt
+
+
+# ── _serialize_sources / sources SSE 事件：終端機 CLI 顯示來源用（2026-08-18）──
+
+def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
+    triples = [_triple("A", "CAUSES", "B")]
+    fact_results = [{"fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
+                      "rel_type": "CREATED_BY", "object": "SpaceX", "score": 0.9}]
+
+    serialized = agent._serialize_sources(triples, fact_results, "CAUSES")
+
+    assert serialized["resolved_rel_type"] == "CAUSES"
+    assert serialized["triples"] == [{
+        "subject": "A", "subject_type": "概念", "verb": "導致", "object": "B",
+        "object_type": "概念", "rel_type": "CAUSES", "source_svo_chunk_file": None,
+    }]
+    assert serialized["facts"] == [{
+        "fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
+        "object": "SpaceX", "rel_type": "CREATED_BY", "score": 0.9,
+    }]
+
+
+def test_serialize_sources_empty_when_nothing_retrieved():
+    assert agent._serialize_sources([], [], None) == {
+        "resolved_rel_type": None, "triples": [], "facts": [],
+    }
+
+
+@pytest.mark.asyncio
+async def test_chat_yields_sources_event_after_answer_stream(monkeypatch):
+    kg_id = uuid4()
+    triples = [_triple("A", "CAUSES", "B")]
+
+    async def fake_find_seeds(driver, kg_id_arg, question):
+        return ["A"]
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return triples
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return [{"fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
+                  "rel_type": "CREATED_BY", "object": "SpaceX"}]
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return "CAUSES"
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM()
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="是什麼導致 B 的？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert chunks[-1].startswith("event: sources\n")
+    sources_data = json.loads(chunks[-1].split("\n", 1)[1][len("data: "):])
+    assert sources_data["resolved_rel_type"] == "CAUSES"
+    assert sources_data["triples"][0]["subject"] == "A"
+    assert sources_data["facts"][0]["fact_text"] == "馬斯克 創立 SpaceX"
+
+
+@pytest.mark.asyncio
+async def test_chat_yields_empty_sources_event_when_kg_id_missing():
+    """kg_id 缺失時提早 return error 事件，不應該再多送一個 sources 事件。"""
+    payload = ChatRequest(question="沒有指定 KG", kg_id=None)
+
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert len(chunks) == 1
+    assert "event: sources" not in chunks[0]

@@ -57,6 +57,39 @@ def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | N
     return [t for t in triples if t.rel_type == rel_type]
 
 
+def _serialize_sources(triples: list[SVOTriple], fact_results: list[dict], resolved_rel_type: str | None) -> dict:
+    """把本次檢索到的原始來源（BFS 三元組 + 語意 Fact）整理成可序列化的
+    結構，隨 SSE `sources` 事件一併送出——讓呼叫端（CLI 工具、之後的前端）
+    能顯示「答案根據哪些圖譜資料」，供人工審核，而不必只信任 LLM 自己在
+    回答文字裡宣稱的來源。
+    """
+    return {
+        "resolved_rel_type": resolved_rel_type,
+        "triples": [
+            {
+                "subject": t.subject,
+                "subject_type": t.subject_type,
+                "verb": t.verb,
+                "object": t.object,
+                "object_type": t.object_type,
+                "rel_type": t.rel_type,
+                "source_svo_chunk_file": t.source_svo_chunk_file,
+            }
+            for t in triples
+        ],
+        "facts": [
+            {
+                "fact_text": f.get("fact_text"),
+                "subject": f.get("subject"),
+                "object": f.get("object"),
+                "rel_type": f.get("rel_type"),
+                "score": f.get("score"),
+            }
+            for f in fact_results
+        ],
+    }
+
+
 def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> list[str]:
     """合併 BFS 圖遍歷三元組（`bfs_query`）與語意檢索到的 Fact（
     `vector_search_facts`，2026-08-18 接線）成單一份事實清單，供 prompt 使用。
@@ -156,6 +189,7 @@ async def chat(payload: ChatRequest):
         llm_provider = get_llm_provider()
         triples: list[SVOTriple] = []
         fact_results: list[dict] = []
+        resolved_rel_type: str | None = None
         if payload.use_svo:
             seeds = await _find_seed_entities(driver, payload.kg_id, payload.question)
             triples = await bfs_query(driver, payload.kg_id, seeds, hops=payload.svo_hops)
@@ -175,5 +209,10 @@ async def chat(payload: ChatRequest):
         async for token in llm_provider.stream(prompt):
             data = json.dumps({"token": token})
             yield f"data: {data}\n\n"
+
+        sources_json = json.dumps(
+            _serialize_sources(triples, fact_results, resolved_rel_type), ensure_ascii=False
+        )
+        yield f"event: sources\ndata: {sources_json}\n\n"
 
     return StreamingResponse(_stream(), media_type="text/event-stream")
