@@ -7,10 +7,10 @@ from fastapi.responses import StreamingResponse
 from neo4j import AsyncDriver
 
 from core.database import get_driver
-from core.providers.factory import get_llm_provider
+from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
-from services.svo_service import bfs_query
+from services.svo_service import bfs_query, vector_search_facts
 
 router = APIRouter(prefix="/agent", tags=["agent"])
 
@@ -45,12 +45,45 @@ async def _find_seed_entities(driver: AsyncDriver, kg_id: UUID, question: str) -
     return matched[:_SEED_ENTITY_LIMIT]
 
 
-def _build_prompt(question: str, triples: list[SVOTriple], history: list[ChatMessage] | None) -> str:
-    if triples:
-        facts = "\n".join(
-            f"- {t.subject}（{t.subject_type}）{t.verb}{t.object}（{t.object_type}）"
-            for t in triples
-        )
+def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> list[str]:
+    """合併 BFS 圖遍歷三元組（`bfs_query`）與語意檢索到的 Fact（
+    `vector_search_facts`，2026-08-18 接線）成單一份事實清單，供 prompt 使用。
+
+    以 `(subject, rel_type, object)` 去重——兩條來源描述同一件事時只保留一筆
+    （優先保留先出現的 BFS 版本）。`vector_search_facts()` 回傳的 `subject`／
+    `object`／`rel_type` 只有 2026-08-18 之後建立、或已跑過 §b 回填批次任務
+    的 `Fact` 節點才有值；缺席（`None`）時視為無法安全去重，一律原樣保留，
+    不強行比對——寧可讓少數舊資料出現重複描述，也不要因為誤判「相同」而
+    漏掉語意檢索才找得到的事實。
+    """
+    seen: set[tuple[str, str, str]] = set()
+    lines: list[str] = []
+
+    for t in triples:
+        key = (t.subject, t.rel_type, t.object)
+        seen.add(key)
+        lines.append(f"- {t.subject}（{t.subject_type}）{t.verb}{t.object}（{t.object_type}）")
+
+    for f in fact_results:
+        key = (f.get("subject"), f.get("rel_type"), f.get("object"))
+        if all(key) and key in seen:
+            continue
+        if all(key):
+            seen.add(key)
+        lines.append(f"- {f['fact_text']}")
+
+    return lines
+
+
+def _build_prompt(
+    question: str,
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    history: list[ChatMessage] | None,
+) -> str:
+    fact_lines = _merge_fact_lines(triples, fact_results)
+    if fact_lines:
+        facts = "\n".join(fact_lines)
         context_block = f"以下是從知識圖譜檢索到、可能與問題相關的事實：\n{facts}\n"
         instruction = "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，但務必清楚區分哪些是根據圖譜事實、哪些是你自己的補充。"
     else:
@@ -78,11 +111,16 @@ def _build_prompt(question: str, triples: list[SVOTriple], history: list[ChatMes
 async def chat(payload: ChatRequest):
     """SSE 串流問答。
 
-    ⚠️ **暫時方案（2026-07-28）**：正式的雙層 RAG 流程（`ConceptNode` 路由
-    → `BFS` 圖遍歷 → 圖譜驅動文件取回 → 自我精煉迴圈 → LLM 串流）待 3.2 §a
-    （RQ2）設計討論完成後才會實作。這裡先接一個跳過路由層、直接用字面
-    比對＋既有 `bfs_query()` 的堪用版本，供使用者 demo 用；沒有向量檢索、
-    沒有語意排序、沒有自我精煉，檢索品質不代表正式版本的水準。
+    ⚠️ **暫時方案（2026-07-28；2026-08-18 補上語意 Fact 檢索）**：正式的雙層
+    RAG 流程（`ConceptNode` 路由 → `BFS` 圖遍歷 → 圖譜驅動文件取回 → 自我精煉
+    迴圈 → LLM 串流）待 3.2 §a（RQ2）設計討論完成後才會實作。這裡先接一個
+    跳過路由層的堪用版本：BFS 種子仍是字面比對（`_find_seed_entities`），
+    但額外接上 3.1.4 §a 已完成的 `vector_search_facts()`——問題向量化後在
+    已選定的 `kg_id` 內做語意檢索，補足字面比對找不到、但語意相關的事實
+    （例如問題用「資遣」、圖譜存的是「解僱」）。仍然沒有語意排序、沒有
+    自我精煉，檢索品質不代表正式版本的水準；`ConceptNode` 跨 KG 路由本身
+    （RQ2）仍未實作，此處的語意檢索侷限在使用者已手動指定的單一 `kg_id`
+    範圍內。
     """
 
     async def _stream():
@@ -93,11 +131,18 @@ async def chat(payload: ChatRequest):
 
         driver = get_driver()
         triples: list[SVOTriple] = []
+        fact_results: list[dict] = []
         if payload.use_svo:
             seeds = await _find_seed_entities(driver, payload.kg_id, payload.question)
             triples = await bfs_query(driver, payload.kg_id, seeds, hops=payload.svo_hops)
 
-        prompt = _build_prompt(payload.question, triples, payload.history)
+            embedding_provider = get_embedding_provider()
+            question_vector = await embedding_provider.encode(payload.question)
+            fact_results = await vector_search_facts(
+                driver, payload.kg_id, question_vector, top_k=payload.top_k
+            )
+
+        prompt = _build_prompt(payload.question, triples, fact_results, payload.history)
         llm_provider = get_llm_provider()
         async for token in llm_provider.stream(prompt):
             data = json.dumps({"token": token})
