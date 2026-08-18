@@ -1,3 +1,4 @@
+import json
 from uuid import uuid4
 
 import pytest
@@ -99,6 +100,48 @@ class TestTrustAndRebuild:
             doc_folder, status="completed", progress=5, total_sentences=5,
         )
         document_record_service.set_svo_chunk_total(doc_folder, 3)
+
+        svc.rebuild_from_records(db_path, {"kg-1": kg_folder})
+
+        assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc-a.txt", 1)
+
+    def test_rebuild_uses_svo_index_json_for_non_contiguous_chunk_indices(self, tmp_path):
+        """對應 commit 5909c4c 的修復意圖：svo chunk index 並非一定從 1 連續
+        編號時，應直接採用 `svo_index.json` 記錄的實際 index 清單，而非用
+        `chunk_progress+1..total` 推算出查無此 index 的假性待處理項目。"""
+        db_path = _db_path(tmp_path)
+        kg_folder = tmp_path / "kg-1"
+        doc_folder = kg_folder / "doc-a"
+        doc_folder.mkdir(parents=True)
+        document_record_service.init_record(doc_folder, source="doc-a.txt", total_chunks=5)
+        document_record_service.set_svo_chunk_total(doc_folder, 3)
+        (doc_folder / "svo_index.json").write_text(
+            json.dumps({"source": "doc-a.txt", "total_svo_chunks": 3, "chunks": [
+                {"index": 2}, {"index": 5}, {"index": 7},  # 刻意非連續、不從 1 開始
+            ]}),
+            encoding="utf-8",
+        )
+
+        svc.rebuild_from_records(db_path, {"kg-1": kg_folder})
+
+        registered = set()
+        while (item := svc.next_pending(db_path, "kg-1")) is not None:
+            registered.add(item[2])
+            svc.update_status(db_path, "kg-1", "doc-a.txt", item[2], "completed")
+        assert registered == {2, 5, 7}
+
+    def test_rebuild_falls_back_to_range_when_svo_index_json_missing(self, tmp_path):
+        """2026-08-18 迴歸修復：REBUILD 本身就是索引檔案已遺失/損毀時的救援
+        路徑——`svo_index.json` 若剛好也缺席，不該靜默跳過整份文件（會讓
+        待處理進度悄悄消失），應退回範圍推算，寧可誤登記幾個查無此 index
+        的項目（worker 端可重試）。"""
+        db_path = _db_path(tmp_path)
+        kg_folder = tmp_path / "kg-1"
+        doc_folder = kg_folder / "doc-a"
+        doc_folder.mkdir(parents=True)
+        document_record_service.init_record(doc_folder, source="doc-a.txt", total_chunks=5)
+        document_record_service.set_svo_chunk_total(doc_folder, 3)
+        # 刻意不寫 svo_index.json，模擬索引檔案本身也缺席的情境
 
         svc.rebuild_from_records(db_path, {"kg-1": kg_folder})
 

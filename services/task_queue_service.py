@@ -13,6 +13,7 @@
 """
 from __future__ import annotations
 
+import logging
 import sqlite3
 from contextlib import closing
 from pathlib import Path
@@ -20,6 +21,8 @@ from typing import Literal
 
 from services import document_record_service
 from services.svo_chunking import read_svo_index
+
+logger = logging.getLogger(__name__)
 
 TaskStatus = Literal["pending", "processing", "completed", "failed", "pending_upload"]
 
@@ -124,7 +127,7 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
     重建索引，取代原本可能已損毀的索引檔案。
 
     `kg_folders` 為 `{kg_id: KG 資料夾路徑}`。重建規則：`extraction_status`
-    為 `completed` 的文件不需要登記任何 pending chunk；其餘直接讀取
+    為 `completed` 的文件不需要登記任何 pending chunk；其餘優先讀取
     `svo_index.json` 裡實際存在的 chunk_index 清單（而非用
     `chunk_progress+1..total` 推算連續範圍——部份文件的 svo chunk index
     並非從 1 開始連續編號，用推算範圍會查到不存在的 index，導致
@@ -132,6 +135,16 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
     尚未完成（index > chunk_progress）的部份登記為 `pending`（`processing`
     狀態的 chunk 在記錄檔真實狀態來源裡本來就無法與「已中斷」區分，直接
     視為未完成，與 `reset_stuck_processing` 對同一問題的處理精神一致）。
+
+    ⚠️ **`svo_index.json` 缺席時退回範圍推算（2026-08-18 訂正，修復
+    2026-08-04 引入的迴歸）**：`REBUILD` 本身就是「索引檔案已遺失/損毀」
+    才會觸發的救援路徑——若 `svo_index.json` 這份索引檔案剛好也在同一次
+    事故中缺席（例如較舊的文件、或磁碟事故同時波及多個檔案），2026-08-04
+    的版本會直接靜默跳過整份文件，救援路徑本身反而造成待處理進度悄悄消失，
+    與 `REBUILD` 存在的目的矛盾。改為此時退回原本的 `chunk_progress+1..total`
+    範圍推算並記錄警告——寧可誤登記幾個實際不存在的 index（worker 端
+    `_find_chunk()` 找不到時視為 `failed`，可重試，非資料損毀等級的風險），
+    也不要靜默漏掉整份文件。
     """
     if db_path.exists():
         db_path.unlink()
@@ -146,13 +159,25 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
                 record = document_record_service.read_record(doc_folder)
                 if record is None or record.extraction_status == "completed":
                     continue
+
                 svo_index = read_svo_index(doc_folder)
-                if svo_index is None:
-                    continue
-                pending_indices = [
-                    chunk["index"] for chunk in svo_index["chunks"]
-                    if chunk["index"] > record.chunk_progress
-                ]
+                if svo_index is not None:
+                    pending_indices = [
+                        chunk["index"] for chunk in svo_index["chunks"]
+                        if chunk["index"] > record.chunk_progress
+                    ]
+                else:
+                    logger.warning(
+                        "REBUILD：%s 缺少 svo_index.json，退回 chunk_progress+1..total "
+                        "範圍推算（可能誤登記不存在的 chunk_index，worker 端會視為 "
+                        "failed 並可重試，非資料遺失）",
+                        doc_folder,
+                    )
+                    total = record.svo_total_chunks or record.total_chunks
+                    pending_indices = (
+                        list(range(record.chunk_progress + 1, total + 1)) if total > 0 else []
+                    )
+
                 if not pending_indices:
                     continue
                 conn.executemany(
