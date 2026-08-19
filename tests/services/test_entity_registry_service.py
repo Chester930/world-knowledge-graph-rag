@@ -230,6 +230,30 @@ async def test_apply_registry_resumes_from_checkpoint():
 
 
 @pytest.mark.asyncio
+async def test_apply_registry_does_not_corrupt_unrelated_substring_occurrences():
+    """迴歸測試（2026-08-19 真實審查發現並修復）：`str.replace()` 不帶 count
+    時是整句全域替換——若 `mention.text` 恰好也是句子裡另一個不相關詞彙的
+    子字串（此例："AB" ⊂ "CAB"），舊版會把那個不相關的詞也錯誤替換掉。這裡
+    用兩句先建立「AB」→「ABC」的別名關係，再用第三句驗證替換只作用於真正的
+    提及本身，不波及句子裡另一個恰好包含相同子字串、但無關的詞（CAB）。"""
+    sentences = [
+        "AB reported profit.",
+        "ABC issued a statement.",  # "AB" ⊂ "ABC"，觸發規則式合併／長度優先提升為 ABC
+        "AB again, but old CAB system remains.",
+    ]
+    mentions = [
+        [Mention(sentence_idx=0, text="AB", entity_type="ORG")],
+        [Mention(sentence_idx=1, text="ABC", entity_type="ORG")],
+        [Mention(sentence_idx=2, text="AB", entity_type="ORG")],
+    ]
+
+    output, registry = await apply_registry(sentences, mentions)
+
+    assert registry.entry("ABC") is not None  # 已提升為較長的標準名
+    assert output[2] == "ABC again, but old CAB system remains."  # CAB 未被誤替換成 CABC
+
+
+@pytest.mark.asyncio
 async def test_apply_registry_rejects_mismatched_lengths():
     with pytest.raises(ValueError):
         await apply_registry(["句子一"], [])

@@ -238,7 +238,18 @@ async def apply_registry(
                 idx, mention.text, mention.entity_type, llm_provider
             )
             if canonical != mention.text:
-                sentence = sentence.replace(mention.text, canonical)
+                # 2026-08-19（真實審查發現並修復）：`str.replace()` 不帶 count
+                # 時是整句全域替換——若 `mention.text` 這個子字串恰好也出現在
+                # 句子裡其他不相關的詞彙內（例如 "AB" 恰好是 "CAB" 的子字串），
+                # 會把那個不相關的詞也錯誤替換掉。上游（NER/LLM 抽取）目前只
+                # 提供 `mention.text`，沒有字元位置資訊（見模組 docstring
+                # 「不在本模組職責範圍內」），無法做到真正的定點替換；退而求其次
+                # 限制只替換第一個出現的位置——假設同一句內多個提及依文字順序
+                # 排列（NER 輸出的常見慣例），每次呼叫只消耗句子裡最早、尚未被
+                # 取代的一個出現位置，不會波及後面不相關的子字串匹配。這目前
+                # 仍是休眠路徑（trigger_extraction() 呼叫 prepare_svo_ready_chunks()
+                # 時 mentions 恆為 None，見 svo_service.py），此修復先行到位。
+                sentence = sentence.replace(mention.text, canonical, 1)
         output[idx] = sentence
     return output, registry
 
