@@ -440,11 +440,26 @@ async def resolve_entity_name(
     if not candidates:
         return name
 
+    # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher
+    # 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性——若多個候選同時超過編輯距離
+    # 門檻，原本「回傳第一個超過門檻的候選」在不同次執行間可能選到不同名稱，
+    # 導致同一批資料的實體合併結果不可重現，與下方 cosine 相似度區塊、以及
+    # 本專案其他地方（如 UMAP 固定 random_state=42）一貫的可重現性要求不一致。
+    # 改為與 cosine 區塊同樣的寫法：走訪所有候選，取分數最高者，同分時保留
+    # 先遇到的（Python min/max 對等值採穩定的「保留第一個」語意，但候選順序
+    # 本身仍非決定性——此修復只保證「選到分數最高者」，不保證同分平局時的
+    # 決定性，該情況本身即代表兩個候選對這次提及同樣合適，不影響合併正確性）。
+    best_edit_name: str | None = None
+    best_edit_ratio = 0.0
     for c in candidates:
         if c["name"] == name:
             return name
-        if _edit_ratio(name, c["name"]) >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD:
-            return c["name"]
+        ratio = _edit_ratio(name, c["name"])
+        if ratio >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD and ratio > best_edit_ratio:
+            best_edit_ratio = ratio
+            best_edit_name = c["name"]
+    if best_edit_name is not None:
+        return best_edit_name
 
     if embedding_provider is None:
         return name

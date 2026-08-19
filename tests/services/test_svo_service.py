@@ -1134,6 +1134,33 @@ async def test_resolve_entity_name_merges_via_edit_distance():
 
 
 @pytest.mark.asyncio
+async def test_resolve_entity_name_picks_best_edit_ratio_match_not_first():
+    """迴歸測試（2026-08-19 真實審查發現並修復）：`_fetch_entity_candidates()`
+    的 Cypher 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性；原本的編輯距離比對
+    迴圈「回傳第一個超過門檻的候選」，若有多個候選都超過門檻，選到哪一個
+    取決於查詢回傳順序，並非最佳匹配。這裡刻意讓分數較低（0.75）的候選排在
+    分數較高（≈0.857）的候選之前，驗證修復後會選分數最高者，而非第一個。"""
+    candidates = [
+        {"name": "台積電公司", "alias_counts_json": "{}"},  # ratio ≈ 0.75，排第一但非最佳
+        {"name": "台積電廠", "alias_counts_json": "{}"},      # ratio ≈ 0.857，較佳匹配
+    ]
+    resolved = await svc.resolve_entity_name("台積電", candidates)
+    assert resolved == "台積電廠"
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_edit_ratio_choice_is_order_independent():
+    """同一組候選、順序相反，應得到相同結果——模擬 Neo4j 查詢順序不保證的
+    情境，確認修復後的合併決策不再受候選回傳順序影響。"""
+    candidates_reversed = [
+        {"name": "台積電廠", "alias_counts_json": "{}"},
+        {"name": "台積電公司", "alias_counts_json": "{}"},
+    ]
+    resolved = await svc.resolve_entity_name("台積電", candidates_reversed)
+    assert resolved == "台積電廠"
+
+
+@pytest.mark.asyncio
 async def test_resolve_entity_name_merges_via_cosine_similarity():
     embedding = FakeEmbedding(similar_to={"I-35": "Interstate Highway 35"})
     candidates = [{"name": "Interstate Highway 35", "alias_counts_json": "{}"}]
