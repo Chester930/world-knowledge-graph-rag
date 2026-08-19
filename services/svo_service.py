@@ -157,8 +157,8 @@ def _svo_prompt(text: str) -> str:
 
 
 # SIM 節點的型別描述句 embedding 快取——依 embedding_provider.model_name 為 key，
-# 33 個型別的描述句 embedding 在同一個 provider/model 底下固定不變，避免每次
-# extract_svo_triples() 呼叫都重新對全部 33 筆描述句呼叫一次 embedding provider。
+# 35 個型別的描述句 embedding 在同一個 provider/model 底下固定不變，避免每次
+# extract_svo_triples() 呼叫都重新對全部 35 筆描述句呼叫一次 embedding provider。
 _TYPE_DESCRIPTION_EMBEDDING_CACHE: dict[str, dict[str, list[float]]] = {}
 
 
@@ -175,7 +175,7 @@ async def _type_description_embeddings(embedding_provider: EmbeddingProvider) ->
 async def classify_relation_by_embedding(
     verb: str, embedding_provider: EmbeddingProvider
 ) -> tuple[str, float]:
-    """SIM：`verb` embedding 與 33 個關係型別**描述句**（非識別碼字串本身，見
+    """SIM：`verb` embedding 與 35 個關係型別**描述句**（非識別碼字串本身，見
     `SVO_REL_TYPE_DESCRIPTIONS` docstring）embedding 算 cosine 相似度，取最相似者。
     回傳 (最相似的型別, 該型別的相似度分數)。"""
     type_vectors = await _type_description_embeddings(embedding_provider)
@@ -200,7 +200,7 @@ async def resolve_query_relation_type(
     動詞措辭解析為對應的 canonical 關係型別，供呼叫端對 `bfs_query()` 的結果
     做後篩選（§ 3.2 §c `QFILTER`，本函式不做篩選，只負責解析型別）。
 
-    重用 3.1.3 `classify_relation_by_embedding()`（`SIM`）——與 33 個型別描述句
+    重用 3.1.3 `classify_relation_by_embedding()`（`SIM`）——與 35 個型別描述句
     的 embedding 比對，同一顆 cache 之後不必重算。三區判斷（與 `COMPARE`／
     `ESCALATE3` 的二元一致性檢查不同，見設計文件同名段落誠實訂正）：
 

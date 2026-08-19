@@ -82,7 +82,7 @@ class SequencedFakeLLM:
 class TypeDescriptionFakeEmbedding:
     """供 SIM／COMPARE／ESCALATE3 測試使用：只精確控制指定文字的向量方向，
     其餘（未列出的）文字一律回傳 `default` 向量。刻意不沿用 `FakeEmbedding`
-    的雜湊索引方式——33 個真實描述句彼此雜湊碰撞（`idx % dim`）的機率不可忽略，
+    的雜湊索引方式——35 個真實描述句彼此雜湊碰撞（`idx % dim`）的機率不可忽略，
     會讓「哪個型別是最相似者」的測試斷言變得不可靠。
 
     `model_name` 每個實例各自不同（遞增計數器）——`classify_relation_by_embedding()`
@@ -327,7 +327,7 @@ async def test_extract_svo_triples_escalate3_confirms_original_llm_answer():
     """ESCALATE3 仲裁後確認原答案（而非 embedding 建議的候選）時，維持 LLM 自報值。"""
     embedding = TypeDescriptionFakeEmbedding(
         vectors={"導致": [1.0, 0.0, 0.0]},
-        default=[0.0, 1.0, 0.0],  # 33 個型別描述句皆與 verb 不相似，分數低於門檻
+        default=[0.0, 1.0, 0.0],  # 35 個型別描述句皆與 verb 不相似，分數低於門檻
     )
     llm = SequencedFakeLLM([
         '{"triples":[{"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":3}]}',
@@ -482,7 +482,7 @@ async def test_resolve_query_relation_type_gray_zone_without_llm_provider_return
 @pytest.mark.asyncio
 async def test_resolve_query_relation_type_below_low_threshold_skips_llm_call():
     """低於 QSIM_ESCALATE_LOW_THRESHOLD 時直接判無 match，不浪費一次 LLM 呼叫
-    （即使有提供 llm_provider）。所有 33 個型別描述句皆未指定、共用 default
+    （即使有提供 llm_provider）。所有 35 個型別描述句皆未指定、共用 default
     向量，與查詢措辭的向量正交（cosine=0），確保分數低於門檻。"""
     embedding = TypeDescriptionFakeEmbedding(
         vectors={"完全不相關的措辭": [0.0, 0.0, 1.0]}, default=[1.0, 0.0, 0.0]
