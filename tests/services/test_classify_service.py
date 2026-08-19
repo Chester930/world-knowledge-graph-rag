@@ -82,6 +82,37 @@ class TestComputeKgPrototype:
         assert svc.compute_kg_prototype(tmp_path / "does_not_exist") is None
 
 
+class TestComputeKgPrototypeWithCount:
+    """2026-08-19 真實審查發現並修復：compute_kg_prototype_with_count() 回傳的
+    實際向量數，可能小於 count_kg_members() 的資料夾總數（部份成員文件無法
+    向量化，不會被計入平均）——兩者是不同的量，見該函式 docstring。"""
+
+    def test_vector_count_excludes_unvectorizable_members(self, tmp_path, monkeypatch):
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "doc1", 1, 1, "A")
+        (kg_folder / "ghost").mkdir(parents=True)  # 沒有任何 chunk 檔案
+
+        fake = FakeEmbeddingProvider({"A": [1.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        prototype, vector_count = svc.compute_kg_prototype_with_count(kg_folder)
+
+        assert prototype == pytest.approx([1.0, 0.0])
+        assert vector_count == 1
+        assert svc.count_kg_members(kg_folder) == 2  # 資料夾總數包含 ghost，兩者不同
+
+    def test_nonexistent_kg_folder_returns_none_and_zero(self, tmp_path):
+        assert svc.compute_kg_prototype_with_count(tmp_path / "does_not_exist") == (None, 0)
+
+    def test_compute_kg_prototype_stays_consistent_with_with_count_variant(self, tmp_path, monkeypatch):
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "doc1", 1, 1, "A")
+        fake = FakeEmbeddingProvider({"A": [1.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        assert svc.compute_kg_prototype(kg_folder) == svc.compute_kg_prototype_with_count(kg_folder)[0]
+
+
 class TestClassifyByVector:
     def test_scores_above_min_threshold_get_matched(self):
         kg = svc.KGInfo(kg_id=uuid4(), kg_name="KG-A", folder_path=Path("/x"))
@@ -344,3 +375,34 @@ class TestClassifyAll:
         assert results[0].auto_assigned is True
         assert results[0].candidates[0].member_count == 1
         assert results[1].candidates[0].member_count == 2
+
+    def test_incremental_update_uses_actual_vector_count_not_folder_count(self, tmp_path, monkeypatch):
+        """迴歸測試（2026-08-19）：KG 資料夾內有一個成員文件沒有任何可解析的
+        chunk 內容（compute_document_vector() 回傳 None，不會被計入 prototype
+        平均）——_incremental_prototype_update() 的 old_count 必須用實際向量數
+        （compute_kg_prototype_with_count() 回傳的第二個值），而非
+        count_kg_members() 的資料夾總數，否則移動平均公式算出數學上錯誤的值。"""
+        staging = tmp_path / "staging"
+        _write_chunk(staging / "new_doc", 1, 1, "A")
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "seed", 1, 1, "A")
+        (kg_folder / "ghost").mkdir(parents=True)  # 無任何 chunk 檔案
+
+        fake = FakeEmbeddingProvider({"A": [1.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        assert svc.count_kg_members(kg_folder) == 2  # 資料夾總數包含 ghost
+        assert svc.compute_kg_prototype_with_count(kg_folder)[1] == 1  # 實際只有 1 個向量
+
+        captured_old_counts = []
+        original = svc._incremental_prototype_update
+
+        def _spy(old_prototype, old_count, new_vector):
+            captured_old_counts.append(old_count)
+            return original(old_prototype, old_count, new_vector)
+        monkeypatch.setattr(svc, "_incremental_prototype_update", _spy)
+
+        kg = svc.KGInfo(kg_id=uuid4(), kg_name="KG-A", folder_path=kg_folder)
+        svc.classify_all(staging, [kg], auto_assign=True, auto_threshold=0.3)
+
+        assert captured_old_counts == [1]  # 不是 count_kg_members() 的 2
