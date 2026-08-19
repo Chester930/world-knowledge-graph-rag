@@ -88,6 +88,16 @@ COMPARE_COSINE_THRESHOLD = 0.75
 QSIM_ASSIGN_THRESHOLD = 0.75
 QSIM_ESCALATE_LOW_THRESHOLD = 0.60
 
+# `vector_search_facts()`（見 docs/論文/03_系統設計與方法論.md § 3.1.4 §a
+# `RETRIEVE`）查詢後去重的候選池倍數——同一件事實可能因多筆 citation（例如
+# 切塊重疊）各自產生獨立 Fact 節點，KNN 直接取 top_k 可能被近乎重複的結果
+# 佔掉名額；先取 top_k × 此倍數的候選池，做完既有 kg_id post-filter 與
+# (subject, rel_type, object) 去重後再截斷回 top_k。⚠️ 暫定值，未經校準：
+# 4 倍是工程預設（同時預留給既有 kg_id post-filter 與新增去重兩道篩選消耗，
+# 讓多數情況下截斷後仍有機會湊滿 top_k 筆），非從文獻或實際資料推導，
+# 第五章消融實驗需重新校準。
+FACT_SEARCH_CANDIDATE_MULTIPLIER = 4
+
 # `EXPAND` 治理機制（見 docs/論文/03_系統設計與方法論.md § 3.1.3 §a Behavior
 # Tree；docs/報告/11_抽取管線完整實作任務書.md P2-1）——以下四個常數皆為
 # ⚠️ 暫定值，未經校準，第五章消融實驗需依實際候選池／登記表資料重新校準：

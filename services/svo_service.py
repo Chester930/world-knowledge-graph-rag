@@ -15,6 +15,7 @@ from core.constants import (
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
     ENTITY_TYPES,
+    FACT_SEARCH_CANDIDATE_MULTIPLIER,
     QSIM_ASSIGN_THRESHOLD,
     QSIM_ESCALATE_LOW_THRESHOLD,
     SVO_REL_TYPE_DESCRIPTIONS,
@@ -932,10 +933,20 @@ async def vector_search_facts(
     支援），留待第五章消融實驗評估合適的 `top_k` 值。**扁平相似度檢索
     本身、未利用圖結構鄰接關係的侷限**，見 3.1.4 §a 與 G-Retriever 對照
     討論，非本函式範圍。
+
+    ✅ **查詢後去重（2026-08-19，真實資料驗證發現並修復）**：同一件事實可能
+    因多筆 citation（例如切塊重疊）各自產生獨立 `Fact` 節點——這是刻意設計
+    （見 3.1.4 §a「解法」段落，避免代表性偏差與語意壓平），但代表 `top_k`
+    名額可能被近乎重複的結果佔掉。改為先取 `top_k × FACT_SEARCH_CANDIDATE_MULTIPLIER`
+    的候選池，做完既有 `kg_id` post-filter 後，再依 `(subject, rel_type,
+    object)` 去重（`_dedupe_facts_by_key()`，同一鍵只保留分數最高的一筆），
+    最後截斷回 `top_k`。不改動 Fact 節點的建立/儲存邏輯，只在查詢輸出層
+    後處理，對外 `top_k` 契約不變。
     """
+    candidate_k = top_k * FACT_SEARCH_CANDIDATE_MULTIPLIER
     result = await driver.execute_query(
         """
-        CALL db.index.vector.queryNodes('fact_embedding_vector', $top_k, $vector)
+        CALL db.index.vector.queryNodes('fact_embedding_vector', $candidate_k, $vector)
         YIELD node, score
         WHERE node.kg_id = $kg_id
         RETURN node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
@@ -944,10 +955,46 @@ async def vector_search_facts(
                node.source_svo_chunk_index AS source_svo_chunk_index, score
         """,
         kg_id=str(kg_id),
-        top_k=top_k,
+        candidate_k=candidate_k,
         vector=query_vector,
     )
-    return [dict(r) for r in result.records]
+    records = [dict(r) for r in result.records]
+    return _dedupe_facts_by_key(records)[:top_k]
+
+
+def _dedupe_facts_by_key(records: list[dict]) -> list[dict]:
+    """`vector_search_facts()` 查詢輸出層去重：以 `(subject, rel_type,
+    object)` 為鍵，同一鍵只保留分數最高的一筆，維持原始分數排序。任一欄位
+    為 `None`（例如 2026-08-18 schema 修正前建立、尚未跑過 §b 回填批次的
+    舊 Fact 節點）時視為無法安全去重，一律原樣保留——與
+    `routers/agent.py::_merge_fact_lines()` 既有的同名情境處理原則一致。
+    """
+    best_by_key: dict[tuple, dict] = {}
+    order: list[tuple | dict] = []
+
+    for record in records:
+        key = (record.get("subject"), record.get("rel_type"), record.get("object"))
+        if not all(key):
+            order.append(record)
+            continue
+        existing = best_by_key.get(key)
+        if existing is None:
+            best_by_key[key] = record
+            order.append(key)
+        elif record.get("score", 0) > existing.get("score", 0):
+            best_by_key[key] = record
+
+    deduped: list[dict] = []
+    seen_keys: set[tuple] = set()
+    for item in order:
+        if isinstance(item, dict):
+            deduped.append(item)
+            continue
+        if item in seen_keys:
+            continue
+        seen_keys.add(item)
+        deduped.append(best_by_key[item])
+    return deduped
 
 
 async def backfill_fact_nodes(

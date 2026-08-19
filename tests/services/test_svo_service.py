@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 
 from core import config
-from core.constants import SVO_REL_TYPES
+from core.constants import FACT_SEARCH_CANDIDATE_MULTIPLIER, SVO_REL_TYPES
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
@@ -1822,8 +1822,73 @@ async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
     assert "node.subject AS subject" in query
     assert "node.rel_type AS rel_type" in query
     assert params["kg_id"] == str(kg_id)
-    assert params["top_k"] == 5
+    # 2026-08-19：改為向候選池要 top_k × FACT_SEARCH_CANDIDATE_MULTIPLIER 筆，
+    # 供 kg_id post-filter 與去重消耗後仍有機會湊滿 top_k，見下方去重測試。
+    assert params["candidate_k"] == 5 * FACT_SEARCH_CANDIDATE_MULTIPLIER
     assert params["vector"] == [0.1, 0.2]
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_dedupes_same_subject_rel_object_keeping_highest_score():
+    """同一件事實因多筆 citation（例如切塊重疊）各自產生獨立 Fact 節點時，
+    只保留分數最高的一筆，不讓 top_k 名額被近乎重複的結果佔掉——真實資料
+    驗證發現（見 docs/報告/15_314修復效果驗證報告_2026-08-19.md），非臆測。"""
+    driver = FakeDriver(records=[
+        {"fact_text": "生理假不併入普通傷病假（版本一）", "verb": "不併入", "confidence": 3,
+         "subject": "生理假", "object": "普通傷病假", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.862},
+        {"fact_text": "生理假不併入普通傷病假（版本二，分數較高）", "verb": "不併入", "confidence": 3,
+         "subject": "生理假", "object": "普通傷病假", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 2, "score": 0.911},
+        {"fact_text": "生理假工資折半", "verb": "折半", "confidence": 3,
+         "subject": "生理假期間工資", "object": "全勤", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 3, "score": 0.844},
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert len(results) == 2  # 兩筆重複的「生理假不併入普通傷病假」收斂成一筆
+    assert results[0]["fact_text"] == "生理假不併入普通傷病假（版本二，分數較高）"
+    assert results[0]["score"] == 0.911
+    assert results[1]["fact_text"] == "生理假工資折半"
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_keeps_entries_with_missing_key_fields_undeduped():
+    """subject／rel_type／object 任一為 None（2026-08-18 schema 修正前建立、
+    尚未跑過 §b 回填批次的舊 Fact 節點）時無法安全去重，一律原樣保留——與
+    routers/agent.py::_merge_fact_lines() 既有的同名情境處理原則一致。"""
+    driver = FakeDriver(records=[
+        {"fact_text": "舊資料事實一", "verb": None, "confidence": 1,
+         "subject": None, "object": None, "rel_type": None,
+         "source_doc_id": None, "source_svo_chunk_index": None, "score": 0.80},
+        {"fact_text": "舊資料事實二", "verb": None, "confidence": 1,
+         "subject": None, "object": None, "rel_type": None,
+         "source_doc_id": None, "source_svo_chunk_index": None, "score": 0.79},
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert len(results) == 2  # 都保留，不因缺鍵而互相合併或誤判為重複
+    assert {r["fact_text"] for r in results} == {"舊資料事實一", "舊資料事實二"}
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_truncates_deduped_results_to_top_k():
+    driver = FakeDriver(records=[
+        {"fact_text": f"事實{i}", "verb": "V", "confidence": 1,
+         "subject": f"S{i}", "object": f"O{i}", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": i, "score": 1.0 - i * 0.01}
+        for i in range(10)
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=3)
+
+    assert len(results) == 3
+    assert [r["fact_text"] for r in results] == ["事實0", "事實1", "事實2"]
 
 
 # ── backfill_fact_nodes（3.1.4 §b 回填批次任務，2026-08-18）─────────────────
