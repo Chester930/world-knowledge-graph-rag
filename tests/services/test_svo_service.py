@@ -1013,6 +1013,7 @@ async def test_merge_triples_to_graph_accumulates_citation_on_edge():
         verb="導致",
         object="B",
         source_doc_id=doc_id,
+        source="內政部_台內勞字第356410號函.md",
         source_svo_chunk_index=2,
         source_svo_chunk_file="svo-chunk-002-of-003.md",
         source_sentence_start=5,
@@ -1031,6 +1032,10 @@ async def test_merge_triples_to_graph_accumulates_citation_on_edge():
     citations = json.loads(params["citations_json"])
     assert len(citations) == 1
     assert citations[0]["source_doc_id"] == str(doc_id)
+    # 2026-08-19：冗餘存下原始文件名稱字串（見 SVOTriple.source docstring）——
+    # source_doc_id 是單向雜湊，chunk 檔名在同長度文件間可能撞名，唯有這個
+    # 欄位能讓查詢端不必另外查資料庫就回溯到原文。
+    assert citations[0]["source"] == "內政部_台內勞字第356410號函.md"
     assert citations[0]["source_svo_chunk_index"] == 2
     assert citations[0]["source_sentence_start"] == 5
     assert citations[0]["source_sentence_end"] == 7
@@ -1534,6 +1539,7 @@ async def test_bfs_query_maps_records_using_latest_citation():
     citations_json = json.dumps([
         {
             "source_doc_id": str(doc_id),
+            "source": "內政部_台內勞字第356410號函.md",
             "source_svo_chunk_index": 1,
             "source_svo_chunk_file": "svo-chunk-001-of-001.md",
             "source_sentence_start": 1,
@@ -1558,6 +1564,9 @@ async def test_bfs_query_maps_records_using_latest_citation():
 
     assert len(triples) == 1
     assert triples[0].source_doc_id == doc_id
+    # 2026-08-19：source 欄位也要正確從 citation 還原回來，不是只有
+    # source_doc_id——見 SVOTriple.source docstring 的回溯可靠性說明。
+    assert triples[0].source == "內政部_台內勞字第356410號函.md"
     assert triples[0].source_sentence_start == 1
     assert triples[0].verb == "導致"
 

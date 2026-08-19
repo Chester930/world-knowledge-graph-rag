@@ -153,6 +153,15 @@ class SVOTriple(BaseModel):
     object_type: str = "概念"
     confidence: int = 1
     source_doc_id: UUID | None = None
+    # 2026-08-19（真實資料回溯驗證發現並修復）：source_doc_id 是
+    # uuid5(NAMESPACE, source) 算出的單向雜湊，光憑這個值無法反推回原始
+    # 文件名稱字串，必須另外查 DocumentRecord／KnowledgeGraph 才能對應。
+    # 冗餘存下原始 source 字串本身，即使查詢端手上只有這筆 SVOTriple／
+    # citation、沒有另外查資料庫，也能直接回溯到 workspace/<kg_id>/<source>/
+    # 找到原文——尤其在 source_doc_id 缺席（舊資料）或 source_svo_chunk_file
+    # 跨文件撞名（同長度文件之間，例如 125 份中有 94 份剛好都是 4-chunk
+    # 的短函釋，檔名完全相同）時，這是唯一能可靠定位文件的欄位。
+    source: str | None = None
     # 句子/chunk 層級來源追溯。source_doc_id 只定位到文件；以下欄位定位到
     # SVO 專用 chunk 與 original.md 中的句子範圍（1-based，閉區間）。
     source_svo_chunk_index: int | None = Field(default=None, ge=1)

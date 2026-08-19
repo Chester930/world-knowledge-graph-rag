@@ -687,6 +687,10 @@ def _new_citation(triple: SVOTriple) -> dict:
     """把一次抽取的來源追溯資訊，包成一筆可累積在邊上的引用紀錄。"""
     return {
         "source_doc_id": str(triple.source_doc_id) if triple.source_doc_id else None,
+        # 2026-08-19：冗餘存下原始文件名稱字串，見 SVOTriple.source 欄位
+        # docstring——即使查詢端手上只有這筆 citation、沒有另外查資料庫，
+        # 也能直接回溯到 workspace/<kg_id>/<source>/ 找到原文。
+        "source": triple.source,
         "source_svo_chunk_index": triple.source_svo_chunk_index,
         "source_svo_chunk_file": triple.source_svo_chunk_file,
         "source_sentence_start": triple.source_sentence_start,
@@ -1451,6 +1455,7 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
         latest = citations[-1] if citations else {}
         payload["verb"] = latest.get("verb", payload["rel_type"])
         payload["source_doc_id"] = UUID(latest["source_doc_id"]) if latest.get("source_doc_id") else None
+        payload["source"] = latest.get("source")
         payload["source_svo_chunk_index"] = latest.get("source_svo_chunk_index")
         payload["source_svo_chunk_file"] = latest.get("source_svo_chunk_file")
         payload["source_sentence_start"] = latest.get("source_sentence_start")
