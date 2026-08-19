@@ -121,6 +121,7 @@ async def test_process_one_success_merges_triples_and_marks_completed(tmp_path, 
     updated_record = document_record_service.read_record(doc_folder)
     assert updated_record.extraction_status == "completed"
     assert updated_record.chunk_progress == chunk_index
+    assert chunk_index in updated_record.completed_chunk_indices
 
 
 @pytest.mark.asyncio
@@ -164,6 +165,7 @@ async def test_process_one_llm_error_marks_failed(tmp_path, monkeypatch):
     updated_record = document_record_service.read_record(doc_folder)
     assert updated_record.extraction_status == "failed"
     assert updated_record.chunk_progress == 0  # 失敗不推進進度
+    assert updated_record.completed_chunk_indices == []
 
 
 @pytest.mark.asyncio

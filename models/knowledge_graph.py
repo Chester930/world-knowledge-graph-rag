@@ -91,6 +91,16 @@ class DocumentRecord(BaseModel):
     # chunk 進度歸零，不沿用舊 KG 的抽取結果。
     extraction_status: Literal["pending", "processing", "completed", "failed", "pending_upload"] = "pending"
     chunk_progress: int = 0
+    # 2026-08-19（真實審查發現並修復）：chunk_progress 只是「看過的最大
+    # chunk_index」，不是「實際完成的集合」——若中間任一 chunk 失敗、但編號
+    # 更大的 chunk 之後成功，chunk_progress 會被推到 total，讓
+    # record_chunk_completed() 誤判整份文件已完成，且會把 mark_extraction_failed()
+    # 寫入的 "failed" 狀態靜默覆寫回去，中間失敗的 chunk 內容永遠遺失且無法
+    # 察覺。completed_chunk_indices 記錄真正完成的 chunk_index 集合（可能不連續、
+    # 不按順序），是否「全部完成」由集合大小是否涵蓋 total 決定，不再依賴 max
+    # 值——chunk_progress 欄位保留供既有程式碼／顯示用途相容，但不再是完成判斷
+    # 的依據。
+    completed_chunk_indices: list[int] = []
     total_chunks: int = 0
     # SVO 抽取有獨立於 RAG chunk 的前處理與切塊流程。normalization_* 追蹤
     # 文件級標準化 checkpoint；svo_total_chunks 則記錄標準化後寫出的 SVO 專用
