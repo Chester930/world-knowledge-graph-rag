@@ -1824,20 +1824,33 @@ async def test_create_fact_vector_index_without_driver_is_noop():
 
 
 @pytest.mark.asyncio
-async def test_create_fact_vector_index_issues_create_vector_index_query():
+async def test_create_fact_vector_index_without_kg_id_is_noop():
     driver = FakeDriver()
+    await svc.create_fact_vector_index(driver)  # kg_id 缺席同樣視為 noop
+    assert driver.calls == []
 
-    await svc.create_fact_vector_index(driver, dim=384)
+
+@pytest.mark.asyncio
+async def test_create_fact_vector_index_issues_per_kg_create_vector_index_query():
+    """2026-08-19：改為每個 KG 各自一個獨立索引（label 與索引名稱皆含
+    kg_id），取代原本全 KG 共用單一索引＋查詢後 kg_id 過濾的設計，見
+    create_fact_vector_index() docstring 完整查證脈絡。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+
+    await svc.create_fact_vector_index(driver, kg_id, dim=384)
 
     assert len(driver.calls) == 1
     query, params = driver.calls[0]
-    assert "CREATE VECTOR INDEX fact_embedding_vector" in query
-    assert "FOR (f:Fact) ON f.fact_embedding" in query
+    assert svc._fact_vector_index_name(str(kg_id)) in query
+    assert f"FOR (f:{svc._kg_fact_label(str(kg_id))}) ON f.fact_embedding" in query
     assert params["dim"] == 384
 
 
 @pytest.mark.asyncio
-async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
+async def test_vector_search_facts_queries_per_kg_index_without_post_filter():
+    """2026-08-19：KG 範圍隔離改由 per-KG 索引結構保證，查詢不再需要
+    `WHERE node.kg_id = $kg_id` 這個查詢後 post-filter。"""
     driver = FakeDriver(records=[
         {"fact_text": "台積電 生產 晶片", "verb": "生產", "confidence": 3,
          "subject": "台積電", "object": "晶片", "rel_type": "CAUSES",
@@ -1852,14 +1865,17 @@ async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
          "subject": "台積電", "object": "晶片", "rel_type": "CAUSES",
          "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.92},
     ]
-    query, params = driver.calls[0]
-    assert "fact_embedding_vector" in query
-    assert "WHERE node.kg_id = $kg_id" in query
+    # 第一次呼叫是 create_fact_vector_index() 的惰性索引建立
+    index_query, index_params = driver.calls[0]
+    assert svc._fact_vector_index_name(str(kg_id)) in index_query
+    assert index_params["dim"] == 2  # 由 query_vector 長度推得，不需額外參數
+    # 第二次才是實際的 KNN 查詢
+    query, params = driver.calls[1]
+    assert svc._fact_vector_index_name(str(kg_id)) in query
+    assert "WHERE node.kg_id" not in query
     assert "node.subject AS subject" in query
     assert "node.rel_type AS rel_type" in query
-    assert params["kg_id"] == str(kg_id)
-    # 2026-08-19：改為向候選池要 top_k × FACT_SEARCH_CANDIDATE_MULTIPLIER 筆，
-    # 供 kg_id post-filter 與去重消耗後仍有機會湊滿 top_k，見下方去重測試。
+    # 候選池倍數仍保留，供下方去重測試消耗（與 KG 範圍過濾是獨立問題）
     assert params["candidate_k"] == 5 * FACT_SEARCH_CANDIDATE_MULTIPLIER
     assert params["vector"] == [0.1, 0.2]
 

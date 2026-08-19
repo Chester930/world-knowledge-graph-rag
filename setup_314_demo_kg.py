@@ -25,7 +25,6 @@ from services.extraction_worker import _process_one
 from services.svo_service import (
     create_chunk_vector_index,
     create_entity_index,
-    create_fact_vector_index,
     create_related_to_vector_index,
     trigger_extraction,
 )
@@ -52,7 +51,8 @@ async def main() -> None:
         await create_entity_index(driver)
         await create_chunk_vector_index(driver, embedding.dim)
         await create_related_to_vector_index(driver, embedding.dim)
-        await create_fact_vector_index(driver, embedding.dim)
+        # Fact 向量索引 2026-08-19 起改為每個 KG 各自一個、由
+        # vector_search_facts() 在查詢當下惰性建立，此處不需再預先呼叫。
 
         kg = await KGRepository(driver).create(
             KnowledgeGraphCreate(

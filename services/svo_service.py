@@ -735,6 +735,25 @@ def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, ob
     return f"{subj} {verb} {obj}"
 
 
+def _kg_fact_label(kg_id: str) -> str:
+    """每個 KG 各自一個 Fact 節點標籤（`Fact_<kg_id 底線化>`），供 per-KG
+    向量索引使用——2026-08-19 真實資料庫實測確認（`docker exec` 對 5.26.27
+    Enterprise 連續建立兩個同名 `(label, property)` 但不同索引名稱的向量索引，
+    第二次 `IF NOT EXISTS` 靜默略過，`SHOW INDEXES` 確認實際只建立了一個），
+    Neo4j 同一個 `(label, property)` 組合僅能有一個向量索引，無法只靠「不同
+    索引名稱」切出多個獨立索引；要讓每個 KG 的 `Fact` 向量檢索範圍互相隔離，
+    必須是不同的 label。節點仍同時保留通用 `:Fact` label（多重 label，
+    `backfill_fact_nodes()` 的 `EXIST5` 存在性查詢等既有 `MATCH (f:Fact {...})`
+    不需改動即可繼續運作）。`uuid.UUID()` 往返驗證輸入格式合法，避免非 UUID
+    字串被直接字串插入 Cypher label（目前呼叫端皆為內部已驗證過的 kg_id，
+    此為額外防禦層）。"""
+    return f"Fact_{str(UUID(kg_id)).replace('-', '_')}"
+
+
+def _fact_vector_index_name(kg_id: str) -> str:
+    return f"fact_embedding_vector_{str(UUID(kg_id)).replace('-', '_')}"
+
+
 async def _create_fact_node(
     driver: AsyncDriver,
     kg_id_str: str,
@@ -766,16 +785,16 @@ async def _create_fact_node(
     這次呼叫是否真的建立了節點，供 `backfill_fact_nodes()` 準確計數。
     """
     result = await driver.execute_query(
-        """
-        MATCH (s:Entity {kg_id: $kg_id, name: $subject})
-        MATCH (o:Entity {kg_id: $kg_id, name: $object})
-        MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
-        CREATE (f:Fact {
+        f"""
+        MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})
+        MATCH (o:Entity {{kg_id: $kg_id, name: $object}})
+        MATCH (c:Chunk {{kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index}})
+        CREATE (f:Fact:{_kg_fact_label(kg_id_str)} {{
             kg_id: $kg_id, fact_text: $fact_text, fact_embedding: $fact_embedding,
             verb: $verb, confidence: $confidence,
             source_doc_id: $source_doc_id, source_svo_chunk_index: $chunk_index,
             subject: $subject, object: $object, rel_type: $rel_type
-        })
+        }})
         CREATE (f)-[:HAS_SUBJECT]->(s)
         CREATE (f)-[:HAS_OBJECT]->(o)
         CREATE (f)-[:SUPPORTED_BY]->(c)
@@ -913,19 +932,35 @@ async def merge_triples_to_graph(
             )
 
 
-async def create_fact_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
-    """建立 `Fact` 節點的 `fact_embedding` 向量索引（app 啟動時呼叫一次），
-    供 3.1.4 §a 事實層級語意檢索使用。單一 `Fact` label＋單一 `fact_embedding`
-    屬性，不受 Neo4j relationship 向量索引過去「僅能綁定單一 relationship
-    type」的版本限制（這正是選擇獨立節點而非直接在 33 種 `SVO_REL_TYPES`
-    邊上加向量屬性的技術理由，見 3.1.4 §a 文獻查證段落）。"""
-    if driver is None:
+async def create_fact_vector_index(
+    driver: AsyncDriver | None = None, kg_id: UUID | None = None, dim: int = VECTOR_DIM
+) -> None:
+    """建立指定 KG 專屬的 `Fact` 向量索引，供 3.1.4 §a 事實層級語意檢索使用。
+
+    **2026-08-19 改為每個 KG 各自一個獨立索引（原本是全 KG 共用單一
+    `fact_embedding_vector` 索引，`vector_search_facts()` 查完再用
+    `WHERE node.kg_id = $kg_id` 過濾，已知有 post-filter 限制）**：查證
+    Neo4j 目前部署版本（5.26.27 Enterprise LTS）不支援 Cypher 25 的原生
+    向量索引 pre-filter（該功能是 2026.01 preview／2026.02 GA 才推出的
+    calendar-versioned continuous release 版本線，5.26 這條 LTS 線依官方
+    版本政策只收安全性/bug 修補、不收新功能，無法透過小版本更新取得，
+    需要整條版本線遷移，非本次範圍）。改採比照 Pinecone 官方建議的「每個
+    租戶各自一個 namespace」精神（`docs.pinecone.io` 已查證原文；無對應
+    學術文獻，這是向量資料庫多租戶隔離的常見工程模式，非本論文提出）——
+    Neo4j 沒有 namespace 概念，但 2026-08-19 實測確認可用「每個 KG 各自
+    一個 label」達到等效效果（見 `_kg_fact_label()`），索引範圍由 label
+    在結構上保證，不再依賴查詢後才執行的應用層過濾。冪等（`IF NOT EXISTS`），
+    呼叫端（`vector_search_facts()`）每次查詢前直接呼叫，不需要另外在寫入
+    路徑或啟動流程預先建立——Neo4j 索引本來就會自動涵蓋建立之前已寫入的
+    符合條件節點，不要求「先有索引才能寫資料」。"""
+    if driver is None or kg_id is None:
         return
+    kg_id_str = str(kg_id)
     await driver.execute_query(
-        """
-        CREATE VECTOR INDEX fact_embedding_vector IF NOT EXISTS
-        FOR (f:Fact) ON f.fact_embedding
-        OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
+        f"""
+        CREATE VECTOR INDEX {_fact_vector_index_name(kg_id_str)} IF NOT EXISTS
+        FOR (f:{_kg_fact_label(kg_id_str)}) ON f.fact_embedding
+        OPTIONS {{ indexConfig: {{ `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' }} }}
         """,
         dim=dim,
     )
@@ -934,46 +969,44 @@ async def create_fact_vector_index(driver: AsyncDriver | None = None, dim: int =
 async def vector_search_facts(
     driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
 ) -> list[dict]:
-    """3.1.4 §a `RETRIEVE`：`fact_embedding_vector` 向量索引 KNN 查詢，
-    比照 `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳
-    最相近的 `Fact` 候選（`fact_text`／`verb`／`confidence`／`subject`／
-    `object`／`rel_type`／來源追溯欄位／`score`；2026-08-18 追加後三者——
+    """3.1.4 §a `RETRIEVE`：per-KG `Fact` 向量索引 KNN 查詢，比照
+    `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳最相近的
+    `Fact` 候選（`fact_text`／`verb`／`confidence`／`subject`／`object`／
+    `rel_type`／來源追溯欄位／`score`；2026-08-18 追加後三者——
     `_create_fact_node()` 補上這三個扁平屬性後，呼叫端不必再額外 traversal
     `HAS_SUBJECT`／`HAS_OBJECT` 邊就能取得完整三元組）。
 
-    ⚠️ **已知限制（KG 範圍過濾為查詢後 post-filter，非索引原生 pre-filter）**：
-    Neo4j 向量索引的 KNN 查詢是對**全部** `Fact` 節點（跨所有 KG）做近似
-    最近鄰，`WHERE node.kg_id = $kg_id` 是拿到 `top_k` 筆候選後才篩選——
-    若某次查詢的前 `top_k` 名近似鄰居剛好大多來自其他 KG，篩選後回傳筆數
-    可能少於 `top_k`，甚至為空，即使該 KG 內其實有語意相關的 Fact 只是
-    排名較後面。比照 3.2 §a `ConceptNode` 路由層「粗篩 Top-K 再精算」的
-    設計語言，這是同一類「先寬後窄」查詢共有的已知取捨，非本函式獨有的
-    缺陷；若要保證命中，需加大 `top_k` 或改用 pre-filter（若 Neo4j 版本
-    支援），留待第五章消融實驗評估合適的 `top_k` 值。**扁平相似度檢索
-    本身、未利用圖結構鄰接關係的侷限**，見 3.1.4 §a 與 G-Retriever 對照
-    討論，非本函式範圍。
+    ✅ **KG 範圍過濾已從查詢後 post-filter 改為索引結構原生隔離
+    （2026-08-19，見 `create_fact_vector_index()` 與 `_kg_fact_label()`
+    docstring 完整查證脈絡）**：原本是全 KG 共用單一向量索引、查完再用
+    `WHERE node.kg_id = $kg_id` 過濾，若前 `top_k` 名近似鄰居剛好大多來自
+    其他 KG，篩選後回傳筆數可能少於 `top_k` 甚至為空。改為每個 KG 各自一個
+    索引後，`db.index.vector.queryNodes()` 天生只能查到該索引涵蓋範圍
+    （該 KG）的節點，範圍過濾由索引定義本身保證，不再是可能失效的應用層
+    篩選步驟，此已知限制已解除。**扁平相似度檢索本身、未利用圖結構鄰接
+    關係的侷限（G-Retriever 對照討論）不在此次範圍內，仍待後續評估。**
 
-    ✅ **查詢後去重（2026-08-19，真實資料驗證發現並修復）**：同一件事實可能
-    因多筆 citation（例如切塊重疊）各自產生獨立 `Fact` 節點——這是刻意設計
-    （見 3.1.4 §a「解法」段落，避免代表性偏差與語意壓平），但代表 `top_k`
-    名額可能被近乎重複的結果佔掉。改為先取 `top_k × FACT_SEARCH_CANDIDATE_MULTIPLIER`
-    的候選池，做完既有 `kg_id` post-filter 後，再依 `(subject, rel_type,
-    object)` 去重（`_dedupe_facts_by_key()`，同一鍵只保留分數最高的一筆），
-    最後截斷回 `top_k`。不改動 Fact 節點的建立/儲存邏輯，只在查詢輸出層
-    後處理，對外 `top_k` 契約不變。
+    ✅ **查詢後去重（2026-08-19，真實資料驗證發現並修復；與上方 KG 範圍
+    過濾是兩個獨立問題，此處的候選池倍數不因上方修復而可以拿掉）**：同一件
+    事實可能因多筆 citation（例如切塊重疊）各自產生獨立 `Fact` 節點——這是
+    刻意設計（見 3.1.4 §a「解法」段落，避免代表性偏差與語意壓平），但代表
+    `top_k` 名額可能被近乎重複的結果佔掉，與 KG 範圍無關、單一 KG 內就會
+    發生。改為先取 `top_k × FACT_SEARCH_CANDIDATE_MULTIPLIER` 的候選池，
+    再依 `(subject, rel_type, object)` 去重（`_dedupe_facts_by_key()`，
+    同一鍵只保留分數最高的一筆），最後截斷回 `top_k`。不改動 Fact 節點的
+    建立/儲存邏輯，只在查詢輸出層後處理，對外 `top_k` 契約不變。
     """
+    await create_fact_vector_index(driver, kg_id, dim=len(query_vector))
     candidate_k = top_k * FACT_SEARCH_CANDIDATE_MULTIPLIER
     result = await driver.execute_query(
-        """
-        CALL db.index.vector.queryNodes('fact_embedding_vector', $candidate_k, $vector)
+        f"""
+        CALL db.index.vector.queryNodes('{_fact_vector_index_name(str(kg_id))}', $candidate_k, $vector)
         YIELD node, score
-        WHERE node.kg_id = $kg_id
         RETURN node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
                node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
                node.source_doc_id AS source_doc_id,
                node.source_svo_chunk_index AS source_svo_chunk_index, score
         """,
-        kg_id=str(kg_id),
         candidate_k=candidate_k,
         vector=query_vector,
     )

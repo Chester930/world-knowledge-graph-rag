@@ -51,7 +51,8 @@ async def test_lifespan_starts_and_gracefully_cancels_background_workers(monkeyp
     monkeypatch.setattr(main_module.svo_service, "create_entity_index", _noop_async)
     monkeypatch.setattr(main_module.svo_service, "create_chunk_vector_index", _noop_async)
     monkeypatch.setattr(main_module.svo_service, "create_related_to_vector_index", _noop_async)
-    monkeypatch.setattr(main_module.svo_service, "create_fact_vector_index", _noop_async)
+    # create_fact_vector_index() 2026-08-19 起改為 vector_search_facts()
+    # 查詢當下惰性呼叫，lifespan 不再呼叫，不需要在此 monkeypatch。
     monkeypatch.setattr(main_module, "_restart_task_queue", _noop_async)
     monkeypatch.setattr(main_module, "get_driver", lambda: "fake-driver")
 
