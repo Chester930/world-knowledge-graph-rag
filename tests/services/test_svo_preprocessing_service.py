@@ -2,7 +2,13 @@ import pytest
 
 from services import ingestion_service
 from services.entity_registry_service import Mention
-from services.svo_preprocessing_service import prepare_svo_ready_chunks, read_sentence_embeddings
+from services.pronoun_resolution_service import DEFAULT_PRONOUN_LEXICON
+from services.svo_preprocessing_service import (
+    prepare_svo_ready_chunks,
+    read_sentence_embeddings,
+    read_standardized_sentences,
+    write_sentence_embeddings,
+)
 
 
 class FakeLLM:
@@ -178,3 +184,89 @@ async def test_pipeline_skips_sentence_embeddings_without_provider(tmp_path):
     await prepare_svo_ready_chunks("note.md", staging, output)
 
     assert read_sentence_embeddings("note.md", output) is None
+
+
+# ── write/read_standardized_sentences（2026-08-20，§ Phase 1 標準化 RAG）──────
+
+def test_write_sentence_embeddings_stores_sentences_when_provided(tmp_path):
+    write_sentence_embeddings(
+        [[0.1, 0.2], [0.3, 0.4]], "note.md", tmp_path,
+        sentences=["馬斯克創立了太空公司。", "馬斯克隨後研發了獵鷹火箭。"],
+    )
+
+    assert read_standardized_sentences("note.md", tmp_path) == [
+        "馬斯克創立了太空公司。", "馬斯克隨後研發了獵鷹火箭。",
+    ]
+    # 既有只需要向量的呼叫端不受影響，仍可正常讀回向量本身
+    assert read_sentence_embeddings("note.md", tmp_path) == [[0.1, 0.2], [0.3, 0.4]]
+
+
+def test_write_sentence_embeddings_omits_sentences_field_when_not_provided(tmp_path):
+    """向後相容：不帶 `sentences` 時行為與 2026-08-20 修正前完全一致。"""
+    write_sentence_embeddings([[0.1, 0.2]], "note.md", tmp_path)
+
+    assert read_standardized_sentences("note.md", tmp_path) is None
+    assert read_sentence_embeddings("note.md", tmp_path) == [[0.1, 0.2]]
+
+
+def test_read_standardized_sentences_returns_none_when_file_missing(tmp_path):
+    assert read_standardized_sentences("does-not-exist.md", tmp_path) is None
+
+
+@pytest.mark.asyncio
+async def test_pipeline_writes_standardized_sentence_text_alongside_embeddings(tmp_path):
+    """2026-08-20：`prepare_svo_ready_chunks()` 呼叫 `write_sentence_embeddings()`
+    時應一併帶入 `sentences=normalized_sentences`，供 § Phase 1 的 Neo4j
+    `Sentence` 節點寫入時讀回文字本身，不需重新呼叫指代消解。"""
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    text = "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。"
+    ingestion_service.chunk_and_stage(text, "note.md", staging)
+
+    llm = FakeLLM(responses=["馬斯克隨後研發了獵鷹火箭。"])
+    await prepare_svo_ready_chunks(
+        "note.md", staging, output, pronoun_llm_provider=llm, embedding_provider=FakeEmbedding(),
+    )
+
+    sentences = read_standardized_sentences("note.md", output)
+    assert sentences == ["馬斯克創立了太空公司。", "馬斯克隨後研發了獵鷹火箭。"]
+
+
+# ── pronoun_lexicon（2026-08-20，§ KG 專屬代名詞排除詞庫）───────────────────
+
+@pytest.mark.asyncio
+async def test_pipeline_uses_custom_pronoun_lexicon_to_skip_resolution(tmp_path):
+    """`pronoun_lexicon` 明確傳入時（呼叫端已扣除該 KG 排除的字），詞庫外的字
+    即使原本在 `DEFAULT_PRONOUN_LEXICON` 內，也不應觸發 LLM 消解。"""
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    ingestion_service.chunk_and_stage("本法保障其權益。", "note.md", staging)
+
+    llm = FakeLLM(default="不應被呼叫")
+    custom_lexicon = DEFAULT_PRONOUN_LEXICON - {"其"}
+
+    paths, chunks = await prepare_svo_ready_chunks(
+        "note.md", staging, output,
+        pronoun_llm_provider=llm, pronoun_lexicon=custom_lexicon,
+    )
+
+    assert chunks[0].normalized_sentences == ["本法保障其權益。"]
+    assert llm.prompts == []
+
+
+@pytest.mark.asyncio
+async def test_pipeline_defaults_to_full_lexicon_when_pronoun_lexicon_not_given(tmp_path):
+    """`pronoun_lexicon` 未傳入（`None`）時沿用完整的 `DEFAULT_PRONOUN_LEXICON`，
+    行為與此參數新增前完全一致——確認新增可選參數未改變既有預設行為。"""
+    staging = tmp_path / "staging"
+    output = tmp_path / "output"
+    ingestion_service.chunk_and_stage("本法保障其權益。", "note.md", staging)
+
+    llm = FakeLLM(responses=["本法保障勞工權益。"])
+
+    paths, chunks = await prepare_svo_ready_chunks(
+        "note.md", staging, output, pronoun_llm_provider=llm,
+    )
+
+    assert chunks[0].normalized_sentences == ["本法保障勞工權益。"]
+    assert len(llm.prompts) == 1

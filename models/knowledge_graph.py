@@ -17,6 +17,9 @@ class KnowledgeGraphUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = None
     is_public: bool | None = None
+    # 2026-08-20：見 KnowledgeGraph.pronoun_lexicon_exclude 欄位說明。透過既有
+    # update() 端點即可設定，不需另開專屬 API。
+    pronoun_lexicon_exclude: list[str] | None = None
 
 
 class KnowledgeGraph(BaseModel):
@@ -29,6 +32,14 @@ class KnowledgeGraph(BaseModel):
     doc_count: int = 0
     entity_count: int = 0
     relation_count: int = 0
+    # 2026-08-20（真實資料發現）：法律全文中「其」「該」幾乎都是自我完備的正式
+    # 泛稱（如「及其家屬」「該法」），不是需要換成具體實體名稱的模糊代名詞，但
+    # `pronoun_resolution_service.DEFAULT_PRONOUN_LEXICON` 的字面比對規則會把它們
+    # 一律當成代名詞觸發 LLM 消解——實測某份 390 句的法規全文中 41% 的句子因此
+    # 觸發，單筆文件耗時超過 600 秒。此欄位讓個別 KG 從預設詞庫中排除特定字
+    # （`trigger_extraction()` 依此組出該 KG 專屬的消解詞庫），不影響其他 KG
+    # 沿用完整預設詞庫的行為，見 docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md。
+    pronoun_lexicon_exclude: list[str] = []
     created_at: datetime
     updated_at: datetime
 

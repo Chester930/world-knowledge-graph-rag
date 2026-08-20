@@ -29,13 +29,24 @@ class FakeLLM:
         return self.payload
 
 
+class FakeResult:
+    def __init__(self, records=None):
+        self.records = records or []
+
+
 class SpyDriver:
+    """只記錄呼叫、不模擬任何查詢結果的最小 spy——沿用本專案其餘 Fake／Spy
+    driver（`FakeDriver`／`FakeKGDriver`／`MissingEmbeddingFakeDriver` 等）
+    一致的「一律回傳空結果物件，而非 `None`」慣例，讓任何真的會讀取
+    `result.records` 的呼叫（例如 2026-08-20 新增的 `KGRepository.get()`）
+    也能安全通過，不因這個測試替身回傳 `None` 而炸掉。"""
+
     def __init__(self):
         self.calls: list[tuple[str, dict]] = []
 
     async def execute_query(self, query: str, **params):
         self.calls.append((query.strip(), params))
-        return None
+        return FakeResult([])
 
 
 def _raise_runtime_error():

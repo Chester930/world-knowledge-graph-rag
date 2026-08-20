@@ -59,11 +59,13 @@ import time
 from pathlib import Path
 from uuid import UUID
 
+import httpx
+
 from core.config import settings, staging_folder
 from core.database import connect, disconnect, get_driver
 from core.providers.factory import init_providers
 from models.knowledge_graph import KnowledgeGraphCreate
-from parser.chunk_writer import document_folder_path
+from parser.chunk_writer import document_folder_path, read_sentences_index
 from repositories.kg_repo import KGRepository
 from services.classify_service import KGInfo, assign_document_to_kg
 from services.document_record_service import document_uuid
@@ -177,15 +179,45 @@ async def _run(kg_id: UUID | None, kg_name: str | None, dry_run: bool) -> None:
             staging_doc_folder, _record = chunk_and_stage(text, source, staging_folder())
             dest = assign_document_to_kg(staging_doc_folder, kg_info, method="manual")
             t0 = time.monotonic()
+            # 2026-08-20 真實匯入時發現：491 句的長篇法規（勞工退休金條例施行細則）
+            # 光是逐句 embedding 就要 218 秒，單筆文件時間差異可以很大——加上逾時
+            # 保護，避免單一離群文件卡住整批匯入（比照本專案既有的「單一項目失敗
+            # 不阻擋其餘項目」慣例，見 extraction_worker／governance_worker）。
+            #
+            # 2026-08-20 固定 600s 上限實測不足：即使套用 KG 專屬代名詞排除詞庫
+            # （見 svo_service.py trigger_extraction()），397 句的《性騷擾防治法》
+            # 仍逾時。直接量測本機 Ollama（qwen2.5:7b）單次指代消解呼叫延遲：
+            # 冷啟動 30-35 秒、暖機後穩定在 13 秒左右，扣除「其」「該」後觸發率仍
+            # 有 7.1%（57→28 句／397 句）。換算下來單是消解階段就需要 28×13≈364 秒，
+            # 加上逐句 embedding，固定 600 秒明顯偏緊。改為依句數動態放寬（每句抓
+            # 5 秒安全餘裕，涵蓋冷啟動與最壞情況觸發率），下限維持 600 秒不變。
+            sentences = read_sentences_index(source, kg_info.folder_path) or []
+            timeout_seconds = max(600, len(sentences) * 5)
             try:
-                # 2026-08-20 真實匯入時發現：491 句的長篇法規（勞工退休金條例施行細則）
-                # 光是逐句 embedding 就要 218 秒，單筆文件時間差異可以很大——加上逾時
-                # 保護，避免單一離群文件卡住整批匯入（比照本專案既有的「單一項目失敗
-                # 不阻擋其餘項目」慣例，見 extraction_worker／governance_worker）。
-                await asyncio.wait_for(trigger_extraction(driver, dest, kg.id), timeout=600)
+                await asyncio.wait_for(trigger_extraction(driver, dest, kg.id), timeout=timeout_seconds)
             except asyncio.TimeoutError:
                 timed_out += 1
-                print(f"[{source_key}] ⚠️ 逾時（>600s），略過此筆，之後可手動重跑補上：{source}", flush=True)
+                print(
+                    f"[{source_key}] ⚠️ 逾時（>{timeout_seconds}s，{len(sentences)} 句），"
+                    f"略過此筆，之後可手動重跑補上：{source}",
+                    flush=True,
+                )
+                continue
+            except httpx.HTTPError as exc:
+                # 2026-08-20 真實批次執行時發現：Ollama provider（core/providers/llm/
+                # ollama.py）每次呼叫自帶 300s httpx 逾時，跟這裡外層的逐文件逾時是
+                # 兩層獨立保護——負載嚴重時單次 LLM 呼叫本身就可能卡超過 300s，
+                # httpx.ReadTimeout 會在外層 asyncio.wait_for 之前先炸開、未被
+                # 上面的 except 接住，導致整批匯入直接中斷（曾實際發生：跑到一半
+                # 因單次呼叫逾時而整個程序崩潰，當晚後續候選文件全部沒有機會處理）。
+                # 比照上面 asyncio.TimeoutError 的「單一項目失敗不阻擋其餘項目」
+                # 慣例，同樣視為此筆離群、略過續跑。
+                timed_out += 1
+                print(
+                    f"[{source_key}] ⚠️ LLM 呼叫失敗（{type(exc).__name__}: {exc}），"
+                    f"略過此筆，之後可手動重跑補上：{source}",
+                    flush=True,
+                )
                 continue
             imported += 1
             elapsed = time.monotonic() - t0

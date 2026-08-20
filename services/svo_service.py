@@ -26,11 +26,17 @@ from core.config import task_queue_db_path
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.knowledge_graph import SVOTriple
+from repositories.kg_repo import KGRepository
 from services import document_record_service, expand_governance_service, sim_calibration_service, task_queue_service
 from services.classify_service import cosine_similarity
 from services.entity_registry_service import should_promote_by_frequency
+from services.pronoun_resolution_service import DEFAULT_PRONOUN_LEXICON
 from services.svo_chunking import SVOChunk
-from services.svo_preprocessing_service import prepare_svo_ready_chunks
+from services.svo_preprocessing_service import (
+    prepare_svo_ready_chunks,
+    read_sentence_embeddings,
+    read_standardized_sentences,
+)
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
@@ -1401,6 +1407,121 @@ async def embed_svo_chunks(
         )
 
 
+def _kg_sentence_label(kg_id: str) -> str:
+    """每個 KG 各自一個標準化句子節點標籤，比照 `_kg_fact_label()` 同一套
+    per-KG label＋per-KG 向量索引模式（見該函式 docstring 完整查證脈絡：
+    Neo4j 同一個 `(label, property)` 組合僅能有一個向量索引，2026-08-19
+    已用真實資料庫驗證確認）——供 § Phase 1 標準化 RAG 句子向量索引使用，
+    見 `docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md` §5。"""
+    return f"Sentence_{str(UUID(kg_id)).replace('-', '_')}"
+
+
+def _sentence_vector_index_name(kg_id: str) -> str:
+    return f"sentence_embedding_vector_{str(UUID(kg_id)).replace('-', '_')}"
+
+
+async def create_sentence_vector_index(
+    driver: AsyncDriver | None = None, kg_id: UUID | None = None, dim: int = VECTOR_DIM
+) -> None:
+    """建立指定 KG 專屬的標準化句子向量索引（§ Phase 1）。冪等
+    （`IF NOT EXISTS`），呼叫端（`services/retrieval_service.py`）每次查詢前
+    直接呼叫，不需要另外在寫入路徑或 app 啟動流程預先建立——與
+    `create_fact_vector_index()` 同一套惰性建立設計，見該函式 docstring。"""
+    if driver is None or kg_id is None:
+        return
+    kg_id_str = str(kg_id)
+    await driver.execute_query(
+        f"""
+        CREATE VECTOR INDEX {_sentence_vector_index_name(kg_id_str)} IF NOT EXISTS
+        FOR (s:{_kg_sentence_label(kg_id_str)}) ON s.sentence_embedding
+        OPTIONS {{ indexConfig: {{ `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' }} }}
+        """,
+        dim=dim,
+    )
+
+
+async def embed_standardized_sentences(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    source: str,
+    sentences: list[str],
+    vectors: list[list[float]],
+    chunks: list[SVOChunk],
+) -> None:
+    """把每句標準化句子（已消解代名詞）各自建立一個 `Sentence` 節點＋向量，
+    供 § Phase 1／Phase 2 標準化 RAG 雙階檢索使用（`docs/報告/
+    08_三軌混合檢索架構與標準化RAG設計報告.md` §3：單句精確命中 → 依
+    `chunk_index` 拉出所屬語意 chunk 全文）。
+
+    **句子→所屬 chunk 的對應規則**：`build_svo_chunks()` 產出的 chunk 之間
+    刻意有重疊（見 3.1.2 節設計），同一句話可能同時落在多個相鄰 chunk 的
+    範圍內——比照既有 MVP（`standardized_rag.py` 前身 `build_standardized_rag_index.py::
+    _chunk_for_sentence()`）的既有規則，取**第一個**（依 `chunks` 既有順序，
+    即 chunk_index 由小到大）涵蓋此句的 chunk，非任意規則。
+
+    `sentences`／`vectors` 長度不一致，或任一為空，視為資料不一致，不寫入
+    任何節點（比照 `build_standardized_rag_index.py` 既有的「資料不一致就
+    略過，不假裝能對齊」原則）。不建立 Neo4j 向量索引本身（見
+    `create_sentence_vector_index()`，惰性建立於查詢端）。
+    """
+    if not sentences or not vectors or len(sentences) != len(vectors):
+        return
+
+    source_doc_id = document_record_service.document_uuid(source)
+    label = _kg_sentence_label(str(kg_id))
+
+    for i, (sentence, vector) in enumerate(zip(sentences, vectors), start=1):
+        chunk = next(
+            (c for c in chunks if c.source_sentence_start <= i <= c.source_sentence_end), None
+        )
+        if chunk is None:
+            continue
+        await driver.execute_query(
+            f"""
+            MERGE (s:Sentence:{label} {{
+                kg_id: $kg_id, source_doc_id: $source_doc_id, sentence_index: $sentence_index
+            }})
+            SET s.sentence_text = $sentence_text, s.sentence_embedding = $embedding,
+                s.chunk_index = $chunk_index, s.source = $source
+            """,
+            kg_id=str(kg_id),
+            source_doc_id=str(source_doc_id),
+            sentence_index=i,
+            sentence_text=sentence,
+            embedding=vector,
+            chunk_index=chunk.index,
+            source=source,
+        )
+
+
+async def vector_search_sentences(
+    driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
+) -> list[dict]:
+    """§ Phase 1 標準化 RAG（`docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md`
+    §3 第一階「單句粗篩」）：per-KG `Sentence` 向量索引 KNN 查詢，比照
+    `vector_search_facts()` 同一套模式，回傳原始候選（`sentence_text`／
+    `source`／`chunk_index`／`source_doc_id`／`score`）。
+
+    **刻意不在此處做 chunk 去重與上下文擴展**（同一 chunk 內相鄰句子很可能
+    同時命中）——去重需要讀取 `svo_index.json`（檔案系統存取，非 Neo4j
+    查詢），依本專案既有的分層慣例（router → service → repository），這是
+    `services/retrieval_service.py::search_standardized_rag()`（§ Phase 2）
+    的職責，本函式只負責「單純的向量索引查詢」這一層，與 `vector_search_facts()`
+    的分工原則一致。"""
+    await create_sentence_vector_index(driver, kg_id, dim=len(query_vector))
+    result = await driver.execute_query(
+        f"""
+        CALL db.index.vector.queryNodes('{_sentence_vector_index_name(str(kg_id))}', $top_k, $vector)
+        YIELD node, score
+        RETURN node.sentence_text AS sentence_text, node.source AS source,
+               node.chunk_index AS chunk_index, node.source_doc_id AS source_doc_id, score
+        """,
+        top_k=top_k,
+        vector=query_vector,
+    )
+    return [dict(r) for r in result.records]
+
+
 async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID) -> None:
     """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
     不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
@@ -1425,6 +1546,16 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     需要 `knowledge_graph_service.build_graph(force_rebuild=True)` 重新觸發
     才能拿到消解後版本，見上述報告 §0 的時機決策記錄。
 
+    ✅ **2026-08-20 KG 專屬代名詞排除詞庫**：真實匯入法規全文資料集時發現，
+    `DEFAULT_PRONOUN_LEXICON` 的「其」「該」在法律文本中幾乎都是自我完備的
+    正式泛稱（如「及其家屬」「該法」），字面比對規則卻一律當成代名詞觸發 LLM
+    消解——實測某份 390 句的法規全文 41% 的句子因此觸發，單筆文件耗時超過
+    600 秒（見 `docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md`）。
+    每次呼叫先查一次 `KnowledgeGraph.pronoun_lexicon_exclude`，扣除該 KG 指定
+    排除的字後才傳入 `prepare_svo_ready_chunks()`；欄位預設為空，對其他既有／
+    未來 KG 沒有行為變化，只有明確設定過此欄位的 KG（例如本次的「請假與排班
+    法規遵循」）才會套用縮減後的詞庫。
+
     ⚠️ 誠實侷限（仍未解決，非本次範圍）：`prepare_svo_ready_chunks()` 仍以
     `mentions=None` 呼叫，跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決
     的上游依賴，見 `services/svo_preprocessing_service.py` docstring）——別名
@@ -1447,10 +1578,16 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     except RuntimeError:
         pronoun_llm_provider = None
 
+    kg = await KGRepository(driver).get(kg_id)
+    pronoun_lexicon = DEFAULT_PRONOUN_LEXICON
+    if kg is not None and kg.pronoun_lexicon_exclude:
+        pronoun_lexicon = DEFAULT_PRONOUN_LEXICON - set(kg.pronoun_lexicon_exclude)
+
     kg_folder = doc_folder.parent
     _paths, chunks = await prepare_svo_ready_chunks(
         record.source, kg_folder, kg_folder,
         embedding_provider=embedding_provider, pronoun_llm_provider=pronoun_llm_provider,
+        pronoun_lexicon=pronoun_lexicon,
     )
     if not chunks:
         return
@@ -1459,6 +1596,15 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
 
     if embedding_provider is not None:
         await embed_svo_chunks(driver, kg_id, record.source, chunks, embedding_provider)
+        # § Phase 1 標準化 RAG（docs/報告/08_...md §5）：SENTEMBED 剛寫入的
+        # sentence_embeddings.json 現在同時含句子文字（見 write_sentence_embeddings()
+        # docstring），讀回後逐句建立 Sentence 節點＋向量，供 Phase 2 檢索服務使用。
+        normalized_sentences = read_standardized_sentences(record.source, kg_folder)
+        vectors_for_sentences = read_sentence_embeddings(record.source, kg_folder)
+        if normalized_sentences is not None and vectors_for_sentences is not None:
+            await embed_standardized_sentences(
+                driver, kg_id, record.source, normalized_sentences, vectors_for_sentences, chunks,
+            )
 
     task_queue_service.enqueue(
         task_queue_db_path(), str(kg_id), record.source, list(range(1, len(chunks) + 1)),
