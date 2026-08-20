@@ -103,11 +103,12 @@ flowchart LR
   - **真實 LLM 端到端驗證**（非僅 mock 測試）：對「馬斯克創立了太空公司。他隨後研發了獵鷹火箭。」呼叫真實 Ollama（`qwen2.5:7b`），確認 SVO chunk 文字正確變成「馬斯克創立了太空公司。馬斯克隨後研發了獵鷹火箭。」，耗時 34.8 秒（模型已預熱；冷啟動首次呼叫實測需 90 秒以上，屬 Ollama 模型載入成本，非本次改動引入的問題）。
   - **時機決策已選定選項 A**：暫停「請假與排班法規遵循」KG 的匯入（189/461 已完成），待 Phase 0 落地後再繼續／重跑——避免這批之後要整批重抽一次。
   - **不是本報告的範圍擴張**：這件事即使不做標準化 RAG 也該做（現有 SVO 三元組抽取的品質本身就因為代名詞未消解而打折扣），只是標準化 RAG 的存在讓這個既有缺口變得無法再繞過。
-- [ ] **Phase 1：標準化句子向量索引**（**索引策略修訂**：改用 Neo4j 原生向量索引，取代原設計的 Qdrant/Chromadb/FAISS）
+- [x] **Phase 1：標準化句子向量索引**（**索引策略修訂**：改用 Neo4j 原生向量索引，取代原設計的 Qdrant/Chromadb/FAISS，2026-08-20 已實作）
   - 理由：本專案目前所有向量索引（`concept_q_vector`／`chunk_embedding_vector`／`fact_embedding_vector`／`related_to_verb_embedding`）皆為 Neo4j 原生 `CREATE VECTOR INDEX`，沒有任何外部向量資料庫依賴；`fact_embedding_vector` 已於 2026-08-19 改為每個 KG 各自一個索引（見 `docs/論文/03_系統設計與方法論.md` § 3.1.4 §a），標準化句子索引比照同一套「per-KG label＋per-KG 索引」模式即可，不需要引入新元件、新的維運負擔（部署/備份/多一套連線設定）。
-  - 新增 `Sentence` 節點（或複用既有 `Chunk` 節點加上 `sentence_index` 屬性，兩案取捨留待實作時依 `svo_index.json` 既有結構決定），存 `sentence_text`（已消解）、`sentence_embedding`、`source_doc_id`、`chunk_index`、`sentence_index`。
-- [ ] **Phase 2：雙階檢索服務 (`services/retrieval_service.py`)**
-  - 實作 `search_standardized_rag(query, top_k)` 介面：單句向量 KNN 查詢（Phase 1 索引）→ 依 `svo_index.json` 既有結構找出所屬 chunk → 回傳去重後的 chunk 原文（比照既有 MVP `standardized_rag.py::search()` 的去重/上下文擴展邏輯，重寫為查真正的索引而非 numpy brute-force）。
+  - 已實作：`trigger_extraction()`（`services/svo_service.py`）在 embedding 階段完成後，讀回 § Phase 0 寫出的 `sentence_embeddings.json`（已消解過代名詞的句子＋向量），呼叫 `embed_standardized_sentences()` 逐句建立 per-KG `Sentence` 節點＋向量索引，存 `sentence_text`（已消解）、`sentence_embedding`、`source`、`chunk_index`。
+- [x] **Phase 2：雙階檢索服務 (`services/retrieval_service.py`)**（2026-08-20 已實作，`tests/services/test_retrieval_service.py` 覆蓋）
+  - 已實作 `search_standardized_rag(driver, kg_id, kg_folder, query_vector, top_k)`：單句向量 KNN 查詢（`vector_search_sentences()`，Phase 1 索引）→ 依候選句子所屬 `chunk_index` 讀回 `svo_index.json` 取得完整 chunk 原文 → 依 `(source, chunk_index)` 去重（同一 chunk 僅保留分數最高的一句）→ 回傳前 `top_k` 筆。與既有折衷版 MVP（`standardized_rag.py`，沿用未消解句子＋本機 numpy brute-force）的差異：本模組查詢的是真正消解過代名詞的句子、走 Neo4j 原生索引，不需另外維護 `.npy`／`.json` 索引檔建置腳本。
+  - **實作過程中的額外發現（KG 專屬代名詞排除詞庫）**：用 `labor-compliance-collector` 真實法規全文資料集驗證 Phase 1/2 端到端時發現，`DEFAULT_PRONOUN_LEXICON` 的「其」「該」在法律文本中幾乎都是自我完備的正式泛稱（如「及其家屬」「該法」），字面比對規則卻一律當成代名詞觸發 LLM 消解，單筆文件因此耗時暴增、逾越原本固定 600 秒的匯入逾時上限。新增 `KnowledgeGraph.pronoun_lexicon_exclude` 欄位，`trigger_extraction()` 依 KG 設定動態縮減詞庫（欄位預設為空，對其他既有／未來 KG 沒有行為變化）。同時發現並修復兩個相關的匯入健壯性問題：① `import_labor_compliance_dataset.py` 的單筆逾時改為依句數動態放寬（`max(600, 句數×5)`，取代固定 600 秒）；② Ollama provider（`core/providers/llm/ollama.py`）每次呼叫自帶 300 秒 httpx 逾時，跟外層逐文件逾時是兩層獨立保護，未被原本的 `except asyncio.TimeoutError` 接住時會讓整批匯入直接崩潰，補上 `except httpx.HTTPError` 分支後修復。**實測驗證**：套用排除詞庫後，N0050031（勞工職業災害保險及保護法，1201 句，先前逾時的最大癥結文件）於 2014.2 秒內成功匯入。
 - [ ] **Phase 3：三軌混合熔合器 (`Hybrid Retriever & Reranker`)**（優先度最低，可獨立於 Phase 0-2 排期）
   - 實作 RRF (Reciprocal Rank Fusion)，將三軌回傳的結果進行排序與去重；置於 `routers/agent.py` 既有問答路徑之外，先讓三軌各自可獨立呼叫/比較（呼應 §4 消融實驗規劃），熔合器留待三軌個別驗證過再接上。
 
