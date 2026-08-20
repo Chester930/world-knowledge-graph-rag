@@ -24,7 +24,7 @@ from core.constants import (
 )
 from core.config import task_queue_db_path
 from core.providers.base import EmbeddingProvider, LLMProvider
-from core.providers.factory import get_embedding_provider
+from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, expand_governance_service, sim_calibration_service, task_queue_service
 from services.classify_service import cosine_similarity
@@ -1415,14 +1415,23 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     改為明確參數（而非函式內自行呼叫 `get_driver()`），比照本模組其餘函式
     的依賴注入慣例，也讓測試不需要 monkeypatch 全域函式。
 
-    ⚠️ 誠實侷限：`prepare_svo_ready_chunks()` 目前以 `mentions=None` 呼叫，
-    跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決的上游依賴），也
-    未提供 LLM provider，代名詞消解與實體去重皆退化為最保守版本（見
-    `services/svo_preprocessing_service.py` docstring）——這部分的 Provider
-    注入待第四章實作時再處理。這裡只補上 `SENTEMBED`／`EMBEDCHUNK` 兩處都要
-    用的同一個 embedding provider；`get_embedding_provider()` 在尚未呼叫
-    `init_providers()` 的情境（例如測試）會拋出 `RuntimeError`，此時視為向量化
-    不可用，優雅跳過，不影響切塊與排隊本身。
+    ✅ **2026-08-20 接上指代消解 LLM（docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md
+    §0 前提缺口）**：`prepare_svo_ready_chunks()` 現在帶入 `pronoun_llm_provider`，
+    代名詞消解不再退化為原句直接通過——這不只補上一份額外的標準化句子索引，
+    `build_svo_chunks()` 的 `chunk.text` 本身就是 `normalized_sentences` 組成，
+    即現有 `LLM_SVO` 三元組抽取送出的原文，因此本次改動同時也是既有 SVO 抽取
+    品質的修正（代名詞換成具體實體後，LLM 抽取應更準確），非僅服務標準化 RAG。
+    **範圍聲明**：僅對此修正上線後**新觸發**的抽取生效；已完成抽取的既有 KG
+    需要 `knowledge_graph_service.build_graph(force_rebuild=True)` 重新觸發
+    才能拿到消解後版本，見上述報告 §0 的時機決策記錄。
+
+    ⚠️ 誠實侷限（仍未解決，非本次範圍）：`prepare_svo_ready_chunks()` 仍以
+    `mentions=None` 呼叫，跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決
+    的上游依賴，見 `services/svo_preprocessing_service.py` docstring）——別名
+    登記與代名詞消解是兩個獨立階段，本次只解決後者。`get_llm_provider()`／
+    `get_embedding_provider()` 在尚未呼叫 `init_providers()` 的情境（例如測試）
+    皆會拋出 `RuntimeError`，此時視為對應功能不可用，優雅跳過，不影響切塊與
+    排隊本身——兩個 provider 各自獨立降級，任一缺席不影響另一個。
     """
     record = document_record_service.read_record(doc_folder)
     if record is None:
@@ -1433,9 +1442,15 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     except RuntimeError:
         embedding_provider = None
 
+    try:
+        pronoun_llm_provider = get_llm_provider()
+    except RuntimeError:
+        pronoun_llm_provider = None
+
     kg_folder = doc_folder.parent
     _paths, chunks = await prepare_svo_ready_chunks(
-        record.source, kg_folder, kg_folder, embedding_provider=embedding_provider,
+        record.source, kg_folder, kg_folder,
+        embedding_provider=embedding_provider, pronoun_llm_provider=pronoun_llm_provider,
     )
     if not chunks:
         return

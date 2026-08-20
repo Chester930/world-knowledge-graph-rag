@@ -1719,6 +1719,65 @@ async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path
     assert read_sentence_embeddings("note.md", kg_folder) is not None
 
 
+@pytest.mark.asyncio
+async def test_trigger_extraction_skips_pronoun_resolution_when_llm_not_initialized(tmp_path, monkeypatch):
+    """對應誠實侷限：測試環境未呼叫 `init_providers()`，`get_llm_provider()`
+    會拋出 RuntimeError，指代消解應優雅退化為原句直接通過，不影響切塊與排隊
+    本身——與既有 embedding provider 的降級行為對稱。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", kg_folder,
+    )
+
+    await svc.trigger_extraction(FakeDriver(), doc_folder, uuid4())  # 不應拋出例外
+
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert chunk_files
+    assert "他隨後研發了獵鷹火箭" in chunk_files[0].read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_resolves_pronouns_when_llm_available(tmp_path, monkeypatch):
+    """2026-08-20：對應 docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md
+    §0 前提缺口修復——`trigger_extraction()` 帶入 `pronoun_llm_provider` 後，
+    SVO chunk 的實際文字（`build_svo_chunks()` 的 `chunk.text`，也就是送進
+    `LLM_SVO` 三元組抽取的原文）應反映指代消解後的結果，而非原句代名詞。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", kg_folder,
+    )
+
+    call_count = {"n": 0}
+
+    class FakeLLM:
+        def __init__(self):
+            self.responses = ["馬斯克隨後研發了獵鷹火箭。"]
+
+        async def generate(self, prompt: str) -> str:
+            return self.responses.pop(0)
+
+    def _get_fake_llm_provider():
+        call_count["n"] += 1
+        return FakeLLM()
+
+    monkeypatch.setattr("services.svo_service.get_llm_provider", _get_fake_llm_provider)
+
+    await svc.trigger_extraction(FakeDriver(), doc_folder, uuid4())
+
+    assert call_count["n"] == 1  # 只從 trigger_extraction() fetch 一次，非各自重複 fetch
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert chunk_files
+    chunk_text = chunk_files[0].read_text(encoding="utf-8")
+    assert "馬斯克隨後研發了獵鷹火箭" in chunk_text
+    assert "他隨後研發了獵鷹火箭" not in chunk_text
+
+
 # ── 3.1.4 §a：事實層級向量化（Fact 節點，2026-08-03）────────────────────────
 
 def test_verbalize_fact_includes_types_when_present():
