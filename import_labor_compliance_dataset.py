@@ -55,6 +55,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import time
 from pathlib import Path
 from uuid import UUID
@@ -72,11 +73,10 @@ from services.document_record_service import document_uuid
 from services.ingestion_service import chunk_and_stage
 from services.svo_service import trigger_extraction
 
-COLLECTOR_PROJECT_DIR = Path(
-    r"D:\Users\666\Desktop\labor-compliance-collector\projects\20260818_請假_排班_法規測試"
-)
-EXTRACTION_INPUT_DIR = COLLECTOR_PROJECT_DIR / "03_extraction_input"
-PRUNING_REPORT_PATH = COLLECTOR_PROJECT_DIR / "06_agent_summary" / "phase0_pruning_dry_run.json"
+DEFAULT_COLLECTOR_PROJECT_DIRS = [
+    Path(r"c:\Users\mycena\Desktop\labor-compliance-collector\projects\20260821_請假與排班法規庫"),
+    Path(r"D:\Users\666\Desktop\labor-compliance-collector\projects\20260818_請假_排班_法規測試"),
+]
 
 # (source_key, record_type 子資料夾名稱) —— 第一階段範圍的三個長篇全文來源。
 TARGET_SOURCES = [
@@ -86,63 +86,114 @@ TARGET_SOURCES = [
 ]
 
 
-def _load_source_decisions() -> dict[str, dict]:
-    data = json.loads(PRUNING_REPORT_PATH.read_text(encoding="utf-8"))
-    return data["source_decisions"]
+def _find_default_project_dir() -> Path:
+    for p in DEFAULT_COLLECTOR_PROJECT_DIRS:
+        if p.is_dir():
+            return p
+    return DEFAULT_COLLECTOR_PROJECT_DIRS[0]
+
+
+def _load_source_decisions(project_dir: Path) -> dict[str, dict]:
+    pruning_path = project_dir / "06_agent_summary" / "phase0_pruning_dry_run.json"
+    if pruning_path.is_file():
+        data = json.loads(pruning_path.read_text(encoding="utf-8"))
+        return data.get("source_decisions", {})
+    return {}
 
 
 def _is_core_keep(source_key: str, filename: str, decisions: dict[str, dict]) -> bool:
-    """判斷依據見模組 docstring「篩選邏輯」。不在 `source_decisions` 涵蓋範圍內
-    （目前只有 `JUDICIAL_YUAN_OPEN_DATA_API`）的來源一律視為核心保留。"""
+    """判斷依據見模組 docstring「篩選邏輯」。若未提供 decisions 或不在 `source_decisions`
+    涵蓋範圍內（如 `JUDICIAL_YUAN_OPEN_DATA_API` 或無修剪報告時），一律視為保留。"""
+    if not decisions:
+        return True
     key = f"{source_key}/{filename}"
     decision = decisions.get(key)
     if decision is None:
         return True
-    return decision["decision"] == "keep" and not decision.get("reason", "").startswith("topic_keyword")
+    return decision.get("decision") == "keep" and not decision.get("reason", "").startswith("topic_keyword")
 
 
 def _record_source_string(source_key: str, record: dict) -> str:
     """建立這份記錄在我們系統裡的 `source`（文件識別碼的自然鍵），比照
     `01_moj_laws/` 資料夾既有的 `{pcode}_{標題}` 命名慣例。"""
-    title = record.get("title") or record["item_id"]
+    title = record.get("title") or record.get("item_id", "unknown")
     if source_key == "JUDICIAL_YUAN_OPEN_DATA_API":
-        judgment_id = record.get("payload", {}).get("judgment_id", record["item_id"])
+        judgment_id = record.get("payload", {}).get("judgment_id", record.get("item_id", "judgment"))
         return f"{judgment_id.replace(',', '_')}_{title}"
-    pcode = record.get("payload", {}).get("pcode", record["item_id"])
+    pcode = record.get("payload", {}).get("pcode", record.get("item_id", "pcode"))
     return f"{pcode}_{title}"
 
 
-def _iter_candidate_records(decisions: dict[str, dict]):
-    """依序讀出第一階段範圍內、通過核心保留篩選的記錄。yield (source_key, source, text)。"""
+def _iter_candidate_records(
+    project_dir: Path,
+    decisions: dict[str, dict],
+    filter_keyword: str | None = None,
+    limit: int | None = None,
+):
+    """依序讀出範圍內、通過核心保留篩選的記錄。yield (source_key, source, text)。"""
+    extraction_input_dir = project_dir / "03_extraction_input"
+    yielded = 0
     for source_key, record_type in TARGET_SOURCES:
-        record_dir = EXTRACTION_INPUT_DIR / source_key / record_type
+        record_dir = extraction_input_dir / source_key / record_type
         if not record_dir.is_dir():
             continue
-        for path in sorted(record_dir.glob("*.json")):
-            if not _is_core_keep(source_key, path.name, decisions):
+        for entry in os.scandir(record_dir):
+            if not entry.name.endswith(".json"):
                 continue
-            record = json.loads(path.read_text(encoding="utf-8"))
+            if not _is_core_keep(source_key, entry.name, decisions):
+                continue
+            try:
+                with open(entry.path, "r", encoding="utf-8") as f:
+                    record = json.load(f)
+            except Exception:
+                continue
             text = record.get("text", "").strip()
             if not text:
                 continue
             source = _record_source_string(source_key, record)
+            if filter_keyword and filter_keyword not in source:
+                continue
             yield source_key, source, text
+            yielded += 1
+            if limit and yielded >= limit:
+                return
 
 
-async def _run(kg_id: UUID | None, kg_name: str | None, dry_run: bool) -> None:
-    decisions = _load_source_decisions()
-    candidates = list(_iter_candidate_records(decisions))
+async def _run(
+    project_dir: Path,
+    kg_id: UUID | None,
+    kg_name: str | None,
+    filter_keyword: str | None,
+    limit: int | None,
+    dry_run: bool,
+) -> None:
+    if not project_dir.is_dir():
+        raise SystemExit(f"指定的資料集目錄不存在：{project_dir}")
+
+    print(f"資料來源目錄：{project_dir}")
+    decisions = _load_source_decisions(project_dir)
+    if decisions:
+        print(f"已載入修剪決策報告（共 {len(decisions)} 條決策）")
+    else:
+        print("未偵測到 phase0_pruning_dry_run.json，將直接讀取 03_extraction_input 下所有候選檔案")
+
+    candidates = list(_iter_candidate_records(project_dir, decisions, filter_keyword=filter_keyword, limit=limit))
 
     counts: dict[str, int] = {}
     for source_key, _source, _text in candidates:
         counts[source_key] = counts.get(source_key, 0) + 1
-    print("符合第一階段篩選條件的記錄數：")
+    print("\n符合篩選條件的記錄數：")
     for source_key, count in counts.items():
         print(f"  {source_key}: {count}")
     print(f"  合計: {len(candidates)}")
 
-    if dry_run:
-        print("\n--dry-run：僅列出統計，未寫入 Neo4j、未建立 KG。")
+    if dry_run or not candidates:
+        print("\n候選清單（前 10 筆）：")
+        for i, (sk, src, txt) in enumerate(candidates[:10], 1):
+            print(f"  {i}. [{sk}] {src} ({len(txt)} 字元)")
+        if len(candidates) > 10:
+            print(f"  ... 還有 {len(candidates) - 10} 筆")
+        print("\n--dry-run 模式完成：僅列出統計，未寫入 Neo4j、未建立 KG。")
         return
 
     await connect()
@@ -157,11 +208,11 @@ async def _run(kg_id: UUID | None, kg_name: str | None, dry_run: bool) -> None:
         else:
             kg = await kg_repo.create(
                 KnowledgeGraphCreate(
-                    name=kg_name or "請假與排班法規遵循（labor-compliance-collector 匯入）",
+                    name=kg_name or "請假與排班法規遵循（測試）",
                     description=(
-                        "從 labor-compliance-collector 專案的 20260818_請假_排班_法規測試 "
-                        "資料集匯入，第一階段範圍：法律/命令全文（核心保留）＋司法院判決。"
+                        f"從 {project_dir.name} 資料集匯入，第一階段範圍：法律/命令全文（核心保留）＋司法院判決。"
                     ),
+                    pronoun_lexicon_exclude=["其", "該"],
                 )
             )
             print(f"已建立新 KG：id={kg.id} name={kg.name}")
@@ -179,18 +230,6 @@ async def _run(kg_id: UUID | None, kg_name: str | None, dry_run: bool) -> None:
             staging_doc_folder, _record = chunk_and_stage(text, source, staging_folder())
             dest = assign_document_to_kg(staging_doc_folder, kg_info, method="manual")
             t0 = time.monotonic()
-            # 2026-08-20 真實匯入時發現：491 句的長篇法規（勞工退休金條例施行細則）
-            # 光是逐句 embedding 就要 218 秒，單筆文件時間差異可以很大——加上逾時
-            # 保護，避免單一離群文件卡住整批匯入（比照本專案既有的「單一項目失敗
-            # 不阻擋其餘項目」慣例，見 extraction_worker／governance_worker）。
-            #
-            # 2026-08-20 固定 600s 上限實測不足：即使套用 KG 專屬代名詞排除詞庫
-            # （見 svo_service.py trigger_extraction()），397 句的《性騷擾防治法》
-            # 仍逾時。直接量測本機 Ollama（qwen2.5:7b）單次指代消解呼叫延遲：
-            # 冷啟動 30-35 秒、暖機後穩定在 13 秒左右，扣除「其」「該」後觸發率仍
-            # 有 7.1%（57→28 句／397 句）。換算下來單是消解階段就需要 28×13≈364 秒，
-            # 加上逐句 embedding，固定 600 秒明顯偏緊。改為依句數動態放寬（每句抓
-            # 5 秒安全餘裕，涵蓋冷啟動與最壞情況觸發率），下限維持 600 秒不變。
             sentences = read_sentences_index(source, kg_info.folder_path) or []
             timeout_seconds = max(600, len(sentences) * 5)
             try:
@@ -204,14 +243,6 @@ async def _run(kg_id: UUID | None, kg_name: str | None, dry_run: bool) -> None:
                 )
                 continue
             except httpx.HTTPError as exc:
-                # 2026-08-20 真實批次執行時發現：Ollama provider（core/providers/llm/
-                # ollama.py）每次呼叫自帶 300s httpx 逾時，跟這裡外層的逐文件逾時是
-                # 兩層獨立保護——負載嚴重時單次 LLM 呼叫本身就可能卡超過 300s，
-                # httpx.ReadTimeout 會在外層 asyncio.wait_for 之前先炸開、未被
-                # 上面的 except 接住，導致整批匯入直接中斷（曾實際發生：跑到一半
-                # 因單次呼叫逾時而整個程序崩潰，當晚後續候選文件全部沒有機會處理）。
-                # 比照上面 asyncio.TimeoutError 的「單一項目失敗不阻擋其餘項目」
-                # 慣例，同樣視為此筆離群、略過續跑。
                 timed_out += 1
                 print(
                     f"[{source_key}] ⚠️ LLM 呼叫失敗（{type(exc).__name__}: {exc}），"
@@ -234,14 +265,33 @@ async def _run(kg_id: UUID | None, kg_name: str | None, dry_run: bool) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--dataset-dir",
+        "-d",
+        type=Path,
+        default=_find_default_project_dir(),
+        help="指定 labor-compliance-collector 專案目錄",
+    )
+    parser.add_argument("--limit", "-n", type=int, default=None, help="限制處理筆數（供測試用）")
+    parser.add_argument("--filter", "-f", type=str, default=None, help="依關鍵字或 PCODE 篩選檔名")
     parser.add_argument("--dry-run", action="store_true", help="只列出將匯入的清單與統計，不寫入")
     parser.add_argument("--kg-id", type=str, default=None, help="匯入既有 KG（重跑／增量更新用）")
     parser.add_argument("--kg-name", type=str, default=None, help="建立新 KG 時使用的名稱")
     args = parser.parse_args()
 
     kg_id = UUID(args.kg_id) if args.kg_id else None
-    asyncio.run(_run(kg_id=kg_id, kg_name=args.kg_name, dry_run=args.dry_run))
+    asyncio.run(
+        _run(
+            project_dir=args.dataset_dir,
+            kg_id=kg_id,
+            kg_name=args.kg_name,
+            filter_keyword=args.filter,
+            limit=args.limit,
+            dry_run=args.dry_run,
+        )
+    )
 
 
 if __name__ == "__main__":
     main()
+
