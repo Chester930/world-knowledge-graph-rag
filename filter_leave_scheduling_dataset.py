@@ -20,7 +20,10 @@ collector 自己算好的保留／剔除判斷，因此需要在這一側自行�
    代理」——這句話出現在數十個不相關機關的辦事細則裡，是組織內規樣板文字，不是實質請假規範）。
 5. 排除「只有單一關鍵字且只出現一次」的低確信度記錄（多半是附帶提及，如日期換算、計費單位裡
    偶然出現「工時」「例假」等字——非規則本身在規範請假／排班行為）。保留門檻：≥2 種不同關鍵字，
-   或同一關鍵字出現 ≥2 次。
+   或同一關鍵字出現 ≥2 次。**例外**：`payload.category` 含「勞動部」或「勞工」的記錄不套用此
+   門檻——實測發現這條規則會誤刪 20 筆貨真價實的勞動部法規（如「職業安全衛生法施行細則」只命中
+   一次「輪班」、「團體協約法」只命中一次「工時」），因為勞動部發布的規範本身高機率就是實質相關，
+   單次提及不代表附帶，跟「跨部會、非勞動類別」文件裡的單次提及風險不同。
 
 **驗證方式**：規則式篩選無法窮盡所有語意碰撞，每一輪都靠隨機抽樣 30 筆人工審查校準（過程記錄
 於 `docs/論文/` 相關設計討論，非本檔案職責）。最終結果：11,865 → 排除 3,522 筆已廢止 → 排除
@@ -128,7 +131,12 @@ def classify_record(rec: dict) -> tuple[str, list[tuple[str, str, int]]]:
         return "excluded_boilerplate_only", hits
 
     kw_counts = Counter(h[0] for h in non_boilerplate)
-    if len(kw_counts) < MIN_DISTINCT_KEYWORDS and max(kw_counts.values()) < MIN_SAME_KEYWORD_REPEATS:
+    is_labor_ministry = "勞動部" in category or "勞工" in category
+    if (
+        not is_labor_ministry
+        and len(kw_counts) < MIN_DISTINCT_KEYWORDS
+        and max(kw_counts.values()) < MIN_SAME_KEYWORD_REPEATS
+    ):
         return "excluded_low_confidence", non_boilerplate
 
     return "kept", non_boilerplate
