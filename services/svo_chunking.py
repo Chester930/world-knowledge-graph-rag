@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Protocol, Sequence
 
 from parser.chunk_writer import document_folder_path
 from parser.core import split_into_sentences
@@ -40,6 +40,10 @@ class SVOChunk:
     original_sentences: list[str]
     normalized_sentences: list[str]
     filename: str
+    # 法條感知切塊（ArticleAwareChunking）填入來源條號，供 Fact 追溯回
+    # 「哪一份法規的哪一條」（見 LawArticle 節點設計）；SVOGROUP（固定句數
+    # 聚合）產生的 chunk 橫跨任意句子範圍、不對應單一條文，維持 None。
+    article_no: str | None = None
 
 
 def split_and_clean_sentences(text: str) -> list[str]:
@@ -121,6 +125,142 @@ def build_svo_chunks_from_text(
     )
 
 
+# 法規全文本身以「（刪除）」／「(刪除)」標記已刪除但保留編號的條文（見
+# labor-compliance-collector 資料集實測案例：D0070148 建築物室內裝修管理辦法
+# 第 21 條）——內容非空但無任何可供 SVO 抽取的實質語意，逐條切塊時會產生
+# 一整個「對『（刪除）』抽取事實」的無意義 LLM 呼叫，故在切塊階段先行濾除，
+# 不留給下游抽取管線處理。
+_DELETED_ARTICLE_MARKERS = frozenset({"（刪除）", "(刪除)", "刪除"})
+
+
+def _is_deleted_article_placeholder(content: str) -> bool:
+    stripped = content.strip()
+    return stripped in _DELETED_ARTICLE_MARKERS
+
+
+def build_article_aware_chunks(
+    articles: Sequence[Mapping[str, str]],
+    *,
+    article_no_key: str = "ArticleNo",
+    article_content_key: str = "ArticleContent",
+) -> list[SVOChunk]:
+    """法規領域專屬切塊策略：按 `payload.articles` 既有的 `ArticleNo` 邊界切，
+    一條對一塊，取代 `SVOGROUP` 的固定句數聚合＋重疊窗。
+
+    對應 `docs/論文/03_系統設計與方法論.md` §3.1.2「法規領域專屬切塊策略與
+    『結構化資料優先直接映射』原則」：法規全文本身已經是逐條切好的結構化
+    資料，比通用句數聚合更適合作為 SVO 抽取單位，讓 `Fact` 能精確追溯回
+    「哪一份法規的哪一條」（見 `article_no` 欄位），而非只能追溯到「第幾個
+    5 句聚合塊」。
+
+    與 `build_svo_chunks()`（`SVOGROUP`）的關鍵差異：
+    - `source_sentence_start`／`source_sentence_end` 是**該條文內部**的區域
+      句子索引（從 1 起算），不是整份文件的全域句子索引——法條之間本來就是
+      離散的語意單位，全域句子計數對追溯回原文沒有意義，`article_no` 才是
+      正確的追溯鍵。
+    - 不套用固定句數上限與相鄰塊重疊窗：`SVOGROUP` 的重疊窗是為了避免通用
+      散文的事實描述被切塊邊界攔腰截斷；條文本身就是法規定義好的自我完備
+      語意單位，不需要靠相鄰句補前後文。
+
+    ⚠️ **誠實侷限**：`original_sentences`／`normalized_sentences` 目前相同
+    （尚未接上代名詞消解）——法規全文本身極少使用代名詞是既有觀察（本專案
+    對應 KG 已設定 `pronoun_lexicon_exclude=["其","該"]`，見
+    `import_labor_compliance_dataset.py`），先以條文原文直接作為兩者輸入；
+    是否需要逐條套用 `pronoun_resolution_service`，留待接入
+    `services/svo_preprocessing_service.py::prepare_svo_ready_chunks()` 時
+    再決定，本函式本身不呼叫 LLM。
+
+    `ArticleNo` 為空白、內容為空、或內容等同「（刪除）」佔位標記（見
+    `_is_deleted_article_placeholder()`）的條目會被濾除，不產生對應 chunk；
+    回傳的 `index`／`total_chunks`／`filename` 以濾除後的實際數量重新編號。
+
+    ⚠️ **`ArticleNo` 為空白＝非條文邊界（實測發現）**：`payload.articles` 除了
+    `ArticleType: "A"`（實際條文）外，也可能混入 `ArticleType: "C"`（章節標題，
+    如「第一章　總則」）——`ArticleNo` 恆為空字串，`ArticleContent` 則是章節
+    標題文字，不是可供 SVO 抽取的條文內容（實測案例：`N0030001` 勞動基準法，
+    110 個 `payload.articles` 項目中含 12 個章節標題）。以 `ArticleNo` 是否為
+    空白判斷比硬編碼 `ArticleType == "A"` 更貼近設計本身宣稱的依據（「按
+    `ArticleNo` 邊界切」），且不需要額外假設 `ArticleType` 欄位一定存在。
+    """
+    kept: list[tuple[str, list[str]]] = []
+    for article in articles:
+        article_no = (article.get(article_no_key) or "").strip()
+        content = (article.get(article_content_key) or "").strip()
+        if not article_no or not content or _is_deleted_article_placeholder(content):
+            continue
+        sentences = split_and_clean_sentences(content)
+        if not sentences:
+            continue
+        kept.append((article_no, sentences))
+
+    total = len(kept)
+    if total == 0:
+        return []
+
+    digits = max(3, len(str(total)))
+    chunks: list[SVOChunk] = []
+    for idx, (article_no, sentences) in enumerate(kept, start=1):
+        filename = f"{SVO_CHUNK_PREFIX}-{idx:0{digits}d}-of-{total:0{digits}d}.md"
+        chunks.append(SVOChunk(
+            index=idx,
+            total_chunks=total,
+            source_sentence_start=1,
+            source_sentence_end=len(sentences),
+            text="\n".join(sentences),
+            original_sentences=sentences,
+            normalized_sentences=sentences,
+            filename=filename,
+            article_no=article_no or None,
+        ))
+    return chunks
+
+
+class ChunkingStrategy(Protocol):
+    """SVO 切塊策略介面（策略模式，比照 `pronoun_resolution_service.PosTagger`
+    的 Protocol 注入模式）。不同實作在建構時各自持有所需輸入（扁平句子清單、
+    或條文清單），`build_chunks()` 呼叫時不需額外參數，統一回傳
+    `list[SVOChunk]`——下游 SVO 抽取／`Fact` 建立只認 `SVOChunk` 既有契約
+    （`text`／`source_doc_id`／`chunk_index`），不需要知道切塊策略本身。"""
+
+    def build_chunks(self) -> list[SVOChunk]:
+        ...
+
+
+@dataclass
+class FixedSentenceGroupChunking:
+    """`SVOGROUP`：現行固定句數聚合＋重疊窗策略（通用預設），包裝既有
+    `build_svo_chunks()`，行為完全不變。"""
+
+    original_sentences: Sequence[str]
+    normalized_sentences: Sequence[str]
+    max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES
+    overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES
+
+    def build_chunks(self) -> list[SVOChunk]:
+        return build_svo_chunks(
+            self.original_sentences,
+            self.normalized_sentences,
+            max_sentences=self.max_sentences,
+            overlap_sentences=self.overlap_sentences,
+        )
+
+
+@dataclass
+class ArticleAwareChunking:
+    """法條感知切塊：法規領域專屬替代實作，包裝 `build_article_aware_chunks()`。"""
+
+    articles: Sequence[Mapping[str, str]]
+    article_no_key: str = "ArticleNo"
+    article_content_key: str = "ArticleContent"
+
+    def build_chunks(self) -> list[SVOChunk]:
+        return build_article_aware_chunks(
+            self.articles,
+            article_no_key=self.article_no_key,
+            article_content_key=self.article_content_key,
+        )
+
+
 def _yaml_frontmatter(fields: dict) -> str:
     lines = ["---"]
     for key, value in fields.items():
@@ -153,13 +293,16 @@ def write_svo_chunks(
 
     paths: list[Path] = []
     for chunk in chunks:
-        frontmatter = _yaml_frontmatter({
+        frontmatter_fields = {
             "source": source,
             "svo_chunk_index": chunk.index,
             "total_svo_chunks": chunk.total_chunks,
             "source_sentence_start": chunk.source_sentence_start,
             "source_sentence_end": chunk.source_sentence_end,
-        })
+        }
+        if chunk.article_no:
+            frontmatter_fields["article_no"] = chunk.article_no
+        frontmatter = _yaml_frontmatter(frontmatter_fields)
         path = doc_folder / chunk.filename
         path.write_text(f"{frontmatter}\n\n{chunk.text}\n", encoding="utf-8")
         paths.append(path)
