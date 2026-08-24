@@ -46,6 +46,10 @@ HDBSCAN 的距離計算皆為 O(n²)，而未分配資料夾池會隨時間持�
 評估此設計，而非讓效能劣化悄悄發生。若第五章實驗語料規模觸及此門檻，需將
 「導入 ANN」列為第七章未來工作，而非現階段的正式研究貢獻。
 """
+# Traceability: 02 §2.4.1 -> 03 §3.1.1 -> 04 §4.3.2.
+# Literature: McInnes et al. (UMAP／HDBSCAN), Khandelwal et al. (dominant subcluster).
+# Project: hdbscan and umap-learn are direct dependencies; BERTopic is an architecture
+# reference, not a code import. Tests: tests/services/test_cluster_service.py.
 from __future__ import annotations
 
 import asyncio

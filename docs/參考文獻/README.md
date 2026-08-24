@@ -95,9 +95,8 @@
 | `bloodgood-vijay-shanker-2009-stopping-active-learning.pdf` | Bloodgood & Vijay-Shanker (2009), *Stabilizing Predictions 停止 AL 方法*，CoNLL 2009（3.1.3 §a 人機一致率畢業機制的支持文獻，2026-07-26 新增） | [ACL Anthology W09-1107](https://aclanthology.org/W09-1107/)；[arXiv:1409.5165](https://arxiv.org/abs/1409.5165) |
 | `bloodgood-grothendieck-2013-analysis-stopping-active-learning.pdf` | Bloodgood & Grothendieck (2013), *Analysis of Stopping Active Learning*，CoNLL 2013（上述方法的理論分析，2026-07-26 新增） | [ACL Anthology W13-3502](https://aclanthology.org/W13-3502/)；[arXiv:1504.06329](https://arxiv.org/abs/1504.06329) |
 | `jitkrittum-et-al-2023-confidence-cascade-deferral.pdf` | Jitkrittum et al. (2023, Google Research), *When Does Confidence-Based Cascade Deferral Suffice?*，NeurIPS 2023（3.1.3 主圖 `SIM`／`ESCALATE3` 機制核心理論依據，2026-07-26 新增） | [arXiv:2307.02764](https://arxiv.org/abs/2307.02764) |
-| `madras-et-al-2018-learning-to-defer.pdf` | Madras, Pitassi & Zemel (2018), *Predict Responsibly: Learning to Defer*，NeurIPS 2018（learning-to-defer 術語與理論定位，2026-07-26 新增） | [arXiv:1711.06664](https://arxiv.org/abs/1711.06664) |
-
-**未下載（付費，不下載全文）**：Guha et al. (2016), *Schema.org: Evolution of Structured Data on the Web*（*Communications of the ACM* 59(2)）——ACM 需付費/機構帳號，無公開免費 PDF。引用時僅使用書目資訊（見 `../論文/附錄與參考文獻.md`）。
+| `guha-et-al-2016-schema-org-cacm.pdf` | Guha, Brickley & Macbeth (2016), *Schema.org: Evolution of Structured Data on the Web*，CACM 59(2) / ACM Queue 13(9)（RQ4a 受控詞彙標準化學術錨點，2026-08-20 補齊全文） | [DOI: 10.1145/2844544](https://doi.org/10.1145/2844544) / [ACM Queue](https://queue.acm.org/detail.cfm?id=2857276) |
+| `vrandecic-krotzsch-2014-wikidata.pdf` | Vrandečić & Krötzsch (2014), *Wikidata: A Free Collaborative Knowledgebase*，CACM 57(10)（社群治理受控詞彙擴展佐證與 `rdf:type` 獨立節點建模依據，供 3.1.4／3.3 使用，2026-07-20 新增） | [DOI: 10.1145/2629489](https://doi.org/10.1145/2629489)；[作者開放取用全文](https://iccl.inf.tu-dresden.de/w/images/8/89/Wikidata-CACM-2014.pdf) |
 
 **未下載（標註規範非期刊論文，僅記書目）**：ACE 2005 Relation Extraction Task 標註規範（LDC）——6 個粗類、18 個細類，透過 Aguilar et al. (2014) 查證存在性，未取得 LDC 原始規範全文。
 

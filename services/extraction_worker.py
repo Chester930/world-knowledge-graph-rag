@@ -7,6 +7,11 @@
 任何呼叫端使用過。同時是五態機制（`pending`／`processing`／`completed`／
 `failed`／`pending_upload`）`PROC`／`RESULT`／`UPLOAD`／`DONE4`／`FAIL`
 節點第一次被實際串接的地方。
+
+Traceability: 02 §2.4.1 -> 03 §3.1.2／§3.1.3／§3.1.4 -> 04 §4.6.
+Project: asyncio background worker is this project's own integration; the worker does
+not claim to be a direct Spark or external queue implementation. Tests:
+tests/services/test_extraction_worker.py.
 """
 from __future__ import annotations
 

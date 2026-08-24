@@ -2,12 +2,16 @@
 
 對應 docs/論文/03_系統設計與方法論.md § 3.1.1／3.1.2：每份文件資料夾內都有一份
 `_record.json`，是隨資料夾一起搬移的真實狀態來源——記錄這份文件曾被分配到哪些
-知識圖譜（歸屬歷史），以及目前的抽取進度。`task_queue.db`（3.1.2，尚未實作）僅作為
+知識圖譜（歸屬歷史），以及目前的抽取進度。`task_queue.db`（3.1.2）僅作為
 背景 Worker 的效能索引，需與此記錄檔保持同步，不是唯一的狀態來源。
 
 本模組只負責 3.1.1 範圍內的職責：初始化記錄檔、追加歸屬歷史。抽取狀態機的
 pending/processing/completed/failed/pending_upload 轉換（3.1.2）由後續實作的
 抽取任務佇列負責，不在此模組內處理。
+
+Traceability: 02 §2.4.1／§2.4.5 -> 03 §3.1.2／§3.1.4 -> 04 §4.5.3／§4.6.
+Project: deterministic UUID and record/queue separation are this project's own
+traceability design. Tests: tests/services/test_document_record_service.py.
 """
 from __future__ import annotations
 

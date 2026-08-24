@@ -29,6 +29,7 @@
 | `zhang-et-al-2025-erarag.pdf` | Zhang et al. (2025), EraRAG | arXiv:2506.20963 |
 | `xiao-et-al-2025-graphrag-bench.pdf` | Xiao et al. (2025), GraphRAG-Bench | arXiv:2506.02404 |
 | `li-et-al-2025-t-grag.pdf` | Li et al. (2025), T-GRAG，ACM Multimedia 2025 | arXiv:2508.01680 |
+| `rasmussen-et-al-2025-zep-temporal-kg.pdf` | Rasmussen et al. (2025), *Zep: A Temporal Knowledge Graph Architecture for Autonomous Agents*，arXiv 預印本（雙時態 KG 記憶架構，2026-08-20 補齊下載） | arXiv:2501.13956 |
 | `zhou-et-al-2025-graph-rag-unified-framework.pdf` | Zhou et al. (2025), In-depth Analysis of Graph-based RAG in a Unified Framework | arXiv:2503.04338 |
 | `dong-et-al-2025-kg-rag-evaluation-framework.pdf` | Dong et al. (2025), Knowledge-Graph Based RAG System Evaluation Framework | arXiv:2510.02549 |
 | `guo-et-al-2026-why-rag-fails-graph-perspective.pdf` | Guo et al. (2026), Why RAG Fails: A Graph Perspective | arXiv:2605.14192 |

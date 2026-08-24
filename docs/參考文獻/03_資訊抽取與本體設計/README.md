@@ -92,7 +92,7 @@
 |---|---|---|---|
 | `vashishth-et-al-2018-cesi-canonicalize-open-kb.pdf` | Vashishth, Jain & Talukdar (2018), *CESI: Canonicalizing Open Knowledge Bases using Embeddings and Side Information*, WWW 2018 | arXiv:1902.00172 | ✅ 🟢 已下載並精讀全文（2026-07-26 補齊，查證 `EXPAND` 候選池門檻與 `COMPARE` 相似度門檻的校準方法論） |
 | `angeli-et-al-2015-stanford-openie.pdf` | Angeli, Premkumar & Manning (2015), *Leveraging Linguistic Structure for Open Domain Information Extraction*, ACL 2015 | ACL Anthology P15-1034 | ✅ 已下載 |
-| `guha-et-al-2016-schema-org-cacm.pdf` | Guha, Brickley & Macbeth (2016), *Schema.org: Evolution of Structured Data on the Web*, CACM Vol.59 No.2 | DOI: [10.1145/2844544](https://doi.org/10.1145/2844544) | ⚠️ **付費資源**，ACM 直接下載為登入頁面；2026-07-20 再次查證 ResearchGate／Academia.edu 皆非作者授權的免費全文（前者僅為「request full-text」頁面，後者需帳號且來源不明），確認目前無合法免費全文，仍需透過學校圖書館下載 |
+| `guha-et-al-2016-schema-org-cacm.pdf` | Guha, Brickley & Macbeth (2016), *Schema.org: Evolution of Structured Data on the Web*, CACM Vol.59 No.2 / ACM Queue Vol.13 No.9 | DOI: [10.1145/2844544](https://doi.org/10.1145/2844544) / [10.1145/2857274.2857276](https://doi.org/10.1145/2857274.2857276) | ✅ 🟢 已下載並精讀全文（2026-08-20 透過 ACM Queue 開放取用版本取得全文，已補齊 PDF／Markdown／HTML） |
 | `vrandecic-krotzsch-2014-wikidata.pdf` | Vrandečić & Krötzsch (2014), *Wikidata: A Free Collaborative Knowledgebase*, **CACM 57(10), 78-85** | DOI: [10.1145/2629489](https://doi.org/10.1145/2629489)，作者授權開放取用全文：https://iccl.inf.tu-dresden.de/w/images/8/89/Wikidata-CACM-2014.pdf | ✅ 🟢 已下載並精讀全文（2026-07-20） |
 | `hovy-et-al-2006-ontonotes.pdf` | Hovy, Marcus, Palmer, Ramshaw & Weischedel (2006), *OntoNotes: The 90% Solution*, HLT-NAACL 2006 Companion Volume: Short Papers, pp.57-60 | ACL Anthology [N06-2015](https://aclanthology.org/N06-2015/) | ✅ 🟢 已下載（2026-07-24）；⚠️ **2026-07-26 誠實訂正**：全文逐字核對後確認本文**不涉及 Named Entity 標註**，不能作為「18 類 NER 標籤」的文獻依據——原記錄為查證錯誤，已移除此用途，保留書目僅供 OntoNotes 計畫背景參考 |
 | `pradhan-et-al-2013-conll-ontonotes.pdf` | Pradhan, Moschitti, Xue, Ng, Björkelund, Uryupina, Zhang & Zhong (2013), *Towards Robust Linguistic Analysis Using OntoNotes*, CoNLL 2013, pp.143-152 | ACL Anthology [W13-3516](https://aclanthology.org/W13-3516/) | ✅ 🟢 已下載並精讀全文（2026-07-26） |
@@ -126,7 +126,7 @@
 
 | 文獻 | 在 RQ4a 中的角色 |
 |---|---|
-| **Guha et al. (2016) Schema.org** | Schema.org 的學術錨點——引用此文來說明「以公認 Web 標準作為詞彙錨點」是有文獻支撐的設計選擇，而非自創標準；**因全文尚未取得，本論文正文對其論證細節的引用仍受限，見下方 Vrandečić & Krötzsch 作為部分替代來源的說明** |
+| **Guha et al. (2016) Schema.org** | Schema.org 的學術錨點——引用此文來說明「以公認 Web 標準作為詞彙錨點」是有文獻支撐的設計選擇，而非自創標準；✅ 2026-08-20 透過 ACM Queue 開放取用版本（Vol. 13 No. 9）取得全文並精讀，確認其多語法支援（Microdata/RDFa/JSON-LD）、多型性關聯（polymorphic relations）、核心+擴展機制（Hosted/External Extensions）及簡化開發者負擔的設計決策，直接支撐本論文第 3.3 節「以公認 Web 標準為錨點」與擴展驗證機制 |
 | **Vrandečić & Krötzsch (2014) Wikidata**（2026-07-20 新增，作為 Guha et al. 全文未取得前的可查證替代來源） | 精讀全文後確認：Wikidata 提供一個**已發表、開放取用、可獨立查證**的「社群治理受控詞彙擴展」真實案例——屬性（property）頁面本身**必須指定 datatype**（結構層限制，決定該屬性能接受哪種值），且**schema 本身與資料一樣受社群控制**（"Contributors edit the population number of Rome but also decide whether there is such a number in the first place"），社群另會為屬性訂定（軟性）語意限制條件（如「一個項目最多只能有一個出生地」）並用外部工具掃描違反此限制的資料。**誠實的適配度說明**：本文並未如本論文 3.3 節設計提案般，明確描述一套「結構驗證→語意驗證」**兩階段、循序**的新詞彙審核閘門（Wikidata 的 datatype 限制與語意限制檢查分屬不同機制、非循序閘門），因此**不能宣稱兩者機制等價**；但確實驗證了「受控詞彙的結構層與語意層可分別治理」這個大方向在生產級系統中是可行且已規模化運作（1,176 個屬性、4300 萬筆陳述句，2014 年數據）的設計模式，可作為 Schema.org 之外、獨立可查證的佐證來源。**2026-07-24 補充**：此文的 `rdf:type` 式建模精神（型別本身也是一種陳述/edge，而非特殊保留屬性）也是 3.1.4 節「實體型別改為獨立 Type 節點＋屬於邊」建模決策的直接依據，不需另找新文獻 |
 | **Vashishth et al. (2018) CESI**（2026-07-26 補齊全文精讀） | 直接命名開放式 IE 產生語意相同但字面不同的關係（即「Semantic Drift」問題），並透過嵌入式叢集做規範化——說明本論文要解決的問題在學界已被正式識別。**全文精讀後新增用途**：§6 明確記錄其 HAC 分群門檻值是用驗證集校準而非理論推導出來的，佐證本論文 `EXPAND` 候選池門檻／`COMPARE` 相似度門檻「先訂佔位數字、留待第五章消融實驗校準」的既有慣例本身即為文獻認可的正確作法；其對照基線 AMIE 使用固定門檻（support=2/confidence=0.2）反而召回率極差，佐證「不應套用其他任務的固定門檻」 |
 | **Angeli et al. (2015) Stanford OpenIE** | 開放式關係抽取的代表性基準線——RQ4a 的對照組；說明開放式抽取為什麼是主流選擇，以及本論文封閉式設計刻意反其道而行的動機 |
@@ -153,7 +153,7 @@
 
 ## 待辦
 
-- [ ] 若後續仍需 Guha et al. 全文細節（而非僅需「受控詞彙有生產級先例」這個較粗的論點），透過學校圖書館或機構帳號下載 `guha-et-al-2016-schema-org-cacm.pdf`（DOI: 10.1145/2844544）；Vrandečić & Krötzsch (2014) 已可支撐較粗粒度的論點，此項不再是 RQ4a 的阻斷性待辦
+- [x] （2026-08-20 完成）**下載並精讀 Guha et al. (2016) Schema.org 全文**——透過 ACM Queue 開放取用版本（Vol. 13 No. 9）成功補齊全文並建立 `guha-et-al-2016-schema-org-cacm.pdf`、`.md` 與 `.html`；精讀確認 Schema.org 多型性、分層擴展（Hosted/External）與實體消解設計，RQ4a 核心文獻全文核實完成
 - [x] （2026-07-26 完成）**精讀 CESI 論文方法論**——確認「語意漂移」（Semantic Drift）問題定義與本論文設計的對照關係，並額外查得 §6 分群門檻校準方法論（見上方新增查證段落），用於佐證 `EXPAND`／`COMPARE` 門檻的既有校準慣例
 - [ ] 設計 RQ4a 對照組實驗（開放式 vs 受控式）的評估方法論
 - [x] （2026-07-26 已由改版取代）原問題「公用實體類型庫（OntoNotes 18 類）有多少比例能直接映射到 schema: Type」已因改採 schema.org 實測排名為 `ENTITY_TYPES` 本身而失去意義（型別庫已直接等於 schema.org 類型，不存在映射覆蓋率問題）；新的待辦是評估此清單對本專案任意領域文件（非電商網頁）的實際覆蓋率，留待第四章實作後以真實語料驗證
@@ -166,7 +166,7 @@
 - [x] （2026-07-26 完成）**3.1.3 §a「跨 KG 型別登記表」與「人機一致率畢業機制」的參考先例查證**——原標註「查無直接對應文獻，參考專案尚未查證」，本次查證找到：① 跨 KG 登記表的功能性先例——Wikidata Property Proposal 流程（社群方針頁面，非論文，已誠實區分證據層級）；② 人機一致率畢業的理論先例——Bloodgood & Vijay-Shanker (2009, CoNLL)／Bloodgood & Grothendieck (2013, CoNLL) 兩篇正式出版、逐字精讀全文的論文，證明 Kappa 一致率門檻與模型效能差距的理論上界。兩者皆已誠實標註「具體機制不可直接套用，僅佐證大方向有先例/理論基礎」，3.1.3 §a 的誠實聲明已同步更新，不再是「查無」狀態
 - [x] （2026-07-26 完成）**3.1.3 主圖 `SIM`／`ESCALATE3` cosine+LLM 仲裁「具體組合」的先例查證**——原標註「查無直接對應開源專案或論文先例」，本次查證找到 Jitkrittum et al. (2023, NeurIPS) 精確對應的 confidence-based cascade 理論框架（含最佳性/失效條件證明）與 Madras et al. (2018, NeurIPS) 的 learning-to-defer 術語定位，皆已逐字精讀全文；FrugalGPT 與 `stevenkolawole/Agreement-Based-Cascading` 僅查證存在性作為專案層級佐證，未逐行核對程式碼或精讀 FrugalGPT 全文
 - [ ] （2026-07-26 新增，2026-07-27 更新型別數）驗證 LLM 對 33 個 ConceptNet 型別的仲裁準確度是否均勻——依 Jitkrittum et al. (2023) 理論，若不均勻（LLM 是「專才」情境），單純的 embedding 信心門檻機制會系統性失效，需改用 post-hoc deferral rule（訓練輕量評分器），此為 3.1.3 節實作前的優先驗證項目，非文獻查證缺口
-- [ ] （2026-07-26 新增）FrugalGPT（Chen, Zaharia & Zou, 2023）原始論文尚未下載精讀全文，僅透過搜尋確認存在與方向相符，若後續需要更貼近 LLM 系統場景（而非 Jitkrittum et al. 的影像分類實驗）的佐證，可補齊全文查證
+- [x] （2026-07-26 新增，2026-08-20 補齊下載）FrugalGPT（Chen, Zaharia & Zou, 2023）原始論文已下載收錄，僅透過搜尋確認存在與方向相符，若後續需要更貼近 LLM 系統場景（而非 Jitkrittum et al. 的影像分類實驗）的佐證，可補齊全文查證
 - [x] （2026-07-27 完成）**ConceptNet 官方現行 wiki 查證：`ENTAILS`／`INSTANCE_OF` 已棄用**——`commonsense/conceptnet5/wiki/Relations` 官方頁面明確將兩者列為已棄用（分別建議併入 `MannerOf`/`HasPrerequisite` 與 `IsA`），本論文選擇跟進官方現行建議而非凍結於 2017 年論文快照，`SVO_REL_TYPES` 由 35 個訂正為 33 個，`core/constants.py` 程式碼已同步更正，完整記錄見 `docs/論文/03_變更紀錄.md`「第三十二次調整」
 - [x] （2026-07-27 完成）**33 個型別的官方描述句/範例句彙整**——32 個取自 ConceptNet 官方 GitHub wiki，剩餘 `SENSE_OF` 取自 Speer et al. (2017) 論文正文，兩者合計 33／33 全數覆蓋，彙整表見本檔案上方
 - [x] （2026-07-27 完成）**`SIM`／`COMPARE`／`ESCALATE3` 程式碼落地**——`services/svo_service.py` 新增 `classify_relation_by_embedding()`（比對本檔案彙整的 33 個型別**描述句** embedding，取代原本比對型別識別碼字串的疑慮，`core/constants.py::SVO_REL_TYPE_DESCRIPTIONS` 即為描述句來源，含 model_name 快取避免每次呼叫重算 33 筆 embedding）與 `_reconcile_rel_type()`（`COMPARE`＋`ESCALATE3`，比照 `resolve_entity_name()` 既有 ESCALATE 模式），並接線進 `extract_svo_triples()` 新增的選填 `embedding_provider` 參數（未提供時行為與先前版本相同，向後相容）。⚠️ `ESCALATE3` 判定「兩者皆非」時，因 `EXPAND` 候選池／治理機制尚未實作，暫時退回 `RELATED_TO` 兜底，此為明確標註的暫時限制。新增 7 項單元測試，全套 299 passed。子問題 A（LLM 仲裁準確度是否均勻）與 `COMPARE_COSINE_THRESHOLD` 未經校準這兩項既有限制不受本次實作影響，完整記錄見 `docs/論文/03_變更紀錄.md`「第三十三次調整」

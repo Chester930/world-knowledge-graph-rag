@@ -11,6 +11,11 @@
 背景 Worker 迴圈本體（`run_governance_worker()`，P2-3）定期呼叫本模組的
 `run_governance_cycle()`，隨 `main.py::lifespan` 與抽取 Worker（P0-3）一起
 啟動。
+
+Traceability: 02 §2.4.4 -> 03 §3.1.3§a -> 04 §4.4.2／§4.6.
+Project: the governance pipeline is this project's own design, informed by KGGen and
+human-in-the-loop governance patterns; it is not a direct KGGen code import.
+Tests: tests/services/test_expand_governance_service.py、test_expand_worker.py.
 """
 from __future__ import annotations
 
@@ -121,7 +126,7 @@ async def run_governance_cycle(
     llm_provider: LLMProvider,
 ) -> None:
     """對單一 KG 跑一輪完整的 `EXPAND` 治理判斷（`POOLSIZE`→...→`COMMIT`→
-    `BACKFILL`）。由治理 Worker（P2-3，尚未接上背景迴圈）定期對每個 KG 呼叫
+    `BACKFILL`）。由已接入 `main.py::lifespan` 的治理 Worker（P2-3）定期對每個 KG 呼叫
     一次。
 
     ⚠️ 已知、刻意留白的缺口（見 `03_系統設計與方法論.md` § 3.1.3 §a 決策

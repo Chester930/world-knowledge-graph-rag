@@ -883,7 +883,13 @@ def split_into_sentences(text: str) -> List[str]:
 
 
 def sentence_aware_chunking(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> List[str]:
-    """句子感知的文本切片演算法，確保句子邊界不被粗暴截斷"""
+    """句子感知的文本切片演算法，確保句子邊界不被粗暴截斷。
+
+    Traceability: 02 §2.4.1 -> 03 §3.1.1 -> 04 §4.3.1.
+    Project: this is the project's own parser implementation; chunking literature is
+    the method reference, not a direct external parser import.
+    Tests: parser／ingestion tests.
+    """
     # 依句尾標點進行文本分割，保留標點符號（共用 split_into_sentences()）
     parts = split_into_sentences(text)
 

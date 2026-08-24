@@ -8,6 +8,10 @@ prompt 設計）與 `docs/報告/10_代名詞雙軌檢測與正則詞庫自動�
 
 3.4 §a Behavior Tree 對應：`PRONCHECK`（雙軌偵測）→ `PRONLLM`（雙向上下文
 LLM 消解）／`BYPASS`（直接通過）。
+
+Traceability: 02 §2.4.5 -> 03 §3.4／§4.4.1 -> 04 §4.4.1.
+Project: POS／正則與 optional LLM 消解是本專案的混合設計；UD 是理論參考，
+不是此模組的直接程式依賴。Tests: tests/services/test_pronoun_resolution_service.py.
 """
 from __future__ import annotations
 

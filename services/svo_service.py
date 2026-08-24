@@ -1,4 +1,12 @@
-"""SVO 三元組提取、Neo4j MERGE、BFS 查詢。"""
+"""SVO 三元組提取、Neo4j MERGE、BFS 查詢。
+
+Traceability: 02 §2.4.2／§2.4.4／§2.4.5／§2.4.7 ->
+03 §3.1.3／§3.1.4／§3.2§b -> 04 §4.4／§4.5／§4.7.
+Literature: OpenIE、ConceptNet／Schema.org、entity-alignment、GraphRAG 脈絡。
+Project: Neo4j is a direct dependency; AutoRE、KGGen、PathRAG 等是方法或架構參考，
+不是本模組的直接程式來源。Tests: tests/services/test_svo_service.py、
+tests/routers/test_agent.py.
+"""
 from __future__ import annotations
 import difflib
 import json

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Schema.org: Evolution of Structured Data on the Web</title>
+<style>
+    @page {
+        size: A4;
+        margin: 20mm 18mm 20mm 18mm;
+        @bottom-right {
+            content: counter(page);
+        }
+    }
+    body {
+        font-family: "Times New Roman", Times, "Georgia", serif;
+        font-size: 10.5pt;
+        line-height: 1.45;
+        color: #111;
+        margin: 0;
+        padding: 0;
+    }
+    h1.title {
+        font-size: 18pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+    h2.subtitle {
+        font-size: 12pt;
+        font-weight: normal;
+        font-style: italic;
+        text-align: center;
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+    .authors {
+        text-align: center;
+        font-size: 10pt;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 12px;
+    }
+    .authors span {
+        margin: 0 12px;
+    }
+    .meta-bar {
+        font-size: 9pt;
+        color: #666;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    h2, h3, h4 {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        color: #003366;
+        margin-top: 18px;
+        margin-bottom: 6px;
+    }
+    h2 {
+        font-size: 13pt;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 3px;
+    }
+    h3 {
+        font-size: 11.5pt;
+    }
+    h4 {
+        font-size: 10.5pt;
+        font-style: italic;
+    }
+    p {
+        margin-top: 0;
+        margin-bottom: 10px;
+        text-align: justify;
+        text-justify: inter-word;
+    }
+    ul, ol {
+        margin-top: 0;
+        margin-bottom: 10px;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 5px;
+    }
+    blockquote {
+        margin: 12px 20px;
+        padding: 8px 12px;
+        background-color: #f8f9fa;
+        border-left: 3px solid #003366;
+        font-style: italic;
+    }
+    .references {
+        font-size: 9pt;
+        line-height: 1.35;
+    }
+    .references ol {
+        padding-left: 18px;
+    }
+    .references li {
+        margin-bottom: 4px;
+        word-break: break-all;
+    }
+    .author-bios {
+        background: #fdfdfd;
+        border: 1px solid #e2e8f0;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-top: 24px;
+        font-size: 9pt;
+    }
+</style>
+</head>
+<body>
+
+<h1 class="title">Schema.org: Evolution of Structured Data on the Web</h1>
+<h2 class="subtitle">Big data makes common schemas even more necessary.</h2>
+
+<div class="authors">
+    <span><strong>R.V. Guha</strong> (Google)</span>
+    <span><strong>Dan Brickley</strong> (Google)</span>
+    <span><strong>Steve Macbeth</strong> (Microsoft)</span>
+</div>
+
+<div class="meta-bar">
+    <em>Communications of the ACM</em>, Vol. 59 No. 2, pp. 44–51 (February 2016) / <em>ACM Queue</em>, Vol. 13 No. 9 (December 2015)<br>
+    DOI: <a href="https://doi.org/10.1145/2844544">10.1145/2844544</a> | <a href="https://doi.org/10.1145/2857274.2857276">10.1145/2857274.2857276</a>
+</div>
+
+<p>Separation between content and presentation has always been one of the important design aspects of the Web. Historically, however, even though most Web sites were driven off structured databases, they published their content purely in HTML. Services such as Web search, price comparison, reservation engines, etc. that operated on this content had access only to HTML. Applications requiring access to the structured data underlying these Web pages had to build custom extractors to convert plain HTML into structured data. These efforts were often laborious and the scrapers were fragile and error prone, breaking every time a site changed its layout.</p>
+
+<p>Between 1997 and 2004 various standards (RDF, RDFS, and OWL) were developed under the W3C (World Wide Web Consortium) Semantic Web activity to address this problem. These standards were built on the idea that the Web was not just for human consumption but also for machines. The RDF (Resource Description Framework) data model represents data as a directed graph, where the nodes are resources (identified by URIs) or literals (such as strings or numbers) and the edges are properties. RDF Schema (RDFS) and the Web Ontology Language (OWL) provide a way to define vocabularies (classes and properties) that can be used to describe the resources.</p>
+
+<p>The first major vocabulary to be developed was Friend of a Friend (FOAF) in 2000, which was designed to describe people and their relationships. This was followed by other vocabularies such as vCard (for contact information), hCard (a microformat equivalent of vCard), and hCalendar (for events).</p>
+
+<p>In 2006, the "Linked Data" slogan was introduced to encourage the publication of structured data on the Web using RDF and URIs. While this led to the publication of some high-quality datasets (especially in government, libraries, and the life sciences), it did not achieve widespread adoption among mainstream webmasters.</p>
+
+<p>Search engines were the first major consumers of structured data. In 2009, Google introduced Rich Snippets, which used structured data to display extra information (such as reviews or prices) in search results. Yahoo and Bing also introduced similar features.</p>
+
+<p>However, because each search engine supported different vocabularies and formats (RDFa, Microdata, Microformats), webmasters were faced with a complex and confusing landscape. Because of the resulting confusion, most webmasters simply did not add any markup, and the markup they did add was often incorrectly formatted. This abundance of incorrect formatting required consumers of markup to build complex parsers that were able to handle improperly formed syntax and vocabulary. These complex parsers turned out to be just as brittle as the original systems used to extract structured data from HTML and thus didn't result in the expected advances.</p>
+
+<h2>Schema.org</h2>
+<p>In 2011, the major search engines Bing, Google, and Yahoo (later joined by Yandex) created Schema.org to improve this situation. The goal was to provide a single schema across a wide range of topics that included people, places, events, products, offers, and so on. A single integrated schema covered these topics. The idea was to present webmasters with a single vocabulary. Different search engines might use the markup differently, but webmasters had to do the work only once and would reap the benefits across multiple consumers of the markup.</p>
+
+<p>Schema.org was launched with 297 classes and 187 relations, which over the past four years have grown to 638 classes and 965 relations. The classes are organized into a hierarchy, where each class may have one or more superclasses (though most have only one). Relations are polymorphic in the sense that they have one or more domains and one or more ranges. The class hierarchy is meant more as an organizational tool to help browse the vocabulary than as a representation of common sense, à la Cyc.</p>
+
+<p>The first application to use this markup was Google's Rich Snippets, which switched over to Schema.org vocabulary in 2011. Over the past four years, a number of different applications across many different companies have started using Schema.org vocabulary. Some of the more prominent among these include the following:</p>
+<ul>
+    <li>In addition to per-link Rich Snippets, annotations in Schema.org are used as a data source for the Knowledge Graph, providing background information about well-known entities (e.g., logo, contact, and social information).</li>
+    <li>Schema.org-based structured data markup is now being used in places such as e-mails. For example, e-mails confirming reservations (restaurant, hotel, airline, etc.), purchase receipts, etc. have embedded Schema.org markup with details of the transaction. This approach makes it possible for e-mail assistant tools to extract the structured data and make it available through mobile notifications, maps, calendars, etc. Google's Gmail and Search products use this data to provide notifications and reminders. For example, a dinner booking made on Opentable.com will trigger a reminder for leaving for the restaurant, based on the location of the restaurant, the user, traffic conditions, etc.</li>
+    <li>Microsoft's Cortana (for Windows 10 and Windows phones) makes use of Schema.org from e-mail messages.</li>
+    <li>Yandex uses many parts of Schema.org, including recipes, autos, reviews, organizations, services, and directories. Its earlier use of FOAF (corresponding to the popularity of the LiveJournal social network in Russia) demonstrated the need for pragmatic vocabulary extensions that support consumer-facing product features.</li>
+    <li>Pinterest uses Schema.org to provide rich pins for recipe, movie, article, product, or place items.</li>
+    <li>Apple's iOS 9 (Searchlight/Siri) uses Schema.org for search features including aggregate ratings, offers, products, prices, interaction counts, organizations, images, phone numbers, and potential website search actions. Apple also uses Schema.org within RSS for news markup.</li>
+</ul>
+
+<h2>Adoption Statistics</h2>
+<p>The key measure of success is, of course, the level of adoption by webmasters. A sample of 10 billion pages from a combination of the Google index and Web Data Commons provides some key metrics. In this sample 31.3 percent of pages have Schema.org markup, up from 22 percent one year ago. On average, each page containing this markup makes references to six entities, making 26 logical assertions among them. Extrapolating from the numbers in this sample, we estimate that at least 12 million sites use Schema.org markup. The important point to note is that structured data markup is now of the same order of magnitude as the Web itself.</p>
+
+<p>Although this article does not present a full analysis and comparison, we should emphasize that various other formats are also widespread on the Web. In particular, OGP (Open Graph Protocol) and microformat approaches can be found on approximately as many sites as Schema.org, but given their much smaller vocabularies, they appear on fewer than half as many pages and contain fewer than a quarter as many logical assertions. At this point, Schema.org is the only broad vocabulary that is used by more than a quarter of the pages found in the major search indices.</p>
+
+<p>A key driver of this level of adoption is the extensive support from third-party tools such as Drupal and Wordpress extensions. In verticals (such as events), support from vertical-specific content-management systems (such as Bandsintown and Ticketmaster) has had a substantial impact. A similar phenomenon was observed with the adoption of RSS, where the number of RSS feeds increased dramatically as soon as tools such as Blogger started outputting RSS automatically.</p>
+
+<p>The success of Schema.org is attributable in large part to the search engines and tools rallying behind it. Not every standard pushed by big companies has succeeded, however. Some of the reason for Schema.org's success lies with the design decisions underlying it.</p>
+
+<h2>Design Decisions</h2>
+<p>The driving factor in the design of Schema.org was to make it easy for webmasters to publish their data. In general, the design decisions place more of the burden on consumers of the markup. This section addresses some of the more significant design decisions.</p>
+
+<h3>Syntax</h3>
+<p>From the beginning, Schema.org has tried to find a balance between pragmatically accepting several syntaxes versus making a clear and simple recommendation to webmasters. Over time it became clear that multiple syntaxes would be the best approach. Among these are RDFa (Resource Description Framework in Attributes) and JSON-LD (JavaScript Object Notation for Linked Data), and publishers have their own reasons for preferring one over another.</p>
+
+<p>In fact, in order to deal with the complexity of RDFa 1.0, Schema.org promoted a newer syntax, Microdata, that was developed as part of HTML5. Design choices for Microdata were made through rigorous usability testing on webmasters. Since then, prompted in part by Microdata, revisions to RDFa have made it less complex, particularly for publishers.</p>
+
+<p>Different syntaxes are appropriate for different tools and authoring models. For example, Schema.org recently endorsed JSON-LD, where the structured data is represented as a set of JavaScript-style objects. This works well for sites that are generated using client-side JavaScript as well as in personalized e-mail where the data structures can be significantly more verbose. In contrast, Microdata and RDFa often work better for sites generated using server-side templates.</p>
+
+<p>It can sometimes help to idealize this situation as a tradeoff between machine-friendly and human-friendly formats, although in practice the relationship is subtler. Formats such as RDF and XML were designed primarily with machine consumption in mind, whereas microformats have a stated bias toward humans first. Schema.org is exploring the middle ground, where some machine-consumption convenience is traded for publisher usability.</p>
+
+<h3>Polymorphism</h3>
+<p>Many frame-based KR (knowledge representation) systems, including RDF Schema, OWL (Web Ontology Language), etc., have a single domain and range for each relation. This, unfortunately, leads to many unintuitive classes whose only role is to be the domain or range of some relation. This also makes it much harder to reuse existing relations without significantly changing the class hierarchy. The decision to allow multiple domains and ranges seems to have significantly ameliorated the problem. For example, though there are various types (Events, Reservations, Offers) in Schema.org whose instance can take a <code>startDate</code> property, the polymorphism has allowed us to get away with not having a common supertype (such as <em>Temporally Commencable Activity</em>) in which to group these.</p>
+
+<h3>Entity References</h3>
+<p>Many models such as Linked Data have globally unique URIs for every entity as a core architectural principle. Unfortunately, coordinating entity references with other sites for the tens of thousands of entities about which a site may have information is much too difficult for most sites. Instead, Schema.org insists on unique URIs for only the very small number of terms provided by Schema.org. Publishers are encouraged to add as much extra description to each entity as possible so that consumers of the data can use this description to do entity reconciliation. While this puts a substantial additional burden on applications consuming data from multiple Web sites, it eases the burden on webmasters significantly. In practice, instead of requiring common URIs for entities (which number in the hundreds of millions), webmasters have to use standard vocabulary only for schema terms (which number in the thousands). Schema.org does provide a <code>sameAs</code> property to associate entities with well-known URLs (such as Wikipedia), but adoption has been secondary.</p>
+
+<h3>Incremental Complexity</h3>
+<p>Often, making the representation too simplistic would make it hard to build some of the more sophisticated applications. In such cases, we start with something simple, which is easy for webmasters to implement, but has enough data to build a motivating application. Typically, once the simple applications are built and the vocabulary gets a minimal level of adoption, the application builders and webmasters demand a more expressive vocabulary—one that might have been deemed too complex had we started off with it.</p>
+
+<p>At this point, it's possible to add the complexity of a more expressive vocabulary. Often this amounts to the relatively simple matter of adding a few more descriptive properties or subtypes. For example, adding new types of actions or events is a powerful way of extending Schema.org's expressivity. In many situations, however, closer examination reveals subtle differences in conceptualization. The Schema.org approach is to be led by practicalities—the data fields available in the wider Web and the information requirements of applications that can motivate large-scale publication. Schema.org definitions are never changed in pursuit of the perfect model, but rather in response to feedback from publishers and consumers.</p>
+
+<p>Schema.org's incremental complexity approach can be seen in the interplay among evolving areas of the schema. The project has tried to find a balance between two extremes: uncoordinated addition of schemas with overlapping scopes versus overly heavy coordination of all topics. Rather than seeking a "grand theory of mass produced items and their common properties," Schema.org adopted different modeling idioms for bibliography and e-commerce.</p>
+
+<p>Conversely, finding common ground between fields (e.g. extending <code>Offer</code> to library lending) shows our approach: publish schemas early with the full knowledge that they will need improving, rather than attempt to perfect everything prior to launch.</p>
+
+<h3>Cleanup</h3>
+<p>Every once in a while, we have gotten carried away and have introduced vocabulary that never gets meaningful usage. While it is easy to let such terms lie around, it is better to clean them out. Thus far, this has happened only with large vocabularies that did not have a strong motivating application.</p>
+
+<h2>Extensions</h2>
+<p>Given the variety of structured data underlying the Web, Schema.org can at best hope to provide the core for the most common topics. Even for a relatively common topic such as automobiles, potentially hundreds of attributes are required to capture the details of a car's specifications as found on a manufacturer's Web site. Schema.org's strategy has been to have a small core vocabulary for each such topic and rely on extensions to cover the tail of the specification.</p>
+
+<p>From the beginning there have been two broad classes of extensions: those that are created by the Schema.org community with the goal of getting absorbed into the core, and those that are simply deployed "in the wild" without any central coordination. In 2015 the extension mechanism was enhanced to support both of these ideas better:</p>
+<ol>
+    <li><strong>Hosted Extensions:</strong> Terms that are tightly integrated into Schema.org's core but treated as additional (optional) layers. Such terms still require coordination discussion with the broader community to ensure consistent naming and appropriate integration points, while allowing greater decentralization to specialist communities.</li>
+    <li><strong>External Extensions:</strong> Independently managed vocabularies designed with particular reference to Schema.org's core vocabulary with the expectation of building upon, rather than duplicating, that core. External extensions range from tiny product-specific vocabularies to large domain schemas.</li>
+</ol>
+
+<p>The cross-domain data model has enabled loosely coupled collaboration in which topic experts collaborate in dedicated fora (sports, health, bibliography, etc.) within a predictable framework for integrating their work with other areas of Schema.org. Significant additions have come from groups such as IPTC (rNews / <code>NewsArticle</code>), GoodRelations (e-commerce), and LRMI (educational metadata). In 2014, migration to open-source tooling hosted on GitHub further accelerated community participation and fine-grained iteration.</p>
+
+<h2>Related Efforts</h2>
+<p>Since 2006 the "Linked Data" slogan has served to redirect the W3C RDF community's emphasis from Semantic Web ontology and rule languages toward open-data activism and practical data sharing. While Linked Data has elicited high-quality RDF datasets from the public sector, its strong emphasis on identifier reconciliation, complex best-practice rules, and overlapping schemas limited its adoption in the Web at large.</p>
+
+<p>Schema.org shares the underlying graph data model, schema language, and syntaxes (JSON-LD, RDFa) with Linked Data, as well as skepticism toward premature formalism (rule systems, description logics). However, Schema.org differs in assuming that cleanup, reconciliation, and post-processing will usually be needed by data consumers rather than placed as a burden on webmasters.</p>
+
+<p>At the other extreme lies the <strong>Knowledge Graph</strong> approach (introduced by Google in 2012), which emphasizes unified graph datasets, up-front entity reconciliation, and curated discipline. Schema.org's approach occupies a practical middle ground—less noisy and decentralized than Linked Data, but more flexible and publisher-friendly than monolithic Knowledge Graphs. Structured data expressed in Schema.org serves as a primary source of information for integration into Knowledge Graphs.</p>
+
+<h2>Lessons Learned</h2>
+<ol>
+    <li><strong>Make it easy for publishers/developers to participate:</strong> When there is an asymmetry between the number of publishers and consumers, put the complexity on the smaller number (the consumers). Publishers must be able to use existing tools and workflows.</li>
+    <li><strong>No one reads long specifications:</strong> Most developers copy and adapt examples. Documentation must function like a set of clear recipes rather than an exhaustive specification.</li>
+    <li><strong>Complexity must be added incrementally over time:</strong> Each layer of complexity in a standard can be added only after widespread adoption of the more basic layers.</li>
+</ol>
+
+<h2>Conclusion</h2>
+<p>The history of Schema.org suggests that rather than seeking directly to create "languages for intelligent agents," addressing vastly simpler scenarios from Web search has turned out to be the best practical route toward structured data for artificial personal assistants. As data scientists increasingly explore data-driven analysis and big data applications, the need for common, shared schemas becomes even more pronounced.</p>
+
+<div class="author-bios">
+    <strong>About the Authors:</strong><br>
+    <strong>R.V. Guha</strong> is a Google Fellow and Vice President of Research at Google, creator of RSS and Schema.org, and former co-leader of the Cyc project. He holds a Ph.D. in Computer Science from Stanford University.<br>
+    <strong>Dan Brickley</strong> is a Web standards architect at Google working on Schema.org, best known for creating FOAF and co-developing early Semantic Web technologies at W3C.<br>
+    <strong>Steve Macbeth</strong> is a Partner Architect at Microsoft, responsible for intelligent systems, mobile, and cloud platforms, and former founder and leader in Bing Core Search.
+</div>
+
+<div class="references">
+    <h2>References</h2>
+    <ol>
+        <li>Berners-Lee, T. 1989. Information management: a proposal. <code>http://www.w3.org/History/1989/proposal.html</code>.</li>
+        <li>Berners-Lee, T. 1994. W3 future directions. <code>http://www.w3.org/Talks/WWW94Tim/</code>.</li>
+        <li>Berners-Lee, T. 2006. Linked Data. <code>http://www.w3.org/DesignIssues/LinkedData.html</code>.</li>
+        <li>Berners-Lee, T. 2010. Is your linked open data 5 star? <code>http://www.w3.org/DesignIssues/LinkedData#fivestar</code>.</li>
+        <li>Berners-Lee, T., Hendler, J., Lassila, O. 2001. The semantic web. <em>Scientific American</em> (May): 29-37.</li>
+        <li>Friend of a Friend vocabulary (foaf). <code>http://lov.okfn.org/dataset/lov/vocabs/foaf</code>.</li>
+        <li>Google Developers. 2015. Customizing your Knowledge Graph. <code>https://developers.google.com/structured-data/customize/overview</code>.</li>
+        <li>Guha, R.V. 2012. Good Relations and Schema.org. Schema Blog. <code>http://blog.schema.org/2012/11/good-relations-and-schemaorg.html</code>.</li>
+        <li>Raimond, Y. 2013. Schema.org for TV and radio markup. Schema Blog. <code>http://blog.schema.org/2013/12/schemaorg-for-tv-and-radio-markup.html</code>.</li>
+        <li>Schema.org. Release log. <code>http://schema.org/docs/releases.html</code>.</li>
+        <li>Schofield, J. 2004. Let's be Friendsters. <em>The Guardian</em> (February 19).</li>
+        <li>Wallis, R., Scott, D. 2014. Schema.org support for bibliographic relationships and periodicals. Schema Blog.</li>
+        <li>W3C. 1996. Describing and linking Web resources. <code>http://www.w3.org/Architecture/NOTE-link.html</code>.</li>
+        <li>W3C. 2011. Library Linked Data Incubator Group Final Report. <code>http://w3.org/2005/Incubator/lld/XGR-lld-20111025/</code>.</li>
+        <li>W3C. 2011. Linked Data Cookbook. <code>http://www.w3.org/2011/gld/wiki/Linked_Data_Cookbook</code>.</li>
+        <li>W3C. 2012. Health Care and Life Science Linked Data Guide. <code>http://www.w3.org/2001/sw/hcls/notes/hcls-rdf-guide/</code>.</li>
+        <li>W3C. 2014. RDF Schema 1.1. <code>http://www.w3.org/TR/rdf-schema/</code>.</li>
+        <li>W3C. 1997. MCF Using XML. R.V. Guha, T. Bray. <code>http://w3.org/TR/NOTE-MCF-XML</code>.</li>
+    </ol>
+</div>
+
+</body>
+</html>

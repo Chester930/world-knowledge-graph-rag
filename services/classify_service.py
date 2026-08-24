@@ -37,6 +37,10 @@ KG prototype 快取進 `_prototype_cache.json`（成員清單改變才失效重�
 更新失敗時互相 rollback（不留下位置與記錄檔不一致的中間態）、`classify_by_vector`
 新增 `low_confidence` 標記成員數過少（< `CLUSTER_MIN_SIZE`）的 cold-start KG。
 """
+# Traceability: 02 §2.4.1 -> 03 §3.1.1 -> 04 §4.3.2.
+# Literature: Snell et al. (2017)／sentence-embedding literature.
+# Project: semantic-router is an architecture reference only; centroid classification
+# is this project's own implementation. Tests: tests/services/test_classify_service.py.
 from __future__ import annotations
 
 import asyncio

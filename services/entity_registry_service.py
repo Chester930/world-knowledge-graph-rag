@@ -23,6 +23,11 @@ CESI「頻率加權質心」本來就是跨文件/跨編者尺度的頻率概念
 """
 from __future__ import annotations
 
+# Traceability: 02 §2.4.5 -> 03 §3.4／§3.1.4 -> 04 §4.5.1.
+# Project: frequency／length promotion and snapshot persistence are this project's own
+# design, informed by entity-alignment literature; they are not a direct Text2KGBench
+# or CORE-KG implementation. Tests: tests/services/test_entity_registry_service.py.
+
 import json
 import os
 import tempfile

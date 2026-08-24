@@ -10,6 +10,11 @@
 五態狀態機（`pending`／`processing`／`completed`／`failed`／`pending_upload`）
 的定義與轉換時機由 3.1.2/3.1.3/3.1.4 統一負責，本模組只負責狀態的儲存與
 查詢，不判斷該不該轉換。
+
+Traceability: 02 §2.4.1 -> 03 §3.1.2 -> 04 §4.6.
+Project: SQLite queue and recovery state machine are this project's own engineering
+design; no external queue project is claimed as a direct implementation source.
+Tests: tests/services/test_task_queue_service.py.
 """
 from __future__ import annotations
 

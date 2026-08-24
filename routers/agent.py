@@ -12,6 +12,10 @@ from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
 from services.svo_service import bfs_query, resolve_query_relation_type, vector_search_facts
 
+# Traceability: 02 §2.4.2／§2.4.3 -> 03 §3.2 -> 04 §4.7.
+# RQ status: this router currently supports single-KG BFS + Fact retrieval (RQ1
+# engineering path); ConceptNode routing (RQ2) and self-refinement (RQ3) are not
+# connected here. Tests: tests/routers/test_agent.py.
 router = APIRouter(prefix="/agent", tags=["agent"])
 
 _SEED_ENTITY_LIMIT = 8
