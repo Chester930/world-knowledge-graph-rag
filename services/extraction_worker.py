@@ -89,6 +89,10 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
             triple.source_svo_chunk_file = chunk["filename"]
             triple.source_sentence_start = chunk["source_sentence_start"]
             triple.source_sentence_end = chunk["source_sentence_end"]
+            # 2026-08-24：ArticleAwareChunking 產生的 chunk 才有 article_no
+            # （見 SVOTriple.source_article_no docstring）；SVOGROUP 產生的
+            # chunk 該欄位為 None，.get() 保留這個既有行為不變。
+            triple.source_article_no = chunk.get("article_no")
         if triples:
             await merge_triples_to_graph(
                 driver, UUID(kg_id), triples,

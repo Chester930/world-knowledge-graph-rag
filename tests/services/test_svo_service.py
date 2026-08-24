@@ -1946,6 +1946,87 @@ async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_prov
 
 
 @pytest.mark.asyncio
+async def test_merge_triples_to_graph_threads_article_no_into_fact_node():
+    """2026-08-24（見 03 §3.5「實作範圍定案」下一步）：`SVOTriple.source_article_no`
+    有值時（`ArticleAwareChunking` 產生的 chunk），應原樣傳入 `_create_fact_node()`
+    的 `article_no` 參數，供其 `SUPPORTED_BY` 改連向 `LawArticle`。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    doc_id = uuid4()
+    embedding = FakeEmbedding()
+    triple = SVOTriple(
+        subject="雇主", rel_type="OBLIGATED_TO", verb="應供應", object="飲用水",
+        source_doc_id=doc_id, source_svo_chunk_index=5, source_article_no="第 5 條",
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], embedding_provider=embedding)
+
+    assert len(driver.facts) == 1
+    assert driver.facts[0]["article_no"] == "第 5 條"
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_passes_none_article_no_for_ordinary_documents():
+    """`source_article_no` 未設定（一般文件，`SVOGROUP` 產生的 chunk）時應為
+    `None`，確認新參數不影響既有一般文件的行為。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    embedding = FakeEmbedding()
+    triple = SVOTriple(
+        subject="台積電", subject_type="組織", rel_type="CAUSES", verb="生產",
+        object="晶片", object_type="產品",
+        source_doc_id=uuid4(), source_svo_chunk_index=1,
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], embedding_provider=embedding)
+
+    assert driver.facts[0]["article_no"] is None
+
+
+@pytest.mark.asyncio
+async def test_create_fact_node_matches_law_article_when_article_no_given():
+    """`_create_fact_node()` 直接單元測試：`article_no` 提供時，`SUPPORTED_BY`
+    連結目標的 `MATCH` 應改為 `LawArticle`，不再是 `Chunk`。"""
+    driver = FakeDriver(records=[{"f": {}}])
+    kg_id = uuid4()
+
+    created = await svc._create_fact_node(
+        driver, str(kg_id),
+        subject="雇主", object_="飲用水", rel_type="OBLIGATED_TO",
+        source_doc_id=str(uuid4()), chunk_index=5,
+        fact_text="雇主 應供應 飲用水", fact_embedding=[0.1],
+        verb="應供應", confidence=1, article_no="第 5 條",
+    )
+
+    assert created is True
+    query, params = driver.calls[0]
+    assert "MATCH (c:LawArticle {kg_id: $kg_id, source_doc_id: $source_doc_id, article_no: $article_no})" in query
+    assert "MATCH (c:Chunk" not in query
+    assert params["article_no"] == "第 5 條"
+
+
+@pytest.mark.asyncio
+async def test_create_fact_node_matches_chunk_when_article_no_absent():
+    """`article_no` 未提供（`None`，預設）時，行為與新增此參數前完全一致——
+    仍 `MATCH (c:Chunk ...)`，不觸及 `LawArticle`。"""
+    driver = FakeDriver(records=[{"f": {}}])
+    kg_id = uuid4()
+
+    await svc._create_fact_node(
+        driver, str(kg_id),
+        subject="台積電", object_="晶片", rel_type="CAUSES",
+        source_doc_id=str(uuid4()), chunk_index=1,
+        fact_text="台積電 生產 晶片", fact_embedding=[0.1],
+        verb="生產", confidence=1,
+    )
+
+    query, params = driver.calls[0]
+    assert "MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})" in query
+    assert "LawArticle" not in query
+    assert params["article_no"] is None
+
+
+@pytest.mark.asyncio
 async def test_merge_triples_to_graph_skips_fact_creation_without_embedding_provider():
     driver = InMemoryEntityDriver()
     kg_id = uuid4()
@@ -2195,6 +2276,28 @@ async def test_backfill_fact_nodes_creates_fact_for_uncovered_citation():
     assert call["verb"] == "導致"
     assert call["confidence"] == 3
     assert call["fact_text"] == svc._verbalize_fact("A", "概念", "導致", "B", "概念")
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_nodes_threads_article_no_from_citation():
+    """2026-08-24：citation 的 `article_no`（`_new_citation()` 新增欄位）應
+    原樣傳入 `_create_fact_node()`，讓法規領域的回填 Fact 同樣能連向
+    `LawArticle`，不因走回填路徑而漏掉這個欄位。"""
+    doc_id = str(uuid4())
+    edge = _fact_edge(citations=[
+        {
+            "source_doc_id": doc_id, "source_svo_chunk_index": 5,
+            "verb": "應供應", "confidence": 3, "article_no": "第 5 條",
+        },
+    ])
+    driver = BackfillFactFakeDriver(edges=[edge])
+    embedding = FakeEmbedding()
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 1
+    assert driver.create_calls[0]["article_no"] == "第 5 條"
 
 
 @pytest.mark.asyncio

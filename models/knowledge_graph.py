@@ -189,6 +189,11 @@ class SVOTriple(BaseModel):
     source_svo_chunk_file: str | None = None
     source_sentence_start: int | None = Field(default=None, ge=1)
     source_sentence_end: int | None = Field(default=None, ge=1)
+    # 2026-08-24（見 03 §3.5「實作範圍定案」下一步）：法規領域專屬——來源
+    # chunk 由 ArticleAwareChunking 產生時才有值（對應 svo_chunking.SVOChunk.
+    # article_no），供 Fact.SUPPORTED_BY 改指向 LawArticle 而非 Chunk；一般
+    # 文件（SVOGROUP）產生的 chunk 恆為 None，行為不變。
+    source_article_no: str | None = None
     # 3.1.3 §a-1 BACKFILL：僅在 rel_type 為 RELATED_TO 時才會填入，供 EXPAND
     # 核准新型別後的回溯重分類向量索引查詢使用，避免重複呼叫 embedding provider。
     verb_embedding: list[float] | None = None

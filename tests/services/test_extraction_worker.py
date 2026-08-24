@@ -81,11 +81,11 @@ def _read_status(db_path, kg_id: str, source: str, chunk_index: int) -> str | No
         return row[0] if row else None
 
 
-async def _seed_pending_chunk(tmp_path, kg_id) -> tuple:
+async def _seed_pending_chunk(tmp_path, kg_id, *, articles=None) -> tuple:
     kg_folder = tmp_path / "kg-1"
     kg_folder.mkdir()
     doc_folder, _record = ingestion_service.chunk_and_stage("馬斯克創立了太空公司。", "note.md", kg_folder)
-    await svo_service.trigger_extraction(SpyDriver(), doc_folder, kg_id)
+    await svo_service.trigger_extraction(SpyDriver(), doc_folder, kg_id, articles=articles)
 
     pending = task_queue_service.next_pending(config.task_queue_db_path(), str(kg_id))
     assert pending is not None
@@ -133,6 +133,37 @@ async def test_process_one_success_merges_triples_and_marks_completed(tmp_path, 
     assert updated_record.extraction_status == "completed"
     assert updated_record.chunk_progress == chunk_index
     assert chunk_index in updated_record.completed_chunk_indices
+
+
+@pytest.mark.asyncio
+async def test_process_one_sets_source_article_no_for_article_aware_chunk(tmp_path, monkeypatch):
+    """2026-08-24（見 03 §3.5「實作範圍定案」下一步）：`ArticleAwareChunking`
+    產生的 chunk 帶有 `article_no`（見 `svo_index.json` frontmatter），
+    `_process_one()` 應把它原樣指派到每筆 `SVOTriple.source_article_no`，
+    供 `_create_fact_node()` 之後改連向 `LawArticle`。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+    kg_id = uuid4()
+    articles = [{"ArticleType": "A", "ArticleNo": "第 1 條", "ArticleContent": "本法保障其權益。"}]
+    kg_folder, doc_folder, source, chunk_index = await _seed_pending_chunk(tmp_path, kg_id, articles=articles)
+
+    _patch_kg_repo(monkeypatch, _make_kg(kg_id, str(kg_folder)))
+    llm = FakeLLM(json.dumps([
+        {"subject": "本法", "verb": "保障", "object": "其權益", "rel_type": "RELATED_TO"},
+    ]))
+    monkeypatch.setattr("services.extraction_worker.get_llm_provider", lambda: llm)
+    monkeypatch.setattr("services.extraction_worker.get_embedding_provider", _raise_runtime_error)
+
+    merged = []
+
+    async def _fake_merge(driver, kg_id_arg, triples, **kwargs):
+        merged.append(triples)
+
+    monkeypatch.setattr("services.extraction_worker.merge_triples_to_graph", _fake_merge)
+
+    await extraction_worker._process_one(SpyDriver(), str(kg_id), source, chunk_index)
+
+    assert len(merged) == 1
+    assert merged[0][0].source_article_no == "第 1 條"
 
 
 @pytest.mark.asyncio

@@ -727,6 +727,9 @@ def _new_citation(triple: SVOTriple) -> dict:
         "source_sentence_end": triple.source_sentence_end,
         "verb": triple.verb,
         "confidence": triple.confidence,
+        # 2026-08-24：見 SVOTriple.source_article_no docstring；一般文件恆為
+        # None，供 backfill_fact_nodes() 回填時同樣能正確指向 LawArticle。
+        "article_no": triple.source_article_no,
     }
 
 
@@ -782,6 +785,7 @@ async def _create_fact_node(
     fact_embedding: list[float],
     verb: str,
     confidence: float,
+    article_no: str | None = None,
 ) -> bool:
     """3.1.4 §a／§b 共用：建立一個 Fact 節點並連結 `HAS_SUBJECT`／`HAS_OBJECT`／
     `SUPPORTED_BY`。即時路徑（`merge_triples_to_graph`）與回填路徑
@@ -798,12 +802,31 @@ async def _create_fact_node(
     `MATCH (s)/(o)/(c)` 任一方不存在時（例如 Chunk 尚未向量化，見既有誠實
     侷限段落）整條鏈不會建立任何節點；回傳值依 `RETURN f` 是否有記錄判斷
     這次呼叫是否真的建立了節點，供 `backfill_fact_nodes()` 準確計數。
+
+    `article_no`（2026-08-24 新增，見 03 §3.5「實作範圍定案」下一步）：提供
+    時（法規領域來源，見 `SVOTriple.source_article_no`），`SUPPORTED_BY`
+    改連向 `(:LawArticle {kg_id, source_doc_id, article_no})` 而非
+    `(:Chunk {...chunk_index})`——`LawArticle` 節點須已由
+    `LawDocumentRepository.merge_law_articles()` 建立，否則同樣整條鏈不會
+    建立任何節點（沿用既有 fail-closed 語意，不靜默退化成錯誤的來源連結）。
+    `chunk_index` 此時仍照舊寫入 Fact 節點自身的扁平屬性（`source_svo_chunk_index`，
+    對應 `ArticleAwareChunking` 一條對一塊，數值上仍有意義），只有
+    `SUPPORTED_BY` 的連結目標改變；`None`（預設）維持既有 `Chunk` 行為
+    完全不變。
     """
+    if article_no:
+        support_match = (
+            "MATCH (c:LawArticle {kg_id: $kg_id, source_doc_id: $source_doc_id, article_no: $article_no})"
+        )
+    else:
+        support_match = (
+            "MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})"
+        )
     result = await driver.execute_query(
         f"""
         MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})
         MATCH (o:Entity {{kg_id: $kg_id, name: $object}})
-        MATCH (c:Chunk {{kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index}})
+        {support_match}
         CREATE (f:Fact:{_kg_fact_label(kg_id_str)} {{
             kg_id: $kg_id, fact_text: $fact_text, fact_embedding: $fact_embedding,
             verb: $verb, confidence: $confidence,
@@ -821,6 +844,7 @@ async def _create_fact_node(
         rel_type=rel_type,
         source_doc_id=source_doc_id,
         chunk_index=chunk_index,
+        article_no=article_no,
         fact_text=fact_text,
         fact_embedding=fact_embedding,
         verb=verb,
@@ -944,6 +968,7 @@ async def merge_triples_to_graph(
                 fact_embedding=await embedding_provider.encode(fact_text),
                 verb=triple.verb,
                 confidence=triple.confidence,
+                article_no=triple.source_article_no,
             )
 
 
@@ -1163,6 +1188,7 @@ async def backfill_fact_nodes(
                     fact_embedding=await embedding_provider.encode(fact_text),
                     verb=citation.get("verb", ""),
                     confidence=citation.get("confidence", 1),
+                    article_no=citation.get("article_no"),
                 )
                 if created_now:
                     created += 1
