@@ -256,6 +256,21 @@ async def test_extract_svo_triples_parses_valid_json_and_downgrades_invalid_rel_
 
 
 @pytest.mark.asyncio
+async def test_extract_svo_triples_prompt_instructs_concise_entity_names():
+    """2026-08-24（見 docs/報告/17）：真實測試發現 SVO 抽取常把整段條文子句
+    當成 subject／object（例如 69 字的完整句子），導致 `_find_seed_entities()`
+    的字面比對與跨文件實體共用皆完全失效。prompt 須明確要求簡潔、可重複使用
+    的名詞（附反例／正例），不能只靠 entity_type 參考清單間接約束長度。"""
+    llm = FakeLLM('{"triples":[]}')
+
+    await svc.extract_svo_triples("任意文本。", llm)
+
+    prompt = llm.prompts[0]
+    assert "簡潔" in prompt and "可重複使用" in prompt
+    assert "不可整段抄錄條文子句或完整句子" in prompt
+
+
+@pytest.mark.asyncio
 async def test_extract_svo_triples_without_provider_returns_empty_list():
     assert await svc.extract_svo_triples("A 導致 B。") == []
 
