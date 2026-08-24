@@ -125,28 +125,42 @@ def _prototype_cache_path(kg_folder: Path) -> Path:
     return kg_folder / _PROTOTYPE_CACHE_FILENAME
 
 
-def _read_prototype_cache(kg_folder: Path, member_folders: list[str]) -> list[float] | None:
-    """快取命中條件：快取檔存在，且記錄的成員資料夾清單與目前磁碟現況完全相同。
+def _read_prototype_cache(
+    kg_folder: Path, member_folders: list[str],
+) -> tuple[list[float] | None, int] | None:
+    """快取命中條件：快取檔存在，記錄的成員資料夾清單與目前磁碟現況完全相同，
+    且快取內含 `vector_count`（2026-08-19 修復前寫入的舊格式快取沒有這個欄位，
+    視為未命中、強制重新計算一次，之後即為新格式，見下方 `vector_count` 註解）。
 
     任何解析失敗（快取檔損毀、格式不符）都視為未命中、退回重新計算，不拋例外
     中斷分類流程——快取只是效能優化，正確性永遠以「重新計算」為準。
+
+    回傳 `(prototype, vector_count)`：後者是實際被平均進 prototype 的向量數，
+    可能小於 `len(member_folders)`（部份成員文件的 `compute_document_vector()`
+    可能回傳 `None`），與 `count_kg_members()` 的資料夾總數是兩個不同的量。
     """
     cache_path = _prototype_cache_path(kg_folder)
     if not cache_path.exists():
         return None
     try:
         cached = json.loads(cache_path.read_text(encoding="utf-8"))
-        if cached.get("member_folders") == member_folders:
-            return cached.get("prototype")
+        if cached.get("member_folders") == member_folders and "vector_count" in cached:
+            return cached.get("prototype"), cached["vector_count"]
     except Exception as e:
         logger.warning(f"KG prototype 快取讀取失敗，改為重新計算 [{kg_folder}]: {e}")
     return None
 
 
-def _write_prototype_cache(kg_folder: Path, member_folders: list[str], prototype: list[float] | None) -> None:
+def _write_prototype_cache(
+    kg_folder: Path, member_folders: list[str], prototype: list[float] | None, vector_count: int,
+) -> None:
     try:
         _prototype_cache_path(kg_folder).write_text(
-            json.dumps({"member_folders": member_folders, "prototype": prototype}),
+            json.dumps({
+                "member_folders": member_folders,
+                "prototype": prototype,
+                "vector_count": vector_count,
+            }),
             encoding="utf-8",
         )
     except Exception as e:
@@ -160,8 +174,23 @@ def compute_kg_prototype(kg_folder: Path) -> list[float] | None:
     快取值，跳過所有成員文件的向量計算；一旦任何成員文件被加入/移出該 KG 資料夾
     （清單不再相同），快取自動失效、重新計算並覆寫快取。
     """
+    return compute_kg_prototype_with_count(kg_folder)[0]
+
+
+def compute_kg_prototype_with_count(kg_folder: Path) -> tuple[list[float] | None, int]:
+    """`compute_kg_prototype()` 的完整版本，額外回傳實際被平均進去的向量數。
+
+    2026-08-19（真實審查發現並修復）：`classify_all()` 原本用
+    `count_kg_members()`（資料夾內的成員總數）當作 `_incremental_prototype_update()`
+    的 `old_count`，但 `compute_kg_prototype()` 計算平均時會跳過
+    `compute_document_vector()` 回傳 `None` 的成員（見下方迴圈）——若任何成員
+    文件無法向量化，兩者定義的「成員數」就不一致，移動平均公式
+    `(o * old_count + n) / (old_count + 1)` 的 `old_count` 會偏高，算出數學上
+    錯誤的加權平均。呼叫端（`classify_document`／`classify_all`）改用本函式
+    回傳的真實向量數，不再用 `count_kg_members()` 頂替。
+    """
     if not kg_folder.exists():
-        return None
+        return None, 0
     member_folders = sorted(p.name for p in kg_folder.iterdir() if p.is_dir())
 
     cached = _read_prototype_cache(kg_folder, member_folders)
@@ -174,8 +203,9 @@ def compute_kg_prototype(kg_folder: Path) -> list[float] | None:
         if vec is not None:
             member_vectors.append(vec)
     prototype = mean_vector(member_vectors)
-    _write_prototype_cache(kg_folder, member_folders, prototype)
-    return prototype
+    vector_count = len(member_vectors)
+    _write_prototype_cache(kg_folder, member_folders, prototype, vector_count)
+    return prototype, vector_count
 
 
 def count_kg_members(kg_folder: Path) -> int:
@@ -314,7 +344,12 @@ def classify_all(
     if not staging_folder.exists():
         return []
 
-    prototypes = {kg: compute_kg_prototype(kg.folder_path) for kg in known_kgs}
+    prototypes_with_counts = {kg: compute_kg_prototype_with_count(kg.folder_path) for kg in known_kgs}
+    prototypes = {kg: pc[0] for kg, pc in prototypes_with_counts.items()}
+    prototype_vector_counts = {kg: pc[1] for kg, pc in prototypes_with_counts.items()}
+    # member_counts 是資料夾總數，供 KGCandidate.low_confidence 判斷 cold-start
+    # 用（見 classify_by_vector docstring）——刻意與上面的 prototype_vector_counts
+    # 分開，兩者定義不同，不可互相頂替，見 compute_kg_prototype_with_count() docstring。
     member_counts = {kg: count_kg_members(kg.folder_path) for kg in known_kgs}
 
     results: list[ClassifyResult] = []
@@ -337,8 +372,9 @@ def classify_all(
 
             if doc_vector is not None:
                 prototypes[target] = _incremental_prototype_update(
-                    prototypes.get(target), member_counts.get(target, 0), doc_vector,
+                    prototypes.get(target), prototype_vector_counts.get(target, 0), doc_vector,
                 )
+                prototype_vector_counts[target] = prototype_vector_counts.get(target, 0) + 1
                 member_counts[target] = member_counts.get(target, 0) + 1
 
         results.append(result)

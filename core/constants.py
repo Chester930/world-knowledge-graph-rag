@@ -44,26 +44,45 @@ ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
 # 收斂為扁平單一層」定案。⚠️ 論文正文自稱「36 個核心關係」，但逐字核對其明確列出
 # 的清單實際只有 35 個（7 對稱＋28 非對稱）——此為原始論文自身的數字不一致，已在
 # 上述查證文件誠實記錄。
-# ⚠️ 2026-07-27 再訂正為 33 個：查證 ConceptNet 官方 GitHub wiki
+# ⚠️ 2026-07-27 訂正為 33 個：查證 ConceptNet 官方 GitHub wiki
 # （commonsense/conceptnet5/wiki/Relations，即時查詢版本）發現 ENTAILS／
 # INSTANCE_OF 已被 ConceptNet 專案自己列為「已棄用」——官方原文建議 ENTAILS 應併入
 # MANNER_OF 或 HAS_PREREQUISITE，INSTANCE_OF 應併入 IS_A，理由是自然語言鮮少能明確
 # 區分這兩者與其目標關係的差異。本論文選擇跟進 ConceptNet 官方現行建議，移除這 2
 # 個型別，改為 35-2=33 個，取代 2017 年論文快照版本（此為 2026-07-27 使用者確認的
-# 訂正，非疏漏）。完整查證見 docs/參考文獻/03_資訊抽取與本體設計/README.md。
+# 訂正，非疏漏）。
+# ✅ 2026-08-19 再訂正為 35 個：籌備新資料集抽取任務前的文獻/專案佐證審查中，再次
+# 即時查證同一份官方 wiki（直接讀取 raw markdown 來源
+# raw.githubusercontent.com/wiki/commonsense/conceptnet5/Relations.md，避免
+# WebFetch 中介模型摘要造成的失真），確認官方現行共列出 **34 個 active 關係**
+# （symmetric 7＋asymmetric 27，不含已棄用的 ENTAILS／INSTANCE_OF）——比本論文
+# 2026-07-27 鎖定的 33 個多出 2 個官方後續新增的關係：
+#   - HAS_SUBEVENT：「A and B are events, and B happens as a subevent of A」
+#     （eating → chewing）——與既有的 HAS_FIRST_SUBEVENT／HAS_LAST_SUBEVENT 是
+#     官方 wiki 上三個各自獨立的條目，非合併別名：後兩者特指「開始/結束時發生的
+#     子事件」，HAS_SUBEVENT 是較一般化的「B 是 A 的某個子事件」。
+#   - ETYMOLOGICALLY_DERIVED_FROM：「A is derived from B」（dejta → date）——
+#     與既有對稱關係 ETYMOLOGICALLY_RELATED_TO（「A 與 B 有共同字源」）是官方
+#     wiki 上兩個獨立條目：前者是單向的衍生方向，後者是雙向的共同字源，語意不同。
+# 使用者確認跟進官方最新清單（與 2026-07-27 那次「跟進官方現行建議移除已棄用型別」
+# 同一原則的延伸），SVO_REL_TYPES 由 33 個訂正為 35 個（7 對稱＋28 非對稱）。
+# SENSE_OF 仍非官方 wiki 現行列出的條目，沿用既有作法取自 Speer et al. (2017)
+# 論文正文（見 SVO_REL_TYPE_DESCRIPTIONS 註解）。完整查證見
+# docs/參考文獻/03_資訊抽取與本體設計/README.md。
 # 命名採 Neo4j 關係型別慣例（UPPER_SNAKE_CASE），對應改寫 ConceptNet 原始 CamelCase
 # 命名（如 IsA → IS_A）；語意不變。
 SVO_REL_TYPES: set[str] = {
     # 對稱關係（7）
     "ANTONYM", "DISTINCT_FROM", "ETYMOLOGICALLY_RELATED_TO", "LOCATED_NEAR",
     "RELATED_TO", "SIMILAR_TO", "SYNONYM",
-    # 非對稱關係（26，已依 ConceptNet 官方現行建議移除 ENTAILS／INSTANCE_OF）
+    # 非對稱關係（28，2026-08-19 依 ConceptNet 官方現行清單新增 HAS_SUBEVENT／
+    # ETYMOLOGICALLY_DERIVED_FROM，見上方訂正說明）
     "AT_LOCATION", "CAPABLE_OF", "CAUSES", "CAUSES_DESIRE", "CREATED_BY",
-    "DEFINED_AS", "DERIVED_FROM", "DESIRES", "EXTERNAL_URL",
-    "FORM_OF", "HAS_A", "HAS_CONTEXT", "HAS_FIRST_SUBEVENT", "HAS_LAST_SUBEVENT",
-    "HAS_PREREQUISITE", "HAS_PROPERTY", "IS_A", "MADE_OF",
-    "MANNER_OF", "MOTIVATED_BY_GOAL", "OBSTRUCTED_BY", "PART_OF",
-    "RECEIVES_ACTION", "SENSE_OF", "SYMBOL_OF", "USED_FOR",
+    "DEFINED_AS", "DERIVED_FROM", "DESIRES", "ETYMOLOGICALLY_DERIVED_FROM",
+    "EXTERNAL_URL", "FORM_OF", "HAS_A", "HAS_CONTEXT", "HAS_FIRST_SUBEVENT",
+    "HAS_LAST_SUBEVENT", "HAS_PREREQUISITE", "HAS_PROPERTY", "HAS_SUBEVENT",
+    "IS_A", "MADE_OF", "MANNER_OF", "MOTIVATED_BY_GOAL", "OBSTRUCTED_BY",
+    "PART_OF", "RECEIVES_ACTION", "SENSE_OF", "SYMBOL_OF", "USED_FOR",
 }
 
 # `SIM` 節點比對門檻——見 docs/論文/03_系統設計與方法論.md § 3.1.3 主圖 `COMPARE`
@@ -75,7 +94,7 @@ SVO_REL_TYPES: set[str] = {
 COMPARE_COSINE_THRESHOLD = 0.75
 
 # `QSIM` 節點門檻——見 docs/論文/03_系統設計與方法論.md § 3.2 §c「查詢時關係
-# 連結」（2026-08-18 定案）：查詢動詞措辭與 33 個 canonical 型別描述句
+# 連結」（2026-08-18 定案）：查詢動詞措辭與 35 個 canonical 型別描述句
 # embedding 算 cosine，屬**三區分類**（高門檻直接採信／灰色地帶交 LLM
 # 仲裁／低於低門檻直接判無 match），與 `COMPARE_COSINE_THRESHOLD`（LLM
 # 自報值與 embedding 建議值的二元一致性檢查）判斷結構不同，故不共用同一個
@@ -87,6 +106,16 @@ COMPARE_COSINE_THRESHOLD = 0.75
 # 實驗需依本論文實際查詢語料重新校準。
 QSIM_ASSIGN_THRESHOLD = 0.75
 QSIM_ESCALATE_LOW_THRESHOLD = 0.60
+
+# `vector_search_facts()`（見 docs/論文/03_系統設計與方法論.md § 3.1.4 §a
+# `RETRIEVE`）查詢後去重的候選池倍數——同一件事實可能因多筆 citation（例如
+# 切塊重疊）各自產生獨立 Fact 節點，KNN 直接取 top_k 可能被近乎重複的結果
+# 佔掉名額；先取 top_k × 此倍數的候選池，做完既有 kg_id post-filter 與
+# (subject, rel_type, object) 去重後再截斷回 top_k。⚠️ 暫定值，未經校準：
+# 4 倍是工程預設（同時預留給既有 kg_id post-filter 與新增去重兩道篩選消耗，
+# 讓多數情況下截斷後仍有機會湊滿 top_k 筆），非從文獻或實際資料推導，
+# 第五章消融實驗需重新校準。
+FACT_SEARCH_CANDIDATE_MULTIPLIER = 4
 
 # `EXPAND` 治理機制（見 docs/論文/03_系統設計與方法論.md § 3.1.3 §a Behavior
 # Tree；docs/報告/11_抽取管線完整實作任務書.md P2-1）——以下四個常數皆為
@@ -124,12 +153,13 @@ EXPAND_WORKER_POLL_INTERVAL = 300
 # 也會因此失去意義。
 DOCUMENT_ID_NAMESPACE = UUID("e5884159-825d-4822-93d4-331972dc326b")
 
-# `SIM` 節點的比對目標——33 個關係型別各自的自然語言描述句／範例句（而非型別
+# `SIM` 節點的比對目標——35 個關係型別各自的自然語言描述句／範例句（而非型別
 # 識別碼字串本身），依據 Chen & Li (2021) ZS-BERT 的描述句 embedding 設計與
 # Xue et al. (2024) AutoRE 消融實驗（劣質描述句甚至不如不用描述句），見
-# docs/參考文獻/03_資訊抽取與本體設計/README.md「第三十二次調整」。32 筆取自
+# docs/參考文獻/03_資訊抽取與本體設計/README.md「第三十二次調整」。34 筆取自
 # ConceptNet 官方 GitHub wiki（commonsense/conceptnet5/wiki/Relations，即時查詢
-# 版本），`SENSE_OF` 一筆取自 Speer et al. (2017) 論文正文（現行 wiki 未列出此隱含
+# 版本，2026-08-19 含新增的 HAS_SUBEVENT／ETYMOLOGICALLY_DERIVED_FROM 兩筆），
+# `SENSE_OF` 一筆取自 Speer et al. (2017) 論文正文（現行 wiki 未列出此隱含
 # 關係）。key 需與 `SVO_REL_TYPES` 完全一致，兩者以測試互相校驗。
 SVO_REL_TYPE_DESCRIPTIONS: dict[str, str] = {
     # 對稱關係（7）
@@ -151,6 +181,7 @@ SVO_REL_TYPE_DESCRIPTIONS: dict[str, str] = {
     "CAUSES": "A 的發生會導致 B 發生，例如 exercise 導致 sweat",
     "HAS_FIRST_SUBEVENT": "A 是一個事件，B 是其開始時發生的動作，例如 sleep 從 close eyes 開始",
     "HAS_LAST_SUBEVENT": "A 是一個事件，B 是其結束時發生的動作，例如 cook 以 clean up kitchen 結束",
+    "HAS_SUBEVENT": "A 與 B 皆為事件，B 是 A 發生過程中的一個子事件，例如 eating 包含 chewing 這個子事件（2026-08-19 新增）",
     "HAS_PREREQUISITE": "若要 A 發生，B 必須先發生或存在，例如 dream 的前提是 sleep",
     "HAS_PROPERTY": "A 具有 B 這個性質，例如 ice 是 cold 的",
     "MOTIVATED_BY_GOAL": "做 A 是為了達成目標 B，例如 compete 是為了 win",
@@ -158,6 +189,7 @@ SVO_REL_TYPE_DESCRIPTIONS: dict[str, str] = {
     "DESIRES": "A 是一個會渴望 B 的實體，例如 person 渴望 love",
     "CREATED_BY": "B 是產生 A 的過程或行為，例如 cake 由 bake 這個動作產生",
     "DERIVED_FROM": "A 這個詞是由 B 這個詞衍生而來，例如 pocketbook 衍生自 book",
+    "ETYMOLOGICALLY_DERIVED_FROM": "A 這個詞的字源衍生自 B，例如 dejta 衍生自 date（2026-08-19 新增）",
     "SYMBOL_OF": "A 象徵或代表 B，例如 red 象徵 fervor",
     "DEFINED_AS": "A 與 B 意義幾乎相同，但 B 提供更正式或百科式的定義，例如 peace 被定義為 absence of war",
     "MANNER_OF": "A 是 B 這個較一般行為的特定實現方式，例如 auction 是一種 sale",

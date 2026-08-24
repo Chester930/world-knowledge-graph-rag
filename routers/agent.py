@@ -77,6 +77,7 @@ def _serialize_sources(triples: list[SVOTriple], fact_results: list[dict], resol
                 "object": t.object,
                 "object_type": t.object_type,
                 "rel_type": t.rel_type,
+                "source": t.source,
                 "source_svo_chunk_file": t.source_svo_chunk_file,
             }
             for t in triples

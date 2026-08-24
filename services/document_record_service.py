@@ -175,23 +175,33 @@ def reset_extraction_progress(folder: Path) -> DocumentRecord | None:
         return None
     record.extraction_status = "pending"
     record.chunk_progress = 0
+    record.completed_chunk_indices = []
     _write_record(folder, record)
     return record
 
 
 def record_chunk_completed(folder: Path, chunk_index: int) -> DocumentRecord | None:
-    """抽取 Worker（§ 3.1.3／3.1.4）完成單一 SVO chunk 後回寫真實狀態來源：
-    `chunk_progress` 單調遞增（`max()` 而非直接覆寫，容忍失敗重試造成的
-    非嚴格遞增呼叫順序）；達到總 chunk 數時整份文件才轉為 `completed`，
-    否則維持 `processing`（供 `task_queue_service.rebuild_from_records()`
-    推算尚未完成的 chunk_index 範圍）。
+    """抽取 Worker（§ 3.1.3／3.1.4）完成單一 SVO chunk 後回寫真實狀態來源。
+
+    2026-08-19（真實審查發現並修復）：完成判斷改依 `completed_chunk_indices`
+    這個實際完成集合的大小是否涵蓋總數，不再用 `chunk_progress` 的 max 值——
+    後者若中間任一 chunk 失敗、但編號更大的 chunk 之後成功，會誤判整份文件
+    已完成，且會把 `mark_extraction_failed()` 寫入的 `failed` 狀態靜默覆寫掉，
+    中間失敗的 chunk 永遠不會被 `task_queue_service.rebuild_from_records()`
+    重新排入佇列。集合天然去重（同一 chunk_index 因重試被回報多次不會膨脹
+    計數），也不要求完成順序。`chunk_progress` 仍同步更新（單調遞增，供既有
+    程式碼／顯示用途相容），但不再是完成判斷的依據。
     """
     record = read_record(folder)
     if record is None:
         return None
     record.chunk_progress = max(record.chunk_progress, chunk_index)
+    if chunk_index not in record.completed_chunk_indices:
+        record.completed_chunk_indices.append(chunk_index)
     total = record.svo_total_chunks or record.total_chunks
-    record.extraction_status = "completed" if total and record.chunk_progress >= total else "processing"
+    record.extraction_status = (
+        "completed" if total and len(record.completed_chunk_indices) >= total else "processing"
+    )
     _write_record(folder, record)
     return record
 
@@ -230,6 +240,7 @@ def append_assignment(
     ))
     record.extraction_status = "pending"
     record.chunk_progress = 0
+    record.completed_chunk_indices = []
 
     _write_record(folder, record)
     return record

@@ -199,6 +199,7 @@ async def test_build_graph_force_rebuild_resets_extraction_progress(tmp_path, mo
     record = document_record_service.read_record(doc_a)
     record.extraction_status = "completed"
     record.chunk_progress = 1
+    record.completed_chunk_indices = [1]
     document_record_service._write_record(doc_a, record)
 
     kg = _make_kg(str(kg_folder))
@@ -213,6 +214,7 @@ async def test_build_graph_force_rebuild_resets_extraction_progress(tmp_path, mo
     reset = document_record_service.read_record(doc_a)
     assert reset.extraction_status == "pending"
     assert reset.chunk_progress == 0
+    assert reset.completed_chunk_indices == []
 
 
 @pytest.mark.asyncio

@@ -133,11 +133,10 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
 
     `kg_folders` 為 `{kg_id: KG 資料夾路徑}`。重建規則：`extraction_status`
     為 `completed` 的文件不需要登記任何 pending chunk；其餘優先讀取
-    `svo_index.json` 裡實際存在的 chunk_index 清單（而非用
-    `chunk_progress+1..total` 推算連續範圍——部份文件的 svo chunk index
-    並非從 1 開始連續編號，用推算範圍會查到不存在的 index，導致
-    worker 的 `_find_chunk()` 誤判為失敗，2026-08-04 實測發現），過濾出
-    尚未完成（index > chunk_progress）的部份登記為 `pending`（`processing`
+    `svo_index.json` 裡實際存在的 chunk_index 清單（而非用範圍推算連續
+    範圍——部份文件的 svo chunk index 並非從 1 開始連續編號，用推算範圍
+    會查到不存在的 index，導致 worker 的 `_find_chunk()` 誤判為失敗，
+    2026-08-04 實測發現），過濾出尚未完成的部份登記為 `pending`（`processing`
     狀態的 chunk 在記錄檔真實狀態來源裡本來就無法與「已中斷」區分，直接
     視為未完成，與 `reset_stuck_processing` 對同一問題的處理精神一致）。
 
@@ -146,10 +145,20 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
     才會觸發的救援路徑——若 `svo_index.json` 這份索引檔案剛好也在同一次
     事故中缺席（例如較舊的文件、或磁碟事故同時波及多個檔案），2026-08-04
     的版本會直接靜默跳過整份文件，救援路徑本身反而造成待處理進度悄悄消失，
-    與 `REBUILD` 存在的目的矛盾。改為此時退回原本的 `chunk_progress+1..total`
-    範圍推算並記錄警告——寧可誤登記幾個實際不存在的 index（worker 端
-    `_find_chunk()` 找不到時視為 `failed`，可重試，非資料損毀等級的風險），
-    也不要靜默漏掉整份文件。
+    與 `REBUILD` 存在的目的矛盾。改為此時退回範圍推算並記錄警告——寧可
+    誤登記幾個實際不存在的 index（worker 端 `_find_chunk()` 找不到時視為
+    `failed`，可重試，非資料損毀等級的風險），也不要靜默漏掉整份文件。
+
+    ✅ **「尚未完成」判斷改依 `completed_chunk_indices` 集合（2026-08-19，
+    真實審查發現並修復）**：原本用 `chunk["index"] > record.chunk_progress`
+    篩選——`chunk_progress` 只是「看過的最大 index」，若中間某個 chunk 失敗、
+    但編號更大的 chunk 之後成功，`chunk_progress` 會被推高，導致這個篩選
+    誤判失敗的那個 chunk「已完成」（因為它的 index 小於 chunk_progress），
+    REBUILD 永遠不會把它重新排入佇列，等同永久遺失，與 `record_chunk_completed()`
+    同一根因（見該函式 docstring）。改用 `not in record.completed_chunk_indices`
+    （集合成員判斷，不看大小關係），不論完成順序都能正確識別出真正尚未完成
+    的 chunk；`svo_index.json` 缺席的範圍推算分支同樣改用集合排除，不再假設
+    「只有結尾部分未完成」。
     """
     if db_path.exists():
         db_path.unlink()
@@ -165,22 +174,23 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
                 if record is None or record.extraction_status == "completed":
                     continue
 
+                completed = set(record.completed_chunk_indices)
                 svo_index = read_svo_index(doc_folder)
                 if svo_index is not None:
                     pending_indices = [
                         chunk["index"] for chunk in svo_index["chunks"]
-                        if chunk["index"] > record.chunk_progress
+                        if chunk["index"] not in completed
                     ]
                 else:
                     logger.warning(
-                        "REBUILD：%s 缺少 svo_index.json，退回 chunk_progress+1..total "
-                        "範圍推算（可能誤登記不存在的 chunk_index，worker 端會視為 "
-                        "failed 並可重試，非資料遺失）",
+                        "REBUILD：%s 缺少 svo_index.json，退回 1..total 範圍推算"
+                        "（排除已知完成的 chunk_index，可能誤登記不存在的 index，"
+                        "worker 端會視為 failed 並可重試，非資料遺失）",
                         doc_folder,
                     )
                     total = record.svo_total_chunks or record.total_chunks
                     pending_indices = (
-                        list(range(record.chunk_progress + 1, total + 1)) if total > 0 else []
+                        [i for i in range(1, total + 1) if i not in completed] if total > 0 else []
                     )
 
                 if not pending_indices:

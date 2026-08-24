@@ -5,9 +5,11 @@ from uuid import uuid4
 import pytest
 
 from core import config
+from core.constants import FACT_SEARCH_CANDIDATE_MULTIPLIER, SVO_REL_TYPES
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
+from services.svo_chunking import SVOChunk
 
 
 class FakeLLM:
@@ -81,7 +83,7 @@ class SequencedFakeLLM:
 class TypeDescriptionFakeEmbedding:
     """供 SIM／COMPARE／ESCALATE3 測試使用：只精確控制指定文字的向量方向，
     其餘（未列出的）文字一律回傳 `default` 向量。刻意不沿用 `FakeEmbedding`
-    的雜湊索引方式——33 個真實描述句彼此雜湊碰撞（`idx % dim`）的機率不可忽略，
+    的雜湊索引方式——35 個真實描述句彼此雜湊碰撞（`idx % dim`）的機率不可忽略，
     會讓「哪個型別是最相似者」的測試斷言變得不可靠。
 
     `model_name` 每個實例各自不同（遞增計數器）——`classify_relation_by_embedding()`
@@ -326,7 +328,7 @@ async def test_extract_svo_triples_escalate3_confirms_original_llm_answer():
     """ESCALATE3 仲裁後確認原答案（而非 embedding 建議的候選）時，維持 LLM 自報值。"""
     embedding = TypeDescriptionFakeEmbedding(
         vectors={"導致": [1.0, 0.0, 0.0]},
-        default=[0.0, 1.0, 0.0],  # 33 個型別描述句皆與 verb 不相似，分數低於門檻
+        default=[0.0, 1.0, 0.0],  # 35 個型別描述句皆與 verb 不相似，分數低於門檻
     )
     llm = SequencedFakeLLM([
         '{"triples":[{"subject":"A","rel_type":"CAUSES","verb":"導致","object":"B","confidence":3}]}',
@@ -481,7 +483,7 @@ async def test_resolve_query_relation_type_gray_zone_without_llm_provider_return
 @pytest.mark.asyncio
 async def test_resolve_query_relation_type_below_low_threshold_skips_llm_call():
     """低於 QSIM_ESCALATE_LOW_THRESHOLD 時直接判無 match，不浪費一次 LLM 呼叫
-    （即使有提供 llm_provider）。所有 33 個型別描述句皆未指定、共用 default
+    （即使有提供 llm_provider）。所有 35 個型別描述句皆未指定、共用 default
     向量，與查詢措辭的向量正交（cosine=0），確保分數低於門檻。"""
     embedding = TypeDescriptionFakeEmbedding(
         vectors={"完全不相關的措辭": [0.0, 0.0, 1.0]}, default=[1.0, 0.0, 0.0]
@@ -1012,6 +1014,7 @@ async def test_merge_triples_to_graph_accumulates_citation_on_edge():
         verb="導致",
         object="B",
         source_doc_id=doc_id,
+        source="內政部_台內勞字第356410號函.md",
         source_svo_chunk_index=2,
         source_svo_chunk_file="svo-chunk-002-of-003.md",
         source_sentence_start=5,
@@ -1030,6 +1033,10 @@ async def test_merge_triples_to_graph_accumulates_citation_on_edge():
     citations = json.loads(params["citations_json"])
     assert len(citations) == 1
     assert citations[0]["source_doc_id"] == str(doc_id)
+    # 2026-08-19：冗餘存下原始文件名稱字串（見 SVOTriple.source docstring）——
+    # source_doc_id 是單向雜湊，chunk 檔名在同長度文件間可能撞名，唯有這個
+    # 欄位能讓查詢端不必另外查資料庫就回溯到原文。
+    assert citations[0]["source"] == "內政部_台內勞字第356410號函.md"
     assert citations[0]["source_svo_chunk_index"] == 2
     assert citations[0]["source_sentence_start"] == 5
     assert citations[0]["source_sentence_end"] == 7
@@ -1125,6 +1132,33 @@ async def test_resolve_entity_name_merges_via_edit_distance():
     candidates = [{"name": "台積電公司", "alias_counts_json": "{}"}]
     resolved = await svc.resolve_entity_name("台積電", candidates)
     assert resolved == "台積電公司"
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_picks_best_edit_ratio_match_not_first():
+    """迴歸測試（2026-08-19 真實審查發現並修復）：`_fetch_entity_candidates()`
+    的 Cypher 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性；原本的編輯距離比對
+    迴圈「回傳第一個超過門檻的候選」，若有多個候選都超過門檻，選到哪一個
+    取決於查詢回傳順序，並非最佳匹配。這裡刻意讓分數較低（0.75）的候選排在
+    分數較高（≈0.857）的候選之前，驗證修復後會選分數最高者，而非第一個。"""
+    candidates = [
+        {"name": "台積電公司", "alias_counts_json": "{}"},  # ratio ≈ 0.75，排第一但非最佳
+        {"name": "台積電廠", "alias_counts_json": "{}"},      # ratio ≈ 0.857，較佳匹配
+    ]
+    resolved = await svc.resolve_entity_name("台積電", candidates)
+    assert resolved == "台積電廠"
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_edit_ratio_choice_is_order_independent():
+    """同一組候選、順序相反，應得到相同結果——模擬 Neo4j 查詢順序不保證的
+    情境，確認修復後的合併決策不再受候選回傳順序影響。"""
+    candidates_reversed = [
+        {"name": "台積電廠", "alias_counts_json": "{}"},
+        {"name": "台積電公司", "alias_counts_json": "{}"},
+    ]
+    resolved = await svc.resolve_entity_name("台積電", candidates_reversed)
+    assert resolved == "台積電廠"
 
 
 @pytest.mark.asyncio
@@ -1533,6 +1567,7 @@ async def test_bfs_query_maps_records_using_latest_citation():
     citations_json = json.dumps([
         {
             "source_doc_id": str(doc_id),
+            "source": "內政部_台內勞字第356410號函.md",
             "source_svo_chunk_index": 1,
             "source_svo_chunk_file": "svo-chunk-001-of-001.md",
             "source_sentence_start": 1,
@@ -1557,8 +1592,31 @@ async def test_bfs_query_maps_records_using_latest_citation():
 
     assert len(triples) == 1
     assert triples[0].source_doc_id == doc_id
+    # 2026-08-19：source 欄位也要正確從 citation 還原回來，不是只有
+    # source_doc_id——見 SVOTriple.source docstring 的回溯可靠性說明。
+    assert triples[0].source == "內政部_台內勞字第356410號函.md"
     assert triples[0].source_sentence_start == 1
     assert triples[0].verb == "導致"
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_restricts_traversal_to_svo_rel_types():
+    """2026-08-19 迴歸測試：走訪必須限定在 SVO_REL_TYPES（知識層邊），不能
+    是不限型別的 `[*1..{hops}]`——否則圖上同時存在 § 3.1.4 §a 的
+    HAS_ENTITY／HAS_SUBJECT／HAS_OBJECT／SUPPORTED_BY 結構性邊時，BFS 可能
+    行經這些邊、把 startNode/endNode 解析成沒有 `.name` 的 Chunk／Fact
+    節點，導致 `SVOTriple(subject=None)` 驗證失敗直接拋例外（真實對新建立
+    的 3.1.4 驗證 KG 執行時重現過一次，見 docs/報告/15_...md）。"""
+    driver = FakeDriver(records=[])
+
+    await svc.bfs_query(driver, uuid4(), ["A"], hops=2)
+
+    assert len(driver.calls) == 1
+    query, _params = driver.calls[0]
+    assert "[*1..2]" not in query  # 不應該再出現不限關係型別的走訪模式
+    assert "HAS_ENTITY" not in query
+    for rel_type in SVO_REL_TYPES:
+        assert rel_type in query
 
 
 # ── trigger_extraction（原 routers/staging.py::_trigger_extraction，遷移自
@@ -1660,6 +1718,159 @@ async def test_trigger_extraction_embeds_chunks_when_provider_available(tmp_path
     assert call_count["n"] == 1
     from services.svo_preprocessing_service import read_sentence_embeddings
     assert read_sentence_embeddings("note.md", kg_folder) is not None
+
+    # 2026-08-20 § Phase 1：同一次 trigger_extraction() 呼叫應一併建立
+    # Sentence 節點（供標準化 RAG 檢索），非獨立另外觸發的路徑。
+    sentence_calls = [c for c in fake_driver.calls if "s.sentence_embedding" in c[0]]
+    assert len(sentence_calls) >= 1
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_skips_pronoun_resolution_when_llm_not_initialized(tmp_path, monkeypatch):
+    """對應誠實侷限：測試環境未呼叫 `init_providers()`，`get_llm_provider()`
+    會拋出 RuntimeError，指代消解應優雅退化為原句直接通過，不影響切塊與排隊
+    本身——與既有 embedding provider 的降級行為對稱。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", kg_folder,
+    )
+
+    await svc.trigger_extraction(FakeDriver(), doc_folder, uuid4())  # 不應拋出例外
+
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert chunk_files
+    assert "他隨後研發了獵鷹火箭" in chunk_files[0].read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_resolves_pronouns_when_llm_available(tmp_path, monkeypatch):
+    """2026-08-20：對應 docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md
+    §0 前提缺口修復——`trigger_extraction()` 帶入 `pronoun_llm_provider` 後，
+    SVO chunk 的實際文字（`build_svo_chunks()` 的 `chunk.text`，也就是送進
+    `LLM_SVO` 三元組抽取的原文）應反映指代消解後的結果，而非原句代名詞。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "馬斯克創立了太空公司。他隨後研發了獵鷹火箭。", "note.md", kg_folder,
+    )
+
+    call_count = {"n": 0}
+
+    class FakeLLM:
+        def __init__(self):
+            self.responses = ["馬斯克隨後研發了獵鷹火箭。"]
+
+        async def generate(self, prompt: str) -> str:
+            return self.responses.pop(0)
+
+    def _get_fake_llm_provider():
+        call_count["n"] += 1
+        return FakeLLM()
+
+    monkeypatch.setattr("services.svo_service.get_llm_provider", _get_fake_llm_provider)
+
+    await svc.trigger_extraction(FakeDriver(), doc_folder, uuid4())
+
+    assert call_count["n"] == 1  # 只從 trigger_extraction() fetch 一次，非各自重複 fetch
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert chunk_files
+    chunk_text = chunk_files[0].read_text(encoding="utf-8")
+    assert "馬斯克隨後研發了獵鷹火箭" in chunk_text
+    assert "他隨後研發了獵鷹火箭" not in chunk_text
+
+
+class KGLexiconFakeDriver:
+    """模擬 `KGRepository.get()` 查詢會回傳指定 `pronoun_lexicon_exclude` 的
+    `KnowledgeGraph` 節點，其餘查詢一律回傳空結果並記錄——供
+    `trigger_extraction()` 讀取 KG 專屬代名詞排除詞庫的測試使用（2026-08-20，
+    見 `services/svo_service.py::trigger_extraction()` docstring「KG 專屬
+    代名詞排除詞庫」小節）。"""
+
+    def __init__(self, kg_id, pronoun_lexicon_exclude: list[str]):
+        self._kg_id = kg_id
+        self._pronoun_lexicon_exclude = pronoun_lexicon_exclude
+        self.calls: list = []
+
+    async def execute_query(self, query: str, **params):
+        self.calls.append((query, params))
+        if "MATCH (k:KnowledgeGraph" in query:
+            now = "2026-08-20T00:00:00+00:00"
+            node = {
+                "id": str(self._kg_id), "name": "test-kg", "description": "",
+                "folder_path": "/tmp/x", "is_public": True, "db_name": "",
+                "doc_count": 0, "entity_count": 0, "relation_count": 0,
+                "pronoun_lexicon_exclude": self._pronoun_lexicon_exclude,
+                "created_at": now, "updated_at": now,
+            }
+            return FakeResult([{"k": node}])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_excludes_kg_specific_pronoun_words(tmp_path, monkeypatch):
+    """2026-08-20：真實匯入法規全文資料集時發現，「其」「該」在法律文本中
+    幾乎都是自我完備的正式泛稱（如「及其家屬」「該法」），`DEFAULT_PRONOUN_LEXICON`
+    的字面比對規則卻一律當成代名詞觸發 LLM 消解——實測某份 390 句的法規全文
+    41% 的句子因此觸發，單筆文件耗時超過 600 秒。KG 節點的
+    `pronoun_lexicon_exclude` 讓個別 KG 排除這些字；本測試驗證
+    `trigger_extraction()` 真的把該欄位套用到消解管線本身（讓 LLM 完全不被
+    呼叫），不是只加了欄位卻沒接上。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "本法保障其權益。", "note.md", kg_folder,
+    )
+
+    class ExplodingLLM:
+        async def generate(self, prompt: str) -> str:
+            raise AssertionError("「其」已被 KG 排除詞庫排除，不應觸發 LLM 消解")
+
+    monkeypatch.setattr("services.svo_service.get_llm_provider", lambda: ExplodingLLM())
+
+    kg_id = uuid4()
+    driver = KGLexiconFakeDriver(kg_id, pronoun_lexicon_exclude=["其", "該"])
+
+    await svc.trigger_extraction(driver, doc_folder, kg_id)  # 不應拋出例外（LLM 未被呼叫）
+
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert chunk_files
+    assert "本法保障其權益" in chunk_files[0].read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_resolves_excluded_word_when_kg_has_no_override(tmp_path, monkeypatch):
+    """對照組：KG 沒有設定 `pronoun_lexicon_exclude`（`KGLexiconFakeDriver`
+    回傳空清單）時，「其」仍應維持在預設詞庫內、正常觸發消解——確認排除
+    行為只影響明確設定過的 KG，不是全域改動預設詞庫本身。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_folder, _record = ingestion_service.chunk_and_stage(
+        "本法保障其權益。", "note.md", kg_folder,
+    )
+
+    class FakeLLM:
+        async def generate(self, prompt: str) -> str:
+            return "本法保障勞工權益。"
+
+    monkeypatch.setattr("services.svo_service.get_llm_provider", lambda: FakeLLM())
+
+    kg_id = uuid4()
+    driver = KGLexiconFakeDriver(kg_id, pronoun_lexicon_exclude=[])
+
+    await svc.trigger_extraction(driver, doc_folder, kg_id)
+
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert chunk_files
+    assert "本法保障勞工權益" in chunk_files[0].read_text(encoding="utf-8")
 
 
 # ── 3.1.4 §a：事實層級向量化（Fact 節點，2026-08-03）────────────────────────
@@ -1767,20 +1978,33 @@ async def test_create_fact_vector_index_without_driver_is_noop():
 
 
 @pytest.mark.asyncio
-async def test_create_fact_vector_index_issues_create_vector_index_query():
+async def test_create_fact_vector_index_without_kg_id_is_noop():
     driver = FakeDriver()
+    await svc.create_fact_vector_index(driver)  # kg_id 缺席同樣視為 noop
+    assert driver.calls == []
 
-    await svc.create_fact_vector_index(driver, dim=384)
+
+@pytest.mark.asyncio
+async def test_create_fact_vector_index_issues_per_kg_create_vector_index_query():
+    """2026-08-19：改為每個 KG 各自一個獨立索引（label 與索引名稱皆含
+    kg_id），取代原本全 KG 共用單一索引＋查詢後 kg_id 過濾的設計，見
+    create_fact_vector_index() docstring 完整查證脈絡。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+
+    await svc.create_fact_vector_index(driver, kg_id, dim=384)
 
     assert len(driver.calls) == 1
     query, params = driver.calls[0]
-    assert "CREATE VECTOR INDEX fact_embedding_vector" in query
-    assert "FOR (f:Fact) ON f.fact_embedding" in query
+    assert svc._fact_vector_index_name(str(kg_id)) in query
+    assert f"FOR (f:{svc._kg_fact_label(str(kg_id))}) ON f.fact_embedding" in query
     assert params["dim"] == 384
 
 
 @pytest.mark.asyncio
-async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
+async def test_vector_search_facts_queries_per_kg_index_without_post_filter():
+    """2026-08-19：KG 範圍隔離改由 per-KG 索引結構保證，查詢不再需要
+    `WHERE node.kg_id = $kg_id` 這個查詢後 post-filter。"""
     driver = FakeDriver(records=[
         {"fact_text": "台積電 生產 晶片", "verb": "生產", "confidence": 3,
          "subject": "台積電", "object": "晶片", "rel_type": "CAUSES",
@@ -1795,14 +2019,82 @@ async def test_vector_search_facts_queries_index_and_filters_by_kg_id():
          "subject": "台積電", "object": "晶片", "rel_type": "CAUSES",
          "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.92},
     ]
-    query, params = driver.calls[0]
-    assert "fact_embedding_vector" in query
-    assert "WHERE node.kg_id = $kg_id" in query
+    # 第一次呼叫是 create_fact_vector_index() 的惰性索引建立
+    index_query, index_params = driver.calls[0]
+    assert svc._fact_vector_index_name(str(kg_id)) in index_query
+    assert index_params["dim"] == 2  # 由 query_vector 長度推得，不需額外參數
+    # 第二次才是實際的 KNN 查詢
+    query, params = driver.calls[1]
+    assert svc._fact_vector_index_name(str(kg_id)) in query
+    assert "WHERE node.kg_id" not in query
     assert "node.subject AS subject" in query
     assert "node.rel_type AS rel_type" in query
-    assert params["kg_id"] == str(kg_id)
-    assert params["top_k"] == 5
+    # 候選池倍數仍保留，供下方去重測試消耗（與 KG 範圍過濾是獨立問題）
+    assert params["candidate_k"] == 5 * FACT_SEARCH_CANDIDATE_MULTIPLIER
     assert params["vector"] == [0.1, 0.2]
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_dedupes_same_subject_rel_object_keeping_highest_score():
+    """同一件事實因多筆 citation（例如切塊重疊）各自產生獨立 Fact 節點時，
+    只保留分數最高的一筆，不讓 top_k 名額被近乎重複的結果佔掉——真實資料
+    驗證發現（見 docs/報告/15_314修復效果驗證報告_2026-08-19.md），非臆測。"""
+    driver = FakeDriver(records=[
+        {"fact_text": "生理假不併入普通傷病假（版本一）", "verb": "不併入", "confidence": 3,
+         "subject": "生理假", "object": "普通傷病假", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.862},
+        {"fact_text": "生理假不併入普通傷病假（版本二，分數較高）", "verb": "不併入", "confidence": 3,
+         "subject": "生理假", "object": "普通傷病假", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 2, "score": 0.911},
+        {"fact_text": "生理假工資折半", "verb": "折半", "confidence": 3,
+         "subject": "生理假期間工資", "object": "全勤", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 3, "score": 0.844},
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert len(results) == 2  # 兩筆重複的「生理假不併入普通傷病假」收斂成一筆
+    assert results[0]["fact_text"] == "生理假不併入普通傷病假（版本二，分數較高）"
+    assert results[0]["score"] == 0.911
+    assert results[1]["fact_text"] == "生理假工資折半"
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_keeps_entries_with_missing_key_fields_undeduped():
+    """subject／rel_type／object 任一為 None（2026-08-18 schema 修正前建立、
+    尚未跑過 §b 回填批次的舊 Fact 節點）時無法安全去重，一律原樣保留——與
+    routers/agent.py::_merge_fact_lines() 既有的同名情境處理原則一致。"""
+    driver = FakeDriver(records=[
+        {"fact_text": "舊資料事實一", "verb": None, "confidence": 1,
+         "subject": None, "object": None, "rel_type": None,
+         "source_doc_id": None, "source_svo_chunk_index": None, "score": 0.80},
+        {"fact_text": "舊資料事實二", "verb": None, "confidence": 1,
+         "subject": None, "object": None, "rel_type": None,
+         "source_doc_id": None, "source_svo_chunk_index": None, "score": 0.79},
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert len(results) == 2  # 都保留，不因缺鍵而互相合併或誤判為重複
+    assert {r["fact_text"] for r in results} == {"舊資料事實一", "舊資料事實二"}
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_truncates_deduped_results_to_top_k():
+    driver = FakeDriver(records=[
+        {"fact_text": f"事實{i}", "verb": "V", "confidence": 1,
+         "subject": f"S{i}", "object": f"O{i}", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": i, "score": 1.0 - i * 0.01}
+        for i in range(10)
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_facts(driver, kg_id, [0.1, 0.2], top_k=3)
+
+    assert len(results) == 3
+    assert [r["fact_text"] for r in results] == ["事實0", "事實1", "事實2"]
 
 
 # ── backfill_fact_nodes（3.1.4 §b 回填批次任務，2026-08-18）─────────────────
@@ -1983,3 +2275,132 @@ async def test_backfill_fact_nodes_returns_zero_when_no_edges():
 
     assert count == 0
     assert len(driver.scan_calls) == 1
+
+
+# ── § Phase 1 標準化 RAG：Sentence 節點與向量索引（2026-08-20）───────────────
+
+def test_kg_sentence_label_and_index_name_are_per_kg():
+    kg_id = uuid4()
+    label = svc._kg_sentence_label(str(kg_id))
+    index_name = svc._sentence_vector_index_name(str(kg_id))
+    assert label == f"Sentence_{str(kg_id).replace('-', '_')}"
+    assert index_name == f"sentence_embedding_vector_{str(kg_id).replace('-', '_')}"
+
+
+@pytest.mark.asyncio
+async def test_create_sentence_vector_index_without_driver_or_kg_id_is_noop():
+    await svc.create_sentence_vector_index(None)  # 不應拋出例外
+    driver = FakeDriver()
+    await svc.create_sentence_vector_index(driver)  # kg_id 缺席同樣視為 noop
+    assert driver.calls == []
+
+
+@pytest.mark.asyncio
+async def test_create_sentence_vector_index_issues_per_kg_create_vector_index_query():
+    driver = FakeDriver()
+    kg_id = uuid4()
+
+    await svc.create_sentence_vector_index(driver, kg_id, dim=384)
+
+    assert len(driver.calls) == 1
+    query, params = driver.calls[0]
+    assert svc._sentence_vector_index_name(str(kg_id)) in query
+    assert f"FOR (s:{svc._kg_sentence_label(str(kg_id))}) ON s.sentence_embedding" in query
+    assert params["dim"] == 384
+
+
+def _make_svo_chunk(index: int, start: int, end: int) -> SVOChunk:
+    return SVOChunk(
+        index=index, total_chunks=1, source_sentence_start=start, source_sentence_end=end,
+        text="", original_sentences=[], normalized_sentences=[],
+        filename=f"svo-chunk-{index:03d}-of-001.md",
+    )
+
+
+@pytest.mark.asyncio
+async def test_embed_standardized_sentences_creates_one_node_per_sentence():
+    driver = FakeDriver()
+    kg_id = uuid4()
+    chunks = [_make_svo_chunk(1, 1, 5)]
+
+    await svc.embed_standardized_sentences(
+        driver, kg_id, "note.md",
+        ["馬斯克創立了太空公司。", "馬斯克隨後研發了獵鷹火箭。"],
+        [[0.1, 0.2], [0.3, 0.4]],
+        chunks,
+    )
+
+    assert len(driver.calls) == 2
+    query, params = driver.calls[0]
+    assert svc._kg_sentence_label(str(kg_id)) in query
+    assert params["sentence_index"] == 1
+    assert params["sentence_text"] == "馬斯克創立了太空公司。"
+    assert params["embedding"] == [0.1, 0.2]
+    assert params["chunk_index"] == 1
+
+
+@pytest.mark.asyncio
+async def test_embed_standardized_sentences_uses_first_chunk_when_overlapping():
+    """句子若落在多個重疊 chunk 的範圍內，取第一個（依 chunks 既有順序）
+    涵蓋此句的 chunk，非任意規則——見 embed_standardized_sentences() docstring。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+    # 句子 4 同時落在 chunk 1（1-5）與 chunk 2（4-8）範圍內
+    chunks = [_make_svo_chunk(1, 1, 5), _make_svo_chunk(2, 4, 8)]
+    sentences = ["s1", "s2", "s3", "s4", "s5"]
+    vectors = [[float(i)] for i in range(5)]
+
+    await svc.embed_standardized_sentences(driver, kg_id, "note.md", sentences, vectors, chunks)
+
+    fourth_call_params = driver.calls[3][1]
+    assert fourth_call_params["sentence_index"] == 4
+    assert fourth_call_params["chunk_index"] == 1  # 取第一個涵蓋此句的 chunk，非 chunk 2
+
+
+@pytest.mark.asyncio
+async def test_embed_standardized_sentences_skips_sentence_with_no_covering_chunk():
+    driver = FakeDriver()
+    kg_id = uuid4()
+    chunks = [_make_svo_chunk(1, 1, 1)]  # 只涵蓋第 1 句
+
+    await svc.embed_standardized_sentences(
+        driver, kg_id, "note.md", ["s1", "s2"], [[0.1], [0.2]], chunks,
+    )
+
+    assert len(driver.calls) == 1  # 第 2 句沒有涵蓋它的 chunk，略過
+
+
+@pytest.mark.asyncio
+async def test_embed_standardized_sentences_noop_on_length_mismatch():
+    driver = FakeDriver()
+    kg_id = uuid4()
+
+    await svc.embed_standardized_sentences(
+        driver, kg_id, "note.md", ["s1", "s2"], [[0.1]], [_make_svo_chunk(1, 1, 5)],
+    )
+
+    assert driver.calls == []
+
+
+@pytest.mark.asyncio
+async def test_vector_search_sentences_ensures_index_then_queries_it():
+    driver = FakeDriver(records=[
+        {"sentence_text": "馬斯克隨後研發了獵鷹火箭。", "source": "note.md",
+         "chunk_index": 1, "source_doc_id": "doc-1", "score": 0.9},
+    ])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_sentences(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert results == [
+        {"sentence_text": "馬斯克隨後研發了獵鷹火箭。", "source": "note.md",
+         "chunk_index": 1, "source_doc_id": "doc-1", "score": 0.9},
+    ]
+    # 第一次呼叫是惰性索引建立，第二次才是實際 KNN 查詢
+    index_query, index_params = driver.calls[0]
+    assert svc._sentence_vector_index_name(str(kg_id)) in index_query
+    assert index_params["dim"] == 2
+    query, params = driver.calls[1]
+    assert svc._sentence_vector_index_name(str(kg_id)) in query
+    assert "node.sentence_text AS sentence_text" in query
+    assert params["top_k"] == 5

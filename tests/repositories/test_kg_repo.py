@@ -154,6 +154,34 @@ async def test_delete_is_noop_when_kg_not_found(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_create_defaults_pronoun_lexicon_exclude_to_empty_list(tmp_path, monkeypatch):
+    """2026-08-20：新增欄位對既有／未經設定的 KG 不應有行為變化，見
+    `services/svo_service.py::trigger_extraction()` docstring「KG 專屬代名詞
+    排除詞庫」小節。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+    repo = KGRepository(FakeKGDriver())
+
+    kg = await repo.create(KnowledgeGraphCreate(name="一般 KG"))
+
+    assert kg.pronoun_lexicon_exclude == []
+
+
+@pytest.mark.asyncio
+async def test_update_sets_pronoun_lexicon_exclude(tmp_path, monkeypatch):
+    """透過既有 `update()` 端點即可為特定 KG 設定代名詞排除詞庫，不需另開
+    專屬 API（例如本次「請假與排班法規遵循」KG 排除「其」「該」）。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+    repo = KGRepository(FakeKGDriver())
+    created = await repo.create(KnowledgeGraphCreate(name="法規 KG"))
+
+    updated = await repo.update(created.id, KnowledgeGraphUpdate(pronoun_lexicon_exclude=["其", "該"]))
+
+    assert updated.pronoun_lexicon_exclude == ["其", "該"]
+    fetched = await repo.get(created.id)
+    assert fetched.pronoun_lexicon_exclude == ["其", "該"]
+
+
+@pytest.mark.asyncio
 async def test_delete_does_not_remove_local_folder(tmp_path, monkeypatch):
     """資料夾內容屬使用者資料，delete() 不應自動刪檔（見 docstring 誠實聲明）。"""
     monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))

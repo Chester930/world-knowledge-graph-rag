@@ -29,13 +29,24 @@ class FakeLLM:
         return self.payload
 
 
+class FakeResult:
+    def __init__(self, records=None):
+        self.records = records or []
+
+
 class SpyDriver:
+    """只記錄呼叫、不模擬任何查詢結果的最小 spy——沿用本專案其餘 Fake／Spy
+    driver（`FakeDriver`／`FakeKGDriver`／`MissingEmbeddingFakeDriver` 等）
+    一致的「一律回傳空結果物件，而非 `None`」慣例，讓任何真的會讀取
+    `result.records` 的呼叫（例如 2026-08-20 新增的 `KGRepository.get()`）
+    也能安全通過，不因這個測試替身回傳 `None` 而炸掉。"""
+
     def __init__(self):
         self.calls: list[tuple[str, dict]] = []
 
     async def execute_query(self, query: str, **params):
         self.calls.append((query.strip(), params))
-        return None
+        return FakeResult([])
 
 
 def _raise_runtime_error():
@@ -113,12 +124,15 @@ async def test_process_one_success_merges_triples_and_marks_completed(tmp_path, 
     assert triples[0].source_sentence_start == 1
     # § 3.1.4 §c（2026-08-18）：source_doc_id 先前從未被賦值，現應決定性推導
     assert triples[0].source_doc_id == document_record_service.document_uuid(source)
+    # 2026-08-19：冗餘存下原始文件名稱字串本身，見 SVOTriple.source docstring
+    assert triples[0].source == source
 
     assert _read_status(config.task_queue_db_path(), str(kg_id), source, chunk_index) == "completed"
 
     updated_record = document_record_service.read_record(doc_folder)
     assert updated_record.extraction_status == "completed"
     assert updated_record.chunk_progress == chunk_index
+    assert chunk_index in updated_record.completed_chunk_indices
 
 
 @pytest.mark.asyncio
@@ -162,6 +176,7 @@ async def test_process_one_llm_error_marks_failed(tmp_path, monkeypatch):
     updated_record = document_record_service.read_record(doc_folder)
     assert updated_record.extraction_status == "failed"
     assert updated_record.chunk_progress == 0  # 失敗不推進進度
+    assert updated_record.completed_chunk_indices == []
 
 
 @pytest.mark.asyncio

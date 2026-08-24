@@ -17,6 +17,9 @@ class KnowledgeGraphUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = None
     is_public: bool | None = None
+    # 2026-08-20：見 KnowledgeGraph.pronoun_lexicon_exclude 欄位說明。透過既有
+    # update() 端點即可設定，不需另開專屬 API。
+    pronoun_lexicon_exclude: list[str] | None = None
 
 
 class KnowledgeGraph(BaseModel):
@@ -29,6 +32,14 @@ class KnowledgeGraph(BaseModel):
     doc_count: int = 0
     entity_count: int = 0
     relation_count: int = 0
+    # 2026-08-20（真實資料發現）：法律全文中「其」「該」幾乎都是自我完備的正式
+    # 泛稱（如「及其家屬」「該法」），不是需要換成具體實體名稱的模糊代名詞，但
+    # `pronoun_resolution_service.DEFAULT_PRONOUN_LEXICON` 的字面比對規則會把它們
+    # 一律當成代名詞觸發 LLM 消解——實測某份 390 句的法規全文中 41% 的句子因此
+    # 觸發，單筆文件耗時超過 600 秒。此欄位讓個別 KG 從預設詞庫中排除特定字
+    # （`trigger_extraction()` 依此組出該 KG 專屬的消解詞庫），不影響其他 KG
+    # 沿用完整預設詞庫的行為，見 docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md。
+    pronoun_lexicon_exclude: list[str] = []
     created_at: datetime
     updated_at: datetime
 
@@ -91,6 +102,16 @@ class DocumentRecord(BaseModel):
     # chunk 進度歸零，不沿用舊 KG 的抽取結果。
     extraction_status: Literal["pending", "processing", "completed", "failed", "pending_upload"] = "pending"
     chunk_progress: int = 0
+    # 2026-08-19（真實審查發現並修復）：chunk_progress 只是「看過的最大
+    # chunk_index」，不是「實際完成的集合」——若中間任一 chunk 失敗、但編號
+    # 更大的 chunk 之後成功，chunk_progress 會被推到 total，讓
+    # record_chunk_completed() 誤判整份文件已完成，且會把 mark_extraction_failed()
+    # 寫入的 "failed" 狀態靜默覆寫回去，中間失敗的 chunk 內容永遠遺失且無法
+    # 察覺。completed_chunk_indices 記錄真正完成的 chunk_index 集合（可能不連續、
+    # 不按順序），是否「全部完成」由集合大小是否涵蓋 total 決定，不再依賴 max
+    # 值——chunk_progress 欄位保留供既有程式碼／顯示用途相容，但不再是完成判斷
+    # 的依據。
+    completed_chunk_indices: list[int] = []
     total_chunks: int = 0
     # SVO 抽取有獨立於 RAG chunk 的前處理與切塊流程。normalization_* 追蹤
     # 文件級標準化 checkpoint；svo_total_chunks 則記錄標準化後寫出的 SVO 專用
@@ -153,6 +174,15 @@ class SVOTriple(BaseModel):
     object_type: str = "概念"
     confidence: int = 1
     source_doc_id: UUID | None = None
+    # 2026-08-19（真實資料回溯驗證發現並修復）：source_doc_id 是
+    # uuid5(NAMESPACE, source) 算出的單向雜湊，光憑這個值無法反推回原始
+    # 文件名稱字串，必須另外查 DocumentRecord／KnowledgeGraph 才能對應。
+    # 冗餘存下原始 source 字串本身，即使查詢端手上只有這筆 SVOTriple／
+    # citation、沒有另外查資料庫，也能直接回溯到 workspace/<kg_id>/<source>/
+    # 找到原文——尤其在 source_doc_id 缺席（舊資料）或 source_svo_chunk_file
+    # 跨文件撞名（同長度文件之間，例如 125 份中有 94 份剛好都是 4-chunk
+    # 的短函釋，檔名完全相同）時，這是唯一能可靠定位文件的欄位。
+    source: str | None = None
     # 句子/chunk 層級來源追溯。source_doc_id 只定位到文件；以下欄位定位到
     # SVO 專用 chunk 與 original.md 中的句子範圍（1-based，閉區間）。
     source_svo_chunk_index: int | None = Field(default=None, ge=1)

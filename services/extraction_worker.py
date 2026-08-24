@@ -81,6 +81,10 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         source_doc_id = document_record_service.document_uuid(source)
         for triple in triples:
             triple.source_doc_id = source_doc_id
+            # 2026-08-19：冗餘存下原始文件名稱字串，見 SVOTriple.source 欄位
+            # docstring——source_doc_id 是單向雜湊，只存 UUID 在特定情境下
+            # （例如 chunk 檔名跨文件撞名）無法可靠回溯原文。
+            triple.source = source
             triple.source_svo_chunk_index = chunk["index"]
             triple.source_svo_chunk_file = chunk["filename"]
             triple.source_sentence_start = chunk["source_sentence_start"]

@@ -23,6 +23,7 @@ from core.constants import (
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
     ENTITY_TYPES,
+    FACT_SEARCH_CANDIDATE_MULTIPLIER,
     QSIM_ASSIGN_THRESHOLD,
     QSIM_ESCALATE_LOW_THRESHOLD,
     SVO_REL_TYPE_DESCRIPTIONS,
@@ -31,13 +32,19 @@ from core.constants import (
 )
 from core.config import task_queue_db_path
 from core.providers.base import EmbeddingProvider, LLMProvider
-from core.providers.factory import get_embedding_provider
+from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.knowledge_graph import SVOTriple
+from repositories.kg_repo import KGRepository
 from services import document_record_service, expand_governance_service, sim_calibration_service, task_queue_service
 from services.classify_service import cosine_similarity
 from services.entity_registry_service import should_promote_by_frequency
+from services.pronoun_resolution_service import DEFAULT_PRONOUN_LEXICON
 from services.svo_chunking import SVOChunk
-from services.svo_preprocessing_service import prepare_svo_ready_chunks
+from services.svo_preprocessing_service import (
+    prepare_svo_ready_chunks,
+    read_sentence_embeddings,
+    read_standardized_sentences,
+)
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
@@ -164,8 +171,8 @@ def _svo_prompt(text: str) -> str:
 
 
 # SIM 節點的型別描述句 embedding 快取——依 embedding_provider.model_name 為 key，
-# 33 個型別的描述句 embedding 在同一個 provider/model 底下固定不變，避免每次
-# extract_svo_triples() 呼叫都重新對全部 33 筆描述句呼叫一次 embedding provider。
+# 35 個型別的描述句 embedding 在同一個 provider/model 底下固定不變，避免每次
+# extract_svo_triples() 呼叫都重新對全部 35 筆描述句呼叫一次 embedding provider。
 _TYPE_DESCRIPTION_EMBEDDING_CACHE: dict[str, dict[str, list[float]]] = {}
 
 
@@ -182,7 +189,7 @@ async def _type_description_embeddings(embedding_provider: EmbeddingProvider) ->
 async def classify_relation_by_embedding(
     verb: str, embedding_provider: EmbeddingProvider
 ) -> tuple[str, float]:
-    """SIM：`verb` embedding 與 33 個關係型別**描述句**（非識別碼字串本身，見
+    """SIM：`verb` embedding 與 35 個關係型別**描述句**（非識別碼字串本身，見
     `SVO_REL_TYPE_DESCRIPTIONS` docstring）embedding 算 cosine 相似度，取最相似者。
     回傳 (最相似的型別, 該型別的相似度分數)。"""
     type_vectors = await _type_description_embeddings(embedding_provider)
@@ -207,7 +214,7 @@ async def resolve_query_relation_type(
     動詞措辭解析為對應的 canonical 關係型別，供呼叫端對 `bfs_query()` 的結果
     做後篩選（§ 3.2 §c `QFILTER`，本函式不做篩選，只負責解析型別）。
 
-    重用 3.1.3 `classify_relation_by_embedding()`（`SIM`）——與 33 個型別描述句
+    重用 3.1.3 `classify_relation_by_embedding()`（`SIM`）——與 35 個型別描述句
     的 embedding 比對，同一顆 cache 之後不必重算。三區判斷（與 `COMPARE`／
     `ESCALATE3` 的二元一致性檢查不同，見設計文件同名段落誠實訂正）：
 
@@ -447,11 +454,26 @@ async def resolve_entity_name(
     if not candidates:
         return name
 
+    # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher
+    # 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性——若多個候選同時超過編輯距離
+    # 門檻，原本「回傳第一個超過門檻的候選」在不同次執行間可能選到不同名稱，
+    # 導致同一批資料的實體合併結果不可重現，與下方 cosine 相似度區塊、以及
+    # 本專案其他地方（如 UMAP 固定 random_state=42）一貫的可重現性要求不一致。
+    # 改為與 cosine 區塊同樣的寫法：走訪所有候選，取分數最高者，同分時保留
+    # 先遇到的（Python min/max 對等值採穩定的「保留第一個」語意，但候選順序
+    # 本身仍非決定性——此修復只保證「選到分數最高者」，不保證同分平局時的
+    # 決定性，該情況本身即代表兩個候選對這次提及同樣合適，不影響合併正確性）。
+    best_edit_name: str | None = None
+    best_edit_ratio = 0.0
     for c in candidates:
         if c["name"] == name:
             return name
-        if _edit_ratio(name, c["name"]) >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD:
-            return c["name"]
+        ratio = _edit_ratio(name, c["name"])
+        if ratio >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD and ratio > best_edit_ratio:
+            best_edit_ratio = ratio
+            best_edit_name = c["name"]
+    if best_edit_name is not None:
+        return best_edit_name
 
     if embedding_provider is None:
         return name
@@ -694,6 +716,10 @@ def _new_citation(triple: SVOTriple) -> dict:
     """把一次抽取的來源追溯資訊，包成一筆可累積在邊上的引用紀錄。"""
     return {
         "source_doc_id": str(triple.source_doc_id) if triple.source_doc_id else None,
+        # 2026-08-19：冗餘存下原始文件名稱字串，見 SVOTriple.source 欄位
+        # docstring——即使查詢端手上只有這筆 citation、沒有另外查資料庫，
+        # 也能直接回溯到 workspace/<kg_id>/<source>/ 找到原文。
+        "source": triple.source,
         "source_svo_chunk_index": triple.source_svo_chunk_index,
         "source_svo_chunk_file": triple.source_svo_chunk_file,
         "source_sentence_start": triple.source_sentence_start,
@@ -721,6 +747,25 @@ def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, ob
     subj = f"{subject}（{subject_type}）" if subject_type else subject
     obj = f"{object_}（{object_type}）" if object_type else object_
     return f"{subj} {verb} {obj}"
+
+
+def _kg_fact_label(kg_id: str) -> str:
+    """每個 KG 各自一個 Fact 節點標籤（`Fact_<kg_id 底線化>`），供 per-KG
+    向量索引使用——2026-08-19 真實資料庫實測確認（`docker exec` 對 5.26.27
+    Enterprise 連續建立兩個同名 `(label, property)` 但不同索引名稱的向量索引，
+    第二次 `IF NOT EXISTS` 靜默略過，`SHOW INDEXES` 確認實際只建立了一個），
+    Neo4j 同一個 `(label, property)` 組合僅能有一個向量索引，無法只靠「不同
+    索引名稱」切出多個獨立索引；要讓每個 KG 的 `Fact` 向量檢索範圍互相隔離，
+    必須是不同的 label。節點仍同時保留通用 `:Fact` label（多重 label，
+    `backfill_fact_nodes()` 的 `EXIST5` 存在性查詢等既有 `MATCH (f:Fact {...})`
+    不需改動即可繼續運作）。`uuid.UUID()` 往返驗證輸入格式合法，避免非 UUID
+    字串被直接字串插入 Cypher label（目前呼叫端皆為內部已驗證過的 kg_id，
+    此為額外防禦層）。"""
+    return f"Fact_{str(UUID(kg_id)).replace('-', '_')}"
+
+
+def _fact_vector_index_name(kg_id: str) -> str:
+    return f"fact_embedding_vector_{str(UUID(kg_id)).replace('-', '_')}"
 
 
 async def _create_fact_node(
@@ -754,16 +799,16 @@ async def _create_fact_node(
     這次呼叫是否真的建立了節點，供 `backfill_fact_nodes()` 準確計數。
     """
     result = await driver.execute_query(
-        """
-        MATCH (s:Entity {kg_id: $kg_id, name: $subject})
-        MATCH (o:Entity {kg_id: $kg_id, name: $object})
-        MATCH (c:Chunk {kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index})
-        CREATE (f:Fact {
+        f"""
+        MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})
+        MATCH (o:Entity {{kg_id: $kg_id, name: $object}})
+        MATCH (c:Chunk {{kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index}})
+        CREATE (f:Fact:{_kg_fact_label(kg_id_str)} {{
             kg_id: $kg_id, fact_text: $fact_text, fact_embedding: $fact_embedding,
             verb: $verb, confidence: $confidence,
             source_doc_id: $source_doc_id, source_svo_chunk_index: $chunk_index,
             subject: $subject, object: $object, rel_type: $rel_type
-        })
+        }})
         CREATE (f)-[:HAS_SUBJECT]->(s)
         CREATE (f)-[:HAS_OBJECT]->(o)
         CREATE (f)-[:SUPPORTED_BY]->(c)
@@ -901,19 +946,35 @@ async def merge_triples_to_graph(
             )
 
 
-async def create_fact_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
-    """建立 `Fact` 節點的 `fact_embedding` 向量索引（app 啟動時呼叫一次），
-    供 3.1.4 §a 事實層級語意檢索使用。單一 `Fact` label＋單一 `fact_embedding`
-    屬性，不受 Neo4j relationship 向量索引過去「僅能綁定單一 relationship
-    type」的版本限制（這正是選擇獨立節點而非直接在 33 種 `SVO_REL_TYPES`
-    邊上加向量屬性的技術理由，見 3.1.4 §a 文獻查證段落）。"""
-    if driver is None:
+async def create_fact_vector_index(
+    driver: AsyncDriver | None = None, kg_id: UUID | None = None, dim: int = VECTOR_DIM
+) -> None:
+    """建立指定 KG 專屬的 `Fact` 向量索引，供 3.1.4 §a 事實層級語意檢索使用。
+
+    **2026-08-19 改為每個 KG 各自一個獨立索引（原本是全 KG 共用單一
+    `fact_embedding_vector` 索引，`vector_search_facts()` 查完再用
+    `WHERE node.kg_id = $kg_id` 過濾，已知有 post-filter 限制）**：查證
+    Neo4j 目前部署版本（5.26.27 Enterprise LTS）不支援 Cypher 25 的原生
+    向量索引 pre-filter（該功能是 2026.01 preview／2026.02 GA 才推出的
+    calendar-versioned continuous release 版本線，5.26 這條 LTS 線依官方
+    版本政策只收安全性/bug 修補、不收新功能，無法透過小版本更新取得，
+    需要整條版本線遷移，非本次範圍）。改採比照 Pinecone 官方建議的「每個
+    租戶各自一個 namespace」精神（`docs.pinecone.io` 已查證原文；無對應
+    學術文獻，這是向量資料庫多租戶隔離的常見工程模式，非本論文提出）——
+    Neo4j 沒有 namespace 概念，但 2026-08-19 實測確認可用「每個 KG 各自
+    一個 label」達到等效效果（見 `_kg_fact_label()`），索引範圍由 label
+    在結構上保證，不再依賴查詢後才執行的應用層過濾。冪等（`IF NOT EXISTS`），
+    呼叫端（`vector_search_facts()`）每次查詢前直接呼叫，不需要另外在寫入
+    路徑或啟動流程預先建立——Neo4j 索引本來就會自動涵蓋建立之前已寫入的
+    符合條件節點，不要求「先有索引才能寫資料」。"""
+    if driver is None or kg_id is None:
         return
+    kg_id_str = str(kg_id)
     await driver.execute_query(
-        """
-        CREATE VECTOR INDEX fact_embedding_vector IF NOT EXISTS
-        FOR (f:Fact) ON f.fact_embedding
-        OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
+        f"""
+        CREATE VECTOR INDEX {_fact_vector_index_name(kg_id_str)} IF NOT EXISTS
+        FOR (f:{_kg_fact_label(kg_id_str)}) ON f.fact_embedding
+        OPTIONS {{ indexConfig: {{ `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' }} }}
         """,
         dim=dim,
     )
@@ -922,40 +983,84 @@ async def create_fact_vector_index(driver: AsyncDriver | None = None, dim: int =
 async def vector_search_facts(
     driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
 ) -> list[dict]:
-    """3.1.4 §a `RETRIEVE`：`fact_embedding_vector` 向量索引 KNN 查詢，
-    比照 `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳
-    最相近的 `Fact` 候選（`fact_text`／`verb`／`confidence`／`subject`／
-    `object`／`rel_type`／來源追溯欄位／`score`；2026-08-18 追加後三者——
+    """3.1.4 §a `RETRIEVE`：per-KG `Fact` 向量索引 KNN 查詢，比照
+    `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳最相近的
+    `Fact` 候選（`fact_text`／`verb`／`confidence`／`subject`／`object`／
+    `rel_type`／來源追溯欄位／`score`；2026-08-18 追加後三者——
     `_create_fact_node()` 補上這三個扁平屬性後，呼叫端不必再額外 traversal
     `HAS_SUBJECT`／`HAS_OBJECT` 邊就能取得完整三元組）。
 
-    ⚠️ **已知限制（KG 範圍過濾為查詢後 post-filter，非索引原生 pre-filter）**：
-    Neo4j 向量索引的 KNN 查詢是對**全部** `Fact` 節點（跨所有 KG）做近似
-    最近鄰，`WHERE node.kg_id = $kg_id` 是拿到 `top_k` 筆候選後才篩選——
-    若某次查詢的前 `top_k` 名近似鄰居剛好大多來自其他 KG，篩選後回傳筆數
-    可能少於 `top_k`，甚至為空，即使該 KG 內其實有語意相關的 Fact 只是
-    排名較後面。比照 3.2 §a `ConceptNode` 路由層「粗篩 Top-K 再精算」的
-    設計語言，這是同一類「先寬後窄」查詢共有的已知取捨，非本函式獨有的
-    缺陷；若要保證命中，需加大 `top_k` 或改用 pre-filter（若 Neo4j 版本
-    支援），留待第五章消融實驗評估合適的 `top_k` 值。**扁平相似度檢索
-    本身、未利用圖結構鄰接關係的侷限**，見 3.1.4 §a 與 G-Retriever 對照
-    討論，非本函式範圍。
+    ✅ **KG 範圍過濾已從查詢後 post-filter 改為索引結構原生隔離
+    （2026-08-19，見 `create_fact_vector_index()` 與 `_kg_fact_label()`
+    docstring 完整查證脈絡）**：原本是全 KG 共用單一向量索引、查完再用
+    `WHERE node.kg_id = $kg_id` 過濾，若前 `top_k` 名近似鄰居剛好大多來自
+    其他 KG，篩選後回傳筆數可能少於 `top_k` 甚至為空。改為每個 KG 各自一個
+    索引後，`db.index.vector.queryNodes()` 天生只能查到該索引涵蓋範圍
+    （該 KG）的節點，範圍過濾由索引定義本身保證，不再是可能失效的應用層
+    篩選步驟，此已知限制已解除。**扁平相似度檢索本身、未利用圖結構鄰接
+    關係的侷限（G-Retriever 對照討論）不在此次範圍內，仍待後續評估。**
+
+    ✅ **查詢後去重（2026-08-19，真實資料驗證發現並修復；與上方 KG 範圍
+    過濾是兩個獨立問題，此處的候選池倍數不因上方修復而可以拿掉）**：同一件
+    事實可能因多筆 citation（例如切塊重疊）各自產生獨立 `Fact` 節點——這是
+    刻意設計（見 3.1.4 §a「解法」段落，避免代表性偏差與語意壓平），但代表
+    `top_k` 名額可能被近乎重複的結果佔掉，與 KG 範圍無關、單一 KG 內就會
+    發生。改為先取 `top_k × FACT_SEARCH_CANDIDATE_MULTIPLIER` 的候選池，
+    再依 `(subject, rel_type, object)` 去重（`_dedupe_facts_by_key()`，
+    同一鍵只保留分數最高的一筆），最後截斷回 `top_k`。不改動 Fact 節點的
+    建立/儲存邏輯，只在查詢輸出層後處理，對外 `top_k` 契約不變。
     """
+    await create_fact_vector_index(driver, kg_id, dim=len(query_vector))
+    candidate_k = top_k * FACT_SEARCH_CANDIDATE_MULTIPLIER
     result = await driver.execute_query(
-        """
-        CALL db.index.vector.queryNodes('fact_embedding_vector', $top_k, $vector)
+        f"""
+        CALL db.index.vector.queryNodes('{_fact_vector_index_name(str(kg_id))}', $candidate_k, $vector)
         YIELD node, score
-        WHERE node.kg_id = $kg_id
         RETURN node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
                node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
                node.source_doc_id AS source_doc_id,
                node.source_svo_chunk_index AS source_svo_chunk_index, score
         """,
-        kg_id=str(kg_id),
-        top_k=top_k,
+        candidate_k=candidate_k,
         vector=query_vector,
     )
-    return [dict(r) for r in result.records]
+    records = [dict(r) for r in result.records]
+    return _dedupe_facts_by_key(records)[:top_k]
+
+
+def _dedupe_facts_by_key(records: list[dict]) -> list[dict]:
+    """`vector_search_facts()` 查詢輸出層去重：以 `(subject, rel_type,
+    object)` 為鍵，同一鍵只保留分數最高的一筆，維持原始分數排序。任一欄位
+    為 `None`（例如 2026-08-18 schema 修正前建立、尚未跑過 §b 回填批次的
+    舊 Fact 節點）時視為無法安全去重，一律原樣保留——與
+    `routers/agent.py::_merge_fact_lines()` 既有的同名情境處理原則一致。
+    """
+    best_by_key: dict[tuple, dict] = {}
+    order: list[tuple | dict] = []
+
+    for record in records:
+        key = (record.get("subject"), record.get("rel_type"), record.get("object"))
+        if not all(key):
+            order.append(record)
+            continue
+        existing = best_by_key.get(key)
+        if existing is None:
+            best_by_key[key] = record
+            order.append(key)
+        elif record.get("score", 0) > existing.get("score", 0):
+            best_by_key[key] = record
+
+    deduped: list[dict] = []
+    seen_keys: set[tuple] = set()
+    for item in order:
+        if isinstance(item, dict):
+            deduped.append(item)
+            continue
+        if item in seen_keys:
+            continue
+        seen_keys.add(item)
+        deduped.append(best_by_key[item])
+    return deduped
 
 
 async def backfill_fact_nodes(
@@ -1310,6 +1415,121 @@ async def embed_svo_chunks(
         )
 
 
+def _kg_sentence_label(kg_id: str) -> str:
+    """每個 KG 各自一個標準化句子節點標籤，比照 `_kg_fact_label()` 同一套
+    per-KG label＋per-KG 向量索引模式（見該函式 docstring 完整查證脈絡：
+    Neo4j 同一個 `(label, property)` 組合僅能有一個向量索引，2026-08-19
+    已用真實資料庫驗證確認）——供 § Phase 1 標準化 RAG 句子向量索引使用，
+    見 `docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md` §5。"""
+    return f"Sentence_{str(UUID(kg_id)).replace('-', '_')}"
+
+
+def _sentence_vector_index_name(kg_id: str) -> str:
+    return f"sentence_embedding_vector_{str(UUID(kg_id)).replace('-', '_')}"
+
+
+async def create_sentence_vector_index(
+    driver: AsyncDriver | None = None, kg_id: UUID | None = None, dim: int = VECTOR_DIM
+) -> None:
+    """建立指定 KG 專屬的標準化句子向量索引（§ Phase 1）。冪等
+    （`IF NOT EXISTS`），呼叫端（`services/retrieval_service.py`）每次查詢前
+    直接呼叫，不需要另外在寫入路徑或 app 啟動流程預先建立——與
+    `create_fact_vector_index()` 同一套惰性建立設計，見該函式 docstring。"""
+    if driver is None or kg_id is None:
+        return
+    kg_id_str = str(kg_id)
+    await driver.execute_query(
+        f"""
+        CREATE VECTOR INDEX {_sentence_vector_index_name(kg_id_str)} IF NOT EXISTS
+        FOR (s:{_kg_sentence_label(kg_id_str)}) ON s.sentence_embedding
+        OPTIONS {{ indexConfig: {{ `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' }} }}
+        """,
+        dim=dim,
+    )
+
+
+async def embed_standardized_sentences(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    source: str,
+    sentences: list[str],
+    vectors: list[list[float]],
+    chunks: list[SVOChunk],
+) -> None:
+    """把每句標準化句子（已消解代名詞）各自建立一個 `Sentence` 節點＋向量，
+    供 § Phase 1／Phase 2 標準化 RAG 雙階檢索使用（`docs/報告/
+    08_三軌混合檢索架構與標準化RAG設計報告.md` §3：單句精確命中 → 依
+    `chunk_index` 拉出所屬語意 chunk 全文）。
+
+    **句子→所屬 chunk 的對應規則**：`build_svo_chunks()` 產出的 chunk 之間
+    刻意有重疊（見 3.1.2 節設計），同一句話可能同時落在多個相鄰 chunk 的
+    範圍內——比照既有 MVP（`standardized_rag.py` 前身 `build_standardized_rag_index.py::
+    _chunk_for_sentence()`）的既有規則，取**第一個**（依 `chunks` 既有順序，
+    即 chunk_index 由小到大）涵蓋此句的 chunk，非任意規則。
+
+    `sentences`／`vectors` 長度不一致，或任一為空，視為資料不一致，不寫入
+    任何節點（比照 `build_standardized_rag_index.py` 既有的「資料不一致就
+    略過，不假裝能對齊」原則）。不建立 Neo4j 向量索引本身（見
+    `create_sentence_vector_index()`，惰性建立於查詢端）。
+    """
+    if not sentences or not vectors or len(sentences) != len(vectors):
+        return
+
+    source_doc_id = document_record_service.document_uuid(source)
+    label = _kg_sentence_label(str(kg_id))
+
+    for i, (sentence, vector) in enumerate(zip(sentences, vectors), start=1):
+        chunk = next(
+            (c for c in chunks if c.source_sentence_start <= i <= c.source_sentence_end), None
+        )
+        if chunk is None:
+            continue
+        await driver.execute_query(
+            f"""
+            MERGE (s:Sentence:{label} {{
+                kg_id: $kg_id, source_doc_id: $source_doc_id, sentence_index: $sentence_index
+            }})
+            SET s.sentence_text = $sentence_text, s.sentence_embedding = $embedding,
+                s.chunk_index = $chunk_index, s.source = $source
+            """,
+            kg_id=str(kg_id),
+            source_doc_id=str(source_doc_id),
+            sentence_index=i,
+            sentence_text=sentence,
+            embedding=vector,
+            chunk_index=chunk.index,
+            source=source,
+        )
+
+
+async def vector_search_sentences(
+    driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
+) -> list[dict]:
+    """§ Phase 1 標準化 RAG（`docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md`
+    §3 第一階「單句粗篩」）：per-KG `Sentence` 向量索引 KNN 查詢，比照
+    `vector_search_facts()` 同一套模式，回傳原始候選（`sentence_text`／
+    `source`／`chunk_index`／`source_doc_id`／`score`）。
+
+    **刻意不在此處做 chunk 去重與上下文擴展**（同一 chunk 內相鄰句子很可能
+    同時命中）——去重需要讀取 `svo_index.json`（檔案系統存取，非 Neo4j
+    查詢），依本專案既有的分層慣例（router → service → repository），這是
+    `services/retrieval_service.py::search_standardized_rag()`（§ Phase 2）
+    的職責，本函式只負責「單純的向量索引查詢」這一層，與 `vector_search_facts()`
+    的分工原則一致。"""
+    await create_sentence_vector_index(driver, kg_id, dim=len(query_vector))
+    result = await driver.execute_query(
+        f"""
+        CALL db.index.vector.queryNodes('{_sentence_vector_index_name(str(kg_id))}', $top_k, $vector)
+        YIELD node, score
+        RETURN node.sentence_text AS sentence_text, node.source AS source,
+               node.chunk_index AS chunk_index, node.source_doc_id AS source_doc_id, score
+        """,
+        top_k=top_k,
+        vector=query_vector,
+    )
+    return [dict(r) for r in result.records]
+
+
 async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID) -> None:
     """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
     不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
@@ -1324,14 +1544,33 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     改為明確參數（而非函式內自行呼叫 `get_driver()`），比照本模組其餘函式
     的依賴注入慣例，也讓測試不需要 monkeypatch 全域函式。
 
-    ⚠️ 誠實侷限：`prepare_svo_ready_chunks()` 目前以 `mentions=None` 呼叫，
-    跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決的上游依賴），也
-    未提供 LLM provider，代名詞消解與實體去重皆退化為最保守版本（見
-    `services/svo_preprocessing_service.py` docstring）——這部分的 Provider
-    注入待第四章實作時再處理。這裡只補上 `SENTEMBED`／`EMBEDCHUNK` 兩處都要
-    用的同一個 embedding provider；`get_embedding_provider()` 在尚未呼叫
-    `init_providers()` 的情境（例如測試）會拋出 `RuntimeError`，此時視為向量化
-    不可用，優雅跳過，不影響切塊與排隊本身。
+    ✅ **2026-08-20 接上指代消解 LLM（docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md
+    §0 前提缺口）**：`prepare_svo_ready_chunks()` 現在帶入 `pronoun_llm_provider`，
+    代名詞消解不再退化為原句直接通過——這不只補上一份額外的標準化句子索引，
+    `build_svo_chunks()` 的 `chunk.text` 本身就是 `normalized_sentences` 組成，
+    即現有 `LLM_SVO` 三元組抽取送出的原文，因此本次改動同時也是既有 SVO 抽取
+    品質的修正（代名詞換成具體實體後，LLM 抽取應更準確），非僅服務標準化 RAG。
+    **範圍聲明**：僅對此修正上線後**新觸發**的抽取生效；已完成抽取的既有 KG
+    需要 `knowledge_graph_service.build_graph(force_rebuild=True)` 重新觸發
+    才能拿到消解後版本，見上述報告 §0 的時機決策記錄。
+
+    ✅ **2026-08-20 KG 專屬代名詞排除詞庫**：真實匯入法規全文資料集時發現，
+    `DEFAULT_PRONOUN_LEXICON` 的「其」「該」在法律文本中幾乎都是自我完備的
+    正式泛稱（如「及其家屬」「該法」），字面比對規則卻一律當成代名詞觸發 LLM
+    消解——實測某份 390 句的法規全文 41% 的句子因此觸發，單筆文件耗時超過
+    600 秒（見 `docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md`）。
+    每次呼叫先查一次 `KnowledgeGraph.pronoun_lexicon_exclude`，扣除該 KG 指定
+    排除的字後才傳入 `prepare_svo_ready_chunks()`；欄位預設為空，對其他既有／
+    未來 KG 沒有行為變化，只有明確設定過此欄位的 KG（例如本次的「請假與排班
+    法規遵循」）才會套用縮減後的詞庫。
+
+    ⚠️ 誠實侷限（仍未解決，非本次範圍）：`prepare_svo_ready_chunks()` 仍以
+    `mentions=None` 呼叫，跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決
+    的上游依賴，見 `services/svo_preprocessing_service.py` docstring）——別名
+    登記與代名詞消解是兩個獨立階段，本次只解決後者。`get_llm_provider()`／
+    `get_embedding_provider()` 在尚未呼叫 `init_providers()` 的情境（例如測試）
+    皆會拋出 `RuntimeError`，此時視為對應功能不可用，優雅跳過，不影響切塊與
+    排隊本身——兩個 provider 各自獨立降級，任一缺席不影響另一個。
     """
     record = document_record_service.read_record(doc_folder)
     if record is None:
@@ -1342,9 +1581,21 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     except RuntimeError:
         embedding_provider = None
 
+    try:
+        pronoun_llm_provider = get_llm_provider()
+    except RuntimeError:
+        pronoun_llm_provider = None
+
+    kg = await KGRepository(driver).get(kg_id)
+    pronoun_lexicon = DEFAULT_PRONOUN_LEXICON
+    if kg is not None and kg.pronoun_lexicon_exclude:
+        pronoun_lexicon = DEFAULT_PRONOUN_LEXICON - set(kg.pronoun_lexicon_exclude)
+
     kg_folder = doc_folder.parent
     _paths, chunks = await prepare_svo_ready_chunks(
-        record.source, kg_folder, kg_folder, embedding_provider=embedding_provider,
+        record.source, kg_folder, kg_folder,
+        embedding_provider=embedding_provider, pronoun_llm_provider=pronoun_llm_provider,
+        pronoun_lexicon=pronoun_lexicon,
     )
     if not chunks:
         return
@@ -1353,6 +1604,15 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
 
     if embedding_provider is not None:
         await embed_svo_chunks(driver, kg_id, record.source, chunks, embedding_provider)
+        # § Phase 1 標準化 RAG（docs/報告/08_...md §5）：SENTEMBED 剛寫入的
+        # sentence_embeddings.json 現在同時含句子文字（見 write_sentence_embeddings()
+        # docstring），讀回後逐句建立 Sentence 節點＋向量，供 Phase 2 檢索服務使用。
+        normalized_sentences = read_standardized_sentences(record.source, kg_folder)
+        vectors_for_sentences = read_sentence_embeddings(record.source, kg_folder)
+        if normalized_sentences is not None and vectors_for_sentences is not None:
+            await embed_standardized_sentences(
+                driver, kg_id, record.source, normalized_sentences, vectors_for_sentences, chunks,
+            )
 
     task_queue_service.enqueue(
         task_queue_db_path(), str(kg_id), record.source, list(range(1, len(chunks) + 1)),
@@ -1374,11 +1634,21 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
     if hops < 1 or hops > 5:
         raise ValueError("hops 必須介於 1 到 5")
 
+    # 2026-08-19 修復：走訪必須限定在 SVO_REL_TYPES（Entity--[REL_TYPE]-->Entity
+    # 知識層邊）——先前的 [*1..{hops}] 未限定關係型別，一旦圖譜內同時存在
+    # § 3.1.4 §a 的 HAS_ENTITY／HAS_SUBJECT／HAS_OBJECT／SUPPORTED_BY 等結構性
+    # 邊（連到 Chunk／Fact 節點），BFS 就可能行經這些邊、把 startNode/endNode
+    # 解析成沒有 .name 屬性的 Chunk／Fact 節點，導致 SVOTriple(subject=None)
+    # 驗證失敗直接拋例外。此問題先前從未在正式環境重現過，因為所有既有 KG
+    # 的 source_doc_id 一律為 None（見 § 3.1.4 §c），HAS_ENTITY／Fact 從未
+    # 真正建立過，圖上根本沒有這些結構性邊可供誤走——直到今天才第一次有
+    # KG 同時具備知識層與結構層邊，暴露出這個潛藏 bug。
+    rel_types = "|".join(sorted(SVO_REL_TYPES))
     result = await driver.execute_query(
         f"""
         MATCH (seed:Entity {{kg_id: $kg_id}})
         WHERE seed.name IN $seed_entities
-        MATCH path = (seed)-[*1..{hops}]-(neighbor:Entity {{kg_id: $kg_id}})
+        MATCH path = (seed)-[:{rel_types}*1..{hops}]-(neighbor:Entity {{kg_id: $kg_id}})
         UNWIND relationships(path) AS rel
         WITH DISTINCT startNode(rel) AS s, rel, endNode(rel) AS o
         RETURN
@@ -1402,6 +1672,7 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
         latest = citations[-1] if citations else {}
         payload["verb"] = latest.get("verb", payload["rel_type"])
         payload["source_doc_id"] = UUID(latest["source_doc_id"]) if latest.get("source_doc_id") else None
+        payload["source"] = latest.get("source")
         payload["source_svo_chunk_index"] = latest.get("source_svo_chunk_index")
         payload["source_svo_chunk_file"] = latest.get("source_svo_chunk_file")
         payload["source_sentence_start"] = latest.get("source_sentence_start")

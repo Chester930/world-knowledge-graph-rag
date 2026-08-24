@@ -39,6 +39,7 @@ class KGRepository:
                 id: $id, name: $name, description: $description,
                 folder_path: $folder_path, is_public: $is_public, db_name: '',
                 doc_count: 0, entity_count: 0, relation_count: 0,
+                pronoun_lexicon_exclude: [],
                 created_at: $now, updated_at: $now
             })
             """,
@@ -59,6 +60,7 @@ class KGRepository:
             doc_count=0,
             entity_count=0,
             relation_count=0,
+            pronoun_lexicon_exclude=[],
             created_at=now,
             updated_at=now,
         )
@@ -123,6 +125,7 @@ def _record_to_model(node) -> KnowledgeGraph:
         doc_count=data.get("doc_count", 0),
         entity_count=data.get("entity_count", 0),
         relation_count=data.get("relation_count", 0),
+        pronoun_lexicon_exclude=data.get("pronoun_lexicon_exclude", []),
         created_at=datetime.fromisoformat(data["created_at"]),
         updated_at=datetime.fromisoformat(data["updated_at"]),
     )

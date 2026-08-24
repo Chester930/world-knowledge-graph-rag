@@ -130,6 +130,34 @@ class TestTrustAndRebuild:
             svc.update_status(db_path, "kg-1", "doc-a.txt", item[2], "completed")
         assert registered == {2, 5, 7}
 
+    def test_rebuild_requeues_gap_left_by_out_of_order_completion(self, tmp_path):
+        """迴歸測試（2026-08-19）：chunk 3 從未完成（例如失敗），但編號更大的
+        chunk 5 已完成——`completed_chunk_indices` 只會有 {1,2,4,5}。REBUILD
+        必須依這個實際完成集合判斷缺口，只補登記真正缺席的 3，而不是誤用
+        `chunk_progress`（=5，看過的最大值）以為 1..5 全數完成而漏登記。"""
+        db_path = _db_path(tmp_path)
+        kg_folder = tmp_path / "kg-1"
+        doc_folder = kg_folder / "doc-a"
+        doc_folder.mkdir(parents=True)
+        document_record_service.init_record(doc_folder, source="doc-a.txt", total_chunks=5)
+        document_record_service.set_svo_chunk_total(doc_folder, 5)
+        document_record_service.record_chunk_completed(doc_folder, 1)
+        document_record_service.record_chunk_completed(doc_folder, 2)
+        document_record_service.record_chunk_completed(doc_folder, 4)
+        document_record_service.record_chunk_completed(doc_folder, 5)
+        (doc_folder / "svo_index.json").write_text(
+            json.dumps({"source": "doc-a.txt", "total_svo_chunks": 5, "chunks": [
+                {"index": 1}, {"index": 2}, {"index": 3}, {"index": 4}, {"index": 5},
+            ]}),
+            encoding="utf-8",
+        )
+        record = document_record_service.read_record(doc_folder)
+        assert record.extraction_status == "processing"  # 尚未被誤判為 completed
+
+        svc.rebuild_from_records(db_path, {"kg-1": kg_folder})
+
+        assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc-a.txt", 3)
+
     def test_rebuild_falls_back_to_range_when_svo_index_json_missing(self, tmp_path):
         """2026-08-18 迴歸修復：REBUILD 本身就是索引檔案已遺失/損毀時的救援
         路徑——`svo_index.json` 若剛好也缺席，不該靜默跳過整份文件（會讓

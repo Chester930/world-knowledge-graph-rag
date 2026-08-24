@@ -298,7 +298,8 @@ def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
     assert serialized["resolved_rel_type"] == "CAUSES"
     assert serialized["triples"] == [{
         "subject": "A", "subject_type": "概念", "verb": "導致", "object": "B",
-        "object_type": "概念", "rel_type": "CAUSES", "source_svo_chunk_file": None,
+        "object_type": "概念", "rel_type": "CAUSES", "source": None,
+        "source_svo_chunk_file": None,
     }]
     assert serialized["facts"] == [{
         "fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",

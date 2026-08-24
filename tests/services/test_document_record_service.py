@@ -84,12 +84,14 @@ def test_append_assignment_resets_extraction_progress_on_reassignment(tmp_path):
     record = svc.read_record(tmp_path)
     record.extraction_status = "completed"
     record.chunk_progress = 10
+    record.completed_chunk_indices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     svc._write_record(tmp_path, record)
 
     reassigned = svc.append_assignment(tmp_path, kg_id=kg_b, kg_name="KG-B", method="manual")
 
     assert reassigned.extraction_status == "pending"
     assert reassigned.chunk_progress == 0
+    assert reassigned.completed_chunk_indices == []
     assert len(reassigned.assignment_history) == 1
     assert reassigned.assignment_history[0].kg_id == kg_b
 
@@ -186,3 +188,56 @@ def test_set_svo_chunk_total_persists_separate_from_rag_chunks(tmp_path):
 
     assert record.total_chunks == 9
     assert record.svo_total_chunks == 3
+
+
+# ── record_chunk_completed（2026-08-19 真實審查發現並修復：high-water-mark bug）──
+
+def test_record_chunk_completed_marks_completed_once_all_indices_seen(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=3)
+    svc.set_svo_chunk_total(tmp_path, 3)
+
+    svc.record_chunk_completed(tmp_path, 1)
+    svc.record_chunk_completed(tmp_path, 2)
+    record = svc.record_chunk_completed(tmp_path, 3)
+
+    assert record.extraction_status == "completed"
+    assert sorted(record.completed_chunk_indices) == [1, 2, 3]
+    assert record.chunk_progress == 3
+
+
+def test_record_chunk_completed_does_not_falsely_complete_when_a_lower_index_is_missing(tmp_path):
+    """迴歸測試（2026-08-19）：chunk 3 從未成功完成（例如失敗、由
+    mark_extraction_failed() 標記），但編號更大的 chunk 5 之後成功——舊版用
+    chunk_progress（看過的最大 index）判斷完成，會誤判整份文件已完成，並把
+    failed 狀態靜默覆寫掉。修復後必須維持 processing，且 completed_chunk_indices
+    不應包含從未回報過的 3。"""
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
+    svc.set_svo_chunk_total(tmp_path, 5)
+
+    svc.record_chunk_completed(tmp_path, 1)
+    svc.record_chunk_completed(tmp_path, 2)
+    svc.mark_extraction_failed(tmp_path)  # chunk 3 失敗
+    svc.record_chunk_completed(tmp_path, 4)
+    record = svc.record_chunk_completed(tmp_path, 5)
+
+    assert record.extraction_status == "processing"
+    assert sorted(record.completed_chunk_indices) == [1, 2, 4, 5]
+    assert 3 not in record.completed_chunk_indices
+    # chunk_progress 仍保留單調遞增行為（相容用途），但不再是完成判斷依據
+    assert record.chunk_progress == 5
+
+
+def test_record_chunk_completed_is_idempotent_for_repeated_reports(tmp_path):
+    svc.init_record(tmp_path, source="report.pdf", total_chunks=2)
+    svc.set_svo_chunk_total(tmp_path, 2)
+
+    svc.record_chunk_completed(tmp_path, 1)
+    svc.record_chunk_completed(tmp_path, 1)  # 重試回報同一個 chunk_index
+    record = svc.record_chunk_completed(tmp_path, 2)
+
+    assert record.completed_chunk_indices == [1, 2]
+    assert record.extraction_status == "completed"
+
+
+def test_record_chunk_completed_no_op_when_record_missing(tmp_path):
+    assert svc.record_chunk_completed(tmp_path, 1) is None

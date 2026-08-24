@@ -52,7 +52,10 @@ async def lifespan(app: FastAPI):
     await svo_service.create_entity_index(get_driver())
     await svo_service.create_chunk_vector_index(get_driver(), embedding.dim)
     await svo_service.create_related_to_vector_index(get_driver(), embedding.dim)
-    await svo_service.create_fact_vector_index(get_driver(), embedding.dim)
+    # § 3.1.4 §a Fact 向量索引改為 2026-08-19 起每個 KG 各自一個獨立索引
+    # （見 svo_service.create_fact_vector_index() docstring），啟動時尚不
+    # 知道有哪些 KG，改由 vector_search_facts() 在查詢當下惰性建立
+    # （Neo4j 索引本來就會涵蓋建立之前已寫入的節點，不需要預先建立）。
     await _restart_task_queue()
     # § 3.1.2「WORKER 執行模型定案」：常駐背景 asyncio 任務，隨宿主行程啟動，
     # 消費 task_queue_service.next_pending()（見 services/extraction_worker.py）。
