@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Mapping, Sequence
 
 from core.providers.base import EmbeddingProvider, LLMProvider
 from parser.chunk_writer import document_folder_path
@@ -25,6 +26,7 @@ from services.pronoun_resolution_service import (
 from services.svo_chunking import (
     DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
+    ArticleAwareChunking,
     SVOChunk,
     build_svo_chunks,
     write_svo_chunks,
@@ -98,6 +100,9 @@ async def prepare_svo_ready_chunks(
     base_dir: Path,
     output_dir: Path,
     *,
+    articles: Sequence[Mapping[str, str]] | None = None,
+    article_no_key: str = "ArticleNo",
+    article_content_key: str = "ArticleContent",
     mentions: list[list[Mention]] | None = None,
     ner_tagger: NerTagger | None = None,
     entity_llm_provider: LLMProvider | None = None,
@@ -157,7 +162,26 @@ async def prepare_svo_ready_chunks(
     `ner_tagger=None` 呼叫本函式——此時 §a 別名登記表階段整個跳過，行為與
     NER 模組補上之前相同，非本函式刻意簡化，待 spaCy 依賴於第四章實際安裝
     驗證後才會在 `trigger_extraction()` 接上 `ner_tagger`。
+
+    `articles`（2026-08-24 新增，法規領域專屬路徑，對應
+    `docs/論文/03_系統設計與方法論.md` § 3.5「實作範圍定案」）：提供時直接
+    採用 `services.svo_chunking.ArticleAwareChunking`（按 `ArticleNo` 邊界
+    切，一條對一塊），略過 `SVOGROUP`／別名登記表／代名詞消解／embedding
+    這幾個步驟——條文本身是法規定義好的自我完備語意單位，且本專案既有法規
+    KG 已用 `pronoun_lexicon_exclude=["其","該"]` 排除最常見的代名詞誤判
+    來源。⚠️ **誠實侷限**：這代表法規全文目前不套用代名詞消解，若之後實測
+    發現有跨條文指代需求，需回頭擴充本路徑；`None`（預設）維持既有
+    `SVOGROUP` 行為完全不變，本參數只新增一條路徑，不影響任何既有呼叫端。
     """
+    if articles is not None:
+        chunks = ArticleAwareChunking(
+            articles=articles,
+            article_no_key=article_no_key,
+            article_content_key=article_content_key,
+        ).build_chunks()
+        paths = write_svo_chunks(chunks, source, output_dir)
+        return paths, chunks
+
     original_sentences = await get_or_rebuild_sentences(source, base_dir)
 
     if mentions is None and ner_tagger is not None:

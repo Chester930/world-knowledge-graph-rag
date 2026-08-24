@@ -13,6 +13,7 @@ import json
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import Mapping, Sequence
 from uuid import UUID
 
 from neo4j import AsyncDriver
@@ -1530,7 +1531,13 @@ async def vector_search_sentences(
     return [dict(r) for r in result.records]
 
 
-async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID) -> None:
+async def trigger_extraction(
+    driver: AsyncDriver,
+    doc_folder: Path,
+    kg_id: UUID,
+    *,
+    articles: Sequence[Mapping[str, str]] | None = None,
+) -> None:
     """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
     不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
     SVO 專用切塊）→ 切塊向量化（`embed_svo_chunks`）→ `ENQUEUE`（登記進
@@ -1564,6 +1571,10 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     未來 KG 沒有行為變化，只有明確設定過此欄位的 KG（例如本次的「請假與排班
     法規遵循」）才會套用縮減後的詞庫。
 
+    `articles`（2026-08-24 新增，見 § 3.5「實作範圍定案」）：提供時原樣轉交
+    `prepare_svo_ready_chunks()`，改走 `ArticleAwareChunking` 路徑；`None`
+    （預設）維持既有行為完全不變。
+
     ⚠️ 誠實侷限（仍未解決，非本次範圍）：`prepare_svo_ready_chunks()` 仍以
     `mentions=None` 呼叫，跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決
     的上游依賴，見 `services/svo_preprocessing_service.py` docstring）——別名
@@ -1594,6 +1605,7 @@ async def trigger_extraction(driver: AsyncDriver, doc_folder: Path, kg_id: UUID)
     kg_folder = doc_folder.parent
     _paths, chunks = await prepare_svo_ready_chunks(
         record.source, kg_folder, kg_folder,
+        articles=articles,
         embedding_provider=embedding_provider, pronoun_llm_provider=pronoun_llm_provider,
         pronoun_lexicon=pronoun_lexicon,
     )

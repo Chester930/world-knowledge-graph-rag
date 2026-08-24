@@ -1654,6 +1654,33 @@ async def test_trigger_extraction_records_svo_chunk_total(tmp_path, monkeypatch)
 
 
 @pytest.mark.asyncio
+async def test_trigger_extraction_uses_article_aware_chunking_when_articles_given(tmp_path, monkeypatch):
+    """`articles` 提供時原樣轉交 `prepare_svo_ready_chunks()`（見 § 3.5「實作
+    範圍定案」），排隊的 chunk 數應對應通過濾除規則後的條文數，而非 `staging`
+    階段暫存的無關文字。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    # staging 階段的文字與法條無關，用來驗證 articles 路徑確實略過既有句子清單。
+    doc_folder, _record = ingestion_service.chunk_and_stage("佔位文字。", "N0030001_勞動基準法", kg_folder)
+
+    articles = [
+        {"ArticleType": "C", "ArticleNo": "", "ArticleContent": "第一章 總則"},
+        {"ArticleType": "A", "ArticleNo": "第 1 條", "ArticleContent": "本法保障其權益。"},
+        {"ArticleType": "A", "ArticleNo": "第 2 條", "ArticleContent": "本法定義如下。"},
+    ]
+    kg_id = uuid4()
+    await svc.trigger_extraction(FakeDriver(), doc_folder, kg_id, articles=articles)
+
+    pending = task_queue_service.next_pending(config.task_queue_db_path(), str(kg_id))
+    assert pending == (str(kg_id), "N0030001_勞動基準法", 1)
+
+    updated = document_record_service.read_record(doc_folder)
+    assert updated.svo_total_chunks == 2  # 章節標題（ArticleNo 為空）被濾除
+
+
+@pytest.mark.asyncio
 async def test_trigger_extraction_is_noop_when_record_missing(tmp_path, monkeypatch):
     """資料夾沒有記錄檔（異常狀態）時不應拋出例外，只是靜默跳過。"""
     monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))

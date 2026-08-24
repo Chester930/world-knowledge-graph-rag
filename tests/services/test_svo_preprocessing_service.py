@@ -270,3 +270,32 @@ async def test_pipeline_defaults_to_full_lexicon_when_pronoun_lexicon_not_given(
 
     assert chunks[0].normalized_sentences == ["本法保障勞工權益。"]
     assert len(llm.prompts) == 1
+
+
+@pytest.mark.asyncio
+async def test_pipeline_uses_article_aware_chunking_when_articles_given(tmp_path):
+    """`articles` 提供時改走 `ArticleAwareChunking` 路徑（見 § 3.5 實作範圍
+    定案），略過句子清單重建、別名登記、代名詞消解與 embedding——不呼叫
+    `get_or_rebuild_sentences()`（來源檔案不存在也應成功，因為完全不需要
+    `staging`／`base_dir` 底下的既有句子索引），依 `ArticleNo` 邊界一條對
+    一塊，且不消耗任何 LLM 呼叫（`pronoun_llm_provider` 傳入但不應被呼叫）。
+    """
+    staging = tmp_path / "staging"  # 刻意不建立，驗證此路徑不依賴既有句子索引
+    output = tmp_path / "output"
+    articles = [
+        {"ArticleType": "C", "ArticleNo": "", "ArticleContent": "第一章 總則"},
+        {"ArticleType": "A", "ArticleNo": "第 1 條", "ArticleContent": "本法保障其權益。"},
+        {"ArticleType": "A", "ArticleNo": "第 2 條", "ArticleContent": "本法定義如下。"},
+    ]
+    llm = FakeLLM(responses=["不應被呼叫"])
+
+    paths, chunks = await prepare_svo_ready_chunks(
+        "N0030001", staging, output, articles=articles, pronoun_llm_provider=llm,
+    )
+
+    assert len(chunks) == 2  # 章節標題（ArticleNo 為空）被濾除
+    assert [c.article_no for c in chunks] == ["第 1 條", "第 2 條"]
+    assert chunks[0].original_sentences == chunks[0].normalized_sentences  # 未套用代名詞消解
+    assert llm.prompts == []
+    assert len(paths) == 2
+    assert all(p.exists() for p in paths)
