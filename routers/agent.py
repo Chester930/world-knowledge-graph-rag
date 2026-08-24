@@ -11,6 +11,7 @@ from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
 from services.svo_service import bfs_query, resolve_query_relation_type, vector_search_facts
+from services.verification_service import verify_fact_grounding
 
 # Traceability: 02 §2.4.2／§2.4.3 -> 03 §3.2 -> 04 §4.7.
 # RQ status: this router currently supports single-KG BFS + Fact retrieval (RQ1
@@ -182,6 +183,22 @@ async def chat(payload: ChatRequest):
     是問題裡的實體/名詞也會混進比對的 embedding、可能稀釋比對精準度；好處
     是不多一次 LLM 呼叫、不增加延遲與成本。是否要改為先抽取動詞片語再比對，
     留待第五章消融實驗評估是否值得多一次 LLM 呼叫的代價，非本次範圍。
+
+    ✅ **事實接地性核對（2026-08-24 新增，v1：偵測用，不自動重試）**：串流
+    結束後，逐句核對完整回答是否被 `_merge_fact_lines()`（BFS 三元組 ＋
+    語意 Fact 合併後的 context，與 `_build_prompt()` 實際餵給生成模型的
+    內容一致）支持（`services/verification_service.py::verify_fact_grounding()`），
+    額外送出 `event: grounding`。⚠️ 核對範圍務必與生成時的 context 一致——
+    真實測試曾發現只核對 `fact_results`（略過 BFS 三元組）會把「由 BFS
+    三元組提供、正確的陳述」誤判為未接地（假陽性），已修正為統一使用
+    `_merge_fact_lines()` 的輸出。對應 `docs/報告/16_事實接地性核對機制設計報告.md`
+    ／`docs/論文/03_系統設計與方法論.md` § 3.6：既有的圖遍歷信心訊號（種子
+    命中數／BFS 路徑長度）拓不到「證據已檢索到、生成階段仍捏造內容」這種
+    失效模式，真實測試已重現過此失效案例。**誠實侷限（刻意縮小的 v1 範圍）**：
+    這一版**只偵測、不自動重新生成**——串流已經即時輸出給使用者看過，此時
+    在背後另外生成一個答案去覆蓋會是更混亂的體驗；核對結果只是額外附加的
+    診斷資訊。是否要做完整版（核對通過前不開始串流、抓到未接地就自動重新
+    生成），留待下一步獨立評估。
     """
 
     async def _stream():
@@ -211,7 +228,9 @@ async def chat(payload: ChatRequest):
             )
 
         prompt = _build_prompt(payload.question, triples, fact_results, payload.history)
+        answer_parts: list[str] = []
         async for token in llm_provider.stream(prompt):
+            answer_parts.append(token)
             data = json.dumps({"token": token})
             yield f"data: {data}\n\n"
 
@@ -219,5 +238,21 @@ async def chat(payload: ChatRequest):
             _serialize_sources(triples, fact_results, resolved_rel_type), ensure_ascii=False
         )
         yield f"event: sources\ndata: {sources_json}\n\n"
+
+        # 核對範圍須與 `_build_prompt()` 實際餵給生成模型的 context 一致
+        # （`_merge_fact_lines()` 合併後的 BFS 三元組＋語意 Fact），只用
+        # `fact_results` 會漏掉 BFS 三元組來源的正確陳述，造成假陽性
+        # （2026-08-24 真實測試發現：「每週總時數四十小時」由 BFS 三元組
+        # 提供，只核對 `fact_results` 會誤判為未接地）。
+        grounding = await verify_fact_grounding(
+            "".join(answer_parts),
+            [line.lstrip("- ") for line in _merge_fact_lines(triples, fact_results)],
+            llm_provider,
+        )
+        grounding_json = json.dumps(
+            [{"statement": c.statement, "supported": c.supported, "reason": c.reason} for c in grounding],
+            ensure_ascii=False,
+        )
+        yield f"event: grounding\ndata: {grounding_json}\n\n"
 
     return StreamingResponse(_stream(), media_type="text/event-stream")

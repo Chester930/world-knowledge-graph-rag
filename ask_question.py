@@ -46,6 +46,7 @@ async def _ask(kg_id: UUID, question: str, *, top_k: int, use_svo: bool, hops: i
 
     answer_parts: list[str] = []
     sources: dict | None = None
+    grounding: list[dict] | None = None
     error: str | None = None
 
     async for chunk in response.body_iterator:
@@ -55,10 +56,14 @@ async def _ask(kg_id: UUID, question: str, *, top_k: int, use_svo: bool, hops: i
         elif chunk.startswith("event: sources"):
             data_line = chunk.split("\n", 1)[1]
             sources = json.loads(data_line[len("data: "):])
+        elif chunk.startswith("event: grounding"):
+            # 2026-08-24：見 docs/報告/16_事實接地性核對機制設計報告.md。
+            data_line = chunk.split("\n", 1)[1]
+            grounding = json.loads(data_line[len("data: "):])
         elif chunk.startswith("data: "):
             answer_parts.append(json.loads(chunk[len("data: "):])["token"])
 
-    return {"answer": "".join(answer_parts), "sources": sources, "error": error}
+    return {"answer": "".join(answer_parts), "sources": sources, "grounding": grounding, "error": error}
 
 
 def _print_result(question: str, result: dict) -> None:
@@ -86,6 +91,18 @@ def _print_result(question: str, result: dict) -> None:
     print(f"【語意 Fact 檢索】共 {len(facts)} 筆")
     for f in facts:
         print(f"  - {f['fact_text']}  (score={f.get('score')})")
+
+    # 2026-08-24：見 docs/報告/16_事實接地性核對機制設計報告.md，v1 僅偵測、
+    # 不自動重試。
+    grounding = result.get("grounding")
+    if grounding is not None:
+        unsupported = [c for c in grounding if not c["supported"]]
+        print(f"\n【接地性核對】共 {len(grounding)} 句，{len(unsupported)} 句未接地")
+        for c in grounding:
+            mark = "✅" if c["supported"] else "⚠️ 未接地"
+            print(f"  {mark}  {c['statement']}")
+            if not c["supported"] and c.get("reason"):
+                print(f"       原因：{c['reason']}")
 
 
 async def _main() -> None:

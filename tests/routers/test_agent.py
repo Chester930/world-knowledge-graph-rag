@@ -91,12 +91,20 @@ class _FakeEmbeddingProvider:
 
 
 class _FakeStreamLLM:
-    def __init__(self):
+    def __init__(self, grounding_payload: str = '{"claims":[]}'):
         self.prompt: str | None = None
+        self.grounding_payload = grounding_payload
+        self.grounding_prompts: list[str] = []
 
     async def stream(self, prompt: str):
         self.prompt = prompt
         yield "ok"
+
+    async def generate_json(self, prompt: str) -> str:
+        # 2026-08-24：verify_fact_grounding() 串流結束後呼叫；預設回傳空
+        # claims，既有測試（聚焦串流/檢索接線本身）不需要另外準備核對回應。
+        self.grounding_prompts.append(prompt)
+        return self.grounding_payload
 
 
 async def _drain(response):
@@ -346,11 +354,136 @@ async def test_chat_yields_sources_event_after_answer_stream(monkeypatch):
     response = await agent.chat(payload)
     chunks = await _drain(response)
 
-    assert chunks[-1].startswith("event: sources\n")
-    sources_data = json.loads(chunks[-1].split("\n", 1)[1][len("data: "):])
+    # 2026-08-24：event: grounding 在 sources 之後才送出（見該測試），
+    # sources 因此不再是最後一個 chunk，改用 event 類型定位。
+    sources_chunk = next(c for c in chunks if c.startswith("event: sources\n"))
+    sources_data = json.loads(sources_chunk.split("\n", 1)[1][len("data: "):])
     assert sources_data["resolved_rel_type"] == "CAUSES"
     assert sources_data["triples"][0]["subject"] == "A"
     assert sources_data["facts"][0]["fact_text"] == "馬斯克 創立 SpaceX"
+
+
+@pytest.mark.asyncio
+async def test_chat_yields_grounding_event_after_sources(monkeypatch):
+    """2026-08-24：串流結束後應額外送出 event: grounding（見 § 3.6 設計提案
+    ／`docs/報告/16_事實接地性核對機制設計報告.md`），且順序在 sources 之後。"""
+    kg_id = uuid4()
+
+    async def fake_find_seeds(driver, kg_id_arg, question):
+        return []
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return []
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return [{"fact_text": "公務員每日辦公時數為八小時。", "subject": "公務員",
+                  "rel_type": "HAS_PROPERTY", "object": "八小時"}]
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(grounding_payload=json.dumps({
+        "claims": [{"statement": "ok", "supported": False, "reason": "查無此數字"}]
+    }))
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="考試院公務員每日辦公時數是幾小時？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert chunks[-1].startswith("event: grounding\n")
+    grounding_data = json.loads(chunks[-1].split("\n", 1)[1][len("data: "):])
+    assert grounding_data == [{"statement": "ok", "supported": False, "reason": "查無此數字"}]
+    # 待核對文字（串流累積的完整回答）與 fact_text 清單皆確實送進了核對呼叫
+    assert "公務員每日辦公時數為八小時。" in llm.grounding_prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(monkeypatch):
+    """2026-08-24 真實測試發現的迴歸案例：核對範圍必須與 `_build_prompt()`
+    實際餵給生成模型的 context 一致（`_merge_fact_lines()`），只用
+    `fact_results` 會把 BFS 三元組來源的正確陳述誤判為未接地（假陽性）。"""
+    kg_id = uuid4()
+    triples = [_triple("公務員", "HAS_PROPERTY", "四十小時", verb="每週辦公總時數為")]
+
+    async def fake_find_seeds(driver, kg_id_arg, question):
+        return ["公務員"]
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return triples
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return []  # 這筆事實只由 BFS 找到，語意檢索沒有對應結果
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM()
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="公務員每週辦公總時數多少？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    await _drain(response)
+
+    assert len(llm.grounding_prompts) == 1
+    assert "公務員" in llm.grounding_prompts[0] and "四十小時" in llm.grounding_prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeypatch):
+    """未檢索到任何 Fact 時，`verify_fact_grounding()` 不呼叫 LLM 但仍應送出
+    `event: grounding`（見該函式 docstring：明確標記未接地，不可靜默省略整個
+    事件）。"""
+    kg_id = uuid4()
+
+    async def fake_find_seeds(driver, kg_id_arg, question):
+        return []
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return []
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return []
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM()
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="隨便問點什麼", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert chunks[-1].startswith("event: grounding\n")
+    grounding_data = json.loads(chunks[-1].split("\n", 1)[1][len("data: "):])
+    assert len(grounding_data) == 1
+    assert grounding_data[0]["supported"] is False
+    assert llm.grounding_prompts == []  # 沒有 Fact 可供比對，不呼叫 LLM
 
 
 @pytest.mark.asyncio
