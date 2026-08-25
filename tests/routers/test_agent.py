@@ -111,12 +111,81 @@ async def _drain(response):
     return [chunk async for chunk in response.body_iterator]
 
 
+# ── _find_seed_entities：字面比對 + 語意 fallback（2026-08-25，見 docs/報告/17）──
+
+class _FakeEntityDriver:
+    def __init__(self, names):
+        self._names = names
+
+    async def execute_query(self, query, **params):
+        class _Result:
+            def __init__(self, records):
+                self.records = records
+
+        return _Result([{"name": n} for n in self._names])
+
+
+@pytest.mark.asyncio
+async def test_find_seed_entities_prefers_literal_match_over_vector_fallback(monkeypatch):
+    """字面比對命中時，不應呼叫語意 fallback（優先採用更精確的字面匹配，
+    見函式 docstring）。"""
+    driver = _FakeEntityDriver(["勞工", "雇主"])
+    vector_calls = []
+
+    async def fake_vector_search(driver_arg, kg_id_arg, vector, top_k):
+        vector_calls.append(True)
+        return []
+
+    monkeypatch.setattr(agent, "vector_search_entities", fake_vector_search)
+    embedding = _FakeEmbeddingProvider([0.1])
+
+    seeds = await agent._find_seed_entities(
+        driver, uuid4(), "勞工可以請幾天婚假？", embedding_provider=embedding,
+    )
+
+    assert seeds == ["勞工"]
+    assert vector_calls == []
+
+
+@pytest.mark.asyncio
+async def test_find_seed_entities_falls_back_to_vector_search_when_no_literal_match(monkeypatch):
+    """2026-08-25 新增：字面比對找不到任何種子、且提供 `embedding_provider`
+    時，改用 `vector_search_entities()` 的語意相似度結果。"""
+    driver = _FakeEntityDriver(["請婚假、喪假、公傷病假及公假"])  # 不含「婚假」字面子字串比對不到
+
+    async def fake_vector_search(driver_arg, kg_id_arg, vector, top_k):
+        assert vector == [0.1, 0.2]
+        assert top_k == agent._SEED_ENTITY_LIMIT
+        return ["婚假"]
+
+    monkeypatch.setattr(agent, "vector_search_entities", fake_vector_search)
+    embedding = _FakeEmbeddingProvider([0.1, 0.2])
+
+    seeds = await agent._find_seed_entities(
+        driver, uuid4(), "婚假可以請幾天？",
+        embedding_provider=embedding, question_vector=[0.1, 0.2],
+    )
+
+    assert seeds == ["婚假"]
+
+
+@pytest.mark.asyncio
+async def test_find_seed_entities_without_embedding_provider_stays_empty_on_no_match():
+    """`embedding_provider=None`（既有呼叫端未升級）時行為與新增語意
+    fallback 之前完全一致——不嘗試向量比對，直接回傳空清單。"""
+    driver = _FakeEntityDriver(["請婚假、喪假、公傷病假及公假"])
+
+    seeds = await agent._find_seed_entities(driver, uuid4(), "婚假可以請幾天？")
+
+    assert seeds == []
+
+
 @pytest.mark.asyncio
 async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(monkeypatch):
     kg_id = uuid4()
     vector_search_calls = []
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return []
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
@@ -222,7 +291,7 @@ async def test_chat_filters_bfs_triples_by_resolved_relation_type(monkeypatch):
     resolve_calls = []
     all_triples = [_triple("A", "CAUSES", "B"), _triple("C", "PART_OF", "D")]
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A", "C"]
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
@@ -263,7 +332,7 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
     kg_id = uuid4()
     all_triples = [_triple("A", "CAUSES", "B"), _triple("C", "PART_OF", "D")]
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A", "C"]
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
@@ -326,7 +395,7 @@ async def test_chat_yields_sources_event_after_answer_stream(monkeypatch):
     kg_id = uuid4()
     triples = [_triple("A", "CAUSES", "B")]
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A"]
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
@@ -369,7 +438,7 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
     ／`docs/報告/16_事實接地性核對機制設計報告.md`），且順序在 sources 之後。"""
     kg_id = uuid4()
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return []
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
@@ -414,7 +483,7 @@ async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(m
     kg_id = uuid4()
     triples = [_triple("公務員", "HAS_PROPERTY", "四十小時", verb="每週辦公總時數為")]
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["公務員"]
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
@@ -452,7 +521,7 @@ async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeyp
     事件）。"""
     kg_id = uuid4()
 
-    async def fake_find_seeds(driver, kg_id_arg, question):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return []
 
     async def fake_bfs_query(driver, kg_id_arg, seeds, hops):

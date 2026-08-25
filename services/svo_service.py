@@ -1061,6 +1061,45 @@ async def vector_search_facts(
     return _dedupe_facts_by_key(records)[:top_k]
 
 
+async def vector_search_entities(
+    driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
+) -> list[str]:
+    """語意種子實體比對：供 `_find_seed_entities()` 在字面比對找不到任何
+    種子時的 fallback，回傳依相似度排序的 `Entity.name` 清單（2026-08-25
+    新增，見 `docs/報告/17`／`docs/論文/03_變更紀錄.md` 第五十二次調整發現
+    的字面比對失效問題）。
+
+    ⚠️ **v1（ANN 全域共用索引 + post-filter）在真實測試中被證實無效，
+    v2 改為 `WHERE kg_id` 先行過濾＋`vector.similarity.cosine()` 純量函式
+    現算現排，不再用 Neo4j 原生向量索引**：`Entity` 目前仍是全 KG 共用
+    單一 label（未比照 `Fact` 拆成每個 KG 各自的 label——`merge_entity()`／
+    `_fetch_entity_candidates()`／DEDUP4 合併改名等邏輯已遍佈全專案多處，
+    改動範圍與風險遠大於這次要解決的問題，非本次範圍）。v1 沿用
+    `vector_search_facts()` 的「候選池 + post-filter」模式，實測發現候選池
+    在開發用 Neo4j 累積多個 KG（3292 個 Entity／5 個 KG）時幾乎不可能包含
+    到目標 KG 的實體，fallback 形同無效（BFS 仍是 0）。v2 改為 `MATCH
+    (e:Entity {{kg_id}})` 先精確過濾到本 KG，再逐筆算 cosine 相似度排序——
+    犧牲 ANN 索引的效能換取正確性，demo 規模（單 KG 數十至數百個 Entity）
+    下 brute-force 完全可接受；`name_embedding` 缺席的 Entity（尚未跑過
+    `backfill_entity_name_embeddings()` 的舊資料）會被排除。KG 規模顯著
+    成長時應重新評估是否改用 per-KG label 的原生向量索引。
+    """
+    result = await driver.execute_query(
+        """
+        MATCH (e:Entity {kg_id: $kg_id})
+        WHERE e.name_embedding IS NOT NULL AND e.name IS NOT NULL
+        WITH e, vector.similarity.cosine(e.name_embedding, $vector) AS score
+        RETURN e.name AS name, score
+        ORDER BY score DESC
+        LIMIT $top_k
+        """,
+        kg_id=str(kg_id),
+        vector=query_vector,
+        top_k=top_k,
+    )
+    return [r["name"] for r in result.records if r["name"]]
+
+
 def _dedupe_facts_by_key(records: list[dict]) -> list[dict]:
     """`vector_search_facts()` 查詢輸出層去重：以 `(subject, rel_type,
     object)` 為鍵，同一鍵只保留分數最高的一筆，維持原始分數排序。任一欄位

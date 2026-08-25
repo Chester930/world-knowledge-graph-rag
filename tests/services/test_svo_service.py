@@ -2158,6 +2158,36 @@ async def test_vector_search_facts_queries_per_kg_index_without_post_filter():
 
 
 @pytest.mark.asyncio
+async def test_vector_search_entities_scopes_to_kg_before_ranking():
+    """2026-08-25 v2（見 docs/報告/17）：v1 的全域共用索引＋候選池
+    post-filter 在真實測試中被證實無效（開發用 Neo4j 累積多 KG 時，候選池
+    幾乎不含目標 KG 的實體）。v2 改為 `MATCH (e:Entity {kg_id})` 先精確
+    過濾到本 KG，再用 `vector.similarity.cosine()` 現算排序，不再依賴
+    Neo4j 原生向量索引。"""
+    driver = FakeDriver(records=[{"name": "勞工", "score": 0.91}])
+    kg_id = uuid4()
+
+    results = await svc.vector_search_entities(driver, kg_id, [0.1, 0.2], top_k=5)
+
+    assert results == ["勞工"]
+    query, params = driver.calls[0]
+    assert "MATCH (e:Entity {kg_id: $kg_id})" in query
+    assert "vector.similarity.cosine" in query
+    assert params["kg_id"] == str(kg_id)
+    assert params["vector"] == [0.1, 0.2]
+    assert params["top_k"] == 5
+
+
+@pytest.mark.asyncio
+async def test_vector_search_entities_filters_out_null_names():
+    driver = FakeDriver(records=[{"name": None, "score": 0.9}, {"name": "雇主", "score": 0.8}])
+
+    results = await svc.vector_search_entities(driver, uuid4(), [0.1], top_k=5)
+
+    assert results == ["雇主"]
+
+
+@pytest.mark.asyncio
 async def test_vector_search_facts_dedupes_same_subject_rel_object_keeping_highest_score():
     """同一件事實因多筆 citation（例如切塊重疊）各自產生獨立 Fact 節點時，
     只保留分數最高的一筆，不讓 top_k 名額被近乎重複的結果佔掉——真實資料

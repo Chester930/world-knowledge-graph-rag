@@ -7,10 +7,16 @@ from fastapi.responses import StreamingResponse
 from neo4j import AsyncDriver
 
 from core.database import get_driver
+from core.providers.base import EmbeddingProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
-from services.svo_service import bfs_query, resolve_query_relation_type, vector_search_facts
+from services.svo_service import (
+    bfs_query,
+    resolve_query_relation_type,
+    vector_search_entities,
+    vector_search_facts,
+)
 from services.verification_service import verify_fact_grounding
 
 # Traceability: 02 §2.4.2／§2.4.3 -> 03 §3.2 -> 04 §4.7.
@@ -33,12 +39,31 @@ _TAIWAN_CONTEXT_INSTRUCTION = (
 )
 
 
-async def _find_seed_entities(driver: AsyncDriver, kg_id: UUID, question: str) -> list[str]:
+async def _find_seed_entities(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    question: str,
+    *,
+    embedding_provider: EmbeddingProvider | None = None,
+    question_vector: list[float] | None = None,
+) -> list[str]:
     """⚠️ 暫時方案（3.2 §a ConceptNode 路由層／RQ2 尚未設計，2026-07-28
-    討論後先接的堪用版本，供 demo 使用）：沒有向量檢索或語意排序，只是把
-    該 KG 底下所有既有 Entity 名稱，用最直接的字面比對（是否整段出現在
-    問題字串中）挑出候選種子，取名稱最長（最具體）的前 `_SEED_ENTITY_LIMIT`
-    個做為 BFS 起點。正式的路由層設計待後續討論後再取代這裡。
+    討論後先接的堪用版本，供 demo 使用）：沒有語意排序，只是把該 KG 底下
+    所有既有 Entity 名稱，用最直接的字面比對（是否整段出現在問題字串中）
+    挑出候選種子，取名稱最長（最具體）的前 `_SEED_ENTITY_LIMIT` 個做為
+    BFS 起點。正式的路由層設計待後續討論後再取代這裡。
+
+    ✅ **語意 fallback（2026-08-25 新增，見 `docs/報告/17`／
+    `docs/論文/03_變更紀錄.md` 第五十二次調整）**：真實測試發現字面比對
+    常因 SVO 抽取產生的實體名稱過長（即使已補上簡潔性 prompt 規則，
+    `qwen2.5:7b` 這類小模型仍無法穩定遵守，見上一則調整誠實侷限）而找不到
+    任何種子——7 題真實問題裡 7 題皆是這個情況。字面比對結果為空、且
+    `embedding_provider` 有提供時，改用 `vector_search_entities()`
+    （`services/svo_service.py`）對 `Entity.name_embedding` 做語意相似度
+    比對作為 fallback；`embedding_provider=None`（既有呼叫端未升級）時
+    行為與新增前完全一致。**字面比對優先**：能字面匹配代表精確命中，優先
+    採用；只有完全找不到時才退而求其次改用語意近似，避免語意 fallback
+    的雜訊蓋過精確匹配。
     """
     result = await driver.execute_query(
         "MATCH (e:Entity {kg_id: $kg_id}) RETURN DISTINCT e.name AS name",
@@ -47,7 +72,13 @@ async def _find_seed_entities(driver: AsyncDriver, kg_id: UUID, question: str) -
     names = [r["name"] for r in result.records if r["name"]]
     matched = [name for name in names if name in question]
     matched.sort(key=len, reverse=True)
-    return matched[:_SEED_ENTITY_LIMIT]
+    matched = matched[:_SEED_ENTITY_LIMIT]
+
+    if not matched and embedding_provider is not None:
+        vector = question_vector if question_vector is not None else await embedding_provider.encode(question)
+        matched = await vector_search_entities(driver, kg_id, vector, top_k=_SEED_ENTITY_LIMIT)
+
+    return matched
 
 
 def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | None) -> list[SVOTriple]:
@@ -213,16 +244,23 @@ async def chat(payload: ChatRequest):
         fact_results: list[dict] = []
         resolved_rel_type: str | None = None
         if payload.use_svo:
-            seeds = await _find_seed_entities(driver, payload.kg_id, payload.question)
+            # 2026-08-25：embedding_provider／question_vector 提前算好，供
+            # _find_seed_entities() 的語意 fallback 與下方 vector_search_facts()
+            # 共用同一個問題向量，不多花一次 embedding 呼叫（見該函式 docstring）。
+            embedding_provider = get_embedding_provider()
+            question_vector = await embedding_provider.encode(payload.question)
+
+            seeds = await _find_seed_entities(
+                driver, payload.kg_id, payload.question,
+                embedding_provider=embedding_provider, question_vector=question_vector,
+            )
             triples = await bfs_query(driver, payload.kg_id, seeds, hops=payload.svo_hops)
 
-            embedding_provider = get_embedding_provider()
             resolved_rel_type = await resolve_query_relation_type(
                 payload.question, embedding_provider, llm_provider=llm_provider
             )
             triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
 
-            question_vector = await embedding_provider.encode(payload.question)
             fact_results = await vector_search_facts(
                 driver, payload.kg_id, question_vector, top_k=payload.top_k
             )
