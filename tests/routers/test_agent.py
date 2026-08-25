@@ -376,11 +376,12 @@ def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
     assert serialized["triples"] == [{
         "subject": "A", "subject_type": "概念", "verb": "導致", "object": "B",
         "object_type": "概念", "rel_type": "CAUSES", "source": None,
-        "source_svo_chunk_file": None,
+        "source_svo_chunk_file": None, "document": None,
     }]
     assert serialized["facts"] == [{
         "fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
         "object": "SpaceX", "rel_type": "CREATED_BY", "score": 0.9,
+        "document": None,
     }]
 
 
@@ -388,6 +389,89 @@ def test_serialize_sources_empty_when_nothing_retrieved():
     assert agent._serialize_sources([], [], None) == {
         "resolved_rel_type": None, "triples": [], "facts": [],
     }
+
+
+# ── _serialize_sources 引用豐富化：附加 Document 中繼資料（2026-08-25）───────
+
+def test_serialize_sources_attaches_document_metadata_when_available():
+    """`document_map` 有對應 `source_doc_id` 時，triples／facts 都附加
+    `effective_date` 等法規層級中繼資料，供回答來源標註現行狀態。"""
+    from models.law_document import LawDocument
+
+    doc_id = uuid4()
+    triple = SVOTriple(subject="A", subject_type="概念", rel_type="CAUSES",
+                        verb="導致", object="B", object_type="概念", source_doc_id=doc_id)
+    fact_results = [{"fact_text": "F", "subject": "A", "object": "B",
+                      "rel_type": "CAUSES", "score": 0.9, "source_doc_id": str(doc_id)}]
+    doc = LawDocument(kg_id=uuid4(), source_doc_id=doc_id, source="s", title="勞工請假規則",
+                       record_type="law", content_hash="h", update_date="20251209",
+                       effective_date=None, effective_note="施行日另定")
+    document_map = {str(doc_id): doc}
+
+    serialized = agent._serialize_sources([triple], fact_results, "CAUSES", document_map)
+
+    expected_document = {
+        "title": "勞工請假規則", "update_date": "20251209",
+        "effective_date": None, "effective_note": "施行日另定",
+    }
+    assert serialized["triples"][0]["document"] == expected_document
+    assert serialized["facts"][0]["document"] == expected_document
+
+
+def test_serialize_sources_document_none_when_source_doc_id_missing_from_map():
+    """`source_doc_id` 存在但 `document_map` 查無對應（一般文件，或尚未
+    跑過 Document/LawArticle 匯入的舊 KG）時優雅退化為 `None`，不拋例外。"""
+    triple = SVOTriple(subject="A", subject_type="概念", rel_type="CAUSES",
+                        verb="導致", object="B", object_type="概念", source_doc_id=uuid4())
+
+    serialized = agent._serialize_sources([triple], [], "CAUSES", document_map={})
+
+    assert serialized["triples"][0]["document"] is None
+
+
+@pytest.mark.asyncio
+async def test_fetch_document_map_dedupes_and_skips_lookup_when_no_doc_ids(monkeypatch):
+    """triples／facts 都沒有 `source_doc_id` 時完全不呼叫 repository（不需要
+    真的能連線的 driver）；有重複的 `source_doc_id` 時只查一次。"""
+
+    class _ExplodingRepo:
+        def __init__(self, driver):
+            raise AssertionError("doc_ids 為空時不應建立 repository")
+
+    monkeypatch.setattr(agent, "LawDocumentRepository", _ExplodingRepo)
+
+    result = await agent._fetch_document_map(
+        "fake-driver", uuid4(), [_triple("A", "CAUSES", "B")], [{"fact_text": "F"}]
+    )
+
+    assert result == {}
+
+
+@pytest.mark.asyncio
+async def test_fetch_document_map_returns_map_keyed_by_source_doc_id_string(monkeypatch):
+    from models.law_document import LawDocument
+
+    doc_id = uuid4()
+    doc = LawDocument(kg_id=uuid4(), source_doc_id=doc_id, source="s", title="T",
+                       record_type="law", content_hash="h")
+    calls: list = []
+
+    class _FakeRepo:
+        def __init__(self, driver):
+            pass
+
+        async def get_document(self, kg_id, source_doc_id):
+            calls.append(source_doc_id)
+            return doc if source_doc_id == doc_id else None
+
+    monkeypatch.setattr(agent, "LawDocumentRepository", _FakeRepo)
+    triple = SVOTriple(subject="A", subject_type="概念", rel_type="CAUSES",
+                        verb="導致", object="B", object_type="概念", source_doc_id=doc_id)
+
+    result = await agent._fetch_document_map("fake-driver", uuid4(), [triple], [])
+
+    assert calls == [doc_id]
+    assert result == {str(doc_id): doc}
 
 
 @pytest.mark.asyncio

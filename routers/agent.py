@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import json
 from uuid import UUID
 
@@ -11,6 +12,8 @@ from core.providers.base import EmbeddingProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
+from models.law_document import LawDocument
+from repositories.law_document_repo import LawDocumentRepository
 from services.svo_service import (
     bfs_query,
     resolve_query_relation_type,
@@ -93,12 +96,68 @@ def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | N
     return [t for t in triples if t.rel_type == rel_type]
 
 
-def _serialize_sources(triples: list[SVOTriple], fact_results: list[dict], resolved_rel_type: str | None) -> dict:
+async def _fetch_document_map(
+    driver: AsyncDriver, kg_id: UUID, triples: list[SVOTriple], fact_results: list[dict]
+) -> dict[str, LawDocument]:
+    """為本次檢索到的來源裡出現的每個 `source_doc_id` 各查一次 `Document`
+    節點（§3.5「文件／法條層級的時序錨定」），供 `_serialize_sources()`
+    把 `effective_date`／`effective_note` 等法規層級中繼資料附加到回答
+    來源——只做到「這份來源整體現況如何」，不假裝有逐條精確度（見
+    `LawDocumentRepository`／`services/svo_service.py::_create_fact_node()`
+    docstring：`article_no` 目前只用於 `SUPPORTED_BY` 邊的 MATCH 目標，
+    不是 Fact 節點自身的扁平屬性，無法在不改動既有查詢函式的情況下取得
+    逐條資訊）。
+
+    `Document` 節點是法規領域專屬設計，並非每個 KG 都有——查無資料的
+    `source_doc_id`（一般文件，或尚未跑過本次匯入設計的舊 KG）不會出現在
+    回傳的 map 裡，呼叫端需優雅處理缺席，不視為錯誤。
+    """
+    doc_ids: set[UUID] = set()
+    for t in triples:
+        if t.source_doc_id is not None:
+            doc_ids.add(t.source_doc_id)
+    for f in fact_results:
+        raw = f.get("source_doc_id")
+        if raw:
+            doc_ids.add(UUID(raw) if isinstance(raw, str) else raw)
+
+    if not doc_ids:
+        return {}
+
+    repo = LawDocumentRepository(driver)
+    documents = await asyncio.gather(*(repo.get_document(kg_id, doc_id) for doc_id in doc_ids))
+    return {str(doc.source_doc_id): doc for doc in documents if doc is not None}
+
+
+def _serialize_document(doc: LawDocument | None) -> dict | None:
+    if doc is None:
+        return None
+    return {
+        "title": doc.title,
+        "update_date": doc.update_date,
+        "effective_date": doc.effective_date,
+        "effective_note": doc.effective_note,
+    }
+
+
+def _serialize_sources(
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    resolved_rel_type: str | None,
+    document_map: dict[str, LawDocument] | None = None,
+) -> dict:
     """把本次檢索到的原始來源（BFS 三元組 + 語意 Fact）整理成可序列化的
     結構，隨 SSE `sources` 事件一併送出——讓呼叫端（CLI 工具、之後的前端）
     能顯示「答案根據哪些圖譜資料」，供人工審核，而不必只信任 LLM 自己在
     回答文字裡宣稱的來源。
+
+    `document_map`（2026-08-25 新增，見 `_fetch_document_map()`）：選填。
+    提供時依 `source_doc_id` 附加 `document`（法規層級 `effective_date`／
+    現況），讓來源標註能顯示「此規定出自哪份法規、現行是否有效」，不需要
+    人工再去查一次原始法規；`None`（既有呼叫端未升級）或查無對應
+    `Document` 節點時該筆來源的 `document` 為 `None`，行為與新增前一致。
     """
+    document_map = document_map or {}
     return {
         "resolved_rel_type": resolved_rel_type,
         "triples": [
@@ -111,6 +170,9 @@ def _serialize_sources(triples: list[SVOTriple], fact_results: list[dict], resol
                 "rel_type": t.rel_type,
                 "source": t.source,
                 "source_svo_chunk_file": t.source_svo_chunk_file,
+                "document": _serialize_document(
+                    document_map.get(str(t.source_doc_id)) if t.source_doc_id is not None else None
+                ),
             }
             for t in triples
         ],
@@ -121,6 +183,7 @@ def _serialize_sources(triples: list[SVOTriple], fact_results: list[dict], resol
                 "object": f.get("object"),
                 "rel_type": f.get("rel_type"),
                 "score": f.get("score"),
+                "document": _serialize_document(document_map.get(f.get("source_doc_id"))),
             }
             for f in fact_results
         ],
@@ -272,8 +335,9 @@ async def chat(payload: ChatRequest):
             data = json.dumps({"token": token})
             yield f"data: {data}\n\n"
 
+        document_map = await _fetch_document_map(driver, payload.kg_id, triples, fact_results)
         sources_json = json.dumps(
-            _serialize_sources(triples, fact_results, resolved_rel_type), ensure_ascii=False
+            _serialize_sources(triples, fact_results, resolved_rel_type, document_map), ensure_ascii=False
         )
         yield f"event: sources\ndata: {sources_json}\n\n"
 
