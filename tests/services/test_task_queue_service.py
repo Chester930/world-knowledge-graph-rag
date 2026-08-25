@@ -28,6 +28,36 @@ class TestEnqueueAndStatus:
 
         assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 2)
 
+    def test_enqueue_resets_terminal_status_back_to_pending(self, tmp_path):
+        """2026-08-25 修復：`build_graph(force_rebuild=True)` 清空 Neo4j 圖譜
+        資料＋重設記錄檔進度後，重新呼叫 `trigger_extraction()` 必須真的能
+        再次排入佇列——先前卡在 `completed`／`failed` 的組合會被舊版
+        `INSERT OR IGNORE` 靜默忽略，導致圖譜資料已清空但佇列仍認為完成，
+        Worker 永遠不會重新處理。"""
+        db_path = _db_path(tmp_path)
+        svc.enqueue(db_path, "kg-1", "doc.txt", [1, 2])
+        svc.update_status(db_path, "kg-1", "doc.txt", 1, "completed")
+        svc.update_status(db_path, "kg-1", "doc.txt", 2, "failed")
+
+        svc.enqueue(db_path, "kg-1", "doc.txt", [1, 2])
+
+        assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 1)
+        svc.update_status(db_path, "kg-1", "doc.txt", 1, "completed")
+        assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 2)
+
+    def test_enqueue_still_protects_in_flight_status(self, tmp_path):
+        """終態才重置為 pending；`processing`／`pending_upload` 仍受既有保護，
+        不因重新 ENQUEUE 被誤重置——與上一則修復同一次變更，確認未破壞
+        既有保護語意。"""
+        db_path = _db_path(tmp_path)
+        svc.enqueue(db_path, "kg-1", "doc.txt", [1, 2])
+        svc.update_status(db_path, "kg-1", "doc.txt", 1, "processing")
+        svc.update_status(db_path, "kg-1", "doc.txt", 2, "pending_upload")
+
+        svc.enqueue(db_path, "kg-1", "doc.txt", [1, 2])
+
+        assert svc.next_pending(db_path, "kg-1") is None
+
     def test_update_status_transitions_through_five_states(self, tmp_path):
         db_path = _db_path(tmp_path)
         svc.enqueue(db_path, "kg-1", "doc.txt", [1])

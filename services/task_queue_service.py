@@ -55,13 +55,30 @@ def enqueue(db_path: Path, kg_id: str, source: str, chunk_indices: list[int]) ->
     """`ENQUEUE`：登記尚未完成的 Chunk 進佇列，初始狀態一律為 `pending`。
 
     呼叫端依記錄檔的 `chunk_progress` 進度，只傳入尚未完成的 `chunk_index`
-    清單；已存在的 (kg_id, source, chunk_index) 組合會被忽略，不會覆蓋既有
-    狀態（避免重複登記把已在處理中的 Chunk 誤重置回 pending）。
+    清單；已存在且仍在進行中的 (kg_id, source, chunk_index) 組合
+    （`processing`／`pending_upload`）會被保留、不覆寫（避免重複登記把
+    已在處理中的 Chunk 誤重置回 pending）。
+
+    ⚠️ **2026-08-25 修復（真實排查發現）**：已存在但停在**終態**
+    （`completed`／`failed`）的組合，先前用 `INSERT OR IGNORE` 會被完全
+    忽略、狀態永遠卡在舊值——`knowledge_graph_service.build_graph(force_rebuild=True)`
+    明確承諾「完整重跑 CHUNKREADY」（清空該 KG 的 Neo4j 圖譜節點＋重設
+    記錄檔進度），但 `trigger_extraction()` 隨後呼叫本函式時傳入的仍是同一批
+    `(kg_id, source, chunk_index)`，這批組合在 `task_queue.db` 裡因為第一次
+    抽取早已標記 `completed`，重新登記被靜默忽略，Worker 因此永遠不會重新
+    處理——圖譜資料被清空、佇列卻認為「已完成」，導致重建後看似成功實則
+    完全沒有真正重跑抽取，且無任何錯誤訊息。改為 UPSERT：狀態為終態時才
+    重置回 `pending`，`processing`／`pending_upload` 仍維持原本的保護不變。
     """
     with closing(_connect(db_path)) as conn:
         conn.executemany(
-            "INSERT OR IGNORE INTO task_queue (kg_id, source, chunk_index, status) "
-            "VALUES (?, ?, ?, 'pending')",
+            """
+            INSERT INTO task_queue (kg_id, source, chunk_index, status)
+            VALUES (?, ?, ?, 'pending')
+            ON CONFLICT (kg_id, source, chunk_index) DO UPDATE SET
+                status = 'pending', updated_at = datetime('now')
+            WHERE task_queue.status IN ('completed', 'failed')
+            """,
             [(kg_id, source, idx) for idx in chunk_indices],
         )
         conn.commit()
