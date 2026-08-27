@@ -56,6 +56,50 @@ def test_merge_fact_lines_empty_when_no_sources():
     assert agent._merge_fact_lines([], []) == []
 
 
+# ── _merge_fact_lines：殘缺三元組過濾（2026-08-27，64筆規模抽查發現）───────
+
+def test_merge_fact_lines_skips_triple_with_empty_object():
+    """BFS 三元組 object 為空字串（列舉式抽取失敗殘留）時整筆跳過，不送進 prompt。"""
+    triples = [_triple("失業給付", "RELATED_TO", "")]
+
+    lines = agent._merge_fact_lines(triples, [])
+
+    assert lines == []
+
+
+def test_merge_fact_lines_skips_triple_with_empty_subject():
+    triples = [_triple("", "RELATED_TO", "B")]
+
+    lines = agent._merge_fact_lines(triples, [])
+
+    assert lines == []
+
+
+def test_merge_fact_lines_skips_fact_with_empty_object_string():
+    """fact_results 的 object 是明確的空字串（非 None）時跳過——區分於
+    「舊資料尚未回填、缺席為 None」的既有保留邏輯（見上一則測試）。"""
+    fact_results = [{"fact_text": "失業給付（概念）  （概念）", "subject": "失業給付",
+                      "rel_type": "RELATED_TO", "object": ""}]
+
+    lines = agent._merge_fact_lines([], fact_results)
+
+    assert lines == []
+
+
+def test_merge_fact_lines_keeps_valid_triples_and_facts_when_mixed_with_blank_ones():
+    triples = [_triple("A", "CAUSES", "B"), _triple("殘缺", "RELATED_TO", "")]
+    fact_results = [
+        {"fact_text": "有效事實", "subject": "C", "rel_type": "CAUSES", "object": "D"},
+        {"fact_text": "殘缺事實", "subject": "", "rel_type": "RELATED_TO", "object": "E"},
+    ]
+
+    lines = agent._merge_fact_lines(triples, fact_results)
+
+    assert len(lines) == 2
+    assert any("A" in line for line in lines)
+    assert any("有效事實" in line for line in lines)
+
+
 # ── _build_prompt：合併後的事實清單接進 prompt ─────────────────────────────
 
 def test_build_prompt_includes_semantic_fact_when_no_bfs_triples():

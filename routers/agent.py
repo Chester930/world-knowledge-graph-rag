@@ -200,16 +200,31 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
     的 `Fact` 節點才有值；缺席（`None`）時視為無法安全去重，一律原樣保留，
     不強行比對——寧可讓少數舊資料出現重複描述，也不要因為誤判「相同」而
     漏掉語意檢索才找得到的事實。
+
+    ✅ **殘缺三元組過濾（2026-08-27 新增，見報告 17 後續 64 筆規模抽查發現）**：
+    SVO 抽取偶爾會產生 subject／object 任一為空字串的殘缺三元組（多為列舉式
+    條文抽取失敗的殘留，見 `_svo_prompt()` 規則 8／9），這類三元組送進 prompt
+    對回答毫無幫助，只會佔用 context 並稀釋真正相關的事實（真實測試曾見
+    BFS 456 筆裡混入大量 `→（）` 的殘缺結果）。這裡只過濾**明確的空字串**，
+    不過濾 `None`（`fact_results` 的 `subject`／`object` 為 `None` 代表舊資料
+    尚未跑過 §b 回填、不代表 `fact_text` 本身有問題，仍應保留，理由同上）。
     """
+    def _is_blank(value: str | None) -> bool:
+        return value is not None and value.strip() == ""
+
     seen: set[tuple[str, str, str]] = set()
     lines: list[str] = []
 
     for t in triples:
+        if not t.subject or not t.object:
+            continue
         key = (t.subject, t.rel_type, t.object)
         seen.add(key)
         lines.append(f"- {t.subject}（{t.subject_type}）{t.verb}{t.object}（{t.object_type}）")
 
     for f in fact_results:
+        if _is_blank(f.get("subject")) or _is_blank(f.get("object")):
+            continue
         key = (f.get("subject"), f.get("rel_type"), f.get("object"))
         if all(key) and key in seen:
             continue
