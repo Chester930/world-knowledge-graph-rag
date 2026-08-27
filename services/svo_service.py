@@ -49,11 +49,27 @@ from services.svo_preprocessing_service import (
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
-    """建立 Entity 節點索引（app 啟動時呼叫一次）。"""
+    """建立 Entity 節點唯一約束（app 啟動時呼叫一次）。
+
+    ✅ **2026-08-27 修正（64筆規模真實資料發現）**：原本只建立普通索引
+    （`CREATE INDEX ... ON (e.kg_id, e.name)`），不保證唯一性——`merge_entity()`
+    的 `MERGE (e:Entity {{kg_id, name}})` 在沒有唯一約束背書時，並發寫入
+    （不同 chunk 幾乎同時抽取到同一個高頻實體，如「雇主」）可能各自檢查
+    「不存在」後各自建立，產生屬性完全相同（連 name 的 UTF-8 bytes都一樣）
+    的重複節點——64 筆規模的 KG 實測發現 14 組、共 16 個重複節點，且因為
+    重複節點各自累積少量連結，會讓 BFS 從其中一個節點出發時漏掉另一個
+    節點上的事實。改用 `CREATE CONSTRAINT ... IS UNIQUE`，Neo4j 對唯一約束
+    的 MERGE 有原子性保證，能解決並發寫入下的重複問題；約束會自動建立
+    對應索引，不需要額外的 `CREATE INDEX`。**若資料庫裡已存在違反此約束
+    的重複節點，`CREATE CONSTRAINT` 會失敗**——套用前必須先清理既有重複
+    （見手動合併腳本，本次已對現有 KG 執行過一次性清理，測試環境走
+    `IF NOT EXISTS` 全新資料庫不受影響）。
+    """
     if driver is None:
         return
     await driver.execute_query(
-        "CREATE INDEX entity_kg_name IF NOT EXISTS FOR (e:Entity) ON (e.kg_id, e.name)"
+        "CREATE CONSTRAINT entity_kg_name_unique IF NOT EXISTS "
+        "FOR (e:Entity) REQUIRE (e.kg_id, e.name) IS UNIQUE"
     )
 
 
