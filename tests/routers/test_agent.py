@@ -327,6 +327,68 @@ def test_filter_triples_by_relation_type_empty_input():
     assert agent._filter_triples_by_relation_type([], "CAUSES") == []
 
 
+# ── _relevant_doc_ids_from_facts／_filter_triples_by_source_doc_ids：
+# 借用語意 Fact 檢索結果當 BFS 前置篩選範圍（2026-08-27）─────────────────────
+
+def test_relevant_doc_ids_from_facts_collects_unique_ids():
+    doc_a, doc_b = uuid4(), uuid4()
+    fact_results = [
+        {"fact_text": "F1", "source_doc_id": str(doc_a)},
+        {"fact_text": "F2", "source_doc_id": str(doc_a)},
+        {"fact_text": "F3", "source_doc_id": str(doc_b)},
+    ]
+
+    ids = agent._relevant_doc_ids_from_facts(fact_results)
+
+    assert ids == {doc_a, doc_b}
+
+
+def test_relevant_doc_ids_from_facts_ignores_missing_or_invalid():
+    doc_a = uuid4()
+    fact_results = [
+        {"fact_text": "F1", "source_doc_id": str(doc_a)},
+        {"fact_text": "F2", "source_doc_id": None},
+        {"fact_text": "F3"},
+        {"fact_text": "F4", "source_doc_id": "not-a-uuid"},
+    ]
+
+    ids = agent._relevant_doc_ids_from_facts(fact_results)
+
+    assert ids == {doc_a}
+
+
+def test_relevant_doc_ids_from_facts_empty_when_no_facts():
+    assert agent._relevant_doc_ids_from_facts([]) == set()
+
+
+def test_filter_triples_by_source_doc_ids_keeps_matching_and_unknown():
+    """排除篩選：只排除明確知道來源、且不在允許範圍內的三元組；
+    source_doc_id 為 None（無法判定）一律保留。"""
+    doc_a, doc_b = uuid4(), uuid4()
+    triple_in_range = _triple("A", "CAUSES", "B")
+    triple_in_range.source_doc_id = doc_a
+    triple_out_of_range = _triple("C", "CAUSES", "D")
+    triple_out_of_range.source_doc_id = doc_b
+    triple_unknown = _triple("E", "CAUSES", "F")
+    triple_unknown.source_doc_id = None
+
+    filtered = agent._filter_triples_by_source_doc_ids(
+        [triple_in_range, triple_out_of_range, triple_unknown], {doc_a}
+    )
+
+    assert filtered == [triple_in_range, triple_unknown]
+
+
+def test_filter_triples_by_source_doc_ids_no_filter_when_allowed_set_empty():
+    """語意檢索沒有找到任何範圍訊號（allowed_doc_ids 為空）時原樣回傳，
+    不強加篩選——優雅降級，不因為沒有篩選依據就讓查詢端拿不到結果。"""
+    triples = [_triple("A", "CAUSES", "B"), _triple("C", "CAUSES", "D")]
+
+    filtered = agent._filter_triples_by_source_doc_ids(triples, set())
+
+    assert filtered == triples
+
+
 # ── chat()：驗證查詢時關係連結（QSIM/QFILTER）確實接線（2026-08-18）─────────
 
 @pytest.mark.asyncio

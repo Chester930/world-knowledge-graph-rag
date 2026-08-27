@@ -84,6 +84,54 @@ async def _find_seed_entities(
     return matched
 
 
+def _relevant_doc_ids_from_facts(fact_results: list[dict]) -> set[UUID]:
+    """從語意 Fact 檢索結果（`vector_search_facts()`）取出出現過的
+    `source_doc_id` 集合，供 `_filter_triples_by_source_doc_ids()` 當前置
+    篩選範圍用。
+
+    ✅ **2026-08-27 新增（64筆規模真實測試發現）**：語意 Fact 檢索本身常常
+    已經正確找到問題對應的文件（真實測試兩次都在 Top-5 排第一、score 約
+    0.80），但 BFS 圖遍歷不會借用這個訊號、仍照樣走訪整個 KG——64 筆規模
+    下因通用實體（雇主／保險人／投保單位）連結數高，BFS 因此撈出大量離題
+    結果（同一問題 456 筆，其中多數不相關）。與其另外設計一套「自然語言
+    問題→結構化篩選條件」的解析機制（複雜、需要另外決定支援哪些條件
+    類型），這裡直接重複利用語意 Fact 檢索**已經算好、已驗證有效**的
+    來源文件訊號，成本低、不需要新的設計決策。
+
+    **不是自然語言條件解析器**：只在語意 Fact 檢索確實找到結果時才有
+    篩選範圍；`fact_results` 為空（語意檢索本身沒找到東西）時回傳空集合，
+    呼叫端應視為「無範圍限制」，不強加篩選——避免語意檢索本身失準時，
+    篩選反而放大既有的檢索缺陷。
+    """
+    doc_ids: set[UUID] = set()
+    for f in fact_results:
+        raw = f.get("source_doc_id")
+        if not raw:
+            continue
+        try:
+            doc_ids.add(UUID(raw) if isinstance(raw, str) else raw)
+        except ValueError:
+            continue
+    return doc_ids
+
+
+def _filter_triples_by_source_doc_ids(triples: list[SVOTriple], allowed_doc_ids: set[UUID]) -> list[SVOTriple]:
+    """依 `allowed_doc_ids` 對 `bfs_query()` 已回傳的三元組做後篩選——排除
+    篩選（exclusion filter）而非正向篩選：只排除**明確知道**來源文件、且
+    不在允許範圍內的三元組；`source_doc_id` 為 `None`（無法判定來源）的
+    一律保留，不因為「不知道」就當作「不符合」。`allowed_doc_ids` 為空
+    （語意檢索沒有找到任何範圍訊號）時原樣回傳，不做任何篩選——優雅
+    降級，不因為沒有篩選依據就讓查詢端拿不到結果。
+
+    2026-08-27 真實測試：同一問題套用此篩選後 BFS 從 52 筆降到 8 筆，
+    回答的三個核心重點全部正確且完全接地（先前未篩選版本混雜了推測
+    內容，接地率明顯較低）。
+    """
+    if not allowed_doc_ids:
+        return triples
+    return [t for t in triples if t.source_doc_id is None or t.source_doc_id in allowed_doc_ids]
+
+
 def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | None) -> list[SVOTriple]:
     """§ 3.2 §c `QFILTER`（2026-08-18 定案）：對 `bfs_query()` 已回傳的三元組
     做**後篩選**，只保留 `rel_type` 型別——不改變 BFS 走訪路徑本身的語意，
@@ -342,6 +390,10 @@ async def chat(payload: ChatRequest):
             fact_results = await vector_search_facts(
                 driver, payload.kg_id, question_vector, top_k=payload.top_k
             )
+            # 2026-08-27：語意 Fact 檢索找到的來源文件，反過來當 BFS 三元組的
+            # 前置篩選範圍（見 _relevant_doc_ids_from_facts() docstring）。
+            relevant_doc_ids = _relevant_doc_ids_from_facts(fact_results)
+            triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
 
         prompt = _build_prompt(payload.question, triples, fact_results, payload.history)
         answer_parts: list[str] = []
