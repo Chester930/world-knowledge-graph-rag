@@ -62,7 +62,12 @@ async function sendChatMessage(question) {
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    assistantEl.textContent = "";
+    // 2026-08-28：接地性核對升級為方案 B（限制性重新生成，見
+    // routers/agent.py::chat() docstring）後，後端不再逐 token 即時串流
+    // 第一版草稿——改成先送 `event: status`（generating/verifying/done）
+    // 讓這裡顯示「正在核實中…」佔位，核對（必要時已修正）過的最終答案
+    // 才會透過一次 `data:` 事件送達，避免使用者看到未核對過的內容。
+    assistantEl.textContent = "正在思考中…";
 
     while (true) {
       const { done, value } = await reader.read();
@@ -72,13 +77,30 @@ async function sendChatMessage(question) {
       const events = buffer.split("\n\n");
       buffer = events.pop();
       for (const evt of events) {
-        const dataLine = evt.split("\n").find((l) => l.startsWith("data:"));
+        const lines = evt.split("\n");
+        const eventLine = lines.find((l) => l.startsWith("event:"));
+        const dataLine = lines.find((l) => l.startsWith("data:"));
         if (!dataLine) continue;
+        const eventName = eventLine ? eventLine.slice(6).trim() : "message";
+        let payload;
         try {
-          const payload = JSON.parse(dataLine.slice(5).trim());
-          assistantEl.textContent += payload.token ?? payload.message ?? "";
+          payload = JSON.parse(dataLine.slice(5).trim());
         } catch {
-          // 忽略非 JSON 事件
+          continue; // 忽略非 JSON 事件
+        }
+
+        if (eventName === "status") {
+          if (payload.phase === "generating") assistantEl.textContent = "正在思考中…";
+          else if (payload.phase === "verifying") assistantEl.textContent = "正在核實答案中…";
+          else if (payload.phase === "done" && payload.regenerated) {
+            assistantEl.textContent += "\n\n（部分內容經核對後已自動修正）";
+          }
+        } else if (eventName === "error") {
+          assistantEl.className = "msg error";
+          assistantEl.textContent = payload.message ?? "發生錯誤";
+        } else if (payload.token !== undefined) {
+          // 最終、已核對過的答案一次送達，直接取代佔位文字。
+          assistantEl.textContent = payload.token;
         }
       }
     }

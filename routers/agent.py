@@ -315,6 +315,45 @@ def _build_prompt(
     return f"{_TAIWAN_CONTEXT_INSTRUCTION}\n\n{context_block}\n{history_block}問題：{question}\n\n{instruction}"
 
 
+def _build_constrained_prompt(
+    question: str,
+    fact_lines: list[str],
+    history: list[ChatMessage] | None,
+    unsupported_statements: list[str],
+) -> str:
+    """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、6）。
+
+    只在 `verify_fact_grounding()` 抓到未接地陳述時才呼叫。跟 `_build_prompt()`
+    的差異：(1) 不再給「事實不足可補充自己知識」的空間，改為明確禁止；
+    (2) 把上一版被標記未接地的陳述列出來，明確要求不要重複；(3) 事實不足時
+    要求直接回答「資料未明確記載」，對應使用者「寧願說不知道，也不要亂
+    回答」的明確要求。
+    """
+    facts = "\n".join(fact_lines) if fact_lines else "（本輪未檢索到任何事實）"
+    unsupported_block = "\n".join(f"- {s}" for s in unsupported_statements) or "（無）"
+
+    history_block = ""
+    if history:
+        history_lines = "\n".join(f"{m.role}：{m.content}" for m in history[-6:])
+        history_block = f"對話歷史：\n{history_lines}\n\n"
+
+    return f"""{_TAIWAN_CONTEXT_INSTRUCTION}
+
+以下是從知識圖譜檢索到的事實，這是你這次「唯一」能引用的資訊來源：
+{facts}
+
+上一版回答中，以下陳述經核對「找不到對應的事實依據」（可能是臆測、推論，或錯誤數字）：
+{unsupported_block}
+
+{history_block}問題：{question}
+
+請重新回答上述問題，並嚴格遵守：
+1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。
+2. 若事實清單不足以完整回答問題的某個部分，該部分請直接回答「資料未明確記載，無法確認」，不要臆測或用自己的知識填補。
+3. 不要重複上一版被判定為未接地的那些陳述。
+"""
+
+
 @router.post("/chat")
 async def chat(payload: ChatRequest):
     """SSE 串流問答。
@@ -341,21 +380,28 @@ async def chat(payload: ChatRequest):
     是不多一次 LLM 呼叫、不增加延遲與成本。是否要改為先抽取動詞片語再比對，
     留待第五章消融實驗評估是否值得多一次 LLM 呼叫的代價，非本次範圍。
 
-    ✅ **事實接地性核對（2026-08-24 新增，v1：偵測用，不自動重試）**：串流
-    結束後，逐句核對完整回答是否被 `_merge_fact_lines()`（BFS 三元組 ＋
-    語意 Fact 合併後的 context，與 `_build_prompt()` 實際餵給生成模型的
-    內容一致）支持（`services/verification_service.py::verify_fact_grounding()`），
-    額外送出 `event: grounding`。⚠️ 核對範圍務必與生成時的 context 一致——
-    真實測試曾發現只核對 `fact_results`（略過 BFS 三元組）會把「由 BFS
-    三元組提供、正確的陳述」誤判為未接地（假陽性），已修正為統一使用
-    `_merge_fact_lines()` 的輸出。對應 `docs/報告/16_事實接地性核對機制設計報告.md`
-    ／`docs/論文/03_系統設計與方法論.md` § 3.6：既有的圖遍歷信心訊號（種子
+    ✅ **事實接地性核對（2026-08-24 v1；2026-08-28 升級為方案 B「限制性重新
+    生成」）**：對應 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、6／
+    `docs/論文/03_系統設計與方法論.md` § 3.6。既有的圖遍歷信心訊號（種子
     命中數／BFS 路徑長度）拓不到「證據已檢索到、生成階段仍捏造內容」這種
-    失效模式，真實測試已重現過此失效案例。**誠實侷限（刻意縮小的 v1 範圍）**：
-    這一版**只偵測、不自動重新生成**——串流已經即時輸出給使用者看過，此時
-    在背後另外生成一個答案去覆蓋會是更混亂的體驗；核對結果只是額外附加的
-    診斷資訊。是否要做完整版（核對通過前不開始串流、抓到未接地就自動重新
-    生成），留待下一步獨立評估。
+    失效模式，真實測試已重現過此失效案例（見報告第 1 節）。
+
+    v1（2026-08-24）只偵測、不糾正：使用者已經即時看過第一版回答，事後才
+    送出 `event: grounding` 當診斷資訊，即使抓到幻覺也不會改變使用者看到
+    的內容。**2026-08-28 依使用者明確要求（「寧願說不知道，也禁止亂回答」）
+    升級為方案 B 最小可行版**：不再逐 token 即時串流第一版答案給使用者；
+    先在背後生成完整草稿、核對（`services/verification_service.py::
+    verify_fact_grounding()`，核對範圍統一用 `_merge_fact_lines()` 的輸出，
+    與 `_build_prompt()` 實際餵給生成模型的 context 一致，避免假陽性），若
+    有任一陳述未接地，用 `_build_constrained_prompt()`（明確禁止臆測、要求
+    答不知道）重新生成一次，只把核對過的最終版本送給使用者。過程中送出
+    `event: status`（`phase`: `generating` / `verifying` / `done`，`done` 額外
+    帶 `regenerated: bool`）供前端顯示「正在核實中…」佔位，使用者依此次決策
+    **永遠不會看到未核對過的版本**——對應成本：只有真的抓到未接地內容時才
+    多付一次完整 LLM 生成的延遲，沒有幻覺的情況下只多一次核對呼叫。
+    **誠實侷限**：只重新生成一次，不做多輪迭代收斂；修正版本身理論上仍可能
+    包含新的未接地內容（核對機制本身也可能誤判），未做「核對到收斂為止」的
+    上限迴圈，留待第五章消融實驗評估是否需要。
     """
 
     async def _stream():
@@ -396,11 +442,50 @@ async def chat(payload: ChatRequest):
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
 
         prompt = _build_prompt(payload.question, triples, fact_results, payload.history)
-        answer_parts: list[str] = []
+
+        # 方案 B：不逐 token 即時轉發第一版草稿——先在背後生成完整答案，
+        # 核對過（必要時重新生成）才把最終版本送給使用者（見上方 docstring）。
+        yield f"event: status\ndata: {json.dumps({'phase': 'generating'})}\n\n"
+        draft_parts: list[str] = []
         async for token in llm_provider.stream(prompt):
-            answer_parts.append(token)
-            data = json.dumps({"token": token})
-            yield f"data: {data}\n\n"
+            draft_parts.append(token)
+        draft_answer = "".join(draft_parts)
+
+        # 核對範圍須與 `_build_prompt()` 實際餵給生成模型的 context 一致
+        # （`_merge_fact_lines()` 合併後的 BFS 三元組＋語意 Fact），只用
+        # `fact_results` 會漏掉 BFS 三元組來源的正確陳述，造成假陽性
+        # （2026-08-24 真實測試發現：「每週總時數四十小時」由 BFS 三元組
+        # 提供，只核對 `fact_results` 會誤判為未接地）。
+        fact_lines = _merge_fact_lines(triples, fact_results)
+        fact_texts = [line.lstrip("- ") for line in fact_lines]
+
+        yield f"event: status\ndata: {json.dumps({'phase': 'verifying'})}\n\n"
+        grounding = await verify_fact_grounding(draft_answer, fact_texts, llm_provider)
+
+        final_answer = draft_answer
+        regenerated = False
+        # payload.use_svo=False 時 _build_prompt() 本來就明確允許 LLM 用自己的
+        # 知識回答（見該函式 else 分支的 instruction）——這種模式下完全沒有
+        # fact_texts 可供核對，verify_fact_grounding() 會把每一句都判定未接地
+        # （見其 docstring：無 Fact 時直接標記，不呼叫 LLM），若不排除會導致
+        # 每次 use_svo=False 的回答都被錯誤觸發限制性重新生成、答成「資料未
+        # 明確記載」，違背該模式本身「允許補充自身知識」的設計。只在
+        # use_svo=True（有 KG 事實可供核對）時才觸發重新生成。
+        if payload.use_svo and grounding and any(not c.supported for c in grounding):
+            unsupported = [c.statement for c in grounding if not c.supported]
+            constrained_prompt = _build_constrained_prompt(
+                payload.question, fact_lines, payload.history, unsupported
+            )
+            corrected_parts: list[str] = []
+            async for token in llm_provider.stream(constrained_prompt):
+                corrected_parts.append(token)
+            final_answer = "".join(corrected_parts)
+            regenerated = True
+            # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
+            # 而非已經被取代的草稿。
+            grounding = await verify_fact_grounding(final_answer, fact_texts, llm_provider)
+
+        yield f"data: {json.dumps({'token': final_answer})}\n\n"
 
         document_map = await _fetch_document_map(driver, payload.kg_id, triples, fact_results)
         sources_json = json.dumps(
@@ -408,20 +493,12 @@ async def chat(payload: ChatRequest):
         )
         yield f"event: sources\ndata: {sources_json}\n\n"
 
-        # 核對範圍須與 `_build_prompt()` 實際餵給生成模型的 context 一致
-        # （`_merge_fact_lines()` 合併後的 BFS 三元組＋語意 Fact），只用
-        # `fact_results` 會漏掉 BFS 三元組來源的正確陳述，造成假陽性
-        # （2026-08-24 真實測試發現：「每週總時數四十小時」由 BFS 三元組
-        # 提供，只核對 `fact_results` 會誤判為未接地）。
-        grounding = await verify_fact_grounding(
-            "".join(answer_parts),
-            [line.lstrip("- ") for line in _merge_fact_lines(triples, fact_results)],
-            llm_provider,
-        )
         grounding_json = json.dumps(
             [{"statement": c.statement, "supported": c.supported, "reason": c.reason} for c in grounding],
             ensure_ascii=False,
         )
         yield f"event: grounding\ndata: {grounding_json}\n\n"
+
+        yield f"event: status\ndata: {json.dumps({'phase': 'done', 'regenerated': regenerated})}\n\n"
 
     return StreamingResponse(_stream(), media_type="text/event-stream")

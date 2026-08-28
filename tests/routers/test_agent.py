@@ -135,19 +135,39 @@ class _FakeEmbeddingProvider:
 
 
 class _FakeStreamLLM:
-    def __init__(self, grounding_payload: str = '{"claims":[]}'):
+    def __init__(
+        self,
+        grounding_payload: str = '{"claims":[]}',
+        *,
+        answers: list[str] | None = None,
+        grounding_payloads: list[str] | None = None,
+    ):
         self.prompt: str | None = None
+        self.prompts: list[str] = []  # 2026-08-28：方案 B 可能呼叫 stream() 兩次（草稿＋修正）
         self.grounding_payload = grounding_payload
         self.grounding_prompts: list[str] = []
+        # 2026-08-28：`answers`／`grounding_payloads` 依序供應每次呼叫的回應，
+        # 用完最後一個之後重複沿用——讓測試能模擬「草稿未接地→限制性重新生成
+        # →修正版已接地」這種依 prompt 內容遞增變化的情境，不需要真的解析
+        # prompt 內容來決定回應。
+        self._answers = list(answers) if answers is not None else None
+        self._grounding_payloads = list(grounding_payloads) if grounding_payloads is not None else None
 
     async def stream(self, prompt: str):
         self.prompt = prompt
-        yield "ok"
+        self.prompts.append(prompt)
+        if self._answers:
+            text = self._answers.pop(0) if len(self._answers) > 1 else self._answers[0]
+        else:
+            text = "ok"
+        yield text
 
     async def generate_json(self, prompt: str) -> str:
         # 2026-08-24：verify_fact_grounding() 串流結束後呼叫；預設回傳空
         # claims，既有測試（聚焦串流/檢索接線本身）不需要另外準備核對回應。
         self.grounding_prompts.append(prompt)
+        if self._grounding_payloads:
+            return self._grounding_payloads.pop(0) if len(self._grounding_payloads) > 1 else self._grounding_payloads[0]
         return self.grounding_payload
 
 
@@ -658,8 +678,11 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
     response = await agent.chat(payload)
     chunks = await _drain(response)
 
-    assert chunks[-1].startswith("event: grounding\n")
-    grounding_data = json.loads(chunks[-1].split("\n", 1)[1][len("data: "):])
+    # 2026-08-28：方案 B 升級後，grounding 判定未接地會觸發限制性重新生成，
+    # event: grounding 之後還會多送一個 event: status（phase=done），不再是
+    # 最後一個 chunk，改用 event 類型定位（比照 sources 定位方式）。
+    grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
+    grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
     assert grounding_data == [{"statement": "ok", "supported": False, "reason": "查無此數字"}]
     # 待核對文字（串流累積的完整回答）與 fact_text 清單皆確實送進了核對呼叫
     assert "公務員每日辦公時數為八小時。" in llm.grounding_prompts[0]
@@ -738,11 +761,122 @@ async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeyp
     response = await agent.chat(payload)
     chunks = await _drain(response)
 
-    assert chunks[-1].startswith("event: grounding\n")
-    grounding_data = json.loads(chunks[-1].split("\n", 1)[1][len("data: "):])
+    grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
+    grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
     assert len(grounding_data) == 1
     assert grounding_data[0]["supported"] is False
-    assert llm.grounding_prompts == []  # 沒有 Fact 可供比對，不呼叫 LLM
+    assert llm.grounding_prompts == []  # 沒有 Fact 可供比對，不呼叫 LLM（兩次核對皆短路）
+
+
+# ── 方案 B：限制性重新生成（2026-08-28，見 docs/報告/16 § 3、6）──
+
+
+def _chat_common_monkeypatch(monkeypatch, llm, embedding, *, triples=None, facts=None):
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return ["A"] if triples else []
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+        return triples or []
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return facts or []
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+
+@pytest.mark.asyncio
+async def test_chat_no_regeneration_when_fully_grounded(monkeypatch):
+    """全部陳述句皆接地時，不應該多花一次 LLM 呼叫重新生成——這是方案 B
+    刻意設計的成本控制（見 chat() docstring：只有真的抓到未接地內容才多付
+    一次生成的延遲）。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY", "object": "八日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["婚假為八日。"],
+        grounding_payloads=[json.dumps({"claims": [{"statement": "婚假為八日。", "supported": True, "reason": ""}]})],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    payload = ChatRequest(question="婚假幾天？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert len(llm.prompts) == 1  # 沒有觸發第二次（限制性重新生成）呼叫
+    data_chunk = next(c for c in chunks if c.startswith("data: "))
+    assert json.loads(data_chunk[len("data: "):])["token"] == "婚假為八日。"
+    done_chunk = next(
+        c for c in chunks if c.startswith("event: status\n") and '"phase": "done"' in c
+    )
+    assert json.loads(done_chunk.split("\n", 1)[1][len("data: "):])["regenerated"] is False
+
+
+@pytest.mark.asyncio
+async def test_chat_regenerates_with_constrained_prompt_when_ungrounded(monkeypatch):
+    """草稿有未接地陳述時，應該用 `_build_constrained_prompt()` 重新生成一次，
+    使用者最終收到的 `data:` 事件是修正版而非草稿（對應使用者要求「寧願說
+    不知道，也禁止亂回答」）。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY", "object": "八日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["婚假三日，我自己推測的。", "資料未明確記載，無法確認婚假天數。"],
+        grounding_payloads=[
+            json.dumps({"claims": [{"statement": "婚假三日", "supported": False, "reason": "查無此數字"}]}),
+            json.dumps({"claims": [{"statement": "資料未明確記載，無法確認婚假天數。", "supported": True, "reason": ""}]}),
+        ],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    payload = ChatRequest(question="婚假幾天？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert len(llm.prompts) == 2  # 草稿 + 限制性重新生成各一次
+    constrained_prompt = llm.prompts[1]
+    assert "婚假三日" in constrained_prompt  # 把未接地陳述列出來要求不要重複
+    assert "資料未明確記載" in constrained_prompt  # 明確要求答不知道而非臆測
+
+    data_chunk = next(c for c in chunks if c.startswith("data: "))
+    assert json.loads(data_chunk[len("data: "):])["token"] == "資料未明確記載，無法確認婚假天數。"
+    assert "婚假三日" not in data_chunk  # 使用者最終看到的不是未接地的草稿
+
+    done_chunk = next(
+        c for c in chunks if c.startswith("event: status\n") and '"phase": "done"' in c
+    )
+    assert json.loads(done_chunk.split("\n", 1)[1][len("data: "):])["regenerated"] is True
+
+    grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
+    grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
+    assert grounding_data[0]["supported"] is True  # 反映修正版，非草稿的核對結果
+
+
+@pytest.mark.asyncio
+async def test_chat_emits_status_events_in_expected_order(monkeypatch):
+    kg_id = uuid4()
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM()  # 預設空 claims，不觸發重新生成
+    _chat_common_monkeypatch(monkeypatch, llm, embedding)
+
+    payload = ChatRequest(question="任意問題", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    status_phases = [
+        json.loads(c.split("\n", 1)[1][len("data: "):])["phase"]
+        for c in chunks
+        if c.startswith("event: status\n")
+    ]
+    assert status_phases == ["generating", "verifying", "done"]
 
 
 @pytest.mark.asyncio
