@@ -9,7 +9,7 @@
 | 資料夾 | 對應論文章節（2026-07-23 起） | 狀態 |
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）；01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 25 篇 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）、§ 3.6 方案 B（拒答／abstention，2026-08-28 新增）；01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 26 篇 |
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留）；03_系統設計與方法論.md § 3.1.3／3.1.4／3.2 §b（2026-07-24 擴充；2026-07-26 補充抽取分工文獻與 cascade deferral 文獻；2026-07-27 補充描述句 embedding 文獻與背景任務執行模型文獻） | 🟡 已下載 20 篇，1 篇付費未下載，另有數篇標註規範/社群方針頁面非論文（僅記書目） |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.4.8（RQ6） | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.5（評估方法論的橫向文獻回顧） | ⚪ 待下載 |
@@ -22,6 +22,7 @@
 | `12_三元組事實層級向量化與檢索/` | 03_系統設計與方法論.md § 3.1.4 §a（事實層級向量化，RQ1/RQ3，即時路徑已實作，§b 回填仍為設計提案） | 🟢 已下載 3 篇，另交叉引用 02 資料夾既有的 LightRAG，四篇皆已全文精讀 |
 | `13_實體節點向量化去重開源專案/` | 03_系統設計與方法論.md § 3.1.4「實體對齊/去重」（`DEDUP4`／`resolve_entity_name()`，Entity 節點 `name_embedding` 效能改造，2026-08-03 已定案並實作） | ✅ 機制已實作；文獻查證仍為 🟡 初步層級，已下載 2 篇，另查證 3 個 1000★+ 開源專案，皆僅初步查證未全文精讀 |
 | `14_文件識別碼決定性推導/` | 03_系統設計與方法論.md § 3.1.4 §c（文件識別碼決定性推導機制，Document UUID，2026-08-18 已定案並實作） | ✅ 機制已實作；🟢 RFC 4122 全文已下載，langchain-ai/langchain（144,437★）原始碼已直接讀取確認機制，Kimball Group 官方技術文章已查證，皆屬初步查證層級（機制先例／方法論框架佐證，非逐字精讀論文） |
+| `16_少樣本提示範例干擾/` | 03_系統設計與方法論.md § 3.1.3（SVO 抽取 prompt 範例設計）；`docs/論文/03_變更紀錄.md` 2026-08-28「規則7範例相似度」條目（2026-08-28 新增） | ✅ 機制已修正；🟢 已下載 1 篇 |
 
 ## 01_AGI與智慧定義 內容清單
 
@@ -72,6 +73,7 @@
 | `asai-et-al-2023-self-rag.pdf` | Asai et al. (2023), *Self-RAG*，ICLR 2024（供 1.2 節 RQ3 使用） | arXiv:2310.11511 |
 | `jiang-et-al-2023-flare.pdf` | Jiang et al. (2023), *FLARE*，EMNLP 2023（供 1.2 節 RQ3 使用） | arXiv:2305.06983 |
 | `trivedi-et-al-2022-ircot.pdf` | Trivedi et al. (2022), *IRCoT*，ACL 2023（供 1.2 節 RQ3 使用） | arXiv:2212.10509 |
+| `wen-et-al-2025-abstention-survey.pdf` | Wen, Yao, Feng, Xu, Tsvetkov, Howe & Wang (2025), *Know Your Limits: A Survey of Abstention in Large Language Models*，TACL 13, 529-556（事實接地性核對方案 B「限制性重新生成」的拒答設計原則佐證，2026-08-28 新增，供 § 3.6 使用） | arXiv:2407.18418；ACL Anthology 2025.tacl-1.26 |
 
 ## 03_資訊抽取與本體設計 內容清單
 
@@ -169,6 +171,12 @@
 | `linacre-et-al-2022-splink.pdf` | Linacre et al. (2022), *Splink: Free software for probabilistic record linkage at scale*，International Journal of Population Data Science 7(3) | DOI: 10.23889/ijpds.v7i3.1794 |
 
 **開源專案查證（不下載全文，僅 `gh api` 驗證真實性）**：`neo4j-labs/llm-graph-builder`（4,979★，Entity 節點 embedding+向量索引+去重機制，同構於本專案 DEDUP4 設計選項）、`moj-analytical-services/splink`（2,310★，上列兩篇文獻的生產級落地）、`zinggAI/zingg`（1,233★，查無學術文獻依據，僅工程參考價值）——完整查證細節與誠實限制見 `13_實體節點向量化去重開源專案/README.md`。
+
+## 16_少樣本提示範例干擾 內容清單
+
+| 檔案 | 文獻 | 來源 |
+|---|---|---|
+| `ali-wolf-titov-2026-copy-bias-icl.pdf` | Ali, Wolf & Titov (2026), *Mitigating Copy Bias in In-Context Learning through Neuron Pruning*，Findings of EACL 2026, pp. 230-251（命名並佐證「複製偏誤」——真實踩到 SVO 抽取 prompt 兩個結構相似範例導致 LLM 抄錯範例主詞的失效案例，2026-08-28 新增） | arXiv:2410.01288；ACL Anthology 2026.findings-eacl.13 |
 
 ## 下載原則
 
