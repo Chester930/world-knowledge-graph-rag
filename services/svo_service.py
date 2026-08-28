@@ -199,6 +199,15 @@ subject: "適用勞動基準法之外國人於聘僱許可有效期間內，向�
 {{"subject":"事假", "verb":"一年內合計不得超過", "object":"十四日"}}
 {{"subject":"事假期間", "verb":"不給", "object":"工資"}}
 
+反例（不要這樣做——數量緊貼在名詞後面時，把數量黏進 object，導致之後查「婚假」查不到天數）：
+原文："勞工結婚者給予婚假八日，工資照給。"
+只輸出 {{"subject":"勞工", "verb":"結婚者給予", "object":"婚假八日"}}，把「婚假」跟「八日」黏成一個詞塞進 object，天數變成查不到的死資訊。
+
+正確做法（即使數量緊貼在名詞後面、看起來像一個詞，也要拆成獨立三元組，不要黏在一起；subject／verb／object 必須反映這段原文本身的措辭，不可以照抄其他範例的用字）：
+{{"subject":"勞工", "verb":"結婚者給予", "object":"婚假"}}
+{{"subject":"婚假", "verb":"天數為", "object":"八日"}}
+{{"subject":"婚假", "verb":"照給", "object":"工資"}}
+
 8. 若文本是「共同前提＋下列各款列舉項目」的結構（如「……下列各款……均不計入：一、……。二、……。」），每個列舉項目都要各自形成一筆完整的三元組，繼承共同的動詞與另一端實體，不可以 subject 填了、object 卻留空（或反過來）。
 
 反例（不要這樣做——列舉項目的 object 留空，資訊不完整）：
@@ -1028,6 +1037,98 @@ async def merge_triples_to_graph(
                 confidence=triple.confidence,
                 article_no=triple.source_article_no,
             )
+
+
+async def revoke_chunk_facts(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    source_doc_id: str,
+    chunk_index: int,
+) -> dict:
+    """重新抽取某個 chunk 前的清理：撤銷這個 chunk 先前寫入的 Fact 節點與
+    Entity 關係邊上的 citation（2026-08-28，見 `docs/論文/03_變更紀錄.md`
+    「規則7/8/9 修正前抽取資料的重抽取」設計）。
+
+    **背景**：`merge_triples_to_graph()` 對兩種節點的冪等性不同——Fact 節點
+    是 `CREATE`（見 `_create_fact_node()`），完全沒有去重，同一 chunk 重跑
+    兩次會直接產生兩倍的 Fact 節點；Entity 關係邊是 `MERGE`，鍵為
+    `(kg_id, subject, rel_type, object)`，且**一條邊設計上會累積多個 chunk
+    的 citations**（`citations_json`，見該函式 docstring「事實層級去重」）。
+    若不先清理就重跑：(1) Fact 節點直接重複；(2) 若新版三元組的
+    `object`／`rel_type` 跟舊版不同（例如本次規則7修正後「婚假→八日」
+    vs. 舊版「婚假→''」），會多出一條新邊，舊的錯誤邊變成沒人清理的孤兒
+    垃圾資料，新舊兩條邊同時存在。
+
+    **不能整條邊直接刪除**——`citations_json` 可能同時累積了其他、未受
+    影響的 chunk 的 citation，必須先只移除屬於這個 chunk 的那幾筆；移除後
+    若清單變空才把整條邊一起刪除，否則保留邊、重算 `confidence`（沿用
+    `merge_triples_to_graph()` 既有的 `confidence = max(citations)` 規則）。
+
+    Entity 節點本身不刪除——`(kg_id, name)` 已有唯一約束防重複（見
+    `create_entity_index()`），且同一個 Entity 通常被多個 chunk／文件共用，
+    刪除是不安全的；只清理 Fact 節點與關係邊上「屬於這個 chunk」的部分。
+
+    回傳統計字典（`facts_deleted`／`edges_updated`／`edges_deleted`）供呼叫端
+    （重抽取批次腳本）記錄與驗證，不靜默執行。
+    """
+    kg_id_str = str(kg_id)
+
+    fact_result = await driver.execute_query(
+        """
+        MATCH (f:Fact {kg_id: $kg_id, source_doc_id: $source_doc_id, source_svo_chunk_index: $chunk_index})
+        DETACH DELETE f
+        RETURN count(f) AS deleted
+        """,
+        kg_id=kg_id_str, source_doc_id=source_doc_id, chunk_index=chunk_index,
+    )
+    facts_deleted = fact_result.records[0]["deleted"] if fact_result.records else 0
+
+    # 關係邊型別（rel_type）在寫入時可以是 SVO_REL_TYPES 裡任何一個，這裡
+    # 不指定型別、只靠 `r.citations_json IS NOT NULL` 篩出真正的 SVO 事實邊
+    # （`HAS_SUBJECT`／`HAS_OBJECT`／`SUPPORTED_BY`／`HAS_ENTITY` 等其他邊
+    # 型別都沒有這個屬性，自然被排除）。
+    edge_result = await driver.execute_query(
+        """
+        MATCH (s:Entity {kg_id: $kg_id})-[r]->(o:Entity {kg_id: $kg_id})
+        WHERE r.citations_json IS NOT NULL
+        RETURN elementId(r) AS rel_id, r.citations_json AS citations_json
+        """,
+        kg_id=kg_id_str,
+    )
+
+    edges_updated = 0
+    edges_deleted = 0
+    for record in edge_result.records:
+        citations = json.loads(record["citations_json"] or "[]")
+        remaining = [
+            c for c in citations
+            if not (
+                c.get("source_doc_id") == source_doc_id
+                and c.get("source_svo_chunk_index") == chunk_index
+            )
+        ]
+        if len(remaining) == len(citations):
+            continue  # 這條邊沒有屬於這個 chunk 的 citation，不動它
+
+        if remaining:
+            await driver.execute_query(
+                """
+                MATCH ()-[r]->() WHERE elementId(r) = $rel_id
+                SET r.citations_json = $citations_json, r.confidence = $confidence
+                """,
+                rel_id=record["rel_id"],
+                citations_json=json.dumps(remaining, ensure_ascii=False),
+                confidence=max(c["confidence"] for c in remaining),
+            )
+            edges_updated += 1
+        else:
+            await driver.execute_query(
+                "MATCH ()-[r]->() WHERE elementId(r) = $rel_id DELETE r",
+                rel_id=record["rel_id"],
+            )
+            edges_deleted += 1
+
+    return {"facts_deleted": facts_deleted, "edges_updated": edges_updated, "edges_deleted": edges_deleted}
 
 
 async def create_fact_vector_index(

@@ -2095,6 +2095,112 @@ async def test_merge_triples_to_graph_creates_separate_fact_per_citation_even_wh
     assert {f["verb"] for f in driver.facts} == {"創立", "創辦"}
 
 
+# ── revoke_chunk_facts（2026-08-28，重抽取前清理，見 docs/論文/03_變更紀錄.md
+# 「規則7/8/9 修正前抽取資料的重抽取」設計）──────────────────────────
+
+
+class _FakeRevokeDriver:
+    """辨識 `revoke_chunk_facts()` 實際發出的三種查詢形狀（Fact 刪除計數、
+    候選邊列舉、邊更新／刪除），不連線真實 Neo4j 即可驗證 citation 層級的
+    精準移除邏輯。"""
+
+    def __init__(self, *, fact_deleted_count: int, edges: list[dict]):
+        self.fact_deleted_count = fact_deleted_count
+        self._edges = edges  # [{"rel_id": ..., "citations_json": ...}]
+        self.set_calls: list[dict] = []
+        self.delete_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        q = query.strip()
+        if "MATCH (f:Fact" in q and "DETACH DELETE f" in q:
+            return FakeResult([FakeRecord(deleted=self.fact_deleted_count)])
+        if q.startswith("MATCH (s:Entity {kg_id: $kg_id})-[r]->(o:Entity"):
+            return FakeResult([FakeRecord(**e) for e in self._edges])
+        if "SET r.citations_json" in q:
+            self.set_calls.append(params)
+            return FakeResult([])
+        if q.startswith("MATCH ()-[r]->() WHERE elementId(r) = $rel_id DELETE r"):
+            self.delete_calls.append(params)
+            return FakeResult([])
+        raise AssertionError(f"未預期的查詢：{q}")
+
+
+@pytest.mark.asyncio
+async def test_revoke_chunk_facts_reports_fact_deletion_count():
+    driver = _FakeRevokeDriver(fact_deleted_count=3, edges=[])
+
+    result = await svc.revoke_chunk_facts(driver, uuid4(), "doc-1", 2)
+
+    assert result["facts_deleted"] == 3
+    assert result["edges_updated"] == 0
+    assert result["edges_deleted"] == 0
+
+
+@pytest.mark.asyncio
+async def test_revoke_chunk_facts_deletes_edge_when_last_citation_removed():
+    """邊上唯一的 citation 就是這個 chunk 的──移除後清單變空，整條邊應該
+    被刪除，而不是留下一個 citations_json='[]' 的空殼邊。"""
+    citations = json.dumps([
+        {"source_doc_id": "doc-1", "source_svo_chunk_index": 2, "confidence": 4},
+    ])
+    driver = _FakeRevokeDriver(
+        fact_deleted_count=0,
+        edges=[{"rel_id": "rel-1", "citations_json": citations}],
+    )
+
+    result = await svc.revoke_chunk_facts(driver, uuid4(), "doc-1", 2)
+
+    assert result["edges_deleted"] == 1
+    assert result["edges_updated"] == 0
+    assert driver.delete_calls == [{"rel_id": "rel-1"}]
+    assert driver.set_calls == []
+
+
+@pytest.mark.asyncio
+async def test_revoke_chunk_facts_keeps_edge_and_removes_only_matching_citation():
+    """邊上還累積了其他 chunk 的 citation（跨 chunk 收斂的既有事實層級去重
+    行為）──不能整條邊刪除，只能精準移除屬於這個 chunk 的那一筆，並重算
+    confidence（沿用 merge_triples_to_graph() 的 max(citations) 規則）。"""
+    citations = json.dumps([
+        {"source_doc_id": "doc-1", "source_svo_chunk_index": 2, "confidence": 5},
+        {"source_doc_id": "doc-1", "source_svo_chunk_index": 99, "confidence": 2},
+    ])
+    driver = _FakeRevokeDriver(
+        fact_deleted_count=1,
+        edges=[{"rel_id": "rel-1", "citations_json": citations}],
+    )
+
+    result = await svc.revoke_chunk_facts(driver, uuid4(), "doc-1", 2)
+
+    assert result["edges_updated"] == 1
+    assert result["edges_deleted"] == 0
+    assert driver.delete_calls == []
+    assert len(driver.set_calls) == 1
+    remaining = json.loads(driver.set_calls[0]["citations_json"])
+    assert len(remaining) == 1
+    assert remaining[0]["source_svo_chunk_index"] == 99
+    assert driver.set_calls[0]["confidence"] == 2  # 只剩下 chunk 99 的 citation
+
+
+@pytest.mark.asyncio
+async def test_revoke_chunk_facts_ignores_edges_without_matching_citation():
+    """邊上的 citation 全部屬於其他 chunk──不應該被動到（既不更新也不
+    刪除），避免誤傷跟這次重抽取無關的資料。"""
+    citations = json.dumps([
+        {"source_doc_id": "doc-1", "source_svo_chunk_index": 99, "confidence": 2},
+    ])
+    driver = _FakeRevokeDriver(
+        fact_deleted_count=0,
+        edges=[{"rel_id": "rel-1", "citations_json": citations}],
+    )
+
+    result = await svc.revoke_chunk_facts(driver, uuid4(), "doc-1", 2)
+
+    assert result == {"facts_deleted": 0, "edges_updated": 0, "edges_deleted": 0}
+    assert driver.set_calls == []
+    assert driver.delete_calls == []
+
+
 @pytest.mark.asyncio
 async def test_create_fact_vector_index_without_driver_is_noop():
     await svc.create_fact_vector_index(None)  # 不應拋出例外
