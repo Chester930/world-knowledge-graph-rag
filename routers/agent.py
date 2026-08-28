@@ -319,18 +319,26 @@ def _build_constrained_prompt(
     question: str,
     fact_lines: list[str],
     history: list[ChatMessage] | None,
-    unsupported_statements: list[str],
 ) -> str:
-    """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、6）。
+    """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、9）。
 
     只在 `verify_fact_grounding()` 抓到未接地陳述時才呼叫。跟 `_build_prompt()`
-    的差異：(1) 不再給「事實不足可補充自己知識」的空間，改為明確禁止；
-    (2) 把上一版被標記未接地的陳述列出來，明確要求不要重複；(3) 事實不足時
-    要求直接回答「資料未明確記載」，對應使用者「寧願說不知道，也不要亂
+    的差異：不再給「事實不足可補充自己知識」的空間，改為明確禁止，事實不足
+    時要求直接回答「資料未明確記載」，對應使用者「寧願說不知道，也不要亂
     回答」的明確要求。
+
+    ⚠️ **刻意不把上一版（草稿）或其未接地陳述放進這個 prompt**——2026-08-28
+    讀 Dhuliawala et al. (2023) Chain-of-Verification 全文後的設計修正：該論文
+    明確指出「joint」作法（修正步驟的 context 裡包含原始草稿）會讓修正結果
+    傾向重複草稿裡的錯誤內容（"verification answers have to condition on the
+    initial response... may increase the likelihood of repetition"），因此改採
+    論文建議的「2-step／factored」作法——修正步驟的 context **只有**事實清單
+    與問題本身，看不到有幻覺風險的草稿或其中的錯誤陳述，避免文字錨定效應
+    讓模型忍不住抄自己剛講過的內容。舊版曾把未接地陳述列出來要求「不要
+    重複」，反而正是論文警告的反面案例——先讓模型看到錯誤內容，再指望它
+    自己避開。
     """
     facts = "\n".join(fact_lines) if fact_lines else "（本輪未檢索到任何事實）"
-    unsupported_block = "\n".join(f"- {s}" for s in unsupported_statements) or "（無）"
 
     history_block = ""
     if history:
@@ -342,15 +350,11 @@ def _build_constrained_prompt(
 以下是從知識圖譜檢索到的事實，這是你這次「唯一」能引用的資訊來源：
 {facts}
 
-上一版回答中，以下陳述經核對「找不到對應的事實依據」（可能是臆測、推論，或錯誤數字）：
-{unsupported_block}
-
 {history_block}問題：{question}
 
-請重新回答上述問題，並嚴格遵守：
+請回答上述問題，並嚴格遵守：
 1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。
 2. 若事實清單不足以完整回答問題的某個部分，該部分請直接回答「資料未明確記載，無法確認」，不要臆測或用自己的知識填補。
-3. 不要重複上一版被判定為未接地的那些陳述。
 """
 
 
@@ -472,9 +476,11 @@ async def chat(payload: ChatRequest):
         # 明確記載」，違背該模式本身「允許補充自身知識」的設計。只在
         # use_svo=True（有 KG 事實可供核對）時才觸發重新生成。
         if payload.use_svo and grounding and any(not c.supported for c in grounding):
-            unsupported = [c.statement for c in grounding if not c.supported]
+            # 刻意不把草稿或未接地陳述傳進去——見 _build_constrained_prompt()
+            # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
+            # 草稿會傾向重複草稿裡的錯誤內容）。
             constrained_prompt = _build_constrained_prompt(
-                payload.question, fact_lines, payload.history, unsupported
+                payload.question, fact_lines, payload.history
             )
             corrected_parts: list[str] = []
             async for token in llm_provider.stream(constrained_prompt):

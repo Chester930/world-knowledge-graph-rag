@@ -9,7 +9,7 @@
 | 資料夾 | 對應論文章節（2026-07-23 起） | 狀態 |
 |---|---|---|
 | `01_AGI與智慧定義/` | 01_緒論.md § 1.1.1-1.1.4 | 🟢 已下載 13 篇 |
-| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）、§ 3.6 方案 B（拒答／abstention，2026-08-28 新增）；01_緒論.md § 1.1.1、1.1.4；`docs/報告/04_GraphRAG深度文獻回顧.md` | 🟢 已下載 26 篇 |
+| `02_RAG與GraphRAG/` | 02_文獻探討.md § 2.4.2／2.4.3（GraphRAG，RQ1/RQ2）、§ 2.4.6（T-GRAG，RQ5）、§ 2.4.7（RAG 演進，RQ3）、§ 2.5（評估方法論）、§ 3.6 方案 B（拒答／abstention，2026-08-28 新增；Chain-of-Verification 全文同日補齊下載並據以修正實作） | 🟢 已下載 27 篇 |
 | `03_資訊抽取與本體設計/` | 02_文獻探討.md § 2.4.4（RQ4a）；01_緒論.md § 1.2 RQ4a（預留）；03_系統設計與方法論.md § 3.1.3／3.1.4／3.2 §b（2026-07-24 擴充；2026-07-26 補充抽取分工文獻與 cascade deferral 文獻；2026-07-27 補充描述句 embedding 文獻與背景任務執行模型文獻） | 🟡 已下載 20 篇，1 篇付費未下載，另有數篇標註規範/社群方針頁面非論文（僅記書目） |
 | `04_圖遍歷與大節點問題/` | 02_文獻探討.md § 2.4.8（RQ6） | ⚪ 待下載 |
 | `05_評估方法論/` | 02_文獻探討.md § 2.5（評估方法論的橫向文獻回顧） | ⚪ 待下載 |
@@ -73,6 +73,7 @@
 | `asai-et-al-2023-self-rag.pdf` | Asai et al. (2023), *Self-RAG*，ICLR 2024（供 1.2 節 RQ3 使用） | arXiv:2310.11511 |
 | `jiang-et-al-2023-flare.pdf` | Jiang et al. (2023), *FLARE*，EMNLP 2023（供 1.2 節 RQ3 使用） | arXiv:2305.06983 |
 | `trivedi-et-al-2022-ircot.pdf` | Trivedi et al. (2022), *IRCoT*，ACL 2023（供 1.2 節 RQ3 使用） | arXiv:2212.10509 |
+| `dhuliawala-et-al-2023-chain-of-verification.pdf` | Dhuliawala et al. (2023), *Chain-of-Verification Reduces Hallucination in Large Language Models*，ACL 2024 Findings（此前僅查證摘要，2026-08-28 補齊下載並全文精讀，據以修正 `_build_constrained_prompt()` 設計——見 § 3.6 方案 B「設計修正」） | arXiv:2309.11495 |
 | `wen-et-al-2025-abstention-survey.pdf` | Wen, Yao, Feng, Xu, Tsvetkov, Howe & Wang (2025), *Know Your Limits: A Survey of Abstention in Large Language Models*，TACL 13, 529-556（事實接地性核對方案 B「限制性重新生成」的拒答設計原則佐證，2026-08-28 新增，供 § 3.6 使用） | arXiv:2407.18418；ACL Anthology 2025.tacl-1.26 |
 
 ## 03_資訊抽取與本體設計 內容清單

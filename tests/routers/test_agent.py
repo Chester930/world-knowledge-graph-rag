@@ -843,7 +843,10 @@ async def test_chat_regenerates_with_constrained_prompt_when_ungrounded(monkeypa
 
     assert len(llm.prompts) == 2  # 草稿 + 限制性重新生成各一次
     constrained_prompt = llm.prompts[1]
-    assert "婚假三日" in constrained_prompt  # 把未接地陳述列出來要求不要重複
+    # 2026-08-28：讀完 Dhuliawala et al. (2023) CoVe 全文後修正——修正步驟的
+    # prompt 刻意不放草稿或未接地陳述（避免文字錨定效應讓模型重複自己的
+    # 錯誤），只放事實清單＋問題＋強約束指示。
+    assert "婚假三日" not in constrained_prompt
     assert "資料未明確記載" in constrained_prompt  # 明確要求答不知道而非臆測
 
     data_chunk = next(c for c in chunks if c.startswith("data: "))
