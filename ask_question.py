@@ -48,6 +48,7 @@ async def _ask(kg_id: UUID, question: str, *, top_k: int, use_svo: bool, hops: i
     sources: dict | None = None
     grounding: list[dict] | None = None
     error: str | None = None
+    regenerated: bool | None = None  # 2026-08-28：見 event: status（方案B限制性重新生成）
 
     async for chunk in response.body_iterator:
         if chunk.startswith("event: error"):
@@ -60,10 +61,18 @@ async def _ask(kg_id: UUID, question: str, *, top_k: int, use_svo: bool, hops: i
             # 2026-08-24：見 docs/報告/16_事實接地性核對機制設計報告.md。
             data_line = chunk.split("\n", 1)[1]
             grounding = json.loads(data_line[len("data: "):])
+        elif chunk.startswith("event: status"):
+            data_line = chunk.split("\n", 1)[1]
+            status = json.loads(data_line[len("data: "):])
+            if status.get("phase") == "done":
+                regenerated = status.get("regenerated", False)
         elif chunk.startswith("data: "):
             answer_parts.append(json.loads(chunk[len("data: "):])["token"])
 
-    return {"answer": "".join(answer_parts), "sources": sources, "grounding": grounding, "error": error}
+    return {
+        "answer": "".join(answer_parts), "sources": sources, "grounding": grounding,
+        "error": error, "regenerated": regenerated,
+    }
 
 
 def _print_result(question: str, result: dict) -> None:
@@ -73,6 +82,8 @@ def _print_result(question: str, result: dict) -> None:
         return
 
     print(f"【回答】\n{result['answer']}\n")
+    if result.get("regenerated"):
+        print("（⚠️ 草稿有未接地陳述，已觸發限制性重新生成，以上為修正版）\n")
 
     sources = result["sources"] or {}
     triples = sources.get("triples", [])
