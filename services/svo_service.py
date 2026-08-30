@@ -8,6 +8,7 @@ Project: Neo4j is a direct dependency; AutoRE、KGGen、PathRAG 等是方法或�
 tests/routers/test_agent.py.
 """
 from __future__ import annotations
+import asyncio
 import difflib
 import json
 import re
@@ -574,9 +575,11 @@ async def resolve_entity_name(
     return name
 
 
-async def _execute_with_constraint_retry(driver: AsyncDriver, query: str, **params):
+async def _execute_with_constraint_retry(
+    driver: AsyncDriver, query: str, *, max_attempts: int = 3, retry_delay_seconds: float = 0.2, **params
+):
     """執行含 `MERGE (e:Entity {kg_id, name})` 的查詢，撞上 `entity_kg_name_unique`
-    唯一約束（見 `create_entity_index()`）時重試一次（2026-08-30 新增，真實抽取
+    唯一約束（見 `create_entity_index()`）時重試（2026-08-30 新增，真實抽取
     發現）。
 
     **背景**：`MERGE` 搭配唯一約束理論上是原子的，但這是 Neo4j 官方文件本身
@@ -586,18 +589,27 @@ async def _execute_with_constraint_retry(driver: AsyncDriver, query: str, **para
     2026-08-27 新增唯一約束前，這種情況是**靜默產生重複節點**（已修正的
     真實 bug，見 `docs/論文/03_變更紀錄.md` 該則）；加了約束後變成**直接
     拋出例外、讓整個 chunk 抽取判定失敗**——真實跑一輪長時間抽取後發現，
-    這個新副作用本身也需要處理，否則失敗率會被這個假陽性拉高（真實觀測：
-    某輪抽取新增的失敗筆數幾乎全數是同一根因）。
+    這個新副作用本身也需要處理，否則失敗率會被這個假陽性拉高。
 
-    **重試為何安全**：撞上約束代表該節點在重試當下已經存在（前一次嘗試已
-    成功建立），第二次 `MERGE` 會正常命中既有節點、不再觸發約束衝突。只
-    重試一次——若重試仍失敗，代表是別的問題（例如真正的 schema 衝突），
-    不吞掉例外、讓呼叫端照舊往上拋。
+    ⚠️ **誠實侷限（2026-08-30 補充查證）**：第一版只重試一次，真實觀測發現
+    仍有少量案例連重試都撞同一個約束（例如「中央主管機關」這種極高頻的
+    跨文件實體）——手動用相同查詢＋已知已存在的節點單獨重現，MERGE 都能
+    正常命中既有節點、不會拋出例外，代表問題只在真實 pipeline 的實際執行
+    節奏下才會出現，確切機制未查明（已排除：並發 session、多個 drain 程序
+    同時寫入）。這次改成最多 3 次嘗試、每次重試前短暫等待
+    （`retry_delay_seconds`，預設 0.2 秒），降低發生率但不保證完全消除；
+    仍會撞上的極少數 chunk，依既有做法定期把 `failed` 狀態重置回 `pending`
+    重跑即可（`task_queue` 本身就是為了容忍這類可重試失敗而設計）。
     """
-    try:
-        return await driver.execute_query(query, **params)
-    except ConstraintError:
-        return await driver.execute_query(query, **params)
+    last_error: ConstraintError | None = None
+    for attempt in range(max_attempts):
+        try:
+            return await driver.execute_query(query, **params)
+        except ConstraintError as e:
+            last_error = e
+            if attempt < max_attempts - 1:
+                await asyncio.sleep(retry_delay_seconds)
+    raise last_error
 
 
 async def _merge_chunk_mention(

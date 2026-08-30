@@ -1309,21 +1309,26 @@ class _AlwaysFailsDriver:
 async def test_execute_with_constraint_retry_succeeds_on_second_attempt():
     driver = _FlakyOnceDriver()
 
-    result = await svc._execute_with_constraint_retry(driver, "MERGE (e:Entity) RETURN e", name="x")
+    result = await svc._execute_with_constraint_retry(
+        driver, "MERGE (e:Entity) RETURN e", retry_delay_seconds=0, name="x"
+    )
 
     assert result.records == []
     assert driver.call_count == 2  # 第一次撞約束，第二次重試成功
 
 
 @pytest.mark.asyncio
-async def test_execute_with_constraint_retry_reraises_after_one_retry():
-    """只重試一次——若重試仍失敗，代表是別的問題，不可無限重試吞掉例外。"""
+async def test_execute_with_constraint_retry_reraises_after_max_attempts():
+    """最多重試到 max_attempts 次——若一直失敗，代表是別的問題，不可無限
+    重試吞掉例外。"""
     driver = _AlwaysFailsDriver()
 
     with pytest.raises(ConstraintError):
-        await svc._execute_with_constraint_retry(driver, "MERGE (e:Entity) RETURN e", name="x")
+        await svc._execute_with_constraint_retry(
+            driver, "MERGE (e:Entity) RETURN e", max_attempts=3, retry_delay_seconds=0, name="x"
+        )
 
-    assert driver.call_count == 2  # 原始呼叫 + 一次重試，不會有第三次
+    assert driver.call_count == 3  # 原始呼叫 + 兩次重試，不會有第四次
 
 
 # ── merge_entity（含 RECORD3B／RECHECK/UPDATENAME 跨文件標準名更新）─────────
