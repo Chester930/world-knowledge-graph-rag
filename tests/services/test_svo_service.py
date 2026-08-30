@@ -1087,6 +1087,20 @@ async def test_fetch_entity_candidates_excludes_disjoint_type():
 
 
 @pytest.mark.asyncio
+async def test_fetch_entity_candidates_includes_exact_name_match_despite_disjoint_type():
+    """2026-08-30 修正（真實抽取發現的真實 bug）：即使型別集合無交集，只要
+    `name` 與既有節點精確字串相符，仍必須納入候選——否則 `resolve_entity_name()`
+    的精確相符短路完全看不到既有正確節點，會退化成用編輯距離/cosine比對到
+    錯誤候選，後續改名邏輯撞上既有節點觸發 ConstraintError（真實案例：
+    「中央主管機關」有時判成 ORGANIZATION、有時沒有明確型別）。"""
+    driver = FakeDriver(records=[FakeRecord(name="中央主管機關", type="ORGANIZATION")])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "概念", name="中央主管機關")
+
+    assert {c["name"] for c in candidates} == {"中央主管機關"}
+
+
+@pytest.mark.asyncio
 async def test_fetch_entity_candidates_includes_partial_type_overlap():
     """查詢型別「人物,組織」與既有節點型別「組織,地點」有交集（組織），
     即使非完全相等也應視為候選——完全相等篩選會誤刪本該比對的候選。"""
@@ -1448,6 +1462,55 @@ async def test_merge_entity_recheck_promotes_more_frequent_surface_form():
     assert sorted(driver.entities[(str(kg_id), "I-35")]["aliases"]) == sorted(
         ["I-35", "Interstate Highway 35"]
     )
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_falls_back_to_resolved_name_when_promotion_collides(monkeypatch):
+    """2026-08-30 真實抽取發現的真實 bug：跨文件標準名提升（RECHECK）決定把
+    `resolved_name` 改名成 `final_name`（更常見的別名）時，`final_name` 可能
+    已經是另一個既有節點的名稱（見 `_fetch_entity_candidates()` docstring
+    的根因說明），此時 `SET e.name = $final_name` 撞上唯一約束。這是決定性
+    的名稱衝突、不是可重試解決的競態——不應讓整個 chunk 抽取失敗，應保留
+    `resolved_name`（已成功 MERGE 的既有節點）不改名。"""
+    kg_id = uuid4()
+
+    class _RenameCollisionDriver:
+        def __init__(self):
+            self.rename_attempts = 0
+
+        async def execute_query(self, query, **params):
+            if query.startswith("MATCH (e:Entity {kg_id: $kg_id, name: $resolved_name}) SET e.name"):
+                self.rename_attempts += 1
+                raise ConstraintError("Node already exists")
+            return FakeResult([])
+
+    driver = _RenameCollisionDriver()
+
+    async def fake_fetch_candidates(*a, **k):
+        return []
+
+    async def fake_resolve_entity_name(*a, **k):
+        return "中央主管機關備查"  # 模擬型別篩選漏掉精確相符、比對到錯誤候選
+
+    async def fake_merge_chunk_mention(*a, **k):
+        return None
+
+    async def fake_aggregate_alias_counts(*a, **k):
+        return {"中央主管機關備查": 1, "中央主管機關": 5}
+
+    monkeypatch.setattr(svc, "_fetch_entity_candidates", fake_fetch_candidates)
+    monkeypatch.setattr(svc, "resolve_entity_name", fake_resolve_entity_name)
+    monkeypatch.setattr(svc, "_merge_chunk_mention", fake_merge_chunk_mention)
+    monkeypatch.setattr(svc, "_aggregate_alias_counts", fake_aggregate_alias_counts)
+    monkeypatch.setattr(svc, "should_promote_by_frequency", lambda *a, **k: True)
+
+    final_name = await svc.merge_entity(
+        driver, kg_id, "中央主管機關", "概念", "中央主管機關",
+        source_doc_id=uuid4(), source_svo_chunk_index=1,
+    )
+
+    assert final_name == "中央主管機關備查"  # 改名失敗，保留原本已成功命中的名稱
+    assert driver.rename_attempts == 1  # 只嘗試一次改名，不會無限重試（決定性衝突重試無意義）
 
 
 @pytest.mark.asyncio

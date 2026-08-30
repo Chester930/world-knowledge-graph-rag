@@ -471,7 +471,9 @@ def _type_set(type_str: str | None) -> set[str]:
     return {t.strip() for t in type_str.split(",") if t.strip()}
 
 
-async def _fetch_entity_candidates(driver: AsyncDriver, kg_id: UUID, entity_type: str) -> list[dict]:
+async def _fetch_entity_candidates(
+    driver: AsyncDriver, kg_id: UUID, entity_type: str, name: str | None = None
+) -> list[dict]:
     """查詢同 KG 的既有 Entity 節點，依型別集合交集篩選（名稱＋已持久化的
     `name_embedding`，供編輯距離/cosine 比對）。
 
@@ -482,6 +484,17 @@ async def _fetch_entity_candidates(driver: AsyncDriver, kg_id: UUID, entity_type
     一併撈出 `name_embedding`（2026-08-03 新增，見 3.1.4 `DEDUP4` 節點向量化
     效能改造）：舊資料尚未回填時此欄位為 `None`，`resolve_entity_name()` 會
     針對缺漏者 fallback 即時 `encode()`，新舊資料混存不影響正確性。
+
+    ⚠️ **2026-08-30 修正（真實抽取發現的真實 bug）**：`name` 參數提供時，
+    只要 `e.name` 與其**精確字串相符**，無論型別是否有交集都一律納入候選。
+    真實案例：「中央主管機關」同一實體，不同次抽取判斷出的型別不一致
+    （有時是 `ORGANIZATION`，有時 LLM 沒給明確型別、落到通用的「概念」），
+    型別交集篩選把兩者當成互不相干的候選——導致 `resolve_entity_name()`
+    的精確相符短路完全看不到既有的正確節點，退化成用編輯距離/cosine比對
+    到錯誤的候選（例如比對到「中央主管機關備查」），後續跨文件標準名提升
+    邏輯再把這個錯誤候選改名成正確名稱時，撞上本來就叫這個名稱的既有
+    節點，觸發 `ConstraintError`（見 `merge_entity()` 該段落與
+    `docs/論文/03_變更紀錄.md` 對應條目）。
     """
     result = await driver.execute_query(
         "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding",
@@ -493,7 +506,7 @@ async def _fetch_entity_candidates(driver: AsyncDriver, kg_id: UUID, entity_type
     return [
         {"name": r["name"], "name_embedding": r.get("name_embedding")}
         for r in result.records
-        if not _type_set(r["type"]) or query_types & _type_set(r["type"])
+        if r["name"] == name or not _type_set(r["type"]) or query_types & _type_set(r["type"])
     ]
 
 
@@ -722,7 +735,7 @@ async def merge_entity(
     實作與第五章消融實驗評估，非本設計階段的阻斷性問題（比照 3.1.1 §a
     未分配池 O(n²) 的既有處理方式）。
     """
-    candidates = await _fetch_entity_candidates(driver, kg_id, entity_type)
+    candidates = await _fetch_entity_candidates(driver, kg_id, entity_type, name)
     resolved_name = await resolve_entity_name(
         name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider
     )
@@ -755,13 +768,25 @@ async def merge_entity(
     ):
         final_name = surface_form  # RECHECK/UPDATENAME：標準名隨語料持續擴增而更新
 
-    await driver.execute_query(
-        "MATCH (e:Entity {kg_id: $kg_id, name: $resolved_name}) SET e.name = $final_name, e.aliases = $aliases",
-        kg_id=str(kg_id),
-        resolved_name=resolved_name,
-        final_name=final_name,
-        aliases=list(alias_counts.keys()),
-    )
+    # 2026-08-30 修正：改名（promote 到更常見的別名）理論上很安全——
+    # `final_name` 通常是本來就沒有對應節點的新別名。但真實抽取發現一個
+    # 殘留情境（見 `_fetch_entity_candidates()` docstring 的根因說明修正
+    # 前）：`final_name` 可能已經是另一個既有節點的名稱，此時這條
+    # `SET e.name = $final_name` 會撞上唯一約束。這不是可以重試解決的
+    # 競態（是決定性的名稱衝突），改名的資訊本身也不是不可或缺——保留
+    # 現有 `resolved_name` 不改名，仍是正確、不遺失資料的節點，只是這次
+    # 沒有跟著提升成更常見的別名而已。因此遇到衝突時記錄但不讓整個 chunk
+    # 抽取失敗。
+    try:
+        await driver.execute_query(
+            "MATCH (e:Entity {kg_id: $kg_id, name: $resolved_name}) SET e.name = $final_name, e.aliases = $aliases",
+            kg_id=str(kg_id),
+            resolved_name=resolved_name,
+            final_name=final_name,
+            aliases=list(alias_counts.keys()),
+        )
+    except ConstraintError:
+        return resolved_name
     return final_name
 
 
