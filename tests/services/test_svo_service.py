@@ -3,6 +3,7 @@ import re
 from uuid import uuid4
 
 import pytest
+from neo4j.exceptions import ConstraintError
 
 from core import config
 from core.constants import FACT_SEARCH_CANDIDATE_MULTIPLIER, SVO_REL_TYPES
@@ -1273,6 +1274,56 @@ async def test_resolve_entity_name_gray_zone_without_llm_creates_new_entity():
     candidates = [{"name": "XYZ Corp", "alias_counts_json": "{}"}]
     resolved = await svc.resolve_entity_name("Foo Company", candidates, embedding_provider=embedding)
     assert resolved == "Foo Company"
+
+
+# ── _execute_with_constraint_retry（2026-08-30，真實抽取發現 Entity 唯一
+# 約束在循序執行下仍可能撞上 ConstraintError，見函式 docstring）──────────
+
+
+class _FlakyOnceDriver:
+    """第一次呼叫 execute_query 拋出 ConstraintError，之後正常回傳——模擬
+    MERGE 撞上唯一約束、重試後成功命中既有節點的情境。"""
+
+    def __init__(self):
+        self.call_count = 0
+
+    async def execute_query(self, query: str, **params):
+        self.call_count += 1
+        if self.call_count == 1:
+            raise ConstraintError("Node already exists")
+        return FakeResult([])
+
+
+class _AlwaysFailsDriver:
+    """每次呼叫都拋出 ConstraintError——驗證重試僅一次，不會無限吞掉例外。"""
+
+    def __init__(self):
+        self.call_count = 0
+
+    async def execute_query(self, query: str, **params):
+        self.call_count += 1
+        raise ConstraintError("Node already exists")
+
+
+@pytest.mark.asyncio
+async def test_execute_with_constraint_retry_succeeds_on_second_attempt():
+    driver = _FlakyOnceDriver()
+
+    result = await svc._execute_with_constraint_retry(driver, "MERGE (e:Entity) RETURN e", name="x")
+
+    assert result.records == []
+    assert driver.call_count == 2  # 第一次撞約束，第二次重試成功
+
+
+@pytest.mark.asyncio
+async def test_execute_with_constraint_retry_reraises_after_one_retry():
+    """只重試一次——若重試仍失敗，代表是別的問題，不可無限重試吞掉例外。"""
+    driver = _AlwaysFailsDriver()
+
+    with pytest.raises(ConstraintError):
+        await svc._execute_with_constraint_retry(driver, "MERGE (e:Entity) RETURN e", name="x")
+
+    assert driver.call_count == 2  # 原始呼叫 + 一次重試，不會有第三次
 
 
 # ── merge_entity（含 RECORD3B／RECHECK/UPDATENAME 跨文件標準名更新）─────────

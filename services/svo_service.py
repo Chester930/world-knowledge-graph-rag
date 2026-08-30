@@ -17,6 +17,7 @@ from typing import Mapping, Sequence
 from uuid import UUID
 
 from neo4j import AsyncDriver
+from neo4j.exceptions import ConstraintError
 
 from core.constants import (
     COMPARE_COSINE_THRESHOLD,
@@ -573,6 +574,32 @@ async def resolve_entity_name(
     return name
 
 
+async def _execute_with_constraint_retry(driver: AsyncDriver, query: str, **params):
+    """執行含 `MERGE (e:Entity {kg_id, name})` 的查詢，撞上 `entity_kg_name_unique`
+    唯一約束（見 `create_entity_index()`）時重試一次（2026-08-30 新增，真實抽取
+    發現）。
+
+    **背景**：`MERGE` 搭配唯一約束理論上是原子的，但這是 Neo4j 官方文件本身
+    記載的已知模式——即使呼叫端是循序執行（本專案的抽取 Worker 對每個
+    chunk、每筆 triple 皆為循序 `await`，無內部併發），仍可能在極端時機下讓
+    「嘗試建立同一個新節點」的操作撞上約束，拋出 `ConstraintError`。
+    2026-08-27 新增唯一約束前，這種情況是**靜默產生重複節點**（已修正的
+    真實 bug，見 `docs/論文/03_變更紀錄.md` 該則）；加了約束後變成**直接
+    拋出例外、讓整個 chunk 抽取判定失敗**——真實跑一輪長時間抽取後發現，
+    這個新副作用本身也需要處理，否則失敗率會被這個假陽性拉高（真實觀測：
+    某輪抽取新增的失敗筆數幾乎全數是同一根因）。
+
+    **重試為何安全**：撞上約束代表該節點在重試當下已經存在（前一次嘗試已
+    成功建立），第二次 `MERGE` 會正常命中既有節點、不再觸發約束衝突。只
+    重試一次——若重試仍失敗，代表是別的問題（例如真正的 schema 衝突），
+    不吞掉例外、讓呼叫端照舊往上拋。
+    """
+    try:
+        return await driver.execute_query(query, **params)
+    except ConstraintError:
+        return await driver.execute_query(query, **params)
+
+
 async def _merge_chunk_mention(
     driver: AsyncDriver,
     kg_id: UUID,
@@ -612,7 +639,8 @@ async def _merge_chunk_mention(
         entity_set_clause += ", e.name_embedding = $name_embedding"
         params["name_embedding"] = await embedding_provider.encode(entity_name)
 
-    await driver.execute_query(
+    await _execute_with_constraint_retry(
+        driver,
         f"""
         MERGE (c:Chunk {{kg_id: $kg_id, source_doc_id: $source_doc_id, chunk_index: $chunk_index}})
         ON CREATE SET c.chunk_file = $chunk_file
@@ -693,7 +721,8 @@ async def merge_entity(
         if embedding_provider is not None:
             entity_set_clause += ", e.name_embedding = $name_embedding"
             params["name_embedding"] = await embedding_provider.encode(resolved_name)
-        await driver.execute_query(
+        await _execute_with_constraint_retry(
+            driver,
             f"MERGE (e:Entity {{kg_id: $kg_id, name: $name}}) ON CREATE SET {entity_set_clause}",
             **params,
         )
