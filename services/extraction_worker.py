@@ -114,9 +114,18 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         return
 
     # RESULT／UPLOAD／DONE4：merge 已寫入 Neo4j，依序轉為 pending_upload → completed。
+    #
+    # ✅ 2026-08-31 訂正寫入順序（見 docs/報告/21_抽取管線稽核與修正報告.md）：
+    # `task_queue.db` 是效能索引，記錄檔（`_record.json`）才是真實狀態來源
+    # （見本模組頂部 docstring 引用的 03 §3.1.2）——原本先把 SQLite 標成
+    # completed、最後才更新記錄檔，若恰好在兩行之間中止，記錄檔會漏記這個
+    # 已成功寫入 Neo4j 的 chunk；一旦之後任何原因觸發 `rebuild_from_records()`
+    # （它明確以記錄檔為準），這個 chunk 會被誤判為未完成而重新排入佇列，
+    # 重新處理後又會產生 Fact 節點重複（見 revoke_chunk_facts() 相關修正）。
+    # 改為先寫真實狀態來源，才寫效能索引，符合既有設計原則。
     task_queue_service.update_status(db_path, kg_id, source, chunk_index, "pending_upload")
-    task_queue_service.update_status(db_path, kg_id, source, chunk_index, "completed")
     document_record_service.record_chunk_completed(doc_folder, chunk_index)
+    task_queue_service.update_status(db_path, kg_id, source, chunk_index, "completed")
 
 
 async def run_extraction_worker(driver: AsyncDriver, poll_interval_idle: float = 2.0) -> None:

@@ -120,15 +120,27 @@ def next_pending(db_path: Path, kg_id: str | None = None) -> tuple[str, str, int
         return (row[0], row[1], row[2]) if row else None
 
 
-def reset_stuck_processing(db_path: Path) -> int:
+def reset_stuck_processing(db_path: Path) -> list[tuple[str, str, int]]:
     """中斷處理（3.1.2「中斷處理」註記）：程式重啟時，把所有卡在
     `processing`（當機/強制關閉時未能轉為終態）的 Chunk 批次重置為
-    `pending`，視為未完成、可重新處理，而非誤判為進行中而跳過。回傳受
-    影響的筆數。"""
+    `pending`，視為未完成、可重新處理，而非誤判為進行中而跳過。
+
+    回傳被重置的 `(kg_id, source, chunk_index)` 清單（2026-08-31，見
+    `docs/報告/21_抽取管線稽核與修正報告.md`）——這些 chunk 中斷前可能已
+    對 Neo4j 寫入部分三元組（`merge_triples_to_graph()` 逐筆 `await`、非
+    整個 chunk 一個交易），重新處理前應由呼叫端（`main.py::_restart_task_queue()`）
+    對每一筆呼叫 `svo_service.revoke_chunk_facts()` 清理殘留資料，避免
+    Fact 節點與 citations 重複。原本只回傳筆數（`int`），呼叫端無從得知
+    是哪些 chunk、無法針對性清理，此為稽核發現的真實風險，非單純介面調整。
+    """
     with closing(_connect(db_path)) as conn:
-        cursor = conn.execute("UPDATE task_queue SET status = 'pending' WHERE status = 'processing'")
+        cursor = conn.execute(
+            "SELECT kg_id, source, chunk_index FROM task_queue WHERE status = 'processing'"
+        )
+        affected = [(row[0], row[1], row[2]) for row in cursor.fetchall()]
+        conn.execute("UPDATE task_queue SET status = 'pending' WHERE status = 'processing'")
         conn.commit()
-        return cursor.rowcount
+        return affected
 
 
 def is_index_trustworthy(db_path: Path) -> bool:
@@ -220,11 +232,19 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
         conn.commit()
 
 
-def ensure_ready(db_path: Path, kg_folders: dict[str, Path]) -> None:
+def ensure_ready(db_path: Path, kg_folders: dict[str, Path]) -> list[tuple[str, str, int]]:
     """`RESTART` 分支入口：程式重啟／電腦開機時呼叫——索引可信就地重置卡住的
     `processing`；不可信則整份 `REBUILD`。呼叫後 `task_queue.db` 保證可查詢。
+
+    回傳被 `reset_stuck_processing()` 重置的 `(kg_id, source, chunk_index)`
+    清單，供呼叫端清理這些 chunk 在 Neo4j 裡可能殘留的部分寫入（見該函式
+    docstring）。`REBUILD` 分支回傳空清單——`rebuild_from_records()` 是從
+    記錄檔重建索引，無法像 `reset_stuck_processing()` 一樣精確得知哪些
+    chunk 中斷於寫入中途（記錄檔只區分「已完成」與「未完成」，不記錄
+    「中斷於哪個階段」），這是 `REBUILD` 這條救援路徑本身既有的資訊侷限，
+    不在本次修正範圍內。
     """
     if is_index_trustworthy(db_path):
-        reset_stuck_processing(db_path)
-    else:
-        rebuild_from_records(db_path, kg_folders)
+        return reset_stuck_processing(db_path)
+    rebuild_from_records(db_path, kg_folders)
+    return []

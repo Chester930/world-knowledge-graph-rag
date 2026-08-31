@@ -102,7 +102,7 @@ class TestInterruptionHandling:
 
         affected = svc.reset_stuck_processing(db_path)
 
-        assert affected == 1
+        assert affected == [("kg-1", "doc.txt", 1)]
         assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 1)
 
 
@@ -238,8 +238,9 @@ class TestEnsureReady:
         svc.enqueue(db_path, "kg-1", "doc.txt", [1])
         svc.update_status(db_path, "kg-1", "doc.txt", 1, "processing")
 
-        svc.ensure_ready(db_path, kg_folders={})
+        reset_chunks = svc.ensure_ready(db_path, kg_folders={})
 
+        assert reset_chunks == [("kg-1", "doc.txt", 1)]
         assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 1)
 
     def test_ensure_ready_rebuilds_when_index_missing(self, tmp_path):
@@ -250,6 +251,9 @@ class TestEnsureReady:
         document_record_service.init_record(doc_folder, source="doc-a.txt", total_chunks=1)
         document_record_service.set_svo_chunk_total(doc_folder, 1)
 
-        svc.ensure_ready(db_path, kg_folders={"kg-1": kg_folder})
+        reset_chunks = svc.ensure_ready(db_path, kg_folders={"kg-1": kg_folder})
 
+        # REBUILD 分支無法精確得知哪些 chunk 中斷於寫入中途，回傳空清單
+        # （見 ensure_ready() docstring 誠實聲明），不是遺漏。
+        assert reset_chunks == []
         assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc-a.txt", 1)

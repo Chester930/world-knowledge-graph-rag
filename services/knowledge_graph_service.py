@@ -11,6 +11,15 @@ from neo4j import AsyncDriver
 from models.knowledge_graph import KnowledgeGraph, KnowledgeGraphCreate
 from repositories.kg_repo import KGRepository
 from services import document_record_service, svo_service
+from services.svo_chunking import read_svo_index
+
+
+class ArticleStructureLossError(RuntimeError):
+    """`build_graph(force_rebuild=True)` 偵測到目標文件先前是用
+    `ArticleAwareChunking`（`article_no` 有值）抽取，但本函式無法取得原始
+    `articles` payload、只能改用一般的 `SVOGROUP` 切塊——見 `build_graph()`
+    docstring §「誠實侷限」與 `docs/報告/21_抽取管線稽核與修正報告.md`。
+    """
 
 
 async def create_kg(driver: AsyncDriver, payload: KnowledgeGraphCreate) -> KnowledgeGraph:
@@ -56,6 +65,21 @@ async def build_graph(
     `force_rebuild=False`：救援／恢復用途（例如 `task_queue.db` 曾遺失、
     Worker 曾中斷）。只對 `extraction_status` 尚未 `completed` 的文件重新
     觸發 `trigger_extraction`，已完成的文件略過，不清空既有圖譜內容。
+
+    ⚠️ **誠實侷限（2026-08-31 稽核發現並加上防呆，見
+    docs/報告/21_抽取管線稽核與修正報告.md）**：本函式呼叫
+    `svo_service.trigger_extraction()` 時**不會**傳入 `articles=`——法規類
+    文件（走 `ArticleAwareChunking`，一條文一個chunk，保留 `article_no`／
+    `Fact→LawArticle` 連結）若透過本函式 `force_rebuild=True`，`trigger_
+    extraction()` 會改用一般的 `SVOGROUP`（固定句數切塊）**靜默覆寫**掉
+    `svo_index.json`，條文邊界全部消失——本函式沒有管道能取得或還原原始
+    `articles` payload（未持久化在 `DocumentRecord` 或任何可查詢處）。
+    為避免靜默資料劣化，`force_rebuild=True` 時會先檢查目標文件既有的
+    `svo_index.json` 是否已用 `ArticleAwareChunking`（任一 chunk 有
+    `article_no`）；偵測到就直接拋出 `ArticleStructureLossError`，不靜默
+    進行——法規全文的完整重跑，應改用當初建立此 KG 的專用匯入腳本（例如
+    `import_leave_scheduling_dataset.py`，已正確傳入 `articles=`），而非
+    本函式。
     """
     kg = await KGRepository(driver).get(kg_id)
     if kg is None:
@@ -69,6 +93,20 @@ async def build_graph(
         target_folders = [f for f in kg_folder.iterdir() if f.is_dir()]
     else:
         target_folders = [kg_folder / name for name in doc_ids if (kg_folder / name).is_dir()]
+
+    if force_rebuild:
+        # 2026-08-31 防呆（見本函式 docstring 誠實侷限）：在任何破壞性動作
+        # （清空Neo4j／重設進度）之前，先檢查所有目標文件是否有任一份先前
+        # 用 ArticleAwareChunking 抽取過——寧可整批直接失敗，也不要清空到
+        # 一半才發現有文件會被靜默劣化。
+        for doc_folder in target_folders:
+            index = read_svo_index(doc_folder)
+            if index and any(c.get("article_no") for c in index.get("chunks", [])):
+                raise ArticleStructureLossError(
+                    f"文件 {doc_folder.name} 先前用 ArticleAwareChunking 抽取（article_no 有值），"
+                    "build_graph(force_rebuild=True) 無法還原 articles payload、會靜默改用一般切塊、"
+                    "條文邊界全部消失。請改用當初建立此文件的專用匯入腳本重新觸發，而非本函式。"
+                )
 
     if force_rebuild and doc_ids is None:
         await driver.execute_query("MATCH (n {kg_id: $kg_id}) DETACH DELETE n", kg_id=str(kg_id))

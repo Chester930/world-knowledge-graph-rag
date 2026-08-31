@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import difflib
 import json
+import logging
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -48,6 +49,8 @@ from services.svo_preprocessing_service import (
     read_sentence_embeddings,
     read_standardized_sentences,
 )
+
+logger = logging.getLogger(__name__)
 
 
 async def create_entity_index(driver: AsyncDriver | None = None) -> None:
@@ -442,6 +445,12 @@ async def extract_svo_triples(
         try:
             triples.append(SVOTriple(**item))
         except Exception:
+            # 2026-08-31（見 docs/報告/21_抽取管線稽核與修正報告.md）：先前
+            # 靜默 continue、完全沒有記錄——LLM 對規則8/9輸出非預期型別
+            # （如 subject 給成陣列）時，這筆三元組被丟掉卻沒有任何線索，
+            # 事後無法從log得知重跑到底漏了什麼。不拋例外中斷整批抽取
+            # （單筆格式錯誤不該讓其他正確三元組也遺失），但至少留下記錄。
+            logger.warning("[extract_svo_triples] 三元組格式不合法，已捨棄：%r", item)
             continue
     return triples
 
@@ -526,12 +535,24 @@ def _filter_ungrounded_quantity_triples(
     對應報告19 §10 發現的真實失效案例（跨條文數字挪用），寧可漏抓一筆
     有疑慮的三元組，也不留下錯誤數字污染圖譜（比照 3.1.3 REJECT 不阻斷
     整體、report16/19 既有的降級哲學）。
+
+    2026-08-31（見 docs/報告/21_抽取管線稽核與修正報告.md）：丟棄的三元組
+    會記錄一筆 warning——上線首日完全沒有留下任何線索，無法統計這次修正
+    實際攔了幾筆、也無法區分「這個chunk本來就沒有數量用字」跟「有數量
+    用字但被攔下來了」，稽核時發現這是本機制自己需要補的缺口。
     """
-    return [
-        t for t in triples
-        if not _contains_ungrounded_quantity(t.subject, source_text)
-        and not _contains_ungrounded_quantity(t.object, source_text)
-    ]
+    kept: list[SVOTriple] = []
+    for t in triples:
+        if _contains_ungrounded_quantity(t.subject, source_text) or _contains_ungrounded_quantity(
+            t.object, source_text
+        ):
+            logger.warning(
+                "[數值忠實性核對] 丟棄疑似跨段落挪用數字的三元組：'%s' -[%s]-> '%s'",
+                t.subject, t.verb, t.object,
+            )
+            continue
+        kept.append(t)
+    return kept
 
 
 async def extract_svo_triples_with_completeness_check(

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -166,6 +167,44 @@ async def test_build_graph_force_rebuild_without_doc_ids_wipes_kg_content(tmp_pa
     wipe_calls = [c for c in driver.calls if c[0] == "MATCH (n {kg_id: $kg_id}) DETACH DELETE n"]
     assert len(wipe_calls) == 1
     assert wipe_calls[0][1] == {"kg_id": str(kg.id)}
+
+
+@pytest.mark.asyncio
+async def test_build_graph_force_rebuild_refuses_when_article_structure_would_be_lost(tmp_path, monkeypatch):
+    """2026-08-31（見 docs/報告/21_抽取管線稽核與修正報告.md）：
+    `build_graph(force_rebuild=True)` 不傳 `articles=`，若目標文件先前是用
+    `ArticleAwareChunking` 抽取（`article_no` 有值），改用一般切塊會靜默
+    覆寫掉 `svo_index.json`、條文邊界全部消失——應直接拋出
+    `ArticleStructureLossError`，且不能先執行任何破壞性動作（DETACH DELETE／
+    重設進度）。"""
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    doc_a = kg_folder / "a.md"
+    doc_a.mkdir()
+    document_record_service.init_record(doc_a, source="a.md", total_chunks=1)
+    (doc_a / "svo_index.json").write_text(
+        json.dumps({"source": "a.md", "chunks": [{"index": 1, "article_no": "第 1 條", "text": "內文"}]}),
+        encoding="utf-8",
+    )
+
+    kg = _make_kg(str(kg_folder))
+    _patch_kg_repo(monkeypatch, kg)
+    monkeypatch.setattr(
+        "services.knowledge_graph_service.svo_service.trigger_extraction",
+        lambda *a, **k: _noop(),
+    )
+    reset_calls: list = []
+    monkeypatch.setattr(
+        "services.knowledge_graph_service.document_record_service.reset_extraction_progress",
+        lambda folder: reset_calls.append(folder),
+    )
+
+    driver = SpyDriver()
+    with pytest.raises(svc.ArticleStructureLossError):
+        await svc.build_graph(driver, kg.id, force_rebuild=True)
+
+    assert driver.calls == []  # 沒有任何破壞性 Cypher 被執行
+    assert reset_calls == []  # 沒有任何文件的抽取進度被重設
 
 
 @pytest.mark.asyncio

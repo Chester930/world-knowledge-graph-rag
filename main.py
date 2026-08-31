@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from pathlib import Path
+from uuid import UUID
 
 from core.auth import require_api_key
 from core.config import settings, task_queue_db_path
@@ -19,7 +20,7 @@ from core.providers.factory import init_providers
 from repositories.concept_repo import ConceptRepository
 from repositories.kg_repo import KGRepository
 from routers import agent, documents, expand, knowledge_graph, search, staging
-from services import svo_service, task_queue_service
+from services import document_record_service, svo_service, task_queue_service
 from services.expand_worker import run_governance_worker
 from services.extraction_worker import run_extraction_worker
 
@@ -34,11 +35,28 @@ async def _restart_task_queue() -> None:
     """§ 3.1.2 `RESTART` 進入點：程式重啟時檢查 `task_queue.db` 索引是否
     可信，可信則重置卡住的 `processing`（中斷處理），否則掃描各 KG 資料夾
     記錄檔重建索引（`REBUILD`）。
+
+    ✅ **2026-08-31 新增（見 `docs/報告/21_抽取管線稽核與修正報告.md`）**：
+    對每個被重置的 chunk 呼叫 `revoke_chunk_facts()` 清理 Neo4j 裡可能殘留
+    的部分寫入——`merge_triples_to_graph()` 對每筆三元組各自即時 `await`，
+    非整個 chunk 一筆交易，若上次執行中斷於某個 chunk 處理到一半，重新
+    處理前不清理會導致 Fact 節點重複、citations 重複累加（`ensure_ready()`
+    docstring；此為稽核發現的真實風險，非既有已知限制）。`REBUILD` 分支
+    （索引本身遺失/損毀）回傳空清單，此路徑的殘留清理暫不在本次範圍。
     """
     kgs = await KGRepository(get_driver()).list_all()
     kg_folders = {str(kg.id): Path(kg.folder_path) for kg in kgs}
 
-    task_queue_service.ensure_ready(task_queue_db_path(), kg_folders)
+    reset_chunks = task_queue_service.ensure_ready(task_queue_db_path(), kg_folders)
+    for kg_id_str, source, chunk_index in reset_chunks:
+        source_doc_id = str(document_record_service.document_uuid(source))
+        stats = await svo_service.revoke_chunk_facts(
+            get_driver(), UUID(kg_id_str), source_doc_id, chunk_index,
+        )
+        logger.info(
+            "[Restart] 清理中斷殘留 kg_id=%s source=%s chunk_index=%s -> %s",
+            kg_id_str, source, chunk_index, stats,
+        )
 
 
 @asynccontextmanager
