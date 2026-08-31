@@ -18,12 +18,20 @@ class OllamaLLMProvider(LLMProvider):
     # RAG prompt 通常 8000-20000 字元，需要足夠的 context window
     _NUM_CTX = 8192
 
+    # `seed`（2026-08-31，見 docs/報告/20_抽取數值忠實性核對機制設計報告.md
+    # §2／§7）：`temperature=0.0` 不保證 Ollama 推論本身是決定性的（根因是
+    # 批次大小依賴，非取樣隨機性，見報告20引用的 Horace He 2025 分析）——
+    # 固定 seed 無法完全解決這個問題，但零成本、沒有理由不加，屬既有防護
+    # 之外的額外一層。
+    _SEED = 0
+
     async def generate(self, prompt: str) -> str:
         async with httpx.AsyncClient(timeout=300.0) as client:
             res = await client.post(
                 f"{self.base_url}/api/generate",
                 json={"model": self.model, "prompt": prompt, "stream": False,
-                      "options": {"num_ctx": self._NUM_CTX, "temperature": 0.0, "num_predict": 1024}},
+                      "options": {"num_ctx": self._NUM_CTX, "temperature": 0.0, "num_predict": 1024,
+                                  "seed": self._SEED}},
             )
             res.raise_for_status()
             return res.json().get("response", "")
@@ -34,7 +42,8 @@ class OllamaLLMProvider(LLMProvider):
             res = await client.post(
                 f"{self.base_url}/api/generate",
                 json={"model": self.model, "prompt": prompt, "stream": False,
-                      "format": "json", "options": {"num_ctx": self._NUM_CTX, "temperature": 0.0, "num_predict": 1024}},
+                      "format": "json", "options": {"num_ctx": self._NUM_CTX, "temperature": 0.0, "num_predict": 1024,
+                                                     "seed": self._SEED}},
             )
             res.raise_for_status()
             return res.json().get("response", "")

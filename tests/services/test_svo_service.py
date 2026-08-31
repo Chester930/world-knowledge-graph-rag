@@ -2963,3 +2963,58 @@ async def test_completeness_check_dedupes_supplement_against_first_pass(monkeypa
 
     assert len(llm.prompts) == 2
     assert len(triples) == 1  # 重複三元組已去重
+
+
+# --- docs/報告/20：抽取數值忠實性核對（2026-08-31 實作） -------------------
+
+
+def test_contains_ungrounded_quantity_flags_number_not_in_source():
+    """對應報告19§10真實案例：「三至七日」被錯抽成同文件另一條文的
+    「一至三日」，物件裡的數量片語未逐字出現在這個chunk原文裡。"""
+    source_text = "有左列情事之一者，給予三至七日之特別休假：一、主動破獲叛亂組織，人證俱獲者。"
+    assert svc._contains_ungrounded_quantity("給予一至三日之特別休假", source_text) is True
+
+
+def test_contains_ungrounded_quantity_passes_number_in_source():
+    source_text = "有左列情事之一者，給予三至七日之特別休假：一、主動破獲叛亂組織，人證俱獲者。"
+    assert svc._contains_ungrounded_quantity("給予三至七日之特別休假", source_text) is False
+
+
+def test_contains_ungrounded_quantity_ignores_text_without_quantity():
+    """subject／object 完全沒有數量/期限用字時，無從判定忠實性，不誤殺。"""
+    source_text = "勞工因有事故必須親自處理，得請事假。"
+    assert svc._contains_ungrounded_quantity("勞工", source_text) is False
+    assert svc._contains_ungrounded_quantity("事假", source_text) is False
+
+
+def test_filter_ungrounded_quantity_triples_drops_only_ungrounded():
+    source_text = "有左列情事之一者，給予三至七日之特別休假：一、主動破獲叛亂組織，人證俱獲者。"
+    grounded = SVOTriple(subject="主動破獲叛亂組織，人證俱獲者", verb="給予", object="三至七日之特別休假")
+    ungrounded = SVOTriple(subject="主動破獲叛亂組織，人證俱獲者", verb="給予", object="一至三日之特別休假")
+
+    result = svc._filter_ungrounded_quantity_triples([grounded, ungrounded], source_text)
+
+    assert result == [grounded]
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_drops_triple_with_ungrounded_quantity(monkeypatch):
+    """端到端：extract_svo_triples_with_completeness_check() 回傳前套用
+    數值忠實性核對，含跨條文挪用數字的三元組應被丟棄。"""
+    async def fake_reconcile(verb, llm_rel_type, **kwargs):
+        return llm_rel_type
+    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+
+    text = "有左列情事之一者，給予三至七日之特別休假：一、主動破獲叛亂組織，人證俱獲者。"
+    llm = FakeLLM(
+        '{"triples":['
+        '{"subject":"主動破獲叛亂組織，人證俱獲者","verb":"給予","object":"三至七日之特別休假","rel_type":"RELATED_TO"},'
+        '{"subject":"主動破獲叛亂組織，人證俱獲者","verb":"給予","object":"一至三日之特別休假","rel_type":"RELATED_TO"}'
+        ']}'
+    )
+    embedding = FakeEmbedding()
+
+    triples = await svc.extract_svo_triples_with_completeness_check(text, [text], llm, embedding)
+
+    assert len(triples) == 1
+    assert triples[0].object == "三至七日之特別休假"

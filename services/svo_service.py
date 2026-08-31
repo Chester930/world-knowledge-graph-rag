@@ -493,6 +493,47 @@ async def _find_uncovered_sentences(
     return uncovered
 
 
+# 中文數字（含全形／半形阿拉伯數字混用）＋常見單位的量詞片語粗略偵測，
+# 不要求完全精確（寧可多檢查幾個非量詞片語，也不要漏掉真正的量詞片語）。
+_QUANTITY_PATTERN = re.compile(
+    r"[〇零一二三四五六七八九十百千萬0-9]+"
+    r"(?:至[〇零一二三四五六七八九十百千萬0-9]+)?"
+    r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍)"
+)
+
+
+def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
+    """`docs/報告/20_抽取數值忠實性核對機制設計報告.md` §3：偵測 `text`
+    （三元組 subject 或 object）裡是否含有數量／期限用字，且該片段未逐字
+    出現在 `source_text`（chunk 原文）裡——真的偵測到才回傳 True。
+
+    根因（報告20 §2）：同一份輸入文字，不同次真實LLM呼叫可能產生不同
+    結果（temperature=0 不保證LLM推論決定性輸出，Horace He 2025），真實
+    案例是把「三至七日」錯抽成同文件另一條文的「一至三日」。純字串比對
+    刻意不用embedding——數量用字需要精確比對，語意相似度比對反而會讓
+    結構相似但數值不同的片語被誤判為語意相近而放行。
+    """
+    for match in _QUANTITY_PATTERN.finditer(text):
+        if match.group() not in source_text:
+            return True
+    return False
+
+
+def _filter_ungrounded_quantity_triples(
+    triples: list[SVOTriple], source_text: str,
+) -> list[SVOTriple]:
+    """丟棄 subject／object 含未逐字出現於原文的數量/期限用字的三元組——
+    對應報告19 §10 發現的真實失效案例（跨條文數字挪用），寧可漏抓一筆
+    有疑慮的三元組，也不留下錯誤數字污染圖譜（比照 3.1.3 REJECT 不阻斷
+    整體、report16/19 既有的降級哲學）。
+    """
+    return [
+        t for t in triples
+        if not _contains_ungrounded_quantity(t.subject, source_text)
+        and not _contains_ungrounded_quantity(t.object, source_text)
+    ]
+
+
 async def extract_svo_triples_with_completeness_check(
     text: str,
     original_sentences: Sequence[str],
@@ -525,17 +566,24 @@ async def extract_svo_triples_with_completeness_check(
     `original_sentences` 為空、或 `embedding_provider` 為 `None` 時，涵蓋
     比對無法執行，直接回傳第一階段結果，不強行報錯——優雅降級，行為等同
     直接呼叫 `extract_svo_triples()`。
+
+    ✅ **數值忠實性核對（2026-08-31，見 `docs/報告/20_抽取數值忠實性核對
+    機制設計報告.md`）**：不管走哪個分支，回傳前一律套用
+    `_filter_ungrounded_quantity_triples()`——丟棄 subject／object 含
+    「數量/期限用字未逐字出現於 `text`（chunk原文）」的三元組，防堵同一
+    輸入不同次真實LLM呼叫把數字錯誤挪用到別的條文的失效模式（報告19 §10
+    真實案例）。純字串比對，不需額外 LLM／embedding 呼叫。
     """
     triples = await extract_svo_triples(
         text, llm_provider, embedding_provider, kg_id=kg_id, calibration_db_path=calibration_db_path,
     )
 
     if not original_sentences or embedding_provider is None:
-        return triples
+        return _filter_ungrounded_quantity_triples(triples, text)
 
     uncovered = await _find_uncovered_sentences(original_sentences, triples, embedding_provider)
     if not uncovered:
-        return triples
+        return _filter_ungrounded_quantity_triples(triples, text)
 
     supplement_text = "\n".join(uncovered)
     supplement_triples = await extract_svo_triples(
@@ -550,7 +598,7 @@ async def extract_svo_triples_with_completeness_check(
         if key not in seen:
             seen.add(key)
             merged.append(t)
-    return merged
+    return _filter_ungrounded_quantity_triples(merged, text)
 
 
 _SAFE_REL_TYPE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
