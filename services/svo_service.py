@@ -446,6 +446,113 @@ async def extract_svo_triples(
     return triples
 
 
+UNCOVERED_SENTENCE_THRESHOLD = 0.6
+"""涵蓋比對門檻——沿用 ProMem（Yang et al. 2026，arXiv:2601.04463）§Memory
+Completion 的 τmatch 設定，尚未針對本專案中文法規語料與 bge-m3 embedding
+模型重新校正，是先訂佔位數字、留待第五章消融實驗校準的既有慣例（比照
+`EXPAND_POOL_MIN_SIZE`／`COMPARE_COSINE_THRESHOLD` 等既有門檻常數的處理
+方式，見 `docs/報告/19_SVO抽取完整性自我核對機制設計報告.md` §3 誠實侷限）。
+"""
+
+
+async def _find_uncovered_sentences(
+    original_sentences: Sequence[str],
+    triples: list[SVOTriple],
+    embedding_provider: EmbeddingProvider,
+    *,
+    threshold: float = UNCOVERED_SENTENCE_THRESHOLD,
+) -> list[str]:
+    """比照 ProMem《Beyond Static Summarization》(arXiv:2601.04463) §Memory
+    Completion 的語意涵蓋比對：對每一句原文，計算它與「已抽出三元組」的最高
+    相似度，低於門檻視為未涵蓋——供 `extract_svo_triples_with_completeness_check()`
+    判斷是否需要對這些句子額外做一次針對性補抽（`docs/報告/19` §3 設計）。
+
+    這一步刻意不用LLM——先用便宜的embedding比對局部定位可能遺漏的片段，
+    只有真的有未涵蓋句子才觸發後續的LLM補抽（見報告19 §5 成本分析：與
+    VeriFact 的 word-mapping 演算法同屬「先用非LLM/輕量機制定位、才針對性
+    觸發LLM」這個架構原則，本專案選用embedding是為了與既有抽取管線的向量
+    基礎設施一致，而非word-mapping這種字串比對）。
+
+    `triples` 為空（第一階段完全沒抽到任何三元組）時，全部句子視為未涵蓋；
+    `original_sentences` 為空時直接回傳空清單，不做無意義的比對。
+    """
+    if not original_sentences:
+        return []
+    if not triples:
+        return list(original_sentences)
+
+    sentence_vectors = await embedding_provider.encode_batch(list(original_sentences))
+    triple_texts = [f"{t.subject}{t.verb}{t.object}" for t in triples]
+    triple_vectors = await embedding_provider.encode_batch(triple_texts)
+
+    uncovered: list[str] = []
+    for sentence, s_vec in zip(original_sentences, sentence_vectors):
+        best_score = max(cosine_similarity(s_vec, t_vec) for t_vec in triple_vectors)
+        if best_score < threshold:
+            uncovered.append(sentence)
+    return uncovered
+
+
+async def extract_svo_triples_with_completeness_check(
+    text: str,
+    original_sentences: Sequence[str],
+    llm_provider: LLMProvider | None = None,
+    embedding_provider: EmbeddingProvider | None = None,
+    *,
+    kg_id: str | None = None,
+    calibration_db_path: Path | None = None,
+) -> list[SVOTriple]:
+    """`extract_svo_triples()` 的完整性自我核對版本（`docs/報告/19_SVO抽取
+    完整性自我核對機制設計報告.md` §3／§3.1，2026-08-31 設計，同日實作）。
+
+    背景：規則7-9（`_svo_prompt()` few-shot 反例/正例）能提升第一階段的
+    初始召回率，但只能讓 LLM 泛化到「跟範例夠像」的情況，遇到範例沒示範過
+    的附加規定類別仍會漏抓（真實案例：以小時為請假單位，見報告18 §3.6）。
+    本函式不取代規則7-9、也不要求精簡它們——兩者並存：規則7-9 降低第一階段
+    的遺漏量、間接減少本函式第二階段需要補抽的量（成本考量）；本函式的
+    涵蓋比對＋針對性補抽才是**真正保證召回率**的通用機制，不依賴事先窮舉
+    附加規定類別（使用者 2026-08-31 決策：「先以涵蓋為主，補充為輔」）。
+
+    流程：① 第一階段沿用現有 `extract_svo_triples()`；② 用
+    `_find_uncovered_sentences()`（非LLM，embedding比對）定位未涵蓋句子；
+    ③ 僅未涵蓋句子非空時才觸發第二次 `extract_svo_triples()` 呼叫，只對
+    這些句子重新抽取；④ 合併去重。
+
+    成本模型對稱於報告16接地核對機制：只有真的偵測到問題（此處是「有句子
+    未涵蓋」）才多花一次 LLM 呼叫，多數已抽得夠完整的 chunk 不會觸發第二次
+    呼叫（見報告19 §5，非無條件翻倍）。
+
+    `original_sentences` 為空、或 `embedding_provider` 為 `None` 時，涵蓋
+    比對無法執行，直接回傳第一階段結果，不強行報錯——優雅降級，行為等同
+    直接呼叫 `extract_svo_triples()`。
+    """
+    triples = await extract_svo_triples(
+        text, llm_provider, embedding_provider, kg_id=kg_id, calibration_db_path=calibration_db_path,
+    )
+
+    if not original_sentences or embedding_provider is None:
+        return triples
+
+    uncovered = await _find_uncovered_sentences(original_sentences, triples, embedding_provider)
+    if not uncovered:
+        return triples
+
+    supplement_text = "\n".join(uncovered)
+    supplement_triples = await extract_svo_triples(
+        supplement_text, llm_provider, embedding_provider,
+        kg_id=kg_id, calibration_db_path=calibration_db_path,
+    )
+
+    seen = {(t.subject, t.verb, t.object) for t in triples}
+    merged = list(triples)
+    for t in supplement_triples:
+        key = (t.subject, t.verb, t.object)
+        if key not in seen:
+            seen.add(key)
+            merged.append(t)
+    return merged
+
+
 _SAFE_REL_TYPE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 

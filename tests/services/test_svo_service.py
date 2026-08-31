@@ -2804,3 +2804,162 @@ async def test_vector_search_sentences_ensures_index_then_queries_it():
     assert svc._sentence_vector_index_name(str(kg_id)) in query
     assert "node.sentence_text AS sentence_text" in query
     assert params["top_k"] == 5
+
+
+# --- docs/報告/19：抽取完整性自我核對機制（2026-08-31 實作） ---------------
+
+
+@pytest.mark.asyncio
+async def test_find_uncovered_sentences_returns_all_when_no_triples():
+    """第一階段完全沒抽到任何三元組時，全部句子視為未涵蓋（報告19 §3.1）。"""
+    embedding = FakeEmbedding()
+    sentences = ["句子一。", "句子二。"]
+
+    uncovered = await svc._find_uncovered_sentences(sentences, [], embedding)
+
+    assert uncovered == sentences
+
+
+@pytest.mark.asyncio
+async def test_find_uncovered_sentences_returns_empty_when_no_sentences():
+    embedding = FakeEmbedding()
+    triples = [SVOTriple(subject="A", verb="導致", object="B", rel_type="CAUSES")]
+
+    uncovered = await svc._find_uncovered_sentences([], triples, embedding)
+
+    assert uncovered == []
+
+
+@pytest.mark.asyncio
+async def test_find_uncovered_sentences_excludes_covered_sentence():
+    """句子與已抽三元組文字高度相似（cosine 分數達門檻）時不列入未涵蓋。"""
+    covered_sentence = "勞工因有事故必須親自處理，得請事假。"
+    triple = SVOTriple(subject="勞工", verb="因有事故必須親自處理，得請", object="事假")
+    triple_text = f"{triple.subject}{triple.verb}{triple.object}"
+    embedding = FakeEmbedding(similar_to={covered_sentence: triple_text})
+
+    uncovered = await svc._find_uncovered_sentences([covered_sentence], [triple], embedding)
+
+    assert uncovered == []
+
+
+@pytest.mark.asyncio
+async def test_find_uncovered_sentences_flags_dissimilar_sentence():
+    """句子與已抽三元組文字語意差異夠大（cosine 分數低於門檻）時列入未涵蓋
+    ——對應報告18發現的真實案例：「以小時為請假單位」未被任何三元組涵蓋。"""
+    uncovered_sentence = "勞工得擇定以小時為請假單位。"
+    triple = SVOTriple(subject="勞工", verb="因有事故必須親自處理，得請", object="事假")
+    embedding = FakeEmbedding()  # 未映射 similar_to，兩字串各自正交、cosine=0
+
+    uncovered = await svc._find_uncovered_sentences([uncovered_sentence], [triple], embedding)
+
+    assert uncovered == [uncovered_sentence]
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_skips_second_call_when_no_original_sentences():
+    """未提供 original_sentences 時無法做涵蓋比對，優雅降級為只呼叫一次
+    LLM，行為等同直接呼叫 extract_svo_triples()。"""
+    llm = FakeLLM('{"triples":[{"subject":"A","verb":"導致","object":"B","rel_type":"CAUSES"}]}')
+    embedding = FakeEmbedding()
+
+    triples = await svc.extract_svo_triples_with_completeness_check("A 導致 B。", [], llm, embedding)
+
+    assert len(triples) == 1
+    assert len(llm.prompts) == 1
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_skips_second_call_when_no_embedding_provider():
+    """embedding_provider 為 None 時無法做涵蓋比對，同樣優雅降級。"""
+    llm = FakeLLM('{"triples":[{"subject":"A","verb":"導致","object":"B","rel_type":"CAUSES"}]}')
+
+    triples = await svc.extract_svo_triples_with_completeness_check(
+        "A 導致 B。", ["A 導致 B。"], llm, None,
+    )
+
+    assert len(triples) == 1
+    assert len(llm.prompts) == 1
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_skips_second_call_when_fully_covered(monkeypatch):
+    """涵蓋比對沒抓到任何未涵蓋句子時，不觸發第二次 LLM 呼叫——成本模型
+    對稱於報告16接地核對機制：只有真的偵測到問題才多花一次呼叫（報告19 §5）。
+
+    monkeypatch `_reconcile_rel_type()` 為直接採信：本測試要驗證的是完整性
+    核對本身的呼叫次數，`_reconcile_rel_type()` 的 ESCALATE3 仲裁是既有、
+    與本次新機制無關的另一套邏輯，FakeEmbedding 的雜湊向量無法保證與 35 個
+    真實型別描述句一致，會引入不相關的額外 LLM 呼叫使計數斷言不穩定。
+    """
+    async def fake_reconcile(verb, llm_rel_type, **kwargs):
+        return llm_rel_type
+    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+
+    sentence = "勞工因有事故必須親自處理，得請事假。"
+    llm = FakeLLM(
+        '{"triples":[{"subject":"勞工","verb":"因有事故必須親自處理，得請",'
+        '"object":"事假","rel_type":"RELATED_TO"}]}'
+    )
+    embedding = FakeEmbedding(similar_to={sentence: "勞工因有事故必須親自處理，得請事假"})
+
+    triples = await svc.extract_svo_triples_with_completeness_check(
+        sentence, [sentence], llm, embedding,
+    )
+
+    assert len(triples) == 1
+    assert len(llm.prompts) == 1  # 第二次呼叫未觸發
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_triggers_supplement_and_merges_when_uncovered(monkeypatch):
+    """有未涵蓋句子時觸發第二次針對性補抽，結果併入第一階段——對應報告18
+    發現的真實案例：第一階段漏抓「以小時為請假單位」，第二階段應補上。
+
+    monkeypatch `_reconcile_rel_type()` 理由同上一則測試。"""
+    async def fake_reconcile(verb, llm_rel_type, **kwargs):
+        return llm_rel_type
+    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+
+    main_sentence = "勞工因有事故必須親自處理，得請事假。"
+    missed_sentence = "勞工得擇定以小時為請假單位。"
+    llm = SequencedFakeLLM([
+        '{"triples":[{"subject":"勞工","verb":"因有事故必須親自處理，得請",'
+        '"object":"事假","rel_type":"RELATED_TO"}]}',
+        '{"triples":[{"subject":"事假","verb":"得以","object":"小時為請假單位",'
+        '"rel_type":"RELATED_TO"}]}',
+    ])
+    embedding = FakeEmbedding()  # 兩句彼此正交，missed_sentence 不會被判定為已涵蓋
+
+    triples = await svc.extract_svo_triples_with_completeness_check(
+        f"{main_sentence}\n{missed_sentence}", [main_sentence, missed_sentence], llm, embedding,
+    )
+
+    assert len(llm.prompts) == 2  # 第一階段 + 針對性補抽各一次
+    subjects = {(t.subject, t.verb, t.object) for t in triples}
+    assert ("勞工", "因有事故必須親自處理，得請", "事假") in subjects
+    assert ("事假", "得以", "小時為請假單位") in subjects
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_dedupes_supplement_against_first_pass(monkeypatch):
+    """補抽結果若與第一階段已有的三元組完全重複（同一組 subject/verb/object），
+    合併時應去重，不重複計入。monkeypatch `_reconcile_rel_type()` 理由同上。"""
+    async def fake_reconcile(verb, llm_rel_type, **kwargs):
+        return llm_rel_type
+    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+
+    sentence = "勞工因有事故必須親自處理，得請事假。"
+    duplicate_payload = (
+        '{"triples":[{"subject":"勞工","verb":"因有事故必須親自處理，得請",'
+        '"object":"事假","rel_type":"RELATED_TO"}]}'
+    )
+    llm = SequencedFakeLLM([duplicate_payload, duplicate_payload])
+    embedding = FakeEmbedding()  # 未映射 similar_to → 判定為未涵蓋，觸發補抽
+
+    triples = await svc.extract_svo_triples_with_completeness_check(
+        sentence, [sentence], llm, embedding,
+    )
+
+    assert len(llm.prompts) == 2
+    assert len(triples) == 1  # 重複三元組已去重

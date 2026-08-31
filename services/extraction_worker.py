@@ -28,7 +28,7 @@ from parser.chunk_writer import document_folder_path
 from repositories.kg_repo import KGRepository
 from services import document_record_service, task_queue_service
 from services.svo_chunking import read_svo_index
-from services.svo_service import extract_svo_triples, merge_triples_to_graph
+from services.svo_service import extract_svo_triples_with_completeness_check, merge_triples_to_graph
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +71,12 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         except RuntimeError:
             llm_provider = None
 
-        triples = await extract_svo_triples(
-            chunk["text"], llm_provider, embedding_provider,
+        # 2026-08-31：改用完整性自我核對版本（docs/報告/19），第二階段涵蓋
+        # 比對＋針對性補抽只在真的有句子未涵蓋時才觸發，不影響原本無遺漏
+        # chunk 的行為。chunk["original_sentences"] 為 svo_index.json 既有
+        # 欄位（build_svo_chunks() 產出），未涵蓋任一舊版本呼叫端行為。
+        triples = await extract_svo_triples_with_completeness_check(
+            chunk["text"], chunk.get("original_sentences", []), llm_provider, embedding_provider,
             kg_id=kg_id, calibration_db_path=db_path,
         )
         # § 3.1.4 §c（2026-08-18 定案）：source_doc_id 先前從未被賦值，導致
