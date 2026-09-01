@@ -257,6 +257,19 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
     BFS 456 筆裡混入大量 `→（）` 的殘缺結果）。這裡只過濾**明確的空字串**，
     不過濾 `None`（`fact_results` 的 `subject`／`object` 為 `None` 代表舊資料
     尚未跑過 §b 回填、不代表 `fact_text` 本身有問題，仍應保留，理由同上）。
+
+    ✅ **自然語言化，優先使用 `natural_text`（2026-09-01，報告24 §5 階段3）**：
+    報告23 §6.4 對照實驗確認樣板拼接（「主詞（型別）動詞受詞（型別）」）文字
+    太生硬會顯著降低LLM引用該事實的機率。`t.natural_text` 有值時直接使用
+    （`merge_triples_to_graph()` 即時路徑或 `backfill_natural_text()` 回填批次
+    任務生成），沒有時 fallback 回原本的樣板拼接（優雅降級，不因為部分邊
+    還沒回填就整體失效）。**範圍聲明**：本輪只處理 BFS 三元組（`triples`）
+    這條路徑；`fact_results`（語意 Fact 檢索）的 `fact_text` 沿用
+    `_verbalize_fact()` 樣板拼接、本輪不動——`_verbalize_fact()` 同時是
+    `Fact.fact_embedding` 的生成基礎，KAPING（Baek et al., 2023）已佐證
+    此用途維持簡單串接較利於檢索（見報告24 §2），若未來也要對
+    `fact_results` 做自然語言化，需要獨立評估、不能直接沿用本次的做法
+    （會影響到既有的embedding檢索品質），留待後續視需要再評估。
     """
     def _is_blank(value: str | None) -> bool:
         return value is not None and value.strip() == ""
@@ -269,7 +282,10 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
             continue
         key = (t.subject, t.rel_type, t.object)
         seen.add(key)
-        lines.append(f"- {t.subject}（{t.subject_type}）{t.verb}{t.object}（{t.object_type}）")
+        if t.natural_text:
+            lines.append(f"- {t.natural_text}")
+        else:
+            lines.append(f"- {t.subject}（{t.subject_type}）{t.verb}{t.object}（{t.object_type}）")
 
     for f in fact_results:
         if _is_blank(f.get("subject")) or _is_blank(f.get("object")):

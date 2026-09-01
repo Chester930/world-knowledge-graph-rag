@@ -1070,6 +1070,52 @@ def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, ob
     return f"{subj} {verb} {obj}"
 
 
+_NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順的繁體中文自然語句，只輸出改寫後的句子本身，不要加引號、不要加任何說明或前綴。
+
+主詞：{subject}
+動作：{verb}
+受詞：{object}
+
+改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。"""
+
+
+async def _naturalize_triple(
+    subject: str,
+    subject_type: str,
+    verb: str,
+    object_: str,
+    object_type: str,
+    llm_provider: LLMProvider,
+) -> str:
+    """把三元組改寫成自然語句（見 `docs/報告/24_事實清單自然語言化機制設計
+    報告.md` § 4、§5 階段1）——取代 `routers/agent.py::_merge_fact_lines()`
+    目前「主詞（型別）動詞受詞（型別）」的樣板拼接，解決報告23 §6.4對照
+    實驗確認的根因：這種生硬格式會顯著降低 LLM 在生成階段引用該事實的
+    機率，即使事實已經正確檢索、位置也排得夠前面。
+
+    **與 `_verbalize_fact()`（§3.1.4 §a，供 Fact 節點 embedding 檢索用）的
+    關係已在報告24 §2 釐清、不衝突**：KAPING（Baek et al., 2023）Appendix
+    B.5 的「簡單串接優於訓練式轉換模型」結論測的是**檢索表現**，`_verbalize_
+    fact()` 這個用途因此維持樣板拼接不變；本函式解決的是**生成階段**LLM
+    能否引用已檢索事實，是不同問題面向，KAPING 未測試過這個面向。
+
+    **忠實性風險提示（借鏡 KAPING 的觀察）**：KAPING 也觀察到訓練式轉換
+    模型「有時生成語意偏離原三元組的文字」——prompt 因此明確要求「不可以
+    增加原文沒有的具體數字、期限或條件」，降低幻覺風險；是否需要額外的
+    正式忠實性核對機制（比照報告20），留待報告24 §5 階段4 依真實回填結果
+    的實測幻覺率決定，本函式本身不做核對，只在 prompt 層面做最低限度防範。
+
+    `subject_type`／`object_type` 缺席時直接省略（比照 `_verbalize_fact()`
+    同樣的「型別選填」處理），不強塞空字串進 prompt。失敗時（LLM 呼叫
+    拋例外）由呼叫端決定如何處理，本函式不吞例外、不靜默降級。
+    """
+    subject_part = f"{subject}（{subject_type}）" if subject_type else subject
+    object_part = f"{object_}（{object_type}）" if object_type else object_
+    prompt = _NATURALIZE_PROMPT_TEMPLATE.format(subject=subject_part, verb=verb, object=object_part)
+    result = await llm_provider.generate(prompt)
+    return result.strip().strip("「」\"'")
+
+
 def _kg_fact_label(kg_id: str) -> str:
     """每個 KG 各自一個 Fact 節點標籤（`Fact_<kg_id 底線化>`），供 per-KG
     向量索引使用——2026-08-19 真實資料庫實測確認（`docker exec` 對 5.26.27
@@ -1206,6 +1252,15 @@ async def merge_triples_to_graph(
     時無法連結，直接跳過，不建立不完整的 `Fact` 節點）。實際建立交給
     `_create_fact_node()`（見該函式 docstring，2026-08-18 補上 `subject`／
     `object`／`rel_type` 扁平屬性，供 §b 回填批次任務比對鍵使用）。
+
+    **事實清單自然語言化（2026-09-01 實作，見報告24 § 5 階段1）**：
+    `llm_provider` 提供時，把這筆citation的三元組改寫成自然語句存進
+    `r.natural_text`（`_naturalize_triple()`），供 `routers/agent.py::
+    _merge_fact_lines()` 生成 prompt 時優先使用，解決報告23 §6.4對照
+    實驗確認的根因——樣板拼接文字太生硬會顯著降低LLM引用該事實的機率。
+    每次有新citation合併時都重新生成、覆蓋舊值（與現行「`verb` 取最新
+    一筆citation」慣例一致）；`llm_provider=None` 時完全不呼叫、不寫入
+    `natural_text`，消費端 fallback 回現行樣板拼接，優雅降級。
     """
     kg_id_str = str(kg_id)
     for triple in triples:
@@ -1254,6 +1309,20 @@ async def merge_triples_to_graph(
         if triple.rel_type == "RELATED_TO" and triple.verb_embedding is not None:
             set_clause += ", r.verb_embedding = $verb_embedding"
             set_params["verb_embedding"] = triple.verb_embedding
+
+        # 3.6 事實清單自然語言化（報告24 §5 階段1，2026-09-01 新增）：
+        # llm_provider 提供時，把這筆citation的三元組改寫成自然語句存在
+        # r.natural_text，供 routers/agent.py::_merge_fact_lines() 生成
+        # prompt 時優先使用（缺席時 fallback 回樣板拼接，見該函式）。每次
+        # 有新citation合併時都重新生成、覆蓋舊值——與現行「verb 取最新一筆
+        # citation」的既有慣例（見 bfs_query() docstring）一致，natural_text
+        # 因此也反映最新一次抽取的措辭，不是累積歷史多個版本。
+        if llm_provider is not None:
+            set_clause += ", r.natural_text = $natural_text"
+            set_params["natural_text"] = await _naturalize_triple(
+                subject_name, triple.subject_type, triple.verb, object_name, triple.object_type,
+                llm_provider,
+            )
 
         await driver.execute_query(
             f"""
@@ -1646,6 +1715,90 @@ async def backfill_fact_nodes(
         skip += batch_size
 
     return created
+
+
+async def backfill_natural_text(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    llm_provider: LLMProvider,
+    *,
+    batch_size: int = 100,
+) -> int:
+    """報告24 § 5 階段2 回填批次任務：掃描該 KG 內所有既有邊，把尚未有
+    `r.natural_text` 的邊補上自然語句版本——`_naturalize_triple()` 是本次
+    才實作（見 `merge_triples_to_graph()`），這之前完成的抽取只留下
+    `citations_json`，沒有對應的 `natural_text`；本函式與即時路徑共用
+    同一套 `_naturalize_triple()` 邏輯，不重複實作兩套。
+
+    比照 `backfill_fact_nodes()` 定位為**人工觸發的一次性腳本**，理由相同：
+    即時路徑已覆蓋所有新寫入，缺口是純歷史性的，不會持續產生新缺口
+    （見 `docs/報告/24_事實清單自然語言化機制設計報告.md` § 5 階段2）。
+
+    **分頁設計與 `backfill_fact_nodes()` 的差異（誠實記錄）**：`backfill_
+    fact_nodes()` 的 WHERE 條件（`citations_json IS NOT NULL`）不會因為
+    處理過程而改變，可以安全用 `SKIP`／`LIMIT` 累加分頁。本函式的 WHERE
+    條件是 `r.natural_text IS NULL`——**每處理完一批，符合條件的邊集合
+    就會縮小**，若沿用 `SKIP` 累加分頁，在 Neo4j 未保證穩定排序的情況下
+    可能跳過尚未處理的邊。改為每次都重新查詢 `SKIP 0`（不累加），讓已
+    處理過的邊自然從下一輪的篩選結果中消失，確保不遺漏、也不重複處理。
+    為避免任何無法生成 `natural_text` 的邊造成無窮迴圈，**每一筆嘗試過的
+    邊都保證會被寫入某個非 NULL 值**（`verb` 缺席時 fallback 回
+    `_verbalize_fact()` 的樣板拼接，而非留白重試）——保證每輪迭代都讓
+    符合條件的邊集合確實縮小。
+
+    回傳實際更新的邊數。
+    """
+    kg_id_str = str(kg_id)
+    updated = 0
+    while True:
+        result = await driver.execute_query(
+            """
+            MATCH (s:Entity {kg_id: $kg_id})-[r]->(o:Entity {kg_id: $kg_id})
+            WHERE r.kg_id = $kg_id AND r.natural_text IS NULL
+            RETURN type(r) AS rel_type, s.name AS subject, o.name AS object,
+                   s.type AS subject_type, o.type AS object_type,
+                   r.citations_json AS citations_json
+            LIMIT $batch_size
+            """,
+            kg_id=kg_id_str,
+            batch_size=batch_size,
+        )
+        edges = result.records
+        if not edges:
+            break
+
+        for edge in edges:
+            citations = json.loads(edge["citations_json"] or "[]")
+            verb = citations[-1].get("verb", "") if citations else ""
+            if verb:
+                natural_text = await _naturalize_triple(
+                    edge["subject"], edge["subject_type"], verb,
+                    edge["object"], edge["object_type"], llm_provider,
+                )
+            else:
+                # 防禦性 fallback（理論上不該發生，見上方 docstring）：
+                # 沒有 verb 就無法生成有意義的自然語句，退回樣板拼接，
+                # 保證這筆邊仍會被寫入非 NULL 值、下一輪不再被撈到。
+                natural_text = _verbalize_fact(
+                    edge["subject"], edge["subject_type"], verb, edge["object"], edge["object_type"],
+                )
+            await driver.execute_query(
+                f"""
+                MATCH (s:Entity {{kg_id: $kg_id, name: $subject}})-[r:{edge["rel_type"]} {{kg_id: $kg_id}}]->
+                      (o:Entity {{kg_id: $kg_id, name: $object}})
+                SET r.natural_text = $natural_text
+                """,
+                kg_id=kg_id_str,
+                subject=edge["subject"],
+                object=edge["object"],
+                natural_text=natural_text,
+            )
+            updated += 1
+
+        if len(edges) < batch_size:
+            break
+
+    return updated
 
 
 async def create_related_to_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
@@ -2113,6 +2266,12 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
     `citations_json` 清單中「最後一筆」（最近一次抽取到這個事實）作為代表
     值——挑選哪一筆／哪幾筆來源最適合呈現，是回答階段的向量篩選設計
     （不在本次範圍），這裡只是先確保欄位不會靜默變成 null。
+
+    ✅ **`natural_text` 原樣帶出（2026-09-01，報告24 §5 階段3）**：邊上的
+    `r.natural_text`（若有，見 `merge_triples_to_graph()`／
+    `backfill_natural_text()`）原樣填進回傳的 `SVOTriple.natural_text`，
+    供 `routers/agent.py::_merge_fact_lines()` 優先使用；缺席時為 `None`，
+    消費端 fallback 回樣板拼接。
     """
     seeds = [entity.strip() for entity in seed_entities if entity.strip()]
     if not seeds:
@@ -2143,6 +2302,7 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
             type(rel) AS rel_type,
             coalesce(rel.confidence, 1) AS confidence,
             rel.citations_json AS citations_json,
+            rel.natural_text AS natural_text,
             o.name AS object,
             coalesce(o.type, "概念") AS object_type
         """,

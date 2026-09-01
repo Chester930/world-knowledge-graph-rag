@@ -197,6 +197,11 @@ class SVOTriple(BaseModel):
     # 3.1.3 §a-1 BACKFILL：僅在 rel_type 為 RELATED_TO 時才會填入，供 EXPAND
     # 核准新型別後的回溯重分類向量索引查詢使用，避免重複呼叫 embedding provider。
     verb_embedding: list[float] | None = None
+    # 報告24 §5 階段1／3：事實清單自然語言化——`merge_triples_to_graph()`
+    # 有 llm_provider 時才會生成並存進 `r.natural_text`，`bfs_query()` 原樣
+    # 帶出；缺席（舊資料未跑過即時路徑或回填批次任務）時為 None，消費端
+    # （`routers/agent.py::_merge_fact_lines()`）fallback 回樣板拼接。
+    natural_text: str | None = None
 
 
 class BuildGraphRequest(BaseModel):

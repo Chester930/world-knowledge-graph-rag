@@ -10,9 +10,9 @@ from routers import agent
 
 # ── _merge_fact_lines：BFS 三元組與語意檢索 Fact 合併去重（2026-08-18）──────
 
-def _triple(subject="A", rel_type="CAUSES", object_="B", verb="導致"):
+def _triple(subject="A", rel_type="CAUSES", object_="B", verb="導致", natural_text=None):
     return SVOTriple(subject=subject, subject_type="概念", rel_type=rel_type,
-                      verb=verb, object=object_, object_type="概念")
+                      verb=verb, object=object_, object_type="概念", natural_text=natural_text)
 
 
 def test_merge_fact_lines_includes_both_sources_when_distinct():
@@ -98,6 +98,38 @@ def test_merge_fact_lines_keeps_valid_triples_and_facts_when_mixed_with_blank_on
     assert len(lines) == 2
     assert any("A" in line for line in lines)
     assert any("有效事實" in line for line in lines)
+
+
+# ── _merge_fact_lines：自然語言化優先於樣板拼接（報告24 §5 階段3，2026-09-01）──
+
+def test_merge_fact_lines_uses_natural_text_when_present():
+    triples = [_triple("事假", "RELATED_TO", "小時為請假單位", verb="得以",
+                        natural_text="事假可以用小時為單位申請。")]
+
+    lines = agent._merge_fact_lines(triples, [])
+
+    assert lines == ["- 事假可以用小時為單位申請。"]
+
+
+def test_merge_fact_lines_falls_back_to_template_when_natural_text_missing():
+    """natural_text 缺席（尚未跑過即時路徑或回填批次任務）時，優雅降級
+    回原本的樣板拼接，不因為部分邊還沒回填就整體失效。"""
+    triples = [_triple("A", "CAUSES", "B", verb="導致", natural_text=None)]
+
+    lines = agent._merge_fact_lines(triples, [])
+
+    assert lines == ["- A（概念）導致B（概念）"]
+
+
+def test_merge_fact_lines_fact_results_still_use_verbalize_fact_template():
+    """報告24 §2 範圍聲明：本輪只處理 BFS 三元組，fact_results（語意 Fact
+    檢索）沿用 _verbalize_fact() 樣板拼接，本輪不動。"""
+    fact_results = [{"fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
+                      "rel_type": "CREATED_BY", "object": "SpaceX"}]
+
+    lines = agent._merge_fact_lines([], fact_results)
+
+    assert lines == ["- 馬斯克 創立 SpaceX"]
 
 
 # ── 事實清單排列用的假 embedding provider（2026-09-01 新增，報告23）───────

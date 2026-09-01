@@ -654,6 +654,41 @@ async def test_merge_triples_to_graph_skips_verb_embedding_for_typed_edges():
     assert "verb_embedding" not in params
 
 
+# ── 事實清單自然語言化——merge_triples_to_graph()掛載（報告24 §5 階段1）───
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_stores_natural_text_when_llm_provider_given():
+    driver = FakeDriver()
+    kg_id = uuid4()
+    llm = FakeLLM("事假可以用小時為單位申請。")
+    triple = SVOTriple(subject="事假", subject_type="概念", rel_type="RELATED_TO", verb="得以",
+                        object="小時為請假單位", object_type="概念")
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], llm_provider=llm)
+
+    set_calls = [(q, p) for q, p in driver.calls if "SET r.citations_json = $citations_json" in q]
+    assert len(set_calls) == 1
+    query, params = set_calls[0]
+    assert "r.natural_text" in query
+    assert params["natural_text"] == "事假可以用小時為單位申請。"
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_skips_natural_text_when_llm_provider_missing():
+    """既有可選依賴的優雅降級慣例——沒有 llm_provider 就完全不呼叫、不寫入，
+    消費端 fallback 回樣板拼接（見 `_merge_fact_lines()`）。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+    triple = SVOTriple(subject="A", rel_type="CAUSES", verb="導致", object="B")
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple])
+
+    set_calls = [(q, p) for q, p in driver.calls if "SET r.citations_json = $citations_json" in q]
+    query, params = set_calls[0]
+    assert "r.natural_text" not in query
+    assert "natural_text" not in params
+
+
 @pytest.mark.asyncio
 async def test_create_related_to_vector_index_without_driver_is_noop():
     await svc.create_related_to_vector_index(None)  # 不應拋出例外
@@ -2047,6 +2082,40 @@ def test_verbalize_fact_omits_parens_when_type_missing():
     assert text == "A 導致 B"
 
 
+# ── 事實清單自然語言化（報告24 §5 階段1，2026-09-01）───────────────────────
+
+@pytest.mark.asyncio
+async def test_naturalize_triple_returns_llm_output_stripped():
+    llm = FakeLLM('"事假可以用小時為單位申請。"')
+
+    text = await svc._naturalize_triple("事假", "概念", "得以", "小時為請假單位", "概念", llm)
+
+    assert text == "事假可以用小時為單位申請。"
+    assert "主詞：事假（概念）" in llm.prompts[0]
+    assert "動作：得以" in llm.prompts[0]
+    assert "受詞：小時為請假單位（概念）" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_naturalize_triple_omits_type_parens_when_missing():
+    llm = FakeLLM("A導致B")
+
+    await svc._naturalize_triple("A", "", "導致", "B", "", llm)
+
+    assert "主詞：A\n" in llm.prompts[0]
+    assert "受詞：B\n" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_naturalize_triple_prompt_warns_against_fabrication():
+    """借鏡KAPING觀察到的訓練式轉換模型偏離風險，prompt需明確要求忠實。"""
+    llm = FakeLLM("A導致B")
+
+    await svc._naturalize_triple("A", "", "導致", "B", "", llm)
+
+    assert "不可以增加原文沒有的具體數字" in llm.prompts[0]
+
+
 @pytest.mark.asyncio
 async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_provider_given():
     """3.1.4 §a：`embedding_provider` 提供且有 chunk 追溯資訊時，應為這筆
@@ -2672,6 +2741,111 @@ async def test_backfill_fact_nodes_returns_zero_when_no_edges():
     kg_id = uuid4()
 
     count = await svc.backfill_fact_nodes(driver, kg_id, embedding)
+
+    assert count == 0
+    assert len(driver.scan_calls) == 1
+
+
+# ── backfill_natural_text（報告24 §5 階段2 回填批次任務，2026-09-01）───────
+
+class BackfillNaturalTextFakeDriver:
+    """模擬「掃描既有邊(natural_text IS NULL) → 生成 → SET」鏈路。與
+    `BackfillFactFakeDriver` 的關鍵差異：這裡的 WHERE 條件會隨處理過程
+    縮小（見 `backfill_natural_text()` docstring），所以掃描時排除已經
+    SET 過的邊，而非依 `skip` 累加分頁。"""
+
+    def __init__(self, edges):
+        self._edges = list(edges)
+        self._done: set[tuple[str, str]] = set()
+        self.scan_calls: list[dict] = []
+        self.set_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "WHERE r.kg_id = $kg_id AND r.natural_text IS NULL" in stripped:
+            self.scan_calls.append(params)
+            remaining = [e for e in self._edges if (e["subject"], e["object"]) not in self._done]
+            return FakeResult(remaining[: params["batch_size"]])
+        if "SET r.natural_text" in stripped:
+            self.set_calls.append(params)
+            self._done.add((params["subject"], params["object"]))
+            return FakeResult([])
+        return FakeResult([])
+
+
+def _text_edge(subject="A", object_="B", rel_type="CAUSES", citations=None):
+    return {
+        "rel_type": rel_type, "subject": subject, "object": object_,
+        "subject_type": "概念", "object_type": "概念",
+        "citations_json": json.dumps(citations if citations is not None else [{"verb": "導致"}]),
+    }
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_generates_and_sets_for_uncovered_edge():
+    driver = BackfillNaturalTextFakeDriver(edges=[_text_edge(citations=[{"verb": "導致"}])])
+    llm = FakeLLM("A會導致B。")
+    kg_id = uuid4()
+
+    count = await svc.backfill_natural_text(driver, kg_id, llm)
+
+    assert count == 1
+    assert len(driver.set_calls) == 1
+    assert driver.set_calls[0]["natural_text"] == "A會導致B。"
+    assert "主詞：A（概念）" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_uses_latest_citation_verb_when_multiple():
+    """比照現行 `SVOTriple.verb` 取 `citations[-1]` 的既有慣例。"""
+    driver = BackfillNaturalTextFakeDriver(
+        edges=[_text_edge(citations=[{"verb": "舊措辭"}, {"verb": "新措辭"}])]
+    )
+    llm = FakeLLM("A新措辭B。")
+    kg_id = uuid4()
+
+    await svc.backfill_natural_text(driver, kg_id, llm)
+
+    assert "動作：新措辭" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_falls_back_to_template_when_verb_missing():
+    """防禦性 fallback：citations 為空清單（理論上不該發生）時退回樣板拼接，
+    保證這筆邊仍被寫入非 NULL 值，不造成無窮迴圈。"""
+    driver = BackfillNaturalTextFakeDriver(edges=[_text_edge(citations=[])])
+    llm = FakeLLM("不應該被呼叫")
+    kg_id = uuid4()
+
+    count = await svc.backfill_natural_text(driver, kg_id, llm)
+
+    assert count == 1
+    assert llm.prompts == []  # 沒有 verb，完全不呼叫 LLM
+    assert driver.set_calls[0]["natural_text"] == svc._verbalize_fact("A", "概念", "", "B", "概念")
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_processes_all_edges_across_shrinking_batches():
+    """WHERE 條件隨處理過程縮小——多筆邊應全數處理完，不因為集合縮小而
+    提早中止或遺漏。"""
+    edges = [_text_edge(subject=f"S{i}", object_=f"O{i}") for i in range(3)]
+    driver = BackfillNaturalTextFakeDriver(edges=edges)
+    llm = FakeLLM("自然語句")
+    kg_id = uuid4()
+
+    count = await svc.backfill_natural_text(driver, kg_id, llm, batch_size=2)
+
+    assert count == 3
+    assert len(driver.scan_calls) == 2  # 第一批2筆處理完後集合縮小到1筆、第二批1筆（不足batch_size停止）
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_returns_zero_when_no_edges():
+    driver = BackfillNaturalTextFakeDriver(edges=[])
+    llm = FakeLLM("不應該被呼叫")
+    kg_id = uuid4()
+
+    count = await svc.backfill_natural_text(driver, kg_id, llm)
 
     assert count == 0
     assert len(driver.scan_calls) == 1
