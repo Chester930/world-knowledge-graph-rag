@@ -2136,6 +2136,17 @@ async def test_naturalize_triple_prompt_warns_against_fabrication():
 
 
 @pytest.mark.asyncio
+async def test_naturalize_triple_prompt_warns_against_duplicated_wording():
+    """全KG真實回填觀察到「得以以」這類疊字瑕疵（報告24 §8.4），
+    prompt需明確要求避免動作與受詞開頭字詞重複時硬接。"""
+    llm = FakeLLM("事假可以用小時為單位申請")
+
+    await svc._naturalize_triple("事假", "概念", "得以", "小時為請假單位", "概念", llm)
+
+    assert "避免疊字重複" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
 async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_provider_given():
     """3.1.4 §a：`embedding_provider` 提供且有 chunk 追溯資訊時，應為這筆
     citation 建立一個 Fact 節點，`fact_text` 用 verbalize 後的三元組文字，

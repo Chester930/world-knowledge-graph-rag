@@ -1076,7 +1076,7 @@ _NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順�
 動作：{verb}
 受詞：{object}
 
-改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。"""
+改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。若動作與受詞開頭字詞剛好重複（例如動作是「得以」、受詞開頭又是「以」），改寫時避免疊字重複，選用通順的講法而非逐字硬接。"""
 
 
 async def _naturalize_triple(
@@ -1108,6 +1108,11 @@ async def _naturalize_triple(
     `subject_type`／`object_type` 缺席時直接省略（比照 `_verbalize_fact()`
     同樣的「型別選填」處理），不強塞空字串進 prompt。失敗時（LLM 呼叫
     拋例外）由呼叫端決定如何處理，本函式不吞例外、不靜默降級。
+
+    ✅ **疊字修正（2026-09-01，報告24 §8.4 真實回填品質觀察後新增）**：
+    全KG真實回填發現偶有「得以以」這類疊字瑕疵（動作結尾字詞與受詞開頭
+    字詞剛好相同，逐字硬接產生的冗贅）——語意忠實無誤，但不夠通順。
+    prompt 加一句明確指示避免疊字，低成本 prompt 微調，非架構變更。
     """
     subject_part = f"{subject}（{subject_type}）" if subject_type else subject
     object_part = f"{object_}（{object_type}）" if object_type else object_
