@@ -11,7 +11,7 @@
 | 檔案 | 文獻 | 來源 | 狀態 |
 |---|---|---|---|
 | `liu-et-al-2023-lost-in-the-middle.pdf` | Liu, Lin, Hewitt, Paranjape, Bevilacqua, Petroni & Liang (2023), *Lost in the Middle: How Language Models Use Long Contexts* | arXiv [2307.03172](https://arxiv.org/abs/2307.03172)；後刊登於 TACL 2024（[ACL Anthology](https://aclanthology.org/2024.tacl-1.9/)） | ✅ 🟢 已下載並精讀核心章節（2026-09-01） |
-| `jin-et-al-2025-long-context-rag.pdf` | Jin, Yoon, Han & Arık (2025), *Long-Context LLMs Meet RAG: Overcoming Challenges for Long Inputs in RAG* | ICLR 2025（[會議PDF](https://proceedings.iclr.cc/paper_files/paper/2025/file/5df5b1f121c915d8bdd00db6aac20827-Paper-Conference.pdf)），作者UIUC與Google Cloud | ✅ 🟢 已下載並精讀 §3、§4「Retrieval Reordering」核心章節（2026-09-01） |
+| `jin-et-al-2025-long-context-rag.pdf` | Jin, Yoon, Han & Arık (2025), *Long-Context LLMs Meet RAG: Overcoming Challenges for Long Inputs in RAG* | arXiv [2410.05983](https://arxiv.org/abs/2410.05983)，後刊登於 ICLR 2025（[會議PDF](https://proceedings.iclr.cc/paper_files/paper/2025/file/5df5b1f121c915d8bdd00db6aac20827-Paper-Conference.pdf)），作者UIUC與Google Cloud | ✅ 🟢 已下載並精讀 §3、§4「Retrieval Reordering」核心章節（2026-09-01）；官方無程式碼釋出（已查證） |
 | `nogueira-cho-2019-passage-reranking-bert.pdf` | Nogueira & Cho (2019), *Passage Re-ranking with BERT* | arXiv [1901.04085](https://arxiv.org/abs/1901.04085)，MS MARCO passage ranking 榜首、確立 cross-encoder rerank 為業界標準做法 | ✅ 🟢 已下載並精讀摘要與核心方法（2026-09-01） |
 
 ## 核心發現
@@ -30,7 +30,25 @@
 
 **Nogueira & Cho (2019)**：確立 cross-encoder（query 與 passage 串接後由 BERT 直接判斷相關性）作為 passage re-ranking 的標準做法，MS MARCO 榜首、多篇後續 rerank 工作的基礎引用。與本專案現況的落差：cross-encoder需要額外一個模型服務與較高延遲成本（每個候選都要重新過一次encoder），比embedding-cosine-similarity（複用既有 `EmbeddingProvider`）成本高得多——列為報告22「相關性訊號升級」路徑的**進階選項**，非優先實作項目，優先仍是embedding cosine similarity（複用既有基礎設施，成本低很多）。
 
+## 實作參考（2026-09-01 補齊，見報告23）
+
+**Jin et al. (2025) 本身無官方程式碼釋出**（已查證，2026-09-01）——查無對應GitHub倉庫。改用兩個互補的LangChain開源元件作為截斷與重排兩個步驟各自的程式參考（皆MIT授權）：
+
+- **`LongContextReorder`**（`langchain_community.document_transformers`）——zigzag重排步驟的參考，演算法已完整擷取於本README「核心發現」段落。
+- **`EmbeddingsFilter`**（`langchain_community.retrievers.document_compressors`，[原始碼](https://sj-langchain.readthedocs.io/en/latest/_modules/langchain/retrievers/document_compressors/embeddings_filter.html)）——**截斷**步驟的參考。核心邏輯：
+
+  ```python
+  similarity = self.similarity_fn([embedded_query], embedded_documents)[0]
+  if self.k is not None:
+      included_idxs = np.argsort(similarity)[::-1][: self.k]
+  if self.similarity_threshold is not None:
+      included_idxs = [i for i in included_idxs if similarity[i] > self.similarity_threshold]
+  ```
+
+  用 `numpy.argsort` 取得依相似度由高到低的索引、切前 `k` 筆，選填再疊加一個相似度門檻做二次過濾。**參數預設值 `k=20`**——與報告23 §3.4 理論推導的初始建議值（15-20）相近，屬獨立來源的交叉印證，非互相抄襲。
+
 ## 待辦
 
-- [ ] 依上方「關鍵邊界條件」修正報告22 §5.1 的建議順序：先評估截斷K值的可行性（含對召回率的影響），若不足以解決才疊加LiTM zigzag重排。
+- [x] ~~依上方「關鍵邊界條件」修正報告22 §5.1 的建議順序~~——已完成，見報告23。
+- [ ] 依報告23設計＋上方兩個開源元件的演算法邏輯，實作 `routers/agent.py` 的截斷與條件式zigzag重排函式（尚未動工，待使用者確認）。
 - [ ] embedding相似度排序（複用現有`EmbeddingProvider`）列為近期可實作項目；cross-encoder rerank（Nogueira & Cho路線）列為長期進階選項，非當前優先。
