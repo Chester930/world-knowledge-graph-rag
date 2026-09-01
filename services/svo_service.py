@@ -1317,7 +1317,18 @@ async def merge_triples_to_graph(
         # 有新citation合併時都重新生成、覆蓋舊值——與現行「verb 取最新一筆
         # citation」的既有慣例（見 bfs_query() docstring）一致，natural_text
         # 因此也反映最新一次抽取的措辭，不是累積歷史多個版本。
-        if llm_provider is not None:
+        #
+        # ⚠️ **忠實性防護（2026-09-01，真實小規模回填抽查發現並修正，見
+        # 報告24 §5 階段4）**：subject／object 任一為空字串的殘缺三元組
+        # （見 `_merge_fact_lines()` 的既有殘缺過濾說明），若仍呼叫LLM改寫，
+        # 真實觀察到LLM會自行編造內容補完空白受詞（例如 object 為空時，
+        # 生成「本標準自發布日起施行」這種原文完全沒有依據的句子）——這正是
+        # `_naturalize_triple()` docstring 借鏡 KAPING 提出的偏離風險，在
+        # 真實資料上重現。殘缺三元組本來就會被 `_merge_fact_lines()` 的既有
+        # 過濾（`if not t.subject or not t.object: continue`）擋下、不會被
+        # LLM看到，因此不影響使用者體驗，但仍應在源頭跳過，避免浪費LLM呼叫、
+        # 避免資料庫累積不會被使用且內容有疑慮的欄位。
+        if llm_provider is not None and subject_name and object_name:
             set_clause += ", r.natural_text = $natural_text"
             set_params["natural_text"] = await _naturalize_triple(
                 subject_name, triple.subject_type, triple.verb, object_name, triple.object_type,
@@ -1770,15 +1781,21 @@ async def backfill_natural_text(
         for edge in edges:
             citations = json.loads(edge["citations_json"] or "[]")
             verb = citations[-1].get("verb", "") if citations else ""
-            if verb:
+            # 忠實性防護（2026-09-01，真實小規模回填抽查發現並修正，見報告24
+            # §5 階段4）：subject／object 任一為空字串的殘缺三元組（見
+            # `_merge_fact_lines()` 既有殘缺過濾說明）若仍呼叫LLM改寫，真實
+            # 觀察到LLM會自行編造內容補完空白受詞——不呼叫LLM，直接退回樣板
+            # 拼接（雖然殘缺三元組本來就會被 `_merge_fact_lines()` 擋下不會
+            # 被使用，源頭跳過可省下LLM呼叫、避免資料庫累積有疑慮的內容）。
+            if verb and edge["subject"] and edge["object"]:
                 natural_text = await _naturalize_triple(
                     edge["subject"], edge["subject_type"], verb,
                     edge["object"], edge["object_type"], llm_provider,
                 )
             else:
-                # 防禦性 fallback（理論上不該發生，見上方 docstring）：
-                # 沒有 verb 就無法生成有意義的自然語句，退回樣板拼接，
-                # 保證這筆邊仍會被寫入非 NULL 值、下一輪不再被撈到。
+                # 防禦性 fallback：沒有 verb，或 subject／object 殘缺，無法
+                # 生成有意義／忠實的自然語句，退回樣板拼接，保證這筆邊仍會
+                # 被寫入非 NULL 值、下一輪不再被撈到。
                 natural_text = _verbalize_fact(
                     edge["subject"], edge["subject_type"], verb, edge["object"], edge["object_type"],
                 )

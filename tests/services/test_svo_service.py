@@ -674,6 +674,25 @@ async def test_merge_triples_to_graph_stores_natural_text_when_llm_provider_give
 
 
 @pytest.mark.asyncio
+async def test_merge_triples_to_graph_skips_natural_text_when_object_blank():
+    """忠實性防護（報告24 §5 階段4，真實回填抽查發現）：object 為空字串
+    的殘缺三元組若仍呼叫LLM改寫，真實觀察到LLM會自行編造內容補完——
+    不應呼叫LLM，也不應寫入 natural_text。"""
+    driver = FakeDriver()
+    kg_id = uuid4()
+    llm = FakeLLM("不應該被呼叫")
+    triple = SVOTriple(subject="本標準", rel_type="RELATED_TO", verb="關於", object="")
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], llm_provider=llm)
+
+    assert llm.prompts == []
+    set_calls = [(q, p) for q, p in driver.calls if "SET r.citations_json = $citations_json" in q]
+    query, params = set_calls[0]
+    assert "r.natural_text" not in query
+    assert "natural_text" not in params
+
+
+@pytest.mark.asyncio
 async def test_merge_triples_to_graph_skips_natural_text_when_llm_provider_missing():
     """既有可選依賴的優雅降級慣例——沒有 llm_provider 就完全不呼叫、不寫入，
     消費端 fallback 回樣板拼接（見 `_merge_fact_lines()`）。"""
@@ -2807,6 +2826,21 @@ async def test_backfill_natural_text_uses_latest_citation_verb_when_multiple():
     await svc.backfill_natural_text(driver, kg_id, llm)
 
     assert "動作：新措辭" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_falls_back_to_template_when_object_blank():
+    """忠實性防護（報告24 §5 階段4，真實回填抽查發現）：object 為空字串
+    的殘缺邊不呼叫LLM（會編造內容補完），退回樣板拼接。"""
+    driver = BackfillNaturalTextFakeDriver(edges=[_text_edge(object_="", citations=[{"verb": "關於"}])])
+    llm = FakeLLM("不應該被呼叫")
+    kg_id = uuid4()
+
+    count = await svc.backfill_natural_text(driver, kg_id, llm)
+
+    assert count == 1
+    assert llm.prompts == []
+    assert driver.set_calls[0]["natural_text"] == svc._verbalize_fact("A", "概念", "關於", "", "概念")
 
 
 @pytest.mark.asyncio
