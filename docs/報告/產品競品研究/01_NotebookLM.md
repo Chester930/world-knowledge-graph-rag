@@ -35,7 +35,7 @@ NotebookLM 本身**完全閉源**，是 Google 內部產品，無公開原始碼
 
 1. **寫入階段延遲**：本專案導入文件需全量呼叫 LLM 抽取三元組並執行實體對齊，百萬字文檔的建圖過程可能需要數小時（尤其在本地 Ollama 環境下）；NotebookLM 僅做輕量向量化與快取分片，秒級可用。
 2. **多模態結構解析**：本專案目前 PDF 轉譯依賴純文字提取（pypdf/pdfminer/PaddleOCR），會摧毀複雜表格、圖表與版面排版；NotebookLM 用原生多模態編碼器直接理解這些結構。
-3. **Hub Node 路徑爆炸**：本專案 BFS 圖遍歷遇到高連結度節點時，目前僅用 `_PER_SEED_FACT_LIMIT=20` 做隨機硬截斷；NotebookLM 靠 Transformer 原生 Attention 動態分配權重，沒有這類硬性截斷問題（但有其自身的長上下文「大海撈針」風險，見論文 1.1.1 已引用的 Liu et al. 2023 Lost in the Middle）。
+3. **Hub Node 路徑爆炸**：本專案 BFS 圖遍歷遇到高連結度節點時，目前**完全不截斷**（2026-09-01 訂正——原稱「僅用 `_PER_SEED_FACT_LIMIT=20` 做隨機硬截斷」為現行行為，經核對原始碼確認此常數從未存在，實測曾見單次查詢回傳 800 筆的極端案例；更下游的事實清單組裝階段已補上相關性排序／截斷機制，見論文 03_系統設計與方法論.md § 3.6）；NotebookLM 靠 Transformer 原生 Attention 動態分配權重，沒有圖遍歷這類結構性爆炸問題（但有其自身的長上下文「大海撈針」風險，見論文 1.1.1 已引用的 Liu et al. 2023 Lost in the Middle——本專案 3.6 節同一份文獻也用來解釋事實清單位置偏誤，兩處引用對應不同的失效模式，不是重複）。
 4. **產品層面的主動導讀**：本專案目前缺乏建庫後的宏觀導讀/自動洞察功能，NotebookLM 有完整的 Audio/Video Overview、FAQ、Study Guide 產出鏈。
 
 ## 七、來源
