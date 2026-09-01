@@ -100,85 +100,178 @@ def test_merge_fact_lines_keeps_valid_triples_and_facts_when_mixed_with_blank_on
     assert any("有效事實" in line for line in lines)
 
 
+# ── 事實清單排列用的假 embedding provider（2026-09-01 新增，報告23）───────
+# 用簡單的字元計數向量取代真正的語意模型：兩段文字共用的字元越多，向量
+# 越接近、cosine 相似度越高——不追求語意精確度，只求「排序邏輯本身正確」
+# 這件事在測試裡可預期、不依賴外部模型。
+
+class _FakeSemanticEmbeddingProvider:
+    def __init__(self):
+        self.encoded_texts: list[str] = []
+        self.batch_calls: list[list[str]] = []
+
+    async def encode(self, text: str) -> list[float]:
+        self.encoded_texts.append(text)
+        return self._vector_for(text)
+
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        self.batch_calls.append(list(texts))
+        return [self._vector_for(t) for t in texts]
+
+    @staticmethod
+    def _vector_for(text: str) -> list[float]:
+        vec = [0.0] * 64
+        for ch in text:
+            vec[hash(ch) % 64] += 1.0
+        return vec
+
+
 # ── _build_prompt：合併後的事實清單接進 prompt ─────────────────────────────
 
-def test_build_prompt_includes_semantic_fact_when_no_bfs_triples():
+@pytest.mark.asyncio
+async def test_build_prompt_includes_semantic_fact_when_no_bfs_triples():
     """BFS 完全沒找到種子（字面比對失效），但語意檢索找到相關事實時，仍應
     進入「有事實」的 prompt 分支，而非誤判為完全無資料。"""
     fact_results = [{"fact_text": "資遣 需 預告", "subject": "資遣", "rel_type": "REQUIRES", "object": "預告"}]
+    embedding = _FakeSemanticEmbeddingProvider()
 
-    prompt = agent._build_prompt("資遣要注意什麼？", [], fact_results, None)
+    prompt = await agent._build_prompt(
+        "資遣要注意什麼？", [], fact_results, None, embedding_provider=embedding
+    )
 
     assert "資遣 需 預告" in prompt
     assert "請優先根據上述事實回答問題" in prompt
 
 
-def test_build_prompt_falls_back_to_general_knowledge_when_nothing_found():
-    prompt = agent._build_prompt("隨便問點什麼", [], [], None)
+@pytest.mark.asyncio
+async def test_build_prompt_falls_back_to_general_knowledge_when_nothing_found():
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    prompt = await agent._build_prompt("隨便問點什麼", [], [], None, embedding_provider=embedding)
 
     assert "沒有檢索到與問題直接相關的事實" in prompt
+    assert embedding.batch_calls == []  # 空事實清單不應觸發任何 embedding 呼叫
 
 
-def test_build_prompt_instructs_checking_every_fact_line():
+@pytest.mark.asyncio
+async def test_build_prompt_instructs_checking_every_fact_line():
     """報告22題3追查後新增：生成端遺漏了確實存在於事實清單中的正確事實，
     低成本緩解之一是在prompt裡明確要求逐條核對。"""
     fact_results = [{"fact_text": "資遣 需 預告", "subject": "資遣", "rel_type": "REQUIRES", "object": "預告"}]
+    embedding = _FakeSemanticEmbeddingProvider()
 
-    prompt = agent._build_prompt("資遣要注意什麼？", [], fact_results, None)
+    prompt = await agent._build_prompt(
+        "資遣要注意什麼？", [], fact_results, None, embedding_provider=embedding
+    )
 
     assert "逐條檢視" in prompt
 
 
-# ── _sort_lines_by_relevance：報告22題3追查後新增（2026-09-01）─────────────
-# 真實測試發現正確事實存在於清單中卻未被LLM引用，緩解方案之一是把跟問題
-# 最相關的事實排到清單前段，提高被引用機率。
+# ── _score_lines_by_embedding／_arrange_fact_lines：報告23（2026-09-01）───
+# 取代舊版 _sort_lines_by_relevance()（bigram，報告22題3真實重跑證實訊號
+# 太弱）。改用 embedding cosine similarity，並補上截斷／條件式zigzag重排。
 
-def test_sort_lines_by_relevance_puts_matching_line_first():
-    question = "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？"
-    lines = [
-        "- 高溫作業勞工（概念）給予（概念）中度工作",
-        "- 事假（概念）得以小時為請假單位（概念）",
-        "- 訓練時數（概念）以三百小時為度（概念）",
-    ]
+@pytest.mark.asyncio
+async def test_score_lines_by_embedding_puts_most_similar_line_first():
+    embedding = _FakeSemanticEmbeddingProvider()
+    question = "事假可以用小時請假嗎"
+    lines = ["- 高溫作業勞工給予中度工作", "- 事假得以小時為請假單位"]
 
-    sorted_lines = agent._sort_lines_by_relevance(question, lines)
+    scored = await agent._score_lines_by_embedding(question, lines, embedding_provider=embedding)
 
-    assert sorted_lines[0] == "- 事假（概念）得以小時為請假單位（概念）"
+    assert scored[0] == "- 事假得以小時為請假單位"
 
 
-def test_sort_lines_by_relevance_preserves_all_lines():
-    question = "問題"
-    lines = ["- A", "- B", "- C"]
+@pytest.mark.asyncio
+async def test_score_lines_by_embedding_reuses_precomputed_question_vector():
+    embedding = _FakeSemanticEmbeddingProvider()
+    question_vector = [1.0] * 64
 
-    sorted_lines = agent._sort_lines_by_relevance(question, lines)
+    await agent._score_lines_by_embedding(
+        "問題", ["- A"], embedding_provider=embedding, question_vector=question_vector
+    )
 
-    assert sorted(sorted_lines) == sorted(lines)
-
-
-def test_sort_lines_by_relevance_handles_empty_inputs():
-    assert agent._sort_lines_by_relevance("", []) == []
-    assert agent._sort_lines_by_relevance("問題", []) == []
-    assert agent._sort_lines_by_relevance("", ["- A"]) == ["- A"]
+    assert embedding.encoded_texts == []  # 傳入 question_vector 時不應再呼叫 encode()
 
 
-def test_build_prompt_sorts_fact_lines_by_relevance():
-    question = "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？"
+@pytest.mark.asyncio
+async def test_score_lines_by_embedding_handles_empty_lines():
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    assert await agent._score_lines_by_embedding("問題", [], embedding_provider=embedding) == []
+    assert embedding.batch_calls == []
+
+
+def test_litm_reorder_places_most_relevant_at_both_ends():
+    """Jin et al. (2025) 式1：最相關的排在首尾，最不相關的擠到正中央。"""
+    ranked = ["- rank1", "- rank2", "- rank3", "- rank4", "- rank5", "- rank6", "- rank7"]
+
+    reordered = agent._litm_reorder(ranked)
+
+    assert reordered[0] == "- rank1"
+    assert reordered[-1] == "- rank2"
+    assert reordered[len(reordered) // 2] == "- rank7"
+    assert sorted(reordered) == sorted(ranked)  # 只重排，不遺漏也不新增
+
+
+@pytest.mark.asyncio
+async def test_arrange_fact_lines_keeps_short_list_unsorted_beyond_relevance():
+    """清單長度 ≤ K：直接用相關性排序結果，不截斷也不重排。"""
+    embedding = _FakeSemanticEmbeddingProvider()
+    lines = [f"- line{i}" for i in range(5)]
+
+    arranged = await agent._arrange_fact_lines("問題", lines, embedding_provider=embedding)
+
+    assert len(arranged) == 5
+    assert sorted(arranged) == sorted(lines)
+
+
+@pytest.mark.asyncio
+async def test_arrange_fact_lines_truncates_medium_list_to_k():
+    """K < 長度 ≤ K'：截斷到前 K 筆。"""
+    embedding = _FakeSemanticEmbeddingProvider()
+    lines = [f"- line{i}" for i in range(25)]
+
+    arranged = await agent._arrange_fact_lines("問題", lines, embedding_provider=embedding)
+
+    assert len(arranged) == agent._FACT_LINE_TRUNCATE_K
+
+
+@pytest.mark.asyncio
+async def test_arrange_fact_lines_reorders_instead_of_truncating_large_list():
+    """長度 > K'：不直接截到 K，改保留前 K' 筆並套用 zigzag 重排。"""
+    embedding = _FakeSemanticEmbeddingProvider()
+    lines = [f"- line{i}" for i in range(50)]
+
+    arranged = await agent._arrange_fact_lines("問題", lines, embedding_provider=embedding)
+
+    assert len(arranged) == agent._FACT_LINE_REORDER_THRESHOLD_K
+
+
+@pytest.mark.asyncio
+async def test_build_prompt_arranges_fact_lines_by_relevance():
+    question = "事假可以用小時請假嗎"
     triples = [
         _triple("高溫作業勞工", "RELATED_TO", "中度工作", verb="給予"),
         _triple("事假", "RELATED_TO", "小時為請假單位", verb="得以"),
     ]
+    embedding = _FakeSemanticEmbeddingProvider()
 
-    prompt = agent._build_prompt(question, triples, [], None)
+    prompt = await agent._build_prompt(question, triples, [], None, embedding_provider=embedding)
 
     # 較相關的「事假…小時為請假單位」應排在較不相關的「高溫作業勞工…」之前
     assert prompt.index("事假（概念）得以小時為請假單位") < prompt.index("高溫作業勞工")
 
 
-def test_build_constrained_prompt_sorts_fact_lines_and_instructs_checking_every_line():
-    question = "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？"
+@pytest.mark.asyncio
+async def test_build_constrained_prompt_arranges_fact_lines_and_instructs_checking_every_line():
+    question = "事假可以用小時請假嗎"
     fact_lines = ["- 高溫作業勞工（概念）給予（概念）中度工作", "- 事假（概念）得以小時為請假單位（概念）"]
+    embedding = _FakeSemanticEmbeddingProvider()
 
-    prompt = agent._build_constrained_prompt(question, fact_lines, None)
+    prompt = await agent._build_constrained_prompt(
+        question, fact_lines, None, embedding_provider=embedding
+    )
 
     assert prompt.index("事假（概念）得以小時為請假單位") < prompt.index("高溫作業勞工")
     assert "逐條檢視" in prompt

@@ -14,6 +14,7 @@ from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
 from models.law_document import LawDocument
 from repositories.law_document_repo import LawDocumentRepository
+from services.classify_service import cosine_similarity
 from services.svo_service import (
     bfs_query,
     resolve_query_relation_type,
@@ -283,52 +284,141 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
     return lines
 
 
-def _sort_lines_by_relevance(question: str, lines: list[str]) -> list[str]:
-    """依與問題的字元二元組（bigram）重疊度由高到低排序事實清單，把最相關
-    的事實排到 prompt 最前面。
+# 事實清單截斷／條件式重排的門檻常數（見 `docs/報告/23_生成端事實清單排序機制
+# 優化設計報告.md` § 3.4）。皆為理論推導的初始建議值，尚未實測校準——K 參考
+# LangChain `EmbeddingsFilter` 的預設值（k=20，與此處獨立推導的15-20建議值
+# 巧合吻合，見報告23 § 3.5）取整數18；K' 取報告23建議的「明顯大於K」下限30
+# 再留一些餘裕。留待報告23 §4測試計畫（多次重跑＋K值敏感度比較）校準。
+_FACT_LINE_TRUNCATE_K = 18
+_FACT_LINE_REORDER_THRESHOLD_K = 35
 
-    ✅ **生成端事實遵循率問題緩解（2026-09-01，報告22題3追查後新增）**：真實
-    測試發現一筆完全正確、且確實存在於事實清單中的三元組（「事假 得以
-    小時為請假單位」，位於 28 行事實清單中）被 LLM 忽略、未在最終回答中
-    引用——追查排除了抽取與檢索管線的問題（三元組正確抽取、正確通過型別
-    與文件範圍篩選、確實出現在送給LLM的fact_lines裡），缺陷在生成階段對
-    較長事實清單的注意力／遵循率不足。這裡用最低成本的緩解：把跟問題
-    最相關的事實排到清單最前面，提高被引用的機率——純重排順序，不改變
-    `_merge_fact_lines()` 既有的去重／殘缺過濾邏輯與輸出內容，`verify_
-    fact_grounding()` 的核對邏輯不受順序影響（逐句核對，非位置比對）。
 
-    刻意不用 embedding 相似度排序：事實清單常有數十筆，逐筆呼叫
-    `embedding_provider.encode()` 會顯著拖慢單次問答延遲（且與問題向量
-    化本身重複——`chat()` 已算過一次 `question_vector`，但沒有對應的
-    per-line embedding 可比對）。改用字元二元組 Jaccard 重疊度，對中文
-    （無空白斷詞）比逐字符比對更穩健，且是純 CPU 計算、零額外網路/LLM
-    呼叫的低成本方案，可作為之後若要升級為 embedding 排序或加入自我
-    精煉迴圈（3.2 §a／RQ2 範疇）前的過渡緩解。
+async def _score_lines_by_embedding(
+    question: str,
+    lines: list[str],
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None = None,
+) -> list[str]:
+    """依 embedding cosine similarity 由高到低排序事實清單。
+
+    取代舊版 `_sort_lines_by_relevance()`（字元二元組 bigram 重疊度）——報告22
+    題3真實重跑證實 bigram 訊號太弱，只把目標事實從第16名（28筆中）推進到
+    第11名，兩次真實重跑仍未被引用。改用 embedding 相似度，能捕捉同義詞、
+    指代等 bigram 抓不到的語意相似性。
+
+    ✅ **成本重新估算（2026-09-01，見報告23 § 3.3）**：舊版 docstring 曾誤估
+    「逐筆呼叫 encode() 會顯著拖慢延遲」——`EmbeddingProvider.encode_batch()`
+    可一次批次算完全部 `lines` 的向量，不需要逐行呼叫；`question_vector` 若
+    呼叫端已算過（`chat()` 已為 `_find_seed_entities()`／`vector_search_facts()`
+    算過一次），可直接傳入複用，不重算。
+
+    `embedding_provider` 允許 `None`——但僅限 `lines` 為空清單時安全（此時
+    提前回傳，保證不觸碰 `embedding_provider`）。`chat()` 依此設計維持既有
+    「`payload.use_svo=False` 時完全不呼叫 `get_embedding_provider()`」的
+    不變量（見 `test_chat_skips_semantic_search_when_use_svo_is_false`）——
+    該模式下 `triples`／`fact_results` 恆為空，`_merge_fact_lines()` 輸出
+    `lines` 因此恆為空，這裡的提前回傳自然成立，無需另外判斷 `use_svo`。
     """
-    def _bigrams(text: str) -> set[str]:
-        return {text[i:i + 2] for i in range(len(text) - 1)} or {text}
+    if not lines:
+        return []
+    assert embedding_provider is not None, "lines 非空時 embedding_provider 不應為 None"
+    if question_vector is None:
+        question_vector = await embedding_provider.encode(question)
+    line_vectors = await embedding_provider.encode_batch(lines)
+    scored = sorted(
+        zip(lines, line_vectors),
+        key=lambda pair: cosine_similarity(question_vector, pair[1]),
+        reverse=True,
+    )
+    return [line for line, _ in scored]
 
-    question_bigrams = _bigrams(question)
 
-    def _score(line: str) -> float:
-        line_bigrams = _bigrams(line)
-        if not question_bigrams or not line_bigrams:
-            return 0.0
-        overlap = len(question_bigrams & line_bigrams)
-        return overlap / len(question_bigrams | line_bigrams)
+def _litm_reorder(lines: list[str]) -> list[str]:
+    """依 Jin et al. (2025, ICLR)《Long-Context LLMs Meet RAG》式1的 zigzag
+    重排，把依相關性遞減排序的清單重新排列成「最相關的交替置於首尾」，讓
+    最不相關的項目自然被擠到中段——對應 Liu et al. (2023/2024) *Lost in the
+    Middle* 的 U 形長上下文效能曲線（相關資訊在開頭/結尾效能最好、中段
+    顯著下降）。演算法邏輯與 LangChain `langchain_community.document_
+    transformers.LongContextReorder` 的開源實作一致（見 `docs/參考文獻/
+    19_生成端長清單事實遺漏與位置偏誤/README.md`，MIT授權，僅參考演算法
+    邏輯、不依賴 LangChain 套件本身）。
 
-    return sorted(lines, key=_score, reverse=True)
+    `lines` 必須已依相關性由高到低排序（呼叫端負責）。
+    """
+    reversed_lines = list(reversed(lines))
+    reordered: list[str] = []
+    for i, line in enumerate(reversed_lines):
+        if i % 2 == 1:
+            reordered.append(line)
+        else:
+            reordered.insert(0, line)
+    return reordered
 
 
-def _build_prompt(
+async def _arrange_fact_lines(
+    question: str,
+    lines: list[str],
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None = None,
+) -> list[str]:
+    """事實清單的完整排列邏輯（見 `docs/報告/23_生成端事實清單排序機制優化
+    設計報告.md` § 3.2「以截斷為主、重排為條件式後備」，2026-09-01 實作後
+    真實驗證發現原始版本的門檻設計有漏洞，已修正——見下方 ⚠️ 說明）：
+
+    1. 依 embedding cosine similarity 排序（`_score_lines_by_embedding()`）。
+    2. 清單長度 ≤ `_FACT_LINE_TRUNCATE_K`：已經是小清單，直接使用——Jin et
+       al. (2025) 證實此時重排效果不明顯，不需要額外複雜度。
+    3. `_FACT_LINE_TRUNCATE_K` < 長度 ≤ `_FACT_LINE_REORDER_THRESHOLD_K`：
+       截斷到前 `_FACT_LINE_TRUNCATE_K` 筆，**並套用 `_litm_reorder()`**。
+    4. 長度 > `_FACT_LINE_REORDER_THRESHOLD_K`：清單仍大，直接截到
+       `_FACT_LINE_TRUNCATE_K` 可能犧牲過多涵蓋率，改為保留前
+       `_FACT_LINE_REORDER_THRESHOLD_K` 筆並套用 `_litm_reorder()`，緩解
+       中段低谷效應同時保留較多筆數。
+
+    ⚠️ **真實驗證發現並修正的設計漏洞（2026-09-01）**：初版只在分支4套用
+    `_litm_reorder()`，分支3（截斷到K但不重排）維持單純線性排序。真實重跑
+    報告22題3案例（28行事實清單，落在分支3）發現：目標事實 embedding 排序
+    後排第16名（跟舊版bigram排序幾乎沒有進步），因為28≤K'僅套用截斷、
+    沒有重排，第16名恰好卡在18筆截斷範圍的尾端附近、但不是`_litm_reorder()`
+    會刻意擺放的「最尾端」極值位置——仍落在 Lost-in-the-Middle 的低效能
+    區間，LLM 最終仍未引用。分支3現已一併套用 `_litm_reorder()`（在
+    「截斷」之後執行，只重排留下來的K筆，不影響「保留哪K筆」的判斷）。
+
+    ⚠️ **這個修正不保證解決本案例**：即使套用 `_litm_reorder()`，若目標
+    事實的 embedding 相關性分數本身就偏低（本案例排名16/28，並非前段），
+    重排能做的只是把它放到「已保留清單」的首尾附近，而非把它從根本上
+    判定為更相關——這暴露的是相關性訊號本身的準確度侷限，而非單純的
+    位置排列問題，須如實記錄於報告22/23，不宣稱本次修正已解決此案例。
+
+    ⚠️ **K／K' 數值尚未實測校準**，屬理論初始建議值，見報告23 § 3.4／§4。
+    """
+    sorted_lines = await _score_lines_by_embedding(
+        question, lines, embedding_provider=embedding_provider, question_vector=question_vector
+    )
+    if len(sorted_lines) <= _FACT_LINE_TRUNCATE_K:
+        return sorted_lines
+    if len(sorted_lines) <= _FACT_LINE_REORDER_THRESHOLD_K:
+        return _litm_reorder(sorted_lines[:_FACT_LINE_TRUNCATE_K])
+    return _litm_reorder(sorted_lines[:_FACT_LINE_REORDER_THRESHOLD_K])
+
+
+async def _build_prompt(
     question: str,
     triples: list[SVOTriple],
     fact_results: list[dict],
     history: list[ChatMessage] | None,
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None = None,
 ) -> str:
     fact_lines = _merge_fact_lines(triples, fact_results)
     if fact_lines:
-        facts = "\n".join(_sort_lines_by_relevance(question, fact_lines))
+        arranged = await _arrange_fact_lines(
+            question, fact_lines, embedding_provider=embedding_provider, question_vector=question_vector
+        )
+        facts = "\n".join(arranged)
         context_block = f"以下是從知識圖譜檢索到、可能與問題相關的事實：\n{facts}\n"
         instruction = (
             "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，"
@@ -356,10 +446,13 @@ def _build_prompt(
     return f"{_TAIWAN_CONTEXT_INSTRUCTION}\n\n{context_block}\n{history_block}問題：{question}\n\n{instruction}"
 
 
-def _build_constrained_prompt(
+async def _build_constrained_prompt(
     question: str,
     fact_lines: list[str],
     history: list[ChatMessage] | None,
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None = None,
 ) -> str:
     """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、9）。
 
@@ -383,10 +476,13 @@ def _build_constrained_prompt(
     重複」，反而正是論文警告的反面案例——先讓模型看到錯誤內容，再指望它
     自己避開。
     """
-    facts = (
-        "\n".join(_sort_lines_by_relevance(question, fact_lines))
-        if fact_lines else "（本輪未檢索到任何事實）"
-    )
+    if fact_lines:
+        arranged = await _arrange_fact_lines(
+            question, fact_lines, embedding_provider=embedding_provider, question_vector=question_vector
+        )
+        facts = "\n".join(arranged)
+    else:
+        facts = "（本輪未檢索到任何事實）"
 
     history_block = ""
     if history:
@@ -465,13 +561,20 @@ async def chat(payload: ChatRequest):
 
         driver = get_driver()
         llm_provider = get_llm_provider()
+        # 2026-09-01：embedding_provider／question_vector 宣告移到 if 區塊外
+        # （保持 None），供事實清單排列（`_arrange_fact_lines()`）在
+        # `_build_prompt()` 呼叫點（區塊外）有變數可傳；但取得動作
+        # （`get_embedding_provider()`）本身仍留在 use_svo 分支內——
+        # payload.use_svo=False 時 fact_lines 必為空，_arrange_fact_lines()
+        # 對空清單直接回傳、保證不會實際使用 embedding_provider，維持既有
+        # 「use_svo=False 完全不觸碰 embedding provider」的測試不變量
+        # （test_chat_skips_semantic_search_when_use_svo_is_false）。
+        embedding_provider: EmbeddingProvider | None = None
+        question_vector: list[float] | None = None
         triples: list[SVOTriple] = []
         fact_results: list[dict] = []
         resolved_rel_type: str | None = None
         if payload.use_svo:
-            # 2026-08-25：embedding_provider／question_vector 提前算好，供
-            # _find_seed_entities() 的語意 fallback 與下方 vector_search_facts()
-            # 共用同一個問題向量，不多花一次 embedding 呼叫（見該函式 docstring）。
             embedding_provider = get_embedding_provider()
             question_vector = await embedding_provider.encode(payload.question)
 
@@ -494,7 +597,10 @@ async def chat(payload: ChatRequest):
             relevant_doc_ids = _relevant_doc_ids_from_facts(fact_results)
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
 
-        prompt = _build_prompt(payload.question, triples, fact_results, payload.history)
+        prompt = await _build_prompt(
+            payload.question, triples, fact_results, payload.history,
+            embedding_provider=embedding_provider, question_vector=question_vector,
+        )
 
         # 方案 B：不逐 token 即時轉發第一版草稿——先在背後生成完整答案，
         # 核對過（必要時重新生成）才把最終版本送給使用者（見上方 docstring）。
@@ -528,8 +634,9 @@ async def chat(payload: ChatRequest):
             # 刻意不把草稿或未接地陳述傳進去——見 _build_constrained_prompt()
             # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
             # 草稿會傾向重複草稿裡的錯誤內容）。
-            constrained_prompt = _build_constrained_prompt(
-                payload.question, fact_lines, payload.history
+            constrained_prompt = await _build_constrained_prompt(
+                payload.question, fact_lines, payload.history,
+                embedding_provider=embedding_provider, question_vector=question_vector,
             )
             corrected_parts: list[str] = []
             async for token in llm_provider.stream(constrained_prompt):
