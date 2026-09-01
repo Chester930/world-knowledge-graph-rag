@@ -119,6 +119,71 @@ def test_build_prompt_falls_back_to_general_knowledge_when_nothing_found():
     assert "沒有檢索到與問題直接相關的事實" in prompt
 
 
+def test_build_prompt_instructs_checking_every_fact_line():
+    """報告22題3追查後新增：生成端遺漏了確實存在於事實清單中的正確事實，
+    低成本緩解之一是在prompt裡明確要求逐條核對。"""
+    fact_results = [{"fact_text": "資遣 需 預告", "subject": "資遣", "rel_type": "REQUIRES", "object": "預告"}]
+
+    prompt = agent._build_prompt("資遣要注意什麼？", [], fact_results, None)
+
+    assert "逐條檢視" in prompt
+
+
+# ── _sort_lines_by_relevance：報告22題3追查後新增（2026-09-01）─────────────
+# 真實測試發現正確事實存在於清單中卻未被LLM引用，緩解方案之一是把跟問題
+# 最相關的事實排到清單前段，提高被引用機率。
+
+def test_sort_lines_by_relevance_puts_matching_line_first():
+    question = "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？"
+    lines = [
+        "- 高溫作業勞工（概念）給予（概念）中度工作",
+        "- 事假（概念）得以小時為請假單位（概念）",
+        "- 訓練時數（概念）以三百小時為度（概念）",
+    ]
+
+    sorted_lines = agent._sort_lines_by_relevance(question, lines)
+
+    assert sorted_lines[0] == "- 事假（概念）得以小時為請假單位（概念）"
+
+
+def test_sort_lines_by_relevance_preserves_all_lines():
+    question = "問題"
+    lines = ["- A", "- B", "- C"]
+
+    sorted_lines = agent._sort_lines_by_relevance(question, lines)
+
+    assert sorted(sorted_lines) == sorted(lines)
+
+
+def test_sort_lines_by_relevance_handles_empty_inputs():
+    assert agent._sort_lines_by_relevance("", []) == []
+    assert agent._sort_lines_by_relevance("問題", []) == []
+    assert agent._sort_lines_by_relevance("", ["- A"]) == ["- A"]
+
+
+def test_build_prompt_sorts_fact_lines_by_relevance():
+    question = "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？"
+    triples = [
+        _triple("高溫作業勞工", "RELATED_TO", "中度工作", verb="給予"),
+        _triple("事假", "RELATED_TO", "小時為請假單位", verb="得以"),
+    ]
+
+    prompt = agent._build_prompt(question, triples, [], None)
+
+    # 較相關的「事假…小時為請假單位」應排在較不相關的「高溫作業勞工…」之前
+    assert prompt.index("事假（概念）得以小時為請假單位") < prompt.index("高溫作業勞工")
+
+
+def test_build_constrained_prompt_sorts_fact_lines_and_instructs_checking_every_line():
+    question = "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？"
+    fact_lines = ["- 高溫作業勞工（概念）給予（概念）中度工作", "- 事假（概念）得以小時為請假單位（概念）"]
+
+    prompt = agent._build_constrained_prompt(question, fact_lines, None)
+
+    assert prompt.index("事假（概念）得以小時為請假單位") < prompt.index("高溫作業勞工")
+    assert "逐條檢視" in prompt
+
+
 # ── chat()：驗證語意 Fact 檢索確實接線（2026-08-18）─────────────────────────
 
 class _FakeEmbeddingProvider:

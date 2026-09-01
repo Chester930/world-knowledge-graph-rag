@@ -283,6 +283,43 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
     return lines
 
 
+def _sort_lines_by_relevance(question: str, lines: list[str]) -> list[str]:
+    """依與問題的字元二元組（bigram）重疊度由高到低排序事實清單，把最相關
+    的事實排到 prompt 最前面。
+
+    ✅ **生成端事實遵循率問題緩解（2026-09-01，報告22題3追查後新增）**：真實
+    測試發現一筆完全正確、且確實存在於事實清單中的三元組（「事假 得以
+    小時為請假單位」，位於 28 行事實清單中）被 LLM 忽略、未在最終回答中
+    引用——追查排除了抽取與檢索管線的問題（三元組正確抽取、正確通過型別
+    與文件範圍篩選、確實出現在送給LLM的fact_lines裡），缺陷在生成階段對
+    較長事實清單的注意力／遵循率不足。這裡用最低成本的緩解：把跟問題
+    最相關的事實排到清單最前面，提高被引用的機率——純重排順序，不改變
+    `_merge_fact_lines()` 既有的去重／殘缺過濾邏輯與輸出內容，`verify_
+    fact_grounding()` 的核對邏輯不受順序影響（逐句核對，非位置比對）。
+
+    刻意不用 embedding 相似度排序：事實清單常有數十筆，逐筆呼叫
+    `embedding_provider.encode()` 會顯著拖慢單次問答延遲（且與問題向量
+    化本身重複——`chat()` 已算過一次 `question_vector`，但沒有對應的
+    per-line embedding 可比對）。改用字元二元組 Jaccard 重疊度，對中文
+    （無空白斷詞）比逐字符比對更穩健，且是純 CPU 計算、零額外網路/LLM
+    呼叫的低成本方案，可作為之後若要升級為 embedding 排序或加入自我
+    精煉迴圈（3.2 §a／RQ2 範疇）前的過渡緩解。
+    """
+    def _bigrams(text: str) -> set[str]:
+        return {text[i:i + 2] for i in range(len(text) - 1)} or {text}
+
+    question_bigrams = _bigrams(question)
+
+    def _score(line: str) -> float:
+        line_bigrams = _bigrams(line)
+        if not question_bigrams or not line_bigrams:
+            return 0.0
+        overlap = len(question_bigrams & line_bigrams)
+        return overlap / len(question_bigrams | line_bigrams)
+
+    return sorted(lines, key=_score, reverse=True)
+
+
 def _build_prompt(
     question: str,
     triples: list[SVOTriple],
@@ -291,9 +328,13 @@ def _build_prompt(
 ) -> str:
     fact_lines = _merge_fact_lines(triples, fact_results)
     if fact_lines:
-        facts = "\n".join(fact_lines)
+        facts = "\n".join(_sort_lines_by_relevance(question, fact_lines))
         context_block = f"以下是從知識圖譜檢索到、可能與問題相關的事實：\n{facts}\n"
-        instruction = "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，但務必清楚區分哪些是根據圖譜事實、哪些是你自己的補充。"
+        instruction = (
+            "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，"
+            "但務必清楚區分哪些是根據圖譜事實、哪些是你自己的補充。"
+            "回答前請逐條檢視上方事實清單中每一項，判斷是否與問題相關，不要遺漏任何一項可用的事實。"
+        )
     else:
         context_block = ""
         # 2026-07-28 demo 測試發現：地區限定的指示解決不了「同一法域內數字記錯」
@@ -342,7 +383,10 @@ def _build_constrained_prompt(
     重複」，反而正是論文警告的反面案例——先讓模型看到錯誤內容，再指望它
     自己避開。
     """
-    facts = "\n".join(fact_lines) if fact_lines else "（本輪未檢索到任何事實）"
+    facts = (
+        "\n".join(_sort_lines_by_relevance(question, fact_lines))
+        if fact_lines else "（本輪未檢索到任何事實）"
+    )
 
     history_block = ""
     if history:
@@ -359,6 +403,7 @@ def _build_constrained_prompt(
 請回答上述問題，並嚴格遵守：
 1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。
 2. 若事實清單不足以完整回答問題的某個部分，該部分請回答「資料未明確記載，無法確認」，並簡短說明具體是哪個部分找不到依據（例如：「事實清單中沒有提到婚假的天數」），不要臆測或用自己的知識填補。
+3. 回答前請逐條檢視上方事實清單中每一項，確認是否有跟問題相關卻被你遺漏的事實——事實清單已依與問題的相關性排序，最相關的通常在清單前段。
 """
 
 
