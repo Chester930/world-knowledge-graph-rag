@@ -85,10 +85,18 @@ async def _find_seed_entities(
     return matched
 
 
-def _relevant_doc_ids_from_facts(fact_results: list[dict]) -> set[UUID]:
+# 從語意 Fact 推導文件範圍時，只取分數最高的前幾筆——`vector_search_facts()`
+# 回傳已依 score 遞減排序。報告25 §4 發現1：`ChatRequest.top_k` 提高到 20 後，
+# 若拿全部 20 筆的 `source_doc_id` 當範圍，會被相似度 0.80 左右的跨文件事實
+# 稀釋（Q8 真實案例：20 筆裡 13 筆來自其他訓練/補助法規），範圍過濾形同失效。
+# 取前 5 筆＝回到 2026-08-27 定案當時（`top_k` 預設本就是 5）的等效行為。
+_DOC_SCOPE_TOP_N_FACTS = 5
+
+
+def _relevant_doc_ids_from_facts(fact_results: list[dict], *, top_n: int | None = None) -> set[UUID]:
     """從語意 Fact 檢索結果（`vector_search_facts()`）取出出現過的
-    `source_doc_id` 集合，供 `_filter_triples_by_source_doc_ids()` 當前置
-    篩選範圍用。
+    `source_doc_id` 集合，供 `_filter_triples_by_source_doc_ids()`／
+    `_filter_facts_by_source_doc_ids()` 當前置篩選範圍用。
 
     ✅ **2026-08-27 新增（64筆規模真實測試發現）**：語意 Fact 檢索本身常常
     已經正確找到問題對應的文件（真實測試兩次都在 Top-5 排第一、score 約
@@ -103,9 +111,14 @@ def _relevant_doc_ids_from_facts(fact_results: list[dict]) -> set[UUID]:
     篩選範圍；`fact_results` 為空（語意檢索本身沒找到東西）時回傳空集合，
     呼叫端應視為「無範圍限制」，不強加篩選——避免語意檢索本身失準時，
     篩選反而放大既有的檢索缺陷。
+
+    ✅ **`top_n`（2026-09-02，報告25 §4 發現1）**：只取分數最高的前 `top_n`
+    筆推導範圍（`fact_results` 已依 score 遞減）。`top_n=None` 時沿用舊行為
+    （全部）。理由見 `_DOC_SCOPE_TOP_N_FACTS` 常數註解。
     """
+    considered = fact_results[:top_n] if top_n is not None else fact_results
     doc_ids: set[UUID] = set()
-    for f in fact_results:
+    for f in considered:
         raw = f.get("source_doc_id")
         if not raw:
             continue
@@ -116,31 +129,58 @@ def _relevant_doc_ids_from_facts(fact_results: list[dict]) -> set[UUID]:
     return doc_ids
 
 
+def _scope_by_source_doc_ids(items: list, allowed_doc_ids: set[UUID], get_doc_id) -> list:
+    """依 `allowed_doc_ids` 做**排除篩選**的共用邏輯（`_filter_triples_by_
+    source_doc_ids()`／`_filter_facts_by_source_doc_ids()` 共用）：
+
+    - `allowed_doc_ids` 為空（語意檢索沒有找到任何範圍訊號）→ 原樣回傳，
+      不強加篩選（優雅降級）。
+    - 三值邏輯：`get_doc_id(item)` 回 `None`（無法判定來源）的一律保留，
+      只排除**明確知道**來源、且不在允許範圍內的項目。
+    - ⚠️ **歸零守衛（2026-09-02，報告25 §4 發現1）**：若套用篩選會把「原本
+      非空的清單」清成空集合，代表語意檢索判定的來源範圍與這批項目完全
+      不一致——不信任較小／較新的語意 top-K 訊號去零化，放棄篩選、原樣
+      回傳。只擋「完全歸零」，部分重疊命中（2026-08-27 情境）仍照常篩選。
+    """
+    if not allowed_doc_ids:
+        return items
+    filtered = [it for it in items if get_doc_id(it) is None or get_doc_id(it) in allowed_doc_ids]
+    if items and not filtered:
+        return items
+    return filtered
+
+
 def _filter_triples_by_source_doc_ids(triples: list[SVOTriple], allowed_doc_ids: set[UUID]) -> list[SVOTriple]:
-    """依 `allowed_doc_ids` 對 `bfs_query()` 已回傳的三元組做後篩選——排除
-    篩選（exclusion filter）而非正向篩選：只排除**明確知道**來源文件、且
-    不在允許範圍內的三元組；`source_doc_id` 為 `None`（無法判定來源）的
-    一律保留，不因為「不知道」就當作「不符合」。`allowed_doc_ids` 為空
-    （語意檢索沒有找到任何範圍訊號）時原樣回傳，不做任何篩選——優雅
-    降級，不因為沒有篩選依據就讓查詢端拿不到結果。
+    """依 `allowed_doc_ids` 對 `bfs_query()` 已回傳的三元組做排除篩選（見
+    `_scope_by_source_doc_ids()` 的共用邏輯與歸零守衛說明）。
 
     2026-08-27 真實測試：同一問題套用此篩選後 BFS 從 52 筆降到 8 筆，
     回答的三個核心重點全部正確且完全接地（先前未篩選版本混雜了推測
     內容，接地率明顯較低）。
-
-    ⚠️ **歸零守衛（2026-09-02，報告25 §4 發現1）**：若套用篩選會把「原本
-    非空的 BFS 結果」清成空集合，代表語意檢索判定的來源範圍與圖遍歷完全
-    不一致——此時不信任較小／較新的語意 top-K 訊號去零化圖遍歷結果，放棄
-    篩選、原樣回傳。只擋「完全歸零」這個情境（報告25 Q8：語意 top-K 未
-    命中正確文件，導致該文件 BFS 三元組被整批濾掉，答成「資料未明確
-    記載」），部分重疊命中（2026-08-27 情境）仍照常篩選。
     """
-    if not allowed_doc_ids:
-        return triples
-    filtered = [t for t in triples if t.source_doc_id is None or t.source_doc_id in allowed_doc_ids]
-    if triples and not filtered:
-        return triples
-    return filtered
+    return _scope_by_source_doc_ids(triples, allowed_doc_ids, lambda t: t.source_doc_id)
+
+
+def _filter_facts_by_source_doc_ids(fact_results: list[dict], allowed_doc_ids: set[UUID]) -> list[dict]:
+    """依 `allowed_doc_ids` 對 `vector_search_facts()` 回傳的語意 Fact 做排除
+    篩選（見 `_scope_by_source_doc_ids()` 的共用邏輯與歸零守衛說明）。
+
+    ✅ **2026-09-02（報告25 §4 發現1）**：先前只有 BFS 三元組會套文件範圍
+    過濾、語意 Fact 不套。`ChatRequest.top_k` 提高到 20 後，語意 Fact 清單
+    混入大量跨文件的相似事實（Q8 真實案例：LLM 抓了跨文件的「訓練時數
+    不得低於八十小時」答成錯誤數字）。此函式讓語意 Fact 也收斂到語意
+    自身判定的來源文件。`source_doc_id` 為字串，解析失敗／`None` 一律保留。
+    """
+    def _doc_id(f: dict) -> UUID | None:
+        raw = f.get("source_doc_id")
+        if not raw:
+            return None
+        try:
+            return UUID(raw) if isinstance(raw, str) else raw
+        except ValueError:
+            return None
+
+    return _scope_by_source_doc_ids(fact_results, allowed_doc_ids, _doc_id)
 
 
 def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | None) -> list[SVOTriple]:
@@ -618,10 +658,16 @@ async def chat(payload: ChatRequest):
             fact_results = await vector_search_facts(
                 driver, payload.kg_id, question_vector, top_k=payload.top_k
             )
-            # 2026-08-27：語意 Fact 檢索找到的來源文件，反過來當 BFS 三元組的
-            # 前置篩選範圍（見 _relevant_doc_ids_from_facts() docstring）。
-            relevant_doc_ids = _relevant_doc_ids_from_facts(fact_results)
+            # 2026-08-27：語意 Fact 檢索找到的來源文件，反過來當前置篩選範圍。
+            # 2026-09-02（報告25 §4 發現1）：範圍只取分數最高的前 N 筆推導
+            # （`top_k` 提高到 20 後，全 20 筆會被 ~0.80 的跨文件事實稀釋）；
+            # 且範圍同時套用到 BFS 三元組與語意 Fact 清單本身（先前只套前者，
+            # 導致 Q8 的語意 Fact 清單混入跨文件雜訊、被 LLM 採用成錯誤數字）。
+            relevant_doc_ids = _relevant_doc_ids_from_facts(
+                fact_results, top_n=_DOC_SCOPE_TOP_N_FACTS
+            )
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
+            fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
 
         prompt = await _build_prompt(
             payload.question, triples, fact_results, payload.history,

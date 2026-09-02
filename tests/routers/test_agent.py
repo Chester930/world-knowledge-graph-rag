@@ -636,6 +636,50 @@ def test_filter_triples_by_source_doc_ids_partial_overlap_still_filters():
     assert filtered == [triple_in]
 
 
+def test_relevant_doc_ids_from_facts_top_n_only_considers_highest_scored():
+    """報告25 §4 發現1：範圍只取分數最高的前 N 筆推導（fact_results 已依
+    score 遞減），避免 top_k 提高後被低分的跨文件事實稀釋。"""
+    doc_a, doc_b, doc_c = uuid4(), uuid4(), uuid4()
+    fact_results = [
+        {"fact_text": "F1", "source_doc_id": str(doc_a), "score": 0.88},
+        {"fact_text": "F2", "source_doc_id": str(doc_a), "score": 0.86},
+        {"fact_text": "F3", "source_doc_id": str(doc_b), "score": 0.81},
+        {"fact_text": "F4", "source_doc_id": str(doc_c), "score": 0.80},
+    ]
+
+    assert agent._relevant_doc_ids_from_facts(fact_results, top_n=2) == {doc_a}
+    assert agent._relevant_doc_ids_from_facts(fact_results) == {doc_a, doc_b, doc_c}
+
+
+def test_filter_facts_by_source_doc_ids_keeps_in_scope_and_unknown():
+    """語意 Fact 清單也套文件範圍過濾（報告25 §4 發現1）：範圍內＋來源不明
+    （source_doc_id 缺席／None／非 UUID）一律保留，只排除明確跨文件的。"""
+    doc_a, doc_b = uuid4(), uuid4()
+    facts = [
+        {"fact_text": "in", "source_doc_id": str(doc_a)},
+        {"fact_text": "out", "source_doc_id": str(doc_b)},
+        {"fact_text": "none", "source_doc_id": None},
+        {"fact_text": "missing"},
+        {"fact_text": "bad", "source_doc_id": "not-a-uuid"},
+    ]
+
+    kept = agent._filter_facts_by_source_doc_ids(facts, {doc_a})
+
+    assert [f["fact_text"] for f in kept] == ["in", "none", "missing", "bad"]
+
+
+def test_filter_facts_by_source_doc_ids_zero_out_guard_and_empty_scope():
+    """歸零守衛：範圍完全不重疊時放棄篩選、原樣回傳；allowed 為空時不篩選。"""
+    doc_a, doc_b = uuid4(), uuid4()
+    all_out = [
+        {"fact_text": "x", "source_doc_id": str(doc_b)},
+        {"fact_text": "y", "source_doc_id": str(doc_b)},
+    ]
+
+    assert agent._filter_facts_by_source_doc_ids(all_out, {doc_a}) == all_out
+    assert agent._filter_facts_by_source_doc_ids(all_out, set()) == all_out
+
+
 # ── chat()：驗證查詢時關係連結（QSIM/QFILTER）確實接線（2026-08-18）─────────
 
 @pytest.mark.asyncio
