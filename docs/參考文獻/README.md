@@ -28,6 +28,7 @@
 | `19_生成端長清單事實遺漏與位置偏誤/` | `docs/報告/22_乾淨重跑新舊KG問答品質比對報告.md` § 5、§5.1；`docs/報告/23_生成端事實清單排序機制優化設計報告.md`（位置工程已實作，commit `0ff4e74`；4次真實測試皆未解決報告22題3案例）；02_文獻探討.md § 2.4.7；03_系統設計與方法論.md § 3.6 | ✅ 位置工程（截斷＋條件式zigzag）已實作；🟢 已下載精讀 3 篇（TACL 2024 Lost in the Middle、ICLR 2025 Long-Context LLMs Meet RAG、Nogueira & Cho 2019 BERT rerank）；另查得LangChain `LongContextReorder`／`EmbeddingsFilter` 開源實作可直接參考演算法邏輯 |
 | `20_事實清單自然語言化/` | `docs/報告/23_生成端事實清單排序機制優化設計報告.md` § 6.4（對照實驗確認根因）、§7（新方向）；02_文獻探討.md § 2.4.7；03_系統設計與方法論.md § 3.6；報告25 §4 發現4（OpenCC 簡→繁保險） | ✅ 已實作（報告24＋報告25 §4）；🟢 已下載精讀 2 篇（INLG 2017 WebNLG、IJCKG 2023 Retrieve-Rewrite-Answer）；另查得 microsoft/graphrag（35,774★）、wuyike2000/Retrieve-Rewrite-Answer（63★）|
 | `21_圖遍歷與向量檢索結果融合/` | `docs/報告/25_擴大版新舊KG問答品質比對報告.md` § 4 發現6；03_系統設計與方法論.md § 3.6（`_arrange_fact_lines()` v2） | ✅ 機制已實作（報告25 §6 ⑤）；🟢 已下載精讀 RRF（Cormack et al. 2009, SIGIR，2 頁完整論文）、已下載 Han et al. GraphRAG 綜述（2501.00309，待精讀鄰居爆炸段落）；🟡 SAGE（2602.16964）、PhaseGraph/Calibrated Fusion（2603.28886）摘要已查證 |
+| `22_生成端過度保守與選擇性拒答/` | `docs/報告/25_擴大版新舊KG問答品質比對報告.md` § 4 發現2／§6 ⑥；03_系統設計與方法論.md § 3.6（`verify_fact_grounding()` 的 `is_claim` 三分類、限制性重生成觸發條件） | ✅ 2a 機制已實作（報告25 §6 ⑥）；🟢 已下載精讀 Context-faithful Prompting（Zhou et al. 2023, EMNLP Findings，含小模型反效果警示）；🟡 RefusalBench（2510.10390）已下載待精讀；"Not All Needles Are Found"（2601.02023）、Copy-Paste（2510.00508）搜尋層級 |
 
 ## 01_AGI與智慧定義 內容清單
 

@@ -1000,7 +1000,9 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
     # 最後一個 chunk，改用 event 類型定位（比照 sources 定位方式）。
     grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
     grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
-    assert grounding_data == [{"statement": "ok", "supported": False, "reason": "查無此數字"}]
+    assert grounding_data == [
+        {"statement": "ok", "is_claim": True, "supported": False, "reason": "查無此數字"}
+    ]
     # 待核對文字（串流累積的完整回答）與 fact_text 清單皆確實送進了核對呼叫
     assert "公務員每日辦公時數為八小時。" in llm.grounding_prompts[0]
 
@@ -1178,6 +1180,32 @@ async def test_chat_regenerates_with_constrained_prompt_when_ungrounded(monkeypa
     grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
     grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
     assert grounding_data[0]["supported"] is True  # 反映修正版，非草稿的核對結果
+
+
+@pytest.mark.asyncio
+async def test_chat_no_regeneration_when_only_non_claim_sentences_unsupported(monkeypatch):
+    """報告25 §4 發現6→⑥：草稿的具體主張都接地，只有引言句／問題回貼這類
+    非主張句被判「未接地」時，不觸發限制性重生成——否則會把正確草稿改壞。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY", "object": "八日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["婚假幾天？根據提供的事實，婚假為八日。"],
+        grounding_payloads=[json.dumps({"claims": [
+            {"statement": "婚假幾天？", "is_claim": False, "supported": False, "reason": "問題被當標題回貼，非陳述"},
+            {"statement": "根據提供的事實，婚假為八日。", "is_claim": True, "supported": True, "reason": "與事實一致"},
+        ]})],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    payload = ChatRequest(question="婚假幾天？", kg_id=kg_id)
+    chunks = await _drain(await agent.chat(payload))
+
+    assert len(llm.prompts) == 1  # 沒有觸發限制性重生成
+    done_chunk = next(c for c in chunks if c.startswith("event: status\n") and '"phase": "done"' in c)
+    assert json.loads(done_chunk.split("\n", 1)[1][len("data: "):])["regenerated"] is False
+    data_chunk = next(c for c in chunks if c.startswith("data: "))
+    assert "婚假為八日" in json.loads(data_chunk[len("data: "):])["token"]
 
 
 @pytest.mark.asyncio

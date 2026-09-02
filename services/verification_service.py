@@ -36,6 +36,15 @@ class ClaimGrounding:
     statement: str
     supported: bool
     reason: str
+    # 這句話是否為「需要被事實支持的具體主張」（含數字／期限／條件／結論）。
+    # 引言句、章節標題、把問題原樣回貼、純過渡語等**不是主張**——它們天生
+    # 不會被事實清單支持，但也不代表回答有問題（報告25 § 4 發現6→⑥ 診斷：
+    # `chat()` 對這類非主張句誤觸發限制性重生成、把正確草稿改壞）。判準對齊
+    # RAGAS Faithfulness（Es et al., 2023）與 Context-faithful Prompting
+    # （Zhou et al., 2023, EMNLP Findings）「對抽取出的事實主張做核對」的作法，
+    # 補上本函式 docstring 自述的「句 vs 原子主張」粒度侷限。
+    # 缺省 True：分類不出來時當作主張處理（保守，讓重生成仍會對真問題觸發）。
+    is_claim: bool = True
 
 
 def _strip_json_fence(raw: str) -> str:
@@ -47,7 +56,7 @@ def _strip_json_fence(raw: str) -> str:
 def _grounding_prompt(sentences: Sequence[str], fact_texts: Sequence[str]) -> str:
     facts_block = "\n".join(f"{i}. {text}" for i, text in enumerate(fact_texts, start=1))
     sentences_block = "\n".join(f"{i}. {text}" for i, text in enumerate(sentences, start=1))
-    return f"""你是事實查核員。請核對「回答」裡的每一句陳述，是否被「已知事實」清單支持。
+    return f"""你是事實查核員。請核對「回答」裡的每一句陳述。
 
 已知事實：
 {facts_block}
@@ -55,14 +64,20 @@ def _grounding_prompt(sentences: Sequence[str], fact_texts: Sequence[str]) -> st
 回答（已依句子拆分，逐句列出）：
 {sentences_block}
 
-對每一句判斷 supported：
-- true：這句話陳述的具體內容（包含數字、期限、結論等細節）能在已知事實清單裡找到對應依據。
-- false：這句話陳述的具體內容在已知事實清單裡找不到依據——即使主題相關、即使是合理推論，只要具體數字或結論沒有在清單裡出現過，就算 false，不可因為「聽起來合理」就判定 true。
+對每一句先判斷 is_claim，再判斷 supported：
+
+is_claim（這句是不是「需要被事實支持的具體主張」）：
+- true：這句話對問題的答案做出了具體斷言——含數字、期限、金額、比例、條件、資格、是否允許、結論等。
+- false：這句話不是需要被支持的主張——例如引言句（「根據提供的事實…」）、章節標題、把使用者的問題原樣回貼、純過渡語、對讀者的提醒。這類句子照原樣輸出、is_claim 給 false，不需要（也不會）被事實清單支持。
+
+supported（僅在 is_claim 為 true 時才有意義；is_claim 為 false 時 supported 一律填 true）：
+- true：這句主張的具體內容能在已知事實清單裡找到對應依據。
+- false：這句主張的具體內容在已知事實清單裡找不到依據——即使主題相關、即使是合理推論，只要具體數字或結論沒有在清單裡出現過，就算 false，不可因為「聽起來合理」就判定 true。
 
 只輸出 JSON，不要輸出解釋。
 
 輸出格式：
-{{"claims":[{{"statement":"", "supported": true, "reason":""}}]}}
+{{"claims":[{{"statement":"", "is_claim": true, "supported": true, "reason":""}}]}}
 """
 
 
@@ -85,10 +100,20 @@ async def verify_fact_grounding(
     LLM 回傳格式錯誤時，同樣不可假裝已核對過——每句標記為 `supported=False`
     並在 `reason` 註明核對本身失敗，不拋出例外中斷呼叫端的 SSE 串流回應。
 
-    ⚠️ **誠實侷限**：句子拆解用既有規則式 `split_into_sentences()`，不是
-    RAGAS 原始演算法的 LLM 式原子陳述句拆解——一個句子若包含多個獨立陳述，
-    本函式只能整句判斷 supported/false，無法只標記其中錯誤的那個子陳述；
-    是否改用 LLM 拆解留待第五章消融實驗評估是否值得多一次 LLM 呼叫的代價。
+    ✅ **`is_claim` 三分類（2026-09-02，報告25 § 4 發現6→⑥ 診斷）**：每句
+    先判斷是不是「需要被事實支持的具體主張」（含數字／期限／條件／結論），
+    再判斷 supported——引言句、章節標題、把問題原樣回貼等**非主張句**天生
+    不會被事實清單支持，但也不代表回答有問題。呼叫端（`routers/agent.py::
+    chat()`）據 `is_claim and not supported` 決定是否觸發限制性重生成，不再
+    對非主張句誤觸發（3 輪真實診斷確認：`qwen2.5:7b` 常把問題當 markdown
+    標題回貼，舊版逐句判定全數觸發重生成、把正確草稿改壞成「資料未明確
+    記載」）。對齊 RAGAS Faithfulness（Es et al., 2023）／Context-faithful
+    Prompting（Zhou et al., 2023）「對抽取出的事實主張做核對」的作法。
+
+    ⚠️ **誠實侷限**：句子拆解仍用既有規則式 `split_into_sentences()`，不是
+    RAGAS 的 LLM 式原子陳述句拆解——一個句子若包含多個獨立陳述，本函式只能
+    整句判斷；`is_claim` 分類本身也由核對模型判定、可能誤判（把真主張判成
+    非主張會漏掉該重生成的情況）。是否改用 LLM 拆解留待第五章消融實驗評估。
     """
     if llm_provider is None or not answer_text.strip():
         return []
@@ -119,9 +144,16 @@ async def verify_fact_grounding(
     for item in claims:
         if not isinstance(item, dict):
             continue
+        # `is_claim` 缺省 True——舊版核對模型（或格式不符）沒給這個欄位時，
+        # 當作主張處理，維持「有未接地就重生成」的既有保守行為。
+        is_claim = bool(item.get("is_claim", True))
+        # 非主張句（is_claim=False）永遠視為 supported——它天生不需要被事實
+        # 支持，呼叫端據 `is_claim and not supported` 決定是否重生成。
+        supported = True if not is_claim else bool(item.get("supported", False))
         results.append(ClaimGrounding(
             statement=str(item.get("statement", "")).strip(),
-            supported=bool(item.get("supported", False)),
+            supported=supported,
             reason=str(item.get("reason", "")).strip(),
+            is_claim=is_claim,
         ))
     return results

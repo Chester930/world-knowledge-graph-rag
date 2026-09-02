@@ -788,7 +788,15 @@ async def chat(payload: ChatRequest):
         # 每次 use_svo=False 的回答都被錯誤觸發限制性重新生成、答成「資料未
         # 明確記載」，違背該模式本身「允許補充自身知識」的設計。只在
         # use_svo=True（有 KG 事實可供核對）時才觸發重新生成。
-        if payload.use_svo and grounding and any(not c.supported for c in grounding):
+        #
+        # 2026-09-02（報告25 § 4 發現6→⑥ 診斷）：觸發條件從「任一句未接地」
+        # 收緊為「任一句**是事實主張、且**未接地」——`qwen2.5:7b` 常把使用者
+        # 的問題當 markdown 標題原樣回貼、或加引言句，這類非主張句天生不會被
+        # 事實清單支持，舊條件會對它們誤觸發重生成、把兩部分全對的正確草稿
+        # 改壞成「資料未明確記載」（3 輪真實診斷確認）。見 `ClaimGrounding.
+        # is_claim` docstring。
+        ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
+        if payload.use_svo and ungrounded_claims:
             # 刻意不把草稿或未接地陳述傳進去——見 _build_constrained_prompt()
             # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
             # 草稿會傾向重複草稿裡的錯誤內容）。
@@ -814,7 +822,11 @@ async def chat(payload: ChatRequest):
         yield f"event: sources\ndata: {sources_json}\n\n"
 
         grounding_json = json.dumps(
-            [{"statement": c.statement, "supported": c.supported, "reason": c.reason} for c in grounding],
+            [
+                {"statement": c.statement, "is_claim": c.is_claim,
+                 "supported": c.supported, "reason": c.reason}
+                for c in grounding
+            ],
             ensure_ascii=False,
         )
         yield f"event: grounding\ndata: {grounding_json}\n\n"

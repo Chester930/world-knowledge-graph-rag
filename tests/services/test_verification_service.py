@@ -78,6 +78,35 @@ async def test_parses_valid_grounding_response():
 
 
 @pytest.mark.asyncio
+async def test_parses_is_claim_and_missing_defaults_true():
+    """報告25 §4 發現6→⑥：核對結果多帶 `is_claim`；舊格式（無此欄位）缺省 True，
+    維持既有「有未接地就重生成」的保守行為。"""
+    llm = FakeLLM(payload=json.dumps({"claims": [
+        {"statement": "根據提供的事實：", "is_claim": False, "supported": True, "reason": "引言句"},
+        {"statement": "每日不得超過十二小時。", "is_claim": True, "supported": False, "reason": "無此數字"},
+        {"statement": "舊格式沒帶 is_claim。", "supported": True, "reason": "一致"},
+    ]}))
+
+    result = await verify_fact_grounding("引言。主張。舊句。", ["某事實。"], llm)
+
+    assert [(c.is_claim, c.supported) for c in result] == [(False, True), (True, False), (True, True)]
+
+
+@pytest.mark.asyncio
+async def test_non_claim_forced_supported_even_if_llm_says_false():
+    """is_claim=False 的句子天生不需要被支持——即使核對模型填了 supported:false
+    也一律視為 supported，呼叫端據 `is_claim and not supported` 判斷是否重生成。"""
+    llm = FakeLLM(payload=json.dumps({"claims": [
+        {"statement": "問題被當標題回貼？", "is_claim": False, "supported": False, "reason": "問題非陳述"},
+    ]}))
+
+    result = await verify_fact_grounding("問題被當標題回貼？", ["某事實。"], llm)
+
+    assert result[0].is_claim is False
+    assert result[0].supported is True
+
+
+@pytest.mark.asyncio
 async def test_accepts_bare_json_list_response():
     """比照 `_parse_triples_payload()` 的既有彈性：`{"claims": [...]}` 與
     裸陣列皆可接受，不強制單一格式。"""
