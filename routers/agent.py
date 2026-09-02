@@ -303,69 +303,93 @@ def _strip_type_markers(text: str) -> str:
     return _TYPE_MARKER_RE.sub("", text).strip()
 
 
-def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> list[str]:
-    """合併 BFS 圖遍歷三元組（`bfs_query`）與語意檢索到的 Fact（
-    `vector_search_facts`，2026-08-18 接線）成單一份事實清單，供 prompt 使用。
+def _is_contentful_line(line: str, subject: str | None) -> bool:
+    """判斷一行事實文字是否「有內容」——用於取代舊版直接看結構化 `object`
+    欄位是否為空的殘缺過濾。
 
-    以 `(subject, rel_type, object)` 去重——兩條來源描述同一件事時只保留一筆
-    （優先保留先出現的 BFS 版本）。`vector_search_facts()` 回傳的 `subject`／
-    `object`／`rel_type` 只有 2026-08-18 之後建立、或已跑過 §b 回填批次任務
-    的 `Fact` 節點才有值；缺席（`None`）時視為無法安全去重，一律原樣保留，
-    不強行比對——寧可讓少數舊資料出現重複描述，也不要因為誤判「相同」而
-    漏掉語意檢索才找得到的事實。
-
-    ✅ **殘缺三元組過濾（2026-08-27 新增，見報告 17 後續 64 筆規模抽查發現）**：
-    SVO 抽取偶爾會產生 subject／object 任一為空字串的殘缺三元組（多為列舉式
-    條文抽取失敗的殘留，見 `_svo_prompt()` 規則 8／9），這類三元組送進 prompt
-    對回答毫無幫助，只會佔用 context 並稀釋真正相關的事實（真實測試曾見
-    BFS 456 筆裡混入大量 `→（）` 的殘缺結果）。這裡只過濾**明確的空字串**，
-    不過濾 `None`（`fact_results` 的 `subject`／`object` 為 `None` 代表舊資料
-    尚未跑過 §b 回填、不代表 `fact_text` 本身有問題，仍應保留，理由同上）。
-
-    ✅ **自然語言化，優先使用 `natural_text`（2026-09-01，報告24 §5 階段3）**：
-    報告23 §6.4 對照實驗確認樣板拼接文字太生硬會顯著降低LLM引用該事實的
-    機率。`t.natural_text` 有值時直接使用（`merge_triples_to_graph()` 即時
-    路徑或 `backfill_natural_text()` 回填批次任務生成），沒有時 fallback 回
-    `subject verb object` 直接串接（優雅降級，不因為部分邊還沒回填就整體
-    失效）。**範圍聲明**：BFS 三元組（`triples`）走自然語言化這條路徑；
-    `fact_results`（語意 Fact 檢索）的 `fact_text` 仍是 `_verbalize_fact()`
-    的簡單串接——`_verbalize_fact()` 同時是 `Fact.fact_embedding` 的生成
-    基礎，KAPING（Baek et al., 2023）佐證此用途維持簡單串接較利於檢索
-    （見報告24 §2）。若未來也要對 `fact_results` 做自然語言化，需要獨立
-    評估、不能直接沿用本次的做法
-    （會影響到既有的embedding檢索品質），留待後續視需要再評估。
+    ⚠️ **報告25 § 4 發現6 追查（2026-09-02）**：舊版 `if not object: continue`
+    會把 `X -[RELATED_TO]-> (懸空概念)` 這種**payload 在 verb、object 為空**的
+    合法事實一起丟掉——Q8 三筆答案事實（「訓練時數 以三百小時為度」等）正是
+    這個形狀，被靜默丟棄、從頭到尾沒進過 prompt。改為看**渲染後的文字**：
+    只有「空字串」或「只有 subject、沒有動詞/受詞內容」才算殘缺。
     """
-    def _is_blank(value: str | None) -> bool:
-        return value is not None and value.strip() == ""
+    core = _strip_type_markers(line).lstrip("- ").strip()
+    if not core:
+        return False
+    if subject and core == subject.strip():
+        return False
+    return True
 
-    seen: set[tuple[str, str, str]] = set()
-    lines: list[str] = []
 
+def _split_fact_lines(
+    triples: list[SVOTriple], fact_results: list[dict]
+) -> tuple[list[str], list[str]]:
+    """把 BFS 圖遍歷三元組與語意檢索 Fact 各自轉成 prompt 文字行，**分開回傳**
+    `(bfs_lines, fact_lines)`，供 `_arrange_fact_lines()` 依來源分別處理——
+    報告25 § 4 發現6：語意 Fact 經過 `vector_search_facts()` 的問題相關性
+    KNN 檢索，BFS 三元組沒有任何問題相關性排序（`bfs_query()` 無 `LIMIT`／
+    無評分），兩者不可等同看待、丟進同一個池子重排（會讓有相關性訊號的
+    語意 Fact 被沒有訊號的 BFS 樣板列舉擠掉）。`_merge_fact_lines()` 保留
+    為兩者相接的扁平版本，供接地核對等只需要「最終文字清單」的呼叫端。
+
+    去重：優先按 `(subject, rel_type, object)`（三欄皆非空時，BFS 版優先）；
+    object 為空時 `all(key)` 為 False、無法用 key 比對，改以**渲染後的行
+    文字**比對涵蓋這個情況。
+
+    ✅ **殘缺過濾改看渲染文字（2026-09-02，報告25 § 4 發現6 追查）**：見
+    `_is_contentful_line()`——只丟空字串或「只有 subject」的行，`X verb (空)`
+    這種 payload 在 verb 的合法事實保留（Q8 三筆答案事實正是這個形狀）。
+
+    ✅ **自然語言化（2026-09-01，報告24 §5 階段3）**：BFS 三元組 `natural_text`
+    有值時直接用，沒有時 fallback 回 `subject verb object` 直接串接（報告25
+    § 4 發現5：不再塞 `（型別）`）。`fact_results` 的 `fact_text` 沿用
+    `_verbalize_fact()` 簡單串接，輸出前用 `_strip_type_markers()` 清掉尚未
+    回填 KG 殘留的型別標記。
+    """
+    seen_keys: set[tuple[str, str, str]] = set()
+    seen_texts: set[str] = set()
+    bfs_lines: list[str] = []
     for t in triples:
-        if not t.subject or not t.object:
+        if not t.subject:
             continue
-        key = (t.subject, t.rel_type, t.object)
-        seen.add(key)
-        if t.natural_text:
-            lines.append(f"- {t.natural_text}")
-        else:
-            # 報告25 § 4 發現5：fallback 比照新版 `_verbalize_fact()`，不再
-            # 塞 `（型別）`（會洩漏到 prompt／答案、也稀釋可讀性）。
-            lines.append(f"- {t.subject} {t.verb} {t.object}".rstrip())
+        raw = t.natural_text if t.natural_text else f"{t.subject} {t.verb} {t.object}".rstrip()
+        # 尚未跑過發現5 回填的 KG，其邊 `natural_text` 仍帶 `（型別）`——與
+        # `fact_results` 側一致，輸出前一律過 `_strip_type_markers()`（順帶讓
+        # 「帶標記的 BFS 版」與「乾淨的語意 Fact 版」文字一致、可被去重）。
+        line = f"- {_strip_type_markers(raw)}"
+        if not _is_contentful_line(line, t.subject) or line in seen_texts:
+            continue
+        if t.subject and t.rel_type and t.object:
+            seen_keys.add((t.subject, t.rel_type, t.object))
+        seen_texts.add(line)
+        bfs_lines.append(line)
 
+    fact_lines: list[str] = []
     for f in fact_results:
-        if _is_blank(f.get("subject")) or _is_blank(f.get("object")):
+        subject = f.get("subject")
+        if subject is not None and subject.strip() == "":
             continue
         key = (f.get("subject"), f.get("rel_type"), f.get("object"))
-        if all(key) and key in seen:
+        if all(key) and key in seen_keys:
+            continue
+        line = f"- {_strip_type_markers(f['fact_text'])}"
+        if not _is_contentful_line(line, subject) or line in seen_texts:
             continue
         if all(key):
-            seen.add(key)
-        # 防禦性清除殘留型別標記（見 `_strip_type_markers()`）——尚未跑過
-        # `backfill_fact_text_embeddings()` 的 KG 其 `fact_text` 仍帶 `（概念）`。
-        lines.append(f"- {_strip_type_markers(f['fact_text'])}")
+            seen_keys.add(key)
+        seen_texts.add(line)
+        fact_lines.append(line)
 
-    return lines
+    return bfs_lines, fact_lines
+
+
+def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> list[str]:
+    """`_split_fact_lines()` 的扁平版本（BFS 行在前、語意 Fact 行在後），供
+    接地核對（`verify_fact_grounding()`）等只需要「本輪最終送進 prompt 的
+    事實文字清單」、不關心來源分層的呼叫端使用。**排序／截斷／來源分層
+    邏輯在 `_arrange_fact_lines()`，不在這裡。**"""
+    bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
+    return bfs_lines + fact_lines
 
 
 # 事實清單截斷／條件式重排的門檻常數（見 `docs/報告/23_生成端事實清單排序機制
@@ -375,6 +399,19 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
 # 再留一些餘裕。留待報告23 §4測試計畫（多次重跑＋K值敏感度比較）校準。
 _FACT_LINE_TRUNCATE_K = 18
 _FACT_LINE_REORDER_THRESHOLD_K = 35
+
+# 報告25 § 4 發現6：BFS 鄰居剪枝與 rank fusion 的參數（皆未實測校準，除 RRF k）。
+# `_BFS_KEEP_MAX`：BFS 三元組行先對問題 embedding 排序，只留前這麼多筆——
+#   SAGE（Titiya et al., 2026）「expand → 用 dense retrieval 過濾鄰居、只選 k'」
+#   的簡化對應；BFS 本身無問題相關性排序（`bfs_query()` 無 LIMIT），不剪枝會
+#   讓一條文的列舉樣板（如 N0080016 第5條「訓練計畫書應包括…」8 行）佔滿清單。
+# `_MIN_BFS_SLOTS`：截斷時保底給 BFS 的名額，避免「答案由 BFS 三元組提供」
+#   （報告22「每週總時數四十小時」案例）被語意 Fact 全數擠掉。
+# `_RRF_K`：Reciprocal Rank Fusion 常數，Cormack, Clarke & Büttcher (2009) 定 60、
+#   後續驗證未改（Table 1：k=10~100 幾乎持平），本專案沿用。
+_BFS_KEEP_MAX = 18
+_MIN_BFS_SLOTS = 4
+_RRF_K = 60
 
 
 async def _score_lines_by_embedding(
@@ -440,52 +477,79 @@ def _litm_reorder(lines: list[str]) -> list[str]:
     return reordered
 
 
+def _rrf_order(sem_ranked: list[str], bfs_ranked: list[str], lines: list[str]) -> list[str]:
+    """Reciprocal Rank Fusion（Cormack, Clarke & Büttcher, 2009, SIGIR）：把
+    `lines` 依兩個排序清單的 RRF 分數由高到低重排——`RRFscore(l) = Σ 1/(k +
+    rank_i(l))`，k=`_RRF_K`。只用 rank、不用原始分數，因此不需要 `vector_
+    search_facts()` 的 KNN 分數與 `_score_lines_by_embedding()` 的 cosine
+    在同一個尺度上（RRF 原文：「combines ranks without regard to the
+    arbitrary scores returned by particular ranking methods」）。Python `sorted`
+    穩定，RRF 同分時保留傳入 `lines` 的既有順序。"""
+    rank_sem = {line: i for i, line in enumerate(sem_ranked)}
+    rank_bfs = {line: i for i, line in enumerate(bfs_ranked)}
+
+    def _score(line: str) -> float:
+        s = 0.0
+        if line in rank_sem:
+            s += 1.0 / (_RRF_K + rank_sem[line])
+        if line in rank_bfs:
+            s += 1.0 / (_RRF_K + rank_bfs[line])
+        return s
+
+    return sorted(lines, key=_score, reverse=True)
+
+
 async def _arrange_fact_lines(
     question: str,
-    lines: list[str],
+    bfs_lines: list[str],
+    fact_lines: list[str],
     *,
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
 ) -> list[str]:
-    """事實清單的完整排列邏輯（見 `docs/報告/23_生成端事實清單排序機制優化
-    設計報告.md` § 3.2「以截斷為主、重排為條件式後備」，2026-09-01 實作後
-    真實驗證發現原始版本的門檻設計有漏洞，已修正——見下方 ⚠️ 說明）：
+    """事實清單的完整排列邏輯。**2026-09-02 改版（報告25 § 4 發現6）**：
+    先前把 BFS 三元組與語意 Fact 合併成一份清單、整批用
+    `_score_lines_by_embedding()` 重排＋截斷——這一步丟棄了
+    `vector_search_facts()` 已算好的問題相關性 KNN 排名，改用一個對「短
+    答案事實 vs 冗長條文列舉」不利的第二次 embedding pass，導致 Q8 三筆
+    已檢索到的答案事實被 N0080016 第5條的 8 行「訓練計畫書應包括…」樣板
+    擠出前 18 名、完全沒進 prompt。
 
-    1. 依 embedding cosine similarity 排序（`_score_lines_by_embedding()`）。
-    2. 清單長度 ≤ `_FACT_LINE_TRUNCATE_K`：已經是小清單，直接使用——Jin et
-       al. (2025) 證實此時重排效果不明顯，不需要額外複雜度。
-    3. `_FACT_LINE_TRUNCATE_K` < 長度 ≤ `_FACT_LINE_REORDER_THRESHOLD_K`：
-       截斷到前 `_FACT_LINE_TRUNCATE_K` 筆，**並套用 `_litm_reorder()`**。
-    4. 長度 > `_FACT_LINE_REORDER_THRESHOLD_K`：清單仍大，直接截到
-       `_FACT_LINE_TRUNCATE_K` 可能犧牲過多涵蓋率，改為保留前
-       `_FACT_LINE_REORDER_THRESHOLD_K` 筆並套用 `_litm_reorder()`，緩解
-       中段低谷效應同時保留較多筆數。
+    改為分來源處理（文獻見 `docs/參考文獻/21_圖遍歷與向量檢索結果融合/`）：
 
-    ⚠️ **真實驗證發現並修正的設計漏洞（2026-09-01）**：初版只在分支4套用
-    `_litm_reorder()`，分支3（截斷到K但不重排）維持單純線性排序。真實重跑
-    報告22題3案例（28行事實清單，落在分支3）發現：目標事實 embedding 排序
-    後排第16名（跟舊版bigram排序幾乎沒有進步），因為28≤K'僅套用截斷、
-    沒有重排，第16名恰好卡在18筆截斷範圍的尾端附近、但不是`_litm_reorder()`
-    會刻意擺放的「最尾端」極值位置——仍落在 Lost-in-the-Middle 的低效能
-    區間，LLM 最終仍未引用。分支3現已一併套用 `_litm_reorder()`（在
-    「截斷」之後執行，只重排留下來的K筆，不影響「保留哪K筆」的判斷）。
+    1. **BFS 鄰居剪枝**（SAGE, Titiya et al., 2026）：`bfs_lines` 本身無問題
+       相關性排序（`bfs_query()` 無 LIMIT），先用 `_score_lines_by_embedding()`
+       對問題排序、只留前 `_BFS_KEEP_MAX` 筆。
+    2. **語意 Fact 為主、BFS 為輔的名額分配**（Han et al. 2024/2025 綜述：
+       BFS 鄰居爆炸稀釋 LLM 焦點、需重排優先化；SAGE：k' additional on top
+       of primary retrieval）：截斷目標 K（或 K'）內，語意 Fact 依
+       `vector_search_facts()` 檢索順序優先佔位，BFS 至少保底 `_MIN_BFS_SLOTS`
+       席（避免報告22「答案由 BFS 提供」案例被擠掉）；任一側不足時把餘額
+       讓給另一側。
+    3. **RRF 融合排序**（`_rrf_order()`，Cormack et al. 2009）：對留下來的 K 筆
+       依兩個 rank 清單的 RRF 分數重排，決定 zigzag 時哪些落在首尾（最相關）。
+    4. **zigzag 重排**（`_litm_reorder()`，Jin et al. 2025 / Liu et al. 2023）：
+       清單 > K 時套用；≤ K 的小清單 Jin et al. 證實重排效果不明顯，不套。
 
-    ⚠️ **這個修正不保證解決本案例**：即使套用 `_litm_reorder()`，若目標
-    事實的 embedding 相關性分數本身就偏低（本案例排名16/28，並非前段），
-    重排能做的只是把它放到「已保留清單」的首尾附近，而非把它從根本上
-    判定為更相關——這暴露的是相關性訊號本身的準確度侷限，而非單純的
-    位置排列問題，須如實記錄於報告22/23，不宣稱本次修正已解決此案例。
-
-    ⚠️ **K／K' 數值尚未實測校準**，屬理論初始建議值，見報告23 § 3.4／§4。
+    ⚠️ **`_BFS_KEEP_MAX`／`_MIN_BFS_SLOTS`／K／K' 皆未實測校準**（`_RRF_K=60`
+    有 Cormack et al. 背書），留待報告25 §6 的 K 值敏感度測試與擴大題組
+    重測校準。
     """
-    sorted_lines = await _score_lines_by_embedding(
-        question, lines, embedding_provider=embedding_provider, question_vector=question_vector
+    bfs_ranked = await _score_lines_by_embedding(
+        question, bfs_lines, embedding_provider=embedding_provider, question_vector=question_vector
     )
-    if len(sorted_lines) <= _FACT_LINE_TRUNCATE_K:
-        return sorted_lines
-    if len(sorted_lines) <= _FACT_LINE_REORDER_THRESHOLD_K:
-        return _litm_reorder(sorted_lines[:_FACT_LINE_TRUNCATE_K])
-    return _litm_reorder(sorted_lines[:_FACT_LINE_REORDER_THRESHOLD_K])
+    bfs_ranked = bfs_ranked[:_BFS_KEEP_MAX]
+    sem_ranked = list(fact_lines)  # 已是 vector_search_facts() 檢索順序
+
+    total = len(sem_ranked) + len(bfs_ranked)
+    if total <= _FACT_LINE_TRUNCATE_K:
+        return _rrf_order(sem_ranked, bfs_ranked, sem_ranked + bfs_ranked)
+
+    target = _FACT_LINE_TRUNCATE_K if total <= _FACT_LINE_REORDER_THRESHOLD_K else _FACT_LINE_REORDER_THRESHOLD_K
+    n_bfs = min(len(bfs_ranked), max(_MIN_BFS_SLOTS, target - len(sem_ranked)))
+    n_sem = min(len(sem_ranked), target - n_bfs)
+    kept = sem_ranked[:n_sem] + bfs_ranked[:n_bfs]
+    return _litm_reorder(_rrf_order(sem_ranked, bfs_ranked, kept))
 
 
 async def _build_prompt(
@@ -497,10 +561,11 @@ async def _build_prompt(
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
 ) -> str:
-    fact_lines = _merge_fact_lines(triples, fact_results)
-    if fact_lines:
+    bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
+    if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
-            question, fact_lines, embedding_provider=embedding_provider, question_vector=question_vector
+            question, bfs_lines, fact_lines,
+            embedding_provider=embedding_provider, question_vector=question_vector,
         )
         facts = "\n".join(arranged)
         context_block = f"以下是從知識圖譜檢索到、可能與問題相關的事實：\n{facts}\n"
@@ -532,7 +597,8 @@ async def _build_prompt(
 
 async def _build_constrained_prompt(
     question: str,
-    fact_lines: list[str],
+    triples: list[SVOTriple],
+    fact_results: list[dict],
     history: list[ChatMessage] | None,
     *,
     embedding_provider: EmbeddingProvider | None,
@@ -560,9 +626,11 @@ async def _build_constrained_prompt(
     重複」，反而正是論文警告的反面案例——先讓模型看到錯誤內容，再指望它
     自己避開。
     """
-    if fact_lines:
+    bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
+    if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
-            question, fact_lines, embedding_provider=embedding_provider, question_vector=question_vector
+            question, bfs_lines, fact_lines,
+            embedding_provider=embedding_provider, question_vector=question_vector,
         )
         facts = "\n".join(arranged)
     else:
@@ -725,7 +793,7 @@ async def chat(payload: ChatRequest):
             # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
             # 草稿會傾向重複草稿裡的錯誤內容）。
             constrained_prompt = await _build_constrained_prompt(
-                payload.question, fact_lines, payload.history,
+                payload.question, triples, fact_results, payload.history,
                 embedding_provider=embedding_provider, question_vector=question_vector,
             )
             corrected_parts: list[str] = []

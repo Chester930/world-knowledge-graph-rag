@@ -56,15 +56,39 @@ def test_merge_fact_lines_empty_when_no_sources():
     assert agent._merge_fact_lines([], []) == []
 
 
-# ── _merge_fact_lines：殘缺三元組過濾（2026-08-27，64筆規模抽查發現）───────
+# ── _merge_fact_lines：殘缺過濾改看渲染文字（報告25 §4 發現6 追查，2026-09-02）─
+# 舊版直接看結構化 object 欄位是否為空——會把 `X -[RELATED_TO]-> (懸空概念)`
+# 這種 payload 在 verb 的合法事實（Q8 三筆答案事實正是此形狀）一起丟掉。
+# 改為看渲染後的文字：只丟「空字串」或「只有 subject」的行。
 
-def test_merge_fact_lines_skips_triple_with_empty_object():
-    """BFS 三元組 object 為空字串（列舉式抽取失敗殘留）時整筆跳過，不送進 prompt。"""
-    triples = [_triple("失業給付", "RELATED_TO", "")]
+def test_merge_fact_lines_keeps_object_empty_fact_when_verb_carries_content():
+    """報告25 §4 發現6：`訓練時數 以三百小時為度`（object 為空、payload 在
+    verb）是合法事實，不再被殘缺過濾丟掉。"""
+    fact_results = [{"fact_text": "訓練時數 以三百小時為度", "subject": "訓練時數",
+                      "rel_type": "RELATED_TO", "object": ""}]
+
+    lines = agent._merge_fact_lines([], fact_results)
+
+    assert lines == ["- 訓練時數 以三百小時為度"]
+
+
+def test_merge_fact_lines_keeps_object_empty_bfs_triple_with_verb():
+    triples = [_triple("訓練時數", "RELATED_TO", "", verb="以三百小時為度")]
 
     lines = agent._merge_fact_lines(triples, [])
 
-    assert lines == []
+    assert lines == ["- 訓練時數 以三百小時為度"]
+
+
+def test_merge_fact_lines_skips_subject_only_line():
+    """渲染後只剩 subject（verb／object 皆空，或型別標記清掉後什麼都不剩）
+    才算殘缺、丟棄。"""
+    triples = [_triple("殘缺", "RELATED_TO", "", verb="")]
+    fact_results = [{"fact_text": "失業給付（概念）  （概念）", "subject": "失業給付",
+                      "rel_type": "RELATED_TO", "object": ""}]
+
+    assert agent._merge_fact_lines(triples, []) == []
+    assert agent._merge_fact_lines([], fact_results) == []
 
 
 def test_merge_fact_lines_skips_triple_with_empty_subject():
@@ -75,19 +99,8 @@ def test_merge_fact_lines_skips_triple_with_empty_subject():
     assert lines == []
 
 
-def test_merge_fact_lines_skips_fact_with_empty_object_string():
-    """fact_results 的 object 是明確的空字串（非 None）時跳過——區分於
-    「舊資料尚未回填、缺席為 None」的既有保留邏輯（見上一則測試）。"""
-    fact_results = [{"fact_text": "失業給付（概念）  （概念）", "subject": "失業給付",
-                      "rel_type": "RELATED_TO", "object": ""}]
-
-    lines = agent._merge_fact_lines([], fact_results)
-
-    assert lines == []
-
-
-def test_merge_fact_lines_keeps_valid_triples_and_facts_when_mixed_with_blank_ones():
-    triples = [_triple("A", "CAUSES", "B"), _triple("殘缺", "RELATED_TO", "")]
+def test_merge_fact_lines_keeps_valid_and_skips_truly_blank_when_mixed():
+    triples = [_triple("A", "CAUSES", "B"), _triple("殘缺", "RELATED_TO", "", verb="")]
     fact_results = [
         {"fact_text": "有效事實", "subject": "C", "rel_type": "CAUSES", "object": "D"},
         {"fact_text": "殘缺事實", "subject": "", "rel_type": "RELATED_TO", "object": "E"},
@@ -257,37 +270,57 @@ def test_litm_reorder_places_most_relevant_at_both_ends():
 
 
 @pytest.mark.asyncio
-async def test_arrange_fact_lines_keeps_short_list_unsorted_beyond_relevance():
-    """清單長度 ≤ K：直接用相關性排序結果，不截斷也不重排。"""
+async def test_arrange_fact_lines_keeps_short_list_no_zigzag():
+    """總長度 ≤ K：全部保留、RRF 排序、不套 zigzag（Jin et al. 2025：小清單
+    重排效果不明顯）。"""
     embedding = _FakeSemanticEmbeddingProvider()
-    lines = [f"- line{i}" for i in range(5)]
+    bfs = [f"- bfs{i}" for i in range(3)]
+    fact = [f"- fact{i}" for i in range(2)]
 
-    arranged = await agent._arrange_fact_lines("問題", lines, embedding_provider=embedding)
+    arranged = await agent._arrange_fact_lines("問題", bfs, fact, embedding_provider=embedding)
 
     assert len(arranged) == 5
-    assert sorted(arranged) == sorted(lines)
+    assert sorted(arranged) == sorted(bfs + fact)
 
 
 @pytest.mark.asyncio
-async def test_arrange_fact_lines_truncates_medium_list_to_k():
-    """K < 長度 ≤ K'：截斷到前 K 筆。"""
+async def test_arrange_fact_lines_caps_bfs_lines():
+    """BFS 鄰居剪枝（SAGE）：BFS 行超過 `_BFS_KEEP_MAX` 時只留前這麼多筆。"""
     embedding = _FakeSemanticEmbeddingProvider()
-    lines = [f"- line{i}" for i in range(25)]
+    bfs = [f"- bfs{i}" for i in range(40)]
 
-    arranged = await agent._arrange_fact_lines("問題", lines, embedding_provider=embedding)
+    arranged = await agent._arrange_fact_lines("問題", bfs, [], embedding_provider=embedding)
+
+    assert len(arranged) == agent._BFS_KEEP_MAX
+
+
+@pytest.mark.asyncio
+async def test_arrange_fact_lines_semantic_facts_survive_truncation():
+    """報告25 §4 發現6：截斷時語意 Fact 依檢索順序優先佔位，不被大量無
+    問題相關性排序的 BFS 三元組擠掉；BFS 至少保底 `_MIN_BFS_SLOTS` 席。"""
+    embedding = _FakeSemanticEmbeddingProvider()
+    bfs = [f"- bfs{i}" for i in range(30)]
+    fact = [f"- fact{i}" for i in range(13)]
+
+    arranged = await agent._arrange_fact_lines("問題", bfs, fact, embedding_provider=embedding)
 
     assert len(arranged) == agent._FACT_LINE_TRUNCATE_K
+    for line in fact:  # 全部 13 筆語意 Fact 都在最終清單裡
+        assert line in arranged
+    assert sum(1 for line in arranged if line.startswith("- bfs")) == agent._MIN_BFS_SLOTS + 1
 
 
 @pytest.mark.asyncio
-async def test_arrange_fact_lines_reorders_instead_of_truncating_large_list():
-    """長度 > K'：不直接截到 K，改保留前 K' 筆並套用 zigzag 重排。"""
+async def test_arrange_fact_lines_bfs_floor_when_few_semantic_facts():
+    """語意 Fact 少時餘額讓給 BFS——不會因為「語意優先」就浪費名額。"""
     embedding = _FakeSemanticEmbeddingProvider()
-    lines = [f"- line{i}" for i in range(50)]
+    bfs = [f"- bfs{i}" for i in range(30)]
+    fact = ["- fact0", "- fact1"]
 
-    arranged = await agent._arrange_fact_lines("問題", lines, embedding_provider=embedding)
+    arranged = await agent._arrange_fact_lines("問題", bfs, fact, embedding_provider=embedding)
 
-    assert len(arranged) == agent._FACT_LINE_REORDER_THRESHOLD_K
+    assert len(arranged) == agent._FACT_LINE_TRUNCATE_K
+    assert "- fact0" in arranged and "- fact1" in arranged
 
 
 @pytest.mark.asyncio
@@ -308,14 +341,17 @@ async def test_build_prompt_arranges_fact_lines_by_relevance():
 @pytest.mark.asyncio
 async def test_build_constrained_prompt_arranges_fact_lines_and_instructs_checking_every_line():
     question = "事假可以用小時請假嗎"
-    fact_lines = ["- 高溫作業勞工（概念）給予（概念）中度工作", "- 事假（概念）得以小時為請假單位（概念）"]
+    triples = [
+        _triple("高溫作業勞工", "RELATED_TO", "中度工作", verb="給予"),
+        _triple("事假", "RELATED_TO", "小時為請假單位", verb="得以"),
+    ]
     embedding = _FakeSemanticEmbeddingProvider()
 
     prompt = await agent._build_constrained_prompt(
-        question, fact_lines, None, embedding_provider=embedding
+        question, triples, [], None, embedding_provider=embedding
     )
 
-    assert prompt.index("事假（概念）得以小時為請假單位") < prompt.index("高溫作業勞工")
+    assert prompt.index("事假 得以 小時為請假單位") < prompt.index("高溫作業勞工")
     assert "逐條檢視" in prompt
 
 
