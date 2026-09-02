@@ -472,6 +472,14 @@ async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(
     assert "台積電 生產 晶片" in llm.prompt
 
 
+def test_chat_request_default_top_k_is_20():
+    """報告25 §4 發現1：語意 Fact 檢索預設候選數需 ≥ 事實清單截斷值
+    `_FACT_LINE_TRUNCATE_K`（18），否則排序／截斷／重排永遠拿不到足夠候選。
+    先前預設 5，已提高到 20（對齊 LangChain `EmbeddingsFilter` k=20）。"""
+    assert ChatRequest(question="x").top_k == 20
+    assert ChatRequest(question="x", top_k=50).top_k == 50
+
+
 @pytest.mark.asyncio
 async def test_chat_skips_semantic_search_when_use_svo_is_false(monkeypatch):
     kg_id = uuid4()
@@ -597,6 +605,35 @@ def test_filter_triples_by_source_doc_ids_no_filter_when_allowed_set_empty():
     filtered = agent._filter_triples_by_source_doc_ids(triples, set())
 
     assert filtered == triples
+
+
+def test_filter_triples_by_source_doc_ids_zero_out_guard_keeps_original():
+    """歸零守衛（報告25 §4 發現1）：套用篩選會把原本非空的 BFS 結果清成
+    空集合時，代表語意範圍與圖遍歷完全不一致——放棄篩選、原樣回傳，不讓
+    較小的語意 top-K 訊號零化圖遍歷結果。"""
+    doc_a, doc_b = uuid4(), uuid4()
+    triple_out_1 = _triple("A", "CAUSES", "B")
+    triple_out_1.source_doc_id = doc_b
+    triple_out_2 = _triple("C", "CAUSES", "D")
+    triple_out_2.source_doc_id = doc_b
+
+    filtered = agent._filter_triples_by_source_doc_ids([triple_out_1, triple_out_2], {doc_a})
+
+    assert filtered == [triple_out_1, triple_out_2]
+
+
+def test_filter_triples_by_source_doc_ids_partial_overlap_still_filters():
+    """部分重疊命中（2026-08-27 情境）：篩選後仍有結果時照常排除範圍外的
+    三元組，歸零守衛不介入。"""
+    doc_a, doc_b = uuid4(), uuid4()
+    triple_in = _triple("A", "CAUSES", "B")
+    triple_in.source_doc_id = doc_a
+    triple_out = _triple("C", "CAUSES", "D")
+    triple_out.source_doc_id = doc_b
+
+    filtered = agent._filter_triples_by_source_doc_ids([triple_in, triple_out], {doc_a})
+
+    assert filtered == [triple_in]
 
 
 # ── chat()：驗證查詢時關係連結（QSIM/QFILTER）確實接線（2026-08-18）─────────

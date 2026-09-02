@@ -44,7 +44,14 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=4000)
-    top_k: int = Field(default=5, ge=1, le=10)
+    # 語意 Fact 檢索（`vector_search_facts()`）取回的候選筆數。預設 20：與
+    # 報告23 §3.4 事實清單截斷值 `_FACT_LINE_TRUNCATE_K=18` 及 LangChain
+    # `EmbeddingsFilter` 預設 k=20 對齊——先前預設 5 遠低於截斷值，排序／
+    # 截斷／重排邏輯實際上永遠拿不到足夠候選（報告25 §4 發現1：Q8 三項
+    # 答案事實都在庫且有 embedding，卻因 top-5 未涵蓋而完全沒進 prompt，
+    # 且連鎖觸發 `_relevant_doc_ids_from_facts()` 把 BFS 結果一併濾掉）。
+    # `le` 由 10 放寬到 50，對齊 `SearchRequest.top_k`。
+    top_k: int = Field(default=20, ge=1, le=50)
     max_chars_per_doc: int = Field(default=2000, ge=500, le=12000)
     use_svo: bool = True
     svo_hops: int = Field(default=2, ge=1, le=3)

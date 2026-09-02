@@ -127,10 +127,20 @@ def _filter_triples_by_source_doc_ids(triples: list[SVOTriple], allowed_doc_ids:
     2026-08-27 真實測試：同一問題套用此篩選後 BFS 從 52 筆降到 8 筆，
     回答的三個核心重點全部正確且完全接地（先前未篩選版本混雜了推測
     內容，接地率明顯較低）。
+
+    ⚠️ **歸零守衛（2026-09-02，報告25 §4 發現1）**：若套用篩選會把「原本
+    非空的 BFS 結果」清成空集合，代表語意檢索判定的來源範圍與圖遍歷完全
+    不一致——此時不信任較小／較新的語意 top-K 訊號去零化圖遍歷結果，放棄
+    篩選、原樣回傳。只擋「完全歸零」這個情境（報告25 Q8：語意 top-K 未
+    命中正確文件，導致該文件 BFS 三元組被整批濾掉，答成「資料未明確
+    記載」），部分重疊命中（2026-08-27 情境）仍照常篩選。
     """
     if not allowed_doc_ids:
         return triples
-    return [t for t in triples if t.source_doc_id is None or t.source_doc_id in allowed_doc_ids]
+    filtered = [t for t in triples if t.source_doc_id is None or t.source_doc_id in allowed_doc_ids]
+    if triples and not filtered:
+        return triples
+    return filtered
 
 
 def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | None) -> list[SVOTriple]:
