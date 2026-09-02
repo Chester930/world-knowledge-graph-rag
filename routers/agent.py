@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import json
+import re
 from uuid import UUID
 
 from fastapi import APIRouter
@@ -289,6 +290,19 @@ def _serialize_sources(
     }
 
 
+# 事實文字裡的型別標記——`（概念）` 或 `（PLACE）`／`（MonetaryAmount）` 這類
+# schema.org 型別 token。報告25 § 4 發現5：`_verbalize_fact()` 新版已不再產生
+# 這種標記、且 `backfill_fact_text_embeddings()` 會重寫既有 `Fact` 節點，但
+# 尚未回填的 KG／殘留資料仍可能帶進 prompt（甚至洩漏到最終答案），這裡做
+# 一道輸出前的防禦性清除。只吃「（純 ASCII 字母型別）」與「（概念）」，不會
+# 誤刪 `（民國一百十年）` 這種正常的中文括號內容。
+_TYPE_MARKER_RE = re.compile(r"\s*（(?:概念|[A-Za-z][A-Za-z0-9_]*)）")
+
+
+def _strip_type_markers(text: str) -> str:
+    return _TYPE_MARKER_RE.sub("", text).strip()
+
+
 def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> list[str]:
     """合併 BFS 圖遍歷三元組（`bfs_query`）與語意檢索到的 Fact（
     `vector_search_facts`，2026-08-18 接線）成單一份事實清單，供 prompt 使用。
@@ -309,16 +323,16 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
     尚未跑過 §b 回填、不代表 `fact_text` 本身有問題，仍應保留，理由同上）。
 
     ✅ **自然語言化，優先使用 `natural_text`（2026-09-01，報告24 §5 階段3）**：
-    報告23 §6.4 對照實驗確認樣板拼接（「主詞（型別）動詞受詞（型別）」）文字
-    太生硬會顯著降低LLM引用該事實的機率。`t.natural_text` 有值時直接使用
-    （`merge_triples_to_graph()` 即時路徑或 `backfill_natural_text()` 回填批次
-    任務生成），沒有時 fallback 回原本的樣板拼接（優雅降級，不因為部分邊
-    還沒回填就整體失效）。**範圍聲明**：本輪只處理 BFS 三元組（`triples`）
-    這條路徑；`fact_results`（語意 Fact 檢索）的 `fact_text` 沿用
-    `_verbalize_fact()` 樣板拼接、本輪不動——`_verbalize_fact()` 同時是
-    `Fact.fact_embedding` 的生成基礎，KAPING（Baek et al., 2023）已佐證
-    此用途維持簡單串接較利於檢索（見報告24 §2），若未來也要對
-    `fact_results` 做自然語言化，需要獨立評估、不能直接沿用本次的做法
+    報告23 §6.4 對照實驗確認樣板拼接文字太生硬會顯著降低LLM引用該事實的
+    機率。`t.natural_text` 有值時直接使用（`merge_triples_to_graph()` 即時
+    路徑或 `backfill_natural_text()` 回填批次任務生成），沒有時 fallback 回
+    `subject verb object` 直接串接（優雅降級，不因為部分邊還沒回填就整體
+    失效）。**範圍聲明**：BFS 三元組（`triples`）走自然語言化這條路徑；
+    `fact_results`（語意 Fact 檢索）的 `fact_text` 仍是 `_verbalize_fact()`
+    的簡單串接——`_verbalize_fact()` 同時是 `Fact.fact_embedding` 的生成
+    基礎，KAPING（Baek et al., 2023）佐證此用途維持簡單串接較利於檢索
+    （見報告24 §2）。若未來也要對 `fact_results` 做自然語言化，需要獨立
+    評估、不能直接沿用本次的做法
     （會影響到既有的embedding檢索品質），留待後續視需要再評估。
     """
     def _is_blank(value: str | None) -> bool:
@@ -335,7 +349,9 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
         if t.natural_text:
             lines.append(f"- {t.natural_text}")
         else:
-            lines.append(f"- {t.subject}（{t.subject_type}）{t.verb}{t.object}（{t.object_type}）")
+            # 報告25 § 4 發現5：fallback 比照新版 `_verbalize_fact()`，不再
+            # 塞 `（型別）`（會洩漏到 prompt／答案、也稀釋可讀性）。
+            lines.append(f"- {t.subject} {t.verb} {t.object}".rstrip())
 
     for f in fact_results:
         if _is_blank(f.get("subject")) or _is_blank(f.get("object")):
@@ -345,7 +361,9 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
             continue
         if all(key):
             seen.add(key)
-        lines.append(f"- {f['fact_text']}")
+        # 防禦性清除殘留型別標記（見 `_strip_type_markers()`）——尚未跑過
+        # `backfill_fact_text_embeddings()` 的 KG 其 `fact_text` 仍帶 `（概念）`。
+        lines.append(f"- {_strip_type_markers(f['fact_text'])}")
 
     return lines
 

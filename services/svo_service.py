@@ -1052,9 +1052,9 @@ def _new_citation(triple: SVOTriple) -> dict:
 
 def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, object_type: str) -> str:
     """3.1.4 §a `VERBALIZE`：三元組文字化（linear verbalization），比照 KAPING
-    （Baek et al., 2023）triple-to-text 模式——subject（＋型別）＋原始 verb＋
-    object（＋型別）直接串接，不引入額外的 graph-to-text 轉換模型（KAPING
-    Appendix B.5 消融實驗顯示簡單串接檢索表現優於訓練過的轉換模型，見
+    （Baek et al., 2023）triple-to-text 模式——subject＋原始 verb＋object 直接
+    串接，不引入額外的 graph-to-text 轉換模型（KAPING Appendix B.5 消融實驗
+    顯示簡單串接檢索表現優於訓練過的轉換模型，見
     docs/參考文獻/12_三元組事實層級向量化與檢索/README.md）。
 
     `subject`／`object` 使用 DEDUP4 解析後的**canonical Entity 名稱**（而非
@@ -1062,12 +1062,38 @@ def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, ob
     不同：canonical 名稱讓 `(Fact)-[:HAS_SUBJECT]->(Entity)` 連結與 `fact_text`
     描述的對象一致，`verb` 沒有對應的「解析後版本」（動詞只被歸類到
     `rel_type`，不像實體有 canonical 名稱可用），保留原始措辭才能反映這筆
-    citation 的實際語意細節。`subject_type`／`object_type` 缺席時（型別選填）
-    省略括號，不留空括號。
+    citation 的實際語意細節。
+
+    ⚠️ **型別括號已移除（2026-09-02，報告25 § 4 發現5）**：原本會在 subject／
+    object 後綴 `（型別）`（如 `訓練時數（概念） 以三百小時為度 （概念）`）。
+    真實查證（`vector_search_facts()` 對 bge-m3 的實測 cosine）發現：當型別
+    是通用兜底值「概念」時，兩個 `（概念）` token 佔短事實字串近四成、且是
+    純雜訊，明顯稀釋 `fact_embedding` 的語意——去掉後正確事實對問題的
+    cosine 上升 +0.03～+0.10（跨文件雜訊事實幾乎不動，precision 也一併
+    改善）。KAPING 引用的「簡單串接」本就是 `subject relation object`、
+    不含型別標註，`（型別）` 是本專案先前額外加的、不在該引用涵蓋範圍。
+    型別仍以 `subject_type`／`object_type` 存為 `Fact` 節點扁平屬性，需要的
+    呼叫端（如 `_serialize_sources()`）照樣取得。
     """
-    subj = f"{subject}（{subject_type}）" if subject_type else subject
-    obj = f"{object_}（{object_type}）" if object_type else object_
-    return f"{subj} {verb} {obj}"
+    return f"{subject} {verb} {object_}".strip()
+
+
+@lru_cache(maxsize=1)
+def _opencc_s2tw():
+    """OpenCC 簡→繁（臺灣標準字）轉換器，惰性初始化。用 `s2tw`（字元級）而非
+    `s2twp`（含詞彙轉換）——法規語料要的是字形正規化（台→臺、内→內、
+    经→經），不希望詞彙層被改（如「软件」→「軟體」可能動到法律用語）。"""
+    from opencc import OpenCC
+
+    return OpenCC("s2tw")
+
+
+def _to_traditional(text: str) -> str:
+    """把字串正規化成臺灣標準繁體字。已是繁體時 OpenCC 近乎 identity。
+    報告25 § 4 發現4：`qwen2.5:7b` 的自然語言化改寫偶爾漏簡體
+    （`补助经费额度`／`训练`／`经费`），在既有 prompt「繁體中文」指示之外
+    再加一道字元級保險。"""
+    return _opencc_s2tw().convert(text)
 
 
 _NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順的繁體中文自然語句，只輸出改寫後的句子本身，不要加引號、不要加任何說明或前綴。
@@ -1118,7 +1144,9 @@ async def _naturalize_triple(
     object_part = f"{object_}（{object_type}）" if object_type else object_
     prompt = _NATURALIZE_PROMPT_TEMPLATE.format(subject=subject_part, verb=verb, object=object_part)
     result = await llm_provider.generate(prompt)
-    return result.strip().strip("「」\"'")
+    # 報告25 § 4 發現4：改寫輸出過一道 OpenCC 簡→繁（臺灣標準字）正規化，
+    # 補救小模型偶爾漏簡體的情況（prompt 已要求繁體，這是保險不是取代）。
+    return _to_traditional(result.strip().strip("「」\"'"))
 
 
 def _kg_fact_label(kg_id: str) -> str:
@@ -1819,6 +1847,150 @@ async def backfill_natural_text(
 
         if len(edges) < batch_size:
             break
+
+    return updated
+
+
+async def backfill_fact_text_embeddings(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    embedding_provider: EmbeddingProvider,
+    *,
+    batch_size: int = 200,
+) -> int:
+    """報告25 § 4 發現5 回填批次任務：對該 KG 內既有 `Fact` 節點，用**新版**
+    `_verbalize_fact()`（已移除 `（型別）` 括號）重算 `fact_text`，並在文字
+    實際有變時重新 `encode()` 出 `fact_embedding`。
+
+    起點：`_verbalize_fact()` 舊版會後綴 `（型別）`（如 `訓練時數（概念）
+    以三百小時為度 （概念）`），真實查證（`vector_search_facts()` 對 bge-m3
+    的 cosine）發現通用兜底型別「概念」的兩個 token 對短事實是純雜訊、
+    明顯稀釋 `fact_embedding`——去掉後正確事實對問題 cosine 上升
+    +0.03～+0.10。既有 `Fact` 節點的 `fact_embedding` 是舊字串算出來的，
+    需回填重算才能受益。
+
+    順帶做一次 OpenCC 簡→繁（臺灣標準字）正規化（報告25 § 4 發現4），
+    把歷史抽取殘留的簡體字（`补助经费额度` 等）一併收掉——`fact_text` 是
+    `fact_embedding` 的來源字串，字形不一致同樣影響檢索。
+
+    比照 `backfill_fact_nodes()`／`backfill_natural_text()` 定位為**人工觸發的
+    一次性腳本**：即時路徑（`merge_triples_to_graph` → `_create_fact_node`）
+    已改用新版 `_verbalize_fact()`，缺口是純歷史性的。
+
+    **冪等性**：重算後與現值相同就跳過、不呼叫 `embedding_provider`（已跑過
+    一次的 KG 第二次執行回傳 0）。`fact_text` 由 `f.subject`／`f.verb`／
+    `f.object` 三個扁平屬性重建（新版 `_verbalize_fact()` 不再需要型別），
+    不依賴回頭 join Entity 節點。
+
+    **分頁**：`ORDER BY elementId(f) SKIP $skip LIMIT`、`skip` 依「本批實際
+    看過的列數」累加——本函式會改 `fact_text` 但**不會**把節點移出結果集
+    （不像 `backfill_natural_text()` 的 `IS NULL` 條件），所以必須用 SKIP
+    掃過每一列（不論有無變更），不能靠條件收斂。
+
+    回傳實際更新（`fact_embedding` 有重算）的 `Fact` 節點數。
+    """
+    kg_id_str = str(kg_id)
+    updated = 0
+    skip = 0
+    while True:
+        result = await driver.execute_query(
+            """
+            MATCH (f:Fact {kg_id: $kg_id})
+            RETURN elementId(f) AS eid, f.subject AS subject, f.verb AS verb,
+                   f.object AS object, f.fact_text AS fact_text
+            ORDER BY elementId(f)
+            SKIP $skip LIMIT $batch_size
+            """,
+            kg_id=kg_id_str,
+            skip=skip,
+            batch_size=batch_size,
+        )
+        rows = result.records
+        if not rows:
+            break
+
+        for row in rows:
+            new_text = _to_traditional(
+                _verbalize_fact(row["subject"] or "", "", row["verb"] or "", row["object"] or "", "")
+            )
+            if new_text == row["fact_text"]:
+                continue
+            await driver.execute_query(
+                """
+                MATCH (f:Fact {kg_id: $kg_id}) WHERE elementId(f) = $eid
+                SET f.fact_text = $fact_text, f.fact_embedding = $fact_embedding
+                """,
+                kg_id=kg_id_str,
+                eid=row["eid"],
+                fact_text=new_text,
+                fact_embedding=await embedding_provider.encode(new_text),
+            )
+            updated += 1
+
+        if len(rows) < batch_size:
+            break
+        skip += len(rows)
+
+    return updated
+
+
+async def backfill_natural_text_traditionalize(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    *,
+    batch_size: int = 500,
+) -> int:
+    """報告25 § 4 發現4 回填批次任務：對該 KG 內既有 `r.natural_text` 套一次
+    OpenCC 簡→繁（臺灣標準字）正規化，收掉報告24 全KG回填時 `qwen2.5:7b`
+    漏轉的簡體字（`补助经费额度`／`训练`／`经费`）。
+
+    純字串轉換、**不呼叫 LLM**、冪等（已是繁體時 OpenCC 近乎 identity，
+    重算後 `converted == r.natural_text` 就跳過，第二次執行回傳 0）。分頁用
+    `ORDER BY elementId(r) SKIP`、`skip` 依本批列數累加——本函式會改
+    `natural_text` 但不會把邊移出結果集，須掃過每一列。
+
+    即時路徑（`_naturalize_triple()`）已在輸出端加了同一道 `_to_traditional()`，
+    缺口是純歷史性的。回傳實際更新的邊數。
+    """
+    kg_id_str = str(kg_id)
+    updated = 0
+    skip = 0
+    while True:
+        result = await driver.execute_query(
+            """
+            MATCH (:Entity {kg_id: $kg_id})-[r]->(:Entity {kg_id: $kg_id})
+            WHERE r.kg_id = $kg_id AND r.natural_text IS NOT NULL
+            RETURN elementId(r) AS eid, r.natural_text AS natural_text
+            ORDER BY elementId(r)
+            SKIP $skip LIMIT $batch_size
+            """,
+            kg_id=kg_id_str,
+            skip=skip,
+            batch_size=batch_size,
+        )
+        rows = result.records
+        if not rows:
+            break
+
+        for row in rows:
+            converted = _to_traditional(row["natural_text"])
+            if converted == row["natural_text"]:
+                continue
+            await driver.execute_query(
+                """
+                MATCH (:Entity {kg_id: $kg_id})-[r]->(:Entity {kg_id: $kg_id})
+                WHERE elementId(r) = $eid
+                SET r.natural_text = $natural_text
+                """,
+                kg_id=kg_id_str,
+                eid=row["eid"],
+                natural_text=converted,
+            )
+            updated += 1
+
+        if len(rows) < batch_size:
+            break
+        skip += len(rows)
 
     return updated
 

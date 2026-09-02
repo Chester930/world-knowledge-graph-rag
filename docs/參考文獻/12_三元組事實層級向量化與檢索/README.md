@@ -45,6 +45,10 @@
 
 四篇文獻構成一條清晰的方法論光譜：KAPING（直接方法論來源）→ LightRAG（生產級驗證）→ HippoRAG（對照組，侷限性實證）→ G-Retriever（未來延伸方向，且有直接實證比較）。全文查證後四篇描述皆無錯誤需訂正，但發現本節現行設計與 KAPING 共享同一個已知侷限（扁平檢索、未利用圖結構），已誠實記錄於 `03_系統設計與方法論.md` 3.1.4 §a。
 
+## `_verbalize_fact()` 型別括號移除（2026-09-02，報告25 §4 發現5）
+
+`_verbalize_fact()` 先前在 KAPING 的 `subject relation object` 之外**額外**在 subject／object 後綴 `（型別）`（`訓練時數（概念） … （概念）`）。這不在 KAPING Appendix B.5 消融實驗（「簡單串接 vs. 訓練式轉換」）涵蓋範圍——KAPING 的 linear verbalization 不含型別標註。報告25 Q8 追查時做的**不改資料 cosine 對照實驗**（bge-m3，問題 vs 事實字串）：去掉型別括號後正確事實對問題的 cosine 上升 +0.03～+0.10、跨文件雜訊事實幾乎不動（+0.006）——通用兜底型別「概念」的兩個 token 對短事實是純雜訊。已改回 KAPING 原本的無型別直接串接（`03_系統設計與方法論.md` 3.1.4 §a 發現5 條目、`services/svo_service.py::_verbalize_fact()`），既有 `Fact` 節點由 `backfill_fact_text_embeddings()` 一次性重算 `fact_text`+`fact_embedding`。**這是把非 KAPING 的自加成分移除、回到該引用的原始做法，非推翻 KAPING。**
+
 ## 尚未查證/待辦
 
 - [ ] G-Retriever 的 PCST 演算法若未來要正式採用為本論文機制，需進一步查證其計算複雜度與本論文圖規模（單一 KG 的節點/邊數量級）是否匹配，本次僅確認機制存在與其與 KAPING 的比較數據。

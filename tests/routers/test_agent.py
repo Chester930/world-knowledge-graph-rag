@@ -112,24 +112,34 @@ def test_merge_fact_lines_uses_natural_text_when_present():
 
 
 def test_merge_fact_lines_falls_back_to_template_when_natural_text_missing():
-    """natural_text 缺席（尚未跑過即時路徑或回填批次任務）時，優雅降級
-    回原本的樣板拼接，不因為部分邊還沒回填就整體失效。"""
+    """natural_text 缺席時優雅降級回 `subject verb object` 直接串接（報告25
+    §4 發現5：不再塞 `（型別）`，避免洩漏到 prompt／答案）。"""
     triples = [_triple("A", "CAUSES", "B", verb="導致", natural_text=None)]
 
     lines = agent._merge_fact_lines(triples, [])
 
-    assert lines == ["- A（概念）導致B（概念）"]
+    assert lines == ["- A 導致 B"]
 
 
-def test_merge_fact_lines_fact_results_still_use_verbalize_fact_template():
-    """報告24 §2 範圍聲明：本輪只處理 BFS 三元組，fact_results（語意 Fact
-    檢索）沿用 _verbalize_fact() 樣板拼接，本輪不動。"""
-    fact_results = [{"fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
-                      "rel_type": "CREATED_BY", "object": "SpaceX"}]
+def test_merge_fact_lines_strips_residual_type_markers_from_fact_text():
+    """報告25 §4 發現5：尚未跑過 `backfill_fact_text_embeddings()` 的 KG 其
+    `fact_text` 仍帶 `（概念）`／`（PLACE）`，輸出前做防禦性清除。"""
+    fact_results = [{"fact_text": "訓練時數（概念） 以三百小時為度 （概念）",
+                      "subject": "訓練時數", "rel_type": "RELATED_TO", "object": "以三百小時為度"}]
 
     lines = agent._merge_fact_lines([], fact_results)
 
-    assert lines == ["- 馬斯克 創立 SpaceX"]
+    assert lines == ["- 訓練時數 以三百小時為度"]
+
+
+def test_merge_fact_lines_leaves_normal_parentheses_untouched():
+    """只清型別標記（`（概念）`／ASCII 型別），不誤刪正常中文括號內容。"""
+    fact_results = [{"fact_text": "本標準 自 中華民國一百十年（2021年）施行",
+                      "subject": "本標準", "rel_type": "RELATED_TO", "object": "施行"}]
+
+    lines = agent._merge_fact_lines([], fact_results)
+
+    assert lines == ["- 本標準 自 中華民國一百十年（2021年）施行"]
 
 
 # ── 事實清單排列用的假 embedding provider（2026-09-01 新增，報告23）───────
@@ -292,7 +302,7 @@ async def test_build_prompt_arranges_fact_lines_by_relevance():
     prompt = await agent._build_prompt(question, triples, [], None, embedding_provider=embedding)
 
     # 較相關的「事假…小時為請假單位」應排在較不相關的「高溫作業勞工…」之前
-    assert prompt.index("事假（概念）得以小時為請假單位") < prompt.index("高溫作業勞工")
+    assert prompt.index("事假 得以 小時為請假單位") < prompt.index("高溫作業勞工")
 
 
 @pytest.mark.asyncio
@@ -719,8 +729,8 @@ async def test_chat_filters_bfs_triples_by_resolved_relation_type(monkeypatch):
     assert len(resolve_calls) == 1
     assert resolve_calls[0][0] == "是什麼導致 B 的？"
     assert resolve_calls[0][2] is llm  # llm_provider 有正確傳入
-    assert "A（概念）導致B（概念）" in llm.prompt
-    assert "C（概念）導致D（概念）" not in llm.prompt  # PART_OF 三元組已被篩掉
+    assert "A 導致 B" in llm.prompt
+    assert "C 導致 D" not in llm.prompt  # PART_OF 三元組已被篩掉
 
 
 @pytest.mark.asyncio
@@ -756,8 +766,8 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
     response = await agent.chat(payload)
     await _drain(response)
 
-    assert "A（概念）導致B（概念）" in llm.prompt
-    assert "C（概念）導致D（概念）" in llm.prompt
+    assert "A 導致 B" in llm.prompt
+    assert "C 導致 D" in llm.prompt
 
 
 # ── _serialize_sources / sources SSE 事件：終端機 CLI 顯示來源用（2026-08-18）──

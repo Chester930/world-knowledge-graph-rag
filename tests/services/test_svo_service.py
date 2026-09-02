@@ -2090,15 +2090,25 @@ async def test_trigger_extraction_resolves_excluded_word_when_kg_has_no_override
 
 # ── 3.1.4 §a：事實層級向量化（Fact 節點，2026-08-03）────────────────────────
 
-def test_verbalize_fact_includes_types_when_present():
+def test_verbalize_fact_drops_type_parens():
+    """報告25 § 4 發現5：型別括號會稀釋 `fact_embedding` 的語意，新版
+    只做 `subject verb object` 直接串接（比照 KAPING linear verbalization）。"""
     text = svc._verbalize_fact("台積電", "組織", "生產", "晶片", "產品")
-    assert text == "台積電（組織） 生產 晶片（產品）"
+    assert text == "台積電 生產 晶片"
 
 
-def test_verbalize_fact_omits_parens_when_type_missing():
-    """型別選填，缺席時不留空括號。"""
-    text = svc._verbalize_fact("A", "", "導致", "B", "")
-    assert text == "A 導致 B"
+def test_verbalize_fact_ignores_type_args_entirely():
+    """型別參數保留在簽章（呼叫端仍傳），但不再影響輸出。"""
+    assert svc._verbalize_fact("A", "", "導致", "B", "") == "A 導致 B"
+    assert svc._verbalize_fact("A", "概念", "導致", "B", "概念") == "A 導致 B"
+
+
+def test_to_traditional_normalizes_simplified():
+    """報告25 § 4 發現4：簡→繁（臺灣標準字）字元級正規化。"""
+    assert svc._to_traditional("补助经费额度 以每人每小时新台币一百元为限") == \
+        "補助經費額度 以每人每小時新臺幣一百元為限"
+    # 已是繁體時近乎 identity
+    assert svc._to_traditional("訓練時數 以三百小時為度") == "訓練時數 以三百小時為度"
 
 
 # ── 事實清單自然語言化（報告24 §5 階段1，2026-09-01）───────────────────────
@@ -2123,6 +2133,16 @@ async def test_naturalize_triple_omits_type_parens_when_missing():
 
     assert "主詞：A\n" in llm.prompts[0]
     assert "受詞：B\n" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_naturalize_triple_traditionalizes_simplified_llm_output():
+    """報告25 § 4 發現4：小模型偶爾漏簡體，輸出端再過一道 OpenCC 保險。"""
+    llm = FakeLLM("补助经费额度以每人每小时新台币一百元为限")
+
+    text = await svc._naturalize_triple("補助經費額度", "概念", "以", "每人每小時一百元為限", "概念", llm)
+
+    assert text == "補助經費額度以每人每小時新臺幣一百元為限"
 
 
 @pytest.mark.asyncio
@@ -2882,6 +2902,112 @@ async def test_backfill_natural_text_processes_all_edges_across_shrinking_batche
 
     assert count == 3
     assert len(driver.scan_calls) == 2  # 第一批2筆處理完後集合縮小到1筆、第二批1筆（不足batch_size停止）
+
+
+# ── backfill_fact_text_embeddings（報告25 §4 發現5 回填，2026-09-02）─────────
+
+class BackfillFactTextFakeDriver:
+    """模擬「掃描 Fact 節點 → 重算 fact_text → 有變則 SET fact_text+embedding」。
+    `nodes` 為 (eid, subject, verb, object, fact_text) 清單。"""
+
+    def __init__(self, nodes):
+        self._nodes = list(nodes)
+        self.scan_calls: list[dict] = []
+        self.set_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "RETURN elementId(f) AS eid, f.subject AS subject" in stripped:
+            self.scan_calls.append(params)
+            skip, bs = params["skip"], params["batch_size"]
+            rows = [
+                {"eid": n[0], "subject": n[1], "verb": n[2], "object": n[3], "fact_text": n[4]}
+                for n in self._nodes[skip: skip + bs]
+            ]
+            return FakeResult(rows)
+        if "SET f.fact_text = $fact_text, f.fact_embedding" in stripped:
+            self.set_calls.append(params)
+            return FakeResult([])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_text_embeddings_rewrites_polluted_and_reencodes():
+    # Fact 節點的扁平 subject/verb/object 本就是乾淨的 canonical 值（型別括號
+    # 是舊版 `_verbalize_fact()` 從型別「參數」加上去的，只存在於舊 fact_text
+    # 字串裡）。新版重建 = subject+verb+object 直接串接，型別括號自然消失。
+    driver = BackfillFactTextFakeDriver(nodes=[
+        ("f1", "訓練時數", "以三百小時為度", "", "訓練時數（概念） 以三百小時為度 （概念）"),
+        ("f2", "补助经费额度", "以每人每小时一百元为限", "", "补助经费额度（概念） 以每人每小时一百元为限 （概念）"),
+    ])
+    embedding = FakeEmbedding()
+
+    count = await svc.backfill_fact_text_embeddings(driver, uuid4(), embedding)
+
+    assert count == 2
+    assert driver.set_calls[0]["fact_text"] == "訓練時數 以三百小時為度"  # 型別括號移除
+    assert driver.set_calls[0]["fact_embedding"] is not None  # 重新 encode
+    assert driver.set_calls[1]["fact_text"] == "補助經費額度 以每人每小時一百元為限"  # 型別移除＋簡→繁
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_text_embeddings_idempotent_skips_unchanged():
+    """已經是新格式＋繁體的 Fact 節點：重算後與現值相同，不呼叫 embedding、
+    不 SET（第二次執行回傳 0）。"""
+    driver = BackfillFactTextFakeDriver(nodes=[
+        ("f1", "訓練時數", "以三百小時為度", "", "訓練時數 以三百小時為度"),
+    ])
+    kg_id = uuid4()
+
+    count = await svc.backfill_fact_text_embeddings(driver, kg_id, FakeEmbedding())
+
+    assert count == 0
+    assert driver.set_calls == []
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_text_embeddings_paginates_with_skip():
+    nodes = [(f"f{i}", f"S{i}", "V", "O", f"S{i}（概念） V O（概念）") for i in range(3)]
+    driver = BackfillFactTextFakeDriver(nodes=nodes)
+
+    count = await svc.backfill_fact_text_embeddings(driver, uuid4(), FakeEmbedding(), batch_size=2)
+
+    assert count == 3
+    assert [c["skip"] for c in driver.scan_calls] == [0, 2]
+
+
+# ── backfill_natural_text_traditionalize（報告25 §4 發現4 回填，2026-09-02）──
+
+class BackfillNaturalTextTradFakeDriver:
+    def __init__(self, edges):
+        self._edges = list(edges)  # (eid, natural_text)
+        self.scan_calls: list[dict] = []
+        self.set_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "r.natural_text IS NOT NULL" in stripped and "RETURN elementId(r) AS eid" in stripped:
+            self.scan_calls.append(params)
+            skip, bs = params["skip"], params["batch_size"]
+            return FakeResult([{"eid": e[0], "natural_text": e[1]} for e in self._edges[skip: skip + bs]])
+        if "SET r.natural_text = $natural_text" in stripped:
+            self.set_calls.append(params)
+            return FakeResult([])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_backfill_natural_text_traditionalize_converts_and_skips_traditional():
+    driver = BackfillNaturalTextTradFakeDriver(edges=[
+        ("r1", "补助经费额度以每人每小时新台币一百元为限。"),
+        ("r2", "訓練時數以三百小時為度。"),  # 已是繁體，跳過
+    ])
+
+    count = await svc.backfill_natural_text_traditionalize(driver, uuid4())
+
+    assert count == 1
+    assert len(driver.set_calls) == 1
+    assert driver.set_calls[0]["natural_text"] == "補助經費額度以每人每小時新臺幣一百元為限。"
 
 
 @pytest.mark.asyncio

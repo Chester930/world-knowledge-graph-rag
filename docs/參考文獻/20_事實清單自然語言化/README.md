@@ -23,6 +23,10 @@
 
 **Microsoft GraphRAG 官方索引階段自然語言化先例（2026-09-01 新增查證）**：本專案已於 `docs/參考文獻/02_RAG與GraphRAG` 引用 Edge et al. (2024) GraphRAG 論文；[microsoft/graphrag](https://github.com/microsoft/graphrag) 官方倉庫（35,774★，2026-09-01 GitHub API 查證）的 `packages/graphrag/graphrag/prompts/index/community_report.py`（`COMMUNITY_REPORT_PROMPT`）是report23 §7候選方案(c)「抽取／索引階段預存自然語句版本」的官方實作先例——GraphRAG 在**索引建置階段**（非查詢時）用LLM把一個社群（community）內的結構化實體/關係 CSV 資料（`human_readable_id,title,description` 這類扁平表格）改寫成一份包含 TITLE／SUMMARY／DETAILED FINDINGS 的自然語言報告，查詢時直接檢索這份已經自然語言化的報告，而非每次查詢都重新組裝原始三元組。這與 Wu et al. 的**查詢時**改寫（方案b）形成互補的兩種時機選擇，皆屬KG-to-Text這條研究/工程脈絡，非孤立的個別做法。**誠實侷限**：GraphRAG 的社群報告是「整個社群」層級的摘要（多個實體/關係聚合成一份敘事報告），粒度比本專案「單一問答需要哪幾筆事實」粗得多，不能直接套用其pipeline，只能佐證「索引階段預先自然語言化」這個時機選擇本身是被驗證過的可行架構。
 
+## 簡→繁正規化保險（2026-09-02，報告25 §4 發現4）
+
+報告24 的自然語言化用既有 `LLMProvider`（`qwen2.5:7b`）做零樣本改寫；報告25 擴大測試發現全KG回填的 `natural_text` 偶有漏轉的簡體字（`补助经费额度`／`训练`／`经费`），來源原文為繁體。`natural_text`／`fact_text` 都是 embedding 檢索的來源字串，字形不一致影響召回。修法：在 `_naturalize_triple()` 輸出端加一道 OpenCC `s2tw`（字元級，不動法律詞彙——`s2twp` 會把「软件→軟體」這類詞彙也換掉，法規語料不需要）字形正規化，既有資料由 `backfill_natural_text_traditionalize()` 一次性補上。`opencc-python-reimplemented` 加入 `requirements.txt`。屬工程層面的輸出清理，非新的方法論主張，不需新增文獻。
+
 ## 待辦
 
 - [ ] 依報告23 §7候選方案(a)(b)(c)，評估三個方向的成本與可行性，確認優先實作順序，過程中應引用本資料夾文獻作為各方案的依據與邊界條件參照。
