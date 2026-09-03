@@ -1234,8 +1234,63 @@ def _to_traditional(text: str) -> str:
     """把字串正規化成臺灣標準繁體字。已是繁體時 OpenCC 近乎 identity。
     報告25 § 4 發現4：`qwen2.5:7b` 的自然語言化改寫偶爾漏簡體
     （`补助经费额度`／`训练`／`经费`），在既有 prompt「繁體中文」指示之外
-    再加一道字元級保險。"""
+    再加一道字元級保險。
+
+    ⚠️ **會過度轉換**：OpenCC 把 `雇→僱`、`托→託`、`里→裡` 也當簡→繁字元
+    映射，但這些字在臺灣法規原文有其正當用法（勞基法用「雇主」不用「僱主」、
+    育嬰留停辦法原文是「停托」不是「停託」）。用於**內部比對**（如
+    `_normalize_for_binding()` 兩邊都轉、過度轉換相互抵銷）沒問題；用於
+    **寫回資料**（Entity 名稱／`fact_text`）時應改用
+    `_to_traditional_selective()`，以來源語料實際用字為白名單。"""
     return _opencc_s2tw().convert(text)
+
+
+def _to_traditional_selective(text: str, source_charset: frozenset[str] | None) -> str:
+    """逐字選擇性簡→繁（報告25 §4 發現4，使用者 2026-09-03 選定「來源語料
+    當白名單」）：只轉「OpenCC 會改、且該字不出現在這個 KG 的繁體來源文件
+    裡」的字。`職`／`經`／`嬰`（來源 0 次）會轉；`雇`／`托`（來源實際在用）
+    保留原字。`source_charset` 為 `None` 時退回 `_to_traditional()`（全轉，
+    無來源可對照——優雅降級，行為等同舊版）。"""
+    if source_charset is None:
+        return _to_traditional(text)
+    out = []
+    for ch in text:
+        tw = _opencc_s2tw().convert(ch)
+        out.append(tw if (tw != ch and ch not in source_charset) else ch)
+    return "".join(out)
+
+
+@lru_cache(maxsize=8)
+def _kg_source_charset(kg_folder: str) -> frozenset[str]:
+    """蒐集這個 KG 所有繁體來源文件（`workspace/<kg>/<doc>/original.md`）出現
+    過的字元集合，供 `_to_traditional_selective()` 當「這些字是合法繁體用字，
+    不要動」的白名單。找不到任何來源檔時回傳空集合（等於全轉）。"""
+    from pathlib import Path
+
+    chars: set[str] = set()
+    root = Path(kg_folder)
+    if not root.exists():
+        return frozenset()
+    for src in root.glob("*/original.md"):
+        try:
+            chars.update(src.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+    return frozenset(chars)
+
+
+def traditionalize_triples(
+    triples: list[SVOTriple], source_charset: frozenset[str] | None,
+) -> list[SVOTriple]:
+    """對一批三元組的 subject／verb／object 就地套用 `_to_traditional_selective()`
+    ——抽取端修正 `qwen2.5:7b` 偶發輸出簡體字的失效（報告25 §4 發現4）。
+    在 `extraction_worker._process_one()` merge 前呼叫；`source_charset` 由
+    `_kg_source_charset(kg_folder)` 提供。"""
+    for t in triples:
+        t.subject = _to_traditional_selective(t.subject, source_charset)
+        t.verb = _to_traditional_selective(t.verb, source_charset)
+        t.object = _to_traditional_selective(t.object, source_charset)
+    return triples
 
 
 _NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順的繁體中文自然語句，只輸出改寫後的句子本身，不要加引號、不要加任何說明或前綴。
@@ -1999,6 +2054,7 @@ async def backfill_fact_text_embeddings(
     embedding_provider: EmbeddingProvider,
     *,
     batch_size: int = 200,
+    source_charset: frozenset[str] | None = None,
 ) -> int:
     """報告25 § 4 發現5 回填批次任務：對該 KG 內既有 `Fact` 節點，用**新版**
     `_verbalize_fact()`（已移除 `（型別）` 括號）重算 `fact_text`，並在文字
@@ -2011,9 +2067,11 @@ async def backfill_fact_text_embeddings(
     +0.03～+0.10。既有 `Fact` 節點的 `fact_embedding` 是舊字串算出來的，
     需回填重算才能受益。
 
-    順帶做一次 OpenCC 簡→繁（臺灣標準字）正規化（報告25 § 4 發現4），
-    把歷史抽取殘留的簡體字（`补助经费额度` 等）一併收掉——`fact_text` 是
-    `fact_embedding` 的來源字串，字形不一致同樣影響檢索。
+    順帶做一次簡→繁正規化（報告25 § 4 發現4），把歷史抽取殘留的簡體字
+    （`补助经费额度` 等）一併收掉——`fact_text` 是 `fact_embedding` 的來源
+    字串，字形不一致同樣影響檢索。傳入 `source_charset`（`_kg_source_charset()`）
+    時走 `_to_traditional_selective()`（`雇`／`托` 保留），未傳時退回全轉
+    （向後相容）。
 
     比照 `backfill_fact_nodes()`／`backfill_natural_text()` 定位為**人工觸發的
     一次性腳本**：即時路徑（`merge_triples_to_graph` → `_create_fact_node`）
@@ -2052,8 +2110,9 @@ async def backfill_fact_text_embeddings(
             break
 
         for row in rows:
-            new_text = _to_traditional(
-                _verbalize_fact(row["subject"] or "", "", row["verb"] or "", row["object"] or "", "")
+            new_text = _to_traditional_selective(
+                _verbalize_fact(row["subject"] or "", "", row["verb"] or "", row["object"] or "", ""),
+                source_charset,
             )
             if new_text == row["fact_text"]:
                 continue
@@ -2135,6 +2194,152 @@ async def backfill_natural_text_traditionalize(
         skip += len(rows)
 
     return updated
+
+
+def _union_citations(a_json: str | None, b_json: str | None) -> tuple[str, float]:
+    """把兩條 SVO 事實邊的 `citations_json` 合併去重（依整筆 citation 的
+    JSON 字面），回傳 `(合併後 json, max confidence)`——比照
+    `merge_triples_to_graph()` 的事實層級去重與 `confidence = max(citations)`
+    規則。任一為空時視為空清單。"""
+    seen: set[str] = set()
+    merged: list[dict] = []
+    for raw in (a_json, b_json):
+        for c in json.loads(raw or "[]"):
+            key = json.dumps(c, ensure_ascii=False, sort_keys=True)
+            if key not in seen:
+                seen.add(key)
+                merged.append(c)
+    conf = max((c.get("confidence", 1) for c in merged), default=1)
+    return json.dumps(merged, ensure_ascii=False), conf
+
+
+async def backfill_traditionalize_entity_names(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    kg_folder: str,
+    *,
+    embedding_provider: EmbeddingProvider | None = None,
+    batch_size: int = 300,
+) -> dict:
+    """報告25 §4 發現4 回填批次任務：把 KG 內 Entity 節點名稱裡 `qwen2.5:7b`
+    遺漏的簡體字**選擇性**轉繁（`_to_traditional_selective()`，以這個 KG 的
+    繁體來源文件實際用字為白名單——`雇`／`托` 保留，`職`／`經`／`嬰` 轉）。
+
+    - **純改名**（繁體版節點不存在）：`SET e.name = 新名`，有 `embedding_provider`
+      時一併重算 `name_embedding`。
+    - **撞名**（繁體版節點已存在，如 `事业单位`↔`事業單位`）：把簡體節點的每
+      一條邊搬到繁體節點——同型別、同另一端點的 SVO 事實邊 `union` 其
+      `citations_json`＋重算 `confidence`，其餘同型別同端點的邊直接丟（繁體
+      版已有等價邊），沒有對應的邊則在繁體節點上以相同屬性重建；最後
+      `DETACH DELETE` 簡體節點。Entity 節點有 `(kg_id, name)` 唯一約束，直接
+      `SET name` 撞名會拋例外，故撞名一律走搬邊＋刪節點。
+
+    冪等（選擇性轉繁後 == 原名就跳過，第二次執行回傳全 0）。純字串轉換
+    ＋圖結構搬移，改名分支不呼叫 LLM；`embedding_provider` 未提供時改名節點
+    的 `name_embedding` 留待 `backfill_entity_name_embeddings()` 補。
+
+    回傳 `{renamed, merged, edges_moved, edges_unioned, edges_dropped}`。
+    """
+    kg_id_str = str(kg_id)
+    charset = _kg_source_charset(kg_folder)
+    stats = {"renamed": 0, "merged": 0, "edges_moved": 0, "edges_unioned": 0, "edges_dropped": 0}
+
+    result = await driver.execute_query(
+        "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name ORDER BY e.name",
+        kg_id=kg_id_str,
+    )
+    names = [r["name"] for r in result.records]
+    existing = set(names)
+
+    for old_name in names:
+        new_name = _to_traditional_selective(old_name, charset)
+        if new_name == old_name:
+            continue
+
+        if new_name not in existing:
+            # 純改名
+            set_clause = "SET e.name = $new_name"
+            params = {"kg_id": kg_id_str, "old_name": old_name, "new_name": new_name}
+            if embedding_provider is not None:
+                params["emb"] = await embedding_provider.encode(new_name)
+                set_clause += ", e.name_embedding = $emb"
+            await driver.execute_query(
+                f"MATCH (e:Entity {{kg_id: $kg_id, name: $old_name}}) {set_clause}",
+                **params,
+            )
+            existing.discard(old_name)
+            existing.add(new_name)
+            stats["renamed"] += 1
+            continue
+
+        # 撞名——搬邊到繁體節點後刪簡體節點
+        for direction in ("out", "in"):
+            pattern = (
+                "MATCH (s:Entity {kg_id: $kg_id, name: $old})-[r]->(x)"
+                if direction == "out"
+                else "MATCH (x)-[r]->(s:Entity {kg_id: $kg_id, name: $old})"
+            )
+            edges = await driver.execute_query(
+                f"{pattern} RETURN elementId(r) AS rid, type(r) AS t, "
+                "properties(r) AS props, elementId(x) AS xid",
+                kg_id=kg_id_str, old=old_name,
+            )
+            for e in edges.records:
+                rel_type = _relationship_type(e["t"])  # 注入防線（大寫/底線）
+                props = dict(e["props"])
+                twin_pattern = (
+                    f"MATCH (t:Entity {{kg_id: $kg_id, name: $new}})-[r2:{rel_type}]->(x) "
+                    "WHERE elementId(x) = $xid"
+                    if direction == "out"
+                    else f"MATCH (x)-[r2:{rel_type}]->(t:Entity {{kg_id: $kg_id, name: $new}}) "
+                    "WHERE elementId(x) = $xid"
+                )
+                twin = await driver.execute_query(
+                    f"{twin_pattern} RETURN elementId(r2) AS r2id, r2.citations_json AS cj",
+                    kg_id=kg_id_str, new=new_name, xid=e["xid"],
+                )
+                if twin.records:
+                    r2 = twin.records[0]
+                    if props.get("citations_json") is not None and r2["cj"] is not None:
+                        union_json, conf = _union_citations(props["citations_json"], r2["cj"])
+                        await driver.execute_query(
+                            "MATCH ()-[r2]->() WHERE elementId(r2) = $r2id "
+                            "SET r2.citations_json = $cj, r2.confidence = $conf",
+                            r2id=r2["r2id"], cj=union_json, conf=conf,
+                        )
+                        stats["edges_unioned"] += 1
+                    else:
+                        stats["edges_dropped"] += 1
+                    # 不論 union 或 drop，簡體節點這條邊都刪掉
+                    await driver.execute_query(
+                        "MATCH ()-[r]->() WHERE elementId(r) = $rid DELETE r",
+                        rid=e["rid"],
+                    )
+                else:
+                    create_pattern = (
+                        f"MATCH (t:Entity {{kg_id: $kg_id, name: $new}}), (x) "
+                        f"WHERE elementId(x) = $xid CREATE (t)-[nr:{rel_type}]->(x) SET nr = $props"
+                        if direction == "out"
+                        else f"MATCH (t:Entity {{kg_id: $kg_id, name: $new}}), (x) "
+                        f"WHERE elementId(x) = $xid CREATE (x)-[nr:{rel_type}]->(t) SET nr = $props"
+                    )
+                    await driver.execute_query(
+                        create_pattern, kg_id=kg_id_str, new=new_name, xid=e["xid"], props=props,
+                    )
+                    await driver.execute_query(
+                        "MATCH ()-[r]->() WHERE elementId(r) = $rid DELETE r",
+                        rid=e["rid"],
+                    )
+                    stats["edges_moved"] += 1
+
+        await driver.execute_query(
+            "MATCH (s:Entity {kg_id: $kg_id, name: $old}) DETACH DELETE s",
+            kg_id=kg_id_str, old=old_name,
+        )
+        existing.discard(old_name)
+        stats["merged"] += 1
+
+    return stats
 
 
 async def create_related_to_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:

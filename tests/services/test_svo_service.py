@@ -2133,6 +2133,52 @@ def test_to_traditional_normalizes_simplified():
     assert svc._to_traditional("訓練時數 以三百小時為度") == "訓練時數 以三百小時為度"
 
 
+def test_to_traditional_selective_uses_source_charset_as_whitelist():
+    """報告25 § 4 發現4（使用者 2026-09-03 選定「來源語料當白名單」）：
+    只轉「OpenCC 會改、且不在白名單」的字。`雇`／`托` 在來源出現過 → 保留；
+    `职`／`经`／`婴` 不在來源 → 轉。"""
+    charset = frozenset("雇主停托兒受僱者及期間三十日以上於前提出")
+    # 真簡體、且不在白名單 → 轉
+    assert svc._to_traditional_selective("职业训练经费", charset) == "職業訓練經費"
+    # 「雇」「托」在白名單 → 原字保留（不變 僱／託）
+    assert svc._to_traditional_selective("雇主及停托", charset) == "雇主及停托"
+    # 混合：简体字转、白名单字留
+    assert svc._to_traditional_selective("雇主的经费", charset) == "雇主的經費"
+
+
+def test_to_traditional_selective_none_charset_falls_back_to_full_convert():
+    assert svc._to_traditional_selective("雇主经费", None) == svc._to_traditional("雇主经费")
+
+
+def test_traditionalize_triples_applies_selective_convert_to_all_fields():
+    charset = frozenset("雇主受僱者育嬰留職停薪期間三十日以上於十五前提出")
+    triples = [
+        SVOTriple(subject="育婴留職停薪期间三十日以上", verb="於十日前提出", object="雇主"),
+        SVOTriple(subject="职业训练", verb="补助", object="经费"),
+    ]
+    out = svc.traditionalize_triples(triples, charset)
+    assert out[0].subject == "育嬰留職停薪期間三十日以上"
+    assert out[0].object == "雇主"  # 白名單字保留
+    assert (out[1].subject, out[1].verb, out[1].object) == ("職業訓練", "補助", "經費")
+
+
+def test_traditionalize_triples_none_charset_is_graceful():
+    triples = [SVOTriple(subject="职业训练", verb="补助", object="经费")]
+    out = svc.traditionalize_triples(triples, None)
+    assert (out[0].subject, out[0].verb, out[0].object) == ("職業訓練", "補助", "經費")
+
+
+def test_union_citations_dedupes_and_takes_max_confidence():
+    a = '[{"source_svo_chunk_index": 1, "verb": "以", "confidence": 1}]'
+    b = ('[{"source_svo_chunk_index": 1, "verb": "以", "confidence": 1}, '
+         '{"source_svo_chunk_index": 2, "verb": "為", "confidence": 3}]')
+    merged_json, conf = svc._union_citations(a, b)
+    merged = json.loads(merged_json)
+    assert len(merged) == 2  # 第一筆重複被去掉
+    assert conf == 3
+    assert svc._union_citations(None, None) == ("[]", 1)
+
+
 # ── 事實清單自然語言化（報告24 §5 階段1，2026-09-01）───────────────────────
 
 @pytest.mark.asyncio

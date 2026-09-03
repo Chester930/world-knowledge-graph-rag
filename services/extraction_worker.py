@@ -28,7 +28,12 @@ from parser.chunk_writer import document_folder_path
 from repositories.kg_repo import KGRepository
 from services import document_record_service, task_queue_service
 from services.svo_chunking import read_svo_index
-from services.svo_service import extract_svo_triples_with_completeness_check, merge_triples_to_graph
+from services.svo_service import (
+    _kg_source_charset,
+    extract_svo_triples_with_completeness_check,
+    merge_triples_to_graph,
+    traditionalize_triples,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +84,12 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
             chunk["text"], chunk.get("original_sentences", []), llm_provider, embedding_provider,
             kg_id=kg_id, calibration_db_path=db_path,
         )
+        # 報告25 §4 發現4（2026-09-03）：`qwen2.5:7b` 對繁體輸入偶發輸出簡體
+        # subject／verb／object（`育婴留職停薪期间`、`补助经费`），污染 Entity
+        # 名稱、拖累檢索比對、跟繁體同義節點分裂。merge 前就地選擇性轉繁——
+        # 白名單為這個 KG 繁體來源文件實際用過的字（`雇`／`托` 保留，`職`／
+        # `經`／`嬰` 轉）。
+        triples = traditionalize_triples(triples, _kg_source_charset(str(kg_folder)))
         # § 3.1.4 §c（2026-08-18 定案）：source_doc_id 先前從未被賦值，導致
         # HAS_ENTITY 邊／Fact 節點在正式環境從未真正建立過。document_uuid()
         # 對穩定的 source 決定性推導出 UUID，同一份文件每次都得到相同的值。
