@@ -528,13 +528,135 @@ def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
     return False
 
 
+# 條號／列舉項目的起始標記（「一、」「（一）」「1.」等）與句末標點，切子句
+# 時一併當分隔點——讓「一、三十日以上：於十日前提出。二、未滿三十日：於
+# 五日前提出。」被切成兩個獨立子句，而非黏成一句、使子句層級綁定核對失效。
+_CLAUSE_SPLIT_PATTERN = re.compile(
+    r"[。；\n]+"
+    r"|(?=[一二三四五六七八九十]+、)"
+    r"|(?=（[一二三四五六七八九十]+）)"
+    r"|(?=\d+[.、)])"
+)
+
+_BINDING_NORMALIZE_PATTERN = re.compile(r"[\s、，。：:；「」（）()【】]")
+
+# 子句層級綁定核對只對「夠有辨識度」的 subject 觸發：正規化後長度未達此值
+# 的 subject（多為「受僱者」「雇主」「勞工」這類角色詞，且常在具體子句中被
+# 省略）不做綁定判斷，避免誤殺——見 docs/報告/25 §4 發現3。
+_MIN_BINDING_SUBJECT_LEN = 4
+
+
+def _split_into_clauses(text: str) -> list[str]:
+    """把一段原文切成子句（依句末標點與列舉項目起始標記）。"""
+    return [seg.strip() for seg in _CLAUSE_SPLIT_PATTERN.split(text) if seg and seg.strip()]
+
+
+def _normalize_for_binding(text: str) -> str:
+    """比對子句綁定時的輕度正規化：去空白與常見標點、並統一轉繁體，讓
+    subject 與子句用字的細微標點差異、以及抽取 LLM 偶發的簡繁混用
+    （`qwen2.5:7b` 對繁體輸入有時輸出簡體字，見報告25 §4 發現4）不影響
+    substring 判斷——否則簡體 subject 在繁體原文裡永遠找不到歸屬子句，
+    子句層級綁定核對會被這個守衛條件靜默略過（報告25 §4 發現3 收尾發現）。"""
+    return _BINDING_NORMALIZE_PATTERN.sub("", _to_traditional(text))
+
+
+_BINDING_UNITS = ("百分之", "小時", "分鐘", "日", "月", "年", "次", "％", "%", "元", "倍")
+
+
+def _quantity_unit(phrase: str) -> str:
+    """取數量片語結尾的單位（「十日前」的 phrase 是 `_QUANTITY_PATTERN` 抓到的
+    「十日」，回傳「日」）。取不到回傳空字串。"""
+    for unit in _BINDING_UNITS:
+        if phrase.endswith(unit):
+            return unit
+    return ""
+
+
+def _rival_quantity(phrase: str, clause_texts: Sequence[str]) -> str | None:
+    """`clause_texts` 裡是否有「與 `phrase` 同單位、但不同值」的競爭數量片語。
+    有的話回傳第一個，代表三元組本該用這個值。"""
+    unit = _quantity_unit(phrase)
+    if not unit:
+        return None
+    for text in clause_texts:
+        for other in _QUANTITY_PATTERN.findall(text):
+            if other != phrase and _quantity_unit(other) == unit:
+                return other
+    return None
+
+
+def _quantity_mis_bound_to_clause(
+    triple: SVOTriple, source_text: str, original_sentences: Sequence[str] | None,
+) -> bool:
+    """`docs/報告/25_擴大版新舊KG問答品質比對報告.md` §4 發現3：把報告20 的
+    數值忠實性核對從「字詞層級」擴充到「子句層級綁定」。
+
+    報告20 的 `_contains_ungrounded_quantity()` 只檢查數量/期限用字有沒有
+    逐字出現在 chunk 原文裡——但真實失效案例（報告25 Q7「每增加一種型式
+    加收八千元」實為四千元、Q2「三十日以上於五日前提出」實為十日前）中，
+    錯誤數字**確實逐字出現在同一 chunk 的另一個列舉子句**，字詞層級核對
+    因此放行。
+
+    子句層級綁定核對：對三元組 verb＋object 裡的每個數量片語 Q，找出原文中
+    逐字包含 Q 的子句（Q 的「歸屬子句」）。若同時滿足——
+      (1) subject 夠有辨識度（正規化後長度 ≥ `_MIN_BINDING_SUBJECT_LEN`）、
+          在原文裡確實有自己的歸屬子句；
+      (2) subject 的歸屬子句與 Q 的歸屬子句**完全不相交**；
+      (3) subject 的歸屬子句裡帶著一個「同單位、不同值」的競爭數字
+          （三元組本該用它）；
+    ——才判定 Q 是從別的列舉子句挪過來錯接，回傳 True（應丟棄）。
+
+    條件 (3) 是關鍵的誤殺防線：像「給予三至七日之特別休假：一、<條件>」
+    這種「數字在共用句幹、條件在列舉項目」的正常法條，條件子句本身沒有
+    競爭數字，不會被誤判。
+
+    保守設計（寧可漏抓、不可誤殺，比照報告19/20 的降級哲學）：任一條件
+    不成立就回傳 False。子句切分優先用 `original_sentences`（再各自切子句），
+    沒有時退回切 `source_text`。純字串比對，不需額外 LLM／embedding 呼叫。
+    """
+    subj_norm = _normalize_for_binding(triple.subject)
+    if len(subj_norm) < _MIN_BINDING_SUBJECT_LEN:
+        return False
+
+    units = list(original_sentences) if original_sentences else [source_text]
+    clauses: list[str] = []
+    for unit in units:
+        clauses.extend(_split_into_clauses(unit))
+    if not clauses:
+        return False
+
+    clauses_norm = [(_normalize_for_binding(c), c) for c in clauses]
+    subject_clauses = [(cn, orig) for cn, orig in clauses_norm if subj_norm in cn]
+    if not subject_clauses:
+        # subject 在原文裡找不到對應子句（多為 coref 正規化後的標準名）：
+        # 無從判斷綁定對錯，不丟。
+        return False
+    subject_clause_keys = {cn for cn, _ in subject_clauses}
+    subject_clause_texts = [orig for _, orig in subject_clauses]
+
+    for phrase in _QUANTITY_PATTERN.findall(f"{triple.verb}{triple.object}"):
+        home_keys = {cn for cn, orig in clauses_norm if phrase in orig}
+        if not home_keys or not subject_clause_keys.isdisjoint(home_keys):
+            continue
+        if _rival_quantity(phrase, subject_clause_texts) is not None:
+            return True
+    return False
+
+
 def _filter_ungrounded_quantity_triples(
     triples: list[SVOTriple], source_text: str,
+    original_sentences: Sequence[str] | None = None,
 ) -> list[SVOTriple]:
-    """丟棄 subject／object 含未逐字出現於原文的數量/期限用字的三元組——
-    對應報告19 §10 發現的真實失效案例（跨條文數字挪用），寧可漏抓一筆
-    有疑慮的三元組，也不留下錯誤數字污染圖譜（比照 3.1.3 REJECT 不阻斷
-    整體、report16/19 既有的降級哲學）。
+    """丟棄含未忠實數量/期限用字的三元組。兩層核對：
+
+    1. **字詞層級**（報告20）：subject／object 的數量用字未逐字出現於原文
+       → 丟（跨條文數字挪用，如「三至七日」錯抽成「一至三日」）。
+    2. **子句層級綁定**（報告25 §4 發現3）：數量用字逐字出現在原文、但
+       出現它的子句與三元組 subject 的歸屬子句不相交 → 丟（數字錯接到
+       別的列舉項目，如 Q7「每增加一種型式加收八千元」實為四千元）。
+
+    寧可漏抓一筆有疑慮的三元組，也不留下錯誤數字污染圖譜（比照 3.1.3
+    REJECT 不阻斷整體、report16/19 既有的降級哲學）。
 
     2026-08-31（見 docs/報告/21_抽取管線稽核與修正報告.md）：丟棄的三元組
     會記錄一筆 warning——上線首日完全沒有留下任何線索，無法統計這次修正
@@ -548,6 +670,12 @@ def _filter_ungrounded_quantity_triples(
         ):
             logger.warning(
                 "[數值忠實性核對] 丟棄疑似跨段落挪用數字的三元組：'%s' -[%s]-> '%s'",
+                t.subject, t.verb, t.object,
+            )
+            continue
+        if _quantity_mis_bound_to_clause(t, source_text, original_sentences):
+            logger.warning(
+                "[數值忠實性核對] 丟棄數字錯接到別的列舉子句的三元組：'%s' -[%s]-> '%s'",
                 t.subject, t.verb, t.object,
             )
             continue
@@ -588,23 +716,24 @@ async def extract_svo_triples_with_completeness_check(
     比對無法執行，直接回傳第一階段結果，不強行報錯——優雅降級，行為等同
     直接呼叫 `extract_svo_triples()`。
 
-    ✅ **數值忠實性核對（2026-08-31，見 `docs/報告/20_抽取數值忠實性核對
-    機制設計報告.md`）**：不管走哪個分支，回傳前一律套用
-    `_filter_ungrounded_quantity_triples()`——丟棄 subject／object 含
-    「數量/期限用字未逐字出現於 `text`（chunk原文）」的三元組，防堵同一
-    輸入不同次真實LLM呼叫把數字錯誤挪用到別的條文的失效模式（報告19 §10
-    真實案例）。純字串比對，不需額外 LLM／embedding 呼叫。
+    ✅ **數值忠實性核對（2026-08-31，報告20；2026-09-03 擴充子句層級綁定，
+    報告25 §4 發現3）**：不管走哪個分支，回傳前一律套用
+    `_filter_ungrounded_quantity_triples()`——除了丟棄 subject／object 含
+    「數量/期限用字未逐字出現於 `text`」的三元組（報告20），再多一層子句
+    層級綁定核對：數量用字雖逐字出現、但落在與三元組 subject 不相干的
+    列舉子句 → 也丟（報告25 Q7/Q2 真實案例）。子句切分用 `original_sentences`，
+    沒有時退回切 `text`。純字串比對，不需額外 LLM／embedding 呼叫。
     """
     triples = await extract_svo_triples(
         text, llm_provider, embedding_provider, kg_id=kg_id, calibration_db_path=calibration_db_path,
     )
 
     if not original_sentences or embedding_provider is None:
-        return _filter_ungrounded_quantity_triples(triples, text)
+        return _filter_ungrounded_quantity_triples(triples, text, original_sentences or None)
 
     uncovered = await _find_uncovered_sentences(original_sentences, triples, embedding_provider)
     if not uncovered:
-        return _filter_ungrounded_quantity_triples(triples, text)
+        return _filter_ungrounded_quantity_triples(triples, text, original_sentences)
 
     supplement_text = "\n".join(uncovered)
     supplement_triples = await extract_svo_triples(
@@ -619,7 +748,7 @@ async def extract_svo_triples_with_completeness_check(
         if key not in seen:
             seen.add(key)
             merged.append(t)
-    return _filter_ungrounded_quantity_triples(merged, text)
+    return _filter_ungrounded_quantity_triples(merged, text, original_sentences)
 
 
 _SAFE_REL_TYPE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
@@ -719,6 +848,19 @@ async def resolve_entity_name(
     fallback 即時編碼——比對邏輯與門檻本身不變，純粹省去重複編碼成本。
     """
     if not candidates:
+        return name
+
+    # 2026-09-03（`docs/報告/25_擴大版新舊KG問答品質比對報告.md` §4 發現3 收尾
+    # 真實重抽發現）：數量／金額實體只准精確比對，不做編輯距離／cosine 模糊
+    # 合併。真實案例——正確抽出的三元組 `每增加一種型式 → 新臺幣四千元`，在
+    # merge 階段 `新臺幣四千元` 與既有的 `新臺幣八千元` 只差一字（`_edit_ratio`
+    # ＝0.833 ≥ `ENTITY_DEDUP_EDIT_RATIO_THRESHOLD` 0.70），被誤併成同一實體，
+    # 邊接到 `八千元`，把 Q7 的答案數字改錯。`四千/八千`、`五日/十日`、
+    # `三十日以上/未滿三十日` 這類「字面高度相似、數值完全不同」的量詞實體，
+    # 模糊合併必然出錯——直接回傳原名，交由下游 `MERGE (e:Entity {kg_id, name})`
+    # 做精確去重即可（發現3 的子句層級核對在 merge 前跑、攔不到這個 merge 期
+    # 的錯併，兩者互補）。
+    if _QUANTITY_PATTERN.search(name):
         return name
 
     # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher

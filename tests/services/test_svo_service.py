@@ -1219,6 +1219,28 @@ async def test_resolve_entity_name_merges_via_edit_distance():
 
 
 @pytest.mark.asyncio
+async def test_resolve_entity_name_quantity_entity_no_fuzzy_merge():
+    """報告25 §4 發現3 收尾（真實重抽發現）：數量／金額實體只准精確比對。
+    `新臺幣四千元` 與既有 `新臺幣八千元` 只差一字（SequenceMatcher ratio
+    0.833 ≥ 門檻 0.70），模糊合併會把正確抽取的三元組接到錯的金額——
+    含「數字＋單位」的名稱一律回傳原名、建新節點。"""
+    candidates = [{"name": "新臺幣八千元", "alias_counts_json": "{}"}]
+    assert await svc.resolve_entity_name("新臺幣四千元", candidates) == "新臺幣四千元"
+    # 期限用字同理：三十日以上 vs 未滿三十日
+    cands2 = [{"name": "育嬰留職停薪期間未滿三十日", "alias_counts_json": "{}"}]
+    assert await svc.resolve_entity_name(
+        "育嬰留職停薪期間三十日以上", cands2,
+    ) == "育嬰留職停薪期間三十日以上"
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_quantity_entity_still_merges_on_exact_match():
+    """數量實體的精確相符仍照常合併（守衛只擋模糊比對，不擋 exact）。"""
+    candidates = [{"name": "新臺幣四千元", "alias_counts_json": "{}"}]
+    assert await svc.resolve_entity_name("新臺幣四千元", candidates) == "新臺幣四千元"
+
+
+@pytest.mark.asyncio
 async def test_resolve_entity_name_picks_best_edit_ratio_match_not_first():
     """迴歸測試（2026-08-19 真實審查發現並修復）：`_fetch_entity_candidates()`
     的 Cypher 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性；原本的編輯距離比對
@@ -3363,3 +3385,110 @@ async def test_completeness_check_drops_triple_with_ungrounded_quantity(monkeypa
 
     assert len(triples) == 1
     assert triples[0].object == "三至七日之特別休假"
+
+
+# --- docs/報告/25 §4 發現3：子句層級綁定核對（2026-09-03 實作） -------------
+
+_Q2_SENTENCES = [
+    "育嬰留職停薪期間三十日以上者，應於十日前以書面向雇主提出。",
+    "育嬰留職停薪期間未滿三十日者，應於五日前以書面向雇主提出。",
+]
+_Q7_SENTENCES = [
+    "型式檢查，每一型式收取新臺幣八千元。",
+    "同時申請多種型式且屬相同種類者，每增加一種型式加收新臺幣四千元。",
+]
+
+
+def test_quantity_mis_bound_flags_number_from_sibling_clause():
+    """報告25 Q2：主詞「三十日以上」的正解是「十日前」，但三元組把同一
+    chunk 另一列舉項目的「五日前」錯接過來——字詞層級核對放行（五日前
+    確實逐字在原文），子句層級綁定核對應攔下。"""
+    mis_bound = SVOTriple(
+        subject="育嬰留職停薪期間三十日以上者", verb="應於", object="五日前以書面向雇主提出",
+    )
+    assert svc._quantity_mis_bound_to_clause(mis_bound, "\n".join(_Q2_SENTENCES), _Q2_SENTENCES) is True
+
+
+def test_quantity_correctly_bound_passes_clause_check():
+    correct = SVOTriple(
+        subject="育嬰留職停薪期間三十日以上者", verb="應於", object="十日前以書面向雇主提出",
+    )
+    assert svc._quantity_mis_bound_to_clause(correct, "\n".join(_Q2_SENTENCES), _Q2_SENTENCES) is False
+
+
+def test_quantity_mis_bound_flags_wrong_enumeration_amount():
+    """報告25 Q7：主詞「每增加一種型式」的正解是四千元，三元組錯接成
+    另一子句的八千元。"""
+    mis_bound = SVOTriple(
+        subject="同時申請多種型式且屬相同種類者", verb="每增加一種型式加收", object="新臺幣八千元",
+    )
+    assert svc._quantity_mis_bound_to_clause(mis_bound, "\n".join(_Q7_SENTENCES), _Q7_SENTENCES) is True
+
+
+def test_quantity_mis_bound_flags_even_when_subject_is_simplified_chinese():
+    """報告25 §4 發現3 收尾：抽取 LLM（qwen2.5:7b）對繁體輸入偶發輸出簡體字，
+    簡體 subject 在繁體原文裡找不到歸屬子句、綁定核對會被守衛條件靜默略過。
+    `_normalize_for_binding()` 統一轉繁後，簡體 subject 也應正確攔下。"""
+    mis_bound = SVOTriple(
+        subject="育婴留職停薪期间三十日以上者", verb="應於", object="五日前以書面向雇主提出",
+    )
+    assert svc._quantity_mis_bound_to_clause(mis_bound, "\n".join(_Q2_SENTENCES), _Q2_SENTENCES) is True
+    correct = SVOTriple(
+        subject="育婴留職停薪期间三十日以上者", verb="應於", object="十日前以書面向雇主提出",
+    )
+    assert svc._quantity_mis_bound_to_clause(correct, "\n".join(_Q2_SENTENCES), _Q2_SENTENCES) is False
+
+
+def test_quantity_mis_bound_skips_short_subject():
+    """subject 太短（角色詞、常在具體子句被省略）時不做綁定判斷，避免誤殺。"""
+    triple = SVOTriple(subject="雇主", verb="應於", object="五日前提出")
+    assert svc._quantity_mis_bound_to_clause(triple, "\n".join(_Q2_SENTENCES), _Q2_SENTENCES) is False
+
+
+def test_quantity_mis_bound_skips_subject_absent_from_source():
+    """subject 在原文找不到歸屬子句（多為 coref 正規化後的標準名）時不丟。"""
+    triple = SVOTriple(
+        subject="申請育嬰留職停薪之受僱勞工本人", verb="應於", object="五日前提出",
+    )
+    assert svc._quantity_mis_bound_to_clause(triple, "\n".join(_Q2_SENTENCES), _Q2_SENTENCES) is False
+
+
+def test_quantity_mis_bound_falls_back_to_source_text_when_no_sentences():
+    mis_bound = SVOTriple(
+        subject="育嬰留職停薪期間三十日以上者", verb="應於", object="五日前以書面向雇主提出",
+    )
+    assert svc._quantity_mis_bound_to_clause(mis_bound, "\n".join(_Q2_SENTENCES), None) is True
+
+
+def test_filter_drops_clause_mis_bound_triple():
+    correct = SVOTriple(
+        subject="育嬰留職停薪期間三十日以上者", verb="應於", object="十日前以書面向雇主提出",
+    )
+    mis_bound = SVOTriple(
+        subject="育嬰留職停薪期間三十日以上者", verb="應於", object="五日前以書面向雇主提出",
+    )
+    result = svc._filter_ungrounded_quantity_triples(
+        [correct, mis_bound], "\n".join(_Q2_SENTENCES), _Q2_SENTENCES,
+    )
+    assert result == [correct]
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_drops_clause_mis_bound_triple(monkeypatch):
+    async def fake_reconcile(verb, llm_rel_type, **kwargs):
+        return llm_rel_type
+    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+
+    llm = FakeLLM(
+        '{"triples":['
+        '{"subject":"育嬰留職停薪期間三十日以上者","verb":"應於","object":"十日前以書面向雇主提出","rel_type":"RELATED_TO"},'
+        '{"subject":"育嬰留職停薪期間三十日以上者","verb":"應於","object":"五日前以書面向雇主提出","rel_type":"RELATED_TO"}'
+        ']}'
+    )
+    embedding = FakeEmbedding()
+
+    triples = await svc.extract_svo_triples_with_completeness_check(
+        "\n".join(_Q2_SENTENCES), _Q2_SENTENCES, llm, embedding,
+    )
+
+    assert [t.object for t in triples] == ["十日前以書面向雇主提出"]
