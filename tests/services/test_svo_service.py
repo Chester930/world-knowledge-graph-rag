@@ -1241,6 +1241,34 @@ async def test_resolve_entity_name_quantity_entity_still_merges_on_exact_match()
 
 
 @pytest.mark.asyncio
+async def test_resolve_entity_name_measure_entity_age_tiers_no_fuzzy_merge():
+    """報告25 §4 發現C（診斷 Q3）：守衛擴到 `_MEASURE_PATTERN`（多收「歲」等
+    分段量詞）。`年齡六歲以上未滿十二歲者` 與既有 `年齡十二歲以上未滿十五歲者`
+    `_edit_ratio`＝0.80 ≥ 門檻 0.70，舊守衛（只認「數字＋日/月/元…」）擋不住，
+    三段每日工時上限會全併到同一節點。含「數字＋歲」的名稱一律回傳原名。"""
+    cands = [{"name": "年齡十二歲以上未滿十五歲者", "alias_counts_json": "{}"}]
+    assert await svc.resolve_entity_name(
+        "年齡六歲以上未滿十二歲者", cands,
+    ) == "年齡六歲以上未滿十二歲者"
+    assert await svc.resolve_entity_name(
+        "年齡未滿六歲者", cands,
+    ) == "年齡未滿六歲者"
+
+
+def test_measure_pattern_is_superset_of_quantity_pattern_units():
+    """`_MEASURE_PATTERN` 命中所有 `_QUANTITY_PATTERN` 命中的、再加分段量詞；
+    `_QUANTITY_PATTERN` 本身不受影響（發現3／報告20 行為不變）。"""
+    for s in ["三十日", "新臺幣四千元", "五十％", "二小時", "二次"]:
+        assert svc._QUANTITY_PATTERN.search(s) and svc._MEASURE_PATTERN.search(s)
+    # 只有 _MEASURE_PATTERN 命中的分段量詞
+    for s in ["未滿六歲", "十二歲以上", "第三款", "五種型式"]:
+        assert svc._MEASURE_PATTERN.search(s)
+        assert svc._QUANTITY_PATTERN.search(s) is None
+    # 「歲」不在 _QUANTITY_PATTERN，發現3 的 _quantity_mis_bound 不受牽連
+    assert svc._QUANTITY_PATTERN.search("未滿六歲") is None
+
+
+@pytest.mark.asyncio
 async def test_resolve_entity_name_picks_best_edit_ratio_match_not_first():
     """迴歸測試（2026-08-19 真實審查發現並修復）：`_fetch_entity_candidates()`
     的 Cypher 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性；原本的編輯距離比對

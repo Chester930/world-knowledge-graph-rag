@@ -510,6 +510,21 @@ _QUANTITY_PATTERN = re.compile(
     r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍)"
 )
 
+# 比 `_QUANTITY_PATTERN` 更寬的「分段量詞」偵測——多收「歲／人／名／週／度／
+# 種／類／條／款／項／點」等法規列舉分段常用的單位。**只給
+# `resolve_entity_name()` 的模糊合併守衛用**（報告25 §4 發現C／診斷 Q3）：
+# `年齡未滿六歲者`／`年齡六歲以上未滿十二歲者`／`年齡十二歲以上未滿十五歲者`
+# 這種「字面高度相似、分段值不同」的主詞，被 `_edit_ratio` 0.80／cosine 0.88
+# 誤併成一個節點，三段工時上限（二／三／四小時）全接到同一個節點、
+# `natural_text` 還被寫錯段。`_QUANTITY_PATTERN` 刻意不動（發現3 的
+# `_quantity_mis_bound_to_clause`／報告20 的 `_contains_ungrounded_quantity`
+# 對「數量忠實性」的語意較窄，混進「歲／人／條」會擴大它們的誤判面）。
+_MEASURE_PATTERN = re.compile(
+    r"[〇零一二三四五六七八九十百千萬0-9]+"
+    r"(?:至[〇零一二三四五六七八九十百千萬0-9]+)?"
+    r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍|歲|人|名|週|度|種|類|條|款|項|點)"
+)
+
 
 def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
     """`docs/報告/20_抽取數值忠實性核對機制設計報告.md` §3：偵測 `text`
@@ -860,7 +875,13 @@ async def resolve_entity_name(
     # 模糊合併必然出錯——直接回傳原名，交由下游 `MERGE (e:Entity {kg_id, name})`
     # 做精確去重即可（發現3 的子句層級核對在 merge 前跑、攔不到這個 merge 期
     # 的錯併，兩者互補）。
-    if _QUANTITY_PATTERN.search(name):
+    #
+    # 2026-09-03 擴大（發現C／診斷 Q3）：守衛從 `_QUANTITY_PATTERN` 換成更寬的
+    # `_MEASURE_PATTERN`——多收「歲／人／條／款」等法規列舉分段常用單位。真實
+    # 案例：`年齡未滿六歲者`／`年齡六歲以上未滿十二歲者`／`年齡十二歲以上未滿
+    # 十五歲者` 被 `_edit_ratio` 0.80／cosine 0.88 誤併成一個節點，三段每日
+    # 工時上限（二／三／四小時）全接到同一個節點、`natural_text` 寫錯段。
+    if _MEASURE_PATTERN.search(name):
         return name
 
     # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher
