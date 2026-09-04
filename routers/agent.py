@@ -32,6 +32,19 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 _SEED_ENTITY_LIMIT = 8
 
+# 報告27 L1：種子度數上限。度數（相連邊數）超過這個值的實體屬「樞紐」
+# （勞動法語料裡的雇主／被保險人／投保單位），當作 BFS 起點會把走訪灌爆
+# （報告26 §4 #4：Q5/6/7 各 330–440 秒）。只要還有非樞紐種子可用就剔除
+# 樞紐；全部候選都是樞紐時才保留（否則沒有起點）。對應 CatRAG（Lau et al.,
+# 2026，arXiv:2602.01965）「semantic drift into hub nodes」的簡化對策。
+# 初值 200，待報告27 §6 敏感度測試（θ_deg ∈ {100, 200, 400}）校準。
+_SEED_MAX_DEGREE = 200
+
+# 報告27 L1：`bfs_query()` 每個 seed 的展開路徑數上限（CALL 子查詢內 LIMIT）。
+# 樞紐種子已由 `_SEED_MAX_DEGREE` 剔除，這是第二道扇出防線。8 seeds × 60
+# ≈ 480 條路徑上限。初值 60，待報告27 §6 校準。
+_BFS_PER_SEED_LIMIT = 60
+
 # 2026-07-28 demo 測試發現：退回一般知識（或補充說明）時，LLM 有時會混入
 # 中國大陸的法規／數值（例如「中華人民共和國勞動法」、退休金提繳比例誤答
 # 成中國大陸的數字），即使有依事實回答的部分也可能在補充段落裡跑偏。加一句
@@ -83,7 +96,24 @@ async def _find_seed_entities(
         vector = question_vector if question_vector is not None else await embedding_provider.encode(question)
         matched = await vector_search_entities(driver, kg_id, vector, top_k=_SEED_ENTITY_LIMIT)
 
-    return matched
+    return await _drop_hub_seeds(driver, kg_id, matched)
+
+
+async def _drop_hub_seeds(driver: AsyncDriver, kg_id: UUID, names: list[str]) -> list[str]:
+    """報告27 L1：剔除度數 > `_SEED_MAX_DEGREE` 的樞紐種子——只要還有非樞紐
+    種子可用就剔除，全部都是樞紐時原樣保留（BFS 需要至少一個起點）。
+    候選 < 2 個時直接回傳、不多打一次查詢。"""
+    if len(names) < 2:
+        return names
+    result = await driver.execute_query(
+        "MATCH (e:Entity {kg_id: $kg_id})-[r]-() WHERE e.name IN $names "
+        "RETURN e.name AS name, count(r) AS degree",
+        kg_id=str(kg_id),
+        names=names,
+    )
+    degree = {r["name"]: (r.get("degree") or 0) for r in result.records}
+    non_hub = [n for n in names if degree.get(n, 0) <= _SEED_MAX_DEGREE]
+    return non_hub if non_hub else names
 
 
 # 從語意 Fact 推導文件範圍時，只取分數最高的前幾筆——`vector_search_facts()`
@@ -730,17 +760,10 @@ async def chat(payload: ChatRequest):
             embedding_provider = get_embedding_provider()
             question_vector = await embedding_provider.encode(payload.question)
 
-            seeds = await _find_seed_entities(
-                driver, payload.kg_id, payload.question,
-                embedding_provider=embedding_provider, question_vector=question_vector,
-            )
-            triples = await bfs_query(driver, payload.kg_id, seeds, hops=payload.svo_hops)
-
-            resolved_rel_type = await resolve_query_relation_type(
-                payload.question, embedding_provider, llm_provider=llm_provider
-            )
-            triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
-
+            # 報告27 L1（2026-09-04）：語意 Fact 檢索提前到 `bfs_query()` 之前，
+            # 推出的文件範圍當走訪的**前置**約束（下推到 Cypher），而非只做
+            # 事後排除篩選——原順序讓昂貴的無界路徑枚舉先發生、範圍訊號用不上
+            # （報告26 §4 #4：Q5/6/7 各 330–440 秒）。
             fact_results = await vector_search_facts(
                 driver, payload.kg_id, question_vector, top_k=payload.top_k
             )
@@ -752,6 +775,26 @@ async def chat(payload: ChatRequest):
             relevant_doc_ids = _relevant_doc_ids_from_facts(
                 fact_results, top_n=_DOC_SCOPE_TOP_N_FACTS
             )
+
+            seeds = await _find_seed_entities(
+                driver, payload.kg_id, payload.question,
+                embedding_provider=embedding_provider, question_vector=question_vector,
+            )
+            triples = await bfs_query(
+                driver, payload.kg_id, seeds,
+                hops=payload.svo_hops,
+                scope_doc_ids=(relevant_doc_ids or None),
+                per_seed_limit=_BFS_PER_SEED_LIMIT,
+            )
+
+            resolved_rel_type = await resolve_query_relation_type(
+                payload.question, embedding_provider, llm_provider=llm_provider
+            )
+            triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
+
+            # 事後排除篩選仍保留：`bfs_query()` 的 Cypher 範圍下推有「空結果
+            # → 退回無範圍」的 fallback（相容無 HAS_ENTITY 邊的舊 KG），該
+            # 情況下仍可能放行離題三元組，這裡兜底。
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
             fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
 

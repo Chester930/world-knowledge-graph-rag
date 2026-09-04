@@ -480,6 +480,117 @@ async def test_find_seed_entities_without_embedding_provider_stays_empty_on_no_m
     assert seeds == []
 
 
+# ── _drop_hub_seeds：種子度數上限（報告27 L1）──
+
+class _DegreeAwareDriver:
+    """對「列 Entity 名稱」查詢回傳全部候選；對「算度數」查詢回傳 degree map。"""
+
+    def __init__(self, names, degrees):
+        self._names = names
+        self._degrees = degrees  # {name: degree}
+        self.queries = []
+
+    async def execute_query(self, query, **params):
+        self.queries.append(query)
+
+        class _Result:
+            def __init__(self, records):
+                self.records = records
+
+        if "count(r) AS degree" in query:
+            wanted = params["names"]
+            return _Result([{"name": n, "degree": self._degrees.get(n, 0)} for n in wanted])
+        return _Result([{"name": n} for n in self._names])
+
+
+@pytest.mark.asyncio
+async def test_find_seed_entities_drops_hub_seed_when_non_hub_available(monkeypatch):
+    """報告27 L1：度數 > `_SEED_MAX_DEGREE` 的樞紐種子在還有非樞紐種子時被剔除。"""
+    driver = _DegreeAwareDriver(
+        names=["雇主", "特別休假"],
+        degrees={"雇主": agent._SEED_MAX_DEGREE + 500, "特別休假": 12},
+    )
+    seeds = await agent._find_seed_entities(driver, uuid4(), "雇主應給特別休假幾天？")
+    assert seeds == ["特別休假"]
+
+
+@pytest.mark.asyncio
+async def test_find_seed_entities_keeps_hub_when_all_candidates_are_hubs(monkeypatch):
+    """全部候選都是樞紐時原樣保留——BFS 需要至少一個起點。"""
+    driver = _DegreeAwareDriver(
+        names=["雇主", "勞工"],
+        degrees={"雇主": 9999, "勞工": 8888},
+    )
+    seeds = await agent._find_seed_entities(driver, uuid4(), "雇主與勞工的關係？")
+    assert set(seeds) == {"雇主", "勞工"}
+
+
+@pytest.mark.asyncio
+async def test_find_seed_entities_single_candidate_skips_degree_query():
+    """候選 < 2 個時不多打一次度數查詢。"""
+    driver = _DegreeAwareDriver(names=["特別休假"], degrees={"特別休假": 99999})
+    seeds = await agent._find_seed_entities(driver, uuid4(), "特別休假幾天？")
+    assert seeds == ["特別休假"]  # 即使度數超標，唯一候選仍保留
+    assert not any("count(r) AS degree" in q for q in driver.queries)
+
+
+@pytest.mark.asyncio
+async def test_chat_runs_semantic_search_before_bfs_and_passes_scope(monkeypatch):
+    """報告27 L1：`vector_search_facts` 先跑、推出的 `relevant_doc_ids` 當
+    `bfs_query(scope_doc_ids=)` 前置約束傳入；`per_seed_limit` 一併帶上。"""
+    kg_id = uuid4()
+    doc_id = uuid4()
+    call_order = []
+    bfs_kwargs = {}
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        call_order.append("seeds")
+        return ["特別休假"]
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
+        call_order.append("bfs")
+        bfs_kwargs.update(kwargs)
+        bfs_kwargs["hops"] = hops
+        return []
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        call_order.append("facts")
+        return [{"fact_text": "x", "subject": "特別休假", "rel_type": "CAUSES",
+                 "object": "y", "source_doc_id": str(doc_id), "score": 0.9}]
+
+    async def fake_resolve(question, embedding_provider, *, llm_provider):
+        return None
+
+    async def fake_fetch_document_map(driver, kg_id_arg, triples, fact_results):
+        return {}
+
+    embedding = _FakeEmbeddingProvider([0.1])
+    llm = _FakeStreamLLM()
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_fetch_document_map)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="特別休假幾天？", kg_id=kg_id)
+    await _drain(await agent.chat(payload))
+
+    assert call_order.index("facts") < call_order.index("bfs")
+    assert bfs_kwargs["hops"] == 1  # 報告27 L0 預設
+    assert bfs_kwargs["scope_doc_ids"] == {doc_id}
+    assert bfs_kwargs["per_seed_limit"] == agent._BFS_PER_SEED_LIMIT
+
+
+def test_chat_request_default_svo_hops_is_1():
+    """報告27 L0：`svo_hops` 預設由 2 改為 1（`bfs_query` 現把它當最大跳數，
+    先跑 1-hop、不足才擴展）。"""
+    assert ChatRequest(question="x").svo_hops == 1
+    assert ChatRequest(question="x", svo_hops=3).svo_hops == 3
+
+
 @pytest.mark.asyncio
 async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(monkeypatch):
     kg_id = uuid4()
@@ -488,7 +599,7 @@ async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return []
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return []
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -737,7 +848,7 @@ async def test_chat_filters_bfs_triples_by_resolved_relation_type(monkeypatch):
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A", "C"]
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return all_triples
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -778,7 +889,7 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A", "C"]
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return all_triples
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -925,7 +1036,7 @@ async def test_chat_yields_sources_event_after_answer_stream(monkeypatch):
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A"]
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return triples
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -968,7 +1079,7 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return []
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return []
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -1018,7 +1129,7 @@ async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(m
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["公務員"]
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return triples
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -1056,7 +1167,7 @@ async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeyp
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return []
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return []
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
@@ -1094,7 +1205,7 @@ def _chat_common_monkeypatch(monkeypatch, llm, embedding, *, triples=None, facts
     async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
         return ["A"] if triples else []
 
-    async def fake_bfs_query(driver, kg_id_arg, seeds, hops):
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
         return triples or []
 
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):

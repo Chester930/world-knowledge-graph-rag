@@ -54,6 +54,10 @@ class ChatRequest(BaseModel):
     top_k: int = Field(default=20, ge=1, le=50)
     max_chars_per_doc: int = Field(default=2000, ge=500, le=12000)
     use_svo: bool = True
-    svo_hops: int = Field(default=2, ge=1, le=3)
+    # 報告27 L0（2026-09-04）：預設由 2 改為 1。`bfs_query()` 現把 `svo_hops`
+    # 當「最大允許跳數」，一律先跑 1-hop，去重後少於門檻才擴展到 2..svo_hops。
+    # 共用高頻實體當種子時 2-hop 會組合爆炸（報告26 §4 #4：Q5/6/7 各
+    # 330–440 秒）；報告26 Q6 證實好種子的 1-hop 即足以接到答案並正確歸因。
+    svo_hops: int = Field(default=1, ge=1, le=3)
     history: list[ChatMessage] | None = Field(default=None, max_length=50)
     kg_id: UUID | None = None  # 指定時強制路由到此 KG，跳過全域路由

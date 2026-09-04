@@ -15,7 +15,7 @@ import logging
 import re
 from functools import lru_cache
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Collection, Mapping, Sequence
 from uuid import UUID
 
 from neo4j import AsyncDriver
@@ -2820,7 +2820,81 @@ async def trigger_extraction(
     )
 
 
-async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], hops: int = 2) -> list[SVOTriple]:
+# 報告27 L0：`bfs_query` 的懶惰擴展門檻——1-hop 結果去重後少於這麼多筆，
+# 才擴展到 2-hop（僅在呼叫端允許 `hops >= 2` 時）。共用高頻實體（雇主／
+# 被保險人）當種子時，1-hop 通常已足夠且遠快於 2-hop 的組合爆炸（報告26
+# §4 #4：Q5/6/7 各 330–440 秒）。初值 8，待報告27 §6 敏感度測試校準。
+_BFS_EXPAND_WHEN_BELOW = 8
+
+
+def _bfs_pass_cypher(rel_types: str, min_hop: int, max_hop: int, *, scoped: bool, per_seed_limit: bool) -> str:
+    """組一趟 BFS 走訪的 Cypher（報告27 L1）。
+
+    - `scoped=True`：鄰居必須經 `(:Chunk)-[:HAS_ENTITY]->` 連到 `source_doc_id`
+      在 `$scope_doc_ids` 內的文件——把 `routers/agent.py` 語意 Fact 推導出的
+      文件範圍下推到走訪階段，遍歷不出離題文件。⚠️ `HAS_ENTITY` 只出現在
+      這個 `EXISTS {}` 範圍子查詢裡，**不在** `*min..max` 變長走訪型別清單中
+      （2026-08-19 迴歸：走訪本身行經 HAS_ENTITY 會把端點解析成 Chunk 節點）。
+    - `per_seed_limit=True`：每個 seed 的展開路徑數上限 `$per_seed_limit`
+      （CALL 子查詢內 LIMIT），限制樞紐種子的扇出。
+    """
+    scope_clause = (
+        "\n            WHERE EXISTS {\n"
+        "                MATCH (c:Chunk {kg_id: $kg_id})-[:HAS_ENTITY]->(neighbor)\n"
+        "                WHERE c.source_doc_id IN $scope_doc_ids\n"
+        "            }"
+        if scoped else ""
+    )
+    limit_clause = "\n            RETURN path LIMIT $per_seed_limit" if per_seed_limit else "\n            RETURN path"
+    return f"""
+        MATCH (seed:Entity {{kg_id: $kg_id}})
+        WHERE seed.name IN $seed_entities
+        CALL {{
+            WITH seed
+            MATCH path = (seed)-[:{rel_types}*{min_hop}..{max_hop}]-(neighbor:Entity {{kg_id: $kg_id}}){scope_clause}{limit_clause}
+        }}
+        UNWIND relationships(path) AS rel
+        WITH DISTINCT startNode(rel) AS s, rel, endNode(rel) AS o
+        RETURN
+            s.name AS subject,
+            coalesce(s.type, "概念") AS subject_type,
+            type(rel) AS rel_type,
+            coalesce(rel.confidence, 1) AS confidence,
+            rel.citations_json AS citations_json,
+            rel.natural_text AS natural_text,
+            o.name AS object,
+            coalesce(o.type, "概念") AS object_type
+    """
+
+
+def _bfs_records_to_triples(records) -> list[SVOTriple]:
+    triples: list[SVOTriple] = []
+    for record in records:
+        payload = dict(record)
+        citations_json = payload.pop("citations_json", None)
+        citations = json.loads(citations_json) if citations_json else []
+        latest = citations[-1] if citations else {}
+        payload["verb"] = latest.get("verb", payload["rel_type"])
+        payload["source_doc_id"] = UUID(latest["source_doc_id"]) if latest.get("source_doc_id") else None
+        payload["source"] = latest.get("source")
+        payload["source_svo_chunk_index"] = latest.get("source_svo_chunk_index")
+        payload["source_svo_chunk_file"] = latest.get("source_svo_chunk_file")
+        payload["source_sentence_start"] = latest.get("source_sentence_start")
+        payload["source_sentence_end"] = latest.get("source_sentence_end")
+        triples.append(SVOTriple(**payload))
+    return triples
+
+
+async def bfs_query(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    seed_entities: list[str],
+    hops: int = 1,
+    *,
+    scope_doc_ids: Collection[UUID] | None = None,
+    per_seed_limit: int | None = None,
+    expand_when_below: int = _BFS_EXPAND_WHEN_BELOW,
+) -> list[SVOTriple]:
     """從 seed entity 做 bounded BFS，回傳路徑上的去重 SVO triples。
 
     每條邊可能累積多筆來源引用（見 `merge_triples_to_graph` 的事實層級
@@ -2834,6 +2908,22 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
     `backfill_natural_text()`）原樣填進回傳的 `SVOTriple.natural_text`，
     供 `routers/agent.py::_merge_fact_lines()` 優先使用；缺席時為 `None`，
     消費端 fallback 回樣板拼接。
+
+    ✅ **報告27（2026-09-04）：遍歷剪枝**——`hops` 由「固定走訪深度」改為
+    「最大允許跳數」，預設 1：
+
+    - **L0 懶惰擴展**：一律先跑 1-hop；去重後三元組數 < `expand_when_below`
+      且 `hops >= 2` 時，才補跑一趟 `2..hops` 擴展並合併（依
+      `(subject, rel_type, object)` 去重）。避免樞紐種子 2-hop 的組合爆炸。
+    - **L1 文件範圍下推**：`scope_doc_ids` 非空時，走訪只保留經
+      `(:Chunk)-[:HAS_ENTITY]->` 連到範圍內文件的鄰居。**空結果 fallback**：
+      scoped 首趟 1-hop 撈不到任何列時，自動改跑無範圍版（相容尚未建立
+      `HAS_ENTITY` 結構邊的舊 KG，或範圍推導失準的情況）。
+    - **L1 扇出上限**：`per_seed_limit` 非 None 時，每個 seed 的展開路徑數
+      上限（CALL 子查詢內 LIMIT）。
+
+    ⚠️ `scope_doc_ids` 的 Cypher 下推需對真實 Neo4j（kg2-neo4j）驗證，
+    見 `docs/報告/27_...md` §6；空結果 fallback 讓上線本身安全。
     """
     seeds = [entity.strip() for entity in seed_entities if entity.strip()]
     if not seeds:
@@ -2846,44 +2936,51 @@ async def bfs_query(driver: AsyncDriver, kg_id: UUID, seed_entities: list[str], 
     # § 3.1.4 §a 的 HAS_ENTITY／HAS_SUBJECT／HAS_OBJECT／SUPPORTED_BY 等結構性
     # 邊（連到 Chunk／Fact 節點），BFS 就可能行經這些邊、把 startNode/endNode
     # 解析成沒有 .name 屬性的 Chunk／Fact 節點，導致 SVOTriple(subject=None)
-    # 驗證失敗直接拋例外。此問題先前從未在正式環境重現過，因為所有既有 KG
-    # 的 source_doc_id 一律為 None（見 § 3.1.4 §c），HAS_ENTITY／Fact 從未
-    # 真正建立過，圖上根本沒有這些結構性邊可供誤走——直到今天才第一次有
-    # KG 同時具備知識層與結構層邊，暴露出這個潛藏 bug。
+    # 驗證失敗直接拋例外。走訪型別清單一律只含 SVO_REL_TYPES；報告27 的
+    # 文件範圍約束用獨立的 EXISTS {} 子查詢、不進走訪路徑。
     rel_types = "|".join(sorted(SVO_REL_TYPES))
-    result = await driver.execute_query(
-        f"""
-        MATCH (seed:Entity {{kg_id: $kg_id}})
-        WHERE seed.name IN $seed_entities
-        MATCH path = (seed)-[:{rel_types}*1..{hops}]-(neighbor:Entity {{kg_id: $kg_id}})
-        UNWIND relationships(path) AS rel
-        WITH DISTINCT startNode(rel) AS s, rel, endNode(rel) AS o
-        RETURN
-            s.name AS subject,
-            coalesce(s.type, "概念") AS subject_type,
-            type(rel) AS rel_type,
-            coalesce(rel.confidence, 1) AS confidence,
-            rel.citations_json AS citations_json,
-            rel.natural_text AS natural_text,
-            o.name AS object,
-            coalesce(o.type, "概念") AS object_type
-        """,
-        kg_id=str(kg_id),
-        seed_entities=seeds,
-    )
+    scoped = bool(scope_doc_ids)
+    scope_ids = [str(d) for d in scope_doc_ids] if scoped else None
+    want_limit = per_seed_limit is not None
 
-    triples: list[SVOTriple] = []
-    for record in result.records:
-        payload = dict(record)
-        citations_json = payload.pop("citations_json", None)
-        citations = json.loads(citations_json) if citations_json else []
-        latest = citations[-1] if citations else {}
-        payload["verb"] = latest.get("verb", payload["rel_type"])
-        payload["source_doc_id"] = UUID(latest["source_doc_id"]) if latest.get("source_doc_id") else None
-        payload["source"] = latest.get("source")
-        payload["source_svo_chunk_index"] = latest.get("source_svo_chunk_index")
-        payload["source_svo_chunk_file"] = latest.get("source_svo_chunk_file")
-        payload["source_sentence_start"] = latest.get("source_sentence_start")
-        payload["source_sentence_end"] = latest.get("source_sentence_end")
-        triples.append(SVOTriple(**payload))
+    params: dict = {"kg_id": str(kg_id), "seed_entities": seeds}
+    if scoped:
+        params["scope_doc_ids"] = scope_ids
+    if want_limit:
+        params["per_seed_limit"] = per_seed_limit
+
+    # L0：先跑 1-hop
+    result = await driver.execute_query(
+        _bfs_pass_cypher(rel_types, 1, 1, scoped=scoped, per_seed_limit=want_limit),
+        **params,
+    )
+    triples = _bfs_records_to_triples(result.records)
+
+    # L1 空結果 fallback：scoped 首趟撈不到 → 改跑無範圍版
+    if scoped and not triples:
+        result = await driver.execute_query(
+            _bfs_pass_cypher(rel_types, 1, 1, scoped=False, per_seed_limit=want_limit),
+            **{k: v for k, v in params.items() if k != "scope_doc_ids"},
+        )
+        triples = _bfs_records_to_triples(result.records)
+        scoped = False  # 擴展趟也不再套範圍，維持一致
+
+    # L0 懶惰擴展：1-hop 不足才補 2..hops
+    if hops >= 2 and len(triples) < expand_when_below:
+        exp_params = {"kg_id": str(kg_id), "seed_entities": seeds}
+        if scoped:
+            exp_params["scope_doc_ids"] = scope_ids
+        if want_limit:
+            exp_params["per_seed_limit"] = per_seed_limit
+        exp = await driver.execute_query(
+            _bfs_pass_cypher(rel_types, 2, hops, scoped=scoped, per_seed_limit=want_limit),
+            **exp_params,
+        )
+        seen = {(t.subject, t.rel_type, t.object) for t in triples}
+        for t in _bfs_records_to_triples(exp.records):
+            key = (t.subject, t.rel_type, t.object)
+            if key not in seen:
+                seen.add(key)
+                triples.append(t)
+
     return triples

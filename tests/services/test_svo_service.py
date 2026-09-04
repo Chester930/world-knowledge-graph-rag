@@ -1844,17 +1844,99 @@ async def test_bfs_query_restricts_traversal_to_svo_rel_types():
     HAS_ENTITY／HAS_SUBJECT／HAS_OBJECT／SUPPORTED_BY 結構性邊時，BFS 可能
     行經這些邊、把 startNode/endNode 解析成沒有 `.name` 的 Chunk／Fact
     節點，導致 `SVOTriple(subject=None)` 驗證失敗直接拋例外（真實對新建立
-    的 3.1.4 驗證 KG 執行時重現過一次，見 docs/報告/15_...md）。"""
+    的 3.1.4 驗證 KG 執行時重現過一次，見 docs/報告/15_...md）。
+
+    報告27（2026-09-04）：`hops` 改為「最大允許跳數」＋懶惰擴展——`records=[]`
+    且 `hops=2` 時會先跑一趟 1-hop、再跑一趟 2..2 擴展，共 2 次查詢；兩趟的
+    走訪型別清單都只能是 SVO_REL_TYPES。無 `scope_doc_ids` 時 `HAS_ENTITY`
+    不應出現在任何一趟（它只在範圍 `EXISTS {}` 子查詢裡）。"""
     driver = FakeDriver(records=[])
 
     await svc.bfs_query(driver, uuid4(), ["A"], hops=2)
 
+    assert len(driver.calls) == 2  # 1-hop + 2..2 懶惰擴展
+    for query, _params in driver.calls:
+        assert "*1..2]" not in query  # 不應該再出現不限關係型別的單趟走訪
+        assert "HAS_ENTITY" not in query  # 未帶 scope_doc_ids，不應有範圍子查詢
+        for rel_type in SVO_REL_TYPES:
+            assert rel_type in query
+    assert "*1..1]" in driver.calls[0][0]  # 首趟固定 1-hop
+    assert "*2..2]" in driver.calls[1][0]  # 擴展趟 2..hops
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_single_hop_no_expansion_when_default():
+    """報告27 L0：預設 `hops=1` 時只跑一趟 1-hop，不做懶惰擴展。"""
+    driver = FakeDriver(records=[])
+    await svc.bfs_query(driver, uuid4(), ["A"])
     assert len(driver.calls) == 1
-    query, _params = driver.calls[0]
-    assert "[*1..2]" not in query  # 不應該再出現不限關係型別的走訪模式
-    assert "HAS_ENTITY" not in query
-    for rel_type in SVO_REL_TYPES:
-        assert rel_type in query
+    assert "*1..1]" in driver.calls[0][0]
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_skips_expansion_when_first_hop_already_rich():
+    """報告27 L0：1-hop 去重後已達門檻（`expand_when_below`）就不擴展。"""
+    records = [
+        FakeRecord(subject=f"S{i}", subject_type="概念", rel_type="CAUSES",
+                   confidence=1, citations_json=None, natural_text=None,
+                   object=f"O{i}", object_type="概念")
+        for i in range(10)
+    ]
+    driver = FakeDriver(records=records)
+    await svc.bfs_query(driver, uuid4(), ["A"], hops=2, expand_when_below=8)
+    assert len(driver.calls) == 1  # 10 ≥ 8，不擴展
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_passes_scope_and_per_seed_limit():
+    """報告27 L1：`scope_doc_ids` 下推為 Cypher `EXISTS {}` 範圍子查詢、
+    `per_seed_limit` 下推為 CALL 子查詢內 LIMIT；參數一併傳入。"""
+    doc_id = uuid4()
+    records = [
+        FakeRecord(subject="S", subject_type="概念", rel_type="CAUSES",
+                   confidence=1, citations_json=None, natural_text=None,
+                   object="O", object_type="概念")
+    ]
+    driver = FakeDriver(records=records)
+    await svc.bfs_query(
+        driver, uuid4(), ["A"], hops=1,
+        scope_doc_ids=[doc_id], per_seed_limit=50,
+    )
+    query, params = driver.calls[0]
+    assert "HAS_ENTITY" in query
+    assert "c.source_doc_id IN $scope_doc_ids" in query
+    assert "LIMIT $per_seed_limit" in query
+    assert params["scope_doc_ids"] == [str(doc_id)]
+    assert params["per_seed_limit"] == 50
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_scope_empty_result_falls_back_to_unscoped():
+    """報告27 L1：scoped 首趟 1-hop 撈不到任何列（例如舊 KG 無 HAS_ENTITY
+    邊）→ 自動改跑無範圍版。"""
+
+    class _ScopedEmptyDriver:
+        def __init__(self):
+            self.calls = []
+
+        async def execute_query(self, query, **params):
+            self.calls.append((query, params))
+            # 帶範圍子查詢的那趟回空，無範圍版回一筆
+            if "HAS_ENTITY" in query:
+                return FakeResult([])
+            return FakeResult([
+                FakeRecord(subject="S", subject_type="概念", rel_type="CAUSES",
+                           confidence=1, citations_json=None, natural_text=None,
+                           object="O", object_type="概念")
+            ])
+
+    driver = _ScopedEmptyDriver()
+    triples = await svc.bfs_query(
+        driver, uuid4(), ["A"], hops=1, scope_doc_ids=[uuid4()],
+    )
+    assert len(triples) == 1
+    assert "HAS_ENTITY" in driver.calls[0][0]       # 首趟 scoped
+    assert "HAS_ENTITY" not in driver.calls[1][0]   # fallback 無範圍
 
 
 # ── trigger_extraction（原 routers/staging.py::_trigger_extraction，遷移自
