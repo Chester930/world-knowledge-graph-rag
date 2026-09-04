@@ -19,14 +19,14 @@ supernode／hub node 的「fanning-out problem」在 GraphRAG 檢索階段的具
 
 ## 內容清單
 
-| 檔案 | 文獻 | 來源 | 狀態 |
-|---|---|---|---|
-| `lau-et-al-2026-catrag-breaking-static-graph.pdf` | Lau, Zhang, Ruan, Zhou, Guo, Zhang & Zhou (2026), *Breaking the Static Graph: Context-Aware Traversal for Robust Retrieval-Augmented Generation*（CatRAG），Findings of ACL 2026 | [arXiv:2602.01965](https://arxiv.org/abs/2602.01965)；[GitHub kwunhang/CatRAG](https://github.com/kwunhang/CatRAG) | 🟢 已下載全文（10 頁）；🟡 待精讀方法章節（symbolic anchoring／query-aware edge weighting） |
+本資料夾**不另存 PDF**——RQ6 的核心文獻（CatRAG／PathRAG／LightRAG／G-Retriever／
+Han 綜述／SAGE）全文皆已收錄於 `02_RAG與GraphRAG/`、`12_三元組事實層級向量化與
+檢索/`、`21_圖遍歷與向量檢索結果融合/`，本節僅記各文獻在 RQ6／報告27 中的角色與
+交叉引用路徑（比照 G-Retriever 收於 `12_`、PathRAG/LightRAG 收於 `02_` 的既有模式）。
 
-**交叉引用（全文收錄於其他資料夾，本節僅記角色）**：
-
-| 文獻 | 資料夾 | 在 RQ6／報告27 中的角色 |
+| 文獻 | 全文位置 | 在 RQ6／報告27 中的角色 |
 |---|---|---|
+| **CatRAG**（Lau, Zhang, Ruan, Zhou, Guo, Zhang & Zhou, 2026，*Breaking the Static Graph: Context-Aware Traversal for Robust RAG*，Findings of ACL 2026，arXiv:2602.01965） | `../02_RAG與GraphRAG/lau-et-al-2026-catrag-static-graph-fallacy.pdf`（2026-08-25 收錄；官方碼 [kwunhang/CatRAG](https://github.com/kwunhang/CatRAG)） | 命名 **「Static Graph Fallacy」**：索引階段固定的轉移機率忽略邊相關性的**查詢相依**本質 → semantic drift，隨機游走被高度數 hub 節點吸走、還沒走到關鍵下游證據就偏航。與報告26 §4 #4「共用實體把 BFS 灌爆、離題事實佔多數」近乎逐字對應。解法：symbolic anchoring ＋ query-aware 動態邊加權 ＋ key-fact passage enhancement，建於 HippoRAG 2 + Personalized PageRank。🟢 全文已收錄；🟡 待精讀方法章節（symbolic anchoring／query-aware edge weighting 的權重公式）。 |
 | **G-Retriever**（He et al., 2024, NeurIPS 2024，arXiv:2402.07630） | `../12_三元組事實層級向量化與檢索/he-et-al-2024-g-retriever.pdf` | 子圖檢索形式化為 PCST（Prize-Collecting Steiner Tree）：node／edge 依查詢相似度給 prize，求最大化 Σprize − Σcost 的連通子圖。**嚴謹上界方法**；報告27 L2 的「向量引導 prize 剪枝」是其扁平化簡化（無 Steiner tree 最佳化、無 GNN），第五章需聲明差距。 |
 | **PathRAG**（Chen et al., 2025，arXiv:2502.14902） | `../02_RAG與GraphRAG/chen-et-al-2025-pathrag.pdf` | 命名「retrieved subgraph 的**冗餘**」為核心問題；flow-based pruning ＋ 只取關鍵關聯路徑不取任意子圖。官方碼 [BUPT-GAMMA/PathRAG](https://github.com/BUPT-GAMMA/PathRAG)。 |
 | **LightRAG**（Guo et al., 2024, EMNLP 2025，arXiv:2410.05779） | `../02_RAG與GraphRAG/guo-et-al-2024-lightrag.pdf` | dual-level 檢索，local 層只取 **one-hop** 鄰居——報告27 L0「`svo_hops` 預設 2→1」的先例。 |
