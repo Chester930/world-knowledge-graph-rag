@@ -46,3 +46,6 @@ registry.json
 # OS
 .DS_Store
 Thumbs.db
+
+# 抽取任務佇列（執行期 SQLite，非原始碼）
+task_queue.db
