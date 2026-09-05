@@ -30,7 +30,8 @@
 | `21_圖遍歷與向量檢索結果融合/` | `docs/報告/25_擴大版新舊KG問答品質比對報告.md` § 4 發現6；03_系統設計與方法論.md § 3.6（`_arrange_fact_lines()` v2） | ✅ 機制已實作（報告25 §6 ⑤）；🟢 已下載精讀 RRF（Cormack et al. 2009, SIGIR，2 頁完整論文）、已下載 Han et al. GraphRAG 綜述（2501.00309，待精讀鄰居爆炸段落）；🟡 SAGE（2602.16964）、PhaseGraph/Calibrated Fusion（2603.28886）摘要已查證 |
 | `22_生成端過度保守與選擇性拒答/` | `docs/報告/25_擴大版新舊KG問答品質比對報告.md` § 4 發現2／§6 ⑥；03_系統設計與方法論.md § 3.6（`verify_fact_grounding()` 的 `is_claim` 三分類、限制性重生成觸發條件） | ✅ 2a 機制已實作（報告25 §6 ⑥）；🟢 已下載精讀 Context-faithful Prompting（Zhou et al. 2023, EMNLP Findings，含小模型反效果警示）；🟡 RefusalBench（2510.10390）已下載待精讀；"Not All Needles Are Found"（2601.02023）、Copy-Paste（2510.00508）搜尋層級 |
 | `23_複合問題分解與自相矛盾修正/` | `docs/報告/28_複合問題子問題分解機制設計與實作報告.md`（報告26 §4 #2 修法：`_split_into_subquestions()`／`_generate_decomposed_answer()`） | ✅ 機制已實作（報告28，真實驗證 6/6 無重現）；🟢 已下載精讀 Least-to-Most（Zhou et al. 2023, ICLR）、Self-Ask（Press et al. 2022，compositionality gap） |
-| `24_短語模糊合併與否定範圍偵測/` | `docs/論文/02_文獻探討.md` § 2.4.5（RQ4b，`resolve_entity_name()` 模糊合併守衛文獻定位）；`03_系統設計與方法論.md` § 3.4 `DEDUP4`／`GUARD4`；報告25 §4 發現3／發現C（真實案例） | 🟡 設計討論中，機制未實作；🟢 已下載精讀 Mrkšić et al. (2016)、Tosun et al. (2026)；⚠️ Chapman et al. (2001) NegEx 付費牆，僅摘要層級 |
+| `24_短語模糊合併與否定範圍偵測/` | `docs/論文/02_文獻探討.md` § 2.4.5（RQ4b，`resolve_entity_name()` 模糊合併守衛文獻定位）；`03_系統設計與方法論.md` § 3.4 `DEDUP4`／`GUARD4`；報告25 §4 發現3／發現C（真實案例）；報告29（正式設計，數字比較詞子機制已實作+真實驗證，範圍修飾詞子機制設計已定案待抽取端凍結後實作） | ✅ 數字比較詞守衛（`_RANGE_COMPARATOR_PATTERN`）已實作＋端到端驗證通過（commit `df2bc62`）；🟡 範圍修飾詞守衛設計已定案，程式碼未實作；🟢 已下載精讀 Mrkšić et al. (2016)、Tosun et al. (2026)、Chapman et al. (2001) NegEx（作者官方存檔全文） |
+| `25_三元組自然語言化遺漏偵測/` | `docs/報告/26_修正後瓶頸探測問答比對報告.md` § 4 #6（自然語言化小失真真實案例）；`services/svo_service.py::_naturalize_triple()`（報告24 機制） | 🟡 討論中，機制未實作；🟢 已下載精讀 FABLES（Kim et al. 2024, COLM，遺漏錯誤分類法）、RHO（Ji et al. 2023, ACL Findings，Entity Coverage Recall 框架）；交叉引用已下載的 KAPING（`12_`） |
 
 ## 01_AGI與智慧定義 內容清單
 
