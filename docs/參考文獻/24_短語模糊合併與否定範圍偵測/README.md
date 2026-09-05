@@ -12,9 +12,10 @@
 - **量詞類**（發現3）：`新臺幣四千元` vs `新臺幣八千元`，`_edit_ratio`＝0.833；`五日`
   vs `十日`；`三十日以上` vs `未滿三十日`。已用 `_QUANTITY_PATTERN`／`_MEASURE_PATTERN`
   守衛攔截（數字＋單位樣式命中即跳過模糊比對）。
-- **範圍修飾詞類**（尚未涵蓋，設計討論中）：`每一型式` vs `每增加一種型式`，
-  `_edit_ratio`＝0.727，**不含任何數字**，現行守衛的樣式規則抓不到——「增加」這個
-  詞把「基礎量」改成「遞增量」，語意相反但表面極相似。
+- **範圍修飾詞類**（設計已提案，尚未實作——見 `docs/報告/29_實體模糊合併範圍修飾詞守衛設計報告.md`）：
+  `每一型式` vs `每增加一種型式`，`_edit_ratio`＝0.727，**不含任何數字**，
+  現行守衛的樣式規則抓不到——「增加」這個詞把「基礎量」改成「遞增量」，
+  語意相反但表面極相似。
 
 ## 內容清單
 
@@ -22,7 +23,7 @@
 |---|---|---|---|
 | `mrksic-et-al-2016-counter-fitting.pdf` | Mrkšić, Ó Séaghdha, Thomson, Gašić, Rojas-Barahona, Su, Vandyke, Wen & Young (2016), *Counter-fitting Word Vectors to Linguistic Constraints*，ACL 2016 | [arXiv:1603.00892](https://arxiv.org/abs/1603.00892)；[GitHub nmrksic/counter-fitting](https://github.com/nmrksic/counter-fitting) | ✅ 已下載全文（7 頁） |
 | `tosun-et-al-2026-antonym-intrusion-synonym-graph.pdf` | Tosun, Buldur, Ezerceli & ElHussieni (2026), *Beyond Cosine Similarity: Taming Semantic Drift and Antonym Intrusion in a 15-Million Node Turkish Synonym Graph* | [arXiv:2601.13251](https://arxiv.org/abs/2601.13251) | ✅ 已下載全文（11 頁） |
-| （未下載）Chapman, Bridewell, Hanbury, Cooper & Buchanan (2001), *A Simple Algorithm for Identifying Negated Findings and Diseases in Discharge Summaries*（**NegEx**），*Journal of Biomedical Informatics* 34, 301-310 | [ScienceDirect](https://www.sciencedirect.com/science/article/pii/S1532046401910299) | ⚠️ 付費牆（ScienceDirect），查無合法免費全文（ResearchGate／Academia.edu 為第三方上傳、非本專案慣例採用來源），僅依 WebSearch 查得之摘要與量化結果（specificity 85.3%→94.5%、PPV 68.4%→84.5%）引用，比照 Fellegi & Sunter (1969) 的既有處理慣例 |
+| `chapman-et-al-2001-negex.pdf` | Chapman, Bridewell, Hanbury, Cooper & Buchanan (2001), *A Simple Algorithm for Identifying Negated Findings and Diseases in Discharge Summaries*（**NegEx**），*Journal of Biomedical Informatics* 34, 301-310 | [ScienceDirect](https://www.sciencedirect.com/science/article/pii/S1532046401910299)；全文取自共同作者 [Will Bridewell 官方主頁存檔](https://paravidya.com/publication/jbi2001/jbi2001.pdf)（非第三方轉載） | ✅ 已下載全文（2026-09-05，13頁），已精讀 |
 
 ## 各文獻在本設計中的角色
 
@@ -44,14 +45,27 @@ depression"）。解法：語義關係分類器（同義/反義/共下位詞三�
 拓撲感知的軟到硬剪枝。**證實這是 2026 年現行研究問題**，但需要訓練分類器，
 規模遠超本專案（64 份文件、量詞短語級別）需求，僅作問題真實性與嚴重性佐證。
 
-### 3. Chapman et al. (2001, NegEx) —— 支持「規則式路線」的關鍵先例
+### 3. Chapman et al. (2001, NegEx) —— 支持「規則式路線」的關鍵先例（2026-09-05 全文精讀）
 
-臨床文本否定語意偵測，用**簡單觸發詞清單 + 正規表示式**（非訓練模型），在
-1235 個真實案例測試中把精確率從 68.4%（baseline）提升到 84.5%，特異度
-85.3%→94.5%。證實「觸發詞表 + regex」這種輕量規則法在「否定/範圍修飾詞
-偵測」這類問題上有實證效果，是本論文選擇延伸 `_QUANTITY_PATTERN`／
-`_MEASURE_PATTERN` 既有架構（而非訓練分類器）處理範圍修飾詞類別的方法論
-依據。
+臨床文本否定語意偵測，用**簡單觸發詞清單 + 正規表示式**（非訓練模型）。
+1000 句出院病摘（1235 個 UMLS 詞次）測試中，NegEx 對比 baseline：
+specificity 85.27%→94.51%、PPV 68.42%→84.49%（sensitivity/NPV 略降，
+77.84% vs 88.27%、91.73% vs 93.01%，作者判斷為可接受取捨）。
+
+全文精讀後，兩個設計細節與本論文的範圍修飾詞守衛直接相關：
+
+- **觸發詞分兩類**——「偽否定詞」（pseudo-negation，如 `no further`／
+  `gram negative`，表面像否定詞但不是）與「真否定詞」，且真否定詞再依
+  「詞在前」（`no` * `UMLS詞`）／「詞在後」（`UMLS詞` * `without`）分兩條
+  正規表示式，**中間允許 0–5 個詞的間隔**。本論文 `_SCOPE_MODIFIER_PATTERN`
+  目前只做「詞是否出現在候選字串中」的整體比對（無此間隔窗口設計），是
+  比 NegEx 更簡化的版本——因為本專案的候選字串本身就是短法律語素（通常
+  5-10字），不像臨床病歷句子需要在長句中定位觸發詞與目標詞的相對位置。
+- 論文誠實列出失敗案例（如「hepatitis」在「Hepatitis A negative」誤判、
+  「versus」PPV僅0%）並提出後續應對——這種「規則清單非窮盡、依真實案例
+  逐步擴充」的立場，與本論文 `_QUANTITY_PATTERN`→`_MEASURE_PATTERN`→
+  `_SCOPE_MODIFIER_PATTERN` 的擴充脈絡一致，是選擇規則式路線（而非訓練
+  分類器）時參考的既有先例，而非本論文守衛規則本身的直接來源。
 
 ## 誠實聲明
 
@@ -62,6 +76,6 @@ depression"）。解法：語義關係分類器（同義/反義/共下位詞三�
 
 ## 尚未查證／待辦
 
-- [ ] NegEx 全文若後續找到合法免費來源（例如作者機構典藏），應補下載精讀。
-- [ ] 範圍修飾詞守衛（增加／額外／再／又／另等）本身尚未實作，設計討論中——
-      若實作，另立報告記錄（比照報告27/28 的模式）。
+- [x] NegEx 全文合法免費來源已找到並精讀（2026-09-05，共同作者官方主頁存檔）。
+- [ ] 範圍修飾詞守衛（`_SCOPE_MODIFIER_PATTERN`：增加／額外／追加／新增）設計已定案
+      （見報告29），程式碼尚未實作——需等 c15949bf 全量重抽完成、抽取端凍結後才動。
