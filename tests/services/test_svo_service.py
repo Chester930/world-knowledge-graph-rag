@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from uuid import uuid4
 
@@ -11,6 +12,24 @@ from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
 from services.svo_chunking import SVOChunk
+
+
+@pytest.fixture(autouse=True)
+def _clear_type_description_embedding_cache():
+    """2026-09-05 修正（既有測試隔離缺口）：`svc._TYPE_DESCRIPTION_EMBEDDING_
+    CACHE` 依 `embedding_provider.model_name` 為 key，正式環境沒問題（同一顆
+    真實模型的型別描述向量固定不變）。但本檔案的 `FakeEmbedding.model_name`
+    對所有測試實例都回傳同一個固定字串 `"fake-embedding"`，而每個實例的
+    「字串→正交基底向量」映射其實各自獨立（依各自的呼叫順序分配）——導致
+    先跑的測試把它那個實例算出的型別描述向量快取住，後跑的測試（用另一個
+    `FakeEmbedding()` 實例）誤用到不屬於自己的快取向量，`classify_relation_
+    by_embedding()` 的比對結果因而跨測試漂移（真實 debug 案例：新增一支
+    `extract_svo_triples` 測試後，另一支完全不相干的 completeness-check 測試
+    開始斷言失敗，只在整檔一起跑才重現，單獨跑則通過）。每個測試前清掉這顆
+    快取，讓各測試的 `FakeEmbedding()` 都從乾淨狀態重新計算。"""
+    svc._TYPE_DESCRIPTION_EMBEDDING_CACHE.clear()
+    yield
+    svc._TYPE_DESCRIPTION_EMBEDDING_CACHE.clear()
 
 
 class FakeLLM:
@@ -254,6 +273,37 @@ async def test_extract_svo_triples_parses_valid_json_and_downgrades_invalid_rel_
     assert triples[1].rel_type == "RELATED_TO"
     assert triples[1].verb == "關係"
     assert "合法 rel_type" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_discard_log_redacts_verb_embedding(caplog):
+    """2026-09-05 修正：格式不合法的三元組被捨棄時，`RELATED_TO` 兜底已經
+    幫它加上 `verb_embedding`（384/8維浮點陣列）——原樣 `%r` 記錄會把整條
+    向量印進 log、真實批次重抽時發現會灌爆日誌檔。記錄前應換成長度摘要，
+    不能出現原始浮點數字串。
+
+    ⚠️ verb 刻意用本檔案其他測試沒用過的字串（非「導致」）——`_reconcile_
+    rel_type()` 的 SIM/ESCALATE3 機制有以 verb 文字為 key 的既有快取/學習
+    狀態，同一 verb 被不同測試重複使用會讓呼叫次數等斷言跨測試互相汙染
+    （2026-09-05 debug 過程真實踩到：與另一支用「導致」的測試撞在一起，
+    多觸發一次 escalation LLM 呼叫）。這是既有機制的測試隔離缺口，不在
+    本次修正範圍內，這裡只是避開撞名。"""
+    llm = FakeLLM("""
+    {"triples":[
+      {"subject":["不合法的陣列"],"rel_type":"RELATED_TO","verb":"促成該情況","object":"B","confidence":3}
+    ]}
+    """)
+    embedding = FakeEmbedding()
+
+    with caplog.at_level(logging.WARNING):
+        triples = await svc.extract_svo_triples("測試句子。", llm, embedding)
+
+    assert triples == []  # 格式不合法，整條被捨棄
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "已捨棄" in message
+    assert "<embedding len=8>" in message
+    assert "0.0" not in message  # 不應出現原始浮點數字串
 
 
 @pytest.mark.asyncio
