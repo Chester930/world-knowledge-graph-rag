@@ -355,6 +355,62 @@ async def test_build_constrained_prompt_arranges_fact_lines_and_instructs_checki
     assert "逐條檢視" in prompt
 
 
+# ── _split_into_subquestions／_generate_decomposed_answer：報告27 C#2 M1
+# （2026-09-04，規則式問題分解，避免複合問題單次生成內跨子答案自我矛盾）──
+
+def test_split_into_subquestions_splits_on_multiple_question_marks():
+    q = "連續僱用滿多久才能申請獎勵金？獎勵金最多發給幾個月？應在幾日內申請？"
+    parts = agent._split_into_subquestions(q)
+    assert parts == [
+        "連續僱用滿多久才能申請獎勵金？",
+        "獎勵金最多發給幾個月？",
+        "應在幾日內申請？",
+    ]
+
+
+def test_split_into_subquestions_single_question_mark_stays_whole():
+    q = "婚假可以請幾天？"
+    assert agent._split_into_subquestions(q) == [q]
+
+
+def test_split_into_subquestions_no_question_mark_stays_whole():
+    q = "請說明婚假天數"
+    assert agent._split_into_subquestions(q) == [q]
+
+
+def test_split_into_subquestions_caps_at_max_subquestions():
+    q = "".join(f"第{i}問？" for i in range(10))
+    parts = agent._split_into_subquestions(q)
+    assert len(parts) == agent._MAX_SUBQUESTIONS
+
+
+def test_split_into_subquestions_ascii_question_mark_also_splits():
+    q = "第一問?第二問?"
+    assert agent._split_into_subquestions(q) == ["第一問?", "第二問?"]
+
+
+@pytest.mark.asyncio
+async def test_generate_decomposed_answer_calls_llm_once_per_subquestion_and_numbers_output():
+    sub_questions = ["連續僱用滿多久才能申請獎勵金？", "獎勵金最多發給幾個月？"]
+    triples = [_triple("優先僱用", "RELATED_TO", "連續三個月", verb="須")]
+    llm = _FakeStreamLLM(answers=["連續三個月。", "以三個月為限。"])
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    answer = await agent._generate_decomposed_answer(
+        sub_questions, triples, [],
+        embedding_provider=embedding, question_vector=None, llm_provider=llm,
+    )
+
+    assert len(llm.prompts) == 2  # 每個子問題各一次生成呼叫
+    assert "1. 連續僱用滿多久才能申請獎勵金？\n連續三個月。" in answer
+    assert "2. 獎勵金最多發給幾個月？\n以三個月為限。" in answer
+    # 每個子問題各自的 prompt 都要看得到完整事實清單（不重新檢索、只是各自
+    # 獨立生成），且子問題彼此的 prompt 不互相夾帶對方的問句文字。
+    assert "優先僱用 須 連續三個月" in llm.prompts[0]
+    assert "優先僱用 須 連續三個月" in llm.prompts[1]
+    assert "獎勵金最多發給幾個月" not in llm.prompts[0]
+
+
 # ── chat()：驗證語意 Fact 檢索確實接線（2026-08-18）─────────────────────────
 
 class _FakeEmbeddingProvider:
@@ -1224,6 +1280,46 @@ def _chat_common_monkeypatch(monkeypatch, llm, embedding, *, triples=None, facts
 
 
 @pytest.mark.asyncio
+async def test_chat_decomposes_compound_question_into_isolated_generation_calls(monkeypatch):
+    """報告27 C#2 M1：複合問題（≥2 個句末問號）且有檢索到事實時，`chat()`
+    應改用 `_generate_decomposed_answer()`——每個子問題各自一次生成呼叫，
+    取代原本的單次生成。最終送給使用者的 `data:` token 是組裝後的完整文字。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "連續僱用滿三個月得申請獎勵金", "subject": "連續僱用",
+              "rel_type": "RELATED_TO", "object": "三個月"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(answers=["連續三個月。", "以三個月為限。"])
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    payload = ChatRequest(question="連續僱用滿多久才能申請獎勵金？獎勵金最多發給幾個月？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    assert len(llm.prompts) == 2  # 兩個子問題各自獨立生成，非單次生成
+    data_chunk = next(c for c in chunks if c.startswith("data: ") and "token" in c)
+    token = json.loads(data_chunk[len("data: "):])["token"]
+    assert "連續三個月。" in token
+    assert "以三個月為限。" in token
+
+
+@pytest.mark.asyncio
+async def test_chat_single_question_mark_uses_single_generation_call(monkeypatch):
+    """非複合問題（單一句末問號）行為與 M1 修改前完全一致——只呼叫一次生成，
+    不觸發 `_generate_decomposed_answer()`。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY", "object": "八日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(answers=["婚假為八日。"])
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    payload = ChatRequest(question="婚假幾天？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    await _drain(response)
+
+    assert len(llm.prompts) == 1
+
+
+@pytest.mark.asyncio
 async def test_chat_no_regeneration_when_fully_grounded(monkeypatch):
     """全部陳述句皆接地時，不應該多花一次 LLM 呼叫重新生成——這是方案 B
     刻意設計的成本控制（見 chat() docstring：只有真的抓到未接地內容才多付
@@ -1291,6 +1387,38 @@ async def test_chat_regenerates_with_constrained_prompt_when_ungrounded(monkeypa
     grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
     grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
     assert grounding_data[0]["supported"] is True  # 反映修正版，非草稿的核對結果
+
+
+@pytest.mark.asyncio
+async def test_chat_decomposed_regeneration_keeps_subquestion_structure_when_ungrounded(monkeypatch):
+    """報告27 C#2 M1（2026-09-05 修正）：複合問題的草稿被判未接地時，限制性
+    重新生成也要保留分解結構——逐子問題各自重生（各一次 `stream()` 呼叫），
+    而非退回單次生成整個複合問題。這曾是真實測出的 bug：重生路徑漏接分解，
+    見 `_generate_decomposed_constrained_answer()` docstring。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "連續僱用滿三個月得申請獎勵金", "subject": "連續僱用",
+              "rel_type": "RELATED_TO", "object": "三個月"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["亂猜的答案一。", "亂猜的答案二。", "資料未明確記載，無法確認。", "以三個月為限。"],
+        grounding_payloads=[
+            json.dumps({"claims": [{"statement": "亂猜的答案一。", "supported": False, "reason": "查無依據"}]}),
+            json.dumps({"claims": [{"statement": "以三個月為限。", "supported": True, "reason": ""}]}),
+        ],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    payload = ChatRequest(question="連續僱用滿多久才能申請獎勵金？獎勵金最多發給幾個月？", kg_id=kg_id)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    # 草稿：每子問題各一次 stream() 呼叫（2）＋重生：每子問題各一次（2）＝4。
+    assert len(llm.prompts) == 4
+    data_chunk = next(c for c in chunks if c.startswith("data: ") and "token" in c)
+    token = json.loads(data_chunk[len("data: "):])["token"]
+    assert "資料未明確記載，無法確認。" in token
+    assert "以三個月為限。" in token
+    assert "亂猜的答案" not in token  # 使用者最終看到的是重生版，非未接地草稿
 
 
 @pytest.mark.asyncio

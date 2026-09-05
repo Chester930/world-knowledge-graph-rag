@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 from neo4j import AsyncDriver
 
 from core.database import get_driver
-from core.providers.base import EmbeddingProvider
+from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
@@ -582,6 +582,111 @@ async def _arrange_fact_lines(
     return _litm_reorder(_rrf_order(sem_ranked, bfs_ranked, kept))
 
 
+# 報告27 C#2 M1（2026-09-04）：複合問題的子問題數上限——極端情況（問題本文
+# 混進大量問號，例如貼上一整段條文）防止炸開過多次獨立生成呼叫。
+_MAX_SUBQUESTIONS = 6
+
+
+def _split_into_subquestions(question: str) -> list[str]:
+    """規則式問題分解，按句末問號切分複合問題成獨立子問題——報告26 §4 #2
+    真實案例：`qwen2.5:7b` 對「連續僱用滿多久…？獎勵金最多發給幾個月？…
+    分別完成報備與申請？」這類 3 個「？」的複合問題單次生成時，會在回答
+    第 3 點正確引用某條事實後，收尾摘要卻自我矛盾地說該事實「未記載」
+    （報告27 C#2 前置查證，2026-09-04：4 次真實呼叫重現 1 次，3 次乾淨）。
+
+    ✅ **零額外 LLM 呼叫的簡化設計**：Least-to-Most Prompting（Zhou et al.,
+    ICLR 2023，arXiv:2205.10625）與 Self-Ask（Press et al., 2022，
+    arXiv:2210.03350）皆用 LLM 做問題分解、且子答案**循序依賴**（後一題的
+    解答建立在前一題答案之上）。本專案的子問題彼此**獨立**——`_build_prompt()`
+    已把完整事實清單一次餵給每個子問題，不需要「上一子問題答案」當輸入，
+    也就不需要文獻裡的循序求解機制，改用最簡單的規則式分句取代其「分解」
+    階段：中文問句以「？」／「?」結尾這個慣例本身就是現成的子問題邊界，
+    不必另花一次 LLM 呼叫做語意分解。
+
+    只有 ≥2 個非空子句時才視為複合問題，否則原樣回傳 `[question]`
+    （單一問題行為完全不變，不觸發下方 `_generate_decomposed_answer()`）。
+    """
+    parts = re.split(r"([？?])", question)
+    segments: list[str] = []
+    for i in range(0, len(parts) - 1, 2):
+        text = parts[i].strip()
+        if text:
+            segments.append(text + parts[i + 1])
+    if len(parts) % 2 == 1:
+        trailing = parts[-1].strip()
+        if trailing:
+            segments.append(trailing)
+    if len(segments) < 2:
+        return [question]
+    return segments[:_MAX_SUBQUESTIONS]
+
+
+async def _generate_decomposed_answer(
+    sub_questions: list[str],
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None,
+    llm_provider: LLMProvider,
+) -> str:
+    """報告27 C#2 M1：每個子問題各自獨立生成一次完整答案（同一份已檢索事實
+    清單、不重新檢索），彼此在生成當下互相看不到——這正是避免「回答子問題
+    A 時看到子問題 B 已寫的內容、進而互相汙染／矛盾」的機制核心（單次生成
+    處理複合問題時，模型會在同一段輸出裡前後不一致，見上方 docstring 的
+    真實案例）。依原問題的子問題順序組裝，不做額外的整合式摘要 LLM 呼叫
+    （省一次呼叫；子答案已依原順序編號，可讀性足夠）。
+
+    ⚠️ **成本**：N 個子問題 = N 次完整生成呼叫，取代原本 1 次——本專案的
+    子問題數通常 2-4（報告26 Q3 為 3），生成端延遲會相應增加，換取正確性。
+    下游的 `verify_fact_grounding()`／限制性重新生成沿用既有機制，對組裝後
+    的完整文字整體核對一次，不逐子答案核對（維持既有接地核對介面不變）。
+    """
+    parts: list[str] = []
+    for i, sub_q in enumerate(sub_questions, start=1):
+        sub_prompt = await _build_prompt(
+            sub_q, triples, fact_results, history=None,
+            embedding_provider=embedding_provider, question_vector=question_vector,
+        )
+        tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
+        answer = "".join(tokens).strip()
+        parts.append(f"{i}. {sub_q}\n{answer}")
+    return "\n\n".join(parts)
+
+
+async def _generate_decomposed_constrained_answer(
+    sub_questions: list[str],
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None,
+    llm_provider: LLMProvider,
+) -> str:
+    """`_generate_decomposed_answer()` 的限制性重新生成版本——方案B（見
+    `_build_constrained_prompt()` docstring）判定草稿有未接地陳述、需要重新
+    生成時，若草稿本身是分解出來的，修正版**也要保留分解結構**，逐子問題
+    各自用 `_build_constrained_prompt()` 重生一次。
+
+    ⚠️ **2026-09-05 真實測試抓到的 bug**：`chat()` 原本不分這個情況，一律用
+    `_build_constrained_prompt(payload.question, ...)` 對整個複合問題單次
+    重新生成——一旦接地核對觸發重生（`qwen2.5:7b` 非決定性下常發生），
+    分解機制在最需要它的路徑上完全失效，退回報告26 §4 #2 原本的失效模式
+    （真實輸出：修正版格式跟分解草稿不一致、多個子答案內容混在一起）。
+    此函式修正這個缺口，讓重生路徑跟草稿路徑用同一套分解結構。
+    """
+    parts: list[str] = []
+    for i, sub_q in enumerate(sub_questions, start=1):
+        sub_prompt = await _build_constrained_prompt(
+            sub_q, triples, fact_results, history=None,
+            embedding_provider=embedding_provider, question_vector=question_vector,
+        )
+        tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
+        answer = "".join(tokens).strip()
+        parts.append(f"{i}. {sub_q}\n{answer}")
+    return "\n\n".join(parts)
+
+
 async def _build_prompt(
     question: str,
     triples: list[SVOTriple],
@@ -603,6 +708,13 @@ async def _build_prompt(
             "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，"
             "但務必清楚區分哪些是根據圖譜事實、哪些是你自己的補充。"
             "回答前請逐條檢視上方事實清單中每一項，判斷是否與問題相關，不要遺漏任何一項可用的事實。"
+            # 報告27 C#2 M0（2026-09-04）：真實案例（報告26 §4 #2、報告27 §C2
+            # 前置查證）發現模型會在回答的某一部分正確引用某條事實，卻在收尾
+            # 摘要時又說該事實「未記載／無法確認」，自我矛盾——多半發生於
+            # 事實清單裡有多條「形狀相近」（同單位數字、同類期限）的事實時。
+            "若你在回答的任何一部分已經引用某條事實作答，後面的摘要或結論"
+            "不可以再說這項資訊「未記載」或「無法確認」——同一份事實清單內，"
+            "已經用過的事實視為確定可用，前後結論必須一致。"
         )
     else:
         context_block = ""
@@ -682,6 +794,7 @@ async def _build_constrained_prompt(
 1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。
 2. 若事實清單不足以完整回答問題的某個部分，該部分請回答「資料未明確記載，無法確認」，並簡短說明具體是哪個部分找不到依據（例如：「事實清單中沒有提到婚假的天數」），不要臆測或用自己的知識填補。
 3. 回答前請逐條檢視上方事實清單中每一項，確認是否有跟問題相關卻被你遺漏的事實——事實清單已依與問題的相關性排序，最相關的通常在清單前段。
+4. 若你在回答的任何一部分已經引用某條事實作答，後面的摘要或結論不可以再說這項資訊「未記載」或「無法確認」——同一份事實清單內，已經用過的事實視為確定可用，前後結論必須一致。
 """
 
 
@@ -798,18 +911,32 @@ async def chat(payload: ChatRequest):
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
             fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
 
-        prompt = await _build_prompt(
-            payload.question, triples, fact_results, payload.history,
-            embedding_provider=embedding_provider, question_vector=question_vector,
-        )
+        # 報告27 C#2 M1（2026-09-04）：複合問題（句末問號 ≥2）先按規則拆成獨立
+        # 子問題，各自對同一份事實清單生成答案，避免單次生成內跨子答案互相
+        # 汙染／矛盾（見 `_split_into_subquestions()` docstring 的真實案例）。
+        # `payload.use_svo=False` 或檢索為空時沒有事實清單可分工，維持原單次
+        # 生成路徑；`_split_into_subquestions()` 對非複合問題原樣回傳單元素
+        # 清單，行為與修改前完全一致。
+        sub_questions = _split_into_subquestions(payload.question)
 
-        # 方案 B：不逐 token 即時轉發第一版草稿——先在背後生成完整答案，
-        # 核對過（必要時重新生成）才把最終版本送給使用者（見上方 docstring）。
         yield f"event: status\ndata: {json.dumps({'phase': 'generating'})}\n\n"
-        draft_parts: list[str] = []
-        async for token in llm_provider.stream(prompt):
-            draft_parts.append(token)
-        draft_answer = "".join(draft_parts)
+        if payload.use_svo and len(sub_questions) > 1 and (triples or fact_results):
+            draft_answer = await _generate_decomposed_answer(
+                sub_questions, triples, fact_results,
+                embedding_provider=embedding_provider, question_vector=question_vector,
+                llm_provider=llm_provider,
+            )
+        else:
+            prompt = await _build_prompt(
+                payload.question, triples, fact_results, payload.history,
+                embedding_provider=embedding_provider, question_vector=question_vector,
+            )
+            # 方案 B：不逐 token 即時轉發第一版草稿——先在背後生成完整答案，
+            # 核對過（必要時重新生成）才把最終版本送給使用者（見上方 docstring）。
+            draft_parts: list[str] = []
+            async for token in llm_provider.stream(prompt):
+                draft_parts.append(token)
+            draft_answer = "".join(draft_parts)
 
         # 核對範圍須與 `_build_prompt()` 實際餵給生成模型的 context 一致
         # （`_merge_fact_lines()` 合併後的 BFS 三元組＋語意 Fact），只用
@@ -840,17 +967,27 @@ async def chat(payload: ChatRequest):
         # is_claim` docstring。
         ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
         if payload.use_svo and ungrounded_claims:
-            # 刻意不把草稿或未接地陳述傳進去——見 _build_constrained_prompt()
-            # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
-            # 草稿會傾向重複草稿裡的錯誤內容）。
-            constrained_prompt = await _build_constrained_prompt(
-                payload.question, triples, fact_results, payload.history,
-                embedding_provider=embedding_provider, question_vector=question_vector,
-            )
-            corrected_parts: list[str] = []
-            async for token in llm_provider.stream(constrained_prompt):
-                corrected_parts.append(token)
-            final_answer = "".join(corrected_parts)
+            # 報告27 C#2 M1（2026-09-05）：重生路徑也要保留分解結構，否則退回
+            # 單次生成整個複合問題、抵銷分解本身的效果（見
+            # `_generate_decomposed_constrained_answer()` docstring 的真實 bug 案例）。
+            if len(sub_questions) > 1 and (triples or fact_results):
+                final_answer = await _generate_decomposed_constrained_answer(
+                    sub_questions, triples, fact_results,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    llm_provider=llm_provider,
+                )
+            else:
+                # 刻意不把草稿或未接地陳述傳進去——見 _build_constrained_prompt()
+                # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
+                # 草稿會傾向重複草稿裡的錯誤內容）。
+                constrained_prompt = await _build_constrained_prompt(
+                    payload.question, triples, fact_results, payload.history,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                )
+                corrected_parts: list[str] = []
+                async for token in llm_provider.stream(constrained_prompt):
+                    corrected_parts.append(token)
+                final_answer = "".join(corrected_parts)
             regenerated = True
             # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
             # 而非已經被取代的草稿。
