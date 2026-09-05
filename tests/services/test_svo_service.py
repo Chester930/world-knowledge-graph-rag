@@ -1319,6 +1319,43 @@ def test_measure_pattern_is_superset_of_quantity_pattern_units():
 
 
 @pytest.mark.asyncio
+async def test_resolve_entity_name_range_comparator_no_fuzzy_merge():
+    """報告29 §2.4／§4.3（報告26 §4 #3 Q8 真實根因診斷）：容許濃度變量係數表
+    5 段主詞（`未滿 1 的容許濃度`／`1 以上，未滿 10 的容許濃度`／`10 以上，
+    未滿 100 的容許濃度`／`100 以上，未滿 1000 的容許濃度`／`1000 以上的
+    容許濃度`）共用長共同子字串、`_edit_ratio` 必然超過門檻，但數字後面接的
+    是「以上」「未滿」「的容許濃度」，不是 `_MEASURE_PATTERN` 認得的單位，
+    舊守衛完全抓不到——真實案例中這 5 段被合併成 2 個節點，其中一個同時掛
+    3 個矛盾的變量係數值（Q8 需要的「1以上未滿10→2」從圖中消失）。含
+    「數字＋以上/以下/以內/未滿/超過」的名稱一律回傳原名，不做模糊合併。"""
+    cands = [{"name": "100 以上，未滿 1000 的容許濃度", "alias_counts_json": "{}"}]
+    assert await svc.resolve_entity_name(
+        "10 以上，未滿 100 的容許濃度", cands,
+    ) == "10 以上，未滿 100 的容許濃度"
+    assert await svc.resolve_entity_name(
+        "1 以上，未滿 10 的容許濃度", cands,
+    ) == "1 以上，未滿 10 的容許濃度"
+    assert await svc.resolve_entity_name(
+        "未滿 1 的容許濃度", cands,
+    ) == "未滿 1 的容許濃度"
+    assert await svc.resolve_entity_name(
+        "1000 以上的容許濃度", cands,
+    ) == "1000 以上的容許濃度"
+
+
+def test_range_comparator_pattern_matches_bare_number_comparisons():
+    """`_RANGE_COMPARATOR_PATTERN` 抓裸數字（無單位）緊鄰以上/以下/以內/
+    未滿/超過；跟 `_MEASURE_PATTERN` 疊加用 `or`，互補不取代。"""
+    for s in ["1000 以上的容許濃度", "未滿 1 的容許濃度",
+              "1 以上，未滿 10 的容許濃度", "10 以上，未滿 100 的容許濃度",
+              "100 以上，未滿 1000 的容許濃度", "5 以下", "超過 20"]:
+        assert svc._RANGE_COMPARATOR_PATTERN.search(s)
+    # 無比較詞或無數字的一般名稱不應誤觸發
+    for s in ["三十日", "台積電公司", "第三款"]:
+        assert svc._RANGE_COMPARATOR_PATTERN.search(s) is None
+
+
+@pytest.mark.asyncio
 async def test_resolve_entity_name_picks_best_edit_ratio_match_not_first():
     """迴歸測試（2026-08-19 真實審查發現並修復）：`_fetch_entity_candidates()`
     的 Cypher 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性；原本的編輯距離比對

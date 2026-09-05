@@ -530,6 +530,22 @@ _MEASURE_PATTERN = re.compile(
     r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍|歲|人|名|週|度|種|類|條|款|項|點)"
 )
 
+# 裸數字（無須接單位）緊鄰「以上／以下／以內／未滿／超過」的比較句式偵測
+# （報告29 §2.4／§4.3，2026-09-05，報告26 §4 #3 Q8 真實根因診斷）。法規門檻／
+# 級距表（變量係數表、罰鍰級距等）常見寫法如「1 以上，未滿 10」「100 以上，
+# 未滿 1000」——數字後面接的是比較詞而非 `_MEASURE_PATTERN` 認得的單位，
+# 結構上抓不到，導致整段級距表在 `resolve_entity_name()` 被模糊合併壞（真實
+# 案例：N0060004 容許暴露標準變量係數表 5 段被併成 2 個節點，其中一個同時
+# 掛 3 個互相矛盾的係數值，Q8 需要的「1以上未滿10→2」完全從圖中消失）。
+# 跟 `_MEASURE_PATTERN` 同樣只給 `resolve_entity_name()` 的模糊合併守衛用、
+# 同樣是早退機制（見該函式 §4.3 設計說明：量詞類實體只准精確比對，不同數值
+# range 之間沒有「同類可合併」的中間地帶，跟 `_SCOPE_MODIFIER_PATTERN` 的
+# 雙向過濾機制不同）。
+_RANGE_COMPARATOR_PATTERN = re.compile(
+    r"[〇零一二三四五六七八九十百千萬0-9]+\s*(?:以上|以下|以內)"
+    r"|(?:未滿|超過)\s*[〇零一二三四五六七八九十百千萬0-9]+"
+)
+
 
 def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
     """`docs/報告/20_抽取數值忠實性核對機制設計報告.md` §3：偵測 `text`
@@ -886,7 +902,11 @@ async def resolve_entity_name(
     # 案例：`年齡未滿六歲者`／`年齡六歲以上未滿十二歲者`／`年齡十二歲以上未滿
     # 十五歲者` 被 `_edit_ratio` 0.80／cosine 0.88 誤併成一個節點，三段每日
     # 工時上限（二／三／四小時）全接到同一個節點、`natural_text` 寫錯段。
-    if _MEASURE_PATTERN.search(name):
+    # 2026-09-05（報告29 §2.4／§4.3，報告26 §4 #3 Q8 真實根因診斷）：裸數字＋
+    # 「以上／以下／以內／未滿／超過」比較句式，`_MEASURE_PATTERN` 抓不到
+    # （數字後面接的是比較詞不是單位），法規門檻/級距表常見，同樣只准精確
+    # 比對、不做模糊合併——理由見 `_RANGE_COMPARATOR_PATTERN` 定義處註解。
+    if _MEASURE_PATTERN.search(name) or _RANGE_COMPARATOR_PATTERN.search(name):
         return name
 
     # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher
