@@ -26,7 +26,7 @@ Han 綜述／SAGE）全文皆已收錄於 `02_RAG與GraphRAG/`、`12_三元組�
 
 | 文獻 | 全文位置 | 在 RQ6／報告27 中的角色 |
 |---|---|---|
-| **CatRAG**（Lau, Zhang, Ruan, Zhou, Guo, Zhang & Zhou, 2026，*Breaking the Static Graph: Context-Aware Traversal for Robust RAG*，Findings of ACL 2026，arXiv:2602.01965） | `../02_RAG與GraphRAG/lau-et-al-2026-catrag-static-graph-fallacy.pdf`（2026-08-25 收錄；官方碼 [kwunhang/CatRAG](https://github.com/kwunhang/CatRAG)） | 命名 **「Static Graph Fallacy」**：索引階段固定的轉移機率忽略邊相關性的**查詢相依**本質 → semantic drift，隨機游走被高度數 hub 節點吸走、還沒走到關鍵下游證據就偏航。與報告26 §4 #4「共用實體把 BFS 灌爆、離題事實佔多數」近乎逐字對應。解法：symbolic anchoring ＋ query-aware 動態邊加權 ＋ key-fact passage enhancement，建於 HippoRAG 2 + Personalized PageRank。🟢 全文已收錄；🟡 待精讀方法章節（symbolic anchoring／query-aware edge weighting 的權重公式）。 |
+| **CatRAG**（Lau, Zhang, Ruan, Zhou, Guo, Zhang & Zhou, 2026，*Breaking the Static Graph: Context-Aware Traversal for Robust RAG*，Findings of ACL 2026，arXiv:2602.01965） | `../02_RAG與GraphRAG/lau-et-al-2026-catrag-static-graph-fallacy.pdf`（2026-08-25 收錄；官方碼 [kwunhang/CatRAG](https://github.com/kwunhang/CatRAG)） | 命名 **「Static Graph Fallacy」**：索引階段固定的轉移機率忽略邊相關性的**查詢相依**本質 → semantic drift，隨機游走被高度數 hub 節點吸走、還沒走到關鍵下游證據就偏航。建於 HippoRAG 2 的 Personalized PageRank 上，三機制：① **Symbolic Anchoring**（§3.2，具名實體注入為權重 ε 的弱種子）；② **Query-Aware Dynamic Edge Weighting**（§3.3，Stage I 拓撲粗篩 top-K_edge → Stage II **LLM 對邊做離散分級** {Irrelevant,Weak,High,Direct} 算動態權重）；③ Key-Fact Passage Weight Enhancement（§3.4，純算法）。與報告26 §4 #4「共用實體把 BFS 灌爆、離題事實佔多數」近乎逐字對應。🟢 全文已收錄並精讀方法章節（2026-09-05，§3.1-3.5）。 |
 | **G-Retriever**（He et al., 2024, NeurIPS 2024，arXiv:2402.07630） | `../12_三元組事實層級向量化與檢索/he-et-al-2024-g-retriever.pdf` | 子圖檢索形式化為 PCST（Prize-Collecting Steiner Tree）：node／edge 依查詢相似度給 prize，求最大化 Σprize − Σcost 的連通子圖。**嚴謹上界方法**；報告27 L2 的「向量引導 prize 剪枝」是其扁平化簡化（無 Steiner tree 最佳化、無 GNN），第五章需聲明差距。 |
 | **PathRAG**（Chen et al., 2025，arXiv:2502.14902） | `../02_RAG與GraphRAG/chen-et-al-2025-pathrag.pdf` | 命名「retrieved subgraph 的**冗餘**」為核心問題；flow-based pruning ＋ 只取關鍵關聯路徑不取任意子圖。官方碼 [BUPT-GAMMA/PathRAG](https://github.com/BUPT-GAMMA/PathRAG)。 |
 | **LightRAG**（Guo et al., 2024, EMNLP 2025，arXiv:2410.05779） | `../02_RAG與GraphRAG/guo-et-al-2024-lightrag.pdf` | dual-level 檢索，local 層只取 **one-hop** 鄰居——報告27 L0「`svo_hops` 預設 2→1」的先例。 |
@@ -47,9 +47,13 @@ Han 綜述／SAGE）全文皆已收錄於 `02_RAG與GraphRAG/`、`12_三元組�
 
 ## 尚未查證／待辦
 
-- [ ] CatRAG（arXiv:2602.01965）方法章節逐字精讀——symbolic anchoring 的實作、
-      query-aware dynamic edge weighting 的權重公式、與本專案「seed degree 上限 +
-      Cypher 範圍約束」簡化對策的方法論差距定位。
-- [ ] PathRAG flow-based pruning 方法章節精讀（目前 🟡，僅摘要）。
-- [ ] 報告27 L1／L2 的門檻（θ_deg、θ_hop、L2 top-k）皆為初始值，待報告27 §6
-      敏感度測試校準。
+- [x] CatRAG（arXiv:2602.01965）方法章節逐字精讀（2026-09-05，§3.1-3.5）——
+      symbolic anchoring、query-aware dynamic edge weighting 的兩階段權重公式、
+      key-fact passage enhancement 皆已確認；與本專案「seed degree 上限 +
+      Cypher 範圍約束」的精確方法論差距見報告27 §3 誠實聲明段。
+- [x] PathRAG flow-based pruning 方法章節精讀（2026-09-05）——資源分配傳播
+      公式（Eq.2-4）、early stopping 剪枝、路徑可靠度升冪排列（Eq.6）皆已確認。
+- [ ] 報告27 §6.2 敏感度測試（2026-09-05）已針對 Q6 單題校準 θ_deg（200→100）、
+      per_seed_limit（60→30）；θ_hop 在 `hops=1` 預設下是 dead code path（見
+      commit `7b6d208`）。⚠️ 僅單題驗證，非窮舉全題組，待全量重抽完成後隨
+      報告27 §6.2 完整題組重新驗證。

@@ -29,6 +29,7 @@
 | `20_事實清單自然語言化/` | `docs/報告/23_生成端事實清單排序機制優化設計報告.md` § 6.4（對照實驗確認根因）、§7（新方向）；02_文獻探討.md § 2.4.7；03_系統設計與方法論.md § 3.6；報告25 §4 發現4（OpenCC 簡→繁保險） | ✅ 已實作（報告24＋報告25 §4）；🟢 已下載精讀 2 篇（INLG 2017 WebNLG、IJCKG 2023 Retrieve-Rewrite-Answer）；另查得 microsoft/graphrag（35,774★）、wuyike2000/Retrieve-Rewrite-Answer（63★）|
 | `21_圖遍歷與向量檢索結果融合/` | `docs/報告/25_擴大版新舊KG問答品質比對報告.md` § 4 發現6；03_系統設計與方法論.md § 3.6（`_arrange_fact_lines()` v2） | ✅ 機制已實作（報告25 §6 ⑤）；🟢 已下載精讀 RRF（Cormack et al. 2009, SIGIR，2 頁完整論文）、已下載 Han et al. GraphRAG 綜述（2501.00309，待精讀鄰居爆炸段落）；🟡 SAGE（2602.16964）、PhaseGraph/Calibrated Fusion（2603.28886）摘要已查證 |
 | `22_生成端過度保守與選擇性拒答/` | `docs/報告/25_擴大版新舊KG問答品質比對報告.md` § 4 發現2／§6 ⑥；03_系統設計與方法論.md § 3.6（`verify_fact_grounding()` 的 `is_claim` 三分類、限制性重生成觸發條件） | ✅ 2a 機制已實作（報告25 §6 ⑥）；🟢 已下載精讀 Context-faithful Prompting（Zhou et al. 2023, EMNLP Findings，含小模型反效果警示）；🟡 RefusalBench（2510.10390）已下載待精讀；"Not All Needles Are Found"（2601.02023）、Copy-Paste（2510.00508）搜尋層級 |
+| `23_複合問題分解與自相矛盾修正/` | `docs/報告/28_複合問題子問題分解機制設計與實作報告.md`（報告26 §4 #2 修法：`_split_into_subquestions()`／`_generate_decomposed_answer()`） | ✅ 機制已實作（報告28，真實驗證 6/6 無重現）；🟢 已下載精讀 Least-to-Most（Zhou et al. 2023, ICLR）、Self-Ask（Press et al. 2022，compositionality gap） |
 
 ## 01_AGI與智慧定義 內容清單
 
