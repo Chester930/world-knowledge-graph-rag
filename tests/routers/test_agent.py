@@ -1175,6 +1175,49 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_chat_converts_simplified_chinese_in_final_answer_to_traditional(monkeypatch):
+    """報告26 §4 #5：生成端（`qwen2.5:7b`）偶爾在自己的答案文字裡混簡體，
+    跟已修的抽取端發現4（SVO 三元組欄位，`traditionalize_triples()`）是不同
+    呼叫點的同一類問題。`chat()` 最終送給使用者的 `final_answer` 應套用
+    同一套字元級選擇性轉繁（`_to_traditional_selective()`）。測試用的
+    `kg_id` 在 workspace 底下沒有對應資料夾，`_kg_source_charset()` 依既有
+    「找不到來源檔→空白名單」的優雅降級規則回傳空集合，等同全轉——不需要
+    另外準備真實 workspace 檔案即可驗證轉換有生效。"""
+    kg_id = uuid4()
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return []
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
+        return []
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return []
+
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+        return None
+
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(answers=["补助经费额度为八千元。"])
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+
+    payload = ChatRequest(question="補助經費額度是多少？", kg_id=kg_id, use_svo=False)
+    response = await agent.chat(payload)
+    chunks = await _drain(response)
+
+    answer_chunk = next(c for c in chunks if c.startswith("data: ") and '"token"' in c)
+    answer_data = json.loads(answer_chunk[len("data: "):].strip())
+    assert answer_data["token"] == "補助經費額度為八千元。"
+
+
+@pytest.mark.asyncio
 async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(monkeypatch):
     """2026-08-24 真實測試發現的迴歸案例：核對範圍必須與 `_build_prompt()`
     實際餵給生成模型的 context 一致（`_merge_fact_lines()`），只用

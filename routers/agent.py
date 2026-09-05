@@ -2,12 +2,14 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from neo4j import AsyncDriver
 
+from core.config import settings
 from core.database import get_driver
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
@@ -17,6 +19,8 @@ from models.law_document import LawDocument
 from repositories.law_document_repo import LawDocumentRepository
 from services.classify_service import cosine_similarity
 from services.svo_service import (
+    _kg_source_charset,
+    _to_traditional_selective,
     bfs_query,
     resolve_query_relation_type,
     vector_search_entities,
@@ -60,6 +64,7 @@ _TAIWAN_CONTEXT_INSTRUCTION = (
     "你是台灣勞動法規顧問，只根據台灣現行法規（例如勞動基準法、勞工保險條例、"
     "性別平等工作法等）回答，絕對不要引用中國大陸、香港、澳門或其他地區的法規、"
     "機關名稱或數值（例如「中華人民共和國勞動法」），也不要混用其他地區的制度或用語。"
+    "請一律使用繁體中文回答，不要使用簡體字。"
 )
 
 
@@ -998,6 +1003,14 @@ async def chat(payload: ChatRequest):
             # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
             # 而非已經被取代的草稿。
             grounding = await verify_fact_grounding(final_answer, fact_texts, llm_provider)
+
+        # 報告26 §4 #5：生成端（`qwen2.5:7b`）偶爾在自己的答案文字裡混簡體，
+        # 跟已修的抽取端發現4（SVO 三元組欄位）是不同呼叫點的同一類問題。
+        # 沿用發現4的字元級選擇性轉繁（來源語料當白名單，避免「雇」「托」
+        # 這類法規原文正當用字被誤轉）；`_TAIWAN_CONTEXT_INSTRUCTION` 的
+        # 「請一律使用繁體中文回答」是 prompt 層防線，這裡是保底。
+        kg_folder = str(Path(settings.workspace_dir) / str(payload.kg_id))
+        final_answer = _to_traditional_selective(final_answer, _kg_source_charset(kg_folder))
 
         yield f"data: {json.dumps({'token': final_answer})}\n\n"
 
