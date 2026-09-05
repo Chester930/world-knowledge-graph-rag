@@ -516,8 +516,11 @@ _QUANTITY_PATTERN = re.compile(
 )
 
 # 比 `_QUANTITY_PATTERN` 更寬的「分段量詞」偵測——多收「歲／人／名／週／度／
-# 種／類／條／款／項／點」等法規列舉分段常用的單位。**只給
-# `resolve_entity_name()` 的模糊合併守衛用**（報告25 §4 發現C／診斷 Q3）：
+# 種／類／條／款／項／點」等法規列舉分段常用的單位。原設計**只給
+# `resolve_entity_name()` 的模糊合併守衛用**（報告25 §4 發現C／診斷 Q3），
+# 2026-09-05（報告26 §4 #6）新增第二個用途：`_naturalization_dropped_
+# quantity()` 借用同一組樣式核對自然語言化輸出是否遺漏量詞/日期片語，
+# 兩個用途共用同一份「量詞/日期片語」定義，不必另建一份重複清單：
 # `年齡未滿六歲者`／`年齡六歲以上未滿十二歲者`／`年齡十二歲以上未滿十五歲者`
 # 這種「字面高度相似、分段值不同」的主詞，被 `_edit_ratio` 0.80／cosine 0.88
 # 誤併成一個節點，三段工時上限（二／三／四小時）全接到同一個節點、
@@ -1348,6 +1351,26 @@ _NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順�
 改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。若動作與受詞開頭字詞剛好重複（例如動作是「得以」、受詞開頭又是「以」），改寫時避免疊字重複，選用通順的講法而非逐字硬接。"""
 
 
+def _naturalization_dropped_quantity(natural_text: str, subject: str, verb: str, object_: str) -> bool:
+    """報告26 §4 #6／報告29-鄰近設計（`docs/參考文獻/25_三元組自然語言化
+    遺漏偵測/README.md`）：`_naturalize_triple()` 的 LLM 改寫偶爾遺漏
+    subject／verb／object 裡的量詞或日期片語（真實案例：`災害發生之當月
+    一日起` 被改寫成「從災害發生之當月起…」，「一日」消失）——跟報告20
+    「量詞接地核對」（`_contains_ungrounded_quantity`，核對輸出是否**新增**
+    未依據內容）方向相反，是同一個「比對輸出與輸入」架構家族的鏡像版本：
+    核對輸出是否**遺漏**了輸入裡的量詞/日期片語。
+
+    沿用既有 `_MEASURE_PATTERN`（無需另外設計新樣式）從三個欄位抓出所有
+    量詞/日期片語，逐一核對是否逐字留在 `natural_text` 裡；任一片語消失
+    即回傳 `True`，由呼叫端決定是否退回樣板拼接（見 `_naturalize_triple()`）。
+    """
+    for field in (subject, verb, object_):
+        for match in _MEASURE_PATTERN.finditer(field):
+            if match.group(0) not in natural_text:
+                return True
+    return False
+
+
 async def _naturalize_triple(
     subject: str,
     subject_type: str,
@@ -1370,9 +1393,16 @@ async def _naturalize_triple(
 
     **忠實性風險提示（借鏡 KAPING 的觀察）**：KAPING 也觀察到訓練式轉換
     模型「有時生成語意偏離原三元組的文字」——prompt 因此明確要求「不可以
-    增加原文沒有的具體數字、期限或條件」，降低幻覺風險；是否需要額外的
-    正式忠實性核對機制（比照報告20），留待報告24 §5 階段4 依真實回填結果
-    的實測幻覺率決定，本函式本身不做核對，只在 prompt 層面做最低限度防範。
+    增加原文沒有的具體數字、期限或條件」，降低幻覺風險；報告24 §5 階段4
+    依當時實測幻覺率判斷不需要正式核對機制（只對殘缺三元組退回樣板拼接）。
+
+    ✅ **遺漏偵測（2026-09-05，報告26 §4 #6 真實案例後新增）**：報告24 的
+    忠實性防護只擋「編造內容」方向，報告26 §4 #6 發現真實案例走的是
+    **相反方向**——`災害發生之當月一日起` 被改寫成「從災害發生之當月起…」，
+    遺漏「一日」。新增 `_naturalization_dropped_quantity()` 核對，命中即
+    捨棄 LLM 改寫、退回 `_verbalize_fact()` 樣板拼接（見下方回傳邏輯），
+    與報告24 §5 階段4「殘缺三元組不呼叫LLM、直接退回樣板」同一取捨原則。
+    文獻定位見 `docs/參考文獻/25_三元組自然語言化遺漏偵測/README.md`。
 
     `subject_type`／`object_type` 缺席時直接省略（比照 `_verbalize_fact()`
     同樣的「型別選填」處理），不強塞空字串進 prompt。失敗時（LLM 呼叫
@@ -1389,7 +1419,10 @@ async def _naturalize_triple(
     result = await llm_provider.generate(prompt)
     # 報告25 § 4 發現4：改寫輸出過一道 OpenCC 簡→繁（臺灣標準字）正規化，
     # 補救小模型偶爾漏簡體的情況（prompt 已要求繁體，這是保險不是取代）。
-    return _to_traditional(result.strip().strip("「」\"'"))
+    result = _to_traditional(result.strip().strip("「」\"'"))
+    if _naturalization_dropped_quantity(result, subject, verb, object_):
+        return _verbalize_fact(subject, subject_type, verb, object_, object_type)
+    return result
 
 
 def _kg_fact_label(kg_id: str) -> str:

@@ -2431,6 +2431,44 @@ async def test_naturalize_triple_prompt_warns_against_duplicated_wording():
     assert "避免疊字重複" in llm.prompts[0]
 
 
+def test_naturalization_dropped_quantity_detects_missing_measure_phrase():
+    """報告26 §4 #6 真實案例：`災害發生之當月一日起` 被改寫成「當月起」，
+    量詞片語「一日」消失於 natural_text。"""
+    assert svc._naturalization_dropped_quantity(
+        "從災害發生之當月起計算前條所定災後六個月期間。",
+        "災害發生之當月一日起", "", "前條所定災後六個月期間",
+    )
+
+
+def test_naturalization_dropped_quantity_false_when_all_phrases_preserved():
+    assert not svc._naturalization_dropped_quantity(
+        "從災害發生之當月一日起計算前條所定災後六個月期間。",
+        "災害發生之當月一日起", "", "前條所定災後六個月期間",
+    )
+
+
+def test_naturalization_dropped_quantity_checks_verb_too():
+    assert svc._naturalization_dropped_quantity(
+        "事假可以申請。", "事假", "得以三十日為限申請", "",
+    )
+
+
+@pytest.mark.asyncio
+async def test_naturalize_triple_falls_back_to_template_when_quantity_dropped():
+    """報告26 §4 #6 修法：偵測到遺漏時捨棄 LLM 改寫，退回 `_verbalize_fact()`
+    樣板拼接，保證忠實（100%保留輸入片語）優先於通順。"""
+    llm = FakeLLM("從災害發生之當月起計算前條所定災後六個月期間。")
+
+    text = await svc._naturalize_triple(
+        "災害發生之當月一日起", "概念", "計算", "前條所定災後六個月期間", "概念", llm,
+    )
+
+    assert text == svc._verbalize_fact(
+        "災害發生之當月一日起", "概念", "計算", "前條所定災後六個月期間", "概念",
+    )
+    assert "一日" in text
+
+
 @pytest.mark.asyncio
 async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_provider_given():
     """3.1.4 §a：`embedding_provider` 提供且有 chunk 追溯資訊時，應為這筆
