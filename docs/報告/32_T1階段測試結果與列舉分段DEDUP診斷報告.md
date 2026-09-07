@@ -221,13 +221,16 @@ Fact／Chunk 節點無時間戳，「~896 真重抽」與「~80 stale」無法�
 
 ### 9.6 更新後的執行順序
 
-1. **記錄**（本節）——完成。
-2. F2／F3a／F3b／§4.1 設計＋實作＋測試＋全套 pytest → merge 到 master。
-3. E3 診斷 N0030018 §2；F4 驗證 `_naturalization_dropped_quantity()`。
+1. **記錄**（本節）——✅ 完成（commit `e270aee`）。
+2. **F2／F3b／§4.1 設計＋實作＋測試＋全套 pytest → merge master**——✅ 完成（commit `3194185`，pytest 680）。F3a 依設計不做（`_MEASURE_PATTERN` 與自然語言化核對共用）。
+3. **E3 診斷 N0030018 §2；F4 驗證 `_naturalization_dropped_quantity()`**——✅ 完成（commit `fb813eb`，pytest 681）。
+   - **F4**：守衛正確、不需改碼。T1 Q5 失敗是回填時序（naturalization 09-01 回填、#6 守衛 09-05 上線）；全新 KG 每條邊過現行 `_naturalize_triple` 即修；Q5 殘留是生成端（G4）。
+   - **E3**：c15949bf 的「壓成一串」blob entity 現行碼已不重現（抽出 4–5 筆分開三元組，blob 是 09-04 B-run 舊產物）。**prompt 規則 10（限制句 → 條件當 subject、核心值當 object）未落地**——實測能修 §2 的限制句 object 空問題，但兩次收窄試驗都把相鄰、現行 ✅ 的「條件：於X日前提出」形態（G3）弄壞或弄不穩，`qwen2.5:7b` 對規則數量太敏感；且「以二次為限」是懸空事實形態、與 T1 已驗證可引用的「十日前」同形，Q2 殘留缺口偏生成/檢索端。待更強模型或全新 KG 驗證後再議。**唯一落地**：`_MEASURE_PATTERN` 補 `個月／個年／個星期`（`X個月` 的「個」卡在數字與「月」間、`三個月為限`／`六個月為限` 期程分段主詞沒被守衛擋）。
+   - **master head 現在 `fb813eb`**——`[6de205]` 開 drain 前要把 `reextract-v2` ff 到此。
 4. 重建 workspace（64 文件 ArticleAware 重切）＋ 重建 `task_queue.db`（3303 pending）＋
-   環境路徑（worktree 或主 checkout）。
-5. 啟動全量 drain（跨 session，ETA ~7–13 天）。
+   環境路徑——`[6de205]` 進行中：新 KG `236903cf-055a-40a8-8923-b9d06601f3b7`、worktree `kg-reextract` / 分支 `reextract-v2`（從 `3194185`，需再 ff 到 `fb813eb`）、runtime 在 `D:/Users/666/Desktop/kg-runtime`（git 樹外）。
+5. 啟動全量 drain（跨 session，ETA ~7–13 天）——`[6de205]` 做到「匯入＋切＋備份」就停，開 drain 前對 E3/F4 狀態。
 6. DRAIN-DONE 後：報告27 §6.2 全量 8 題 ×3 ＋ 報告25 條件A 8 題回歸（此時 Q1／Q6 應 ✅、
-   Q2 視 E3 結果）。
-7. L2（視 Q6/Q7 收斂）、θ 調校、G1–G4——平行或後續。
+   Q2 視 E3 prompt 規則是否補上；F2/F3b/§4.1 已在碼裡，題目文件重抽即受益）。
+7. L2（視 Q6/Q7 收斂）、θ 調校、G1–G4（G1 = 限制性重生成過度修正，最高優先）——平行或後續。
 8. 論文正文同步。
