@@ -1,20 +1,20 @@
 # 交接：c15949bf 誤刪 → reextract-v2 全新重跑
 
-**產生時間**：2026-09-07 ~17:15
+**產生時間**：2026-09-07 ~17:15（末更新 ~19:35）
 **交接自**：session efb89cec（背景 job）
-**狀態**：新 KG 匯入+切 chunk **執行中**（~5/64 份），**尚未抽取**
 
 ---
 
 ## 0. TL;DR（狀態）
 
-**✅ 匯入 + 切 chunk 完成（2026-09-07 ~18:35）**：
-- KG `236903cf` = 64 Document / 3303 Chunk / 3303 LawArticle，無 Fact/Entity（尚未抽取）
-- `kg-runtime/task_queue.db` = **3303 pending**（64 sources）
-- **已備份**：`D:\Users\666\Desktop\kg-backups\kg-runtime-import-done-20260907-182539.zip`（5.3 MB，testzip 乾淨）
-- **分支已 rebase onto `fb813eb`**（純 ff 不成立，零衝突 rebase）：`reextract-v2` = `3194185 → fb813eb`(E3 `_MEASURE_PATTERN`) `→ d48ac9a`(本交接文件+resume 腳本)。抽取端守衛 F2/F3b/§4.1/E3 全在。
+**▶ drain 抽取執行中（2026-09-07 ~19:31 起）**：
+- `drain_236903cf.py`（本 worktree，commit `ba1fdf3`）nohup pid **27180**，log `C:\Users\666\.claude\jobs\efb89cec\tmp\drain_236903cf.log`
+- Monitor `b69ge5goh`（每 30 分 + 4 份驗證窗口清零偵測）
+- 起點 completed=0 / pending=3303；ETA 數天、跨多 session
+- 匯入階段（已完成）：KG `236903cf` = 64 Doc / 3303 Chunk / 3303 LawArticle；已備份 `D:\Users\666\Desktop\kg-backups\kg-runtime-import-done-20260907-182539.zip`
+- 分支 `reextract-v2` = `3194185 → fb813eb`(E3) `→ d48ac9a`(交接+resume) `→ e4f3fb9`(交接更新) `→ ba1fdf3`(drain 腳本)。抽取端守衛 F2/F3b/§4.1/E3 全在。
 
-**⏸ 現在停在這裡，等使用者指示開 drain。** 開 drain 時 → §7。開 drain 前對任何 `svo_service.py` / `_svo_prompt` 抽取端變更都要先 ff（§6 一般原則）。
+**接手要做的**：看 §7「drain 執行中」。drain 掛了就從 worktree 目錄 nohup 重跑 `drain_236903cf.py`（環境先查）。
 
 ---
 
