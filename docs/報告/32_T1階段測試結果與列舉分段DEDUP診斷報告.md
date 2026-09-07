@@ -157,3 +157,77 @@ Q2 的「每次以六個月為單位／二次為限」退化：N0030018 §2 chun
 - `docs/報告/29_實體模糊合併範圍修飾詞與數字比較詞守衛設計報告.md` §2.4／§4.1／§4.3
 - `docs/報告/30_c15949bf全量重抽最終驗收計畫.md` §9（T0 smoke、T1 就緒、§9.3–§9.5）
 - 原始輸出：`t1_output.txt`（T1 全 72 次呼叫）、`diag_e1.py`（DEDUP 診斷腳本）
+
+---
+
+## 9. Addendum（2026-09-07 傍晚）：c15949bf worktree 誤刪、改走全量重新抽取
+
+### 9.1 事件
+
+T1（§1–§3）與 E1 診斷（§5）完成、drain 由使用者手動重啟後，平行 session
+`thesis cross-chapter consistency check` 於 **16:05–16:11** 執行「使用者核准的分支清理 A 類」，
+對 `.claude/worktrees/agent-citation-enrichment` 跑了 `git worktree remove`（無 `--force`）。
+
+- `.gitignore` 忽略 `workspace/`（第 38 行）與 `task_queue.db`（第 51 行），所以
+  `git status --porcelain` 看不到 drain 的執行期狀態，`git worktree remove` 判定「乾淨」→
+  `rm -rf` 整個 worktree。
+- **遺失**：c15949bf 的 `task_queue.db`（`completed=896 / failed=6 / pending=2401`），以及
+  **整個 c15949bf workspace 資料夾**——每份文件的 chunk 原文、`svo_index.json`、`_record.json`。
+- **未遺失**：Neo4j `kg2-neo4j` 內 896 個已完成 chunk 的 Fact／naturalized 邊／Entity 合併
+  （4248 Entity / 4963 Fact / 976 個 (doc,chunk) 有 Fact——含約 80 個 sweep 未到、帶前一輪
+  舊資料的 chunk）；報告 30/31/32 已在 master。
+- 使用者回收筒（C:／D:）9/7 無任何刪除記錄（`git worktree remove` 為永久 unlink）；三方
+  session 皆無 `task_queue.db` 副本。16:09 原路徑出現的 `task_queue.db` 是 drain 腳本
+  `ensure_ready()` 在找不到 DB 時建的 **0 列空殼**，之後腳本即因路徑失效退出（log 末行
+  `DRAIN-DONE：本次處理 1 筆`，completed 896→897）。目前無任何抽取／worker 行程。
+
+### 9.2 決定：走全量重新抽取（選項 C）
+
+Fact／Chunk 節點無時間戳，「~896 真重抽」與「~80 stale」無法可靠區分，部分保留有靜默汙染
+風險，重於 ETA +~3 天。使用者接受從頭重跑。**「凍結」前提消失**——這是把所有抽取端修正
+一次做完再重跑的機會，可省掉原 §7「解凍批次 + targeted 重抽 ~10–20 份 + §6.2 重驗證」的循環。
+
+### 9.3 重跑前要落地的抽取端修正批次（取代 §7 的「解凍批次」）
+
+| # | 項目 | 內容 | 狀態 |
+|---|---|---|---|
+| **F2** | `_RANGE_COMPARATOR_PATTERN` 缺口 | 允許數字與「以上／以下／以內」間夾一個單位 token（`十 μg/dl 以上`、`二十公尺 以上`）——Q6 根因、Q1 一部分 | 未實作 |
+| **F3a** | `_MEASURE_PATTERN` 單位表 | 補 `級` ＋ 量測單位（μg/dl、公尺、公分、℃、ppm、mg…）——Q6、N0060007 WBGT 溫度 | 未實作 |
+| **F3b** | 序數／分數／小數列舉守衛 | `第[數字](級\|類\|種\|款\|項\|條)`、`之[數字]`（精密作業之一/之三）、`[數字]分之[數字]`、小數（1.25/1.5）、`附表[數字]`；或「兩候選名僅差一個數字/序數 token」的結構性判斷 | 未實作 |
+| **§4.1** | `_SCOPE_MODIFIER_PATTERN` 雙向過濾 | `每一型式` vs `每增加一種型式`（無數字的短語素）——報告29 §4.1 設計完成，可能被 F3b 結構性判斷吸收 | 設計完成、未實作 |
+| **E3** | N0030018 §2 多子規則擠成一個 entity 名 | Q2「六個月為單位／二次為限」退化根因——**尚未根因診斷**（§2 的 SVO 切塊太粗？抽取 prompt？）。重跑前先診斷 N0030018 §2 | 未診斷 |
+| **F4** | `_naturalization_dropped_quantity()` 是否攔得住「一日」類遺漏 | Q5 起算日「當月一日起」→ nt「當月起」，#6 上線後 T1 仍 3/3 失敗——確認是守衛 bug 還是純生成端沒用該事實 | 待驗證 |
+
+批次做法：F2／F3a／F3b／§4.1 一起加測試、跑全套 pytest 後才進 `merge` → 才 enqueue。
+
+### 9.4 不擋重跑（重跑後任何時候可做）
+
+- **L2** 向量引導 prize 剪枝——經查證是**查詢端**（改 `bfs_query()` 遍歷語意、query 時跑，
+  不寫抽取輸出）；報告27 說「等凍結」只因它是相鄰程式碼＋要等 naturalized 邊齊備才好測。
+- **θ_deg／θ_hop／per_seed_limit** 敏感度調校（報告27 §6.2 待辦2）。
+- **G1**（限制性重生成過度修正，`routers/agent.py`，生成端最高優先）、**G2／G3／G4**。
+
+已在 master `ed32291`、重跑自動帶到：發現3／4／C／29、#6、報告19／20／21／24。
+
+### 9.5 基礎設施
+
+- workspace 從原始 64 文件重切——**必須 ArticleAwareChunking，不能 `build_graph(force_rebuild=True)`**
+  （報告21；`ArticleStructureLossError` 守衛已在 master）。確認重切 chunk_index 對映穩定。
+- 重建執行環境：重建 worktree 或移到主 checkout（`ed32291` 已含全部合併碼）跑；`task_queue.db`
+  路徑不進 git，需在 `.gitignore` 或另建位置——**並在往後 `git worktree remove` 前先備份 `workspace/`**。
+- c15949bf 的 Neo4j 舊資料：重跑前 `reset` 全 3303 pending 後，drain 每 chunk 先
+  `revoke_chunk_facts()` 再抽（現有邏輯），舊 Fact 會被逐步清掉；勿在重跑完成前跑
+  `rebuild_from_records()` 或 `main.py` 全域 worker。
+
+### 9.6 更新後的執行順序
+
+1. **記錄**（本節）——完成。
+2. F2／F3a／F3b／§4.1 設計＋實作＋測試＋全套 pytest → merge 到 master。
+3. E3 診斷 N0030018 §2；F4 驗證 `_naturalization_dropped_quantity()`。
+4. 重建 workspace（64 文件 ArticleAware 重切）＋ 重建 `task_queue.db`（3303 pending）＋
+   環境路徑（worktree 或主 checkout）。
+5. 啟動全量 drain（跨 session，ETA ~7–13 天）。
+6. DRAIN-DONE 後：報告27 §6.2 全量 8 題 ×3 ＋ 報告25 條件A 8 題回歸（此時 Q1／Q6 應 ✅、
+   Q2 視 E3 結果）。
+7. L2（視 Q6/Q7 收斂）、θ 調校、G1–G4——平行或後續。
+8. 論文正文同步。
