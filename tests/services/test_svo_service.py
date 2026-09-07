@@ -1316,6 +1316,20 @@ def test_measure_pattern_is_superset_of_quantity_pattern_units():
         assert svc._QUANTITY_PATTERN.search(s) is None
     # 「歲」不在 _QUANTITY_PATTERN，發現3 的 _quantity_mis_bound 不受牽連
     assert svc._QUANTITY_PATTERN.search("未滿六歲") is None
+    # 報告32 §9.3 E3：`X個月`（「個」卡在數字與「月」之間），只加進 _MEASURE_PATTERN
+    for s in ["六個月", "三個月為限", "六個月為限", "十二個月"]:
+        assert svc._MEASURE_PATTERN.search(s)
+        assert svc._QUANTITY_PATTERN.search(s) is None
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_period_tier_ge_ge_yue_no_fuzzy_merge():
+    """報告32 §9.3 E3：`三個月為限` 與 `六個月為限` `_edit_ratio` 高（只差一字），
+    舊 `_MEASURE_PATTERN` 抓不到（「個」卡在「三」與「月」之間），期程分段主詞
+    被誤併。加 `個月` 後守衛命中、回傳原名。"""
+    assert await svc.resolve_entity_name(
+        "六個月為限", [{"name": "三個月為限", "alias_counts_json": "{}"}],
+    ) == "六個月為限"
 
 
 @pytest.mark.asyncio
