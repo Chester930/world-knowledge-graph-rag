@@ -6,11 +6,15 @@
 
 ---
 
-## 0. TL;DR（你現在要做什麼）
+## 0. TL;DR（狀態）
 
-1. **等匯入跑完**（背景 pid 523，log 見下）。預期結果：新 KG `236903cf` 有 64 Document、~3303 Chunk、~3303 LawArticle；`D:\Users\666\Desktop\kg-runtime\task_queue.db` 有 ~3303 筆 `pending`。
-2. 匯入一完成 → **立刻備份** `D:\Users\666\Desktop\kg-runtime\`（整個資料夾複製到 repo 外，例如壓成 zip 放 `D:\Users\666\Desktop\kg-backups\`）。這是這次事故的教訓——佇列 + chunk 原文的唯一副本絕不能只放在 git 樹裡。
-3. 備份後 → `git merge --ff-only fb813eb`（抽取端修正 E3/F4 已完成，見 §6）→ **停在這裡，不要開 drain**。開 drain 前對任何 `svo_service.py` / `_svo_prompt` 抽取端變更都要先 ff（§6 一般原則）。
+**✅ 匯入 + 切 chunk 完成（2026-09-07 ~18:35）**：
+- KG `236903cf` = 64 Document / 3303 Chunk / 3303 LawArticle，無 Fact/Entity（尚未抽取）
+- `kg-runtime/task_queue.db` = **3303 pending**（64 sources）
+- **已備份**：`D:\Users\666\Desktop\kg-backups\kg-runtime-import-done-20260907-182539.zip`（5.3 MB，testzip 乾淨）
+- **分支已 rebase onto `fb813eb`**（純 ff 不成立，零衝突 rebase）：`reextract-v2` = `3194185 → fb813eb`(E3 `_MEASURE_PATTERN`) `→ d48ac9a`(本交接文件+resume 腳本)。抽取端守衛 F2/F3b/§4.1/E3 全在。
+
+**⏸ 現在停在這裡，等使用者指示開 drain。** 開 drain 時 → §7。開 drain 前對任何 `svo_service.py` / `_svo_prompt` 抽取端變更都要先 ff（§6 一般原則）。
 
 ---
 
