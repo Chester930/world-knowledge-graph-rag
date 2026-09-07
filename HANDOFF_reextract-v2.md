@@ -119,7 +119,7 @@ git fetch && git merge --ff-only fb813eb     # 或 1cc4676，兩者皆可
 - 掛 30 分進度 Monitor。
 - 每 25% 備份一次 kg-runtime。
 - ETA 數天（3303 chunk × qwen2.5:7b 本機 ~40s–5min）。
-- **⚠️ 通知平行 session「project status review」**：drain 跑起來後，橫掃過 chunk_index 16 時這 4 份會清完（約 drain 開始後 1–2 天）——`N0060004` / `N0030025` / `N0060065` / `N0050030` 的 `pending`+`processing` 全歸零時，SendMessage 通知他（他要跑 `diag_g2g3_window.py` 診斷 G2/G3）。查詢：
+- **⚠️ 通知平行 session「project status review」**（Remote Control session，最後見 ref `[855a3c]`，2026-09-07 19:35 當下 offline——屆時用 `ListAgents` 重查現址）：drain 跑起來後，橫掃過 chunk_index 16 時這 4 份會清完（約 drain 開始後 1–2 天）——`N0060004` / `N0030025` / `N0060065` / `N0050030` 的 `pending`+`processing` 全歸零時，SendMessage 通知他（他要跑 `diag_g2g3_window.py` 診斷 G2/G3）。Monitor `b69ge5goh` 已內建這個偵測（`G2G3G4_window_open=0` 時發事件）。查詢：
   ```sql
   SELECT source, status, COUNT(*) FROM task_queue
   WHERE source LIKE 'N0060004%' OR source LIKE 'N0030025%'
