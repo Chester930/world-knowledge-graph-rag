@@ -55,5 +55,19 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 ## 尚未查證／待辦
 
 - [ ] RefusalBench 全文精讀（目前僅摘要），確認其「selective refusal」定義與本專案 over-abstention 的對應程度、有無可借用的評估指標。
-- [ ] "Not All Needles Are Found"、Copy-Paste 兩篇目前僅搜尋結果層級，若 2a 不足、要動 `_build_constrained_prompt()` 措辭或改採「定向修訂」（2b），需補全文精讀。
+- [x] ~~"Not All Needles Are Found"、Copy-Paste 兩篇……若 2a 不足、要動 `_build_constrained_prompt()` 措辭或改採「定向修訂」（2b），需補全文精讀。~~ → **2b 已於 2026-09-07 落地（報告32 §9 G1，commit `bd3bbb7`）**，用的是本專案已有的 CoVe factored/joint 框架（見 `docs/參考文獻/16`、Dhuliawala et al. 2023），未動這兩篇；2b = 只把「未接地的主張句」給修正步驟、明確禁止沿用其中未查核的數值，接地句零 LLM 重生成。三臂（factored / joint / 2b）正式 A/B 為第五章消融待辦。
+
+---
+
+## G2（Q8 多跳區間推理 + 接地核對罰有效推論，報告32 §9）候選文獻 —— 待精讀，G2 設計時定案
+
+報告32 T1 Q8 的失效有兩層：(1) 生成端不會做「值 5 落在事實清單的『1 以上未滿 10』級距 → 取該級係數 2」這個查表＋比較的組合推論（compositionality gap，既有 `docs/參考文獻/23` 的 Press et al. Self-Ask 已涵蓋）；(2) 就算推對了，`verify_fact_grounding()`（RAGAS 式逐句核對）把「係數 2」判為未接地——因為它是推論結果、不是事實清單裡逐字出現的字串。第 (2) 層是 RAGAS 式 faithfulness 的已知侷限。候選（僅摘要／社群文件層級查證，**未精讀**）：
+
+| 檔案 | 文獻 | 來源 | 狀態 |
+|---|---|---|---|
+| `xu-et-al-2025-veritas-faithful-reasoning-rag.pdf` | Xu, Wu, Zhou, Feng, Zhou, Woo, Ramnath, Tian, Qi, Qiu, Cheong & Ding (2025), *Beyond Correctness: Rewarding Faithful Reasoning in Retrieval-Augmented Generation*（VERITAS） | arXiv [2510.13272](https://arxiv.org/abs/2510.13272)（v3 2026-06） | 🟡 已下載（14 頁），僅摘要層級——明確區分「逐字接地」與「邏輯上由檢索內容推得、但非字對字複述」的推理鏈；三個 faithfulness 維度（Think-Search／Information-Think／Think-Answer）。⚠️ 是 RL 訓練框架（turn-level reward），比本專案 prompt-only 路線重，僅作「有效推論不該被逐字核對罰掉」的問題定位與路線佐證，非方法採用 |
+
+**尚未下載、G2 設計時再評估**：RAG-Zeval（arXiv:2505.22430，rule-guided reasoning 的 RAG 回答評估，回應 RAGAS 過度嚴格）；DROP（Dua et al. 2019，NAACL，discrete/numeric reasoning over text 的奠基基準——若 G2 要正式定位「數值級距查表」這個能力）。RAGAS 對「可推得但非逐字」claim 的過度懲罰是社群廣泛記錄的現象（如 Nike「1967 年成立」可由「1967 年 incorporated」推得卻可能被判 unfaithful），非單一 canonical 論文，G2 設計時以 RAGAS 官方文件 + VERITAS 佐證即可。
+
+**⚠️ G2 的碼與設計尚未動**——依使用者指示，等 KG #4 抽完、§6.2 窗口確認 Q8 在 F2/F3b/發現29 之後是否還失敗，再設計（prompt 區間比對提示 / 報告28 分解擴充 / grounding 對「明示推論」放寬）。
 - [ ] `is_claim` 分類本身由核對模型（`qwen2.5:7b`）判定，可能誤判（把真主張判成非主張 → 漏觸發該重生成的情況）——真實觸發率與誤判率待實測。

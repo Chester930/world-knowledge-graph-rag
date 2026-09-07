@@ -52,3 +52,18 @@
 - [x] ~~依上方「關鍵邊界條件」修正報告22 §5.1 的建議順序~~——已完成，見報告23。
 - [ ] 依報告23設計＋上方兩個開源元件的演算法邏輯，實作 `routers/agent.py` 的截斷與條件式zigzag重排函式（尚未動工，待使用者確認）。
 - [ ] embedding相似度排序（複用現有`EmbeddingProvider`）列為近期可實作項目；cross-encoder rerank（Nogueira & Cho路線）列為長期進階選項，非當前優先。
+
+---
+
+## G3（分段清單答不全，報告32 §9 T1 Q3/Q6）候選文獻 —— 待精讀，G3 設計時定案
+
+報告32 T1 暴露的失效：事實清單給 N 段分級（Q3 三段年齡工時上限 2/3/4 小時、Q6 血中鉛三級管理），生成端答案只列 M<N 段。與本資料夾既有「長清單中段遺漏」（Liu et al. U 形曲線）方向相近，但 G3 是**答案召回不足（precision > recall）**，且部分成因是接地核對把「一份 N 段分級」逐段當獨立 claim、部分逐字命中就整段退掉。以下為候選（僅摘要層級查證，**未精讀**）：
+
+| 檔案 | 文獻 | 來源 | 狀態 |
+|---|---|---|---|
+| `amouyal-et-al-2022-qampari.pdf` | Amouyal, Wolfson, Rubin, Yoran, Herzig & Berant (2022), *QAMPARI: An Open-domain QA Benchmark for Questions with Many Answers from Multiple Paragraphs* | arXiv [2205.12665](https://arxiv.org/abs/2205.12665)；GEM 2023 | 🟡 已下載（6 頁），僅摘要層級——確立「多答案 QA，模型 precision 幾乎總是高於 recall、只吐出部分正解集」（retrieve-and-read F1 最佳僅 32.8），G3「只列部分 tier」的直接文獻定位 |
+| `dumitru-et-al-2025-tlqa-list-construction.pdf` | Dumitru, Venktesh V, Jatowt & Anand (2025), *Evaluating List Construction and Temporal Understanding Capabilities of LLMs* | arXiv [2506.21783](https://arxiv.org/abs/2506.21783)；ICTIR 2025（SIGIR） | 🟡 已下載（9 頁），僅摘要層級——TLQA 基準要求「結構化清單答案＋對應時間段」，明確度量 list completeness；「fail to generate a complete list of entities」與 G3 逐字對應，比 QAMPARI 更貼近本專案的「結構化分級答案」形狀 |
+
+**尚未下載、G3 設計時再評估**：RoMQA（Zhong et al. 2022，robust multi-answer QA）、Atomic Self-Consistency（arXiv:2405.13131，取樣多次＋合併原子單元提升 recall，屬修法方向）、Inter-Passage Verification for Multi-evidence Multi-answer QA（Findings ACL 2025，高召回後驗證，屬修法方向）。
+
+**⚠️ G3 的碼與設計尚未動**——依使用者指示，等 KG #4 抽完、§6.2 窗口確認 F2/F3b 之後 Q3/Q6 是否還真的失敗，再用真實診斷資料設計。
