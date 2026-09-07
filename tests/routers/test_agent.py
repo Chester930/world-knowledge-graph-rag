@@ -1491,6 +1491,101 @@ async def test_chat_no_regeneration_when_only_non_claim_sentences_unsupported(mo
 
 
 @pytest.mark.asyncio
+async def test_chat_targeted_correction_keeps_grounded_sentences_when_partly_ungrounded(monkeypatch):
+    """報告32 §9 G1（2b 定向修訂）：草稿裡部分主張接地、部分未接地時，只重寫
+    未接地的主張句（一次 LLM 呼叫），接地的句子原樣保留——不再整段重寫把已
+    對的部分一併改壞（T1 的 ~75% 觸發率、正確草稿被改成「未記載」）。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "甲項為三十日", "subject": "甲項", "rel_type": "HAS_PROPERTY", "object": "三十日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["甲項為三十日。乙項為六個半月。", "修正1：（此部分）資料未明確記載，無法確認乙項期程。"],
+        grounding_payloads=[
+            json.dumps({"claims": [
+                {"statement": "甲項為三十日。", "is_claim": True, "supported": True, "reason": "與事實一致"},
+                {"statement": "乙項為六個半月。", "is_claim": True, "supported": False, "reason": "查無此數字"},
+            ]}),
+            json.dumps({"claims": [
+                {"statement": "甲項為三十日。", "is_claim": True, "supported": True, "reason": ""},
+                {"statement": "（此部分）資料未明確記載，無法確認乙項期程。", "is_claim": True, "supported": True, "reason": ""},
+            ]}),
+        ],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    chunks = await _drain(await agent.chat(ChatRequest(question="甲項乙項各多久？", kg_id=kg_id)))
+
+    assert len(llm.prompts) == 2  # 草稿 + 定向修訂各一次（沒有整段重寫）
+    targeted_prompt = llm.prompts[1]
+    assert "下列片段來自一份草稿答案" in targeted_prompt  # 是定向修訂 prompt
+    assert "乙項為六個半月。" in targeted_prompt          # 未接地片段有傳進去（joint 的一面）
+    assert "不要沿用" in targeted_prompt                  # 但明確禁止沿用未查核數值
+
+    token = json.loads(next(c for c in chunks if c.startswith("data: ") and "token" in c)[len("data: "):])["token"]
+    assert "甲項為三十日。" in token          # 接地句原樣保留
+    assert "六個半月" not in token            # 未接地句被換掉
+    assert "資料未明確記載" in token
+
+    done = next(c for c in chunks if c.startswith("event: status\n") and '"phase": "done"' in c)
+    assert json.loads(done.split("\n", 1)[1][len("data: "):])["regenerated"] is True
+
+
+@pytest.mark.asyncio
+async def test_chat_targeted_correction_parse_failure_falls_back_to_full_regen(monkeypatch):
+    """定向修訂的 LLM 輸出行數對不上（解析失敗）→ 退回整份限制性重生成
+    （`_build_constrained_prompt()`，factored、不給草稿）。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "甲項為三十日", "subject": "甲項", "rel_type": "HAS_PROPERTY", "object": "三十日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["甲項為三十日。乙項為六個半月。", "亂七八糟、沒有依格式輸出的回應", "資料未明確記載，無法確認。"],
+        grounding_payloads=[
+            json.dumps({"claims": [
+                {"statement": "甲項為三十日。", "is_claim": True, "supported": True, "reason": ""},
+                {"statement": "乙項為六個半月。", "is_claim": True, "supported": False, "reason": "查無"},
+            ]}),
+            json.dumps({"claims": [{"statement": "資料未明確記載，無法確認。", "is_claim": True, "supported": True, "reason": ""}]}),
+        ],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    chunks = await _drain(await agent.chat(ChatRequest(question="甲項乙項各多久？", kg_id=kg_id)))
+
+    assert len(llm.prompts) == 3  # 草稿 + 定向修訂(失敗) + 整份重生
+    assert "下列片段來自一份草稿答案" not in llm.prompts[2]  # 整份重生 prompt 不含草稿片段
+    assert "資料未明確記載" in llm.prompts[2]
+    token = json.loads(next(c for c in chunks if c.startswith("data: ") and "token" in c)[len("data: "):])["token"]
+    assert "六個半月" not in token
+
+
+@pytest.mark.asyncio
+async def test_chat_full_regen_when_no_grounded_claim_to_keep(monkeypatch):
+    """草稿裡每一句主張都未接地（`grounded_claim_count == 0`）→ 沒有東西可保留，
+    走既有的整份 factored 重生，不呼叫定向修訂。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "甲項為三十日", "subject": "甲項", "rel_type": "HAS_PROPERTY", "object": "三十日"}]
+    embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
+    llm = _FakeStreamLLM(
+        answers=["甲項為十日。乙項為六個半月。", "資料未明確記載，無法確認。"],
+        grounding_payloads=[
+            json.dumps({"claims": [
+                {"statement": "甲項為十日。", "is_claim": True, "supported": False, "reason": "查無"},
+                {"statement": "乙項為六個半月。", "is_claim": True, "supported": False, "reason": "查無"},
+            ]}),
+            json.dumps({"claims": [{"statement": "資料未明確記載，無法確認。", "is_claim": True, "supported": True, "reason": ""}]}),
+        ],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, embedding, facts=facts)
+
+    chunks = await _drain(await agent.chat(ChatRequest(question="甲項乙項各多久？", kg_id=kg_id)))
+
+    assert len(llm.prompts) == 2  # 草稿 + 整份重生（沒有定向修訂那次）
+    assert "下列片段來自一份草稿答案" not in llm.prompts[1]
+    done = next(c for c in chunks if c.startswith("event: status\n") and '"phase": "done"' in c)
+    assert json.loads(done.split("\n", 1)[1][len("data: "):])["regenerated"] is True
+
+
+@pytest.mark.asyncio
 async def test_chat_emits_status_events_in_expected_order(monkeypatch):
     kg_id = uuid4()
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])

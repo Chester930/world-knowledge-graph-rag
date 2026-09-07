@@ -698,6 +698,70 @@ async def _generate_decomposed_constrained_answer(
     return "\n\n".join(parts)
 
 
+_TARGETED_FIX_RE = re.compile(r"^\s*修正\s*\d+\s*[:：]\s*(.+?)\s*$")
+
+
+async def _targeted_correction(
+    question: str,
+    ungrounded_statements: list[str],
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    question_vector: list[float] | None,
+    llm_provider: LLMProvider,
+) -> list[str] | None:
+    """報告32 §9 G1（2b 定向修訂）：只重寫草稿裡未接地的主張句，一次 LLM 呼叫。
+
+    回傳與 `ungrounded_statements` 等長、順序對應的修正句清單；LLM 輸出行數對
+    不上（解析失敗）時回傳 `None`，由呼叫端退回整份限制性重生成。
+
+    ⚠️ **與 `_build_constrained_prompt()` 的 CoVe factored 取捨的關係**：這裡把
+    未接地片段放進 prompt（CoVe「joint」的一面），但 prompt 明確禁止沿用片段裡
+    未經查核的具體數字／期限／金額——CoVe（Dhuliawala et al., 2023）擔心的
+    「修正步驟看得到草稿→傾向重複草稿的錯誤」對象正是這些值；保留的只是片段
+    的問題框架。草稿裡已接地的句子完全不進這個呼叫、零重複風險。整段重寫
+    （`grounded_claim_count == 0` 時）仍走 `_build_constrained_prompt()` 的 factored。
+    """
+    if not ungrounded_statements:
+        return []
+    bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
+    if bfs_lines or fact_lines:
+        arranged = await _arrange_fact_lines(
+            question, bfs_lines, fact_lines,
+            embedding_provider=embedding_provider, question_vector=question_vector,
+        )
+        facts = "\n".join(arranged)
+    else:
+        facts = "（本輪未檢索到任何事實）"
+    fragments = "\n".join(f"{i}. {s}" for i, s in enumerate(ungrounded_statements, start=1))
+    prompt = f"""{_TAIWAN_CONTEXT_INSTRUCTION}
+
+以下是從知識圖譜檢索到的事實，這是你這次「唯一」能引用的資訊來源：
+{facts}
+
+原問題：{question}
+
+下列片段來自一份草稿答案，未通過事實查核（片段裡的具體數字／期限／金額在上方事實清單找不到依據）：
+{fragments}
+
+請針對每一個片段輸出一行修正，嚴格遵守：
+1. 若事實清單裡有該片段所問內容的正確依據 → 只用事實清單的內容，把它改寫成正確的一句。
+2. 若事實清單裡沒有 → 輸出「（此部分）資料未明確記載，無法確認」，並簡短指出缺的是問題的哪個部分。
+3. 不要沿用原片段裡任何未經查核的具體數字／期限／金額／結論。
+4. 一個片段一行、順序對應，每行格式固定為「修正N：<內容>」（N 為片段編號）。
+"""
+    raw = "".join([tok async for tok in llm_provider.stream(prompt)])
+    fixes: list[str] = [
+        m.group(1).strip()
+        for line in raw.splitlines()
+        if (m := _TARGETED_FIX_RE.match(line))
+    ]
+    if len(fixes) != len(ungrounded_statements):
+        return None
+    return fixes
+
+
 async def _build_prompt(
     question: str,
     triples: list[SVOTriple],
@@ -978,19 +1042,46 @@ async def chat(payload: ChatRequest):
         # is_claim` docstring。
         ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
         if payload.use_svo and ungrounded_claims:
-            # 報告27 C#2 M1（2026-09-05）：重生路徑也要保留分解結構，否則退回
-            # 單次生成整個複合問題、抵銷分解本身的效果（見
-            # `_generate_decomposed_constrained_answer()` docstring 的真實 bug 案例）。
-            if len(sub_questions) > 1 and (triples or fact_results):
+            # 報告32 §9 G1（2b 定向修訂）：先看草稿有沒有可保留的接地主張——
+            # `grounded_claim_count = is_claim 句數 − 未接地 is_claim 句數`。T1 證實
+            # 「觸發後整段重寫」的粒度本身有問題：~75% 觸發率、且常把草稿裡已接地
+            # 的正確部分一併改成「資料未明確記載」（見 03 §3.6 §2b 段）。
+            claim_count = sum(1 for c in grounding if c.is_claim)
+            grounded_claim_count = claim_count - len(ungrounded_claims)
+            corrections: list[str] | None = None
+            if grounded_claim_count > 0:
+                # 草稿部分正確 → 只重寫未接地的主張句，一次 LLM 呼叫；接地句與
+                # 非主張句原樣保留。解析失敗回傳 None → 下面退回整份重生。
+                corrections = await _targeted_correction(
+                    payload.question,
+                    [c.statement for c in ungrounded_claims],
+                    triples, fact_results,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    llm_provider=llm_provider,
+                )
+            if corrections is not None:
+                # 從 grounding 逐句清單重組（不用字串取代——回傳的 statement 可能與
+                # 草稿原字不完全一致）；未接地主張句換成對應修正，其餘原樣。
+                fix_i = 0
+                out_lines: list[str] = []
+                for c in grounding:
+                    if c.is_claim and not c.supported:
+                        out_lines.append(corrections[fix_i])
+                        fix_i += 1
+                    else:
+                        out_lines.append(c.statement)
+                final_answer = "\n".join(out_lines)
+            elif len(sub_questions) > 1 and (triples or fact_results):
+                # 整份草稿沒有接地主張可保留（或定向修訂解析失敗）＋分解草稿 →
+                # 分解式整份重生（報告27 C#2 M1，保留分解結構）。
                 final_answer = await _generate_decomposed_constrained_answer(
                     sub_questions, triples, fact_results,
                     embedding_provider=embedding_provider, question_vector=question_vector,
                     llm_provider=llm_provider,
                 )
             else:
-                # 刻意不把草稿或未接地陳述傳進去——見 _build_constrained_prompt()
-                # docstring（CoVe 的 joint vs. factored 發現：修正步驟看得到原始
-                # 草稿會傾向重複草稿裡的錯誤內容）。
+                # 整份重寫 → 刻意不把草稿或未接地陳述傳進去，見 _build_constrained_prompt()
+                # docstring（CoVe 的 joint vs. factored 發現）。
                 constrained_prompt = await _build_constrained_prompt(
                     payload.question, triples, fact_results, payload.history,
                     embedding_provider=embedding_provider, question_vector=question_vector,
