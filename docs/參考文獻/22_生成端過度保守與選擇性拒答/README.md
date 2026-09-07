@@ -69,5 +69,10 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 
 **尚未下載、G2 設計時再評估**：RAG-Zeval（arXiv:2505.22430，rule-guided reasoning 的 RAG 回答評估，回應 RAGAS 過度嚴格）；DROP（Dua et al. 2019，NAACL，discrete/numeric reasoning over text 的奠基基準——若 G2 要正式定位「數值級距查表」這個能力）。RAGAS 對「可推得但非逐字」claim 的過度懲罰是社群廣泛記錄的現象（如 Nike「1967 年成立」可由「1967 年 incorporated」推得卻可能被判 unfaithful），非單一 canonical 論文，G2 設計時以 RAGAS 官方文件 + VERITAS 佐證即可。
 
+**候選參考專案（僅查證存在性，star 數／是否採用留待 G2 設計時）**：
+- [`github.com/confident-ai/deepeval`](https://github.com/confident-ai/deepeval) —— DeepEval，開源 LLM 評估框架，其 faithfulness 指標（claim 抽取＋LLM-as-judge）與 RAGAS 走不同「字面 vs 語用」尺度的實作對照——`verify_fact_grounding()` 要放寬「明示推論」時的既有實作參考。
+- VERITAS（arXiv:2510.13272）——官方 repo URL 待查（RL 訓練框架，本專案 prompt-only 路線不直接複用，僅問題定位）。
+- RAGAS（[`explodinggradients/ragas`](https://github.com/explodinggradients/ragas)，已在 `docs/參考文獻/05`）——`verify_fact_grounding()` 的方法來源，其官方文件對「可推得但非逐字」的處理即為對照基準。
+
 **⚠️ G2 的碼與設計尚未動**——依使用者指示，等 KG #4 抽完、§6.2 窗口確認 Q8 在 F2/F3b/發現29 之後是否還失敗，再設計（prompt 區間比對提示 / 報告28 分解擴充 / grounding 對「明示推論」放寬）。
 - [ ] `is_claim` 分類本身由核對模型（`qwen2.5:7b`）判定，可能誤判（把真主張判成非主張 → 漏觸發該重生成的情況）——真實觸發率與誤判率待實測。

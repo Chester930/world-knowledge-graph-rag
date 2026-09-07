@@ -66,4 +66,9 @@
 
 **尚未下載、G3 設計時再評估**：RoMQA（Zhong et al. 2022，robust multi-answer QA）、Atomic Self-Consistency（arXiv:2405.13131，取樣多次＋合併原子單元提升 recall，屬修法方向）、Inter-Passage Verification for Multi-evidence Multi-answer QA（Findings ACL 2025，高召回後驗證，屬修法方向）。
 
+**候選參考專案（僅查證存在性，star 數／是否採用留待 G3 設計時）**：
+- [`github.com/samsam3232/qampari`](https://github.com/samsam3232/qampari) —— QAMPARI 官方 repo，資料集＋retrieve-and-read baseline，P/R/F1 度量。G3 的問題/評估參考。
+- Atomic Self-Consistency（arXiv:2405.13131）——官方 repo URL 待查；在 QAMPARI 上用 P/R/F1 度量、以「取樣多次＋合併原子單元」提升 recall，屬修法方向候選。
+- RAGAS（[`explodinggradients/ragas`](https://github.com/explodinggradients/ragas)，已在 `docs/參考文獻/05`）——其 claim decomposition 程式碼是「一份 N 段分級要不要當一個 claim」粒度問題的既有實作先例，交叉引用即可。
+
 **⚠️ G3 的碼與設計尚未動**——依使用者指示，等 KG #4 抽完、§6.2 窗口確認 F2/F3b 之後 Q3/Q6 是否還真的失敗，再用真實診斷資料設計。
