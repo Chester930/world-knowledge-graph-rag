@@ -533,7 +533,7 @@ _MEASURE_PATTERN = re.compile(
     r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍|歲|人|名|週|度|種|類|條|款|項|點)"
 )
 
-# 裸數字（無須接單位）緊鄰「以上／以下／以內／未滿／超過」的比較句式偵測
+# 數字＋（選配單位）＋「以上／以下／以內／未滿／超過」的比較句式偵測
 # （報告29 §2.4／§4.3，2026-09-05，報告26 §4 #3 Q8 真實根因診斷）。法規門檻／
 # 級距表（變量係數表、罰鍰級距等）常見寫法如「1 以上，未滿 10」「100 以上，
 # 未滿 1000」——數字後面接的是比較詞而非 `_MEASURE_PATTERN` 認得的單位，
@@ -544,10 +544,45 @@ _MEASURE_PATTERN = re.compile(
 # 同樣是早退機制（見該函式 §4.3 設計說明：量詞類實體只准精確比對，不同數值
 # range 之間沒有「同類可合併」的中間地帶，跟 `_SCOPE_MODIFIER_PATTERN` 的
 # 雙向過濾機制不同）。
+#
+# v2（報告32 §9.3 F2，2026-09-07）：v1 的 `[數字]\s*(以上|以下|以內)` 要求數字
+# 與比較詞相鄰（只允許空白），中間夾一個單位就失效——真實案例 `血中鉛濃度在
+# 十 μg/dl 以上者` 被誤併進 `五 μg/dl 以上未達十 μg/dl`（第一級），「≥10→第三級」
+# 事實從圖中消失（報告32 Q6）。改為在數字與比較詞之間允許至多 12 個非標點字元
+# （非貪婪），涵蓋 `十 μg/dl 以上`、`二十公尺 以上`、`五百平方公尺 以上`；
+# 既有「1 以上，未滿 10」等案例無迴歸（`\s*` 是新字元類的子集）。
 _RANGE_COMPARATOR_PATTERN = re.compile(
-    r"[〇零一二三四五六七八九十百千萬0-9]+\s*(?:以上|以下|以內)"
-    r"|(?:未滿|超過)\s*[〇零一二三四五六七八九十百千萬0-9]+"
+    r"[〇零一二三四五六七八九十百千萬0-9]+[^，,。；;、（）()]{0,12}?(?:以上|以下|以內)"
+    r"|(?:未滿|超過)[^，,。；;、（）()]{0,12}?[〇零一二三四五六七八九十百千萬0-9]+"
 )
+
+# 序數／分數／小數／附表列舉守衛（報告32 §9.3 F3b，2026-09-07）——`_MEASURE_PATTERN`
+# （要單位）與 `_RANGE_COMPARATOR_PATTERN`（要比較詞）都抓不到的列舉主詞：
+# `第三級管理`（`級` 不在 `_MEASURE_PATTERN`，vs `第一級管理`）、`二分之一`／`五分之一`、
+# WBGT 溫度 `30.6℃`／`32.6℃`、變量係數 `1.25`／`1.5`、`附表一`／`附表二`、
+# `精密作業之一`／`精密作業之三`。同 `_RANGE_COMPARATOR_PATTERN` 走早退（這類名稱
+# 本身即精確列舉標記，不該跟任何東西模糊合併）。F3a「補 `_MEASURE_PATTERN` 單位表」
+# 刻意不做：`_MEASURE_PATTERN` 已被 `_naturalization_dropped_quantity()`（報告26 §4 #6）
+# 共用，擴大它會連帶讓自然語言化核對更嚴——`級` 走這裡、`公尺／μg/dl` 走 v2 的單位間隔。
+_ENUM_GUARD_PATTERN = re.compile(
+    r"第[〇零一二三四五六七八九十百千0-9]+級"
+    r"|[〇零一二三四五六七八九十百千0-9]+分之[〇零一二三四五六七八九十百千0-9]+"
+    r"|[0-9]+\.[0-9]+"
+    r"|附表[〇零一二三四五六七八九十0-9]+"
+    r"|之[〇零一二三四五六七八九十]+$"
+)
+
+# 範圍修飾詞守衛（報告29 §4.1／報告32 §9.3，2026-09-07）——「基礎量 vs 遞增量」：
+# `每一型式` vs `每增加一種型式`（`_edit_ratio`＝0.727、不含任何量詞，`_MEASURE_PATTERN`／
+# `_RANGE_COMPARATOR_PATTERN` 都不命中）。「增加／額外／追加／新增／逾／超出」這個修飾詞把
+# 「基礎量」改成「遞增量」，語意相反、表面極相似。與 `_MEASURE_PATTERN`／§4.3 的早退不同：
+# 此處做**雙向過濾**——比對迴圈前依「是否含範圍修飾詞」把候選清單與 `name` 分同異兩類、
+# 只保留同類候選再比對（含修飾詞的彼此仍可正常合併，不含的彼此也是）。
+_SCOPE_MODIFIER_PATTERN = re.compile(r"增加|增列|額外|追加|新增|另計|加計|超出")
+
+
+def _has_scope_modifier(name: str) -> bool:
+    return _SCOPE_MODIFIER_PATTERN.search(name) is not None
 
 
 def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
@@ -909,8 +944,24 @@ async def resolve_entity_name(
     # 「以上／以下／以內／未滿／超過」比較句式，`_MEASURE_PATTERN` 抓不到
     # （數字後面接的是比較詞不是單位），法規門檻/級距表常見，同樣只准精確
     # 比對、不做模糊合併——理由見 `_RANGE_COMPARATOR_PATTERN` 定義處註解。
-    if _MEASURE_PATTERN.search(name) or _RANGE_COMPARATOR_PATTERN.search(name):
+    # 2026-09-07（報告32 §9.3 F3b）：序數／分數／小數／附表列舉主詞（`第三級管理`／
+    # `二分之一`／`30.6℃`／`附表一`／`精密作業之一`），前兩個守衛都抓不到，加進同一處早退。
+    if (
+        _MEASURE_PATTERN.search(name)
+        or _RANGE_COMPARATOR_PATTERN.search(name)
+        or _ENUM_GUARD_PATTERN.search(name)
+    ):
         return name
+
+    # 2026-09-07（報告29 §4.1／報告32 §9.3 §4.1）：範圍修飾詞雙向過濾。「基礎量 vs
+    # 遞增量」——`每一型式`（無修飾詞）不該跟 `每增加一種型式`（有「增加」）模糊合併
+    # （`_edit_ratio`＝0.727、無量詞、上面的早退守衛都不命中）。與早退不同，這裡只是
+    # **縮小候選集**：把 `name` 與各候選依「是否含範圍修飾詞」分同異兩類，下方的模糊
+    # 比對（編輯距離／cosine）只在同類候選內進行；exact 相符不受影響（仍先全量檢查）。
+    _name_has_scope_mod = _has_scope_modifier(name)
+    fuzzy_candidates = [
+        c for c in candidates if _has_scope_modifier(c["name"]) == _name_has_scope_mod
+    ]
 
     # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher
     # 查詢沒有 ORDER BY，Neo4j 回傳順序非決定性——若多個候選同時超過編輯距離
@@ -921,11 +972,13 @@ async def resolve_entity_name(
     # 先遇到的（Python min/max 對等值採穩定的「保留第一個」語意，但候選順序
     # 本身仍非決定性——此修復只保證「選到分數最高者」，不保證同分平局時的
     # 決定性，該情況本身即代表兩個候選對這次提及同樣合適，不影響合併正確性）。
-    best_edit_name: str | None = None
-    best_edit_ratio = 0.0
     for c in candidates:
         if c["name"] == name:
             return name
+
+    best_edit_name: str | None = None
+    best_edit_ratio = 0.0
+    for c in fuzzy_candidates:
         ratio = _edit_ratio(name, c["name"])
         if ratio >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD and ratio > best_edit_ratio:
             best_edit_ratio = ratio
@@ -939,7 +992,7 @@ async def resolve_entity_name(
     name_vec = await embedding_provider.encode(name)
     best_name: str | None = None
     best_score = 0.0
-    for c in candidates:
+    for c in fuzzy_candidates:
         candidate_vec = c.get("name_embedding") or (await embedding_provider.encode(c["name"]))
         score = cosine_similarity(name_vec, candidate_vec)
         if score > best_score:

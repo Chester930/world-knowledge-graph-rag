@@ -1355,6 +1355,93 @@ def test_range_comparator_pattern_matches_bare_number_comparisons():
         assert svc._RANGE_COMPARATOR_PATTERN.search(s) is None
 
 
+def test_range_comparator_pattern_v2_allows_unit_between_number_and_comparator():
+    """報告32 §9.3 F2：v1 要求數字緊鄰比較詞（只允許空白），中間夾一個單位就
+    失效——`血中鉛濃度在十 μg/dl 以上者` 被誤併進 `五 μg/dl 以上未達十 μg/dl`
+    （第一級），「≥10→第三級」事實從圖中消失（報告32 Q6）。v2 在數字與比較詞
+    間允許至多 12 個非標點字元。"""
+    for s in ["血中鉛濃度在十 μg/dl 以上者", "血中鉛濃度在五 μg/dl 以上未達十 μg/dl",
+              "高度在二公尺以上未滿五公尺者", "工程造價達新臺幣二億元以上",
+              "開挖面積達五百平方公尺以上"]:
+        assert svc._RANGE_COMPARATOR_PATTERN.search(s)
+    # v1 既有案例無迴歸
+    for s in ["1 以上，未滿 10 的容許濃度", "1000 以上的容許濃度", "未滿 1 的容許濃度",
+              "5 以下", "超過 20"]:
+        assert svc._RANGE_COMPARATOR_PATTERN.search(s)
+    # 一般名稱仍不誤觸發
+    for s in ["勞工健康服務事項", "母性健康保護期間", "台積電公司"]:
+        assert svc._RANGE_COMPARATOR_PATTERN.search(s) is None
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_range_with_unit_no_fuzzy_merge():
+    """報告32 §9.3 F2 整合：血中鉛濃度分級主詞（單位夾在數字與比較詞之間），
+    v1 守衛抓不到而被 `_edit_ratio` 誤併成第一級、丟失第三級門檻事實。"""
+    cands = [{"name": "血中鉛濃度在五 μg/dl 以上未達十 μg/dl", "alias_counts_json": "{}"}]
+    assert await svc.resolve_entity_name(
+        "血中鉛濃度在十 μg/dl 以上者", cands,
+    ) == "血中鉛濃度在十 μg/dl 以上者"
+
+
+def test_enum_guard_pattern_matches_ordinal_fraction_decimal_enumerations():
+    """報告32 §9.3 F3b：`_MEASURE_PATTERN`（要單位）與 `_RANGE_COMPARATOR_PATTERN`
+    （要比較詞）都抓不到的列舉主詞——序數（第N級、附表N、…之N）、分數、小數。"""
+    for s in ["第三級管理", "屬於第三級管理者", "第一級管理", "第二級管理",
+              "二分之一", "五分之一", "30.6℃", "32.6℃", "1.25", "1.5",
+              "附表一", "附表二", "精密作業之一", "精密作業之三"]:
+        assert svc._ENUM_GUARD_PATTERN.search(s)
+    # 一般名稱與已被其他守衛涵蓋的量詞名稱不應誤觸發
+    for s in ["台積電", "勞動基準法", "育嬰留職停薪", "新臺幣四千元",
+              "年齡未滿六歲者", "第十六條", "工作規則"]:
+        assert svc._ENUM_GUARD_PATTERN.search(s) is None
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_enum_guard_no_fuzzy_merge():
+    """報告32 §9.3 F3b 整合：`第三級管理` 與 `第一級管理` `_edit_ratio` 高（只差
+    一字），舊守衛抓不到（`級` 不在 `_MEASURE_PATTERN`、無比較詞）；`二分之一`
+    與 `五分之一` 同理。"""
+    assert await svc.resolve_entity_name(
+        "第三級管理", [{"name": "第一級管理", "alias_counts_json": "{}"}],
+    ) == "第三級管理"
+    assert await svc.resolve_entity_name(
+        "二分之一", [{"name": "五分之一", "alias_counts_json": "{}"}],
+    ) == "二分之一"
+
+
+def test_scope_modifier_pattern_matches_increment_words():
+    """報告29 §4.1／報告32 §9.3 §4.1：範圍修飾詞（增加／增列／額外／追加／新增／
+    另計／加計／超出）標記「遞增量」，與「基礎量」語意相反而表面相似。"""
+    for s in ["每增加一種型式", "增列項目", "額外給付", "追加預算", "新增條文",
+              "超出部分"]:
+        assert svc._has_scope_modifier(s)
+    for s in ["每一型式", "台積電", "台積電公司", "同時申請多種型式且皆屬相同種類者",
+              "逾期申請"]:
+        assert not svc._has_scope_modifier(s)
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_scope_modifier_bidirectional_filter():
+    """報告29 §4.1／報告32 §9.3 §4.1：`每一型式`（無修飾詞）與 `每增加一種型式`
+    （有「增加」）`_edit_ratio`＝0.727、無量詞、早退守衛都不命中——雙向過濾把
+    兩者分屬異類、不做模糊比對。反向：兩個都無修飾詞的一般名稱仍正常合併。"""
+    # 異類 → 不合併
+    assert await svc.resolve_entity_name(
+        "每一型式", [{"name": "每增加一種型式", "alias_counts_json": "{}"}],
+    ) == "每一型式"
+    assert await svc.resolve_entity_name(
+        "每增加一種型式", [{"name": "每一型式", "alias_counts_json": "{}"}],
+    ) == "每增加一種型式"
+    # 同類（皆無修飾詞）→ 迴歸：仍正常合併
+    assert await svc.resolve_entity_name(
+        "台積電", [{"name": "台積電公司", "alias_counts_json": "{}"}],
+    ) == "台積電公司"
+    # 同類（皆有修飾詞）→ 仍可正常合併
+    assert await svc.resolve_entity_name(
+        "額外給付工資", [{"name": "額外給付之工資", "alias_counts_json": "{}"}],
+    ) == "額外給付之工資"
+
+
 @pytest.mark.asyncio
 async def test_resolve_entity_name_picks_best_edit_ratio_match_not_first():
     """迴歸測試（2026-08-19 真實審查發現並修復）：`_fetch_entity_candidates()`
