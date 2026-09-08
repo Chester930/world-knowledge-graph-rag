@@ -47,6 +47,10 @@ CREATE INDEX IF NOT EXISTS idx_task_queue_status ON task_queue (kg_id, status, c
 def _connect(db_path: Path) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path))
+    # 多 Worker 併發（`claim_next_pending()`）時，兩個連線同時要寫入會有一個
+    # 拿不到寫鎖——讓它等鎖（最多 15s）而不是立刻拋 `sqlite3.OperationalError:
+    # database is locked`。單 Worker 情境下這個設定沒有任何行為影響。
+    conn.execute("PRAGMA busy_timeout = 15000")
     conn.executescript(_SCHEMA)
     return conn
 
@@ -117,6 +121,50 @@ def next_pending(db_path: Path, kg_id: str | None = None) -> tuple[str, str, int
 
     with closing(_connect(db_path)) as conn:
         row = conn.execute(query, params).fetchone()
+        return (row[0], row[1], row[2]) if row else None
+
+
+def claim_next_pending(
+    db_path: Path, kg_id: str | None = None
+) -> tuple[str, str, int] | None:
+    """`WORKER`（多 Worker 版）：原子地挑出下一個 `pending` Chunk（依
+    `chunk_index` 由小到大）**並同時把它標記為 `processing`**，回傳
+    `(kg_id, source, chunk_index)`；沒有待處理項目時回傳 `None`。
+
+    `next_pending()` 只做 `SELECT`、由呼叫端（`_process_one()` 第一行）另外
+    轉 `processing`——單一 Worker 沒問題，但兩個 Worker 併跑時會在
+    `SELECT` 與 `UPDATE` 之間各自拿到同一列，重複抽取、產生重複 Fact 節點
+    （`merge_triples_to_graph()` 的 Fact 是 `CREATE`、非冪等）。本函式把
+    「挑選 + 認領」合併成單一 `UPDATE ... RETURNING` 語句，SQLite 對該語句
+    取寫鎖，第二個併發呼叫會在鎖上等待（見 `_connect()` 的 `busy_timeout`），
+    等前一個認領完成後其子查詢自然跳過已變 `processing` 的那列、挑到下一列。
+
+    `next_pending()` 保留不動（`main.py` 的單一全域 Worker 仍用它，且測試
+    與既有呼叫端相容）。`_process_one()` 第一行仍會 `update_status(...,
+    'processing')`——對已被本函式認領的列是無害的冪等寫入，也讓
+    `_process_one()` 可以被直接呼叫（例如定向重抽腳本）而不需要先認領。
+    """
+    where = "status = 'pending'"
+    params: tuple = ()
+    if kg_id is not None:
+        where += " AND kg_id = ?"
+        params = (kg_id,)
+
+    sql = f"""
+        UPDATE task_queue
+        SET status = 'processing', updated_at = datetime('now')
+        WHERE (kg_id, source, chunk_index) = (
+            SELECT kg_id, source, chunk_index FROM task_queue
+            WHERE {where}
+            ORDER BY chunk_index ASC
+            LIMIT 1
+        )
+        RETURNING kg_id, source, chunk_index
+    """
+
+    with closing(_connect(db_path)) as conn:
+        row = conn.execute(sql, params).fetchone()
+        conn.commit()
         return (row[0], row[1], row[2]) if row else None
 
 
