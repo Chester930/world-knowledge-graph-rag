@@ -53,12 +53,21 @@ def _strip_json_fence(raw: str) -> str:
     return fence.group(1).strip() if fence else cleaned
 
 
-def _grounding_prompt(sentences: Sequence[str], fact_texts: Sequence[str]) -> str:
+def _grounding_prompt(
+    sentences: Sequence[str],
+    fact_texts: Sequence[str],
+    *,
+    question: str = "",
+) -> str:
     facts_block = "\n".join(f"{i}. {text}" for i, text in enumerate(fact_texts, start=1))
     sentences_block = "\n".join(f"{i}. {text}" for i, text in enumerate(sentences, start=1))
+    # A′（報告32 §9 G2）：核對「查表例外僅限逐字對照、且題目數值本身要逐字出現
+    # 在事實清單或問題裡」需要看到問題本身。question 為空（裸單元測試）時省略此段，
+    # prompt 與舊版逐字相同。
+    question_block = f"使用者問題：{question}\n\n" if question.strip() else ""
     return f"""你是事實查核員。請核對「回答」裡的每一句陳述。
 
-已知事實：
+{question_block}已知事實：
 {facts_block}
 
 回答（已依句子拆分，逐句列出）：
@@ -72,8 +81,8 @@ is_claim（這句是不是「需要被事實支持的具體主張」）：
 
 supported（僅在 is_claim 為 true 時才有意義；is_claim 為 false 時 supported 一律填 true）：
 - true：這句主張的具體內容能在已知事實清單裡找到對應依據。
-- true（明示查表推論例外）：若已知事實清單裡有一組「數值區間 → 對應值」的分段對照（例如「1 以上未滿 10 → 變量係數為 2」「10 以上未滿 100 → 變量係數為 1.5」這種分段對照表），而這句主張只是把問題給定的一個具體數值，對應到它所落在的那個區間、取該區間在清單裡明列的對應值，這種「把清單裡明列的分段對照表套用到題目給定的數值」算 supported=true。此例外僅限數值區間／門檻／分級的查表對應，且用到的每一列對照、以及題目數值本身，都必須逐字出現在事實清單或問題裡。
-- false：這句主張的具體內容在已知事實清單裡找不到依據——除了上面「明示查表推論例外」那一種情形以外，即使主題相關、即使是合理推論，只要具體數字或結論沒有在清單裡出現過，就算 false，不可因為「聽起來合理」就判定 true。
+- true（明示查表推論例外）：若已知事實清單裡有一組「數值區間 → 對應值」的分段對照（例如「1 以上未滿 10 → 變量係數為 2」「10 以上未滿 100 → 變量係數為 1.5」這種分段對照表），而這句主張只是把問題給定的一個具體數值，對應到它所落在的那個區間、取該區間在清單裡明列的對應值，這種「把清單裡明列的分段對照表套用到題目給定的數值」算 supported=true。此例外僅限數值區間／門檻／分級的查表對應，且用到的每一列對照都必須逐字出現在事實清單裡（題目數值則須逐字出現在上方「使用者問題」或事實清單裡）。此例外只在「這句主張所用的數值，嚴格落在它所引用那一列明列的上下界之內」時成立——若這句主張取的是「最接近的一列」、或所用數值落在該列明列下界以下／上界以上、或落在相鄰兩列之間的間隙，都不算查表命中，一律依下面的 false 處理。
+- false（含查表未命中）：這句主張的具體內容在已知事實清單裡找不到依據——除了上面「明示查表推論例外」那一種情形以外，即使主題相關、即使是合理推論，只要具體數字或結論沒有在清單裡出現過，就算 false，不可因為「聽起來合理」就判定 true。下列情形即使事實清單裡有分段對照表也一律算 false：(a) 這句主張所用的數值沒有落在任何一列明列的區間內；(b) 事實清單只出現了部分級距／部分區間（例如三級只給了兩級、對照表中間缺一段），而這句主張卻對沒被列出的那一段給了確定答案。這兩種情形的正確回答是承認查不到，挑一列硬套算未接地。
 
 只輸出 JSON，不要輸出解釋。
 
@@ -86,6 +95,8 @@ async def verify_fact_grounding(
     answer_text: str,
     fact_texts: Sequence[str],
     llm_provider: LLMProvider | None,
+    *,
+    question: str = "",
 ) -> list[ClaimGrounding]:
     """核對 `answer_text` 逐句是否被 `fact_texts` 支持。
 
@@ -115,6 +126,10 @@ async def verify_fact_grounding(
     RAGAS 的 LLM 式原子陳述句拆解——一個句子若包含多個獨立陳述，本函式只能
     整句判斷；`is_claim` 分類本身也由核對模型判定、可能誤判（把真主張判成
     非主張會漏掉該重生成的情況）。是否改用 LLM 拆解留待第五章消融實驗評估。
+
+    `question`（keyword-only，2026-09-08 報告32 §9 A′）：供 `_grounding_prompt()`
+    核對 G2「明示查表推論例外」的「題目數值須逐字出現」要求。未傳入時該半句
+    退化為僅核對事實清單側，其餘行為與舊版逐字相同。
     """
     if llm_provider is None or not answer_text.strip():
         return []
@@ -129,7 +144,9 @@ async def verify_fact_grounding(
             for s in sentences
         ]
 
-    raw = await llm_provider.generate_json(_grounding_prompt(sentences, fact_texts))
+    raw = await llm_provider.generate_json(
+        _grounding_prompt(sentences, fact_texts, question=question)
+    )
     try:
         payload = json.loads(_strip_json_fence(raw))
         claims = payload.get("claims", []) if isinstance(payload, dict) else payload

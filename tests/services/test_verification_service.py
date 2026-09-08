@@ -150,6 +150,31 @@ def test_grounding_prompt_carries_interval_lookup_carve_out():
     assert "不可因為「聽起來合理」就判定 true" in prompt
 
 
+def test_grounding_prompt_interval_lookup_has_coverage_precondition():
+    """報告32 §9 A/B：查表例外只在數值「嚴格落在明列列的上下界內」時成立，
+    取最近一列／落在間隙／越界 → 一律回到 false（含查表未命中）。級距缺一段
+    卻硬答也算未接地。"""
+    prompt = _grounding_prompt(["某句陳述。"], ["1 以上未滿 10 → 變量係數為 2"])
+    assert "嚴格落在它所引用那一列明列的上下界之內" in prompt
+    assert "false（含查表未命中）" in prompt
+    assert "只出現了部分級距" in prompt
+    assert "挑一列硬套算未接地" in prompt
+
+
+def test_grounding_prompt_includes_question_when_supplied():
+    """報告32 §9 A′：傳入 question 時 prompt 帶「使用者問題：」段，供核對
+    查表例外的「題目數值須逐字出現」要求。"""
+    prompt = _grounding_prompt(
+        ["某句。"], ["某事實。"], question="5 ppm 時變量係數是多少？"
+    )
+    assert "使用者問題：5 ppm 時變量係數是多少？" in prompt
+
+
+def test_grounding_prompt_omits_question_block_when_absent():
+    """A′：question 為空時 prompt 與舊版逐字相同（不含「使用者問題：」段）。"""
+    assert "使用者問題：" not in _grounding_prompt(["某句。"], ["某事實。"])
+
+
 @pytest.mark.asyncio
 async def test_strips_markdown_code_fence_from_response():
     llm = FakeLLM(payload="""```json

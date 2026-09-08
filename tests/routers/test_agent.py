@@ -237,6 +237,9 @@ async def test_build_prompt_allows_interval_lookup_inference():
 
     assert "數值區間 → 對應值" in prompt
     assert "落在哪一個區間" in prompt
+    # 報告32 §9 A/B：收緊為「嚴格落在上下界內」+ 缺級距／越界時不得硬套
+    assert "嚴格" in prompt and "落在某一列明列的上下界之內" in prompt
+    assert "查不到題目數值對應的那一段" in prompt
 
 
 @pytest.mark.asyncio
@@ -255,6 +258,8 @@ async def test_build_constrained_prompt_allows_interval_lookup_inference():
     assert "唯一例外" in prompt
     assert "分段查表" in prompt
     assert "不可以用推論" in prompt  # 一般禁令仍在
+    # 報告32 §9 A/B：越界／缺級距時仍回到規則 2 拒答，不可挑最接近的一列
+    assert "不可挑最接近的一列硬套" in prompt
 
 
 @pytest.mark.asyncio

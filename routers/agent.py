@@ -868,14 +868,21 @@ async def _build_prompt(
             "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，"
             "但務必清楚區分哪些是根據圖譜事實、哪些是你自己的補充。"
             "回答前請逐條檢視上方事實清單中每一項，判斷是否與問題相關，不要遺漏任何一項可用的事實。"
-            # 報告32 §9 G2（2026-09-08）：Q8 型「查表 + 區間比對」組合推論——事實
-            # 清單給了分段對照表、問題給了一個具體數值，模型常不做「落在哪一段」
-            # 這步而直接答「未記載」。明確允許這一種確定性推論（且只有這一種）。
+            # 報告32 §9 G2（2026-09-08；A/B 收緊 2026-09-08）：Q8 型「查表 + 區間
+            # 比對」組合推論——事實清單給了分段對照表、問題給了一個具體數值，模型
+            # 常不做「落在哪一段」這步而直接答「未記載」。明確允許這一種確定性推論
+            # （且只有這一種），但只在數值「嚴格落在某一明列列的上下界內」時允許——
+            # 不准取最近的一列、不准外插到沒檢索到的級距（RefusalBench
+            # GranularityMismatch：模型最常把「級距缺一段」誤當成可查表而硬答）。
             "若上述事實清單裡有一組「數值區間 → 對應值」的分段對照（例如"
             "「1 以上未滿 10 → 變量係數 2」「10 以上未滿 100 → 變量係數 1.5」），"
-            "而問題給了一個具體數值，請直接判斷該數值落在哪一個區間、取該區間"
-            "在清單裡明列的對應值作答，並註明用了哪一列——這種把清單明列的分段"
-            "對照表套用到題目數值的推論是允許的，不算臆測。"
+            "而問題給了一個具體數值，請判斷該數值落在哪一個區間；只有當它「嚴格"
+            "落在某一列明列的上下界之內」時，才取該區間在清單裡明列的對應值作答、"
+            "並註明用了哪一列——這種把清單明列的分段對照表套用到題目數值的推論"
+            "是允許的，不算臆測。"
+            "但若該數值沒有落在任何一列明列的區間內，或清單只檢索到部分區間／"
+            "部分分級（你無法確認是否還有沒被檢索到的級距），不要挑最接近的一列"
+            "硬套，這部分請回答「事實清單只有部分級距，查不到題目數值對應的那一段」。"
             # 報告32 §9 G3（2026-09-08）：Q3/Q6 型「分 N 段回答」——三段年齡工時、
             # 三級血中鉛管理。真實失效：把「未滿六歲」與「未滿六個月」（字樣相近）
             # 混段、或整段漏掉一段。逐段對照、每段獨立配自己那條事實。
@@ -967,7 +974,7 @@ async def _build_constrained_prompt(
 {history_block}問題：{question}
 
 請回答上述問題，並嚴格遵守：
-1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。唯一例外（報告32 §9 G2）：事實清單裡有「數值區間 → 對應值」的分段對照表（例如「1 以上未滿 10 → 變量係數 2」）、問題又給了一個具體數值時，可以判斷該數值落在哪一個區間、取該區間在清單裡明列的對應值作答，並註明用了哪一列；此例外僅限這種分段查表，其他任何推論仍一律禁止。
+1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。唯一例外（報告32 §9 G2）：事實清單裡有「數值區間 → 對應值」的分段對照表（例如「1 以上未滿 10 → 變量係數 2」）、問題又給了一個具體數值、且該數值嚴格落在某一列明列的上下界之內時，可以取該區間在清單裡明列的對應值作答，並註明用了哪一列；此例外僅限這種分段查表。若該數值沒有落在任何一列明列的區間內，或清單只有部分級距（缺了中間或兩端某一段），仍依規則 2 回答「資料未明確記載，無法確認」，不可挑最接近的一列硬套。其他任何推論一律禁止。
 2. 若事實清單不足以完整回答問題的某個部分，該部分請回答「資料未明確記載，無法確認」，並簡短說明具體是哪個部分找不到依據（例如：「事實清單中沒有提到婚假的天數」），不要臆測或用自己的知識填補。
 3. 回答前請逐條檢視上方事實清單中每一項，確認是否有跟問題相關卻被你遺漏的事實——事實清單已依與問題的相關性排序，最相關的通常在清單前段。
 4. 若你在回答的任何一部分已經引用某條事實作答，後面的摘要或結論不可以再說這項資訊「未記載」或「無法確認」——同一份事實清單內，已經用過的事實視為確定可用，前後結論必須一致。
@@ -1123,7 +1130,9 @@ async def chat(payload: ChatRequest):
         fact_texts = [line.lstrip("- ") for line in fact_lines]
 
         yield f"event: status\ndata: {json.dumps({'phase': 'verifying'})}\n\n"
-        grounding = await verify_fact_grounding(draft_answer, fact_texts, llm_provider)
+        grounding = await verify_fact_grounding(
+            draft_answer, fact_texts, llm_provider, question=payload.question
+        )
 
         final_answer = draft_answer
         regenerated = False
@@ -1194,7 +1203,9 @@ async def chat(payload: ChatRequest):
             regenerated = True
             # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
             # 而非已經被取代的草稿。
-            grounding = await verify_fact_grounding(final_answer, fact_texts, llm_provider)
+            grounding = await verify_fact_grounding(
+                final_answer, fact_texts, llm_provider, question=payload.question
+            )
 
         # 報告32 §9 G3 completeness guard：分段/分級問題（三段年齡工時、三級
         # 血中鉛管理）——最終答案偶爾整段漏掉一段，且接地核對抓不到「缺內容」
@@ -1211,7 +1222,9 @@ async def chat(payload: ChatRequest):
                     llm_provider=llm_provider,
                 )
                 regenerated = True
-                grounding = await verify_fact_grounding(final_answer, fact_texts, llm_provider)
+                grounding = await verify_fact_grounding(
+                    final_answer, fact_texts, llm_provider, question=payload.question
+                )
                 missing = _missing_tier_members(final_answer, tier_families)
             if missing:
                 supplement = "\n".join(
