@@ -13,7 +13,13 @@ profile → per-request override。前三層由 `ConfigSource` 提供，`ConfigL
 deep-merge 後建構出**深度不可變**的 `KGConfig`（pydantic frozen model，巢狀亦
 frozen）。
 """
-from core.kg_config.loader import ConfigLoader, deep_merge
+from core.kg_config.loader import (
+    CONFIG_SCHEMA_VERSION,
+    MIN_CONFIG_SCHEMA_VERSION,
+    ConfigLoader,
+    ConfigSchemaVersionError,
+    deep_merge,
+)
 from core.kg_config.model import (
     BfsConfig,
     DecomposeConfig,
@@ -50,6 +56,9 @@ __all__ = [
     "RoutingConfig",
     "DomainConfig",
     "ConfigLoader",
+    "ConfigSchemaVersionError",
+    "CONFIG_SCHEMA_VERSION",
+    "MIN_CONFIG_SCHEMA_VERSION",
     "deep_merge",
     "ConfigSource",
     "DictConfigSource",

@@ -14,16 +14,48 @@ config/
 
 - 副檔名分派：`.json`（一定支援）、`.toml`（Python 3.11+ 內建）、`.yaml`（需另裝 PyYAML）。
 - 檔案頂層必須是 mapping，**只寫要覆蓋的鍵**（比照 Kustomize overlay）。
+- 以 `_` 開頭的頂層／巢狀鍵一律當註解略過（JSON 無原生註解），可用 `"_note": "…"`
+  自我說明而不觸發 `KGConfig` 的 `extra="forbid"`。
 
 ## 範例：`config/kg/236903cf-055a-40a8-8923-b9d06601f3b7.json`
 
 ```json
 {
+  "schema_version": 1,
   "bfs": { "seed_max_degree": 200, "per_seed_limit": 60 }
 }
 ```
 
 未列出的鍵沿用 `KGConfig` 預設。可覆蓋的完整鍵見 `core/kg_config/model.py`。
+
+## schema 版本（相容性把關，報告33 §5 R6）
+
+domain pack 與 per-KG profile 可在**頂層**宣告一個整數 `schema_version`。
+`ConfigLoader` 在合併前取出並檢查（不寫進 `KGConfig`，故不觸發 `extra="forbid"`）：
+
+| 檔案宣告 | 行為 |
+|---|---|
+| 未宣告 | 視為相容 —— 既有／舊檔不受影響 |
+| `== CONFIG_SCHEMA_VERSION` | 正常 |
+| `> CONFIG_SCHEMA_VERSION` | 拋 `ConfigSchemaVersionError`（設定檔比程式新，語意可能已變，不無聲吃下） |
+| `< MIN_CONFIG_SCHEMA_VERSION` | 拋 `ConfigSchemaVersionError`（設定檔太舊） |
+
+目前 `CONFIG_SCHEMA_VERSION == MIN_CONFIG_SCHEMA_VERSION == 1`（`core/kg_config/loader.py`）。
+**破壞相容的結構調整**（改鍵名、換巢狀層次、改欄位語意）才 +1，並在此段補遷移說明；
+純新增可選欄位不算。新寫的設定檔建議都帶 `"schema_version": 1`，讓日後升級能明確報錯
+而非默默走味。內建的 `domain_packs/{taiwan-labor-law,generic}.json` 已示範。
+
+## 可覆蓋鍵的權威定義
+
+`KGConfig` 本身即 schema —— 逐欄位型別與範圍見 `core/kg_config/model.py`；機器可讀版本：
+
+```python
+from core.kg_config import KGConfig
+KGConfig.model_json_schema()   # 每個分區、欄位、型別、ge/le 範圍
+```
+
+per-KG profile ＝「`KGConfig` 的任意子集，以巢狀 mapping 表示」＋ 選配 `schema_version`
+＋ 選配 `_`-前綴註解鍵。
 
 ## 疊合順序（低→高）
 

@@ -13,7 +13,9 @@ import pytest
 
 from core import constants as C
 from core.kg_config import (
+    CONFIG_SCHEMA_VERSION,
     ConfigLoader,
+    ConfigSchemaVersionError,
     DictConfigSource,
     FileConfigSource,
     KGConfig,
@@ -242,3 +244,53 @@ def test_file_config_source_reads_json(tmp_path):
 
 def test_file_config_source_missing_files_are_empty(tmp_path):
     assert ConfigLoader([FileConfigSource(tmp_path)]).load("nope").model_dump() == KGConfig().model_dump()
+
+
+# ── schema 版本把關（報告33 §5 R6 / §6 第 5b 步）─────────────────────────────
+
+def test_schema_version_absent_is_compatible():
+    """未宣告 schema_version 的設定檔照常載入（相容所有既有檔）。"""
+    src = DictConfigSource(kg_overrides={"kg-A": {"bfs": {"seed_max_degree": 111}}})
+    assert ConfigLoader([src]).load("kg-A").bfs.seed_max_degree == 111
+
+
+def test_schema_version_current_is_accepted_and_not_merged():
+    """宣告當前版本 → 正常；schema_version 本身不進 KGConfig（不觸發 extra=forbid）。"""
+    src = DictConfigSource(
+        kg_overrides={"kg-A": {"schema_version": CONFIG_SCHEMA_VERSION,
+                               "bfs": {"seed_max_degree": 123}}}
+    )
+    cfg = ConfigLoader([src]).load("kg-A")
+    assert cfg.bfs.seed_max_degree == 123
+    assert not hasattr(cfg, "schema_version")
+
+
+def test_schema_version_future_is_rejected():
+    src = DictConfigSource(
+        packs={"p": {"schema_version": CONFIG_SCHEMA_VERSION + 1, "domain": {"name": "p"}}}
+    )
+    with pytest.raises(ConfigSchemaVersionError, match=r"domain pack 'p'"):
+        ConfigLoader([src]).load("kg-A", domain_pack="p")
+
+
+def test_schema_version_non_int_is_rejected():
+    src = DictConfigSource(kg_overrides={"kg-A": {"schema_version": "1"}})
+    with pytest.raises(ConfigSchemaVersionError, match="必須是整數"):
+        ConfigLoader([src]).load("kg-A")
+
+
+def test_schema_version_bool_is_rejected():
+    """bool 是 int 的子型別 —— 明確擋掉 True/False 被當成 1/0。"""
+    src = DictConfigSource(kg_overrides={"kg-A": {"schema_version": True}})
+    with pytest.raises(ConfigSchemaVersionError, match="必須是整數"):
+        ConfigLoader([src]).load("kg-A")
+
+
+def test_shipped_domain_packs_declare_current_schema_version():
+    """內建兩個 domain pack 都帶 schema_version，且等於當前版本。"""
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[2] / "config" / "domain_packs"
+    for name in ("taiwan-labor-law", "generic"):
+        data = json.loads((root / f"{name}.json").read_text(encoding="utf-8"))
+        assert data["schema_version"] == CONFIG_SCHEMA_VERSION
