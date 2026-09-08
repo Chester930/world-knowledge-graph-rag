@@ -562,6 +562,50 @@ async def test_resolve_query_relation_type_below_low_threshold_skips_llm_call():
     assert llm.prompts == []
 
 
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_cfg_lowers_assign_threshold():
+    """報告33 §6 第 4 步查詢端半：`cfg.reltype.qsim_assign_threshold` 調低後，
+    原本落在灰色地帶（需 LLM 仲裁）的分數改為直接採用，不呼叫 LLM。"""
+    from core.kg_config import KGConfig
+
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    mid_score = (svc.QSIM_ASSIGN_THRESHOLD + svc.QSIM_ESCALATE_LOW_THRESHOLD) / 2
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [mid_score, (1 - mid_score**2) ** 0.5, 0.0],
+                 causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 0.0, 1.0],
+    )
+    llm = FakeLLM("不應被呼叫")
+    cfg = KGConfig.model_validate({"reltype": {"qsim_assign_threshold": mid_score - 0.01}})
+
+    result = await svc.resolve_query_relation_type("導致", embedding, llm_provider=llm, cfg=cfg)
+
+    assert result == "CAUSES"
+    assert llm.prompts == []
+
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_cfg_raises_escalate_low_threshold():
+    """`cfg.reltype.qsim_escalate_low_threshold` 調高後，原本會進 LLM 仲裁的
+    灰色地帶分數改為直接判無 match（不浪費 LLM 呼叫）。"""
+    from core.kg_config import KGConfig
+
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    mid_score = (svc.QSIM_ASSIGN_THRESHOLD + svc.QSIM_ESCALATE_LOW_THRESHOLD) / 2
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"某措辭": [mid_score, (1 - mid_score**2) ** 0.5, 0.0],
+                 causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 0.0, 1.0],
+    )
+    llm = FakeLLM("不應被呼叫")
+    cfg = KGConfig.model_validate({"reltype": {"qsim_escalate_low_threshold": mid_score + 0.01}})
+
+    result = await svc.resolve_query_relation_type("某措辭", embedding, llm_provider=llm, cfg=cfg)
+
+    assert result is None
+    assert llm.prompts == []
+
+
 # ── _relationship_type（Cypher 注入防護，見 P2-1 docstring）─────────────────
 
 def test_relationship_type_accepts_svo_rel_types_member():

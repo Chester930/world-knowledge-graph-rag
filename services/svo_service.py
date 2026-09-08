@@ -291,6 +291,7 @@ async def resolve_query_relation_type(
     embedding_provider: EmbeddingProvider,
     *,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> str | None:
     """§ 3.2 §c `QSIM`／`QESCALATE`／`QNOMATCH`（2026-08-18 定案）：把查詢端的
     動詞措辭解析為對應的 canonical 關係型別，供呼叫端對 `bfs_query()` 的結果
@@ -309,13 +310,18 @@ async def resolve_query_relation_type(
 
     `QNOMATCH`（回傳 `None`）由呼叫端決定後續處理——設計定案為退回不篩選，
     本函式本身不內建這個退回邏輯，只負責解析。
+
+    `cfg` 未傳（`None`）時 → `KGConfig()` 預設，`qsim_assign_threshold` /
+    `qsim_escalate_low_threshold` == `QSIM_ASSIGN_THRESHOLD` /
+    `QSIM_ESCALATE_LOW_THRESHOLD`，行為零變化（報告33 §6 第 4 步查詢端半）。
     """
+    _cfg = cfg or KGConfig()
     best_type, best_score = await classify_relation_by_embedding(verb_phrase, embedding_provider)
 
-    if best_score >= QSIM_ASSIGN_THRESHOLD:
+    if best_score >= _cfg.reltype.qsim_assign_threshold:
         return best_type
 
-    if best_score < QSIM_ESCALATE_LOW_THRESHOLD or llm_provider is None:
+    if best_score < _cfg.reltype.qsim_escalate_low_threshold or llm_provider is None:
         return None
 
     prompt = (

@@ -860,7 +860,7 @@ async def test_chat_runs_semantic_search_before_bfs_and_passes_scope(monkeypatch
         return [{"fact_text": "x", "subject": "特別休假", "rel_type": "CAUSES",
                  "object": "y", "source_doc_id": str(doc_id), "score": 0.9}]
 
-    async def fake_resolve(question, embedding_provider, *, llm_provider):
+    async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     async def fake_fetch_document_map(driver, kg_id_arg, triples, fact_results):
@@ -913,7 +913,7 @@ async def test_chat_applies_per_kg_profile_from_file_config_source(monkeypatch, 
     async def fake_facts(driver, kg, vec, top_k):
         return []
 
-    async def fake_resolve(q, ep, *, llm_provider):
+    async def fake_resolve(q, ep, *, llm_provider, cfg=None):
         return None
 
     async def fake_docmap(driver, kg, triples, facts):
@@ -1020,7 +1020,7 @@ async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
     llm = _FakeStreamLLM()
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None  # 本測試聚焦 Fact 檢索接線，不驗證關係連結（見專屬測試）
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
@@ -1265,7 +1265,7 @@ async def test_chat_filters_bfs_triples_by_resolved_relation_type(monkeypatch):
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
         return []
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         resolve_calls.append((question, embedding_provider, llm_provider))
         return "CAUSES"
 
@@ -1306,7 +1306,7 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
         return []
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
@@ -1454,7 +1454,7 @@ async def test_chat_yields_sources_event_after_answer_stream(monkeypatch):
         return [{"fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
                   "rel_type": "CREATED_BY", "object": "SpaceX"}]
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return "CAUSES"
 
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
@@ -1497,7 +1497,7 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
         return [{"fact_text": "公務員每日辦公時數為八小時。", "subject": "公務員",
                   "rel_type": "HAS_PROPERTY", "object": "八小時"}]
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
@@ -1549,7 +1549,7 @@ async def test_chat_converts_simplified_chinese_in_final_answer_to_traditional(m
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
         return []
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
@@ -1589,7 +1589,7 @@ async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(m
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
         return []  # 這筆事實只由 BFS 找到，語意檢索沒有對應結果
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
@@ -1627,7 +1627,7 @@ async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeyp
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
         return []
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     embedding = _FakeEmbeddingProvider([0.1, 0.2, 0.3])
@@ -1665,7 +1665,7 @@ def _chat_common_monkeypatch(monkeypatch, llm, embedding, *, triples=None, facts
     async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
         return facts or []
 
-    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider):
+    async def fake_resolve_query_relation_type(question, embedding_provider, *, llm_provider, cfg=None):
         return None
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)

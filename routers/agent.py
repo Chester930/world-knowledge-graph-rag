@@ -1145,7 +1145,7 @@ async def chat(payload: ChatRequest):
             )
 
             resolved_rel_type = await resolve_query_relation_type(
-                payload.question, embedding_provider, llm_provider=llm_provider
+                payload.question, embedding_provider, llm_provider=llm_provider, cfg=cfg
             )
             triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
 
