@@ -110,7 +110,7 @@ Full System 的 **RQ3 自我精煉迴圈尚未實作**（只有單次 grounded r
 
 - [x] 下載 ReAct（Yao 2023）、Adaptive-RAG（Jeong 2024）進 `docs/參考文獻/28_Agentic檢索強基準/`（📥，未精讀）。
 - [x] `docs/參考文獻/28_Agentic檢索強基準/README.md`。
-- [ ] 論文 §5.4.1 補 B2 定義段（元件表 + 評估 + Confounder 聲明 + 排除）；§5.2 表「B2」列補元件細節；§5.5 新增「穩定性」列；§5.7 時程把「B1 → B2（optional）→ RQ1 對照」序列釘死。
+- [x] 論文 §5.4.1 補 B2 定義段（元件表 + 評估 + Confounder 聲明 + 排除）；§5.2 表「B2」列補元件細節；§5.5 新增「離線建構成本」「穩定性」列（commit `878b47d`）；§5.7 時程把「B1 → B2（optional）→ RQ1 對照」序列釘死（2026-09-09，§5.7.1/§5.7.2 分階段 DAG）。
 - [ ] 論文 §2.3.1 擴（收 ReAct／Adaptive-RAG／IRCoT-as-baseline 譜系），或新增 §2.3.2「RQ1 agentic 對照組（B2）的方法定位」。
 - [ ] `文獻與專案查核表.md` 補 ReAct／Adaptive-RAG 兩列（標 📥 已下載、未精讀）。
 - [ ] （實作階段）ReAct §prompt、Adaptive-RAG §複雜度標籤、Fan 2026 §4.3/§5.5.1/App B/App E 全文精讀。
