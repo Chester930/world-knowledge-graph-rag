@@ -13,7 +13,11 @@ from core.config import settings
 from core.database import get_driver
 from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
 from core.providers.base import EmbeddingProvider, LLMProvider
-from core.providers.factory import get_embedding_provider, get_llm_provider
+from core.providers.factory import (
+    get_embedding_provider,
+    get_judge_llm_provider,
+    get_llm_provider,
+)
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
 from models.law_document import LawDocument
@@ -1079,6 +1083,11 @@ async def chat(payload: ChatRequest):
 
         driver = get_driver()
         llm_provider = get_llm_provider()
+        # 事實接地核對（verify_fact_grounding）的 LLM：settings.judge_llm_provider
+        # 未設定 → fallback 回 llm_provider（行為零變化）；設定後為獨立實例，供
+        # 論文 §5.6.1「獨立核對者對照組」實驗——避免生成者＝核對者的判斷循環性
+        # （§3.8）。生成、_targeted_correction、關係型別仲裁維持用 llm_provider。
+        judge_llm_provider = get_judge_llm_provider(llm_provider)
         # 報告33 §3.9 / 論文 04 §4.10（設定分層）：載入這個知識圖譜的 KGConfig。
         # `FileConfigSource(settings.kg_config_dir)` 讀 `<dir>/domain_packs/<name>.*`
         # 與 `<dir>/kg/<kg_id>.*`；目錄或檔案缺 → 該層貢獻 {} → 退回預設。
@@ -1193,7 +1202,7 @@ async def chat(payload: ChatRequest):
 
         yield f"event: status\ndata: {json.dumps({'phase': 'verifying'})}\n\n"
         grounding = await verify_fact_grounding(
-            draft_answer, fact_texts, llm_provider, question=payload.question
+            draft_answer, fact_texts, judge_llm_provider, question=payload.question
         )
 
         final_answer = draft_answer
@@ -1267,7 +1276,7 @@ async def chat(payload: ChatRequest):
             # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
             # 而非已經被取代的草稿。
             grounding = await verify_fact_grounding(
-                final_answer, fact_texts, llm_provider, question=payload.question
+                final_answer, fact_texts, judge_llm_provider, question=payload.question
             )
 
         # 報告32 §9 G3 completeness guard：分段/分級問題（三段年齡工時、三級
@@ -1286,7 +1295,7 @@ async def chat(payload: ChatRequest):
                 )
                 regenerated = True
                 grounding = await verify_fact_grounding(
-                    final_answer, fact_texts, llm_provider, question=payload.question
+                    final_answer, fact_texts, judge_llm_provider, question=payload.question
                 )
                 missing = _missing_tier_members(final_answer, tier_families)
             if missing:

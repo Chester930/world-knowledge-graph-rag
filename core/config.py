@@ -13,6 +13,13 @@ class Settings(BaseSettings):
     llm_provider: str = "ollama"        # ollama | openai | anthropic | gemini | grok
     embedding_provider: str = "local"   # local | openai | ollama
 
+    # ── 核對者（grounding judge）provider —— 論文 §3.8 / §5.6.1 ─────────────────
+    # 讓事實接地核對（verify_fact_grounding）能用獨立於生成端的模型，支援
+    # 「獨立、更強模型當核對者」的對照實驗（避免生成者＝核對者的判斷循環性）。
+    # 兩者皆留空（None）＝ judge 沿用生成端 provider，行為與重構前完全一致。
+    judge_llm_provider: str | None = None   # None ＝ 沿用 llm_provider；否則 ollama|openai|anthropic|gemini|grok
+    judge_llm_model: str | None = None      # None 且 judge_llm_provider 有設 → 用該 provider 的預設 model 設定
+
     # ── Ollama（本地）─────────────────────────────────────────────────────────
     ollama_base_url: str = "http://localhost:11434"
     ollama_llm_model: str = "qwen2.5:7b"

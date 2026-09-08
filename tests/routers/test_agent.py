@@ -1612,6 +1612,50 @@ async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(m
 
 
 @pytest.mark.asyncio
+async def test_chat_uses_dedicated_judge_provider_for_grounding_when_configured(monkeypatch):
+    """論文 §3.8 / §5.6.1：設定了獨立 judge provider 時，事實接地核對走 judge
+    provider，生成端 provider 不被拿去做核對（避免生成者＝核對者的循環性）。"""
+    from core.providers import factory
+
+    kg_id = uuid4()
+    triples = [_triple("公務員", "HAS_PROPERTY", "四十小時", verb="每週辦公總時數為")]
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return ["公務員"]
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
+        return triples
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return []
+
+    async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
+        return None
+
+    gen_llm = _FakeStreamLLM()
+    judge_llm = _FakeStreamLLM()
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1, 0.2, 0.3]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: gen_llm)
+    monkeypatch.setattr(factory, "_judge_llm", judge_llm)
+
+    payload = ChatRequest(question="公務員每週辦公總時數多少？", kg_id=kg_id)
+    await _drain(await agent.chat(payload))
+
+    # 核對走 judge、不走生成端
+    assert len(judge_llm.grounding_prompts) == 1
+    assert gen_llm.grounding_prompts == []
+    # 生成走生成端、不走 judge
+    assert len(gen_llm.prompts) >= 1
+    assert judge_llm.prompts == []
+
+
+@pytest.mark.asyncio
 async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeypatch):
     """未檢索到任何 Fact 時，`verify_fact_grounding()` 不呼叫 LLM 但仍應送出
     `event: grounding`（見該函式 docstring：明確標記未接地，不可靜默省略整個
