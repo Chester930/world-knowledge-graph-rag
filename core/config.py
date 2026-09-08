@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     score_threshold: float = 0.70
     workspace_dir: str = "./workspace"
     chunk_store_dir: str = "./chunk_store"
+    # 報告33 §3.9 / 論文 04 §4.10：per-KG 設定與 domain pack 的檔案根目錄。
+    # 佈局：<kg_config_dir>/kg/<kg_id>.{json,toml,yaml}、
+    #       <kg_config_dir>/domain_packs/<name>.{json,toml,yaml}
+    # 目錄不存在或檔案缺 → 該層貢獻 {} → 退回 KGConfig 預設（＝重構前常數）。
+    kg_config_dir: str = "./config"
 
     # ── 安全性 ────────────────────────────────────────────────────────────────
     api_key: str = ""     # 設定後，管理端點需帶 X-API-Key header；留空 = 不驗證（僅建議本機開發環境使用）

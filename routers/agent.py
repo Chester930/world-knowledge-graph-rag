@@ -11,7 +11,7 @@ from neo4j import AsyncDriver
 
 from core.config import settings
 from core.database import get_driver
-from core.kg_config import ConfigLoader, KGConfig
+from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
@@ -1054,11 +1054,12 @@ async def chat(payload: ChatRequest):
         driver = get_driver()
         llm_provider = get_llm_provider()
         # 報告33 §3.9 / 論文 04 §4.10（設定分層，2026-09-08 第 2 步）：載入這個
-        # 知識圖譜的 KGConfig。目前未接任何 ConfigSource → `cfg` == `KGConfig()`
-        # == 重構前的模組常數值，行為零變化；查詢端 θ 家族（seed 上限、樞紐度數、
-        # per-seed、懶惰擴展門檻）改為讀 `cfg`，之後接 domain pack / per-KG profile
-        # 即生效。
-        cfg = ConfigLoader().load(payload.kg_id)
+        # 知識圖譜的 KGConfig。`FileConfigSource(settings.kg_config_dir)` 讀
+        # `<dir>/domain_packs/<name>.*` 與 `<dir>/kg/<kg_id>.*`；目錄或檔案缺 →
+        # 該層貢獻 {} → 退回預設（＝重構前的模組常數值，行為零變化）。查詢端
+        # θ 家族已改讀 `cfg`；domain pack（第 3 步）尚未抽出，`domain_pack` 參數
+        # 目前無實際覆蓋內容。
+        cfg = ConfigLoader([FileConfigSource(settings.kg_config_dir)]).load(payload.kg_id)
         # 2026-09-01：embedding_provider／question_vector 宣告移到 if 區塊外
         # （保持 None），供事實清單排列（`_arrange_fact_lines()`）在
         # `_build_prompt()` 呼叫點（區塊外）有變數可傳；但取得動作

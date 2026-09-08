@@ -834,6 +834,54 @@ async def test_chat_runs_semantic_search_before_bfs_and_passes_scope(monkeypatch
     assert bfs_kwargs["per_seed_limit"] == agent._BFS_PER_SEED_LIMIT
 
 
+@pytest.mark.asyncio
+async def test_chat_applies_per_kg_profile_from_file_config_source(monkeypatch, tmp_path):
+    """報告33 §3.9：`chat()` 用 `FileConfigSource(settings.kg_config_dir)` 疊 per-KG
+    profile。丟一個 `config/kg/<kg_id>.json` 覆蓋 `bfs.per_seed_limit` → `bfs_query`
+    收到覆蓋後的值。沒有檔案的其他 KG 仍拿預設。"""
+    import json as _json
+
+    kg_id = uuid4()
+    (tmp_path / "kg").mkdir()
+    (tmp_path / "kg" / f"{kg_id}.json").write_text(
+        _json.dumps({"bfs": {"per_seed_limit": 77, "seed_max_degree": 250}}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(agent.settings, "kg_config_dir", str(tmp_path))
+
+    bfs_kwargs: dict = {}
+
+    async def fake_find_seeds(driver, kg, q, **kw):
+        return ["特別休假"]
+
+    async def fake_bfs_query(driver, kg, seeds, hops, **kw):
+        bfs_kwargs.update(kw)
+        return []
+
+    async def fake_facts(driver, kg, vec, top_k):
+        return []
+
+    async def fake_resolve(q, ep, *, llm_provider):
+        return None
+
+    async def fake_docmap(driver, kg, triples, facts):
+        return {}
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_docmap)
+    monkeypatch.setattr(agent, "get_driver", lambda: "d")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: _FakeStreamLLM())
+
+    await _drain(await agent.chat(ChatRequest(question="特別休假幾天？", kg_id=kg_id)))
+    assert bfs_kwargs["per_seed_limit"] == 77          # profile 覆蓋
+    assert bfs_kwargs["cfg"].bfs.seed_max_degree == 250
+    assert bfs_kwargs["cfg"].bfs.expand_when_below == agent.KGConfig().bfs.expand_when_below  # 未覆蓋 = 預設
+
+
 def test_chat_request_default_svo_hops_is_1():
     """報告27 L0：`svo_hops` 預設由 2 改為 1（`bfs_query` 現把它當最大跳數，
     先跑 1-hop、不足才擴展）。"""
