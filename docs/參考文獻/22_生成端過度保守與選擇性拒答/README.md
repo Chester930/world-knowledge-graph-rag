@@ -17,7 +17,7 @@
 | 檔案 | 文獻 | 來源 | 狀態 |
 |---|---|---|---|
 | `zhou-et-al-2023-context-faithful-prompting.pdf` | Zhou, Zhang, Poon & Chen (2023), *Context-faithful Prompting for Large Language Models*，Findings of EMNLP 2023（USC + Microsoft Research） | [arXiv:2303.11315v2](https://arxiv.org/abs/2303.11315)；[ACL Anthology 2023.findings-emnlp.968](https://aclanthology.org/2023.findings-emnlp.968/)；[GitHub wzhouad/context-faithful-llm](https://github.com/wzhouad/context-faithful-llm) | ✅ 🟢 已下載全文精讀（6 頁正文 + 附錄） |
-| `muhamed-et-al-2025-refusalbench.pdf` | Muhamed, Ribeiro, Dreyer, Smith & Diab (2025), *RefusalBench: Generative Evaluation of Selective Refusal in Grounded Language Models* | [arXiv:2510.10390](https://arxiv.org/abs/2510.10390)（2025-10-12） | ✅ 已下載；🟡 待精讀（18 頁，摘要層級已查證：frontier model 在多文件任務 refusal accuracy < 50%、同時存在 overconfidence 與 overcaution） |
+| `muhamed-et-al-2025-refusalbench.pdf` | Muhamed, Ribeiro, Dreyer, Smith & Diab (2025), *RefusalBench: Generative Evaluation of Selective Refusal in Grounded Language Models* | [arXiv:2510.10390](https://arxiv.org/abs/2510.10390)（2025-10-12） | ✅ 🟢 §1–§4.3 精讀（2026-09-08，實為 44 頁）——見下「G2 文獻 §5」。六類不確定性、MissingInfo/Ambiguity 最難、Qwen 家族 refusal <17% 全尺寸、FRR/MRR 指標 |
 
 **參考文獻查證（不下載全文，僅記書目）**：
 - **"Not All Needles Are Found: How Fact Distribution and Don't Make It Up Prompts Shape Literal Extraction, Logical Inference, and Hallucination Risks in Long-Context LLMs"**（[arXiv:2601.02023](https://arxiv.org/abs/2601.02023)，2026-01）——🟡 搜尋結果層級：「Don't Make It Up」型 prompt 在「literal extraction vs hallucination」之間的權衡，與本專案 `_grounding_prompt()`／`_build_constrained_prompt()` 的嚴格措辭直接相關。
@@ -54,18 +54,40 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 
 ## 尚未查證／待辦
 
-- [ ] RefusalBench 全文精讀（目前僅摘要），確認其「selective refusal」定義與本專案 over-abstention 的對應程度、有無可借用的評估指標。
+- [x] ~~RefusalBench 全文精讀，確認其「selective refusal」定義與本專案 over-abstention 的對應程度、有無可借用的評估指標。~~ → **2026-09-08 精讀完成**：定義＝「refuse when they should, answer when they can」，六類不確定性；本專案發現2＝overcaution（答案在場仍拒答），G2 例外的風險＝反向的 overconfidence（答案不在場卻硬答）。借用 FRR/MRR/Detection-F1 → 報告32 §9 C。見下「G2 文獻 §5」。
 - [x] ~~"Not All Needles Are Found"、Copy-Paste 兩篇……若 2a 不足、要動 `_build_constrained_prompt()` 措辭或改採「定向修訂」（2b），需補全文精讀。~~ → **2b 已於 2026-09-07 落地（報告32 §9 G1，commit `bd3bbb7`）**，用的是本專案已有的 CoVe factored/joint 框架（見 `docs/參考文獻/16`、Dhuliawala et al. 2023），未動這兩篇；2b = 只把「未接地的主張句」給修正步驟、明確禁止沿用其中未查核的數值，接地句零 LLM 重生成。三臂（factored / joint / 2b）正式 A/B 為第五章消融待辦。
 
 ---
 
-## G2（Q8 多跳區間推理 + 接地核對罰有效推論，報告32 §9）候選文獻 —— 待精讀，G2 設計時定案
+## G2（Q8 多跳區間推理 + 接地核對罰有效推論，報告32 §9）文獻 —— 2026-09-08 精讀完成
 
-報告32 T1 Q8 的失效有兩層：(1) 生成端不會做「值 5 落在事實清單的『1 以上未滿 10』級距 → 取該級係數 2」這個查表＋比較的組合推論（compositionality gap，既有 `docs/參考文獻/23` 的 Press et al. Self-Ask 已涵蓋）；(2) 就算推對了，`verify_fact_grounding()`（RAGAS 式逐句核對）把「係數 2」判為未接地——因為它是推論結果、不是事實清單裡逐字出現的字串。第 (2) 層是 RAGAS 式 faithfulness 的已知侷限。候選（僅摘要／社群文件層級查證，**未精讀**）：
+報告32 T1 Q8 的失效有兩層：(1) 生成端不會做「值 5 落在事實清單的『1 以上未滿 10』級距 → 取該級係數 2」這個查表＋比較的組合推論（compositionality gap，既有 `docs/參考文獻/23` 的 Press et al. Self-Ask 已涵蓋）；(2) 就算推對了，`verify_fact_grounding()`（RAGAS 式逐句核對）把「係數 2」判為未接地——因為它是推論結果、不是事實清單裡逐字出現的字串。第 (2) 層是 RAGAS 式 faithfulness 的已知侷限。
 
 | 檔案 | 文獻 | 來源 | 狀態 |
 |---|---|---|---|
-| `xu-et-al-2025-veritas-faithful-reasoning-rag.pdf` | Xu, Wu, Zhou, Feng, Zhou, Woo, Ramnath, Tian, Qi, Qiu, Cheong & Ding (2025), *Beyond Correctness: Rewarding Faithful Reasoning in Retrieval-Augmented Generation*（VERITAS） | arXiv [2510.13272](https://arxiv.org/abs/2510.13272)（v3 2026-06） | 🟡 已下載（14 頁），僅摘要層級——明確區分「逐字接地」與「邏輯上由檢索內容推得、但非字對字複述」的推理鏈；三個 faithfulness 維度（Think-Search／Information-Think／Think-Answer）。⚠️ 是 RL 訓練框架（turn-level reward），比本專案 prompt-only 路線重，僅作「有效推論不該被逐字核對罰掉」的問題定位與路線佐證，非方法採用 |
+| `xu-et-al-2025-veritas-faithful-reasoning-rag.pdf` | Xu et al. (2025), *Beyond Correctness: Rewarding Faithful Reasoning in RAG*（VERITAS），TMLR 05/2026 | arXiv [2510.13272](https://arxiv.org/abs/2510.13272)（v3 2026-06） | ✅ 🟢 §2–§3.4 精讀（2026-09-08，30 頁） |
+| `muhamed-et-al-2025-refusalbench.pdf` | Muhamed, Ribeiro, Dreyer, Smith & Diab (2025), *RefusalBench: Generative Evaluation of Selective Refusal in Grounded Language Models* | arXiv [2510.10390](https://arxiv.org/abs/2510.10390) | ✅ 🟢 §1–§4.3 + Fig 4/6/8 精讀（2026-09-08，44 頁——README 舊記「18 頁」為誤） |
+
+### 4. VERITAS（Xu et al. 2025）——問題定位，非方法來源；「有效推論」有邊界
+
+- 三個 faithfulness 維度定義在 **§3.2**（README 舊述「§3.3」為誤；§3.3 是把 §3.2 操作化的評估指標）。與 G2 相關的是 **Information-Think faithfulness**：「the reasoning ... is a valid **synthesis, summary, or logical deduction** based on the **newly retrieved** information」，目的是「preventing the model from **ignoring evidence**」，judge「determines whether the reasoning is **grounded in, consistent with, and responsive to** the retrieved content, flagging **ignored, contradicted, or unsupported** claims」。
+- **關鍵邊界**：VERITAS 許可的是「對*已檢索到的*證據做綜合／演繹」，**不是**跨缺口外推。查表時數值不在任何檢索到的列裡 → 對 VERITAS 也是 "unsupported claim"，一樣會 flag。memory §9 的「非逐字」對 *synthesis* 成立，但不能當成 gap-filling 的擋箭牌。
+- VERITAS 是 **RL turn-level reward 訓練框架**，不提出任何 prompt 措辭。拿它背書 `_grounding_prompt()` 的 prompt 例外是**問題定位層級的佐證**，非方法採用。
+
+### 5. RefusalBench（Muhamed et al. 2025）——G2 的直接風險來源 + §6.2 指標
+
+- **六類資訊不確定性**：Ambiguity / Contradiction / **MissingInfo** / FalsePremise / **GranularityMismatch** / EpistemicMismatch。報26 Q7（問法規沒寫的健檢頻率）= **MissingInfo**；「值落在對照表沒有的級距」= **GranularityMismatch**。
+- **MissingInfo 與 Ambiguity 是所有模型最難的兩類**（Fig 4）。模型**把 REFUSE_INFO_MISSING 當 catch-all**，而 **GranularityMismatch 被系統性誤分類**（Fig 8 混淆矩陣：GranMism→MisInfo 0.819）——正是 G2 例外會踩的邊界。
+- **⚠️ Qwen 家族 selective-refusal 準確率全尺寸 <17%，不隨規模改善**（Fig 9）。本專案 `qwen2.5:7b` **同時當生成端與 grounding judge**——負責執行「每一列必須逐字」的那個 judge，實證上是最不會做這種判斷的家族。
+- 降 FRR 幾乎必然抬 MRR（"dangerous over-confidence or over-caution"，無模型兩維皆 >80%）。G2 壓 False-Refusal → 預期 Missed-Refusal 上升。
+- **可借指標**（Appendix D）：**False Refusal Rate (FRR)**、**Missed Refusal Rate (MRR)**、Refusal Detection F1 → 已用於報告32 §9 C 的 `run_refusal_canary.py`。
+
+### 6. 據此對 G2 的收緊（報告32 §9 A/B/A′，commit `a04f9ea`）
+
+- **A 覆蓋前提**：查表例外只在「數值嚴格落在所引用那一列明列的上下界之內」時成立——取最近一列／落在間隙／越界一律回 false。
+- **B 誠實拒答讓路**：數值不在任何明列區間內、或只檢索到部分級距卻對缺漏段給確定答案 → false（含查表未命中），正解是承認查不到。
+- **A′**：`_grounding_prompt()` 傳入使用者問題，讓「題目數值須逐字出現」可真正核到。
+- **C（§6.2）**：拒答金絲雀組 6 探針 ×3，FRR/MRR 閘門；MRR 一旦 > `ed32291` baseline → 觸發 **E**（把區間查表改成確定性 Python 檢查，移出 qwen judge）。
 
 **尚未下載、G2 設計時再評估**：RAG-Zeval（arXiv:2505.22430，rule-guided reasoning 的 RAG 回答評估，回應 RAGAS 過度嚴格）；DROP（Dua et al. 2019，NAACL，discrete/numeric reasoning over text 的奠基基準——若 G2 要正式定位「數值級距查表」這個能力）。RAGAS 對「可推得但非逐字」claim 的過度懲罰是社群廣泛記錄的現象（如 Nike「1967 年成立」可由「1967 年 incorporated」推得卻可能被判 unfaithful），非單一 canonical 論文，G2 設計時以 RAGAS 官方文件 + VERITAS 佐證即可。
 
@@ -74,5 +96,6 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 - VERITAS（arXiv:2510.13272）——官方 repo URL 待查（RL 訓練框架，本專案 prompt-only 路線不直接複用，僅問題定位）。
 - RAGAS（[`explodinggradients/ragas`](https://github.com/explodinggradients/ragas)，已在 `docs/參考文獻/05`）——`verify_fact_grounding()` 的方法來源，其官方文件對「可推得但非逐字」的處理即為對照基準。
 
-**⚠️ G2 的碼與設計尚未動**——依使用者指示，等 KG #4 抽完、§6.2 窗口確認 Q8 在 F2/F3b/發現29 之後是否還失敗，再設計（prompt 區間比對提示 / 報告28 分解擴充 / grounding 對「明示推論」放寬）。
-- [ ] `is_claim` 分類本身由核對模型（`qwen2.5:7b`）判定，可能誤判（把真主張判成非主張 → 漏觸發該重生成的情況）——真實觸發率與誤判率待實測。
+**G2 狀態**：初版落地 `04a90e8`（窗口診斷 Q8 1/3→3/3），2026-09-08 精讀 RefusalBench/VERITAS 後以 A/B/A′ 收緊（`a04f9ea`，全套 pytest 701 passed）。端到端 FRR/MRR 驗證＝報告32 §9 C，待 DRAIN-DONE 跑 `run_refusal_canary.py`（先 `ed32291` baseline、再 `a04f9ea`）。03 §3.6 G2 段回灌等 C 定案。
+- [ ] `is_claim` 分類本身由核對模型（`qwen2.5:7b`）判定，可能誤判（把真主張判成非主張 → 漏觸發該重生成的情況）——真實觸發率與誤判率待實測（C 的 reducer 會順帶量到 FRR 假陽性分項）。
+- [ ] 若 C 顯示 MRR 上升 → 上 E：`_grounding_prompt` 保持嚴格，Q8 查表改由 `chat()` 內一個確定性 Python 區間檢查（解析 `[區間] → [值]` fact line + 問題數值，嚴格包含才抑制重生成觸發），把弱 judge 移出迴圈。
