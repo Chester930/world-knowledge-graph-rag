@@ -772,6 +772,23 @@ async def test_find_seed_entities_single_candidate_skips_degree_query():
 
 
 @pytest.mark.asyncio
+async def test_build_prompt_uses_cfg_domain_system_context():
+    """第 3a 步：`_build_prompt` 的生成 prompt 前綴改讀 `cfg.domain.system_context`。"""
+    from core.kg_config import KGConfig
+
+    embedding = _FakeSemanticEmbeddingProvider()
+    custom = KGConfig.model_validate({"domain": {"system_context": "我是通用問答助理。"}})
+    prompt = await agent._build_prompt(
+        "婚假幾天？", [], [], None, embedding_provider=embedding, cfg=custom
+    )
+    assert prompt.startswith("我是通用問答助理。")
+    assert "台灣勞動法規顧問" not in prompt
+    # 不傳 cfg → 台灣預設
+    default_prompt = await agent._build_prompt("婚假幾天？", [], [], None, embedding_provider=embedding)
+    assert default_prompt.startswith(agent._TAIWAN_CONTEXT_INSTRUCTION)
+
+
+@pytest.mark.asyncio
 async def test_drop_hub_seeds_uses_cfg_seed_max_degree():
     """報告33 §3.9 第 2 步：`_drop_hub_seeds` 的樞紐門檻改讀 `cfg.bfs.seed_max_degree`。
     傳一個門檻 = 50 的 cfg → degree 60 的種子被當樞紐剔除（預設 100 時不會）。"""

@@ -7,9 +7,9 @@
 **每個 `Field` 的預設值 = 重構前對應模組常數的現值**，來源標於註解。golden test
 （`tests/core/test_kg_config.py`）逐欄位比對 live 常數，任何漂移都會 fail。
 
-第 1 步只收 scalar 常數。domain pack 層的字串欄位（`system_context`、
-`svo_fewshots`、`guard_profile` token 清單）於第 3–4 步併入，屆時新增 `domain`
-分區。
+第 1 步只收 scalar 常數；第 3a 步（2026-09-08）加 `domain` 分區的
+`system_context`／`target_language`（generation prompt 前綴、輸出語言）。
+`svo_fewshots`、`guard_profile` token 清單於第 3b–4 步併入。
 """
 from __future__ import annotations
 
@@ -116,11 +116,35 @@ class ExtractionConfig(BaseModel):
     uncovered_sentence_threshold: float = Field(default=0.6, ge=0.0, le=1.0)
 
 
-class KGConfig(BaseModel):
-    """一個知識圖譜的完整可調整項（第 1 步：scalar 分區）。
+# 第 3a 步（2026-09-08）：generation prompt 前綴（領域/語言鎖定）。shipped
+# default 逐字等於 `routers/agent.py::_TAIWAN_CONTEXT_INSTRUCTION`——golden test
+# 比對。`generic` domain pack 會把 `system_context` 覆蓋成中性版（論文 §2.6.8
+# 已聲明這是唯一「非逐字零變化」處，且僅在明確載入 generic pack 時發生）。
+_TAIWAN_CONTEXT_INSTRUCTION_DEFAULT = (
+    "你是台灣勞動法規顧問，只根據台灣現行法規（例如勞動基準法、勞工保險條例、"
+    "性別平等工作法等）回答，絕對不要引用中國大陸、香港、澳門或其他地區的法規、"
+    "機關名稱或數值（例如「中華人民共和國勞動法」），也不要混用其他地區的制度或用語。"
+    "請一律使用繁體中文回答，不要使用簡體字。"
+)
 
-    `KGConfig()` = shipped defaults 層，逐欄位等於重構前的模組常數。經
-    `ConfigLoader` 疊上 domain pack / per-KG profile / per-request 後仍是同一型別。
+
+class DomainConfig(BaseModel):
+    """領域包層——generation prompt 前綴與輸出語言。第 3b 步再加 `svo_fewshots`
+    與 `guard_profile`。"""
+
+    model_config = _FROZEN
+
+    name: str = Field(default="taiwan-labor-law")
+    # routers/agent.py::_TAIWAN_CONTEXT_INSTRUCTION（每個生成 prompt 的前綴）
+    system_context: str = Field(default=_TAIWAN_CONTEXT_INSTRUCTION_DEFAULT)
+    target_language: str = Field(default="zh-Hant")
+
+
+class KGConfig(BaseModel):
+    """一個知識圖譜的完整可調整項。
+
+    `KGConfig()` = shipped defaults 層，逐欄位等於重構前的模組常數 / prompt 字串。
+    經 `ConfigLoader` 疊上 domain pack / per-KG profile / per-request 後仍是同一型別。
     """
 
     model_config = _FROZEN
@@ -132,3 +156,4 @@ class KGConfig(BaseModel):
     dedup: DedupConfig = Field(default_factory=DedupConfig)
     reltype: RelTypeConfig = Field(default_factory=RelTypeConfig)
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
+    domain: DomainConfig = Field(default_factory=DomainConfig)

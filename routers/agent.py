@@ -66,6 +66,10 @@ _BFS_PER_SEED_LIMIT = 30
 # 成中國大陸的數字），即使有依事實回答的部分也可能在補充段落裡跑偏。加一句
 # 明確的地區限定指示，降低這種跑偏機率——這是 prompt 層級的緩解，不是
 # 100% 保證，仍需搭配「務必區分事實與補充」的既有指示一起看。
+# 2026-09-08（報告33 §3.9 第 3a 步）：生成 prompt 前綴改讀 `chat()` 傳入的
+# `cfg.domain.system_context`；本常數現為 `KGConfig().domain.system_context` 的
+# 預設值錨點（`tests/core/test_kg_config.py` golden test 逐字比對）。正式換領域
+# 應改 domain pack（`config/domain_packs/`），不是直接改這裡。
 _TAIWAN_CONTEXT_INSTRUCTION = (
     "你是台灣勞動法規顧問，只根據台灣現行法規（例如勞動基準法、勞工保險條例、"
     "性別平等工作法等）回答，絕對不要引用中國大陸、香港、澳門或其他地區的法規、"
@@ -730,6 +734,7 @@ async def _generate_decomposed_answer(
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None,
     llm_provider: LLMProvider,
+    cfg: KGConfig | None = None,
 ) -> str:
     """報告27 C#2 M1：每個子問題各自獨立生成一次完整答案（同一份已檢索事實
     清單、不重新檢索），彼此在生成當下互相看不到——這正是避免「回答子問題
@@ -753,7 +758,7 @@ async def _generate_decomposed_answer(
         # 彼此獨立、事實清單不重新檢索，只是排序基準要換成子問題自己。
         sub_prompt = await _build_prompt(
             sub_q, triples, fact_results, history=None,
-            embedding_provider=embedding_provider, question_vector=None,
+            embedding_provider=embedding_provider, question_vector=None, cfg=cfg,
         )
         tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
         answer = "".join(tokens).strip()
@@ -769,6 +774,7 @@ async def _generate_decomposed_constrained_answer(
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None,
     llm_provider: LLMProvider,
+    cfg: KGConfig | None = None,
 ) -> str:
     """`_generate_decomposed_answer()` 的限制性重新生成版本——方案B（見
     `_build_constrained_prompt()` docstring）判定草稿有未接地陳述、需要重新
@@ -788,7 +794,7 @@ async def _generate_decomposed_constrained_answer(
         # None，讓事實清單排序基準換成「這個子問題」而非整個複合問題。
         sub_prompt = await _build_constrained_prompt(
             sub_q, triples, fact_results, history=None,
-            embedding_provider=embedding_provider, question_vector=None,
+            embedding_provider=embedding_provider, question_vector=None, cfg=cfg,
         )
         tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
         answer = "".join(tokens).strip()
@@ -808,6 +814,7 @@ async def _targeted_correction(
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None,
     llm_provider: LLMProvider,
+    cfg: KGConfig | None = None,
 ) -> list[str] | None:
     """報告32 §9 G1（2b 定向修訂）：只重寫草稿裡未接地的主張句，一次 LLM 呼叫。
 
@@ -823,6 +830,7 @@ async def _targeted_correction(
     """
     if not ungrounded_statements:
         return []
+    _cfg = cfg or KGConfig()
     bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
     if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
@@ -833,7 +841,7 @@ async def _targeted_correction(
     else:
         facts = "（本輪未檢索到任何事實）"
     fragments = "\n".join(f"{i}. {s}" for i, s in enumerate(ungrounded_statements, start=1))
-    prompt = f"""{_TAIWAN_CONTEXT_INSTRUCTION}
+    prompt = f"""{_cfg.domain.system_context}
 
 以下是從知識圖譜檢索到的事實，這是你這次「唯一」能引用的資訊來源：
 {facts}
@@ -869,7 +877,9 @@ async def _build_prompt(
     *,
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
+    _cfg = cfg or KGConfig()
     bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
     if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
@@ -931,7 +941,7 @@ async def _build_prompt(
         history_lines = "\n".join(f"{m.role}：{m.content}" for m in history[-6:])
         history_block = f"對話歷史：\n{history_lines}\n\n"
 
-    return f"{_TAIWAN_CONTEXT_INSTRUCTION}\n\n{context_block}\n{history_block}問題：{question}\n\n{instruction}"
+    return f"{_cfg.domain.system_context}\n\n{context_block}\n{history_block}問題：{question}\n\n{instruction}"
 
 
 async def _build_constrained_prompt(
@@ -942,6 +952,7 @@ async def _build_constrained_prompt(
     *,
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、9）。
 
@@ -965,6 +976,7 @@ async def _build_constrained_prompt(
     重複」，反而正是論文警告的反面案例——先讓模型看到錯誤內容，再指望它
     自己避開。
     """
+    _cfg = cfg or KGConfig()
     bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
     if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
@@ -980,7 +992,7 @@ async def _build_constrained_prompt(
         history_lines = "\n".join(f"{m.role}：{m.content}" for m in history[-6:])
         history_block = f"對話歷史：\n{history_lines}\n\n"
 
-    return f"""{_TAIWAN_CONTEXT_INSTRUCTION}
+    return f"""{_cfg.domain.system_context}
 
 以下是從知識圖譜檢索到的事實，這是你這次「唯一」能引用的資訊來源：
 {facts}
@@ -1130,12 +1142,13 @@ async def chat(payload: ChatRequest):
             draft_answer = await _generate_decomposed_answer(
                 sub_questions, triples, fact_results,
                 embedding_provider=embedding_provider, question_vector=question_vector,
-                llm_provider=llm_provider,
+                llm_provider=llm_provider, cfg=cfg,
             )
         else:
             prompt = await _build_prompt(
                 payload.question, triples, fact_results, payload.history,
                 embedding_provider=embedding_provider, question_vector=question_vector,
+                cfg=cfg,
             )
             # 方案 B：不逐 token 即時轉發第一版草稿——先在背後生成完整答案，
             # 核對過（必要時重新生成）才把最終版本送給使用者（見上方 docstring）。
@@ -1190,7 +1203,7 @@ async def chat(payload: ChatRequest):
                     [c.statement for c in ungrounded_claims],
                     triples, fact_results,
                     embedding_provider=embedding_provider, question_vector=question_vector,
-                    llm_provider=llm_provider,
+                    llm_provider=llm_provider, cfg=cfg,
                 )
             if corrections is not None:
                 # 從 grounding 逐句清單重組（不用字串取代——回傳的 statement 可能與
@@ -1210,7 +1223,7 @@ async def chat(payload: ChatRequest):
                 final_answer = await _generate_decomposed_constrained_answer(
                     sub_questions, triples, fact_results,
                     embedding_provider=embedding_provider, question_vector=question_vector,
-                    llm_provider=llm_provider,
+                    llm_provider=llm_provider, cfg=cfg,
                 )
             else:
                 # 整份重寫 → 刻意不把草稿或未接地陳述傳進去，見 _build_constrained_prompt()
@@ -1218,6 +1231,7 @@ async def chat(payload: ChatRequest):
                 constrained_prompt = await _build_constrained_prompt(
                     payload.question, triples, fact_results, payload.history,
                     embedding_provider=embedding_provider, question_vector=question_vector,
+                    cfg=cfg,
                 )
                 corrected_parts: list[str] = []
                 async for token in llm_provider.stream(constrained_prompt):
@@ -1242,7 +1256,7 @@ async def chat(payload: ChatRequest):
                 final_answer = await _generate_decomposed_constrained_answer(
                     sub_questions, triples, fact_results,
                     embedding_provider=embedding_provider, question_vector=question_vector,
-                    llm_provider=llm_provider,
+                    llm_provider=llm_provider, cfg=cfg,
                 )
                 regenerated = True
                 grounding = await verify_fact_grounding(

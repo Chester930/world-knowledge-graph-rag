@@ -1,0 +1,6 @@
+{
+  "_note": "本論文的驗證語料。KGConfig 的 shipped defaults 本身就是這一組值（見 core/kg_config/model.py 的 Field 預設），所以這個 pack 只需宣告名稱；system_context / target_language / 門檻常數皆沿用預設。載入此 pack 等於不載入任何 pack。",
+  "domain": {
+    "name": "taiwan-labor-law"
+  }
+}

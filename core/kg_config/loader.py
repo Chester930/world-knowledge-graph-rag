@@ -24,8 +24,14 @@ from core.kg_config.sources import ConfigSource
 
 
 def deep_merge(base: MutableMapping[str, Any], overlay: Mapping[str, Any]) -> MutableMapping[str, Any]:
-    """把 `overlay` 就地合併進 `base`（見模組 docstring 的語意）。回傳 `base`。"""
+    """把 `overlay` 就地合併進 `base`（見模組 docstring 的語意）。回傳 `base`。
+
+    以 `_` 開頭的鍵視為註解（JSON 無原生註解），任何層級都略過——設定檔可用
+    `"_note": "..."` 自我說明而不觸發 `KGConfig` 的 `extra="forbid"`。
+    """
     for key, val in overlay.items():
+        if isinstance(key, str) and key.startswith("_"):
+            continue
         if (
             key in base
             and isinstance(base[key], MutableMapping)
@@ -47,13 +53,18 @@ class ConfigLoader:
         self,
         kg_id: str | UUID | None = None,
         *,
-        domain_pack: str = "generic",
+        domain_pack: str | None = None,
         request_overrides: Mapping[str, Any] | None = None,
     ) -> KGConfig:
+        """`domain_pack=None`（預設）→ **不載入任何 domain pack**，直接用 shipped
+        defaults（＝重構前的模組常數／prompt）。指定名稱才疊該 pack。此預設保證
+        「不明確指定 → 行為零變化」，`generic` pack 只在明確載入時才把
+        `system_context` 換成中性版（論文 §2.6.8）。"""
         merged: dict[str, Any] = KGConfig().model_dump()
 
-        for src in self._sources:
-            deep_merge(merged, src.get_domain_pack(domain_pack))
+        if domain_pack is not None:
+            for src in self._sources:
+                deep_merge(merged, src.get_domain_pack(domain_pack))
 
         kg_key = None if kg_id is None else str(kg_id)
         for src in self._sources:
