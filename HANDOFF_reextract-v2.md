@@ -7,10 +7,12 @@
 
 ## 0. TL;DR（狀態）
 
-**▶ drain 抽取執行中（2026-09-07 ~19:31 起）**：
-- `drain_236903cf.py`（本 worktree，commit `ba1fdf3`）nohup pid **27180**，log `C:\Users\666\.claude\jobs\efb89cec\tmp\drain_236903cf.log`
-- Monitor `b69ge5goh`（每 30 分 + 4 份驗證窗口清零偵測）
-- 起點 completed=0 / pending=3303；ETA 數天、跨多 session
+**⏸ drain 已暫停（2026-09-08 ~09:35，使用者要求）**：
+- 進度 `completed=629 / failed=4 / pending=2670`（~19%）。停時卡的 `N0060041 c10` 已 revoke+reset。
+- 已備份 `D:\Users\666\Desktop\kg-backups\kg-runtime-drain-pause-c629-*.zip`。
+- **恢復**：環境查（kg2-neo4j healthy + Ollama 200 + 無 stuck processing）→ worktree 目錄 nohup 重跑 `drain_236903cf.py` → 重掛 Monitor `monitor_drain_236903cf.sh`。task_queue.db 自動接續。
+- drain 腳本 `drain_236903cf.py`（commit `ba1fdf3`），log `C:\Users\666\.claude\jobs\efb89cec\tmp\drain_236903cf.log`
+- 抽取端凍結（peer Test A/B 驗證乾淨，不需再動 svo_service.py）
 - 匯入階段（已完成）：KG `236903cf` = 64 Doc / 3303 Chunk / 3303 LawArticle；已備份 `D:\Users\666\Desktop\kg-backups\kg-runtime-import-done-20260907-182539.zip`
 - 分支 `reextract-v2` = `3194185 → fb813eb`(E3) `→ d48ac9a`(交接+resume) `→ e4f3fb9`(交接更新) `→ ba1fdf3`(drain 腳本)。抽取端守衛 F2/F3b/§4.1/E3 全在。
 
