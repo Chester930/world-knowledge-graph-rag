@@ -114,20 +114,38 @@ git fetch && git merge --ff-only fb813eb     # 或 1cc4676，兩者皆可
 **查詢端變更（`routers/agent.py`、BFS query、生成 prompt，如 G1 限制性重生成過度修正、G 系列）不卡 drain**——它們不影響重跑出來的圖。
 目前平行 session 的 `svo_service.py` 已凍結（除非全新 KG 驗證後要推 prompt 規則 10 / G 系列抽取端項目）。
 
-## 7. 開 drain 時（將來）
+## 7. drain 標準作業（2026-09-08 定案，之後都用這個）
 
-- 用 **kg-scoped drain**（`next_pending(db_path, kg_id="236903cf-...")`），不要用 `main.py` 全域 worker。舊 drain 腳本樣板見 memory `project_c15949bf_full_reextraction.md`「啟動指令」節（把 KG_STR 換成 `236903cf-055a-40a8-8923-b9d06601f3b7`，`sys.path` 換成 kg-reextract worktree 路徑）。
-- 從 kg-reextract worktree 目錄跑（`.env` 的 WORKSPACE_DIR 才會生效）。
-- 掛 30 分進度 Monitor。
-- 每 25% 備份一次 kg-runtime。
-- ETA 數天（3303 chunk × qwen2.5:7b 本機 ~40s–5min）。
-- **⚠️ 通知平行 session「project status review」**（Remote Control session，最後見 ref `[855a3c]`，2026-09-07 19:35 當下 offline——屆時用 `ListAgents` 重查現址）：drain 跑起來後，橫掃過 chunk_index 16 時這 4 份會清完（約 drain 開始後 1–2 天）——`N0060004` / `N0030025` / `N0060065` / `N0050030` 的 `pending`+`processing` 全歸零時，SendMessage 通知他（他要跑 `diag_g2g3_window.py` 診斷 G2/G3）。Monitor `b69ge5goh` 已內建這個偵測（`G2G3G4_window_open=0` 時發事件）。查詢：
-  ```sql
-  SELECT source, status, COUNT(*) FROM task_queue
-  WHERE source LIKE 'N0060004%' OR source LIKE 'N0030025%'
-     OR source LIKE 'N0060065%' OR source LIKE 'N0050030%'
-  GROUP BY source, status;
-  ```
+### 7a. 環境 baseline（機器重啟後必查一次）
+1. **Neo4j**：`docker ps` 看 kg2-neo4j healthy。**若容器是機器重啟後才起的 → `docker restart kg2-neo4j`**（重啟前 cache 冷、Entity 掃描 2.7s；重啟後 0.4s）。
+2. **電源計畫**：`powercfg /getactivescheme` 要顯示「終極效能」（GUID `37b0780d-0a52-4497-87c9-53737b1b1024`），不是「平衡」。重啟後常跳回平衡、把 CPU 壓在 2.2GHz 基頻。切換：`powercfg -setactive 37b0780d-...`（若計畫不存在先 `powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61`）。
+3. **VRAM**：`nvidia-smi --query-gpu=memory.used --format=csv,noheader` 在 Ollama 載入前應 <2GB。Chrome / 其他 Chromium app 會佔數 GB VRAM → Ollama 塞不下兩個模型、反覆重載（bge-m3 embed 從 0.1s 變 7.5s）。Antigravity IDE 不能關（終端機在裡面），但它的失控背景 worker 可在工作管理員「詳細資料」按 PID 單獨結束。
+4. **Ollama 環境變數**（User scope，已設）：`OLLAMA_NUM_PARALLEL=2`、`OLLAMA_KEEP_ALIVE=-1`、`OLLAMA_MAX_LOADED_MODELS=2`、`OLLAMA_FLASH_ATTENTION=1`。重啟 Ollama tray app 後 `curl :11434/api/ps` 應看到 qwen2.5:7b + bge-m3 **都常駐**。
+
+### 7b. 啟動 = 2 個並行 worker（定案）
+```
+cd "D:/Users/666/Desktop/world knowledge graph rag/.claude/worktrees/kg-reextract"
+for i in 1 2; do nohup python -u drain_236903cf.py --label w$i \
+  >> "C:/Users/666/.claude/jobs/<job>/tmp/drain_236903cf_w$i.log" 2>&1 & done
+```
+- `drain_236903cf.py`（commit `7f11e15`）用 `claim_next_pending()` 原子認領——2 個 worker 不會撞同一個 chunk。kg-scoped（只吃 236903cf）。**勿用 `main.py` 全域 worker / `rebuild_from_records()`。**
+- 掛 Monitor `bash "C:/Users/666/.claude/jobs/<job>/tmp/monitor_drain_236903cf.sh"`（30 分進度 + drain_proc 計數 + 每 25% 自動備份 + 4 份驗證窗口偵測）。
+
+### 7c. 暫停
+- kill **兩個** worker（`Stop-Process`）。停 Monitor。
+- 查 `processing` 列（**可能有 2 筆**，各 worker 一筆）→ 逐一 `revoke_chunk_facts()` + `reset_stuck_processing()`。
+- 備份 kg-runtime（`Compress-Archive` 到 `D:\Users\666\Desktop\kg-backups\`）。
+
+### 7d. 速率參考（實測，此段密集語料）
+| 配置 | 速率 |
+|---|---|
+| 1 worker | ~22/hr |
+| **2 worker** | **~33/hr**（~1.5x；Ollama 序列化吃掉部分） |
+- 3 worker 未測（使用者決定不加）。ETA @ 33/hr：剩 ~2560 chunk ≈ 3.2 天。
+- **哪些「修復」真的有用**：釋放 VRAM（12→22）＋ 2 worker（22→33）。pid 21216 kill / Neo4j 重啟 / 電源計畫都修了真問題但沒動 drain 速率——歸類為「重啟後 baseline 衛生，要做但別期待它是解方」。剩下離理論值的差距＝語料本身密集（chunk_index 12-14 職安/移工法規）＋ Ollama 序列化。
+
+### 7e. 通知平行 session（4 份驗證窗口）
+`N0060004` / `N0030025` / `N0060065` / `N0050030` 已被 peer 的 Test B 補抽完（2026-09-08）→ **此項已完成，不需再通知**。Monitor 的 `window_open` 事件若再觸發是舊訊號、忽略。
 
 ## 8. 開放事項
 
