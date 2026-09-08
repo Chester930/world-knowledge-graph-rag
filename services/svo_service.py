@@ -35,6 +35,7 @@ from core.constants import (
     VECTOR_DIM,
 )
 from core.config import task_queue_db_path
+from core.kg_config import KGConfig
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.knowledge_graph import SVOTriple
@@ -2940,6 +2941,8 @@ async def trigger_extraction(
 # 才擴展到 2-hop（僅在呼叫端允許 `hops >= 2` 時）。共用高頻實體（雇主／
 # 被保險人）當種子時，1-hop 通常已足夠且遠快於 2-hop 的組合爆炸（報告26
 # §4 #4：Q5/6/7 各 330–440 秒）。初值 8，待報告27 §6 敏感度測試校準。
+# 2026-09-08：`= KGConfig().bfs.expand_when_below`；本常數現為 golden test
+# 錨點（`tests/core/test_kg_config.py`），`bfs_query()` 已改讀 `cfg`。
 _BFS_EXPAND_WHEN_BELOW = 8
 
 # 報告27 L2（向量引導 prize 剪枝，2026-09-08 prototype）：懶惰擴展觸發時，
@@ -3016,10 +3019,11 @@ async def bfs_query(
     *,
     scope_doc_ids: Collection[UUID] | None = None,
     per_seed_limit: int | None = None,
-    expand_when_below: int = _BFS_EXPAND_WHEN_BELOW,
+    expand_when_below: int | None = None,
     prize_top_k: int | None = None,
     question_vector: list[float] | None = None,
     embedding_provider: EmbeddingProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[SVOTriple]:
     """從 seed entity 做 bounded BFS，回傳路徑上的去重 SVO triples。
 
@@ -3063,7 +3067,16 @@ async def bfs_query(
     見 `docs/報告/27_...md` §6；空結果 fallback 讓上線本身安全。
     L2 需邊 `natural_text` 齊備（新 KG 每條邊即時 `_naturalize_triple`），
     舊 KG 邊多無 `natural_text` → 退回拼接字串打分，品質下降但不失效。
+
+    ✅ **報告33 §3.9 / 論文 04 §4.10（設定分層，2026-09-08 第 2 步）**：
+    `expand_when_below` 未明確傳入（`None`）時，改讀 `(cfg or KGConfig()).bfs.
+    expand_when_below`。`cfg=None` → `KGConfig()` 預設 == `_BFS_EXPAND_WHEN_BELOW`，
+    行為零變化。呼叫端（`chat()`）傳入 `cfg` 後即由 domain pack / per-KG profile
+    控制。
     """
+    _cfg = cfg or KGConfig()
+    if expand_when_below is None:
+        expand_when_below = _cfg.bfs.expand_when_below
     seeds = [entity.strip() for entity in seed_entities if entity.strip()]
     if not seeds:
         return []

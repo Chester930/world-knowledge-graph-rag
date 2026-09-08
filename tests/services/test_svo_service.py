@@ -2076,6 +2076,25 @@ async def test_bfs_query_skips_expansion_when_first_hop_already_rich():
 
 
 @pytest.mark.asyncio
+async def test_bfs_query_expand_when_below_defaults_from_cfg():
+    """報告33 §3.9 第 2 步：`expand_when_below` 未傳入時改讀 `cfg.bfs.expand_when_below`。
+    5 筆 1-hop、cfg 門檻 = 12 → 5 < 12 觸發擴展（預設 8 時 5 < 8 也會，故用門檻 3 反證）。"""
+    from core.kg_config import KGConfig
+
+    recs = [_rec(f"A", f"O{i}") for i in range(5)]
+    # cfg 門檻 3：5 ≥ 3 → 不擴展（若沿用預設 8，5 < 8 會擴展）
+    driver = _TwoPassBFSDriver(recs, [_rec("O0", "P")])
+    await svc.bfs_query(driver, uuid4(), ["A"], hops=2,
+                        cfg=KGConfig.model_validate({"bfs": {"expand_when_below": 3}}))
+    assert len(driver.calls) == 1
+
+    # 無 cfg（預設 8）：5 < 8 → 擴展
+    driver2 = _TwoPassBFSDriver(recs, [_rec("O0", "P")])
+    await svc.bfs_query(driver2, uuid4(), ["A"], hops=2)
+    assert len(driver2.calls) == 2
+
+
+@pytest.mark.asyncio
 async def test_bfs_query_passes_scope_and_per_seed_limit():
     """報告27 L1：`scope_doc_ids` 下推為 Cypher `EXISTS {}` 範圍子查詢、
     `per_seed_limit` 下推為 CALL 子查詢內 LIMIT；參數一併傳入。"""

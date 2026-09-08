@@ -11,6 +11,7 @@ from neo4j import AsyncDriver
 
 from core.config import settings
 from core.database import get_driver
+from core.kg_config import ConfigLoader, KGConfig
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
@@ -34,6 +35,11 @@ from services.verification_service import verify_fact_grounding
 # connected here. Tests: tests/routers/test_agent.py.
 router = APIRouter(prefix="/agent", tags=["agent"])
 
+# 2026-09-08（報告33 §3.9 第 2 步）：以下 `_SEED_ENTITY_LIMIT`／`_SEED_MAX_DEGREE`／
+# `_BFS_PER_SEED_LIMIT`／`_DOC_SCOPE_TOP_N_FACTS` 現為 `KGConfig().bfs.*` 的預設值錨點
+# （`tests/core/test_kg_config.py` golden test 逐欄位比對）。查詢端已改讀 `chat()` 傳入的
+# `cfg`；直接改這裡的值仍生效（`KGConfig` 預設會跟著動、golden test 會提醒），但正式
+# 調校應改 domain pack / per-KG profile。
 _SEED_ENTITY_LIMIT = 8
 
 # 報告27 L1：種子度數上限。度數（相連邊數）超過這個值的實體屬「樞紐」
@@ -75,6 +81,7 @@ async def _find_seed_entities(
     *,
     embedding_provider: EmbeddingProvider | None = None,
     question_vector: list[float] | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[str]:
     """⚠️ 暫時方案（3.2 §a ConceptNode 路由層／RQ2 尚未設計，2026-07-28
     討論後先接的堪用版本，供 demo 使用）：沒有語意排序，只是把該 KG 底下
@@ -94,6 +101,7 @@ async def _find_seed_entities(
     採用；只有完全找不到時才退而求其次改用語意近似，避免語意 fallback
     的雜訊蓋過精確匹配。
     """
+    _cfg = cfg or KGConfig()
     result = await driver.execute_query(
         "MATCH (e:Entity {kg_id: $kg_id}) RETURN DISTINCT e.name AS name",
         kg_id=str(kg_id),
@@ -101,21 +109,27 @@ async def _find_seed_entities(
     names = [r["name"] for r in result.records if r["name"]]
     matched = [name for name in names if name in question]
     matched.sort(key=len, reverse=True)
-    matched = matched[:_SEED_ENTITY_LIMIT]
+    matched = matched[:_cfg.bfs.seed_entity_limit]
 
     if not matched and embedding_provider is not None:
         vector = question_vector if question_vector is not None else await embedding_provider.encode(question)
-        matched = await vector_search_entities(driver, kg_id, vector, top_k=_SEED_ENTITY_LIMIT)
+        matched = await vector_search_entities(driver, kg_id, vector, top_k=_cfg.bfs.seed_entity_limit)
 
-    return await _drop_hub_seeds(driver, kg_id, matched)
+    return await _drop_hub_seeds(driver, kg_id, matched, cfg=_cfg)
 
 
-async def _drop_hub_seeds(driver: AsyncDriver, kg_id: UUID, names: list[str]) -> list[str]:
-    """報告27 L1：剔除度數 > `_SEED_MAX_DEGREE` 的樞紐種子——只要還有非樞紐
-    種子可用就剔除，全部都是樞紐時原樣保留（BFS 需要至少一個起點）。
-    候選 < 2 個時直接回傳、不多打一次查詢。"""
+async def _drop_hub_seeds(
+    driver: AsyncDriver, kg_id: UUID, names: list[str], *, cfg: KGConfig | None = None
+) -> list[str]:
+    """報告27 L1：剔除度數 > `cfg.bfs.seed_max_degree` 的樞紐種子——只要還有
+    非樞紐種子可用就剔除，全部都是樞紐時原樣保留（BFS 需要至少一個起點）。
+    候選 < 2 個時直接回傳、不多打一次查詢。
+
+    報告33 §3.9（2026-09-08 第 2 步）：`cfg=None` → `KGConfig()` 預設 ==
+    `_SEED_MAX_DEGREE`，行為零變化。"""
     if len(names) < 2:
         return names
+    _cfg = cfg or KGConfig()
     result = await driver.execute_query(
         "MATCH (e:Entity {kg_id: $kg_id})-[r]-() WHERE e.name IN $names "
         "RETURN e.name AS name, count(r) AS degree",
@@ -123,7 +137,7 @@ async def _drop_hub_seeds(driver: AsyncDriver, kg_id: UUID, names: list[str]) ->
         names=names,
     )
     degree = {r["name"]: (r.get("degree") or 0) for r in result.records}
-    non_hub = [n for n in names if degree.get(n, 0) <= _SEED_MAX_DEGREE]
+    non_hub = [n for n in names if degree.get(n, 0) <= _cfg.bfs.seed_max_degree]
     return non_hub if non_hub else names
 
 
@@ -1039,6 +1053,12 @@ async def chat(payload: ChatRequest):
 
         driver = get_driver()
         llm_provider = get_llm_provider()
+        # 報告33 §3.9 / 論文 04 §4.10（設定分層，2026-09-08 第 2 步）：載入這個
+        # 知識圖譜的 KGConfig。目前未接任何 ConfigSource → `cfg` == `KGConfig()`
+        # == 重構前的模組常數值，行為零變化；查詢端 θ 家族（seed 上限、樞紐度數、
+        # per-seed、懶惰擴展門檻）改為讀 `cfg`，之後接 domain pack / per-KG profile
+        # 即生效。
+        cfg = ConfigLoader().load(payload.kg_id)
         # 2026-09-01：embedding_provider／question_vector 宣告移到 if 區塊外
         # （保持 None），供事實清單排列（`_arrange_fact_lines()`）在
         # `_build_prompt()` 呼叫點（區塊外）有變數可傳；但取得動作
@@ -1069,18 +1089,20 @@ async def chat(payload: ChatRequest):
             # 且範圍同時套用到 BFS 三元組與語意 Fact 清單本身（先前只套前者，
             # 導致 Q8 的語意 Fact 清單混入跨文件雜訊、被 LLM 採用成錯誤數字）。
             relevant_doc_ids = _relevant_doc_ids_from_facts(
-                fact_results, top_n=_DOC_SCOPE_TOP_N_FACTS
+                fact_results, top_n=cfg.bfs.doc_scope_top_n_facts
             )
 
             seeds = await _find_seed_entities(
                 driver, payload.kg_id, payload.question,
                 embedding_provider=embedding_provider, question_vector=question_vector,
+                cfg=cfg,
             )
             triples = await bfs_query(
                 driver, payload.kg_id, seeds,
                 hops=payload.svo_hops,
                 scope_doc_ids=(relevant_doc_ids or None),
-                per_seed_limit=_BFS_PER_SEED_LIMIT,
+                per_seed_limit=cfg.bfs.per_seed_limit,
+                cfg=cfg,
             )
 
             resolved_rel_type = await resolve_query_relation_type(

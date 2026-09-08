@@ -772,6 +772,19 @@ async def test_find_seed_entities_single_candidate_skips_degree_query():
 
 
 @pytest.mark.asyncio
+async def test_drop_hub_seeds_uses_cfg_seed_max_degree():
+    """報告33 §3.9 第 2 步：`_drop_hub_seeds` 的樞紐門檻改讀 `cfg.bfs.seed_max_degree`。
+    傳一個門檻 = 50 的 cfg → degree 60 的種子被當樞紐剔除（預設 100 時不會）。"""
+    from core.kg_config import KGConfig
+
+    driver = _DegreeAwareDriver(names=["A", "B"], degrees={"A": 60, "B": 10})
+    low = KGConfig.model_validate({"bfs": {"seed_max_degree": 50}})
+    assert await agent._drop_hub_seeds(driver, uuid4(), ["A", "B"], cfg=low) == ["B"]
+    # 預設（100）下 A 不算樞紐，兩個都留
+    assert set(await agent._drop_hub_seeds(driver, uuid4(), ["A", "B"])) == {"A", "B"}
+
+
+@pytest.mark.asyncio
 async def test_chat_runs_semantic_search_before_bfs_and_passes_scope(monkeypatch):
     """報告27 L1：`vector_search_facts` 先跑、推出的 `relevant_doc_ids` 當
     `bfs_query(scope_doc_ids=)` 前置約束傳入；`per_seed_limit` 一併帶上。"""
