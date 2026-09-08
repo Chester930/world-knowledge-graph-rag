@@ -20,6 +20,8 @@ class KnowledgeGraphUpdate(BaseModel):
     # 2026-08-20：見 KnowledgeGraph.pronoun_lexicon_exclude 欄位說明。透過既有
     # update() 端點即可設定，不需另開專屬 API。
     pronoun_lexicon_exclude: list[str] | None = None
+    # 2026-09-08（報告33 §3.9 第 5 步）：見 KnowledgeGraph.domain_pack。
+    domain_pack: str | None = None
 
 
 class KnowledgeGraph(BaseModel):
@@ -40,6 +42,13 @@ class KnowledgeGraph(BaseModel):
     # （`trigger_extraction()` 依此組出該 KG 專屬的消解詞庫），不影響其他 KG
     # 沿用完整預設詞庫的行為，見 docs/報告/08_三軌混合檢索架構與標準化RAG設計報告.md。
     pronoun_lexicon_exclude: list[str] = []
+    # 2026-09-08（報告33 §3.9 第 5 步）：這個 KG 用哪個 domain pack（生成端領域
+    # 指示、輸出語言，之後還有抽取少樣本與守衛設定檔）。`chat()` 讀此欄傳給
+    # `ConfigLoader.load(domain_pack=)`。預設 `taiwan-labor-law`＝本論文驗證語料，
+    # 其 pack 檔不覆蓋任何 shipped default（見 `config/domain_packs/`），故預設值
+    # 行為零變化。`config/domain_packs/<name>.json` 不存在時該層貢獻 {}。
+    # 機制同 `pronoun_lexicon_exclude`：Neo4j 節點屬性、經既有 update() 端點設定。
+    domain_pack: str = "taiwan-labor-law"
     created_at: datetime
     updated_at: datetime
 

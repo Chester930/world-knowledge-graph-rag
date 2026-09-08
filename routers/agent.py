@@ -17,6 +17,7 @@ from core.providers.factory import get_embedding_provider, get_llm_provider
 from models.document import ChatMessage, ChatRequest
 from models.knowledge_graph import SVOTriple
 from models.law_document import LawDocument
+from repositories.kg_repo import KGRepository
 from repositories.law_document_repo import LawDocumentRepository
 from services.classify_service import cosine_similarity
 from services.svo_service import (
@@ -1065,13 +1066,25 @@ async def chat(payload: ChatRequest):
 
         driver = get_driver()
         llm_provider = get_llm_provider()
-        # 報告33 §3.9 / 論文 04 §4.10（設定分層，2026-09-08 第 2 步）：載入這個
-        # 知識圖譜的 KGConfig。`FileConfigSource(settings.kg_config_dir)` 讀
-        # `<dir>/domain_packs/<name>.*` 與 `<dir>/kg/<kg_id>.*`；目錄或檔案缺 →
-        # 該層貢獻 {} → 退回預設（＝重構前的模組常數值，行為零變化）。查詢端
-        # θ 家族已改讀 `cfg`；domain pack（第 3 步）尚未抽出，`domain_pack` 參數
-        # 目前無實際覆蓋內容。
-        cfg = ConfigLoader([FileConfigSource(settings.kg_config_dir)]).load(payload.kg_id)
+        # 報告33 §3.9 / 論文 04 §4.10（設定分層）：載入這個知識圖譜的 KGConfig。
+        # `FileConfigSource(settings.kg_config_dir)` 讀 `<dir>/domain_packs/<name>.*`
+        # 與 `<dir>/kg/<kg_id>.*`；目錄或檔案缺 → 該層貢獻 {} → 退回預設。
+        # 第 5 步（2026-09-08）：domain pack 名稱取自該 KG 節點的 `domain_pack` 欄
+        # （預設 `taiwan-labor-law`，其 pack 檔不覆蓋任何 shipped default → 行為
+        # 零變化）；`chat()` 據此選 generic / 自訂領域包。
+        # 這是**盡力而為的中繼資料讀取**：KG 查無、或讀取本身失敗 → `domain_pack`
+        # 退回 None（不套任何 pack ＝ shipped 預設），問答本身照常進行——選不到
+        # 領域包的失效方向就是「用預設那個」，這正是安全的降級。
+        domain_pack: str | None = None
+        try:
+            kg_meta = await KGRepository(driver).get(payload.kg_id)
+            if kg_meta is not None:
+                domain_pack = kg_meta.domain_pack
+        except Exception:
+            domain_pack = None
+        cfg = ConfigLoader([FileConfigSource(settings.kg_config_dir)]).load(
+            payload.kg_id, domain_pack=domain_pack,
+        )
         # 2026-09-01：embedding_provider／question_vector 宣告移到 if 區塊外
         # （保持 None），供事實清單排列（`_arrange_fact_lines()`）在
         # `_build_prompt()` 呼叫點（區塊外）有變數可傳；但取得動作

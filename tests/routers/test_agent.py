@@ -899,6 +899,67 @@ async def test_chat_applies_per_kg_profile_from_file_config_source(monkeypatch, 
     assert bfs_kwargs["cfg"].bfs.expand_when_below == agent.KGConfig().bfs.expand_when_below  # 未覆蓋 = 預設
 
 
+@pytest.mark.asyncio
+async def test_chat_selects_domain_pack_from_kg_node(monkeypatch):
+    """報告33 §3.9 第 5 步：`chat()` 讀該 KG 節點的 `domain_pack` 欄，據此選
+    domain pack。`domain_pack='generic'` → 生成 prompt 前綴換成中性版（用 repo
+    內建的 config/domain_packs/generic.json）；預設 `taiwan-labor-law` → 不變。"""
+    import pathlib
+    from datetime import datetime
+    from models.knowledge_graph import KnowledgeGraph
+
+    repo_config = pathlib.Path(agent.__file__).resolve().parents[1] / "config"
+    monkeypatch.setattr(agent.settings, "kg_config_dir", str(repo_config))
+
+    captured: dict = {}
+
+    async def fake_build_prompt(q, triples, facts, hist, **kw):
+        captured["cfg"] = kw.get("cfg")
+        return "PROMPT"
+
+    def make_kg(pack: str):
+        now = datetime.now()
+        return KnowledgeGraph(
+            id=uuid4(), name="k", description="", folder_path="/x", is_public=True,
+            domain_pack=pack, created_at=now, updated_at=now,
+        )
+
+    class _FakeRepo:
+        kg = None
+
+        def __init__(self, driver):
+            pass
+
+        async def get(self, kg_id):
+            return _FakeRepo.kg
+
+    async def fake_find_seeds(*a, **k): return []
+    async def fake_bfs(*a, **k): return []
+    async def fake_facts(*a, **k): return []
+    async def fake_resolve(*a, **k): return None
+    async def fake_docmap(*a, **k): return {}
+
+    monkeypatch.setattr(agent, "KGRepository", _FakeRepo)
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_docmap)
+    monkeypatch.setattr(agent, "_build_prompt", fake_build_prompt)
+    monkeypatch.setattr(agent, "get_driver", lambda: "d")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: _FakeStreamLLM())
+
+    _FakeRepo.kg = make_kg("generic")
+    await _drain(await agent.chat(ChatRequest(question="婚假幾天？", kg_id=_FakeRepo.kg.id)))
+    assert "台灣勞動法規顧問" not in captured["cfg"].domain.system_context
+    assert captured["cfg"].domain.name == "generic"
+
+    _FakeRepo.kg = make_kg("taiwan-labor-law")
+    await _drain(await agent.chat(ChatRequest(question="婚假幾天？", kg_id=_FakeRepo.kg.id)))
+    assert captured["cfg"].domain.system_context == agent._TAIWAN_CONTEXT_INSTRUCTION
+
+
 def test_chat_request_default_svo_hops_is_1():
     """報告27 L0：`svo_hops` 預設由 2 改為 1（`bfs_query` 現把它當最大跳數，
     先跑 1-hop、不足才擴展）。"""

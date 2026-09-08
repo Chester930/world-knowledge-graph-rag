@@ -182,6 +182,21 @@ async def test_update_sets_pronoun_lexicon_exclude(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_create_defaults_domain_pack_and_update_sets_it(tmp_path, monkeypatch):
+    """報告33 §3.9 第 5 步：`domain_pack` 預設 `taiwan-labor-law`（其 pack 檔不覆蓋
+    任何 shipped default → 行為零變化）；經既有 update() 端點即可改（同
+    `pronoun_lexicon_exclude`，不需另開 API）。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+    repo = KGRepository(FakeKGDriver())
+    created = await repo.create(KnowledgeGraphCreate(name="KG"))
+    assert created.domain_pack == "taiwan-labor-law"
+
+    updated = await repo.update(created.id, KnowledgeGraphUpdate(domain_pack="generic"))
+    assert updated.domain_pack == "generic"
+    assert (await repo.get(created.id)).domain_pack == "generic"
+
+
+@pytest.mark.asyncio
 async def test_delete_does_not_remove_local_folder(tmp_path, monkeypatch):
     """資料夾內容屬使用者資料，delete() 不應自動刪檔（見 docstring 誠實聲明）。"""
     monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))

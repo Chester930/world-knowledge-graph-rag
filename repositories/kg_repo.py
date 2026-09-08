@@ -39,7 +39,7 @@ class KGRepository:
                 id: $id, name: $name, description: $description,
                 folder_path: $folder_path, is_public: $is_public, db_name: '',
                 doc_count: 0, entity_count: 0, relation_count: 0,
-                pronoun_lexicon_exclude: [],
+                pronoun_lexicon_exclude: [], domain_pack: 'taiwan-labor-law',
                 created_at: $now, updated_at: $now
             })
             """,
@@ -61,6 +61,7 @@ class KGRepository:
             entity_count=0,
             relation_count=0,
             pronoun_lexicon_exclude=[],
+            domain_pack="taiwan-labor-law",
             created_at=now,
             updated_at=now,
         )
@@ -126,6 +127,7 @@ def _record_to_model(node) -> KnowledgeGraph:
         entity_count=data.get("entity_count", 0),
         relation_count=data.get("relation_count", 0),
         pronoun_lexicon_exclude=data.get("pronoun_lexicon_exclude", []),
+        domain_pack=data.get("domain_pack") or "taiwan-labor-law",
         created_at=datetime.fromisoformat(data["created_at"]),
         updated_at=datetime.fromisoformat(data["updated_at"]),
     )
