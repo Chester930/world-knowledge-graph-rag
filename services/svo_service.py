@@ -2942,6 +2942,14 @@ async def trigger_extraction(
 # §4 #4：Q5/6/7 各 330–440 秒）。初值 8，待報告27 §6 敏感度測試校準。
 _BFS_EXPAND_WHEN_BELOW = 8
 
+# 報告27 L2（向量引導 prize 剪枝，2026-09-08 prototype）：懶惰擴展觸發時，
+# 不再對 1-hop frontier 做無差別 2-hop 走訪，改對每條候選 2-hop 邊算
+# `cosine(問題向量, 邊 natural_text 向量)`，只保留分數 top-k 條。G-Retriever
+# prize 機制（He et al. 2024）的扁平化簡化——無 Steiner tree 最佳化、無 GNN。
+# 預設關（`bfs_query(prize_top_k=None)`）＝零行為變化；需三個參數齊備才啟用。
+# 初值 10，待報告27 §6 敏感度測試校準（k ∈ {5, 10, 20}）。
+_BFS_PRIZE_TOP_K = 10
+
 
 def _bfs_pass_cypher(rel_types: str, min_hop: int, max_hop: int, *, scoped: bool, per_seed_limit: bool) -> str:
     """組一趟 BFS 走訪的 Cypher（報告27 L1）。
@@ -3009,6 +3017,9 @@ async def bfs_query(
     scope_doc_ids: Collection[UUID] | None = None,
     per_seed_limit: int | None = None,
     expand_when_below: int = _BFS_EXPAND_WHEN_BELOW,
+    prize_top_k: int | None = None,
+    question_vector: list[float] | None = None,
+    embedding_provider: EmbeddingProvider | None = None,
 ) -> list[SVOTriple]:
     """從 seed entity 做 bounded BFS，回傳路徑上的去重 SVO triples。
 
@@ -3037,8 +3048,21 @@ async def bfs_query(
     - **L1 扇出上限**：`per_seed_limit` 非 None 時，每個 seed 的展開路徑數
       上限（CALL 子查詢內 LIMIT）。
 
+    ✅ **報告27 L2（向量引導 prize 剪枝，2026-09-08 prototype）**：當懶惰
+    擴展觸發（`hops >= 2` 且 1-hop 三元組 < `expand_when_below`）且
+    `prize_top_k` / `question_vector` / `embedding_provider` 三者齊備時，
+    **不跑無差別 `2..hops` 走訪**，改為：以 1-hop frontier 實體為新 seed 再
+    走一趟 1-hop（＝候選 2-hop 邊），對每條候選邊算
+    `cosine(question_vector, encode(邊 natural_text))`，只把分數 top-k 條
+    併入結果。邊無 `natural_text` 時退回 `subject verb object` 拼接字串
+    打分。三參數缺任一 → 走原無差別 `2..hops`（零行為變化）。目前只處理
+    2-hop 擴展；`hops > 2` 時 prize 選完 2-hop 後不再深入（初期 `svo_hops`
+    實際只到 2）。k 初值 `_BFS_PRIZE_TOP_K`，待報告27 §6 敏感度測試校準。
+
     ⚠️ `scope_doc_ids` 的 Cypher 下推需對真實 Neo4j（kg2-neo4j）驗證，
     見 `docs/報告/27_...md` §6；空結果 fallback 讓上線本身安全。
+    L2 需邊 `natural_text` 齊備（新 KG 每條邊即時 `_naturalize_triple`），
+    舊 KG 邊多無 `natural_text` → 退回拼接字串打分，品質下降但不失效。
     """
     seeds = [entity.strip() for entity in seed_entities if entity.strip()]
     if not seeds:
@@ -3082,20 +3106,65 @@ async def bfs_query(
 
     # L0 懶惰擴展：1-hop 不足才補 2..hops
     if hops >= 2 and len(triples) < expand_when_below:
-        exp_params = {"kg_id": str(kg_id), "seed_entities": seeds}
-        if scoped:
-            exp_params["scope_doc_ids"] = scope_ids
-        if want_limit:
-            exp_params["per_seed_limit"] = per_seed_limit
-        exp = await driver.execute_query(
-            _bfs_pass_cypher(rel_types, 2, hops, scoped=scoped, per_seed_limit=want_limit),
-            **exp_params,
-        )
         seen = {(t.subject, t.rel_type, t.object) for t in triples}
-        for t in _bfs_records_to_triples(exp.records):
-            key = (t.subject, t.rel_type, t.object)
-            if key not in seen:
-                seen.add(key)
-                triples.append(t)
+        l2_active = (
+            prize_top_k is not None
+            and question_vector is not None
+            and embedding_provider is not None
+        )
+
+        if l2_active:
+            # L2：以 1-hop frontier 為新 seed 再走一趟 1-hop（＝候選 2-hop 邊），
+            # 對每條候選邊算 cosine(問題向量, 邊 natural_text 向量)，只留 top-k。
+            seed_set = set(seeds)
+            frontier = sorted(
+                {t.object for t in triples if t.object and t.object not in seed_set}
+                | {t.subject for t in triples if t.subject and t.subject not in seed_set}
+            )
+            if frontier:
+                fp = {"kg_id": str(kg_id), "seed_entities": frontier}
+                if scoped:
+                    fp["scope_doc_ids"] = scope_ids
+                if want_limit:
+                    fp["per_seed_limit"] = per_seed_limit
+                fres = await driver.execute_query(
+                    _bfs_pass_cypher(rel_types, 1, 1, scoped=scoped, per_seed_limit=want_limit),
+                    **fp,
+                )
+                candidates = [
+                    t for t in _bfs_records_to_triples(fres.records)
+                    if (t.subject, t.rel_type, t.object) not in seen
+                ]
+                if candidates:
+                    prize_texts = [
+                        t.natural_text or f"{t.subject} {t.verb} {t.object}"
+                        for t in candidates
+                    ]
+                    prize_vecs = await embedding_provider.encode_batch(prize_texts)
+                    ranked = sorted(
+                        zip(candidates, prize_vecs),
+                        key=lambda cv: cosine_similarity(question_vector, cv[1]),
+                        reverse=True,
+                    )
+                    for t, _vec in ranked[:prize_top_k]:
+                        key = (t.subject, t.rel_type, t.object)
+                        if key not in seen:
+                            seen.add(key)
+                            triples.append(t)
+        else:
+            exp_params = {"kg_id": str(kg_id), "seed_entities": seeds}
+            if scoped:
+                exp_params["scope_doc_ids"] = scope_ids
+            if want_limit:
+                exp_params["per_seed_limit"] = per_seed_limit
+            exp = await driver.execute_query(
+                _bfs_pass_cypher(rel_types, 2, hops, scoped=scoped, per_seed_limit=want_limit),
+                **exp_params,
+            )
+            for t in _bfs_records_to_triples(exp.records):
+                key = (t.subject, t.rel_type, t.object)
+                if key not in seen:
+                    seen.add(key)
+                    triples.append(t)
 
     return triples

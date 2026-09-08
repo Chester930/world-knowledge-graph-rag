@@ -2127,6 +2127,69 @@ async def test_bfs_query_scope_empty_result_falls_back_to_unscoped():
     assert "HAS_ENTITY" not in driver.calls[1][0]   # fallback 無範圍
 
 
+class _TwoPassBFSDriver:
+    """報告27 L2 測試替身：第 0 趟（1-hop from seed）回 `first`，之後每趟
+    （L2 的 frontier 再走 1-hop、或 blind 2..hops）回 `rest`。"""
+
+    def __init__(self, first, rest):
+        self.calls = []
+        self._first = first
+        self._rest = rest
+
+    async def execute_query(self, query, **params):
+        self.calls.append((query, params))
+        return FakeResult(self._first if len(self.calls) == 1 else self._rest)
+
+
+def _rec(s, o, nt=None):
+    return FakeRecord(subject=s, subject_type="概念", rel_type="CAUSES",
+                      confidence=1, citations_json=None, natural_text=nt,
+                      object=o, object_type="概念")
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_l2_prize_keeps_only_top_k_by_cosine():
+    """報告27 L2：懶惰擴展觸發且三參數齊備時，改對 1-hop frontier 的候選
+    2-hop 邊算 cosine(問題向量, 邊 natural_text)，只留 top-k 條；擴展趟走的
+    是 `*1..1]`（frontier 再走 1 hop），不是無差別 `*2..2]`。"""
+    first = [_rec("A", "X"), _rec("A", "Y")]  # 2 < expand_when_below(8) → 觸發擴展
+    rest = [
+        _rec("X", "P1", nt="近題"),   # cosine 高
+        _rec("X", "P2", nt="離題甲"),
+        _rec("Y", "P3", nt="離題乙"),
+        _rec("Y", "P4", nt="也近題"),  # cosine 高
+    ]
+    driver = _TwoPassBFSDriver(first, rest)
+    emb = TypeDescriptionFakeEmbedding(
+        vectors={"近題": [1.0, 0.0, 0.0], "也近題": [0.94, 0.0, 0.0],
+                 "離題甲": [0.0, 1.0, 0.0], "離題乙": [0.0, 0.0, 1.0]},
+        default=[0.0, 1.0, 0.0],
+    )
+    triples = await svc.bfs_query(
+        driver, uuid4(), ["A"], hops=2,
+        prize_top_k=2, question_vector=[1.0, 0.0, 0.0], embedding_provider=emb,
+    )
+    objs = {t.object for t in triples}
+    assert objs == {"X", "Y", "P1", "P4"}          # 1-hop 2 + prize top-2
+    assert "*1..1]" in driver.calls[1][0]           # frontier 再走 1 hop
+    assert "*2..2]" not in driver.calls[1][0]       # 不是無差別 2-hop
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_l2_falls_back_to_blind_expansion_without_all_params():
+    """報告27 L2：`prize_top_k`／`question_vector`／`embedding_provider` 缺
+    任一 → 走原無差別 `*2..2]` 擴展（零行為變化）。"""
+    first = [_rec("A", "X")]
+    rest = [_rec("X", "P1"), _rec("X", "P2")]
+    driver = _TwoPassBFSDriver(first, rest)
+    triples = await svc.bfs_query(
+        driver, uuid4(), ["A"], hops=2,
+        prize_top_k=2, question_vector=[1.0, 0.0, 0.0],  # 缺 embedding_provider
+    )
+    assert "*2..2]" in driver.calls[1][0]
+    assert {t.object for t in triples} == {"X", "P1", "P2"}
+
+
 # ── trigger_extraction（原 routers/staging.py::_trigger_extraction，遷移自
 # tests/routers/test_staging.py，見 docs/報告/11_抽取管線完整實作任務書.md P0-2）──
 
