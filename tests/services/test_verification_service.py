@@ -2,7 +2,11 @@ import json
 
 import pytest
 
-from services.verification_service import ClaimGrounding, verify_fact_grounding
+from services.verification_service import (
+    ClaimGrounding,
+    _grounding_prompt,
+    verify_fact_grounding,
+)
 
 
 class FakeLLM:
@@ -133,6 +137,17 @@ async def test_gracefully_degrades_on_malformed_json():
     assert len(result) == 1
     assert result[0].supported is False
     assert "格式錯誤" in result[0].reason
+
+
+def test_grounding_prompt_carries_interval_lookup_carve_out():
+    """報告32 §9 G2：`_grounding_prompt()` 要保留「明示查表推論例外」——
+    分段對照表 + 題目數值 → 查表取對應值算 supported，其他推論仍一律 false。
+    這條例外被誤刪會讓 Q8 型答案再度被判未接地、觸發限制性重生成而拒答。"""
+    prompt = _grounding_prompt(["某句陳述。"], ["1 以上未滿 10 → 變量係數為 2"])
+    assert "明示查表推論例外" in prompt
+    assert "分段對照表套用到題目給定的數值" in prompt
+    # 一般禁令仍在（不可因「聽起來合理」就判 true）
+    assert "不可因為「聽起來合理」就判定 true" in prompt
 
 
 @pytest.mark.asyncio

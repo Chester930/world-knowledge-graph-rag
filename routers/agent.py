@@ -433,6 +433,82 @@ def _merge_fact_lines(triples: list[SVOTriple], fact_results: list[dict]) -> lis
     return bfs_lines + fact_lines
 
 
+# ── 報告32 §9 G3 completeness guard（2026-09-08）─────────────────────────────
+# T1 Q3/Q6 型「分 N 段回答」：三條同謂語、object 互異的事實（三段年齡工時
+# 二/三/四小時、三級血中鉛管理），生成端偶爾整段漏掉一段、或重生成走「逐句
+# 重建」路徑補不回。guard 在 chat() 最終答案產出後檢查每個「分段事實族」的
+# 每個 object 都出現在答案裡，缺席就強制走能補全的重生成路徑、再不行就逐字附。
+
+_TIER_MIN_MEMBERS = 3
+
+# 問題是否要求「把每一段/每一級都列出來」——只有這種問題才跑 completeness
+# guard。Q3「依年齡分三段規定」要全列；Q8「5 ppm 時係數是多少」只要一段
+# （查表），不能被 guard 逼著把整張對照表都貼上。
+_FULL_ENUM_RE = re.compile(
+    r"分\s*[一二三四五六七八九十兩0-9]{0,3}\s*(?:段|級|類|階|種|項)"
+    r"|分別|各[自別]|逐一|逐項|哪些|所有(?:的)?(?:規定|情形|情況|類別)|完整(?:列出|清單)"
+)
+
+
+def _wants_full_enumeration(question: str) -> bool:
+    return bool(_FULL_ENUM_RE.search(question or ""))
+
+
+def _fact_verb(f: dict) -> str:
+    """`fact_results` dict 沒有獨立 verb 欄——從 `fact_text` 去掉 subject 前綴、
+    object 後綴，取中段當謂語簽章（純為分組用，抓不準就回空字串）。"""
+    text = str(f.get("fact_text") or "")
+    subj = str(f.get("subject") or "")
+    obj = str(f.get("object") or "")
+    if subj and text.startswith(subj):
+        text = text[len(subj):]
+    if obj and text.endswith(obj):
+        text = text[: len(text) - len(obj)]
+    return text.strip()
+
+
+def _detect_tier_families(
+    triples: list[SVOTriple], fact_results: list[dict]
+) -> list[list[tuple[str, str, str]]]:
+    """把本輪檢索到的事實依 `(rel_type, 謂語)` 分組；成員 ≥ `_TIER_MIN_MEMBERS`
+    且各成員 object 互異、subject 互異者視為一個「分段/分級事實族」。
+    回傳每族的 `(subject, verb, object)` 清單。"""
+    groups: dict[tuple[str, str], list[tuple[str, str, str]]] = {}
+    for t in triples:
+        if not (t.subject and t.verb and t.object):
+            continue
+        groups.setdefault((t.rel_type or "", t.verb), []).append((t.subject, t.verb, t.object))
+    for f in fact_results:
+        subj, obj = f.get("subject"), f.get("object")
+        verb = _fact_verb(f)
+        if not (subj and obj and verb):
+            continue
+        groups.setdefault((f.get("rel_type") or "", verb), []).append((subj, verb, obj))
+
+    families: list[list[tuple[str, str, str]]] = []
+    for members in groups.values():
+        # 同族內去重
+        uniq = list(dict.fromkeys(members))
+        objs = {m[2] for m in uniq}
+        subs = {m[0] for m in uniq}
+        if len(uniq) >= _TIER_MIN_MEMBERS and len(objs) == len(uniq) and len(subs) == len(uniq):
+            families.append(uniq)
+    return families
+
+
+def _missing_tier_members(
+    answer: str, families: list[list[tuple[str, str, str]]]
+) -> list[tuple[str, str, str]]:
+    """回傳「object 沒出現在 answer 裡」的分段事實族成員（去掉空白後比對）。"""
+    flat = answer.replace(" ", "").replace("　", "")
+    missing: list[tuple[str, str, str]] = []
+    for members in families:
+        for subj, verb, obj in members:
+            if obj.replace(" ", "") not in flat:
+                missing.append((subj, verb, obj))
+    return missing
+
+
 # 事實清單截斷／條件式重排的門檻常數（見 `docs/報告/23_生成端事實清單排序機制
 # 優化設計報告.md` § 3.4）。皆為理論推導的初始建議值，尚未實測校準——K 參考
 # LangChain `EmbeddingsFilter` 的預設值（k=20，與此處獨立推導的15-20建議值
@@ -655,9 +731,15 @@ async def _generate_decomposed_answer(
     """
     parts: list[str] = []
     for i, sub_q in enumerate(sub_questions, start=1):
+        # 報告32 §9 G4（2026-09-08）：`question_vector` 傳 None——強制 `_build_prompt()`
+        # → `_arrange_fact_lines()` 對「這個子問題」重新編碼排序，而不是沿用整個
+        # 複合問題的向量。真實案例（Q6 子問3「相關文件及紀錄至少保存幾年」）：
+        # 「相關文件及紀錄至少保存三年」對整題（期間＋血中鉛分級＋保存）相關性
+        # 低、排不進事實清單前段，但對子問題本身高度相關、應排 index 0。子問題
+        # 彼此獨立、事實清單不重新檢索，只是排序基準要換成子問題自己。
         sub_prompt = await _build_prompt(
             sub_q, triples, fact_results, history=None,
-            embedding_provider=embedding_provider, question_vector=question_vector,
+            embedding_provider=embedding_provider, question_vector=None,
         )
         tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
         answer = "".join(tokens).strip()
@@ -688,9 +770,11 @@ async def _generate_decomposed_constrained_answer(
     """
     parts: list[str] = []
     for i, sub_q in enumerate(sub_questions, start=1):
+        # 報告32 §9 G4：同 `_generate_decomposed_answer()`——`question_vector` 傳
+        # None，讓事實清單排序基準換成「這個子問題」而非整個複合問題。
         sub_prompt = await _build_constrained_prompt(
             sub_q, triples, fact_results, history=None,
-            embedding_provider=embedding_provider, question_vector=question_vector,
+            embedding_provider=embedding_provider, question_vector=None,
         )
         tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
         answer = "".join(tokens).strip()
@@ -750,6 +834,7 @@ async def _targeted_correction(
 2. 若事實清單裡沒有 → 輸出「（此部分）資料未明確記載，無法確認」，並簡短指出缺的是問題的哪個部分。
 3. 不要沿用原片段裡任何未經查核的具體數字／期限／金額／結論。
 4. 一個片段一行、順序對應，每行格式固定為「修正N：<內容>」（N 為片段編號）。
+5. 若片段是「分段清單／分級」裡的其中一段（片段提到某個年齡段、某個級別、某個類別加上一個門檻），請先鎖定它是哪一段，再到事實清單裡找「正是這一段」的那條事實、取它的值——這種情況通常事實清單裡有對應那一段的正確值，只是原草稿把段別配錯了（例如把「未滿六歲」的值寫成「未滿六個月」的值）。此時依規則 1 用事實清單的正確值改寫，不算違反規則 3。只有在事實清單確實沒有這一段時才走規則 2。
 """
     raw = "".join([tok async for tok in llm_provider.stream(prompt)])
     fixes: list[str] = [
@@ -783,6 +868,22 @@ async def _build_prompt(
             "請優先根據上述事實回答問題；若事實不足以完整回答，可以補充你自己的知識，"
             "但務必清楚區分哪些是根據圖譜事實、哪些是你自己的補充。"
             "回答前請逐條檢視上方事實清單中每一項，判斷是否與問題相關，不要遺漏任何一項可用的事實。"
+            # 報告32 §9 G2（2026-09-08）：Q8 型「查表 + 區間比對」組合推論——事實
+            # 清單給了分段對照表、問題給了一個具體數值，模型常不做「落在哪一段」
+            # 這步而直接答「未記載」。明確允許這一種確定性推論（且只有這一種）。
+            "若上述事實清單裡有一組「數值區間 → 對應值」的分段對照（例如"
+            "「1 以上未滿 10 → 變量係數 2」「10 以上未滿 100 → 變量係數 1.5」），"
+            "而問題給了一個具體數值，請直接判斷該數值落在哪一個區間、取該區間"
+            "在清單裡明列的對應值作答，並註明用了哪一列——這種把清單明列的分段"
+            "對照表套用到題目數值的推論是允許的，不算臆測。"
+            # 報告32 §9 G3（2026-09-08）：Q3/Q6 型「分 N 段回答」——三段年齡工時、
+            # 三級血中鉛管理。真實失效：把「未滿六歲」與「未滿六個月」（字樣相近）
+            # 混段、或整段漏掉一段。逐段對照、每段獨立配自己那條事實。
+            "若問題要求分段回答（例如依年齡分三段、依濃度分三級），請把每一段"
+            "當成獨立的一問：逐段到事實清單裡找「屬於這一段」的那條事實，取它的值。"
+            "特別注意字樣相近但不同段的標籤（例如「未滿六歲」與「未滿六個月」、"
+            "「六歲以上未滿十二歲」與「十二歲以上未滿十五歲」）不可混用；"
+            "問題列出幾段就要回答幾段，不可以只答其中一部分。"
             # 報告27 C#2 M0（2026-09-04）：真實案例（報告26 §4 #2、報告27 §C2
             # 前置查證）發現模型會在回答的某一部分正確引用某條事實，卻在收尾
             # 摘要時又說該事實「未記載／無法確認」，自我矛盾——多半發生於
@@ -866,7 +967,7 @@ async def _build_constrained_prompt(
 {history_block}問題：{question}
 
 請回答上述問題，並嚴格遵守：
-1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。
+1. 只能陳述上方事實清單裡明確出現過的內容，不可以用推論或你自己的知識補充任何具體數字、天數、期限、結論。唯一例外（報告32 §9 G2）：事實清單裡有「數值區間 → 對應值」的分段對照表（例如「1 以上未滿 10 → 變量係數 2」）、問題又給了一個具體數值時，可以判斷該數值落在哪一個區間、取該區間在清單裡明列的對應值作答，並註明用了哪一列；此例外僅限這種分段查表，其他任何推論仍一律禁止。
 2. 若事實清單不足以完整回答問題的某個部分，該部分請回答「資料未明確記載，無法確認」，並簡短說明具體是哪個部分找不到依據（例如：「事實清單中沒有提到婚假的天數」），不要臆測或用自己的知識填補。
 3. 回答前請逐條檢視上方事實清單中每一項，確認是否有跟問題相關卻被你遺漏的事實——事實清單已依與問題的相關性排序，最相關的通常在清單前段。
 4. 若你在回答的任何一部分已經引用某條事實作答，後面的摘要或結論不可以再說這項資訊「未記載」或「無法確認」——同一份事實清單內，已經用過的事實視為確定可用，前後結論必須一致。
@@ -1094,6 +1195,30 @@ async def chat(payload: ChatRequest):
             # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
             # 而非已經被取代的草稿。
             grounding = await verify_fact_grounding(final_answer, fact_texts, llm_provider)
+
+        # 報告32 §9 G3 completeness guard：分段/分級問題（三段年齡工時、三級
+        # 血中鉛管理）——最終答案偶爾整段漏掉一段，且接地核對抓不到「缺內容」
+        # （缺的段不是未接地的主張、是根本沒寫）。檢查每個「分段事實族」的每個
+        # object 都在答案裡，缺就先強制走「分解式整段重生」（能補全的路徑，跟
+        # 逐句重建不同），仍缺就逐字附上——保證分段清單完整。
+        if payload.use_svo and (triples or fact_results) and _wants_full_enumeration(payload.question):
+            tier_families = _detect_tier_families(triples, fact_results)
+            missing = _missing_tier_members(final_answer, tier_families)
+            if missing and len(sub_questions) > 1:
+                final_answer = await _generate_decomposed_constrained_answer(
+                    sub_questions, triples, fact_results,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    llm_provider=llm_provider,
+                )
+                regenerated = True
+                grounding = await verify_fact_grounding(final_answer, fact_texts, llm_provider)
+                missing = _missing_tier_members(final_answer, tier_families)
+            if missing:
+                supplement = "\n".join(
+                    f"補充（依事實清單）：{s} {v} {o}".strip() for s, v, o in missing
+                )
+                final_answer = f"{final_answer}\n\n{supplement}"
+                regenerated = True
 
         # 報告26 §4 #5：生成端（`qwen2.5:7b`）偶爾在自己的答案文字裡混簡體，
         # 跟已修的抽取端發現4（SVO 三元組欄位）是不同呼叫點的同一類問題。

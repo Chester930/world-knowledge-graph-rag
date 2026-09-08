@@ -222,6 +222,141 @@ async def test_build_prompt_instructs_checking_every_fact_line():
     assert "逐條檢視" in prompt
 
 
+@pytest.mark.asyncio
+async def test_build_prompt_allows_interval_lookup_inference():
+    """報告32 §9 G2：Q8 型「分段對照表 + 題目數值 → 查表取對應值」的組合推論，
+    草稿 prompt 明確允許（其他推論仍不允許）。"""
+    fact_results = [
+        {"fact_text": "1 以上，未滿 10 的容許濃度 變量係數為 2", "subject": "1 以上，未滿 10 的容許濃度", "rel_type": "RELATED_TO", "object": "2"},
+    ]
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    prompt = await agent._build_prompt(
+        "8 小時容許濃度為 5 ppm 時變量係數是多少？", [], fact_results, None, embedding_provider=embedding
+    )
+
+    assert "數值區間 → 對應值" in prompt
+    assert "落在哪一個區間" in prompt
+
+
+@pytest.mark.asyncio
+async def test_build_constrained_prompt_allows_interval_lookup_inference():
+    """報告32 §9 G2：限制性重生成 prompt 規則 1 對「分段查表」開窄例外，
+    其他推論仍一律禁止。"""
+    fact_results = [
+        {"fact_text": "1 以上，未滿 10 的容許濃度 變量係數為 2", "subject": "1 以上，未滿 10 的容許濃度", "rel_type": "RELATED_TO", "object": "2"},
+    ]
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    prompt = await agent._build_constrained_prompt(
+        "8 小時容許濃度為 5 ppm 時變量係數是多少？", [], fact_results, None, embedding_provider=embedding
+    )
+
+    assert "唯一例外" in prompt
+    assert "分段查表" in prompt
+    assert "不可以用推論" in prompt  # 一般禁令仍在
+
+
+@pytest.mark.asyncio
+async def test_build_prompt_carries_segmented_answer_hint():
+    """報告32 §9 G3：Q3/Q6 型「分 N 段回答」——草稿 prompt 要提醒逐段對照、
+    相似段別（未滿六歲 vs 未滿六個月）不可混用、問幾段答幾段。"""
+    fact_results = [
+        {"fact_text": "年齡未滿六歲者 每日不得超過 二小時", "subject": "年齡未滿六歲者", "rel_type": "RELATED_TO", "object": "二小時"},
+    ]
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    prompt = await agent._build_prompt(
+        "未滿十五歲工作者每日工時如何依年齡分三段？", [], fact_results, None, embedding_provider=embedding
+    )
+
+    assert "分段回答" in prompt
+    assert "未滿六個月" in prompt  # 相似段別的警示例子
+    assert "問題列出幾段就要回答幾段" in prompt
+
+
+@pytest.mark.asyncio
+async def test_targeted_correction_prompt_carries_tier_rule():
+    """報告32 §9 G3：定向修訂 prompt 規則 5——被標記的片段若是分段清單其中一段，
+    要鎖定是哪一段、到事實清單找「正是這一段」的正確值，而非一律答未記載。"""
+    triples = [_triple("年齡未滿六歲者", "RELATED_TO", "二小時", verb="每日不得超過")]
+    embedding = _FakeSemanticEmbeddingProvider()
+    llm = _FakeStreamLLM(answers=["修正1：年齡未滿六歲者每日不得超過二小時。"])
+
+    fixes = await agent._targeted_correction(
+        "未滿十五歲工作者每日工時如何依年齡分三段？",
+        ["年齡未滿六歲者的每日工作時間上限為三十分鐘。"],
+        triples, [],
+        embedding_provider=embedding, question_vector=None, llm_provider=llm,
+    )
+
+    assert fixes == ["年齡未滿六歲者每日不得超過二小時。"]
+    assert "分段清單／分級" in llm.prompts[0]
+    assert "把「未滿六歲」的值寫成「未滿六個月」的值" in llm.prompts[0]
+
+
+# ── 報告32 §9 G3 completeness guard：_detect_tier_families／_missing_tier_members ──
+
+def _tier_triples():
+    return [
+        _triple("年齡未滿六歲者", "RELATED_TO", "二小時", verb="每日不得超過"),
+        _triple("六歲以上未滿十二歲者", "RELATED_TO", "三小時", verb="每日不得超過"),
+        _triple("十二歲以上未滿十五歲者", "RELATED_TO", "四小時", verb="每日不得超過"),
+    ]
+
+
+def test_detect_tier_families_groups_three_siblings():
+    fams = agent._detect_tier_families(_tier_triples(), [])
+    assert len(fams) == 1
+    assert {m[2] for m in fams[0]} == {"二小時", "三小時", "四小時"}
+
+
+def test_detect_tier_families_needs_at_least_three_members():
+    assert agent._detect_tier_families(_tier_triples()[:2], []) == []
+
+
+def test_detect_tier_families_rejects_duplicate_objects():
+    trips = [
+        _triple("甲", "RELATED_TO", "三十日", verb="期限為"),
+        _triple("乙", "RELATED_TO", "三十日", verb="期限為"),
+        _triple("丙", "RELATED_TO", "三十日", verb="期限為"),
+    ]
+    assert agent._detect_tier_families(trips, []) == []
+
+
+def test_detect_tier_families_from_fact_results():
+    facts = [
+        {"fact_text": "血中鉛濃度低於五 μg/dl 者 屬於 第一級管理", "subject": "血中鉛濃度低於五 μg/dl 者", "rel_type": "RELATED_TO", "object": "第一級管理"},
+        {"fact_text": "血中鉛濃度在五 μg/dl 以上未達十 μg/dl 屬於 第二級管理", "subject": "血中鉛濃度在五 μg/dl 以上未達十 μg/dl", "rel_type": "RELATED_TO", "object": "第二級管理"},
+        {"fact_text": "血中鉛濃度在十 μg/dl 以上者 屬於 第三級管理", "subject": "血中鉛濃度在十 μg/dl 以上者", "rel_type": "RELATED_TO", "object": "第三級管理"},
+    ]
+    fams = agent._detect_tier_families([], facts)
+    assert len(fams) == 1
+    assert {m[2] for m in fams[0]} == {"第一級管理", "第二級管理", "第三級管理"}
+
+
+def test_missing_tier_members_flags_absent_object():
+    fams = agent._detect_tier_families(_tier_triples(), [])
+    ans = "六歲以上未滿十二歲者每日不得超過三小時；十二歲以上未滿十五歲者每日不得超過四小時。"
+    missing = agent._missing_tier_members(ans, fams)
+    assert [m[2] for m in missing] == ["二小時"]
+
+
+def test_missing_tier_members_empty_when_all_present():
+    fams = agent._detect_tier_families(_tier_triples(), [])
+    ans = "未滿六歲：二小時；六至十二歲：三小時；十二至十五歲：四小時。"
+    assert agent._missing_tier_members(ans, fams) == []
+
+
+def test_wants_full_enumeration_gate():
+    # Q3 型：要全列
+    assert agent._wants_full_enumeration("未滿十五歲工作者每日工時如何依年齡分三段規定？")
+    assert agent._wants_full_enumeration("血中鉛管理分別依濃度怎麼分級？")
+    # Q8 型：查表取一段，不要被 guard 逼著貼整張表
+    assert not agent._wants_full_enumeration("八小時容許濃度為 5 ppm 時變量係數是多少？")
+    assert not agent._wants_full_enumeration("血中鉛濃度達到多少以上屬於第三級管理？")
+
+
 # ── _score_lines_by_embedding／_arrange_fact_lines：報告23（2026-09-01）───
 # 取代舊版 _sort_lines_by_relevance()（bigram，報告22題3真實重跑證實訊號
 # 太弱）。改用 embedding cosine similarity，並補上截斷／條件式zigzag重排。
@@ -409,6 +544,47 @@ async def test_generate_decomposed_answer_calls_llm_once_per_subquestion_and_num
     assert "優先僱用 須 連續三個月" in llm.prompts[0]
     assert "優先僱用 須 連續三個月" in llm.prompts[1]
     assert "獎勵金最多發給幾個月" not in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_decomposed_answer_rescopes_fact_ranking_per_subquestion():
+    """報告32 §9 G4：即使 chat() 傳進整個複合問題的 question_vector，分解路徑
+    也要對「每個子問題」重新編碼排序事實清單——否則對子問題高度相關、對整題
+    相關性低的事實（Q6「相關文件及紀錄至少保存三年」）排不進前段、被生成端
+    忽略。以 `encoded_texts` 出現每個子問句本身為證。"""
+    sub_questions = ["母性健康保護期間到什麼時候為止？", "相關文件及紀錄至少要保存幾年？"]
+    triples = [_triple("相關文件及紀錄", "RELATED_TO", "三年", verb="至少保存")]
+    llm = _FakeStreamLLM(answers=["至分娩後一年。", "至少保存三年。"])
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    await agent._generate_decomposed_answer(
+        sub_questions, triples, [],
+        embedding_provider=embedding, question_vector=[1.0] * 64,  # 模擬 chat() 傳整題向量
+        llm_provider=llm,
+    )
+
+    # 傳進來的整題向量被忽略，改對每個子問句本身編碼
+    assert "母性健康保護期間到什麼時候為止？" in embedding.encoded_texts
+    assert "相關文件及紀錄至少要保存幾年？" in embedding.encoded_texts
+
+
+@pytest.mark.asyncio
+async def test_decomposed_constrained_answer_rescopes_fact_ranking_per_subquestion():
+    """報告32 §9 G4：`_generate_decomposed_constrained_answer()`（重生成路徑）
+    同樣要對每個子問題重新編碼排序。"""
+    sub_questions = ["期間到什麼時候？", "紀錄保存幾年？"]
+    triples = [_triple("相關文件及紀錄", "RELATED_TO", "三年", verb="至少保存")]
+    llm = _FakeStreamLLM(answers=["一年。", "三年。"])
+    embedding = _FakeSemanticEmbeddingProvider()
+
+    await agent._generate_decomposed_constrained_answer(
+        sub_questions, triples, [],
+        embedding_provider=embedding, question_vector=[1.0] * 64,
+        llm_provider=llm,
+    )
+
+    assert "期間到什麼時候？" in embedding.encoded_texts
+    assert "紀錄保存幾年？" in embedding.encoded_texts
 
 
 # ── chat()：驗證語意 Fact 檢索確實接線（2026-08-18）─────────────────────────
