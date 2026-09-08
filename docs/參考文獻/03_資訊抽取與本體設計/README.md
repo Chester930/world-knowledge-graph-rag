@@ -3,6 +3,8 @@
 對應 `../../論文/02_文獻探討.md` § 2.4.4（對應 3.1.3／3.1.4／3.2 §b／3.3，受控語意關係抽取與查詢時關係連結，2026-07-23 第二章重組前為 § 2.1.3）。
 本資料夾支撐 **RQ4a（預留）**：受控關係詞彙的具體內容依據（實體類型／關係類型），以及查詢時「使用者措辭→canonical 類型」的關係連結機制。
 
+> **現行口徑（2026-09-08 複核）**：`ENTITY_TYPES` 為 WDC 2022 官方統計頁的 48 個 class-specific subsets，加上 Brinkmann et al. (2023) Table 1 獨有的 `Offer`、`BlogPosting`、`AggregateRating`、`Review`，聯集為 52 類。ConceptNet 採官方現行頁面列出的 34 個 active 關係（7 對稱＋27 非對稱），另保留 Speer et al. (2017) 論文正文的 `SENSE_OF`，故本專案受控集合為 35 類。本文後續以日期記錄的「新增」或「官方後續新增」僅描述本專案重新採用查核當時頁面現況，不作官方版本歷史推論。
+
 > **2026-07-24 範疇擴充說明**：本資料夾原本只涵蓋「Schema.org 為錨點的受控關係詞彙標準化」這個較窄的主題；因應 3.1.3 節設計討論（實體類型改為選填/多值、關係類型收斂為扁平的 ConceptNet 36 類、新增查詢時關係連結機制），本次新增 6 篇文獻，分兩組：① 公用類型庫的具體內容依據（OntoNotes、ConceptNet）與其結構性佐證（ACE、Aguilar et al.）；② 查詢時關係連結（Relation Linking）機制依據（STAGG、Falcon 2.0、SLING）。
 >
 > **2026-07-26 再擴充**：因應「LLM 抽取當下該不該把原始三元組抽取、實體型別提案、關係型別收斂拆成多階段處理」的分工討論，新增 2 篇討論「抽取流程分階段設計」的文獻（KGGen、AutoRE）。
@@ -37,7 +39,7 @@
 
 > 供 `SIM` 節點比對「型別描述句 embedding」（而非「型別識別碼字串 embedding」）直接取用，已於 `core/constants.py::SVO_REL_TYPE_DESCRIPTIONS` 程式碼落地（2026-07-27，2026-08-19 補上新增兩筆，見下方 TODO）；34 筆取自 ConceptNet 官方 GitHub wiki `commonsense/conceptnet5/wiki/Relations`（即時查詢版本，2026-08-19 直接讀取 raw markdown 來源 `raw.githubusercontent.com/wiki/commonsense/conceptnet5/Relations.md` 複核，避免 WebFetch 中介模型摘要造成的失真），`SENSE_OF` 一筆取自 Speer et al. (2017) 論文正文，詳見上方查證說明。
 >
-> ✅ **2026-08-19 新增 `HAS_SUBEVENT`／`ETYMOLOGICALLY_DERIVED_FROM` 兩個關係**：籌備新資料集抽取任務前的文獻/專案佐證審查中，再次即時查證同一份官方 wiki，確認官方現行共列出 34 個 active 關係（symmetric 7＋asymmetric 27，不含已棄用的 `Entails`／`InstanceOf`），比本論文 2026-07-27 鎖定的 33 個多出這兩個官方後續新增的關係——`HasSubevent`（「A and B are events, and B happens as a subevent of A」，例：eating → chewing，與既有 `HasFirstSubevent`／`HasLastSubevent` 是官方 wiki 上三個各自獨立的條目，非合併別名）、`EtymologicallyDerivedFrom`（「A is derived from B」，例：dejta → date，與既有對稱關係 `EtymologicallyRelatedTo` 是官方 wiki 上兩個獨立條目，前者單向、後者雙向）。使用者確認跟進官方最新清單，`SVO_REL_TYPES` 由 33 個訂正為 35 個（7 對稱＋28 非對稱），完整記錄見 `docs/論文/03_變更紀錄.md`。
+> ✅ **2026-08-19 現行清單複核 `HAS_SUBEVENT`／`ETYMOLOGICALLY_DERIVED_FROM`**：籌備新資料集抽取任務前再次查證官方 wiki，確認官方現行共列出 34 個 active 關係（symmetric 7＋asymmetric 27，不含已棄用的 `Entails`／`InstanceOf`）；本專案因此採用這兩個現行頁面所列條目，並保留論文正文的 `SENSE_OF`，使 `SVO_REL_TYPES` 合計 35 個（7 對稱＋28 非對稱）。此日期記錄的是本專案採用頁面現況，不主張這兩個關係在該日由官方新增；完整記錄見 `docs/論文/03_變更紀錄.md`。
 
 **對稱關係（7）**
 
@@ -51,7 +53,7 @@
 | `LOCATED_NEAR` | LocatedNear | A 與 B 通常在彼此附近被發現 | chair ↔ table |
 | `ETYMOLOGICALLY_RELATED_TO` | EtymologicallyRelatedTo | A 與 B 有共同的字源 | folkmusiikki ↔ folk music |
 
-**非對稱關係（28，2026-08-19 新增 `HAS_SUBEVENT`／`ETYMOLOGICALLY_DERIVED_FROM` 兩個）**
+**非對稱關係（28；其中兩個為 2026-09-08 現行清單複核項目）**
 
 | `core/constants.py` 常數 | ConceptNet 原名 | 定義 | 範例 |
 |---|---|---|---|
@@ -63,7 +65,7 @@
 | `CAPABLE_OF` | CapableOf | A 能夠做 B | knife → cut |
 | `AT_LOCATION` | AtLocation | A 是可以找到 B 的地方 | butter → refrigerator |
 | `CAUSES` | Causes | A 的發生會導致 B 發生 | exercise → sweat |
-| `HAS_SUBEVENT`（2026-08-19 新增） | HasSubevent | A 與 B 皆為事件，B 是 A 發生過程中的一個子事件 | eating → chewing |
+| `HAS_SUBEVENT`（2026-09-08 現行清單複核） | HasSubevent | A 與 B 皆為事件，B 是 A 發生過程中的一個子事件 | eating → chewing |
 | `HAS_FIRST_SUBEVENT` | HasFirstSubevent | A 是一個事件，B 是其開始時發生的動作 | sleep → close eyes |
 | `HAS_LAST_SUBEVENT` | HasLastSubevent | A 是一個事件，B 是其結束時發生的動作 | cook → clean up kitchen |
 | `HAS_PREREQUISITE` | HasPrerequisite | 若要 A 發生，B 必須先發生/存在 | dream → sleep |
@@ -73,7 +75,7 @@
 | `DESIRES` | Desires | A 是一個會渴望 B 的實體 | person → love |
 | `CREATED_BY` | CreatedBy | B 是產生 A 的過程/行為 | cake → bake |
 | `DERIVED_FROM` | DerivedFrom | A 這個詞是由 B 這個詞衍生而來 | pocketbook → book |
-| `ETYMOLOGICALLY_DERIVED_FROM`（2026-08-19 新增） | EtymologicallyDerivedFrom | A 這個詞的字源衍生自 B（與對稱關係 `ETYMOLOGICALLY_RELATED_TO` 是官方 wiki 上兩個獨立條目，前者單向、後者雙向） | dejta → date |
+| `ETYMOLOGICALLY_DERIVED_FROM`（2026-09-08 現行清單複核） | EtymologicallyDerivedFrom | A 這個詞的字源衍生自 B（與對稱關係 `ETYMOLOGICALLY_RELATED_TO` 是官方 wiki 上兩個獨立條目，前者單向、後者雙向） | dejta → date |
 | `SYMBOL_OF` | SymbolOf | A 象徵、代表 B | red → fervor |
 | `DEFINED_AS` | DefinedAs | A 與 B 意義幾乎相同，但 B 提供更正式/百科式的定義 | peace → absence of war |
 | `MANNER_OF` | MannerOf | A 是 B 這個較一般行為的特定實現方式 | auction → sale |

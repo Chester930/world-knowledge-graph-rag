@@ -52,11 +52,12 @@ ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
 # 個型別，改為 35-2=33 個，取代 2017 年論文快照版本（此為 2026-07-27 使用者確認的
 # 訂正，非疏漏）。
 # ✅ 2026-08-19 再訂正為 35 個：籌備新資料集抽取任務前的文獻/專案佐證審查中，再次
-# 即時查證同一份官方 wiki（直接讀取 raw markdown 來源
+# 依官方現行 wiki 複核（直接讀取 raw markdown 來源
 # raw.githubusercontent.com/wiki/commonsense/conceptnet5/Relations.md，避免
 # WebFetch 中介模型摘要造成的失真），確認官方現行共列出 **34 個 active 關係**
-# （symmetric 7＋asymmetric 27，不含已棄用的 ENTAILS／INSTANCE_OF）——比本論文
-# 2026-07-27 鎖定的 33 個多出 2 個官方後續新增的關係：
+# （symmetric 7＋asymmetric 27，不含已棄用的 ENTAILS／INSTANCE_OF）。本地受控集合
+# 在此官方現行清單之外，另保留 Speer et al. (2017) 論文正文的 SENSE_OF，故合計 35 個。
+# 此註解只記錄本專案採用的頁面現況，不推論官方版本歷史；現行頁面包含：
 #   - HAS_SUBEVENT：「A and B are events, and B happens as a subevent of A」
 #     （eating → chewing）——與既有的 HAS_FIRST_SUBEVENT／HAS_LAST_SUBEVENT 是
 #     官方 wiki 上三個各自獨立的條目，非合併別名：後兩者特指「開始/結束時發生的
@@ -64,9 +65,8 @@ ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
 #   - ETYMOLOGICALLY_DERIVED_FROM：「A is derived from B」（dejta → date）——
 #     與既有對稱關係 ETYMOLOGICALLY_RELATED_TO（「A 與 B 有共同字源」）是官方
 #     wiki 上兩個獨立條目：前者是單向的衍生方向，後者是雙向的共同字源，語意不同。
-# 使用者確認跟進官方最新清單（與 2026-07-27 那次「跟進官方現行建議移除已棄用型別」
-# 同一原則的延伸），SVO_REL_TYPES 由 33 個訂正為 35 個（7 對稱＋28 非對稱）。
-# SENSE_OF 仍非官方 wiki 現行列出的條目，沿用既有作法取自 Speer et al. (2017)
+# 本專案因此採用官方現行 34 個（7 對稱＋27 非對稱）加上 SENSE_OF；SENSE_OF 仍非
+# 官方 wiki 現行列出的條目，沿用既有作法取自 Speer et al. (2017)
 # 論文正文（見 SVO_REL_TYPE_DESCRIPTIONS 註解）。完整查證見
 # docs/參考文獻/03_資訊抽取與本體設計/README.md。
 # 命名採 Neo4j 關係型別慣例（UPPER_SNAKE_CASE），對應改寫 ConceptNet 原始 CamelCase
@@ -181,7 +181,7 @@ SVO_REL_TYPE_DESCRIPTIONS: dict[str, str] = {
     "CAUSES": "A 的發生會導致 B 發生，例如 exercise 導致 sweat",
     "HAS_FIRST_SUBEVENT": "A 是一個事件，B 是其開始時發生的動作，例如 sleep 從 close eyes 開始",
     "HAS_LAST_SUBEVENT": "A 是一個事件，B 是其結束時發生的動作，例如 cook 以 clean up kitchen 結束",
-    "HAS_SUBEVENT": "A 與 B 皆為事件，B 是 A 發生過程中的一個子事件，例如 eating 包含 chewing 這個子事件（2026-08-19 新增）",
+    "HAS_SUBEVENT": "A 與 B 皆為事件，B 是 A 發生過程中的一個子事件，例如 eating 包含 chewing 這個子事件（2026-09-08 現行清單複核）",
     "HAS_PREREQUISITE": "若要 A 發生，B 必須先發生或存在，例如 dream 的前提是 sleep",
     "HAS_PROPERTY": "A 具有 B 這個性質，例如 ice 是 cold 的",
     "MOTIVATED_BY_GOAL": "做 A 是為了達成目標 B，例如 compete 是為了 win",
@@ -189,7 +189,7 @@ SVO_REL_TYPE_DESCRIPTIONS: dict[str, str] = {
     "DESIRES": "A 是一個會渴望 B 的實體，例如 person 渴望 love",
     "CREATED_BY": "B 是產生 A 的過程或行為，例如 cake 由 bake 這個動作產生",
     "DERIVED_FROM": "A 這個詞是由 B 這個詞衍生而來，例如 pocketbook 衍生自 book",
-    "ETYMOLOGICALLY_DERIVED_FROM": "A 這個詞的字源衍生自 B，例如 dejta 衍生自 date（2026-08-19 新增）",
+    "ETYMOLOGICALLY_DERIVED_FROM": "A 這個詞的字源衍生自 B，例如 dejta 衍生自 date（2026-09-08 現行清單複核）",
     "SYMBOL_OF": "A 象徵或代表 B，例如 red 象徵 fervor",
     "DEFINED_AS": "A 與 B 意義幾乎相同，但 B 提供更正式或百科式的定義，例如 peace 被定義為 absence of war",
     "MANNER_OF": "A 是 B 這個較一般行為的特定實現方式，例如 auction 是一種 sale",
