@@ -26,6 +26,18 @@ from core.kg_config.model import (
     RoutingConfig,
 )
 from core.kg_config.sources import ConfigSource, DictConfigSource, FileConfigSource
+from core.kg_config.stages import (
+    STAGE_REGISTRY,
+    Blocker,
+    Gate,
+    Harness,
+    Metric,
+    Stage,
+    sections_covered,
+    stages_for_section,
+    stages_without_harness,
+    unblocked_stages,
+)
 
 __all__ = [
     "KGConfig",
@@ -42,4 +54,14 @@ __all__ = [
     "ConfigSource",
     "DictConfigSource",
     "FileConfigSource",
+    "STAGE_REGISTRY",
+    "Stage",
+    "Metric",
+    "Gate",
+    "Blocker",
+    "Harness",
+    "sections_covered",
+    "stages_for_section",
+    "unblocked_stages",
+    "stages_without_harness",
 ]
