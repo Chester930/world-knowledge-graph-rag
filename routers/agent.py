@@ -545,6 +545,10 @@ _FACT_LINE_REORDER_THRESHOLD_K = 35
 #   （報告22「每週總時數四十小時」案例）被語意 Fact 全數擠掉。
 # `_RRF_K`：Reciprocal Rank Fusion 常數，Cormack, Clarke & Büttcher (2009) 定 60、
 #   後續驗證未改（Table 1：k=10~100 幾乎持平），本專案沿用。
+# 2026-09-08（報告33 §3.9 第 8b′ 步）：`_FACT_LINE_TRUNCATE_K`／
+#   `_FACT_LINE_REORDER_THRESHOLD_K`／`_BFS_KEEP_MAX`／`_MIN_BFS_SLOTS`／`_RRF_K`
+#   現為 `KGConfig().factlist.*` 的預設值錨點（`tests/core/test_kg_config.py`
+#   golden test）。`_arrange_fact_lines()` 已改讀 `cfg`；正式調校改 profile。
 _BFS_KEEP_MAX = 18
 _MIN_BFS_SLOTS = 4
 _RRF_K = 60
@@ -613,23 +617,25 @@ def _litm_reorder(lines: list[str]) -> list[str]:
     return reordered
 
 
-def _rrf_order(sem_ranked: list[str], bfs_ranked: list[str], lines: list[str]) -> list[str]:
+def _rrf_order(
+    sem_ranked: list[str], bfs_ranked: list[str], lines: list[str], *, rrf_k: int = _RRF_K
+) -> list[str]:
     """Reciprocal Rank Fusion（Cormack, Clarke & Büttcher, 2009, SIGIR）：把
     `lines` 依兩個排序清單的 RRF 分數由高到低重排——`RRFscore(l) = Σ 1/(k +
-    rank_i(l))`，k=`_RRF_K`。只用 rank、不用原始分數，因此不需要 `vector_
-    search_facts()` 的 KNN 分數與 `_score_lines_by_embedding()` 的 cosine
-    在同一個尺度上（RRF 原文：「combines ranks without regard to the
-    arbitrary scores returned by particular ranking methods」）。Python `sorted`
-    穩定，RRF 同分時保留傳入 `lines` 的既有順序。"""
+    rank_i(l))`，k=`rrf_k`（預設 `_RRF_K`＝Cormack et al. 定的 60）。只用 rank、
+    不用原始分數，因此不需要 `vector_search_facts()` 的 KNN 分數與
+    `_score_lines_by_embedding()` 的 cosine 在同一個尺度上（RRF 原文：「combines
+    ranks without regard to the arbitrary scores returned by particular ranking
+    methods」）。Python `sorted` 穩定，RRF 同分時保留傳入 `lines` 的既有順序。"""
     rank_sem = {line: i for i, line in enumerate(sem_ranked)}
     rank_bfs = {line: i for i, line in enumerate(bfs_ranked)}
 
     def _score(line: str) -> float:
         s = 0.0
         if line in rank_sem:
-            s += 1.0 / (_RRF_K + rank_sem[line])
+            s += 1.0 / (rrf_k + rank_sem[line])
         if line in rank_bfs:
-            s += 1.0 / (_RRF_K + rank_bfs[line])
+            s += 1.0 / (rrf_k + rank_bfs[line])
         return s
 
     return sorted(lines, key=_score, reverse=True)
@@ -642,6 +648,7 @@ async def _arrange_fact_lines(
     *,
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[str]:
     """事實清單的完整排列邏輯。**2026-09-02 改版（報告25 § 4 發現6）**：
     先前把 BFS 三元組與語意 Fact 合併成一份清單、整批用
@@ -669,23 +676,29 @@ async def _arrange_fact_lines(
 
     ⚠️ **`_BFS_KEEP_MAX`／`_MIN_BFS_SLOTS`／K／K' 皆未實測校準**（`_RRF_K=60`
     有 Cormack et al. 背書），留待報告25 §6 的 K 值敏感度測試與擴大題組
-    重測校準。
+    重測校準。2026-09-08（報告33 §3.9 第 8b′ 步）：這幾個值改讀 `cfg.factlist.*`，
+    `cfg=None` → `KGConfig()` 預設 == 對應模組常數，行為零變化。
     """
+    _cfg = cfg or KGConfig()
     bfs_ranked = await _score_lines_by_embedding(
         question, bfs_lines, embedding_provider=embedding_provider, question_vector=question_vector
     )
-    bfs_ranked = bfs_ranked[:_BFS_KEEP_MAX]
+    bfs_ranked = bfs_ranked[:_cfg.factlist.bfs_keep_max]
     sem_ranked = list(fact_lines)  # 已是 vector_search_facts() 檢索順序
 
     total = len(sem_ranked) + len(bfs_ranked)
-    if total <= _FACT_LINE_TRUNCATE_K:
-        return _rrf_order(sem_ranked, bfs_ranked, sem_ranked + bfs_ranked)
+    if total <= _cfg.factlist.truncate_k:
+        return _rrf_order(sem_ranked, bfs_ranked, sem_ranked + bfs_ranked, rrf_k=_cfg.factlist.rrf_k)
 
-    target = _FACT_LINE_TRUNCATE_K if total <= _FACT_LINE_REORDER_THRESHOLD_K else _FACT_LINE_REORDER_THRESHOLD_K
-    n_bfs = min(len(bfs_ranked), max(_MIN_BFS_SLOTS, target - len(sem_ranked)))
+    target = (
+        _cfg.factlist.truncate_k
+        if total <= _cfg.factlist.reorder_threshold_k
+        else _cfg.factlist.reorder_threshold_k
+    )
+    n_bfs = min(len(bfs_ranked), max(_cfg.factlist.min_bfs_slots, target - len(sem_ranked)))
     n_sem = min(len(sem_ranked), target - n_bfs)
     kept = sem_ranked[:n_sem] + bfs_ranked[:n_bfs]
-    return _litm_reorder(_rrf_order(sem_ranked, bfs_ranked, kept))
+    return _litm_reorder(_rrf_order(sem_ranked, bfs_ranked, kept, rrf_k=_cfg.factlist.rrf_k))
 
 
 # 報告27 C#2 M1（2026-09-04）：複合問題的子問題數上限——極端情況（問題本文
@@ -836,7 +849,7 @@ async def _targeted_correction(
     if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
             question, bfs_lines, fact_lines,
-            embedding_provider=embedding_provider, question_vector=question_vector,
+            embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
         )
         facts = "\n".join(arranged)
     else:
@@ -885,7 +898,7 @@ async def _build_prompt(
     if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
             question, bfs_lines, fact_lines,
-            embedding_provider=embedding_provider, question_vector=question_vector,
+            embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
         )
         facts = "\n".join(arranged)
         context_block = f"以下是從知識圖譜檢索到、可能與問題相關的事實：\n{facts}\n"
@@ -982,7 +995,7 @@ async def _build_constrained_prompt(
     if bfs_lines or fact_lines:
         arranged = await _arrange_fact_lines(
             question, bfs_lines, fact_lines,
-            embedding_provider=embedding_provider, question_vector=question_vector,
+            embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
         )
         facts = "\n".join(arranged)
     else:

@@ -435,6 +435,22 @@ async def test_arrange_fact_lines_caps_bfs_lines():
 
 
 @pytest.mark.asyncio
+async def test_arrange_fact_lines_bfs_keep_max_from_cfg():
+    """報告33 §3.9 第 8b′ 步：`_BFS_KEEP_MAX` 改讀 `cfg.factlist.bfs_keep_max`。"""
+    from core.kg_config import KGConfig
+
+    embedding = _FakeSemanticEmbeddingProvider()
+    bfs = [f"- bfs{i}" for i in range(40)]
+    cfg = KGConfig.model_validate({"factlist": {"bfs_keep_max": 5}})
+
+    arranged = await agent._arrange_fact_lines("問題", bfs, [], embedding_provider=embedding, cfg=cfg)
+    assert len(arranged) == 5
+    # 不傳 cfg → 預設
+    default = await agent._arrange_fact_lines("問題", bfs, [], embedding_provider=embedding)
+    assert len(default) == agent._BFS_KEEP_MAX == KGConfig().factlist.bfs_keep_max
+
+
+@pytest.mark.asyncio
 async def test_arrange_fact_lines_semantic_facts_survive_truncation():
     """報告25 §4 發現6：截斷時語意 Fact 依檢索順序優先佔位，不被大量無
     問題相關性排序的 BFS 三元組擠掉；BFS 至少保底 `_MIN_BFS_SLOTS` 席。"""
@@ -786,6 +802,25 @@ async def test_build_prompt_uses_cfg_domain_system_context():
     # 不傳 cfg → 台灣預設
     default_prompt = await agent._build_prompt("婚假幾天？", [], [], None, embedding_provider=embedding)
     assert default_prompt.startswith(agent._TAIWAN_CONTEXT_INSTRUCTION)
+
+
+@pytest.mark.asyncio
+async def test_build_prompt_concurrent_two_cfgs_no_cross_contamination():
+    """報告33 §5.4 驗收標準之一：單一行程並行處理兩個 KG（兩個 domain pack），
+    生成 prompt 前綴互不污染。"""
+    import asyncio
+    from core.kg_config import KGConfig
+
+    emb = _FakeSemanticEmbeddingProvider()
+    cfg_a = KGConfig.model_validate({"domain": {"system_context": "A 前綴。"}})
+    cfg_b = KGConfig.model_validate({"domain": {"system_context": "B 前綴。"}})
+
+    async def build(cfg, q):
+        return await agent._build_prompt(q, [], [], None, embedding_provider=emb, cfg=cfg)
+
+    outs = await asyncio.gather(*([build(cfg_a, "問A"), build(cfg_b, "問B")] * 10))
+    assert all(p.startswith("A 前綴。") and "B 前綴。" not in p for p in outs[0::2])
+    assert all(p.startswith("B 前綴。") and "A 前綴。" not in p for p in outs[1::2])
 
 
 @pytest.mark.asyncio

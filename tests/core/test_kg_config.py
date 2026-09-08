@@ -147,6 +147,45 @@ def test_load_without_domain_pack_ignores_packs():
     assert ConfigLoader([src]).load("kg-A").model_dump() == KGConfig().model_dump()
 
 
+@pytest.mark.asyncio
+async def test_two_kgconfigs_concurrent_no_cross_contamination():
+    """報告33 §5.4 驗收標準之一：單一行程、兩個 KG、兩個 domain pack，並行載入
+    → 兩邊的領域指示與門檻值互不污染（frozen KGConfig 無共享可變狀態）。"""
+    import asyncio
+
+    src = DictConfigSource(
+        packs={
+            "generic": {"domain": {"name": "generic", "system_context": "中性。"}},
+        },
+        kg_overrides={
+            "kg-A": {"bfs": {"seed_max_degree": 111}},
+            "kg-B": {"bfs": {"seed_max_degree": 222}},
+        },
+    )
+    loader = ConfigLoader([src])
+
+    async def load_a():
+        return loader.load("kg-A", domain_pack="generic")
+
+    async def load_b():
+        return loader.load("kg-B")  # 台灣預設，不套包
+
+    # 交錯並行載入多次，任一次的結果都不該受另一邊影響
+    results = await asyncio.gather(*([load_a(), load_b()] * 15))
+    a_results = results[0::2]
+    b_results = results[1::2]
+    assert all(r.domain.system_context == "中性。" for r in a_results)
+    assert all(r.domain.system_context == KGConfig().domain.system_context for r in b_results)
+    assert all(r.bfs.seed_max_degree == 111 for r in a_results)
+    assert all(r.bfs.seed_max_degree == 222 for r in b_results)
+    a, b = a_results[0], b_results[0]
+    # frozen：任一邊都不能就地改
+    with pytest.raises(Exception):
+        a.bfs.seed_max_degree = 999
+    with pytest.raises(Exception):
+        b.domain.system_context = "x"
+
+
 def test_multiple_sources_later_wins_in_same_layer():
     s1 = DictConfigSource(kg_overrides={"k": {"bfs": {"seed_max_degree": 111}}})
     s2 = DictConfigSource(kg_overrides={"k": {"bfs": {"seed_max_degree": 222}}})
