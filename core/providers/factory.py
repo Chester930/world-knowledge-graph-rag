@@ -25,6 +25,7 @@ def _make_llm_provider(provider_name: str, model_override: str | None = None) ->
             return OllamaLLMProvider(
                 base_url=settings.ollama_base_url,
                 model=model_override or settings.ollama_llm_model,
+                num_predict=settings.ollama_llm_num_predict,
             )
         case "openai":
             from core.providers.llm.openai import OpenAILLMProvider

@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # GPU）可設 `OLLAMA_EMBEDDING_NUM_GPU=0` 把 embedding 模型逼到 CPU，讓生成
     # 模型獨佔 GPU、不再互相逐出重載。None＝不帶此選項，行為與先前完全一致。
     ollama_embedding_num_gpu: int | None = None
+    # 報告37 Bug1：SVO 抽取的 generate_json 輸出被 num_predict 截斷 → JSON 沒
+    # 收尾 → json.loads 失敗。列舉條文 chunk 常 >1024 token。預設 4096。
+    ollama_llm_num_predict: int = 4096
 
     # ── 本地 Embedding（sentence-transformers）────────────────────────────────
     local_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
