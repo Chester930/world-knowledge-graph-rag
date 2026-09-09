@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import time
+from pathlib import Path
 from uuid import UUID
 
 from core.database import connect, disconnect, get_driver
@@ -39,6 +40,19 @@ EMPTY_EXITS = 4
 EMPTY_SLEEP = 5.0
 
 
+def _stop_requested(label: str) -> Path | None:
+    """`drain_supervisor.py` 縮編 worker 時的優雅停止：在 kg-runtime 目錄放一個
+    `STOP_<label>`（或 `STOP_all`）檔案，worker 在**認領下一個 chunk 之前**看到就
+    乾淨退出——不會留下孤兒 processing row（不像 SIGKILL）。回傳命中的檔路徑
+    （呼叫端刪除它）或 None。"""
+    runtime = Path(task_queue_db_path()).parent
+    for name in (f"STOP_{label}" if label else "STOP_", "STOP_all"):
+        p = runtime / name
+        if p.exists():
+            return p
+    return None
+
+
 async def main(label: str) -> None:
     await connect()
     init_providers()
@@ -50,6 +64,13 @@ async def main(label: str) -> None:
     empties = 0
     t0 = time.monotonic()
     while True:
+        stop_file = _stop_requested(label)
+        if stop_file is not None:
+            # 只刪 per-label 檔；STOP_all 由 supervisor 收尾時自行清
+            if stop_file.name != "STOP_all":
+                stop_file.unlink(missing_ok=True)
+            print(f"{tag}收到 STOP（{stop_file.name}），優雅退出", flush=True)
+            break
         pending = claim_next_pending(db_path, kg_id=KG_STR)
         if pending is None:
             empties += 1
