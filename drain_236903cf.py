@@ -91,7 +91,9 @@ async def main(label: str) -> None:
             rate = processed / (time.monotonic() - t0)
             print(f"{tag}已處理 {processed} 筆（{rate*3600:.0f}/hr）", flush=True)
     dt = time.monotonic() - t0
-    print(f"{tag}DRAIN-DONE：本次處理 {processed} 筆，耗時 {dt/3600:.1f} 小時", flush=True)
+    # 注意：這裡不印 "DRAIN-DONE"——單一 worker 退出（STOP 檔 / 連續數次查無 pending）
+    # 不代表整個佇列跑完。佇列是否清空由 drain_supervisor.py（看 pending==0）判定。
+    print(f"{tag}worker 退出：本次處理 {processed} 筆，耗時 {dt/3600:.1f} 小時", flush=True)
     await disconnect()
 
 
