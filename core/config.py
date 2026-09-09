@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_llm_model: str = "qwen2.5:7b"
     ollama_embedding_model: str = "nomic-embed-text"
+    # 報告37 ②：VRAM 受限機器（如 8GB，塞不下生成模型＋embedding 模型同時在
+    # GPU）可設 `OLLAMA_EMBEDDING_NUM_GPU=0` 把 embedding 模型逼到 CPU，讓生成
+    # 模型獨佔 GPU、不再互相逐出重載。None＝不帶此選項，行為與先前完全一致。
+    ollama_embedding_num_gpu: int | None = None
 
     # ── 本地 Embedding（sentence-transformers）────────────────────────────────
     local_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"

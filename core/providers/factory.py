@@ -78,6 +78,7 @@ def init_providers() -> EmbeddingProvider:
             _embedding = OllamaEmbeddingProvider(
                 base_url=settings.ollama_base_url,
                 model=settings.ollama_embedding_model,
+                num_gpu=settings.ollama_embedding_num_gpu,
             )
         case _:
             raise ValueError(f"不支援的 embedding_provider：{settings.embedding_provider}")
