@@ -5,14 +5,16 @@
 
 count → 目標 worker 數：
     pending == 0   → 0（收尾、印 DRAIN-DONE、結束）
-    pending > 400  → 3
     pending > 80   → 2
     其餘（1..80）  → 1
 RAM 上限保護：
     free < 2000 MB → 上限 1
-    free < 3000 MB → 上限 2
-    否則           → 上限 3
+    否則           → 上限 2
     target = min(count_target, ram_cap)
+
+⚠️ **上限 = 2**（2026-09-10 實測定案）：3 worker 反而慢（~35/hr vs 2 worker ~50/hr）
+——瓶頸是 Ollama 在 WSL2 序列化 qwen 請求，第 3 個 worker 只是多排隊 + 併發開銷。
+RAM 不是限制（3 worker 時 free 仍 6-7GB），純粹是 Ollama 吞吐上限。
 
 縮編用 `STOP_<label>` 檔——`drain_236903cf.py` 在認領下一個 chunk 前看到就乾淨退出，
 不留孤兒 processing row（不像 SIGKILL）。擴編直接 spawn 新 worker。
@@ -41,7 +43,8 @@ from services.task_queue_service import reset_stuck_processing  # noqa: E402
 
 KG_STR = "236903cf-055a-40a8-8923-b9d06601f3b7"
 INTERVAL = 90
-LABELS = ["w1", "w2", "w3"]
+MAX_WORKERS = 2  # 2026-09-10 實測：3 worker 反而慢（Ollama 序列化 qwen）
+LABELS = ["w1", "w2", "w3"][:MAX_WORKERS]
 WORKER_ENV = {"OLLAMA_EMBEDDING_NUM_GPU": "0", "OLLAMA_LLM_NUM_PREDICT": "8192"}
 LOG_DIR = Path(r"C:\Users\666\.claude\jobs\efb89cec\tmp")
 DRAIN_SCRIPT = str(_HERE / "drain_236903cf.py")
@@ -79,19 +82,15 @@ def free_mb() -> int:
 def count_target(pending: int) -> int:
     if pending == 0:
         return 0
-    if pending > 400:
-        return 3
     if pending > 80:
-        return 2
+        return MAX_WORKERS
     return 1
 
 
 def ram_cap(fm: int) -> int:
     if fm < 2000:
         return 1
-    if fm < 3000:
-        return 2
-    return 3
+    return MAX_WORKERS
 
 
 def spawn(label: str) -> subprocess.Popen:
