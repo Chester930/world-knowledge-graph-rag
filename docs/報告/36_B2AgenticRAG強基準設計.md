@@ -39,7 +39,7 @@ B2＝在 B1（報告 35：dense + BM25 + RRF + 選配 cross-encoder rerank 的 c
 
 ### 2.5 專案內既有資產（B2 大量重用）
 
-B1 檢索前端（報告 35）／`_split_into_subquestions()`（報告 28）／§3.6 grounding + 方案 B/2b 重生 stack／`run_rag_comparison.py`（報告 18）。
+B1 檢索前端（`services/baseline_rag_service.py`，報告 35）／`_split_into_subquestions()`（報告 28，B2 已鏡像一份）／§3.6 grounding + 方案 B/2b 重生 stack／`run_rag_comparison.py`（報告 18）。**證據蒐集側已落地**：`services/agentic_baseline_service.py`（2026-09-10，見 §7／§8）。
 
 ## 3. B2 定義與元件
 
@@ -111,6 +111,7 @@ Full System 的 **RQ3 自我精煉迴圈尚未實作**（只有單次 grounded r
 - [x] 下載 ReAct（Yao 2023）、Adaptive-RAG（Jeong 2024）進 `docs/參考文獻/28_Agentic檢索強基準/`（📥，未精讀）。
 - [x] `docs/參考文獻/28_Agentic檢索強基準/README.md`。
 - [x] 論文 §5.4.1 補 B2 定義段（元件表 + 評估 + Confounder 聲明 + 排除）；§5.2 表「B2」列補元件細節；§5.5 新增「離線建構成本」「穩定性」列（commit `878b47d`）；§5.7 時程把「B1 → B2（optional）→ RQ1 對照」序列釘死（2026-09-09，§5.7.1/§5.7.2 分階段 DAG）。
-- [ ] 論文 §2.3.1 擴（收 ReAct／Adaptive-RAG／IRCoT-as-baseline 譜系），或新增 §2.3.2「RQ1 agentic 對照組（B2）的方法定位」。
-- [ ] `文獻與專案查核表.md` 補 ReAct／Adaptive-RAG 兩列（標 📥 已下載、未精讀）。
+- [x] 論文 §2.3.1 擴（收 ReAct／Adaptive-RAG／IRCoT-as-baseline 譜系），或新增 §2.3.2「RQ1 agentic 對照組（B2）的方法定位」。**已於 2026-09-09 完成**：`02` §2.3.2 已建、§2.1.1 索引補 ReAct／Adaptive-RAG／Fan 2026 三列（2026-09-10 補勾）。
+- [x] `文獻與專案查核表.md` 補 ReAct／Adaptive-RAG 兩列（標 📥 已下載、未精讀）。**已於 2026-09-09 完成**（2026-09-10 補勾）。
+- [x] **B2 證據蒐集側實作（P0c 第 1 部分，2026-09-10）**：`services/agentic_baseline_service.py`——`route_complexity()`（規則式：問號 ≥ 2／連接詞／實體數 ≥ 3）＋ `split_into_subquestions()`（鏡像 `routers/agent.py`）＋ `gather_evidence_agentic(question, retrieve, reflect, *, max_rounds=5, retrieval_budget=8)`（簡單題退回 B1 單次；複雜題逐子問題〔B1 檢索 → `reflect` 判充分性 → 不足則依 `missing` 精煉查詢再檢索〕）→ `AgenticResult`（context_lines ＋ trace：retrieval_calls／reflect_calls／rounds_per_subquestion，供 §5.5 效率欄）。`retrieve`／`reflect` 依賴注入 → 模組不 import LLM／Neo4j。13 項單元測試、全套 pytest 788 passed。**生成端＋真實 `reflect` LLM prompt ＋ harness 併入 P0d，未做**。
 - [ ] （實作階段）ReAct §prompt、Adaptive-RAG §複雜度標籤、Fan 2026 §4.3/§5.5.1/App B/App E 全文精讀。
