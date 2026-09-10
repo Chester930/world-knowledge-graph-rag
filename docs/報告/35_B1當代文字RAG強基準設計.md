@@ -43,9 +43,9 @@ RQ1 的承諾是「界定 KG-BFS 相較**當代 RAG 強基準**仍有優勢的�
 
 ### 2.4 專案內既有資產（B1 不是全新）
 
-- `standardized_rag.py`／`build_standardized_rag_index.py`／`run_rag_comparison.py`——MVP 骨架（單句 brute-force cosine → chunk 擴展 → top_k=5 → `build_prompt` 已比照 `_build_prompt` 風格 → LLM stream；與 `chat()` 完全獨立）。
+- `standardized_rag.py`／`build_standardized_rag_index.py`／`run_rag_comparison.py`——MVP 骨架（單句 brute-force cosine → chunk 擴展 → top_k=5 → `build_prompt` 已比照 `_build_prompt` 風格 → LLM stream；與 `chat()` 完全獨立）。**但其索引來自 `sentence_embeddings.json`＝指代消解前的句子向量、且是句子級**——折衷版，非本報告要的乾淨 chunk 級 baseline。
 - `services/retrieval_service.py::search_standardized_rag()`——Neo4j 原生句子索引版，**含指代消解 → 屬報告 08「軌道 2」＝專案貢獻，不是 B1**。
-- `Chunk` 節點的 `chunk_embedding_vector` Neo4j 原生向量索引——B1 dense 檢索直接重用。
+- ~~`Chunk` 節點的 `chunk_embedding_vector` Neo4j 原生向量索引——B1 dense 檢索直接重用。~~ **✗ 訂正（見 §8）：該索引 embed 的是標準化 SVO chunk（軌道 2），不能當中性 baseline。B0/B1 改用 `build_baseline_chunk_index.py` 對原文自建 `.npy` 索引。**
 - 報告 08 §2/§4 三軌消融規劃；報告 18 真實先例＋報告 13/14 的 30 題題庫種子。
 
 ## 3. 報告 08 baseline 命名訂正
@@ -103,12 +103,35 @@ B1：B0 + ① 混合檢索 (dense + BM25，RRF 融合)
 - **B1 不做受控關係詞彙、不做 query 改寫**：分屬 RQ4a／B2。
 - **reranker 引入新模型依賴**：若校準顯示邊際效益低，B1 退回「dense+BM25 RRF」無新模型版，並在論文說明。
 
-## 8. 實作考量（僅列，本輪不做）
+## 8. 實作考量
 
-- 重用 `standardized_rag.py` 骨架，但：① 檢索改走 `Chunk` 級 Neo4j 原生索引（非 `.npy` brute-force、非句子級、**無 coref**）；② 加 BM25（`rank_bm25` 純 Python 或 Neo4j full-text index）＋ `_rrf_order()`（既有）；③ 選配 CrossEncoder 重排層（`FlagEmbedding` 或 `sentence-transformers`）；④ 生成端改呼叫「與 `chat()` 共用的 post-retrieval pipeline」——需把 `chat()` 內「retrieval 之後」抽成可吃任意 `context_lines` 的函式（中等重構，須不動既有 KG 路徑行為、golden 對照）。
-- 新 harness `run_rq1_comparison.py`：同題組跑 B0／B1／Full-System ×3，輸出對齊 §5.5 rubric 的評分表 ＋ manifest。
-- 依賴：`rank_bm25`（輕）；reranker 為選配。
-- **不碰抽取端、不碰 drain。**
+> **⚠️ 訂正（2026-09-10）：不能重用 `chunk_embedding_vector`**。§2.4／原 §8 假設 Neo4j 的
+> `chunk_embedding_vector` 索引是乾淨的 chunk 級 dense 索引、可直接重用。查證 `embed_svo_chunks()`
+> 後排除：它 embed 的是 `SVOChunk.text` ＝ `"\n".join(normalized_slice)`（**標準化句子**，
+> `services/svo_chunking.py` 第 105 行）——即報告 08「軌道 2＝專案貢獻」，§5／§7 明確要 B1 排除。
+> 因此 B0／B1 dense 檢索改為對 `workspace/<kg>/<doc>/original.md` 的**原文**重新
+> `sentence_aware_chunking()`（無標準化、無 coref、無型別標籤）建一份自有 `.npy` 索引；demo
+> 規模下 brute-force cosine 足夠，Neo4j 原生索引不是必要。
+
+**檢索側（P0b 第 1 項，✅ 2026-09-10 落地）**：
+
+- `build_baseline_chunk_index.py`：讀原文 → `sentence_aware_chunking(chunk_size, chunk_overlap)` →
+  embedding provider → `baseline_rag_index_<kg>_cs<size>.npy` ＋ meta。`chunk_size` 帶進檔名，
+  供 §5.3（P1a）掃 {150,300,500,800,1200}。
+- `services/baseline_rag_service.py`：`search_baseline(question, question_vector, vectors, meta, *,
+  top_k, hybrid, reranker)`——① dense brute-force cosine；② `hybrid=True` 加 BM25（`rank_bm25`，
+  字元 bigram 斷詞）＋ 本地 `rrf_fuse()`（Cormack 2009，與 `routers/agent.py::_rrf_order()` 同演算法，
+  避免 services 反向 import router）；③ `reranker` 選配（`CrossEncoder` 相容介面，預設 None、不加依賴）。
+  `B0 = hybrid=False, reranker=None`；`B1 = hybrid=True, reranker=<選配>`。`build_context_lines()`
+  轉 context 行。依賴：`rank-bm25~=0.2`（進 `requirements-dev.txt`）。12 項單元測試、全套 775 passed。
+
+**生成側（P0b 第 2 項，未做）**：把 `chat()` 內「retrieval 之後」抽成可吃任意 `context_lines`
+的共用函式（中等重構，須不動既有 KG 路徑行為、golden 對照）。**建議等 DRAIN-DONE／T2 之後再做**
+——T2（報告 27 §6.2）要在 `chat()` 上跑，其 baseline 是特定 commit，現在插重構 commit 會讓
+T2 跑在改過的版本上（即使 golden test 保證行為零變化）。
+
+**harness（P0d，未做）**：`run_rq1_comparison.py`——同題組跑 B0／B1／Full-System ×3，輸出對齊
+§5.5 rubric ＋ §3.8 manifest。**不碰抽取端、不碰 drain。**
 
 ## 9. 落地待辦（本報告產出後）
 
