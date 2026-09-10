@@ -46,6 +46,53 @@ def test_split_into_sentences_semicolon_is_sentence_boundary():
     assert sentences == ["前半句；", "後半句。"]
 
 
+# ── B2：結構區塊（Markdown 表格／標記行）的內部換行不被當句界 ─────────────────
+
+def test_split_into_sentences_keeps_markdown_table_as_one_unit():
+    text = "說明段落。\n| 欄A | 欄B |\n| --- | --- |\n| 甲 | 乙 |\n| 丙 | 丁 |\n結語。"
+    sentences = split_into_sentences(text)
+
+    assert "".join(sentences) == text  # 精確重組不變
+    table = "| 欄A | 欄B |\n| --- | --- |\n| 甲 | 乙 |\n| 丙 | 丁 |"
+    # 整張四列表格落在同一個片段內，未被拆成「每列一句」
+    assert any(table in s for s in sentences)
+
+
+def test_split_into_sentences_law_enumeration_still_splits_on_newline():
+    # 法條列舉（非表格）維持既有逐行斷句行為，B2 不影響
+    text = "請假規則如下：\n一、婚假八日。\n二、喪假六日。"
+    sentences = split_into_sentences(text)
+
+    assert "".join(sentences) == text
+    assert "一、婚假八日。" in sentences
+    assert "二、喪假六日。" in sentences
+
+
+def test_sentence_aware_chunking_roundtrips_text_with_table():
+    text = "前言。\n| a | b |\n| c | d |\n" + "補充說明句。" * 40
+    chunks = sentence_aware_chunking(text, chunk_size=120, chunk_overlap=20)
+    assert chunks
+    # 表格列不會各自成為一個殘缺 chunk
+    assert not any(c.strip() in ("| a | b |", "| c | d |") for c in chunks)
+
+
+# ── B1：混合型 PDF 的逐頁品質判定 ───────────────────────────────────────────
+
+_GOOD_PAGE = "這是一段足夠長的正常中文內容用來通過低品質判定門檻。" * 4  # 遠超過 80 字、可讀比例高
+
+
+@pytest.mark.parametrize("full_text, page_texts, expected", [
+    (_GOOD_PAGE * 3, [_GOOD_PAGE, _GOOD_PAGE, _GOOD_PAGE], False),   # 全部正常
+    (_GOOD_PAGE, [_GOOD_PAGE, "", "", ""], True),                     # 1/4 好、3/4 掃描 → 升級
+    (_GOOD_PAGE, [_GOOD_PAGE, ""], False),                           # < 3 頁，不做比例判定
+    (_GOOD_PAGE, [_GOOD_PAGE] * 7 + ["", "", ""], False),            # 3/10 = 30% < 34%
+    (_GOOD_PAGE, [_GOOD_PAGE] * 6 + [""] * 4, True),                 # 4/10 = 40%
+    ("短", ["短"], True),                                            # 整份低品質
+])
+def test_pdf_needs_fallback_thresholds(full_text, page_texts, expected):
+    assert DocumentParser()._pdf_needs_fallback(full_text, page_texts) is expected
+
+
 def test_parser_txt(tmp_path):
     # 建立臨時的 txt 檔案進行解析測試
     test_file = tmp_path / "test.txt"

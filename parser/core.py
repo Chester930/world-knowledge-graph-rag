@@ -165,6 +165,15 @@ def _pil_from_ltimage(lt_image):
     return None
 
 
+# 混合型 PDF 的逐頁品質判定（B1）：`_is_low_quality_text()` 原本只對「整份文件
+# 串接後的文字」判斷——一份「前段電子、後段掃描附件」的 PDF，只要前段字數足夠、
+# 可讀比例過關，整體就過關，後段掃描頁的內容整段流失且無告警。改為額外看逐頁
+# 比例：頁數達下限、且低品質頁數同時滿足「絕對筆數 ≥ 2」與「占比 ≥ 門檻」時，
+# 整份升級到下一軌（pdfminer → OCR）。單頁封面/章名頁不會觸發（需 ≥ 2 頁）。
+_PDF_FRACTION_CHECK_MIN_PAGES = 3
+_PDF_BAD_PAGE_FRACTION = 0.34
+
+
 class DocumentParserError(Exception):
     """文件解析異常基類"""
     pass
@@ -511,20 +520,22 @@ class DocumentParser:
             except Exception:
                 reader = None
 
-        # --- 軌道一：pypdf 快速文本流提取 ---
-        text = self._pdf_track_pypdf(reader)
+        # --- 軌道一：pypdf 快速文本流提取（逐頁保留，供 B1 逐頁品質判定）---
+        pypdf_pages = self._pdf_track_pypdf_pages(reader)
+        text = "\n\n".join(t for t in pypdf_pages if t)
         used_ocr_fallback = False
         pages_layout = None
 
-        # 評估是否需要 Fallback：字元數過少或疑似亂碼
-        if self._is_low_quality_text(text):
+        # 評估是否需要 Fallback：整份低品質，或逐頁比例超標（混合型 PDF，見 B1 註解）
+        if self._pdf_needs_fallback(text, pypdf_pages):
             # --- 軌道二：pdfminer 佈局感知與雙欄排序提取 ---
             # 版面樹狀結構載入後會保留供圖文管線共用，避免同一份 PDF 被 extract_pages() 解析兩次。
             pages_layout = self._load_pdf_layout(path)
-            text = self._pdf_track_pdfminer(pages_layout)
+            pdfminer_pages = self._pdf_track_pdfminer_pages(pages_layout)
+            text = "\n\n".join(p for p in pdfminer_pages if p)
 
             # 如果依然判定為低品質（例如圖片掃描件），進入軌道三
-            if self._is_low_quality_text(text):
+            if self._pdf_needs_fallback(text, pdfminer_pages):
                 # --- 軌道三：OCR 視覺區域識別解析 ---
                 text = self._pdf_track_ocr(path)
                 used_ocr_fallback = True
@@ -579,19 +590,32 @@ class DocumentParser:
         except Exception:
             return True
 
-    def _pdf_track_pypdf(self, reader) -> str:
-        """第一軌：使用已開啟的 PdfReader 提取文字"""
+    def _pdf_track_pypdf_pages(self, reader) -> List[str]:
+        """第一軌（逐頁版）：回傳每一頁的文字（提取不到者為空字串，保留位置），
+        供 `_pdf_needs_fallback()` 做逐頁品質判定。"""
         if reader is None:
-            return ""
+            return []
         try:
-            pages_text = []
-            for page in reader.pages:
-                t = page.extract_text()
-                if t:
-                    pages_text.append(t)
-            return "\n\n".join(pages_text)
+            return [(page.extract_text() or "") for page in reader.pages]
         except Exception:
-            return ""
+            return []
+
+    def _pdf_track_pypdf(self, reader) -> str:
+        """第一軌：使用已開啟的 PdfReader 提取文字（逐頁串接）。"""
+        return "\n\n".join(t for t in self._pdf_track_pypdf_pages(reader) if t)
+
+    def _pdf_needs_fallback(self, full_text: str, page_texts: List[str]) -> bool:
+        """判定是否需要升級到下一軌：① 整份串接後的文字低品質；或 ② 頁數達
+        `_PDF_FRACTION_CHECK_MIN_PAGES`、低品質頁同時滿足「≥ 2 頁」與「占比 ≥
+        `_PDF_BAD_PAGE_FRACTION`」（混合型 PDF：前段電子、後段掃描附件——只看
+        整份會被前段帶過）。單頁封面/章名頁不會觸發（需 ≥ 2 頁）。"""
+        if self._is_low_quality_text(full_text):
+            return True
+        if len(page_texts) >= _PDF_FRACTION_CHECK_MIN_PAGES:
+            bad = sum(1 for t in page_texts if self._is_low_quality_text(t))
+            if bad >= 2 and bad / len(page_texts) >= _PDF_BAD_PAGE_FRACTION:
+                return True
+        return False
 
     def _load_pdf_layout(self, path: Path) -> list:
         """載入 pdfminer 版面樹狀結構（LTPage 列表），供軌道二文字重建與圖片管線共用，
@@ -604,9 +628,14 @@ class DocumentParser:
             return []
 
     def _pdf_track_pdfminer(self, pages_layout: list) -> str:
-        """第二軌：使用已載入的版面樹重建閱讀順序與雙欄解析 (混合佈局優化版)"""
+        """第二軌：使用已載入的版面樹重建閱讀順序與雙欄解析（逐頁串接）。"""
+        return "\n\n".join(p for p in self._pdf_track_pdfminer_pages(pages_layout) if p)
+
+    def _pdf_track_pdfminer_pages(self, pages_layout: list) -> List[str]:
+        """第二軌（逐頁版）：重建閱讀順序與雙欄解析，回傳每頁文字（無文字容器的
+        頁為空字串，保留位置），供 `_pdf_needs_fallback()` 逐頁品質判定。"""
         if not pages_layout:
-            return ""
+            return []
         try:
             pages_text = []
             for page_layout in pages_layout:
@@ -620,6 +649,9 @@ class DocumentParser:
                         text_containers.append(element)
 
                 if not text_containers:
+                    # 無文字容器（例如整頁掃描影像）——保留空字串佔位，讓
+                    # `_pdf_needs_fallback()` 的逐頁比例判定能把這一頁算進去。
+                    pages_text.append("")
                     continue
 
                 # 1. 混合分流：將「跨欄大標題/全寬物件」與「窄欄正文」區分開來
@@ -677,9 +709,9 @@ class DocumentParser:
 
                 pages_text.append("\n".join(page_content))
 
-            return "\n\n".join(pages_text)
+            return pages_text
         except Exception:
-            return ""
+            return []
 
     def _pdf_track_ocr(self, path: Path) -> str:
         """第三軌：PDF 轉影像後使用 pytesseract 進行 OCR"""
@@ -874,6 +906,37 @@ SENTENCE_ENDINGS = re.compile(
     r'([。！？；…\n]|\.\s|\?\s|!\s)'
 )
 
+# 結構區塊保護（B2）：`SENTENCE_ENDINGS` 把 `\n` 當句界，對 Markdown 表格
+# （`| a | b |` 逐列）與 `--- [Slide N] ---` / `--- [第 N 頁圖片解析] ---` 這類
+# 標記行會過度切分——多列表格會被拆成「每列一句」，`sentences.json` 句數膨脹、
+# SVO 專用切塊的 `source_sentence_start/end` 追溯區間被稀釋。做法：切句前，把
+# 「上下兩行同為結構行」之間的換行暫時換成私用區 sentinel（不會被 `\n` 句界
+# 規則命中），切句後在每個片段還原——1:1 代換、長度不變，`"".join()` 仍精確
+# 重組回原文。刻意用 `this AND next`（只保護結構區塊的內部換行），不貪心合併
+# 相鄰散文。
+_STRUCTURAL_NEWLINE_SENTINEL = ""
+_MD_TABLE_ROW = re.compile(r'^[ \t]*\|.*\|[ \t]*$')
+_STRUCT_MARKER_LINE = re.compile(r'^[ \t]*---[ \t]*\[.*?\][ \t]*---[ \t]*$')
+
+
+def _is_structural_line(line: str) -> bool:
+    return bool(_MD_TABLE_ROW.match(line) or _STRUCT_MARKER_LINE.match(line))
+
+
+def _protect_structural_newlines(text: str) -> str:
+    """見上方 `_STRUCTURAL_NEWLINE_SENTINEL` 註解。輸入已含 sentinel（極罕見，
+    私用區字元）時直接原樣回傳，退回未保護行為。"""
+    if _STRUCTURAL_NEWLINE_SENTINEL in text or "\n" not in text:
+        return text
+    lines = text.split("\n")
+    out: List[str] = []
+    for i, line in enumerate(lines):
+        out.append(line)
+        if i < len(lines) - 1:
+            both_structural = _is_structural_line(line) and _is_structural_line(lines[i + 1])
+            out.append(_STRUCTURAL_NEWLINE_SENTINEL if both_structural else "\n")
+    return "".join(out)
+
 
 def split_into_sentences(text: str) -> List[str]:
     """依句尾標點將文字切分為句子清單，保留結尾標點符號與原始間距。
@@ -881,16 +944,20 @@ def split_into_sentences(text: str) -> List[str]:
     刻意不 strip 個別句子——`sentence_aware_chunking()` 需要保留原始間距才能
     用 "".join() 精確重組回原文。若呼叫端只需要乾淨的句子（例如逐句丟給 LLM），
     請自行對回傳結果做 strip()／過濾空字串。
+
+    切句前會保護 Markdown 表格／結構標記區塊的內部換行（見
+    `_protect_structural_newlines()`），避免多列表格被拆成「每列一句」。
     """
+    protected = _protect_structural_newlines(text)
     sentences = []
     current_pos = 0
-    for match in SENTENCE_ENDINGS.finditer(text):
+    for match in SENTENCE_ENDINGS.finditer(protected):
         end_pos = match.end()
-        sentences.append(text[current_pos:end_pos])
+        sentences.append(protected[current_pos:end_pos])
         current_pos = end_pos
-    if current_pos < len(text):
-        sentences.append(text[current_pos:])
-    return sentences
+    if current_pos < len(protected):
+        sentences.append(protected[current_pos:])
+    return [s.replace(_STRUCTURAL_NEWLINE_SENTINEL, "\n") for s in sentences]
 
 
 def sentence_aware_chunking(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> List[str]:
