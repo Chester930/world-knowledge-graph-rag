@@ -209,13 +209,20 @@ DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` =
 ## 5. 驗收標準
 
 - [ ] §2.3 的 6 份比較文件已在 reextract-v2 HEAD `force_rebuild` 重抽，§8 記錄 commit 與時間。
-- [ ] `check_comparison_readiness.py` 能正確辨識缺失資產與**抽取過舊**的文件，並給補救指令。
+      → **⏳ 待主 drain DRAIN-DONE 後執行**（RAM 衝突）；`check_comparison_readiness.py` 已
+      確認這 6 份的抽取新鮮度 FAIL（2026-09-07 版，早於抽取端基準）→ 重抽確有必要。
+- [x] `check_comparison_readiness.py` 能正確辨識缺失資產與**抽取過舊**的文件，並給補救指令。
+      （`c26e05a`；已對 KG#4 6 份實跑：original.md ✅、pending=0 ✅、新鮮度 FAIL ＋ 補救指令 ✅）
 - [ ] 7 條 arm 都能對 §2.3 選定的 6 份文件子集跑通，同一題產出可比結果 JSON + 彙總表。
-- [ ] `retrieval_mode="both"` + `disable_grounding_regen=False` 與現行 `chat()` 逐位元相同（既有 `tests/routers/test_agent.py` 全綠）。
-- [ ] 新增開關各有單元測試。
-- [ ] `pytest` 全套綠。
-- [ ] harness 輸出註明生成端對齊程度。
-- [ ] ⚠️ **不要改動 `docs/報告/36_*.md`**（使用者有長期未提交的 markdownlint 修改，見 memory）。
+      → harness (`run_retrieval_comparison.py`, `2c64bd9`) 已交付、`--dry-run` 驗證 126 次呼叫
+      計畫解析正確；實際跑通卡 force_rebuild ＋ DRAIN-DONE ＋ baseline `.npy`。
+- [x] `retrieval_mode="both"` + `disable_grounding_regen=False` 與現行 `chat()` 逐位元相同
+      （既有 `tests/routers/test_agent.py` 101 個全綠；SDD-3 抽取後仍 114 全綠含 status-phase 順序測試）。
+- [x] 新增開關各有單元測試（`efde509`：三開關各自行為 + `_intersect_doc_scopes` 四邊界 +
+      `scope_doc_ids=None` 零回歸錨點；`6ebbb22`：baseline 模式共用生成路四測試）。
+- [x] `pytest` 全套綠（801 passed）。
+- [x] harness 輸出註明生成端對齊程度（`manifest.json` 的 `generation_alignment` 欄）。
+- [x] ⚠️ **不要改動 `docs/報告/36_*.md`**（本次未觸碰）。
 
 ---
 
@@ -245,9 +252,41 @@ DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` =
 ## 8. 執行紀錄（實作視窗填寫）
 
 - 目標測試 KG id：`236903cf-055a-40a8-8923-b9d06601f3b7`（KG#4，前導版用 §2.3 的 6 份文件子集）
-- 實際比較文件清單（force_rebuild 後）：`________`
-- force_rebuild 所在 reextract-v2 commit：`________`
-- force_rebuild 完成時間：`________`
-- harness / 開關 / 共用生成路完成的 commit：`________`
-- 生成端對齊程度（是否 100% 共用同一函式）：`________`
-- 已知 caveat：`________`
+- 實際比較文件清單（force_rebuild 後）：以 §2.3 的 6 份資料夾名為準——
+  `D0080015_警察人員特別休假辦法`、`F0040034_員工接受召集請假期間薪資費用加成減除辦法`、
+  `N0030006_勞工請假規則`、`N0030018_育嬰留職停薪實施辦法`、
+  `N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法`、
+  `N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法`
+  （對應題號 18-Q1~Q5、26-Q5，見 `docs/附錄A題庫.json` 的 `pilot=true`）
+- force_rebuild 所在 reextract-v2 commit：**⏳ 待執行**（`check_comparison_readiness.py` 已確認
+  這 6 份的最舊 chunk `updated_at` 皆為 `2026-09-07T11:xx`，早於抽取端基準
+  `2026-09-08T22:03:36+08:00` → §2.4 FAIL，force_rebuild 確有必要）。RAM-heavy、
+  與主 drain 衝突 → 排在主 drain DRAIN-DONE 後執行，屆時補記 commit 與時間。
+- force_rebuild 完成時間：**⏳ 待執行**（同上）
+- harness / 開關 / 共用生成路完成的 commit：
+  - SDD-2（chat() 檢索開關 `retrieval_mode`／`disable_grounding_regen`／`scope_doc_ids`）：`efde509`
+  - SDD-3（抽出 `_generate_from_context_lines()` 共用生成路）：`6ebbb22`
+  - SDD-1（`check_comparison_readiness.py`）：`c26e05a`
+  - SDD-4（`docs/附錄A題庫.json` ＋ `run_retrieval_comparison.py`）：`2c64bd9`
+  - 全套 pytest 801 綠（既有 797 ＋ 新增 13：SDD-2 九、SDD-3 四）；`chat()` 逐位元零回歸。
+- 生成端對齊程度（是否 100% 共用同一函式）：**部分共用（前導夠用版）**。
+  B0/B1/D 與 F/G/K/K−2b 共用 `_generate_from_context_lines()` ＋ 同一個
+  `_build_prompt()`／`_build_constrained_prompt()`（`context_lines=` 參數）——同一 prompt
+  模板、同一「draft → verify → 未接地重生 → 選擇性轉繁」尾段。**差異**：baseline arm
+  （context_lines 模式）走**單次強約束重生**（＝ KG 路徑 `grounded_claim_count == 0` 的整份
+  重寫分支），**不套** K 專屬的 2b 定向修訂、分解式重生、G3 列舉完整性 guard。
+  完整生成端共用重構＝ P0b 第 2 項，建議延到 T2/DRAIN（§3.2、§6）。harness manifest.json
+  的 `generation_alignment` 欄逐次記錄此程度。
+- 已知 caveat：
+  1. **抽取新鮮度**：force_rebuild 尚未執行前，F/G/K 讀到的 6 份 Fact 仍是 2026-09-07 版
+     （可能含 `num_predict=1024` 長列舉截斷）→ 前導比較須等 force_rebuild 後才可信（§2.4）。
+  2. **B0/B1 索引未建**：`build_baseline_chunk_index.py <kg> --chunk-size 500` 尚未對 KG#4 跑過
+     （`check_comparison_readiness.py` 已標 FAIL ＋ 補救指令）。
+  3. **關係型別向量索引**：`check_comparison_readiness.py` 對 KG#4 查該索引時尚未驗證
+     （Neo4j 連線用預設 7687，KG#4 在 17990）；缺了 §3.2§c 走 QNOMATCH 優雅降級，報告 40 需記。
+  4. **scope_doc_ids 交集歸零**：語意 Fact 命中的來源全在 6 份子集外時，`_filter_*` 的歸零
+     守衛會放行範圍外事實（角落案例，6 份即題目來源，正常不會發生；`_intersect_doc_scopes()`
+     此時回傳明確子集本身、bfs_query 仍下推 6 份）。
+  5. **llm_calls 含核對呼叫**：harness 的 `_CountingLLM` 也包住 judge provider，`llm_calls`
+     統計含 `verify_fact_grounding()` 的 JSON 呼叫（前導夠用；報告 40 要分開再拆）。
+  6. `ChatRequest` 實際在 `models/document.py`（非任務書 §3.1 寫的 `models/knowledge_graph.py`）。
