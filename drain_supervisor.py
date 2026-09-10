@@ -45,7 +45,12 @@ KG_STR = "236903cf-055a-40a8-8923-b9d06601f3b7"
 INTERVAL = 90
 MAX_WORKERS = 2  # 2026-09-10 實測：3 worker 反而慢（Ollama 序列化 qwen）
 LABELS = ["w1", "w2", "w3"][:MAX_WORKERS]
-WORKER_ENV = {"OLLAMA_EMBEDDING_NUM_GPU": "0", "OLLAMA_LLM_NUM_PREDICT": "8192"}
+# 2026-09-10：8192→4096。failed chunk 的根因是 qwen2.5:7b 貪婪解碼重複崩潰
+# （temperature=0 + format=json + 長 few-shot → 陷入迴圈吐到 num_predict 上限被截斷），
+# 不是上下文窗溢位。正常 chunk 的三元組輸出遠不到 4096 token，調小對成功案例零影響，
+# 只讓迴圈失敗更快截斷、省 ~2x GPU 時間。真正修復（破迴圈 repeat_penalty 重試）
+# 排在 DRAIN-DONE 後對 failed 批次一次性處理（方案 A）。
+WORKER_ENV = {"OLLAMA_EMBEDDING_NUM_GPU": "0", "OLLAMA_LLM_NUM_PREDICT": "4096"}
 LOG_DIR = Path(r"C:\Users\666\.claude\jobs\efb89cec\tmp")
 DRAIN_SCRIPT = str(_HERE / "drain_236903cf.py")
 
