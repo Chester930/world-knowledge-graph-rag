@@ -59,14 +59,47 @@ B2（Agentic RAG）**不在本任務範圍**：`services/agentic_baseline_servic
 - `task_queue.db` 與 workspace 目錄是否健在（避免重演 c15949bf 被 `git worktree remove` 清掉的事故，見 `docs/報告/32`）。
 - 目標 KG 的 `pending` 任務數（`task_queue_service`）—— 前導測試要求 `pending = 0`。
 
-### 2.3 目標測試 KG 選定
+### 2.3 目標測試 KG（前導版 —— 已定案）
 
-DRAIN 未完成 → **不要用還在抽的 KG#4 全量**（對 KG arm 不公平，報告 32/37/38 已踩過）。做法二選一：
+DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` = 1979/3303 chunk ≈ 60%，64 份文件裡 32 份 `pending=0`），**不用等 DRAIN-DONE 才能做前導比較**。
 
-1. **重建小型專用 KG**：比照報告 18 的「請假小場景」5 份文件（勞工請假規則、育嬰留職停薪實施辦法、外國人請假返國辦法、召集請假費用加成減除辦法、警察人員特別休假辦法），新 `kg_id`，抽取時**務必帶 embedding provider**（`OLLAMA_EMBEDDING_NUM_GPU=0`，bge-m3 走 CPU），跑到 `pending=0`。
-2. 或指定 KG#4（`236903cf-055a-40a8-8923-b9d06601f3b7`）內**已 100% 抽完**的文件子集，用 `scope_doc_ids` 限定。
+**定案：前導比較用 KG#4 的「6 份題目來源文件」子集**（報告 18/25/26 的題目來源，皆在 KG#4 已完成清單內）：
 
-選定後把 `kg_id` 記進本任務書 §8。
+| 文件 | 對應題目 |
+|---|---|
+| `N0030006_勞工請假規則` | 報告 18 Q1／Q6／Q7 |
+| `N0030018_育嬰留職停薪實施辦法` | 報告 18 Q2 |
+| `N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法` | 報告 18 Q3 |
+| `F0040034_員工接受召集請假期間薪資費用加成減除辦法` | 報告 18 Q4 |
+| `D0080015_警察人員特別休假辦法` | 報告 18 Q5 |
+| `N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法` | 報告 37／38 Q5 |
+
+- harness 用 `--scope-doc-ids` 限定這 6 份 → KG arm（F/G/K）的 BFS／Fact 檢索被 `scope_doc_ids` 下推限定，不會撈到其他半抽文件，對照公平。
+- 需要更大題面時再擴到 KG#4 的 32 份完成子集（同樣 `--scope-doc-ids`）。
+- **不要用**主 checkout `workspace/` 的 `2ae9d28b`（69 docs）／`deb24e7c`（56 docs）—— 那是 2026-08-07~08-20 era 抽的，落後現行管線一大票修正（發現 3/4/C、naturalization 之前），不能代表「現行系統」。
+
+選定的 `kg_id` 與實際 6 份文件清單記進本任務書 §8。
+
+### 2.4 抽取新鮮度硬性前置（★ 跑比較前必做）
+
+**問題**：`task_queue` 標 `completed` 只代表「該 chunk 到了終態」，**不代表「用最新修正的管線抽的」**。report 37 的後續修正（`num_predict` 1024→4096、timeout 300→600，commit `94b9b9a`；`N0050030` c3、`N0060016` c2 曾是 `num_predict=1024` 長列舉截斷案例）是在 drain 開始後才進的 —— KG#4 早期抽的 chunk 可能仍是截斷版。
+
+**為什麼這會讓「新版方法」不可信**：抽取截斷**不對稱**地影響各 arm ——
+
+| arm | 讀什麼 | 受抽取截斷影響 |
+|---|---|---|
+| B0／B1（chunk RAG） | `original.md` 原文 | ❌ 完全不受影響 |
+| F／G／K（KG 路徑） | Fact 節點／關係邊（從三元組來） | ✅ 截斷 → 少事實 → 表現被低估 |
+
+若前導報告出現「chunk RAG ≈ 或 > KG 路徑」，審查者可一句話推翻：「你的 KG 弱只是因為抽取沒抽完，不是方法問題。」
+
+**硬性前置步驟**：
+
+1. §2.3 的 6 份（或 32 份）比較用文件，在 `reextract-v2` **最新 HEAD** 上以 `force_rebuild=True` **重抽一次**（6 份 ~ 30–60 分鐘，`OLLAMA_EMBEDDING_NUM_GPU=0`；抽取須帶 embedding provider 讓 Fact 節點與 `fact_embedding` 一併重建）。
+2. `check_comparison_readiness.py` 必須檢查：每份比較文件的**所有 chunk** 在 `task_queue.updated_at` 上都**晚於最後一個 extraction-side commit 的日期**（用 `git log -1 --format=%cI -- services/svo_service.py core/constants.py` 之類取基準，或直接接受「本次 force_rebuild 的時間戳」）。任一 chunk 較舊 → FAIL，指示 `force_rebuild` 該份。
+3. §8 記錄實際重抽所在的 `reextract-v2` commit hash 與重抽完成時間。
+
+**誠實邊界**：就算 DRAIN-DONE 也不是「終版」（管線仍在改：G4 的 Q5 起算日生成側、E3 的 Q2 二次為限、`_SCOPE_MODIFIER_PATTERN` 待上線）。「可信」的定義 = **所有 arm 跑在同一份、統一用當前 HEAD 抽的 KG 上，且報告明說 commit／範圍／正式版在報告 40**，不是「用最終管線」。
 
 ---
 
@@ -117,28 +150,31 @@ DRAIN 未完成 → **不要用還在抽的 KG#4 全量**（對 KG arm 不公平
 
 ### 3.5 可行性檢查腳本：`check_comparison_readiness.py`（放 repo root）
 
-- **輸入**：`--kg-id`、`--arms`。
+- **輸入**：`--kg-id`、`--arms`、`--doc-ids`（比較用文件清單）。
 - 對選定 arm 逐一檢查 §2.1／§2.2 所需資產：
   Fact 節點數與 `fact_embedding` 非空比例／`Entity.name_embedding` 非空比例／關係型別索引存在／`original.md` 存在／baseline `.npy` 是否已建／`pending` 任務數。
-- **輸出**：PASS/FAIL 清單，每個 FAIL 附補救指令（例如「跑 `build_baseline_chunk_index.py --kg-id ... --chunk-size 500`」）。
+- **★ 抽取新鮮度檢查（§2.4）**：對每份 `--doc-ids` 文件，查 `task_queue` 內該 `source` 的**所有 chunk** 的 `updated_at`，全部須晚於基準時間（最後一個 extraction-side commit 日期，或指定的 force_rebuild 時間戳）。任一較舊 → FAIL。
+- **輸出**：PASS/FAIL 清單，每個 FAIL 附補救指令（例如「跑 `build_baseline_chunk_index.py --kg-id ... --chunk-size 500`」、「在 reextract-v2 HEAD 對 `<doc>` 跑 `force_rebuild=True` 重抽」）。
 
 ---
 
 ## 4. 使用者跑比較測試的流程（交付後）
 
+0. （前導版一次性）在 `reextract-v2` HEAD 對 §2.3 的 6 份比較文件跑 `force_rebuild=True` 重抽（§2.4），記下 commit hash。
 1. 選題組（附錄 A 全部 / 子集 / `--complexity` 過濾）。
 2. 選 arm 子集。
-3. `python check_comparison_readiness.py --kg-id <id> --arms <...>` → 確認需要的向量都在，補齊 FAIL 項。
-4. `python run_retrieval_comparison.py --kg-id <id> --questions docs/附錄A題庫.json --arms <...> --runs 3 --out <dir>`。
+3. `python check_comparison_readiness.py --kg-id <id> --doc-ids <...> --arms <...>` → 確認需要的向量都在、抽取新鮮度 PASS，補齊 FAIL 項。
+4. `python run_retrieval_comparison.py --kg-id <id> --doc-ids <...> --questions docs/附錄A題庫.json --arms <...> --runs 3 --out <dir>`。
 5. 人工填 0/1/2 grounded 評分（前導）；或跑自動指標（正式版另議）。
-6. 產出比較報告（下一個報告編號，`docs/報告/40_...`）。
+6. 產出比較報告（下一個報告編號，`docs/報告/40_...`），標題掛「前導」，正文載明抽取 commit／文件範圍／正式版在 DRAIN-DONE 後。
 
 ---
 
 ## 5. 驗收標準
 
-- [ ] `check_comparison_readiness.py` 能正確辨識缺失資產並給補救指令。
-- [ ] 7 條 arm 都能對 §2.3 選定的小型測試 KG 跑通，同一題產出可比結果 JSON + 彙總表。
+- [ ] §2.3 的 6 份比較文件已在 reextract-v2 HEAD `force_rebuild` 重抽，§8 記錄 commit 與時間。
+- [ ] `check_comparison_readiness.py` 能正確辨識缺失資產與**抽取過舊**的文件，並給補救指令。
+- [ ] 7 條 arm 都能對 §2.3 選定的 6 份文件子集跑通，同一題產出可比結果 JSON + 彙總表。
 - [ ] `retrieval_mode="both"` + `disable_grounding_regen=False` 與現行 `chat()` 逐位元相同（既有 `tests/routers/test_agent.py` 全綠）。
 - [ ] 新增開關各有單元測試。
 - [ ] `pytest` 全套綠。
@@ -171,8 +207,10 @@ DRAIN 未完成 → **不要用還在抽的 KG#4 全量**（對 KG arm 不公平
 
 ## 8. 執行紀錄（實作視窗填寫）
 
-- 目標測試 KG id：`________`
-- 目標測試 KG 內容：`________`
-- 完成的 commit：`________`
-- 生成端對齊程度：`________`
+- 目標測試 KG id：`236903cf-055a-40a8-8923-b9d06601f3b7`（KG#4，前導版用 §2.3 的 6 份文件子集）
+- 實際比較文件清單（force_rebuild 後）：`________`
+- force_rebuild 所在 reextract-v2 commit：`________`
+- force_rebuild 完成時間：`________`
+- harness / 開關 / 共用生成路完成的 commit：`________`
+- 生成端對齊程度（是否 100% 共用同一函式）：`________`
 - 已知 caveat：`________`
