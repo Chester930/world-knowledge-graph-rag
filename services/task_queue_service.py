@@ -193,48 +193,87 @@ def rebuild_from_records(db_path: Path, kg_folders: dict[str, Path]) -> None:
         db_path.unlink()
 
     with closing(_connect(db_path)) as conn:
-        for kg_id, kg_folder in kg_folders.items():
-            if not kg_folder.is_dir():
-                continue
-            for doc_folder in kg_folder.iterdir():
-                if not doc_folder.is_dir():
-                    continue
-                record = document_record_service.read_record(doc_folder)
-                if record is None or record.extraction_status == "completed":
-                    continue
+        _reconcile_all(conn, kg_folders)
+        conn.commit()
 
-                completed = set(record.completed_chunk_indices)
-                svo_index = read_svo_index(doc_folder)
-                if svo_index is not None:
-                    pending_indices = [
-                        chunk["index"] for chunk in svo_index["chunks"]
-                        if chunk["index"] not in completed
-                    ]
-                else:
-                    logger.warning(
-                        "REBUILD：%s 缺少 svo_index.json，退回 1..total 範圍推算"
-                        "（排除已知完成的 chunk_index，可能誤登記不存在的 index，"
-                        "worker 端會視為 failed 並可重試，非資料遺失）",
-                        doc_folder,
-                    )
-                    total = record.svo_total_chunks or record.total_chunks
-                    pending_indices = (
-                        [i for i in range(1, total + 1) if i not in completed] if total > 0 else []
-                    )
 
-                if not pending_indices:
-                    continue
-                conn.executemany(
-                    "INSERT OR IGNORE INTO task_queue (kg_id, source, chunk_index, status) "
-                    "VALUES (?, ?, ?, 'pending')",
-                    [(kg_id, record.source, idx) for idx in pending_indices],
-                )
+def _pending_indices_for_record(doc_folder: Path, record) -> list[int]:
+    """單一未完成文件記錄檔應登記為 `pending` 的 chunk_index 清單：優先讀
+    `svo_index.json` 的實際 index（見 `rebuild_from_records` docstring 對非連續
+    index 的說明），缺席時退回 `1..total` 範圍推算＋警告；兩種情況都以
+    `completed_chunk_indices` 集合排除已完成的。"""
+    completed = set(record.completed_chunk_indices)
+    svo_index = read_svo_index(doc_folder)
+    if svo_index is not None:
+        return [c["index"] for c in svo_index["chunks"] if c["index"] not in completed]
+    logger.warning(
+        "佇列對帳：%s 缺少 svo_index.json，退回 1..total 範圍推算"
+        "（排除已知完成的 chunk_index，可能誤登記不存在的 index，"
+        "worker 端會視為 failed 並可重試，非資料遺失）",
+        doc_folder,
+    )
+    total = record.svo_total_chunks or record.total_chunks
+    return [i for i in range(1, total + 1) if i not in completed] if total > 0 else []
+
+
+def _reconcile_doc(conn: sqlite3.Connection, kg_id: str, doc_folder: Path) -> None:
+    """把單一文件資料夾的記錄檔（真實狀態來源）與佇列對帳：`extraction_status`
+    非 `completed` 時，把尚未完成的 chunk_index 以 `INSERT OR IGNORE` 補進佇列。
+
+    `INSERT OR IGNORE` 的語意刻意保留兩種呼叫情境：`rebuild_from_records()` 呼叫
+    前已 `unlink()` 整個 db（無既有列，等於全部重登），`reconcile_missing_enqueues()`
+    則不動既有列、**只補上缺漏的列**——涵蓋「`trigger_extraction()` 的 CHUNKREADY
+    已完成但 `enqueue()` 之前中斷」這個乾淨重啟後無人撿回的洞。既有的
+    `failed` 列在後者情境下維持 `failed`（不在每次重啟都自動重試，避免重啟風暴
+    對真正壞掉的 chunk 反覆重跑）；`rebuild_from_records()`（索引已損毀的救援
+    路徑）則因先清空 db 而等同重試——兩者對 `failed` 的處理不同是刻意的。
+    """
+    record = document_record_service.read_record(doc_folder)
+    if record is None or record.extraction_status == "completed":
+        return
+    pending_indices = _pending_indices_for_record(doc_folder, record)
+    if not pending_indices:
+        return
+    conn.executemany(
+        "INSERT OR IGNORE INTO task_queue (kg_id, source, chunk_index, status) "
+        "VALUES (?, ?, ?, 'pending')",
+        [(kg_id, record.source, idx) for idx in pending_indices],
+    )
+
+
+def _reconcile_all(conn: sqlite3.Connection, kg_folders: dict[str, Path]) -> None:
+    for kg_id, kg_folder in kg_folders.items():
+        if not kg_folder.is_dir():
+            continue
+        for doc_folder in kg_folder.iterdir():
+            if doc_folder.is_dir():
+                _reconcile_doc(conn, kg_id, doc_folder)
+
+
+def reconcile_missing_enqueues(db_path: Path, kg_folders: dict[str, Path]) -> None:
+    """`RESTART`「索引可信」分支的 level-triggered 對帳（G1，2026-09-10）：
+    不刪既有索引，只對每份未完成的記錄檔補上佇列裡缺漏的 `pending` 列。
+
+    `ensure_ready()` 原本在索引可信時只做 `reset_stuck_processing()`，等同信任
+    每個 `trigger_extraction()` 事件都成功寫進 `task_queue.db`——若行程死在
+    `CHUNKREADY` 完成（`svo_index.json` 已寫）、`enqueue()` 之前，乾淨重啟後
+    這份文件記錄檔為 `pending`、佇列卻沒有它的列，也沒有任何機制重新
+    `trigger_extraction()`，於是靜默卡死。本函式即把 edge-triggered 的恢復
+    改為 level-triggered：從 `_record.json`（真實狀態來源）重新推導佇列該有的
+    `pending`，不依賴「每個生產者事件都成功登記過」。設計依據見
+    `docs/參考文獻/29_佇列恢復與對帳模型/`（Burns et al. 2016 reconciliation
+    controller；Kubernetes controllers 的 level-triggered 規範）。
+    """
+    with closing(_connect(db_path)) as conn:
+        _reconcile_all(conn, kg_folders)
         conn.commit()
 
 
 def ensure_ready(db_path: Path, kg_folders: dict[str, Path]) -> list[tuple[str, str, int]]:
     """`RESTART` 分支入口：程式重啟／電腦開機時呼叫——索引可信就地重置卡住的
-    `processing`；不可信則整份 `REBUILD`。呼叫後 `task_queue.db` 保證可查詢。
+    `processing` 並對記錄檔做一次 level-triggered 對帳（補上缺漏的 `pending`
+    登記，見 `reconcile_missing_enqueues()`）；不可信則整份 `REBUILD`。呼叫後
+    `task_queue.db` 保證可查詢。
 
     回傳被 `reset_stuck_processing()` 重置的 `(kg_id, source, chunk_index)`
     清單，供呼叫端清理這些 chunk 在 Neo4j 裡可能殘留的部分寫入（見該函式
@@ -245,6 +284,8 @@ def ensure_ready(db_path: Path, kg_folders: dict[str, Path]) -> list[tuple[str, 
     不在本次修正範圍內。
     """
     if is_index_trustworthy(db_path):
-        return reset_stuck_processing(db_path)
+        reset = reset_stuck_processing(db_path)
+        reconcile_missing_enqueues(db_path, kg_folders)
+        return reset
     rebuild_from_records(db_path, kg_folders)
     return []

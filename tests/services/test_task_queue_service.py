@@ -257,3 +257,68 @@ class TestEnsureReady:
         # （見 ensure_ready() docstring 誠實聲明），不是遺漏。
         assert reset_chunks == []
         assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc-a.txt", 1)
+
+
+class TestReconcileMissingEnqueues:
+    """G1（2026-09-10）：`ensure_ready()` 的「索引可信」分支改為 level-triggered
+    對帳——`trigger_extraction()` 死在 CHUNKREADY 完成、`enqueue()` 之前時，
+    乾淨重啟後這份文件記錄檔為 `pending`、佇列卻沒有它的列，過去無人撿回。"""
+
+    def _stage_doc_with_svo_index(self, kg_folder, source="doc-a.txt", n=3):
+        doc_folder = kg_folder / "doc-a"
+        doc_folder.mkdir(parents=True)
+        document_record_service.init_record(doc_folder, source=source, total_chunks=n)
+        document_record_service.set_svo_chunk_total(doc_folder, n)
+        (doc_folder / "svo_index.json").write_text(
+            json.dumps({"source": source, "total_svo_chunks": n,
+                        "chunks": [{"index": i} for i in range(1, n + 1)]}),
+            encoding="utf-8",
+        )
+        return doc_folder
+
+    def test_recovers_doc_that_never_got_enqueued(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        kg_folder = tmp_path / "kg-1"
+        self._stage_doc_with_svo_index(kg_folder)
+        # 佇列可信（建了另一份文件的列）但完全沒有 doc-a 的列 —— 模擬
+        # CHUNKREADY 已完成、enqueue() 之前中斷。
+        svc.enqueue(db_path, "kg-1", "other.txt", [1])
+        svc.update_status(db_path, "kg-1", "other.txt", 1, "completed")
+        assert svc.is_index_trustworthy(db_path) is True
+
+        svc.ensure_ready(db_path, {"kg-1": kg_folder})
+
+        registered = set()
+        while (item := svc.next_pending(db_path, "kg-1")) is not None:
+            registered.add(item[2])
+            svc.update_status(db_path, "kg-1", "doc-a.txt", item[2], "completed")
+        assert registered == {1, 2, 3}
+
+    def test_does_not_disturb_healthy_queue(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        kg_folder = tmp_path / "kg-1"
+        doc_folder = self._stage_doc_with_svo_index(kg_folder)
+        svc.enqueue(db_path, "kg-1", "doc-a.txt", [1, 2, 3])
+        svc.update_status(db_path, "kg-1", "doc-a.txt", 1, "completed")
+        document_record_service.record_chunk_completed(doc_folder, 1)
+        svc.update_status(db_path, "kg-1", "doc-a.txt", 2, "pending_upload")
+
+        svc.ensure_ready(db_path, {"kg-1": kg_folder})
+
+        # chunk 1 仍 completed（不重登）、2 仍 pending_upload（不誤重置）、3 pending
+        assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc-a.txt", 3)
+
+    def test_leaves_existing_failed_chunk_alone(self, tmp_path):
+        """刻意的不對稱：可信分支的對帳只補「缺漏的列」，既有 `failed` 維持
+        `failed`，不在每次重啟自動重試（避免重啟風暴反覆重跑壞掉的 chunk）。"""
+        db_path = _db_path(tmp_path)
+        kg_folder = tmp_path / "kg-1"
+        self._stage_doc_with_svo_index(kg_folder)
+        svc.enqueue(db_path, "kg-1", "doc-a.txt", [1, 2, 3])
+        svc.update_status(db_path, "kg-1", "doc-a.txt", 1, "completed")
+        svc.update_status(db_path, "kg-1", "doc-a.txt", 2, "failed")
+        svc.update_status(db_path, "kg-1", "doc-a.txt", 3, "completed")
+
+        svc.ensure_ready(db_path, {"kg-1": kg_folder})
+
+        assert svc.next_pending(db_path, "kg-1") is None  # 2 仍為 failed，不會被領出

@@ -32,6 +32,7 @@
 | `23_複合問題分解與自相矛盾修正/` | `docs/報告/28_複合問題子問題分解機制設計與實作報告.md`（報告26 §4 #2 修法：`_split_into_subquestions()`／`_generate_decomposed_answer()`） | ✅ 機制已實作（報告28，真實驗證 6/6 無重現）；🟢 已下載精讀 Least-to-Most（Zhou et al. 2023, ICLR）、Self-Ask（Press et al. 2022，compositionality gap） |
 | `24_短語模糊合併與否定範圍偵測/` | `docs/論文/02_文獻探討.md` § 2.4.5（RQ4b，`resolve_entity_name()` 模糊合併守衛文獻定位）；`03_系統設計與方法論.md` § 3.4 `DEDUP4`／`GUARD4`；報告25 §4 發現3／發現C（真實案例）；報告29（正式設計，數字比較詞子機制已實作+真實驗證，範圍修飾詞子機制設計已定案待抽取端凍結後實作） | ✅ 數字比較詞守衛（`_RANGE_COMPARATOR_PATTERN`）已實作＋端到端驗證通過（commit `df2bc62`）；🟡 範圍修飾詞守衛設計已定案，程式碼未實作；🟢 已下載精讀 Mrkšić et al. (2016)、Tosun et al. (2026)、Chapman et al. (2001) NegEx（作者官方存檔全文） |
 | `25_三元組自然語言化遺漏偵測/` | `docs/報告/26_修正後瓶頸探測問答比對報告.md` § 4 #6（自然語言化小失真真實案例）；`services/svo_service.py::_naturalize_triple()`（報告24 機制） | 🟡 討論中，機制未實作；🟢 已下載精讀 FABLES（Kim et al. 2024, COLM，遺漏錯誤分類法）、RHO（Ji et al. 2023, ACL Findings，Entity Coverage Recall 框架）；交叉引用已下載的 KAPING（`12_`） |
+| `29_佇列恢復與對帳模型/` | 03_系統設計與方法論.md § 3.1.2 `RESTART`／`TRUST`／`REBUILD`（重啟時的佇列恢復模型；2026-09-10 Pass 2 L3 審視 G1 修正） | ✅ 已下載精讀 1 篇（Burns et al. 2016, ACM Queue / CACM）；另查證 Kubernetes controllers／controller-runtime 官方 level-triggered 規範。§3.1.2 既有聲明「佇列實作為本專案自行設計」不受影響，本資料夾僅佐證恢復模型 |
 
 ## 01_AGI與智慧定義 內容清單
 

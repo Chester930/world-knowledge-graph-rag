@@ -96,6 +96,7 @@
 - [x] 逐句 embedding（`SENTEMBED`）——`svo_preprocessing_service.py::write_sentence_embeddings()`／`read_sentence_embeddings()`，`prepare_svo_ready_chunks()` 新增 `embedding_provider` 參數，與 `EMBEDCHUNK` 共用同一個 provider 實例
 - [x] 原句子/標準化句子/Chunk 關聯索引的寫入與讀取機制——`svo_index.json`＋`SVOTriple` 句子層級欄位
 - [x] 標準化進度的 checkpoint 機制——`DocumentRecord.normalization_*` 欄位＋`entity_registry_service` 登記表快照
+  - ⚠️ **可達性訂正（2026-09-10，Pass 2 L3 審視）**：`update_normalization_progress()`／登記表快照**僅 §a 別名登記表路徑會呼叫**，而 `svo_service.py::trigger_extraction()` 目前一律以 `mentions=None`／`ner_tagger=None` 呼叫、整段 §a 跳過（見下方 NER 接線待辦）——故**正式流程中此 checkpoint 從未被寫入**，`DocumentRecord.normalization_status` 恆為 `not_started`。目前真正有斷點續傳的只有 chunk 級抽取佇列（`task_queue.db`＋`completed_chunk_indices`）；`CHUNKREADY`（GETSENT→代名詞消解→SENTEMBED→切塊）在 `trigger_extraction()` 內是**不可中斷續傳的單一單元**，中途中止會整份重跑。此 checkbox 標記的是「機制已寫且有測試」，非「production 路徑可達」。
 - [x] `SVOTriple` schema 擴充句子/chunk 層級來源欄位
 - [x] 文件內實體別名登記表（3.4 §a，PK 動態提升機制）——`services/entity_registry_service.py`（新增），含頻率優先＋長度次要規則、規則式別名比對（子字串/縮寫）、LLM 仲裁 hook、斷點續傳快照，測試見 `tests/services/test_entity_registry_service.py`（17 項）
 - [x] `svo_service.py` 實體對齊/去重（3.1.4 DEDUP4／3.4 §b ESCALATE＋RECORD3B＋RECHECK）——`resolve_entity_name()`（編輯距離→cosine→LLM 仲裁三段式）、`_merge_chunk_mention()`／`_aggregate_alias_counts()`（`Chunk`／`HAS_ENTITY` 邊聚合，2026-07-21 修正取代初版的 `alias_counts_json` 節點屬性做法）、`merge_entity()`（含跨文件標準名動態更新），測試見 `tests/services/test_svo_service.py`（16 項，含 `InMemoryEntityDriver` 模擬 Entity／Chunk 節點與邊的完整聚合狀態）
