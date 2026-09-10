@@ -52,6 +52,7 @@ from pathlib import Path
 from typing import Iterable
 from uuid import UUID
 
+from core.config import settings
 from core.constants import CLASSIFY_AUTO_THRESHOLD, CLASSIFY_MIN_THRESHOLD, CLUSTER_MIN_SIZE
 from core.providers.factory import get_embedding_provider
 from models.knowledge_graph import ClassifyResult, KGCandidate
@@ -60,6 +61,22 @@ from services import document_record_service
 _PROTOTYPE_CACHE_FILENAME = "_prototype_cache.json"
 
 logger = logging.getLogger(__name__)
+
+
+def embedding_signature() -> str:
+    """目前 embedding 設定的簽章（`provider:model`），用來標記快取向量是用哪套
+    設定算出來的。`settings.embedding_provider` 或對應的 model 欄位一被換掉，
+    簽章就不同，快取（`_record.json` 的 `document_vector`／KG 資料夾的
+    `_prototype_cache.json`）即失效重算——避免換模型後靜默拿舊向量做 cosine
+    （維度可能剛好相同、不會報錯，但語意空間已不同）。
+    """
+    provider = settings.embedding_provider
+    model = {
+        "local": settings.local_embedding_model,
+        "openai": settings.openai_embedding_model,
+        "ollama": settings.ollama_embedding_model,
+    }.get(provider, "unknown")
+    return f"{provider}:{model}"
 
 
 @dataclass(frozen=True)
@@ -106,18 +123,29 @@ def compute_document_vector(doc_folder: Path) -> list[float] | None:
     非同步的 encode_batch——僅在本函式保證永遠透過 `run_in_executor`（獨立
     執行緒、無執行中的 event loop）呼叫時才安全，見模組 docstring 的警示。
     """
+    signature = embedding_signature()
     record = document_record_service.read_record(doc_folder)
-    if record is not None and record.document_vector is not None:
+    if (
+        record is not None
+        and record.document_vector is not None
+        and record.document_vector_signature == signature
+    ):
         return record.document_vector
 
     bodies = read_chunk_bodies(doc_folder)
     if not bodies:
         return None
-    embedding = get_embedding_provider()
+    try:
+        embedding = get_embedding_provider()
+    except RuntimeError as e:
+        # provider 尚未初始化（例如在完整 app lifespan 之外呼叫）——比照
+        # svo_service.embed_svo_chunks 的處理，優雅回 None，不讓分類端點 500。
+        logger.warning(f"embedding provider 尚未就緒，略過文件向量計算 [{doc_folder.name}]: {e}")
+        return None
     vectors = asyncio.run(embedding.encode_batch(bodies))
     vector = mean_vector(vectors)
     if vector is not None:
-        document_record_service.set_document_vector(doc_folder, vector)
+        document_record_service.set_document_vector(doc_folder, vector, signature)
     return vector
 
 
@@ -129,8 +157,10 @@ def _read_prototype_cache(
     kg_folder: Path, member_folders: list[str],
 ) -> tuple[list[float] | None, int] | None:
     """快取命中條件：快取檔存在，記錄的成員資料夾清單與目前磁碟現況完全相同，
-    且快取內含 `vector_count`（2026-08-19 修復前寫入的舊格式快取沒有這個欄位，
-    視為未命中、強制重新計算一次，之後即為新格式，見下方 `vector_count` 註解）。
+    快取內含 `vector_count`（2026-08-19 修復前寫入的舊格式快取沒有這個欄位，
+    視為未命中、強制重新計算一次，之後即為新格式，見下方 `vector_count` 註解），
+    且 `embedding_signature` 與目前 embedding 設定相同（換 provider／model 後
+    舊 prototype 失效，見 `embedding_signature()`）。
 
     任何解析失敗（快取檔損毀、格式不符）都視為未命中、退回重新計算，不拋例外
     中斷分類流程——快取只是效能優化，正確性永遠以「重新計算」為準。
@@ -144,7 +174,11 @@ def _read_prototype_cache(
         return None
     try:
         cached = json.loads(cache_path.read_text(encoding="utf-8"))
-        if cached.get("member_folders") == member_folders and "vector_count" in cached:
+        if (
+            cached.get("member_folders") == member_folders
+            and "vector_count" in cached
+            and cached.get("embedding_signature") == embedding_signature()
+        ):
             return cached.get("prototype"), cached["vector_count"]
     except Exception as e:
         logger.warning(f"KG prototype 快取讀取失敗，改為重新計算 [{kg_folder}]: {e}")
@@ -160,6 +194,7 @@ def _write_prototype_cache(
                 "member_folders": member_folders,
                 "prototype": prototype,
                 "vector_count": vector_count,
+                "embedding_signature": embedding_signature(),
             }),
             encoding="utf-8",
         )

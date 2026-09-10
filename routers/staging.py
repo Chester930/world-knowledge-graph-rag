@@ -14,9 +14,10 @@ from models.knowledge_graph import (
     ClusterAnalyzeResult,
     ClusterConfirmRequest,
     KnowledgeGraphCreate,
+    StagingPoolItem,
 )
 from repositories.kg_repo import KGRepository
-from services import classify_service, cluster_service, svo_service
+from services import classify_service, cluster_service, document_record_service, svo_service
 
 router = APIRouter(prefix="/staging", tags=["staging"])
 
@@ -24,16 +25,55 @@ router = APIRouter(prefix="/staging", tags=["staging"])
 async def _known_kgs() -> list[classify_service.KGInfo]:
     """組裝 classify_service／cluster_service 所需的最小 KG 資訊清單。
 
-    依賴 `KGRepository.list_all()`（Neo4j KG CRUD，v2 尚為 stub，屬另一個未
-    實作的功能節點）——本路由層可以完整接線，但在 kg_repo 實作完成前，
-    呼叫仍會拋出 NotImplementedError，這與本專案其餘 router（例如
-    routers/knowledge_graph.py）目前已接好但仍依賴 stub 的狀態一致。
+    依賴 `KGRepository.list_all()`（Neo4j KG CRUD）——已為實作完成的 Cypher
+    查詢（`docs/報告/11_抽取管線完整實作任務書.md` P0-1），查無資料回傳空清單。
     """
     kgs = await KGRepository(get_driver()).list_all()
     return [
         classify_service.KGInfo(kg_id=kg.id, kg_name=kg.name, folder_path=Path(kg.folder_path))
         for kg in kgs
     ]
+
+
+@router.get("", response_model=list[StagingPoolItem])
+async def list_pool():
+    """列出未分配資料夾池（§ 3.1.1 POOL 節點）目前有哪些文件在等分類。
+
+    只讀不寫；供 UI 呈現「暫存區堆了哪些東西」，並判斷哪些可對其單獨重新
+    觸發分類（`POST /staging/{filename}/classify`）。資料夾內沒有合法記錄檔
+    時 `record` 為 `None`（異常狀態，通常是舊資料夾或人工放入的）。
+    """
+    staging = _staging_folder()
+    if not staging.exists():
+        return []
+
+    items: list[StagingPoolItem] = []
+    for folder in sorted(p for p in staging.iterdir() if p.is_dir()):
+        record = document_record_service.read_record(folder)
+        items.append(StagingPoolItem(
+            folder_name=folder.name,
+            record=record,
+            chunk_files=sum(1 for _ in folder.glob("chunk-*-of-*.md")),
+            has_document_vector=record is not None and record.document_vector is not None,
+        ))
+    return items
+
+
+@router.post("/{filename}/classify", response_model=ClassifyResult)
+async def classify_one(filename: str):
+    """對未分配池中的單一文件重新計算分類分數（§ 3.1.1 POOL 節點「之後任何
+    時間手動重新觸發個別分類」）。只回候選排名，不自動搬移——要採用某個候選
+    仍走 `POST /staging/{filename}/assign`。
+    """
+    doc_folder = _staging_folder() / filename
+    if not doc_folder.exists():
+        raise HTTPException(status_code=404, detail=f"暫存區找不到資料夾：{filename}")
+
+    known_kgs = await _known_kgs()
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(
+        None, classify_service.classify_document, doc_folder, known_kgs,
+    )
 
 
 @router.post("/classify", response_model=list[ClassifyResult])

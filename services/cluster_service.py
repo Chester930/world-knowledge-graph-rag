@@ -58,10 +58,11 @@ import re
 from collections import Counter
 from pathlib import Path
 
-import hdbscan
 import numpy as np
-import umap
 
+# hdbscan / umap 為體積較大的可選依賴，且只有 ④ AI 自動分群這條路徑會用到。
+# 改在實際用到的函式內 lazy import，避免它們缺席時連累同一個 router
+# （routers/staging.py）底下 ①自動分配／②留池／③手動分配 也無法載入。
 from core.constants import CLUSTER_MIN_SIZE, UMAP_MIN_POOL_SIZE, UMAP_N_COMPONENTS
 from core.providers.factory import get_llm_provider
 from models.knowledge_graph import ClusterAnalyzeResult, ClusterSuggestion
@@ -88,6 +89,12 @@ def _reduce_dimensionality(vectors: list[list[float]]) -> list[list[float]]:
     在小樣本下的不穩定行為。`random_state` 固定，確保同一批輸入的降維結果可重現
     （呼應 `docs/ARCHITECTURE.md`「實驗可追溯性規範」）。
     """
+    import umap
+
+    # 正常運作下本函式只在 len(vectors) >= UMAP_MIN_POOL_SIZE(20) 時被呼叫，
+    # 而 20 - 2 = 18 ≫ UMAP_N_COMPONENTS(5)，故 n_components 恆為 UMAP_N_COMPONENTS；
+    # 保留 `len - 2` 下限只是防呆——若日後有人把 UMAP_MIN_POOL_SIZE 調到
+    # 小於 UMAP_N_COMPONENTS + 2，仍能得到合法的 n_components。
     n_components = min(UMAP_N_COMPONENTS, len(vectors) - 2)
     reducer = umap.UMAP(n_components=n_components, random_state=42)
     return reducer.fit_transform(np.array(vectors)).tolist()
@@ -111,6 +118,8 @@ def cluster_vectors(
     """
     if len(vectors) < min_cluster_size:
         return [-1] * len(vectors)
+
+    import hdbscan
 
     cluster_input = _reduce_dimensionality(vectors) if len(vectors) >= UMAP_MIN_POOL_SIZE else vectors
 

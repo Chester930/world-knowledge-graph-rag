@@ -113,6 +113,56 @@ class TestComputeKgPrototypeWithCount:
         assert svc.compute_kg_prototype(kg_folder) == svc.compute_kg_prototype_with_count(kg_folder)[0]
 
 
+class _CountingEmbeddingProvider(FakeEmbeddingProvider):
+    def __init__(self, mapping):
+        super().__init__(mapping)
+        self.batch_calls = 0
+
+    async def encode_batch(self, texts):
+        self.batch_calls += 1
+        return await super().encode_batch(texts)
+
+
+class TestEmbeddingSignatureInvalidation:
+    """換 embedding provider／model 後，`_record.json` 與 `_prototype_cache.json`
+    裡的舊向量必須失效重算，不能靜默拿不同語意空間的向量做 cosine。"""
+
+    def test_document_vector_recomputed_when_signature_changes(self, tmp_path, monkeypatch):
+        doc_folder = tmp_path / "report"
+        _write_chunk(doc_folder, 1, 1, "第一段")
+        document_record_service.init_record(doc_folder, source="report.pdf", total_chunks=1)
+
+        fake = _CountingEmbeddingProvider({"第一段": [1.0, 0.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        monkeypatch.setattr(svc, "embedding_signature", lambda: "local:model-a")
+        svc.compute_document_vector(doc_folder)
+        svc.compute_document_vector(doc_folder)  # 同簽章 → 命中快取，不再呼叫 provider
+        assert fake.batch_calls == 1
+
+        monkeypatch.setattr(svc, "embedding_signature", lambda: "ollama:model-b")
+        svc.compute_document_vector(doc_folder)  # 簽章不符 → 重算
+        assert fake.batch_calls == 2
+        assert document_record_service.read_record(doc_folder).document_vector_signature == "ollama:model-b"
+
+    def test_prototype_cache_invalidated_when_signature_changes(self, tmp_path, monkeypatch):
+        kg_folder = tmp_path / "kg_a"
+        _write_chunk(kg_folder / "doc1", 1, 1, "A")
+        document_record_service.init_record(kg_folder / "doc1", source="doc1", total_chunks=1)
+
+        fake = _CountingEmbeddingProvider({"A": [1.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+
+        monkeypatch.setattr(svc, "embedding_signature", lambda: "local:model-a")
+        svc.compute_kg_prototype_with_count(kg_folder)
+        svc.compute_kg_prototype_with_count(kg_folder)
+        assert fake.batch_calls == 1  # 第二次命中 _prototype_cache.json
+
+        monkeypatch.setattr(svc, "embedding_signature", lambda: "ollama:model-b")
+        svc.compute_kg_prototype_with_count(kg_folder)
+        assert fake.batch_calls == 2  # 簽章不符 → 快取失效、重算
+
+
 class TestClassifyByVector:
     def test_scores_above_min_threshold_get_matched(self):
         kg = svc.KGInfo(kg_id=uuid4(), kg_name="KG-A", folder_path=Path("/x"))
@@ -177,13 +227,31 @@ class TestComputeDocumentVectorCaching:
         doc_folder = tmp_path / "report"
         _write_chunk(doc_folder, 1, 1, "內容")
         document_record_service.init_record(doc_folder, source="report", total_chunks=1)
-        document_record_service.set_document_vector(doc_folder, [9.0, 9.0, 9.0])
+        monkeypatch.setattr(svc, "embedding_signature", lambda: "test:sig")
+        document_record_service.set_document_vector(doc_folder, [9.0, 9.0, 9.0], "test:sig")
 
         def _boom():
             raise AssertionError("不應呼叫 embedding provider，應直接使用快取")
         monkeypatch.setattr(svc, "get_embedding_provider", _boom)
 
         assert svc.compute_document_vector(doc_folder) == [9.0, 9.0, 9.0]
+
+    def test_recomputes_when_cached_vector_has_no_signature(self, tmp_path, monkeypatch):
+        """簽章上線前寫入的舊格式快取（無 document_vector_signature）→ 重算一次
+        後補上簽章，之後即為新格式、正常命中。"""
+        doc_folder = tmp_path / "report"
+        _write_chunk(doc_folder, 1, 1, "第一段")
+        document_record_service.init_record(doc_folder, source="report", total_chunks=1)
+        document_record_service.set_document_vector(doc_folder, [9.0, 9.0, 9.0])  # 無簽章
+
+        fake = FakeEmbeddingProvider({"第一段": [1.0, 0.0, 0.0]})
+        monkeypatch.setattr(svc, "get_embedding_provider", lambda: fake)
+        monkeypatch.setattr(svc, "embedding_signature", lambda: "test:sig")
+
+        result = svc.compute_document_vector(doc_folder)
+
+        assert result == pytest.approx([1.0, 0.0, 0.0])
+        assert document_record_service.read_record(doc_folder).document_vector_signature == "test:sig"
 
     def test_computes_and_caches_when_record_exists_but_uncached(self, tmp_path, monkeypatch):
         doc_folder = tmp_path / "report"

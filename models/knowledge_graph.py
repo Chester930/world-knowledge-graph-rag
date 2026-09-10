@@ -134,6 +134,12 @@ class DocumentRecord(BaseModel):
     # 更動）時由 document_record_service.init_record() 清空此快取，見
     # docs/論文/03_系統設計與方法論.md § 3.1.1 優化建議 #1
     document_vector: list[float] | None = None
+    # 產生上面這份 document_vector 的 embedding 設定簽章（provider:model）。
+    # settings.embedding_provider／對應 model 欄位被換掉後，舊向量不再可與新
+    # 向量做 cosine 比較（維度可能剛好相同、不會報錯），classify_service
+    # 讀取時發現簽章不符即視同未快取、重算。None＝舊資料（簽章上線前寫入），
+    # 一律重算一次後即補上。
+    document_vector_signature: str | None = None
 
 
 class StagingIngestResult(BaseModel):
@@ -142,6 +148,17 @@ class StagingIngestResult(BaseModel):
     狀態，尚未經過分類（見 `POST /staging/classify` 等端點）。"""
     folder_name: str
     record: DocumentRecord
+
+
+class StagingPoolItem(BaseModel):
+    """`GET /staging` 回應的單筆——未分配資料夾池（§ 3.1.1 POOL 節點）裡的一份
+    文件。供 UI 顯示「有哪些文件在等分類」，並判斷是否可對其單獨重新觸發分類
+    （`POST /staging/{filename}/classify`）。`record` 為 None 代表資料夾內沒有
+    合法記錄檔（異常狀態，通常是上線前的舊資料夾或人工放進來的）。"""
+    folder_name: str
+    record: DocumentRecord | None = None
+    chunk_files: int = 0
+    has_document_vector: bool = False
 
 
 # ── 暫存區 AI 自動分群（HDBSCAN + LLM 命名，見 § 3.1.1 §a）──────────────────────

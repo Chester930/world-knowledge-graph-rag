@@ -93,6 +93,7 @@ def init_record(folder: Path, source: str, total_chunks: int = 0) -> DocumentRec
             # 切塊數改變代表文件內容已重新解析，先前快取的 document_vector 不再
             # 代表目前內容，必須一併清空，否則分類分數會用到過期向量而不自知。
             existing.document_vector = None
+            existing.document_vector_signature = None
             existing.normalization_status = "not_started"
             existing.normalization_progress = 0
             existing.normalization_total_sentences = 0
@@ -105,8 +106,15 @@ def init_record(folder: Path, source: str, total_chunks: int = 0) -> DocumentRec
     return record
 
 
-def set_document_vector(folder: Path, vector: list[float]) -> DocumentRecord | None:
+def set_document_vector(
+    folder: Path, vector: list[float], signature: str | None = None,
+) -> DocumentRecord | None:
     """快取文件代表向量到記錄檔，避免每次分類都重新呼叫 embedding provider。
+
+    `signature`：產生這份向量的 embedding 設定簽章（`provider:model`），一併
+    存入 `DocumentRecord.document_vector_signature`；classify_service 讀取快取
+    時會比對目前設定的簽章，不符即重算（換 embedding 模型後不會靜默沿用舊
+    向量）。傳 `None` 維持既有行為（不記簽章）。
 
     記錄檔不存在時（例如尚未經過 init_record 的暫時性資料夾）不建立新記錄、
     直接跳過快取，只計算不持久化——快取是效能優化，不應該讓呼叫端多一個
@@ -116,6 +124,7 @@ def set_document_vector(folder: Path, vector: list[float]) -> DocumentRecord | N
     if record is None:
         return None
     record.document_vector = vector
+    record.document_vector_signature = signature
     _write_record(folder, record)
     return record
 
