@@ -138,6 +138,6 @@ T2 跑在改過的版本上（即使 golden test 保證行為零變化）。
 - [x] 下載 DPR（Karpukhin 2020）、RAG Survey（Gao 2023）進 `docs/參考文獻/27_當代RAG強基準/`（📥，未精讀）。
 - [x] `docs/參考文獻/27_當代RAG強基準/README.md`。
 - [x] 論文 §5.4.1 擴寫（B0/B1 定義表 ＋ 校準計畫 ＋ 排除聲明）；§5.2 表「B1」列補元件細節（commit `ee24b49`）；§5.7 時程把「§5.3 → B0/B1 建置 → RQ1 對照」序列釘死（2026-09-09，§5.7.1/§5.7.2 分階段 DAG）。
-- [ ] 論文 §2.3 比較表或 §2.6 新增小節，收 DPR／RAG Survey 兩篇（B1 的方法定位）。
+- [x] 論文 §2.3 比較表或 §2.6 新增小節，收 DPR／RAG Survey 兩篇（B1 的方法定位）。**已於 2026-09-09 完成**：`02` §2.3.1「RQ1 非圖對照組（B0／B1）的方法定位」收 DPR（Karpukhin 2020）＋ Gao 2023 RAG Survey（Naive／Advanced／Modular ＋ 四階），`02` §2.1.1 索引補兩列（2026-09-10 補勾）。
 - [ ] `文獻與專案查核表.md` 補 DPR／Gao 兩列（標 📥 已下載、未精讀）。
 - [ ] （實作階段）DPR §hybrid、Gao §post-retrieval 全文精讀；Han §3.4／Zhou §7.1 對 PDF 逐字複核。
