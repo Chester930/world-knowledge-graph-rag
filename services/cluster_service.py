@@ -159,18 +159,46 @@ def dominant_subcluster_indices(
     return [i for i, l in enumerate(labels) if l == dominant_label]
 
 
+_CONCEPT_TOKEN_OK = re.compile(r"[一-鿿A-Za-z0-9]")
+
+
+def _tokenize_for_concepts(body: str) -> list[str]:
+    """把一段文字斷成可統計頻率的詞。
+
+    優先用 jieba 中文斷詞（BERTopic 官方對中文的建議做法，見 3.1.1 §a 與
+    `docs/參考文獻`）——`re.findall(r"[一-鿿A-Za-z]{2,}", ...)` 對中文只會抓到
+    「標點之間的整串連續漢字」（例：「勞工每年特別休假日數」變成單一 token），
+    產生的「高頻詞」多為長句片段而非詞，對 LLM 生成 KG 名稱幾乎無幫助。
+    jieba 未安裝時退回原本的正則行為，功能不中斷（jieba 已列入
+    requirements.txt，正式環境會有）。
+    """
+    try:
+        import jieba
+        jieba.setLogLevel(20)  # 關掉「Building prefix dict」等 INFO 訊息
+        raw = jieba.lcut(body)
+    except Exception:
+        return re.findall(r"[一-鿿A-Za-z]{2,}", body)
+
+    tokens = []
+    for tok in raw:
+        tok = tok.strip()
+        # 至少兩字、且含中英數（濾掉純標點、純空白、單字詞）
+        if len(tok) >= 2 and _CONCEPT_TOKEN_OK.search(tok):
+            tokens.append(tok)
+    return tokens
+
+
 def extract_top_concepts(bodies: list[str], top_n: int = 15) -> list[str]:
     """簡易高頻詞統計，供命名 prompt 參考用的粗略關鍵詞。
 
     這**不是**正式的概念抽取（正式概念抽取屬 services/concept_engine.py，
     3.2 節 RQ2 路由層範圍，尚未實作）——此處只需要足夠代表性的關鍵詞餵給
     LLM 生成名稱，不需要完整的 LLM 概念抽取管線，避免命名這個工程借鏡型
-    功能反過來依賴尚未完成的路由層研究問題。
+    功能反過來依賴尚未完成的路由層研究問題。中文斷詞見 `_tokenize_for_concepts()`。
     """
     counter: Counter[str] = Counter()
     for body in bodies:
-        tokens = re.findall(r"[一-鿿A-Za-z]{2,}", body)
-        counter.update(tokens)
+        counter.update(_tokenize_for_concepts(body))
     return [word for word, _ in counter.most_common(top_n)]
 
 

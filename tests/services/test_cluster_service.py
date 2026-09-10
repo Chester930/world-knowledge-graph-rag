@@ -159,13 +159,36 @@ class TestDominantSubclusterIndices:
 
 
 class TestExtractTopConcepts:
-    def test_counts_word_frequency(self):
-        bodies = ["知識圖譜 知識圖譜 檢索", "知識圖譜 增強生成"]
-        top = svc.extract_top_concepts(bodies, top_n=2)
-        assert top[0] == "知識圖譜"
+    def test_counts_word_frequency_most_common_first(self):
+        # 「勞工」共出現 3 次，斷詞統計後應排在最前
+        bodies = ["勞工權益與勞工保護。", "勞工加班費與雇主義務。"]
+        top = svc.extract_top_concepts(bodies, top_n=5)
+        assert top[0] == "勞工"
 
     def test_empty_bodies_returns_empty_list(self):
         assert svc.extract_top_concepts([]) == []
+
+    def test_chinese_body_is_word_segmented_not_whole_run(self):
+        """E1：連續漢字要被 jieba 斷成詞，而非整串（標點之間）當單一 token。"""
+        pytest.importorskip("jieba")
+        top = svc.extract_top_concepts(["勞工每年特別休假的日數與工資給付。"], top_n=20)
+        # 至少切出多個較短的詞，且不存在「整段連續漢字」這種長 token
+        assert len(top) >= 3
+        assert all(len(t) <= 6 for t in top)
+        assert "勞工每年特別休假的日數與工資給付" not in top
+
+    def test_falls_back_to_regex_when_jieba_missing(self, monkeypatch):
+        import builtins
+        real_import = builtins.__import__
+
+        def _no_jieba(name, *args, **kwargs):
+            if name == "jieba":
+                raise ImportError("simulated missing jieba")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", _no_jieba)
+        # 退回正則行為：整串連續漢字成為單一 token（舊行為，功能不中斷）
+        assert svc._tokenize_for_concepts("勞工每年特別休假日數") == ["勞工每年特別休假日數"]
 
 
 class TestNamingPromptAndParsing:
