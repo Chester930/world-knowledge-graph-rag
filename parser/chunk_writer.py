@@ -249,3 +249,22 @@ def read_sentences_index(source: str, base_dir: Union[str, Path]) -> Optional[Li
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload["sentences"]
+
+
+def read_indexed_source(source: str, base_dir: Union[str, Path]) -> Optional[str]:
+    """讀回某文件資料夾內記錄的「原始來源字串」（取自 `sentences.json` 的
+    `source` 欄位）。用途：偵測「兩個不同的來源字串，經 `_safe_filename_stem()`
+    正規化（移除特殊字元、截斷 80 字元）後撞進同一個資料夾」——例如
+    `勞基法.pdf` 與 `勞基法.docx`，或前 80 字元相同的長檔名。
+
+    資料夾／`sentences.json` 不存在，或內容無法解析時回傳 `None`（視為「尚無
+    佔用」，不阻擋）。
+    """
+    doc_folder = document_folder_path(source, base_dir)
+    path = doc_folder / SENTENCES_INDEX_FILENAME
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("source")
+    except (json.JSONDecodeError, OSError):
+        return None

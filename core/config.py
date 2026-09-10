@@ -35,6 +35,12 @@ class Settings(BaseSettings):
     # ── 本地 Embedding（sentence-transformers）────────────────────────────────
     local_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
+    # ── 本地語音轉文字（Whisper）── 論文 § 3.1（L1 音檔/影片/YouTube 音軌解析）─
+    # parser/core.py 的音檔上傳與 YouTube 無字幕備援皆走本地 Whisper。預設
+    # `tiny`（下載快、對中文堪用但錯字率偏高）；產品環境可設 `base`／`small`
+    # 提升中文轉錄品質。可選值同 openai-whisper：tiny|base|small|medium|large。
+    whisper_model_size: str = "tiny"
+
     # ── OpenAI ─────────────────────────────────────────────────────────────────
     openai_api_key: str = ""
     openai_llm_model: str = "gpt-4o-mini"

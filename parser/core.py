@@ -86,11 +86,23 @@ except ImportError:
 
 _whisper_model_cache = {}
 
+# 本地 Whisper 模型大小的預設值——集中由 core/config.py（`.env` 可覆寫）決定，
+# 讓產品環境能調大提升中文轉錄品質，不必改程式。import 失敗時（例如單獨對
+# parser 模組跑測試、尚未備妥 pydantic-settings 環境）退回 "tiny"，維持本模組
+# 可獨立運作的既有特性。
+try:
+    from core.config import settings as _settings
+    _DEFAULT_WHISPER_MODEL_SIZE = _settings.whisper_model_size or "tiny"
+except Exception:
+    _DEFAULT_WHISPER_MODEL_SIZE = "tiny"
 
-def _transcribe_with_whisper(path: str, model_size: str = "tiny") -> str:
+
+def _transcribe_with_whisper(path: str, model_size: str = _DEFAULT_WHISPER_MODEL_SIZE) -> str:
     """共用的本地 Whisper 語音轉文字函式，供音檔上傳與 YouTube 音軌備援共用。
 
-    模型載入後會快取在行程記憶體中，避免重複解析時重複載入。
+    `model_size` 預設取自 `core/config.py::settings.whisper_model_size`（`.env`
+    的 `WHISPER_MODEL_SIZE` 可覆寫）；模型載入後會快取在行程記憶體中，避免
+    重複解析時重複載入。
     """
     if whisper is None:
         raise ImportError("未安裝 openai-whisper 套件，請執行 pip install openai-whisper")
@@ -479,10 +491,9 @@ class DocumentParser:
         return result.to_text_block() if result else ""
 
     def _parse_audio(self, path: Path) -> str:
-        """使用本地 Whisper 模型進行語音轉文字"""
+        """使用本地 Whisper 模型進行語音轉文字（模型大小由 settings.whisper_model_size 決定）"""
         try:
-            # 使用 tiny 模型，以防使用者下載過久。預設對中文已堪用
-            return _transcribe_with_whisper(str(path), model_size="tiny")
+            return _transcribe_with_whisper(str(path))
         except ImportError:
             raise
         except Exception as e:
@@ -1035,7 +1046,7 @@ class URLParser:
             if not downloaded_files:
                 raise DocumentParserError("音軌下載失敗，未產生任何音訊檔案")
 
-            return _transcribe_with_whisper(downloaded_files[0], model_size="tiny")
+            return _transcribe_with_whisper(downloaded_files[0])
 
     def _extract_youtube_id(self, url: str) -> Optional[str]:
         """從網址中擷取 YouTube Video ID"""

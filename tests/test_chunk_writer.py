@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from parser.chunk_writer import (
+    read_indexed_source,
     read_original_text,
     read_sentences_index,
     write_chunks_as_markdown,
@@ -227,3 +228,21 @@ def test_read_sentences_index_round_trips_list(tmp_path):
 
 def test_read_sentences_index_returns_none_when_missing(tmp_path):
     assert read_sentences_index("missing.txt", tmp_path) is None
+
+
+# ── read_indexed_source（撞名偵測用）────────────────────────────────────────
+
+def test_read_indexed_source_returns_recorded_source(tmp_path):
+    write_sentences_index(["第一句。"], "勞基法.pdf", tmp_path)
+    assert read_indexed_source("勞基法.pdf", tmp_path) == "勞基法.pdf"
+
+
+def test_read_indexed_source_detects_stem_collision(tmp_path):
+    """不同副檔名、同 stem：`勞基法.docx` 定位到 `勞基法.pdf` 已建立的資料夾，
+    讀出的來源是先佔用者，呼叫端據此判斷撞名。"""
+    write_sentences_index(["第一句。"], "勞基法.pdf", tmp_path)
+    assert read_indexed_source("勞基法.docx", tmp_path) == "勞基法.pdf"
+
+
+def test_read_indexed_source_returns_none_when_missing(tmp_path):
+    assert read_indexed_source("missing.txt", tmp_path) is None

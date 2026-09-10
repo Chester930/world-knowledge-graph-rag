@@ -17,6 +17,7 @@ from pathlib import Path
 from models.knowledge_graph import DocumentRecord
 from parser.chunk_writer import (
     document_folder_path,
+    read_indexed_source,
     read_original_text,
     read_sentences_index,
     write_chunks_as_markdown,
@@ -75,6 +76,19 @@ def chunk_and_stage(text: str, source: str, staging_dir: Path) -> tuple[Path, Do
     """
     if not source.strip():
         raise ValueError("source 不可為空白")
+
+    # 撞名防護：不同來源字串經 `_safe_filename_stem()` 正規化後可能對應同一個
+    # 資料夾（例如 `勞基法.pdf` 與 `勞基法.docx`，或前 80 字元相同的長檔名）。
+    # 既有資料夾記錄的來源與本次不同時直接拒絕，把「靜默覆寫既有切塊」變成
+    # 明確錯誤；相同來源（內容更新後重新處理）不受影響，覆寫語意照舊。
+    existing_source = read_indexed_source(source, staging_dir)
+    if existing_source is not None and existing_source != source:
+        folder_name = document_folder_path(source, staging_dir).name
+        raise ValueError(
+            f"暫存區資料夾 {folder_name}/ 已被另一份來源「{existing_source}」佔用，"
+            f"與本次來源「{source}」正規化後相同；請重新命名其中一份再處理，"
+            "避免靜默覆寫既有切塊。"
+        )
 
     chunks = sentence_aware_chunking(text)
     if not chunks:

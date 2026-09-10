@@ -76,6 +76,19 @@ class TestChunkAndStage:
         assert updated_record.assignment_history[0].kg_name == "KG-A"
         assert updated_record.total_chunks > 1
 
+    def test_rejects_different_source_colliding_on_safe_filename_stem(self, tmp_path):
+        """`勞基法.pdf` 與 `勞基法.docx` 經 `_safe_filename_stem()` 正規化後皆對應
+        `勞基法/` 資料夾——第二份必須被明確拒絕，而非靜默覆寫第一份的切塊。"""
+        staging = tmp_path / "staging"
+        first_folder, _ = svc.chunk_and_stage("勞基法內容第一段。" * 5, "勞基法.pdf", staging)
+
+        with pytest.raises(ValueError, match="已被另一份來源"):
+            svc.chunk_and_stage("完全不同的另一份文件內容。" * 5, "勞基法.docx", staging)
+
+        # 第一份的切塊與索引原封不動
+        payload = json.loads((first_folder / "sentences.json").read_text(encoding="utf-8"))
+        assert payload["source"] == "勞基法.pdf"
+
 
 class TestGetOrRebuildSentences:
     """§ 3.1.2 GETSENT 三層判斷。"""
