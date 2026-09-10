@@ -4,6 +4,7 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import NamedTuple
 from uuid import UUID
 
 from fastapi import APIRouter
@@ -922,14 +923,23 @@ async def _build_prompt(
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
     cfg: KGConfig | None = None,
+    context_lines: list[str] | None = None,
 ) -> str:
+    """`context_lines`（報告39 §3.2）：harness baseline arm（B0/B1/D）直接給
+    已排好的 context 行，跳過 `_split_fact_lines()`／`_arrange_fact_lines()`
+    （那是 KG 事實專用的重排）；`context_lines=None` 時行為與抽取前逐位元相同。"""
     _cfg = cfg or KGConfig()
-    bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
-    if bfs_lines or fact_lines:
+    if context_lines is None:
+        bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
+        has_context = bool(bfs_lines or fact_lines)
         arranged = await _arrange_fact_lines(
             question, bfs_lines, fact_lines,
             embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
-        )
+        ) if has_context else []
+    else:
+        arranged = list(context_lines)
+        has_context = bool(arranged)
+    if has_context:
         facts = "\n".join(arranged)
         context_block = f"以下是從知識圖譜檢索到、可能與問題相關的事實：\n{facts}\n"
         instruction = (
@@ -997,6 +1007,7 @@ async def _build_constrained_prompt(
     embedding_provider: EmbeddingProvider | None,
     question_vector: list[float] | None = None,
     cfg: KGConfig | None = None,
+    context_lines: list[str] | None = None,
 ) -> str:
     """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、9）。
 
@@ -1021,15 +1032,20 @@ async def _build_constrained_prompt(
     自己避開。
     """
     _cfg = cfg or KGConfig()
-    bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
-    if bfs_lines or fact_lines:
-        arranged = await _arrange_fact_lines(
-            question, bfs_lines, fact_lines,
-            embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
-        )
-        facts = "\n".join(arranged)
+    # 報告39 §3.2：`context_lines` 有值時直接用（harness baseline arm）；
+    # `None` 時行為與抽取前逐位元相同。
+    if context_lines is not None:
+        facts = "\n".join(context_lines) if context_lines else "（本輪未檢索到任何事實）"
     else:
-        facts = "（本輪未檢索到任何事實）"
+        bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
+        if bfs_lines or fact_lines:
+            arranged = await _arrange_fact_lines(
+                question, bfs_lines, fact_lines,
+                embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
+            )
+            facts = "\n".join(arranged)
+        else:
+            facts = "（本輪未檢索到任何事實）"
 
     history_block = ""
     if history:
@@ -1049,6 +1065,168 @@ async def _build_constrained_prompt(
 3. 回答前請逐條檢視上方事實清單中每一項，確認是否有跟問題相關卻被你遺漏的事實——事實清單已依與問題的相關性排序，最相關的通常在清單前段。
 4. 若你在回答的任何一部分已經引用某條事實作答，後面的摘要或結論不可以再說這項資訊「未記載」或「無法確認」——同一份事實清單內，已經用過的事實視為確定可用，前後結論必須一致。
 """
+
+
+class _GenerationResult(NamedTuple):
+    """`_generate_from_context_lines()` 的最終產物（在 SSE 狀態事件之後 yield）。"""
+    final_answer: str
+    grounding: list  # list[ClaimGrounding]
+    regenerated: bool
+
+
+async def _generate_from_context_lines(
+    question: str,
+    *,
+    history: list[ChatMessage] | None,
+    cfg: KGConfig,
+    llm_provider: LLMProvider,
+    judge_llm_provider: LLMProvider,
+    kg_id: UUID,
+    use_svo: bool,
+    disable_grounding_regen: bool = False,
+    triples: list[SVOTriple] | None = None,
+    fact_results: list[dict] | None = None,
+    embedding_provider: EmbeddingProvider | None = None,
+    question_vector: list[float] | None = None,
+    context_lines: list[str] | None = None,
+):
+    """把 `chat()` 的「context → 生成 → 事實接地核對 → 方案 B／2b 重生 → 選擇性
+    轉繁」尾段抽成共用**非同步產生器**，供 `chat()` 自身與報告39 harness 的
+    B0／B1／D arm 共用同一生成 stack（§5.4.1：生成端逐位元相同，才分得出
+    「贏在檢索」還是「贏在生成端機制」）。
+
+    以 SSE 字串 yield 出 `event: status`（phase `generating`／`verifying`）給
+    `chat()` 原樣轉發；**最後一個 yield** 是一個 `_GenerationResult`。
+
+    兩種輸入模式：
+
+    - `context_lines is None`（`chat()` 的 KG 路徑）：用 `triples`／`fact_results`
+      走 `_build_prompt()`／分解式生成／2b 定向修訂／G3 列舉完整性 guard——
+      行為與抽取前**逐位元相同**。
+    - `context_lines` 有值（harness baseline arm）：用扁平 context 行組 prompt
+      （走同一個 `_build_prompt(context_lines=)`）；接地核對照跑、未接地時
+      **單次強約束重生**（＝ KG 路徑 `grounded_claim_count == 0` 的整份重寫
+      分支）。不套分解式生成、2b 定向修訂、G3 列舉 guard——**前導夠用版**，
+      完整生成端共用重構待 P0b 第 2 項／T2（見報告39 §3.2、§6）。
+    """
+    baseline_mode = context_lines is not None
+    triples = triples or []
+    fact_results = fact_results or []
+    sub_questions = [question] if baseline_mode else _split_into_subquestions(question)
+
+    yield f"event: status\ndata: {json.dumps({'phase': 'generating'})}\n\n"
+    if not baseline_mode and use_svo and len(sub_questions) > 1 and (triples or fact_results):
+        draft_answer = await _generate_decomposed_answer(
+            sub_questions, triples, fact_results,
+            embedding_provider=embedding_provider, question_vector=question_vector,
+            llm_provider=llm_provider, cfg=cfg,
+        )
+    else:
+        prompt = await _build_prompt(
+            question, triples, fact_results, history,
+            embedding_provider=embedding_provider, question_vector=question_vector,
+            cfg=cfg, context_lines=context_lines,
+        )
+        draft_parts: list[str] = []
+        async for token in llm_provider.stream(prompt):
+            draft_parts.append(token)
+        draft_answer = "".join(draft_parts)
+
+    if baseline_mode:
+        fact_texts = [ln.lstrip("- ").strip() for ln in context_lines]
+        grounding_context_present = bool(context_lines)
+    else:
+        fact_lines = _merge_fact_lines(triples, fact_results)
+        fact_texts = [line.lstrip("- ") for line in fact_lines]
+        grounding_context_present = use_svo
+
+    yield f"event: status\ndata: {json.dumps({'phase': 'verifying'})}\n\n"
+    grounding = await verify_fact_grounding(
+        draft_answer, fact_texts, judge_llm_provider, question=question
+    )
+
+    final_answer = draft_answer
+    regenerated = False
+    ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
+    if grounding_context_present and ungrounded_claims and not disable_grounding_regen:
+        if baseline_mode:
+            constrained_prompt = await _build_constrained_prompt(
+                question, triples, fact_results, history,
+                embedding_provider=embedding_provider, question_vector=question_vector,
+                cfg=cfg, context_lines=context_lines,
+            )
+            corrected_parts: list[str] = []
+            async for token in llm_provider.stream(constrained_prompt):
+                corrected_parts.append(token)
+            final_answer = "".join(corrected_parts)
+        else:
+            claim_count = sum(1 for c in grounding if c.is_claim)
+            grounded_claim_count = claim_count - len(ungrounded_claims)
+            corrections: list[str] | None = None
+            if grounded_claim_count > 0:
+                corrections = await _targeted_correction(
+                    question,
+                    [c.statement for c in ungrounded_claims],
+                    triples, fact_results,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    llm_provider=llm_provider, cfg=cfg,
+                )
+            if corrections is not None:
+                fix_i = 0
+                out_lines: list[str] = []
+                for c in grounding:
+                    if c.is_claim and not c.supported:
+                        out_lines.append(corrections[fix_i])
+                        fix_i += 1
+                    else:
+                        out_lines.append(c.statement)
+                final_answer = "\n".join(out_lines)
+            elif len(sub_questions) > 1 and (triples or fact_results):
+                final_answer = await _generate_decomposed_constrained_answer(
+                    sub_questions, triples, fact_results,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    llm_provider=llm_provider, cfg=cfg,
+                )
+            else:
+                constrained_prompt = await _build_constrained_prompt(
+                    question, triples, fact_results, history,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    cfg=cfg,
+                )
+                corrected_parts: list[str] = []
+                async for token in llm_provider.stream(constrained_prompt):
+                    corrected_parts.append(token)
+                final_answer = "".join(corrected_parts)
+        regenerated = True
+        grounding = await verify_fact_grounding(
+            final_answer, fact_texts, judge_llm_provider, question=question
+        )
+
+    if not baseline_mode and use_svo and (triples or fact_results) and _wants_full_enumeration(question):
+        tier_families = _detect_tier_families(triples, fact_results)
+        missing = _missing_tier_members(final_answer, tier_families)
+        if missing and len(sub_questions) > 1:
+            final_answer = await _generate_decomposed_constrained_answer(
+                sub_questions, triples, fact_results,
+                embedding_provider=embedding_provider, question_vector=question_vector,
+                llm_provider=llm_provider, cfg=cfg,
+            )
+            regenerated = True
+            grounding = await verify_fact_grounding(
+                final_answer, fact_texts, judge_llm_provider, question=question
+            )
+            missing = _missing_tier_members(final_answer, tier_families)
+        if missing:
+            supplement = "\n".join(
+                f"補充（依事實清單）：{s} {v} {o}".strip() for s, v, o in missing
+            )
+            final_answer = f"{final_answer}\n\n{supplement}"
+            regenerated = True
+
+    kg_folder = str(Path(settings.workspace_dir) / str(kg_id))
+    final_answer = _to_traditional_selective(final_answer, _kg_source_charset(kg_folder))
+
+    yield _GenerationResult(final_answer=final_answer, grounding=grounding, regenerated=regenerated)
 
 
 @router.post("/chat")
@@ -1211,157 +1389,34 @@ async def chat(payload: ChatRequest):
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
             fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
 
-        # 報告27 C#2 M1（2026-09-04）：複合問題（句末問號 ≥2）先按規則拆成獨立
-        # 子問題，各自對同一份事實清單生成答案，避免單次生成內跨子答案互相
-        # 汙染／矛盾（見 `_split_into_subquestions()` docstring 的真實案例）。
-        # `payload.use_svo=False` 或檢索為空時沒有事實清單可分工，維持原單次
-        # 生成路徑；`_split_into_subquestions()` 對非複合問題原樣回傳單元素
-        # 清單，行為與修改前完全一致。
-        sub_questions = _split_into_subquestions(payload.question)
-
-        yield f"event: status\ndata: {json.dumps({'phase': 'generating'})}\n\n"
-        if payload.use_svo and len(sub_questions) > 1 and (triples or fact_results):
-            draft_answer = await _generate_decomposed_answer(
-                sub_questions, triples, fact_results,
-                embedding_provider=embedding_provider, question_vector=question_vector,
-                llm_provider=llm_provider, cfg=cfg,
-            )
-        else:
-            prompt = await _build_prompt(
-                payload.question, triples, fact_results, payload.history,
-                embedding_provider=embedding_provider, question_vector=question_vector,
-                cfg=cfg,
-            )
-            # 方案 B：不逐 token 即時轉發第一版草稿——先在背後生成完整答案，
-            # 核對過（必要時重新生成）才把最終版本送給使用者（見上方 docstring）。
-            draft_parts: list[str] = []
-            async for token in llm_provider.stream(prompt):
-                draft_parts.append(token)
-            draft_answer = "".join(draft_parts)
-
-        # 核對範圍須與 `_build_prompt()` 實際餵給生成模型的 context 一致
-        # （`_merge_fact_lines()` 合併後的 BFS 三元組＋語意 Fact），只用
-        # `fact_results` 會漏掉 BFS 三元組來源的正確陳述，造成假陽性
-        # （2026-08-24 真實測試發現：「每週總時數四十小時」由 BFS 三元組
-        # 提供，只核對 `fact_results` 會誤判為未接地）。
-        fact_lines = _merge_fact_lines(triples, fact_results)
-        fact_texts = [line.lstrip("- ") for line in fact_lines]
-
-        yield f"event: status\ndata: {json.dumps({'phase': 'verifying'})}\n\n"
-        grounding = await verify_fact_grounding(
-            draft_answer, fact_texts, judge_llm_provider, question=payload.question
-        )
-
-        final_answer = draft_answer
-        regenerated = False
-        # payload.use_svo=False 時 _build_prompt() 本來就明確允許 LLM 用自己的
-        # 知識回答（見該函式 else 分支的 instruction）——這種模式下完全沒有
-        # fact_texts 可供核對，verify_fact_grounding() 會把每一句都判定未接地
-        # （見其 docstring：無 Fact 時直接標記，不呼叫 LLM），若不排除會導致
-        # 每次 use_svo=False 的回答都被錯誤觸發限制性重新生成、答成「資料未
-        # 明確記載」，違背該模式本身「允許補充自身知識」的設計。只在
-        # use_svo=True（有 KG 事實可供核對）時才觸發重新生成。
-        #
-        # 2026-09-02（報告25 § 4 發現6→⑥ 診斷）：觸發條件從「任一句未接地」
-        # 收緊為「任一句**是事實主張、且**未接地」——`qwen2.5:7b` 常把使用者
-        # 的問題當 markdown 標題原樣回貼、或加引言句，這類非主張句天生不會被
-        # 事實清單支持，舊條件會對它們誤觸發重生成、把兩部分全對的正確草稿
-        # 改壞成「資料未明確記載」（3 輪真實診斷確認）。見 `ClaimGrounding.
-        # is_claim` docstring。
-        ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
-        # 報告39 §3.1（K−2b arm）：`disable_grounding_regen` 關掉接地觸發的
-        # 限制性重生（方案 B ＋ 2b 定向修訂）；核對本身照跑、`event: grounding`
-        # 照送，只是草稿即最終答案。下方 G3 列舉完整性 guard 不受影響。
-        if payload.use_svo and ungrounded_claims and not payload.disable_grounding_regen:
-            # 報告32 §9 G1（2b 定向修訂）：先看草稿有沒有可保留的接地主張——
-            # `grounded_claim_count = is_claim 句數 − 未接地 is_claim 句數`。T1 證實
-            # 「觸發後整段重寫」的粒度本身有問題：~75% 觸發率、且常把草稿裡已接地
-            # 的正確部分一併改成「資料未明確記載」（見 03 §3.6 §2b 段）。
-            claim_count = sum(1 for c in grounding if c.is_claim)
-            grounded_claim_count = claim_count - len(ungrounded_claims)
-            corrections: list[str] | None = None
-            if grounded_claim_count > 0:
-                # 草稿部分正確 → 只重寫未接地的主張句，一次 LLM 呼叫；接地句與
-                # 非主張句原樣保留。解析失敗回傳 None → 下面退回整份重生。
-                corrections = await _targeted_correction(
-                    payload.question,
-                    [c.statement for c in ungrounded_claims],
-                    triples, fact_results,
-                    embedding_provider=embedding_provider, question_vector=question_vector,
-                    llm_provider=llm_provider, cfg=cfg,
-                )
-            if corrections is not None:
-                # 從 grounding 逐句清單重組（不用字串取代——回傳的 statement 可能與
-                # 草稿原字不完全一致）；未接地主張句換成對應修正，其餘原樣。
-                fix_i = 0
-                out_lines: list[str] = []
-                for c in grounding:
-                    if c.is_claim and not c.supported:
-                        out_lines.append(corrections[fix_i])
-                        fix_i += 1
-                    else:
-                        out_lines.append(c.statement)
-                final_answer = "\n".join(out_lines)
-            elif len(sub_questions) > 1 and (triples or fact_results):
-                # 整份草稿沒有接地主張可保留（或定向修訂解析失敗）＋分解草稿 →
-                # 分解式整份重生（報告27 C#2 M1，保留分解結構）。
-                final_answer = await _generate_decomposed_constrained_answer(
-                    sub_questions, triples, fact_results,
-                    embedding_provider=embedding_provider, question_vector=question_vector,
-                    llm_provider=llm_provider, cfg=cfg,
-                )
+        # 報告39 SDD-3：「複合問題分解 → 生成 → 事實接地核對 → 方案 B／2b 重生
+        # → G3 列舉完整性 guard → 選擇性轉繁」整段抽成 `_generate_from_context_lines()`
+        # 產生器，`chat()` 與 harness baseline arm 共用同一生成 stack（§5.4.1）。
+        # 這裡把它 yield 出的 `event: status`（generating／verifying）原樣轉發，
+        # 最後拿到 `_GenerationResult`。行為與抽取前逐位元相同。
+        gen_result: _GenerationResult | None = None
+        async for _item in _generate_from_context_lines(
+            payload.question,
+            history=payload.history,
+            cfg=cfg,
+            llm_provider=llm_provider,
+            judge_llm_provider=judge_llm_provider,
+            kg_id=payload.kg_id,
+            use_svo=payload.use_svo,
+            disable_grounding_regen=payload.disable_grounding_regen,
+            triples=triples,
+            fact_results=fact_results,
+            embedding_provider=embedding_provider,
+            question_vector=question_vector,
+        ):
+            if isinstance(_item, _GenerationResult):
+                gen_result = _item
             else:
-                # 整份重寫 → 刻意不把草稿或未接地陳述傳進去，見 _build_constrained_prompt()
-                # docstring（CoVe 的 joint vs. factored 發現）。
-                constrained_prompt = await _build_constrained_prompt(
-                    payload.question, triples, fact_results, payload.history,
-                    embedding_provider=embedding_provider, question_vector=question_vector,
-                    cfg=cfg,
-                )
-                corrected_parts: list[str] = []
-                async for token in llm_provider.stream(constrained_prompt):
-                    corrected_parts.append(token)
-                final_answer = "".join(corrected_parts)
-            regenerated = True
-            # 重新核對修正版，讓 event: grounding 反映使用者實際看到的內容，
-            # 而非已經被取代的草稿。
-            grounding = await verify_fact_grounding(
-                final_answer, fact_texts, judge_llm_provider, question=payload.question
-            )
-
-        # 報告32 §9 G3 completeness guard：分段/分級問題（三段年齡工時、三級
-        # 血中鉛管理）——最終答案偶爾整段漏掉一段，且接地核對抓不到「缺內容」
-        # （缺的段不是未接地的主張、是根本沒寫）。檢查每個「分段事實族」的每個
-        # object 都在答案裡，缺就先強制走「分解式整段重生」（能補全的路徑，跟
-        # 逐句重建不同），仍缺就逐字附上——保證分段清單完整。
-        if payload.use_svo and (triples or fact_results) and _wants_full_enumeration(payload.question):
-            tier_families = _detect_tier_families(triples, fact_results)
-            missing = _missing_tier_members(final_answer, tier_families)
-            if missing and len(sub_questions) > 1:
-                final_answer = await _generate_decomposed_constrained_answer(
-                    sub_questions, triples, fact_results,
-                    embedding_provider=embedding_provider, question_vector=question_vector,
-                    llm_provider=llm_provider, cfg=cfg,
-                )
-                regenerated = True
-                grounding = await verify_fact_grounding(
-                    final_answer, fact_texts, judge_llm_provider, question=payload.question
-                )
-                missing = _missing_tier_members(final_answer, tier_families)
-            if missing:
-                supplement = "\n".join(
-                    f"補充（依事實清單）：{s} {v} {o}".strip() for s, v, o in missing
-                )
-                final_answer = f"{final_answer}\n\n{supplement}"
-                regenerated = True
-
-        # 報告26 §4 #5：生成端（`qwen2.5:7b`）偶爾在自己的答案文字裡混簡體，
-        # 跟已修的抽取端發現4（SVO 三元組欄位）是不同呼叫點的同一類問題。
-        # 沿用發現4的字元級選擇性轉繁（來源語料當白名單，避免「雇」「托」
-        # 這類法規原文正當用字被誤轉）；`_TAIWAN_CONTEXT_INSTRUCTION` 的
-        # 「請一律使用繁體中文回答」是 prompt 層防線，這裡是保底。
-        kg_folder = str(Path(settings.workspace_dir) / str(payload.kg_id))
-        final_answer = _to_traditional_selective(final_answer, _kg_source_charset(kg_folder))
+                yield _item
+        assert gen_result is not None  # 產生器契約：最後一個 yield 必為 _GenerationResult
+        final_answer = gen_result.final_answer
+        grounding = gen_result.grounding
+        regenerated = gen_result.regenerated
 
         yield f"data: {json.dumps({'token': final_answer})}\n\n"
 

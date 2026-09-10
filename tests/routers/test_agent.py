@@ -2203,3 +2203,93 @@ async def test_chat_disable_grounding_regen_keeps_draft_but_still_emits_groundin
     grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
     grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
     assert grounding_data[0]["supported"] is False  # 核對仍照跑、照實反映草稿
+
+
+# ── 報告39 SDD-3：_generate_from_context_lines() baseline 模式（B0/B1/D arm
+#    餵 context_lines，共用同一生成 stack）。KG 模式（context_lines=None）的
+#    逐位元零回歸由上方 chat() 既有測試涵蓋。────────────────────────────────
+
+async def _drain_gen(agen):
+    """把 `_generate_from_context_lines()` 產生器抽乾：回傳 (SSE 字串清單, 結果)。"""
+    sse: list[str] = []
+    result = None
+    async for item in agen:
+        if isinstance(item, agent._GenerationResult):
+            result = item
+        else:
+            sse.append(item)
+    return sse, result
+
+
+@pytest.mark.asyncio
+async def test_generate_from_context_lines_baseline_builds_prompt_and_returns_answer():
+    llm = _FakeStreamLLM(answers=["婚假為八日。"])
+    lines = ["【來源：N0030006，第2段】\n勞工結婚者給予婚假八日，工資照給。"]
+    sse, result = await _drain_gen(agent._generate_from_context_lines(
+        "婚假幾天？", history=None, cfg=agent.KGConfig(),
+        llm_provider=llm, judge_llm_provider=llm, kg_id=uuid4(),
+        use_svo=True, context_lines=lines,
+    ))
+    assert result.final_answer == "婚假為八日。"
+    assert result.regenerated is False
+    # baseline 走同一個 _build_prompt(context_lines=)，context 行進了 prompt
+    assert "婚假八日，工資照給" in llm.prompts[0]
+    phases = [json.loads(c.split("\n", 1)[1][len("data: "):])["phase"] for c in sse]
+    assert phases == ["generating", "verifying"]
+
+
+@pytest.mark.asyncio
+async def test_generate_from_context_lines_baseline_runs_grounding_and_single_regen():
+    """使用者定案：B0/B1 也跑接地核對＋未接地重生（與 K 一致）。baseline 走
+    單次強約束重生（＝ K 的整份重寫分支），regenerated=True。"""
+    llm = _FakeStreamLLM(
+        answers=["婚假三日，我推測的。", "資料未明確記載，無法確認婚假天數。"],
+        grounding_payloads=[
+            json.dumps({"claims": [{"statement": "婚假三日", "supported": False, "reason": "查無"}]}),
+            json.dumps({"claims": [{"statement": "資料未明確記載，無法確認婚假天數。", "supported": True, "reason": ""}]}),
+        ],
+    )
+    lines = ["【來源：N0030006，第2段】\n勞工結婚者給予婚假八日。"]
+    _sse, result = await _drain_gen(agent._generate_from_context_lines(
+        "婚假幾天？", history=None, cfg=agent.KGConfig(),
+        llm_provider=llm, judge_llm_provider=llm, kg_id=uuid4(),
+        use_svo=True, context_lines=lines,
+    ))
+    assert len(llm.prompts) == 2  # 草稿 + 單次強約束重生
+    assert result.regenerated is True
+    assert result.final_answer == "資料未明確記載，無法確認婚假天數。"
+
+
+@pytest.mark.asyncio
+async def test_generate_from_context_lines_baseline_empty_context_skips_regen():
+    """D arm：context_lines 為空 → 無事實可核對，即使核對判未接地也不重生
+    （沿用 chat() `use_svo=False` 時的同一防呆邏輯）。"""
+    llm = _FakeStreamLLM(
+        answers=["婚假我猜三日。"],
+        grounding_payloads=[json.dumps({"claims": [{"statement": "婚假三日", "supported": False, "reason": "無事實"}]})],
+    )
+    _sse, result = await _drain_gen(agent._generate_from_context_lines(
+        "婚假幾天？", history=None, cfg=agent.KGConfig(),
+        llm_provider=llm, judge_llm_provider=llm, kg_id=uuid4(),
+        use_svo=True, context_lines=[],
+    ))
+    assert len(llm.prompts) == 1  # 沒有重生
+    assert result.regenerated is False
+    assert result.final_answer == "婚假我猜三日。"
+
+
+@pytest.mark.asyncio
+async def test_generate_from_context_lines_baseline_disable_grounding_regen():
+    """K−2b 語意也適用 baseline：disable_grounding_regen=True → 不重生。"""
+    llm = _FakeStreamLLM(
+        answers=["婚假三日，我推測的。"],
+        grounding_payloads=[json.dumps({"claims": [{"statement": "婚假三日", "supported": False, "reason": "查無"}]})],
+    )
+    lines = ["【來源：N0030006，第2段】\n勞工結婚者給予婚假八日。"]
+    _sse, result = await _drain_gen(agent._generate_from_context_lines(
+        "婚假幾天？", history=None, cfg=agent.KGConfig(),
+        llm_provider=llm, judge_llm_provider=llm, kg_id=uuid4(),
+        use_svo=True, disable_grounding_regen=True, context_lines=lines,
+    ))
+    assert len(llm.prompts) == 1
+    assert result.regenerated is False
