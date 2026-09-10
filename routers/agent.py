@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import json
+import logging
 import re
 from pathlib import Path
 from uuid import UUID
@@ -39,6 +40,8 @@ from services.verification_service import verify_fact_grounding
 # engineering path); ConceptNode routing (RQ2) and self-refinement (RQ3) are not
 # connected here. Tests: tests/routers/test_agent.py.
 router = APIRouter(prefix="/agent", tags=["agent"])
+
+logger = logging.getLogger(__name__)
 
 # 2026-09-08（報告33 §3.9 第 2 步）：以下 `_SEED_ENTITY_LIMIT`／`_SEED_MAX_DEGREE`／
 # `_BFS_PER_SEED_LIMIT`／`_DOC_SCOPE_TOP_N_FACTS` 現為 `KGConfig().bfs.*` 的預設值錨點
@@ -192,6 +195,29 @@ def _relevant_doc_ids_from_facts(fact_results: list[dict], *, top_n: int | None 
         except ValueError:
             continue
     return doc_ids
+
+
+def _intersect_doc_scopes(
+    semantic_doc_ids: set[UUID], explicit_doc_ids: list[UUID] | None
+) -> set[UUID]:
+    """報告39 §2.3：合併「語意 Fact 推導的文件範圍」（`_relevant_doc_ids_from_facts()`）
+    與「呼叫端明確指定的範圍」（`ChatRequest.scope_doc_ids`，前導比較的 6 份子集）。
+
+    - 明確範圍為 `None`／空 → 原樣回傳語意推導範圍（**零回歸**：未帶
+      `scope_doc_ids` 的既有呼叫端行為完全不變）。
+    - 語意推導範圍為空（`bfs_only`，或語意檢索本身沒找到來源）→ 用明確範圍。
+    - 兩者都有值 → 取交集；交集為空代表語意檢索命中的來源不在指定子集內，
+      回傳明確範圍本身（維持「限縮在子集」的意圖，不因語意雜訊放行全庫）。
+
+    回傳空集合時呼叫端一律視為「無範圍限制」（`scope_doc_ids=None` 傳給
+    `bfs_query()`、`_filter_*_by_source_doc_ids()` 的歸零守衛照舊）。
+    """
+    explicit = set(explicit_doc_ids or [])
+    if not explicit:
+        return semantic_doc_ids
+    if not semantic_doc_ids:
+        return explicit
+    return (semantic_doc_ids & explicit) or explicit
 
 
 def _scope_by_source_doc_ids(items: list, allowed_doc_ids: set[UUID], get_doc_id) -> list:
@@ -1124,43 +1150,64 @@ async def chat(payload: ChatRequest):
             embedding_provider = get_embedding_provider()
             question_vector = await embedding_provider.encode(payload.question)
 
+            # 報告39 §3.1：檢索路徑消融開關。`both`（預設）＝下面兩條都跑；
+            # `fact_only`＝跳過 `bfs_query()`；`bfs_only`＝跳過 `vector_search_facts()`。
+            run_bfs = payload.retrieval_mode in ("both", "bfs_only")
+            run_facts = payload.retrieval_mode in ("both", "fact_only")
+
             # 報告27 L1（2026-09-04）：語意 Fact 檢索提前到 `bfs_query()` 之前，
             # 推出的文件範圍當走訪的**前置**約束（下推到 Cypher），而非只做
             # 事後排除篩選——原順序讓昂貴的無界路徑枚舉先發生、範圍訊號用不上
             # （報告26 §4 #4：Q5/6/7 各 330–440 秒）。
-            fact_results = await vector_search_facts(
-                driver, payload.kg_id, question_vector, top_k=payload.top_k
-            )
+            if run_facts:
+                fact_results = await vector_search_facts(
+                    driver, payload.kg_id, question_vector, top_k=payload.top_k
+                )
             # 2026-08-27：語意 Fact 檢索找到的來源文件，反過來當前置篩選範圍。
             # 2026-09-02（報告25 §4 發現1）：範圍只取分數最高的前 N 筆推導
             # （`top_k` 提高到 20 後，全 20 筆會被 ~0.80 的跨文件事實稀釋）；
             # 且範圍同時套用到 BFS 三元組與語意 Fact 清單本身（先前只套前者，
             # 導致 Q8 的語意 Fact 清單混入跨文件雜訊、被 LLM 採用成錯誤數字）。
-            relevant_doc_ids = _relevant_doc_ids_from_facts(
+            # 報告39 §3.1：`bfs_only` 時 `fact_results` 為空 → `semantic_doc_ids`
+            # 自然回空集合＝「不下推」；報告39 §2.3：與 `payload.scope_doc_ids`
+            # （前導比較的 6 份子集）取交集。未帶 `scope_doc_ids` 時
+            # `_intersect_doc_scopes()` 原樣回傳語意範圍（零回歸）。
+            semantic_doc_ids = _relevant_doc_ids_from_facts(
                 fact_results, top_n=cfg.bfs.doc_scope_top_n_facts
             )
+            relevant_doc_ids = _intersect_doc_scopes(semantic_doc_ids, payload.scope_doc_ids)
 
-            seeds = await _find_seed_entities(
-                driver, payload.kg_id, payload.question,
-                embedding_provider=embedding_provider, question_vector=question_vector,
-                cfg=cfg,
-            )
-            triples = await bfs_query(
-                driver, payload.kg_id, seeds,
-                hops=payload.svo_hops,
-                scope_doc_ids=(relevant_doc_ids or None),
-                per_seed_limit=cfg.bfs.per_seed_limit,
-                cfg=cfg,
-            )
+            if run_bfs:
+                seeds = await _find_seed_entities(
+                    driver, payload.kg_id, payload.question,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    cfg=cfg,
+                )
+                triples = await bfs_query(
+                    driver, payload.kg_id, seeds,
+                    hops=payload.svo_hops,
+                    scope_doc_ids=(relevant_doc_ids or None),
+                    per_seed_limit=cfg.bfs.per_seed_limit,
+                    cfg=cfg,
+                )
 
-            resolved_rel_type = await resolve_query_relation_type(
-                payload.question, embedding_provider, llm_provider=llm_provider, cfg=cfg
-            )
-            triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
+            # 報告39 §3.1：§3.2§c 關係型別連結只在 `both`／`fact_only` 跑；
+            # `bfs_only` 定義為「純圖遍歷」，退化為不解析型別、不後篩（並記錄）。
+            if payload.retrieval_mode != "bfs_only":
+                resolved_rel_type = await resolve_query_relation_type(
+                    payload.question, embedding_provider, llm_provider=llm_provider, cfg=cfg
+                )
+                triples = _filter_triples_by_relation_type(triples, resolved_rel_type)
+            else:
+                logger.info(
+                    "報告39 bfs_only：關係型別連結（§3.2§c）與語意文件範圍下推已"
+                    "退化為不解析、不篩選（純圖遍歷）"
+                )
 
             # 事後排除篩選仍保留：`bfs_query()` 的 Cypher 範圍下推有「空結果
             # → 退回無範圍」的 fallback（相容無 HAS_ENTITY 邊的舊 KG），該
-            # 情況下仍可能放行離題三元組，這裡兜底。
+            # 情況下仍可能放行離題三元組，這裡兜底。`bfs_only` 時
+            # `relevant_doc_ids` 為空 → `_filter_*` 的歸零守衛原樣放行（不篩選）。
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
             fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
 
@@ -1222,7 +1269,10 @@ async def chat(payload: ChatRequest):
         # 改壞成「資料未明確記載」（3 輪真實診斷確認）。見 `ClaimGrounding.
         # is_claim` docstring。
         ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
-        if payload.use_svo and ungrounded_claims:
+        # 報告39 §3.1（K−2b arm）：`disable_grounding_regen` 關掉接地觸發的
+        # 限制性重生（方案 B ＋ 2b 定向修訂）；核對本身照跑、`event: grounding`
+        # 照送，只是草稿即最終答案。下方 G3 列舉完整性 guard 不受影響。
+        if payload.use_svo and ungrounded_claims and not payload.disable_grounding_regen:
             # 報告32 §9 G1（2b 定向修訂）：先看草稿有沒有可保留的接地主張——
             # `grounded_claim_count = is_claim 句數 − 未接地 is_claim 句數`。T1 證實
             # 「觸發後整段重寫」的粒度本身有問題：~75% 觸發率、且常把草稿裡已接地

@@ -2013,3 +2013,193 @@ async def test_chat_yields_empty_sources_event_when_kg_id_missing():
 
     assert len(chunks) == 1
     assert "event: sources" not in chunks[0]
+
+
+# ── 報告39 §3.1：檢索路徑消融開關（retrieval_mode / disable_grounding_regen /
+#    scope_doc_ids）。核心不變量：retrieval_mode="both" + disable_grounding_regen
+#    =False + scope_doc_ids=None 與現行 chat() 逐位元相同（上方既有 101 個測試
+#    全數涵蓋，不再重複）。以下只測新開關各自的行為差異。──────────────────────
+
+def _instrumented_chat_monkeypatch(monkeypatch, llm, embedding, *, triples=None, facts=None):
+    """回傳 dict：`bfs`／`facts`／`resolve` 各記一筆呼叫時的 kwargs（或 True）。"""
+    calls: dict = {"bfs": None, "facts": None, "resolve": None}
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return ["A"] if triples else []
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
+        calls["bfs"] = dict(kwargs)
+        return list(triples or [])
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        calls["facts"] = {"top_k": top_k}
+        return list(facts or [])
+
+    async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
+        calls["resolve"] = True
+        return None
+
+    async def fake_fetch_document_map(driver, kg_id_arg, triples_arg, fact_results_arg):
+        return {}
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_fetch_document_map)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: embedding)
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: llm)
+    return calls
+
+
+def test_intersect_doc_scopes_none_explicit_passes_semantic_through():
+    a, b = uuid4(), uuid4()
+    assert agent._intersect_doc_scopes({a, b}, None) == {a, b}
+    assert agent._intersect_doc_scopes({a, b}, []) == {a, b}
+
+
+def test_intersect_doc_scopes_empty_semantic_uses_explicit():
+    a, b = uuid4(), uuid4()
+    assert agent._intersect_doc_scopes(set(), [a, b]) == {a, b}
+
+
+def test_intersect_doc_scopes_takes_intersection_when_both_present():
+    a, b, c = uuid4(), uuid4(), uuid4()
+    assert agent._intersect_doc_scopes({a, b}, [b, c]) == {b}
+
+
+def test_intersect_doc_scopes_empty_intersection_falls_back_to_explicit():
+    a, b, c = uuid4(), uuid4(), uuid4()
+    # 語意命中的來源不在指定子集內 → 回傳明確子集本身，不放行全庫
+    assert agent._intersect_doc_scopes({a}, [b, c]) == {b, c}
+
+
+@pytest.mark.asyncio
+async def test_chat_fact_only_skips_bfs_query(monkeypatch):
+    """報告39 F arm：`retrieval_mode="fact_only"` → 不呼叫 `bfs_query()`，
+    `triples` 恆為空；`vector_search_facts()` 照跑。"""
+    kg_id = uuid4()
+    doc_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY",
+              "object": "八日", "source_doc_id": str(doc_id), "score": 0.9}]
+    calls = _instrumented_chat_monkeypatch(
+        monkeypatch, _FakeStreamLLM(), _FakeEmbeddingProvider([0.1, 0.2, 0.3]),
+        triples=[_triple("婚假", "HAS_PROPERTY", "八日")], facts=facts,
+    )
+
+    chunks = await _drain(await agent.chat(
+        ChatRequest(question="婚假幾天？", kg_id=kg_id, retrieval_mode="fact_only")
+    ))
+
+    assert calls["bfs"] is None            # bfs_query 完全沒被呼叫
+    assert calls["facts"] == {"top_k": 20}
+    sources = json.loads(
+        next(c for c in chunks if c.startswith("event: sources\n")).split("\n", 1)[1][len("data: "):]
+    )
+    assert sources["triples"] == []
+    assert len(sources["facts"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_chat_bfs_only_skips_facts_and_degrades_relation_linking(monkeypatch):
+    """報告39 G arm：`retrieval_mode="bfs_only"` → 不呼叫 `vector_search_facts()`
+    （`fact_results` 恆為空），且 §3.2§c 關係型別連結退化為不解析、不後篩
+    （`resolve_query_relation_type()` 不被呼叫）。"""
+    kg_id = uuid4()
+    calls = _instrumented_chat_monkeypatch(
+        monkeypatch, _FakeStreamLLM(), _FakeEmbeddingProvider([0.1, 0.2, 0.3]),
+        triples=[_triple("婚假", "HAS_PROPERTY", "八日")], facts=[{"fact_text": "不該出現"}],
+    )
+
+    chunks = await _drain(await agent.chat(
+        ChatRequest(question="婚假幾天？", kg_id=kg_id, retrieval_mode="bfs_only")
+    ))
+
+    assert calls["facts"] is None          # vector_search_facts 完全沒被呼叫
+    assert calls["resolve"] is None        # 關係型別連結退化
+    assert calls["bfs"] is not None
+    assert calls["bfs"]["scope_doc_ids"] is None  # 無語意範圍可下推
+    sources = json.loads(
+        next(c for c in chunks if c.startswith("event: sources\n")).split("\n", 1)[1][len("data: "):]
+    )
+    assert sources["facts"] == []
+    assert len(sources["triples"]) == 1
+    assert sources["resolved_rel_type"] is None
+
+
+@pytest.mark.asyncio
+async def test_chat_scope_doc_ids_intersects_semantic_and_pushes_to_bfs(monkeypatch):
+    """報告39 §2.3：`scope_doc_ids` 與語意 Fact 推導的來源取交集後下推到
+    `bfs_query(scope_doc_ids=)`，並後篩 `fact_results`。"""
+    kg_id = uuid4()
+    in_scope, out_scope = uuid4(), uuid4()
+    facts = [
+        {"fact_text": "在範圍內", "subject": "婚假", "rel_type": "HAS_PROPERTY",
+         "object": "八日", "source_doc_id": str(in_scope), "score": 0.9},
+        {"fact_text": "範圍外雜訊", "subject": "他事", "rel_type": "HAS_PROPERTY",
+         "object": "十日", "source_doc_id": str(out_scope), "score": 0.85},
+    ]
+    calls = _instrumented_chat_monkeypatch(
+        monkeypatch, _FakeStreamLLM(), _FakeEmbeddingProvider([0.1, 0.2, 0.3]),
+        triples=[], facts=facts,
+    )
+
+    chunks = await _drain(await agent.chat(ChatRequest(
+        question="婚假幾天？", kg_id=kg_id, scope_doc_ids=[in_scope],
+    )))
+
+    assert calls["bfs"]["scope_doc_ids"] == {in_scope}
+    sources = json.loads(
+        next(c for c in chunks if c.startswith("event: sources\n")).split("\n", 1)[1][len("data: "):]
+    )
+    fact_texts = [f["fact_text"] for f in sources["facts"]]
+    assert "在範圍內" in fact_texts
+    assert "範圍外雜訊" not in fact_texts  # 後篩掉範圍外文件的事實
+
+
+@pytest.mark.asyncio
+async def test_chat_scope_doc_ids_none_leaves_bfs_scope_as_semantic_derived(monkeypatch):
+    """零回歸錨點：不帶 `scope_doc_ids` 時，`bfs_query(scope_doc_ids=)` 收到的
+    仍是純語意推導的來源集合（與修改前一致）。"""
+    kg_id = uuid4()
+    doc_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY",
+              "object": "八日", "source_doc_id": str(doc_id), "score": 0.9}]
+    calls = _instrumented_chat_monkeypatch(
+        monkeypatch, _FakeStreamLLM(), _FakeEmbeddingProvider([0.1, 0.2, 0.3]),
+        triples=[_triple("婚假", "HAS_PROPERTY", "八日")], facts=facts,
+    )
+
+    await _drain(await agent.chat(ChatRequest(question="婚假幾天？", kg_id=kg_id)))
+
+    assert calls["bfs"]["scope_doc_ids"] == {doc_id}
+
+
+@pytest.mark.asyncio
+async def test_chat_disable_grounding_regen_keeps_draft_but_still_emits_grounding(monkeypatch):
+    """報告39 K−2b arm：`disable_grounding_regen=True` → 草稿有未接地陳述也
+    不重新生成（只呼叫一次 `stream()`），但核對照跑、`event: grounding` 照送、
+    `regenerated` 為 False。"""
+    kg_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY", "object": "八日"}]
+    llm = _FakeStreamLLM(
+        answers=["婚假三日，我自己推測的。"],
+        grounding_payloads=[
+            json.dumps({"claims": [{"statement": "婚假三日", "supported": False, "reason": "查無此數字"}]}),
+        ],
+    )
+    _chat_common_monkeypatch(monkeypatch, llm, _FakeEmbeddingProvider([0.1, 0.2, 0.3]), facts=facts)
+
+    chunks = await _drain(await agent.chat(ChatRequest(
+        question="婚假幾天？", kg_id=kg_id, disable_grounding_regen=True,
+    )))
+
+    assert len(llm.prompts) == 1  # 沒有第二次（限制性重生）呼叫
+    data_chunk = next(c for c in chunks if c.startswith("data: "))
+    assert json.loads(data_chunk[len("data: "):])["token"] == "婚假三日，我自己推測的。"
+    done_chunk = next(c for c in chunks if c.startswith("event: status\n") and '"phase": "done"' in c)
+    assert json.loads(done_chunk.split("\n", 1)[1][len("data: "):])["regenerated"] is False
+    grounding_chunk = next(c for c in chunks if c.startswith("event: grounding\n"))
+    grounding_data = json.loads(grounding_chunk.split("\n", 1)[1][len("data: "):])
+    assert grounding_data[0]["supported"] is False  # 核對仍照跑、照實反映草稿

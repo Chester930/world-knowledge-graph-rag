@@ -61,3 +61,20 @@ class ChatRequest(BaseModel):
     svo_hops: int = Field(default=1, ge=1, le=3)
     history: list[ChatMessage] | None = Field(default=None, max_length=50)
     kg_id: UUID | None = None  # 指定時強制路由到此 KG，跳過全域路由
+    # ── 報告39：七路檢索比較 harness 的消融開關（預設值＝現行行為，零回歸）──
+    # 見 docs/報告/39_七路檢索比較標準化測試harness任務書.md §3.1。
+    retrieval_mode: Literal["both", "bfs_only", "fact_only"] = "both"
+    """檢索路徑消融。`both`＝現行（`bfs_query()` ∪ `vector_search_facts()`）；
+    `fact_only`＝只跑 `vector_search_facts()`、關掉 `bfs_query()`（報告39 F arm）；
+    `bfs_only`＝只跑 `bfs_query()`、關掉 `vector_search_facts()`（報告39 G arm）。
+    `bfs_only` 時語意 Fact 推導的文件範圍下推與 §3.2§c 關係型別後篩選一併
+    退化為「不下推、不篩選」（純圖遍歷）。"""
+    disable_grounding_regen: bool = False
+    """關掉接地核對觸發的限制性重新生成（方案 B ＋ 2b 定向修訂）。仍會做核對、
+    仍送出 `event: grounding` 診斷，只是不因未接地而重寫答案（報告39 K−2b arm）。
+    G3 列舉完整性 guard 不受此開關影響（它由列舉偵測觸發、非接地觸發）。"""
+    scope_doc_ids: list[UUID] | None = None
+    """把 BFS／Fact 檢索的來源文件下推限定到這個集合（報告39 §2.3：前導比較
+    把 F/G/K 限縮在題目來源的 6 份文件子集，避免撈到其他半抽文件）。`None`＝
+    現行（不額外限範圍）。與語意 Fact 推導的 `relevant_doc_ids` 取交集後一併
+    下推到 `bfs_query()` 並後篩 `fact_results`（見 `_intersect_doc_scopes()`）。"""
