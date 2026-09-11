@@ -45,6 +45,14 @@ def _read_original(doc_folder: Path) -> tuple[str, str] | None:
     raw = path.read_text(encoding="utf-8")
     m = _SOURCE_LINE.search(raw.split("---\n", 2)[1] if raw.startswith("---\n") else "")
     source = m.group(1) if m else doc_folder.name
+    # 報告39 SDD-5 真實跑測發現：frontmatter 的 `source:` 值實際上是 YAML 加引號字串
+    # （例如 `source: "D0080015_警察人員特別休假辦法"`），正規表示式把引號也一併
+    # 捕捉進來，導致這裡回傳的 source 帶著頭尾引號、跟 `document_record_service`
+    # 讀到的真實 source（無引號）對不上——`run_retrieval_comparison.py::_resolve_scope()`
+    # 用後者比對 baseline 索引的 `source` 欄位，會因此完全比對不到任何文件
+    # （SDD-5 首次真實跑測即撞見：「baseline 索引沒有涵蓋 --doc-ids 任何文件」）。
+    if len(source) >= 2 and source[0] == source[-1] and source[0] in "\"'":
+        source = source[1:-1]
     body = _FRONTMATTER.sub("", raw, count=1)
     return source, body[:-1] if body.endswith("\n") else body
 
