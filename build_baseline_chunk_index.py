@@ -49,7 +49,12 @@ def _read_original(doc_folder: Path) -> tuple[str, str] | None:
     return source, body[:-1] if body.endswith("\n") else body
 
 
-async def _build_one(kg_id: UUID, chunk_size: int, chunk_overlap: int) -> None:
+async def _build_one(
+    kg_id: UUID, chunk_size: int, chunk_overlap: int, doc_ids: list[str] | None = None,
+) -> None:
+    """`doc_ids`（報告39 §2.3）：選填，`workspace/<kg_id>/` 底下的資料夾名清單，
+    只對這些文件建索引——前導比較的 6 份子集不需要對整個 KG（數千 chunk）
+    跑一次 embedding，省時間與 RAM。`None`＝現行行為（整個 KG 底下所有文件）。"""
     kg_folder = Path(settings.workspace_dir) / str(kg_id)
     if not kg_folder.is_dir():
         print(f"⚠️  {kg_folder} 不存在，略過 {kg_id}")
@@ -59,7 +64,16 @@ async def _build_one(kg_id: UUID, chunk_size: int, chunk_overlap: int) -> None:
     records: list[dict] = []
     chunk_texts: list[str] = []
 
-    for doc_folder in sorted(p for p in kg_folder.iterdir() if p.is_dir()):
+    if doc_ids is not None:
+        candidates = [kg_folder / name for name in doc_ids]
+        missing = [str(p) for p in candidates if not p.is_dir()]
+        if missing:
+            print(f"⚠️  --doc-ids 指定的資料夾不存在：{missing}")
+        doc_folders = sorted(p for p in candidates if p.is_dir())
+    else:
+        doc_folders = sorted(p for p in kg_folder.iterdir() if p.is_dir())
+
+    for doc_folder in doc_folders:
         pair = _read_original(doc_folder)
         if pair is None:
             continue
@@ -80,14 +94,20 @@ async def _build_one(kg_id: UUID, chunk_size: int, chunk_overlap: int) -> None:
     Path(f"{stem}.json").write_text(
         json.dumps(records, ensure_ascii=False), encoding="utf-8"
     )
-    print(f"✅ {kg_id} cs={chunk_size} overlap={chunk_overlap}："
+    scope_note = f"（--doc-ids 子集，{len(doc_folders)} 份文件）" if doc_ids is not None else ""
+    print(f"✅ {kg_id} cs={chunk_size} overlap={chunk_overlap}{scope_note}："
           f"{arr.shape[0]} chunk、dim={arr.shape[1]} → {stem}.npy / .json")
+    if doc_ids is not None:
+        print("   ⚠️ 檔名與整個 KG 的索引相同（同 kg_id/chunk_size）——"
+              "之後若對同一 KG 建整個 KG 的索引會覆寫這份子集索引，反之亦然。")
 
 
-async def _main(kg_ids: list[UUID], chunk_size: int, chunk_overlap: int) -> None:
+async def _main(
+    kg_ids: list[UUID], chunk_size: int, chunk_overlap: int, doc_ids: list[str] | None = None,
+) -> None:
     init_providers()
     for kg_id in kg_ids:
-        await _build_one(kg_id, chunk_size, chunk_overlap)
+        await _build_one(kg_id, chunk_size, chunk_overlap, doc_ids=doc_ids)
 
 
 if __name__ == "__main__":
@@ -95,5 +115,9 @@ if __name__ == "__main__":
     ap.add_argument("kg_ids", nargs="+", type=UUID, help="一或多個 KG id")
     ap.add_argument("--chunk-size", type=int, default=500)
     ap.add_argument("--chunk-overlap", type=int, default=50)
+    ap.add_argument("--doc-ids", default=None,
+                     help="報告39 §2.3：只對這些資料夾名建索引（逗號分隔），"
+                          "省略＝整個 KG（現行行為，多個 kg_ids 時仍套用同一份 --doc-ids 清單）")
     args = ap.parse_args()
-    asyncio.run(_main(args.kg_ids, args.chunk_size, args.chunk_overlap))
+    doc_ids = [d.strip() for d in args.doc_ids.split(",") if d.strip()] if args.doc_ids else None
+    asyncio.run(_main(args.kg_ids, args.chunk_size, args.chunk_overlap, doc_ids=doc_ids))
