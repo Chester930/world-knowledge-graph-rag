@@ -208,19 +208,20 @@ DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` =
 
 ## 5. 驗收標準
 
-- [ ] §2.3 的 6 份比較文件已在 reextract-v2 HEAD `force_rebuild` 重抽，§8 記錄 commit 與時間。
-      → **⏳ 待主 drain DRAIN-DONE 後執行**（RAM 衝突）；`check_comparison_readiness.py` 已
-      確認這 6 份的抽取新鮮度 FAIL（2026-09-07 版，早於抽取端基準）→ 重抽確有必要。
+- [x] §2.3 的 6 份比較文件已在 reextract-v2 HEAD `force_rebuild` 重抽，§8 記錄 commit 與時間。
+      2026-09-11 DRAIN-DONE 後完成（見 §8 詳述；未走 `build_graph(force_rebuild=True)`，
+      改用 `targeted_extract_window.py` 安全模式逐 chunk 重抽，保留 ArticleAware 結構）。
 - [x] `check_comparison_readiness.py` 能正確辨識缺失資產與**抽取過舊**的文件，並給補救指令。
-      （`c26e05a`；已對 KG#4 6 份實跑：original.md ✅、pending=0 ✅、新鮮度 FAIL ＋ 補救指令 ✅）
-- [ ] 7 條 arm 都能對 §2.3 選定的 6 份文件子集跑通，同一題產出可比結果 JSON + 彙總表。
-      → harness (`run_retrieval_comparison.py`, `2c64bd9`) 已交付、`--dry-run` 驗證 126 次呼叫
-      計畫解析正確；實際跑通卡 force_rebuild ＋ DRAIN-DONE ＋ baseline `.npy`。
+      （`c26e05a`；已對 KG#4 6 份實跑：original.md ✅、pending=0 ✅、新鮮度 FAIL ＋ 補救指令 ✅；
+      重抽後重跑同一檢查 → 全 PASS，見 §8）
+- [x] 7 條 arm 都能對 §2.3 選定的 6 份文件子集跑通，同一題產出可比結果 JSON + 彙總表。
+      2026-09-11 真實跑通：42 筆（7 arm × 6 題 × 1 run）、零錯誤，結果存
+      `report39_comparison/pilot_20260911/`（見 §8）。
 - [x] `retrieval_mode="both"` + `disable_grounding_regen=False` 與現行 `chat()` 逐位元相同
       （既有 `tests/routers/test_agent.py` 101 個全綠；SDD-3 抽取後仍 114 全綠含 status-phase 順序測試）。
 - [x] 新增開關各有單元測試（`efde509`：三開關各自行為 + `_intersect_doc_scopes` 四邊界 +
       `scope_doc_ids=None` 零回歸錨點；`6ebbb22`：baseline 模式共用生成路四測試）。
-- [x] `pytest` 全套綠（801 passed）。
+- [x] `pytest` 全套綠（828 passed）。
 - [x] harness 輸出註明生成端對齊程度（`manifest.json` 的 `generation_alignment` 欄）。
 - [x] ⚠️ **不要改動 `docs/報告/36_*.md`**（本次未觸碰）。
 
@@ -252,23 +253,52 @@ DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` =
 ## 8. 執行紀錄（實作視窗填寫）
 
 - 目標測試 KG id：`236903cf-055a-40a8-8923-b9d06601f3b7`（KG#4，前導版用 §2.3 的 6 份文件子集）
-- 實際比較文件清單（force_rebuild 後）：以 §2.3 的 6 份資料夾名為準——
+- 實際比較文件清單：§2.3 的 6 份資料夾名——
   `D0080015_警察人員特別休假辦法`、`F0040034_員工接受召集請假期間薪資費用加成減除辦法`、
   `N0030006_勞工請假規則`、`N0030018_育嬰留職停薪實施辦法`、
   `N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法`、
   `N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法`
   （對應題號 18-Q1~Q5、26-Q5，見 `docs/附錄A題庫.json` 的 `pilot=true`）
-- force_rebuild 所在 reextract-v2 commit：**⏳ 待執行**（`check_comparison_readiness.py` 已確認
-  這 6 份的最舊 chunk `updated_at` 皆為 `2026-09-07T11:xx`，早於抽取端基準
-  `2026-09-08T22:03:36+08:00` → §2.4 FAIL，force_rebuild 確有必要）。RAM-heavy、
-  與主 drain 衝突 → 排在主 drain DRAIN-DONE 後執行，屆時補記 commit 與時間。
-- force_rebuild 完成時間：**⏳ 待執行**（同上）
-- harness / 開關 / 共用生成路完成的 commit：
+- **✅ force_rebuild 已完成（2026-09-11，DRAIN-DONE 後）**：主 drain 於 2026-09-11
+  completed=3294/pending=0/processing=0（`drain_supervisor.py` 自行收斂並退出，
+  peer session 獨立核對過一致）後執行。**未走** `build_graph(force_rebuild=True)`
+  （對這 6 份 ArticleAware 法規文件會直接拋 `ArticleStructureLossError`，見該函式
+  docstring）——改用 kg-reextract worktree 既有 `targeted_extract_window.py` 的
+  安全模式：不重新切塊（`article_no` 結構完全不動），對 56 個既有 chunk 逐一
+  `task_queue_service.enqueue()`（terminal→pending）＋`revoke_chunk_facts()`＋
+  `_process_one()` 在 **reextract-v2 HEAD**（`kg-reextract` worktree 當時 HEAD）上
+  重新抽取。56 個 chunk：55 一次成功、1 個（`F0040034` c2）因 `task_queue.db`
+  短暫讀寫衝突（`sqlite3.OperationalError: attempt to write a readonly database`，
+  與 peer session 同時間跑「方案A」對 9 筆 failed chunk 收尾疑似搶到同一檔案，
+  重試探測確認檔案本身可寫、非長期故障）中斷於 processing，補跑一次即成功。
+  耗時：56 個 chunk 主批次 100.3 分＋單一補跑。
+- force_rebuild 完成時間：2026-09-11 18:31–19:59（重抽本身）＋ 2026-09-11 19:59（單一補跑）。
+- **✅ 抽取後 `check_comparison_readiness.py` 全 PASS**（`--arms F,G,K,K-2b`，帶
+  `kg-reextract` 的 `.env` 認證跑）：pending==0、抽取新鮮度全綠（`updated_at` 皆
+  ≥ 2026-09-11T18:00+08:00）、`fact_embedding` 16712/16712=100%、
+  `Entity.name_embedding` 12066/12066=100%、6 份皆有 Fact 節點、關係型別向量索引
+  `related_to_verb_embedding` 存在。
+- **✅ B0/B1 索引已建**：`build_baseline_chunk_index.py <kg> --chunk-size 500 --doc-ids <6份>`
+  （SDD-4 之後新增 `--doc-ids` 子集過濾，`c3f18c1`）→ 15 chunk、dim=1024（bge-m3）。
+- **✅ 真實 7-arm 比較已跑通**：`run_retrieval_comparison.py --arms D,B0,B1,F,G,K,K-2b
+  --questions 18-Q1,18-Q2,18-Q3,18-Q4,18-Q5,26-Q5 --runs 1`（前導「跑通」用 ×1，
+  非正式 §4.1 的 ×3；正式比較留給使用者依 §4/§4.1 決定規模與 runs）。
+  42 筆呼叫、**零錯誤**，結果存於本 repo `report39_comparison/pilot_20260911/`
+  （manifest.json／run1.json／summary.md，人工評分欄依設計留空）。
+  **抽樣核對**：26-Q5（報告37/38 已知的 Q5 起算日檢索缺陷）7 個 arm 全部正確答出
+  「六個月」但全部答不出「自災害發生之當月一日起」——與報告37/38記錄的
+  `_relevant_doc_ids_from_facts()` 檢索端缺陷（尚未修復）完全吻合，確認 harness
+  跑出的是真實、可信的行為，非雜訊。
+- harness / 開關 / 共用生成路 / 真實跑測完成的 commit：
   - SDD-2（chat() 檢索開關 `retrieval_mode`／`disable_grounding_regen`／`scope_doc_ids`）：`efde509`
   - SDD-3（抽出 `_generate_from_context_lines()` 共用生成路）：`6ebbb22`
   - SDD-1（`check_comparison_readiness.py`）：`c26e05a`
   - SDD-4（`docs/附錄A題庫.json` ＋ `run_retrieval_comparison.py`）：`2c64bd9`
-  - 全套 pytest 801 綠（既有 797 ＋ 新增 13：SDD-2 九、SDD-3 四）；`chat()` 逐位元零回歸。
+  - `build_baseline_chunk_index.py` 加 `--doc-ids`：`c3f18c1`
+  - **真實跑測發現並修復兩個 bug**：
+    `_read_original()` 未剝除 frontmatter `source:` 的 YAML 引號（`40d81e8`）、
+    `_DEFAULT_QUESTIONS` 相對路徑跨 CWD 找不到題庫（`379b7c6`）
+  - 全套 pytest 828 綠；`chat()` 逐位元零回歸。
 - 生成端對齊程度（是否 100% 共用同一函式）：**部分共用（前導夠用版）**。
   B0/B1/D 與 F/G/K/K−2b 共用 `_generate_from_context_lines()` ＋ 同一個
   `_build_prompt()`／`_build_constrained_prompt()`（`context_lines=` 參數）——同一 prompt
@@ -278,15 +308,27 @@ DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` =
   完整生成端共用重構＝ P0b 第 2 項，建議延到 T2/DRAIN（§3.2、§6）。harness manifest.json
   的 `generation_alignment` 欄逐次記錄此程度。
 - 已知 caveat：
-  1. **抽取新鮮度**：force_rebuild 尚未執行前，F/G/K 讀到的 6 份 Fact 仍是 2026-09-07 版
-     （可能含 `num_predict=1024` 長列舉截斷）→ 前導比較須等 force_rebuild 後才可信（§2.4）。
-  2. **B0/B1 索引未建**：`build_baseline_chunk_index.py <kg> --chunk-size 500` 尚未對 KG#4 跑過
-     （`check_comparison_readiness.py` 已標 FAIL ＋ 補救指令）。
-  3. **關係型別向量索引**：`check_comparison_readiness.py` 對 KG#4 查該索引時尚未驗證
-     （Neo4j 連線用預設 7687，KG#4 在 17990）；缺了 §3.2§c 走 QNOMATCH 優雅降級，報告 40 需記。
-  4. **scope_doc_ids 交集歸零**：語意 Fact 命中的來源全在 6 份子集外時，`_filter_*` 的歸零
+  1. **前導版非正式版**：本次跑測為「7 arm 跑通」的驗收（§5），非 §4.1 的正式比較
+     （單一 6 題、`--runs 1`）——正式比較需分批（§4.1）、每批 ≥3 runs、人工填
+     `summary.md` 的評分欄，由使用者後續依 §4/§4.1 執行、產出報告 40。
+  2. **關係型別向量索引缺乏語意內容**：`related_to_verb_embedding` 索引存在但只是
+     RELATED_TO 邊 `verb_embedding` 的空殼索引（見 Pass 2 L8 發現：全 codebase 無
+     ConceptNode 寫入路徑），§3.2§c 關係連結靠 `classify_relation_by_embedding()`
+     另一套機制，非此索引——原 caveat 3「索引尚未驗證」已消解為「索引存在但與
+     §3.2§c 判斷無直接關係」，不影響 F/G/K 可跑性。
+  3. **scope_doc_ids 交集歸零**：語意 Fact 命中的來源全在 6 份子集外時，`_filter_*` 的歸零
      守衛會放行範圍外事實（角落案例，6 份即題目來源，正常不會發生；`_intersect_doc_scopes()`
      此時回傳明確子集本身、bfs_query 仍下推 6 份）。
-  5. **llm_calls 含核對呼叫**：harness 的 `_CountingLLM` 也包住 judge provider，`llm_calls`
+  4. **llm_calls 含核對呼叫**：harness 的 `_CountingLLM` 也包住 judge provider，`llm_calls`
      統計含 `verify_fact_grounding()` 的 JSON 呼叫（前導夠用；報告 40 要分開再拆）。
-  6. `ChatRequest` 實際在 `models/document.py`（非任務書 §3.1 寫的 `models/knowledge_graph.py`）。
+  5. `ChatRequest` 實際在 `models/document.py`（非任務書 §3.1 寫的 `models/knowledge_graph.py`）。
+  6. **baseline .npy 檔名與整個 KG 索引共用**：`--doc-ids` 建的子集索引跟未來對同一
+     `kg_id`/`chunk_size` 建的整個 KG 索引會互相覆寫檔名，之後要留意。
+  7. **baseline 索引 `base_dir` 為 CWD 相對路徑**：`run_retrieval_comparison.py` 目前
+     沒有 `--index-dir` 選項（`check_comparison_readiness.py` 有），build 與 compare
+     兩支腳本須從同一個工作目錄執行；本次兩者都在 `kg-reextract` worktree 下執行、
+     一致無誤，但未來若腳本分開跑要注意。
+  8. **B2 baseline 用 fixed-size chunking 對逐條結構法規語料的 confound**（peer 2026-09-10
+     FYI，未處理）：Prior et al. 2026 指 article-aware 切塊對法規語料 recall 較高，
+     B0/B1 若用 fixed-size 可能低估基準表現，混淆「KG-RAG 贏」的解讀；留給
+     §5.3 sweep 或報告 40 視需要加 article-aware baseline 變體對照。
