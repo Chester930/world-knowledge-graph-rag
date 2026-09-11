@@ -63,7 +63,10 @@ except ImportError:  # pragma: no cover
     _read_original = None  # type: ignore[assignment]
 
 ALL_ARMS = ["D", "B0", "B1", "F", "G", "K", "K-2b"]
-_DEFAULT_QUESTIONS = "docs/附錄A題庫.json"
+# 報告39 SDD-5 真實跑測發現：相對路徑在「跨 worktree 借用 .env 認證」時會斷
+# （例如 `cd kg-reextract && python .../run_retrieval_comparison.py`，CWD 不是
+# 本檔案所在的 repo 根目錄）。錨到本檔案自己的目錄，不管從哪個 CWD 呼叫都找得到。
+_DEFAULT_QUESTIONS = str(Path(__file__).resolve().parent / "docs" / "附錄A題庫.json")
 _BASELINE_TOP_K = 5
 
 
