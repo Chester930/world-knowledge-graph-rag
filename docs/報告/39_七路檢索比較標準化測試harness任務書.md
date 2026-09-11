@@ -269,8 +269,10 @@ DRAIN 未完成（2026-09-10 查：KG#4 `236903cf-055a-40a8-8923-b9d06601f3b7` =
   `_process_one()` 在 **reextract-v2 HEAD**（`kg-reextract` worktree 當時 HEAD）上
   重新抽取。56 個 chunk：55 一次成功、1 個（`F0040034` c2）因 `task_queue.db`
   短暫讀寫衝突（`sqlite3.OperationalError: attempt to write a readonly database`，
-  與 peer session 同時間跑「方案A」對 9 筆 failed chunk 收尾疑似搶到同一檔案，
-  重試探測確認檔案本身可寫、非長期故障）中斷於 processing，補跑一次即成功。
+  **peer session 事後訂正**：根因是 DRAIN-DONE 後 Monitor 自動觸發的 100% 備份
+  （`Compress-Archive` 整包讀 `kg-runtime` 資料夾，含 `task_queue.db`），並非
+  peer 的「方案A」9 筆 failed chunk 收尾（該方案當時尚未開始跑）；重試探測
+  確認檔案本身可寫、非長期故障）中斷於 processing，補跑一次即成功。
   耗時：56 個 chunk 主批次 100.3 分＋單一補跑。
 - force_rebuild 完成時間：2026-09-11 18:31–19:59（重抽本身）＋ 2026-09-11 19:59（單一補跑）。
 - **✅ 抽取後 `check_comparison_readiness.py` 全 PASS**（`--arms F,G,K,K-2b`，帶
