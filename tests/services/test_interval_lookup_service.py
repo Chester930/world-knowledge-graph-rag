@@ -68,16 +68,21 @@ class TestEvaluateLookupOverride:
         result = evaluate_lookup_override(
             q, _VARIANCE_FACTS, "資料未明確記載，無法確認。", is_refusal_text
         )
-        assert result == "force_supported"
+        assert result.decision == "force_supported"
+        assert result.extra_prompt_note is None
 
-    def test_gap_case_draft_picks_nearest_value_is_force_unsupported(self):
+    def test_gap_case_draft_picks_nearest_value_is_force_unsupported_with_note(self):
         """P2 型失效模式：0.5 落在缺口，但草稿挑了最近一列（1.5）硬套——
-        必須強制觸發重生成去修正，不能讓 judge 誤判成已接地放行。"""
+        必須強制觸發重生成去修正，且須帶上 `GAP_REFUSAL_NOTE`（2026-09-13
+        真實測試發現：沒有這段提示，重生成會在壓力下編造新區間去湊答案，
+        比原本的失效更嚴重，見報告42 §7）。"""
         q = "8 小時日時量平均容許濃度為 0.5 ppm 時，變量係數是多少？"
         result = evaluate_lookup_override(
             q, _VARIANCE_FACTS, "變量係數為 1.5。", is_refusal_text
         )
-        assert result == "force_unsupported"
+        assert result.decision == "force_unsupported"
+        assert result.extra_prompt_note is not None
+        assert "編造" in result.extra_prompt_note
 
     def test_in_range_case_correct_answer_is_force_supported(self):
         """P5：5 落在 [1,10)，正解 2。草稿答對且未拒答——確定性判斷已足夠
@@ -86,16 +91,19 @@ class TestEvaluateLookupOverride:
         result = evaluate_lookup_override(
             q, _VARIANCE_FACTS, "根據事實清單，變量係數為 2。", is_refusal_text
         )
-        assert result == "force_supported"
+        assert result.decision == "force_supported"
 
-    def test_in_range_case_wrong_value_is_force_unsupported(self):
+    def test_in_range_case_wrong_value_is_force_unsupported_without_gap_note(self):
         """P5 baseline 真實失效：5 落在 [1,10) 正解應為 2，草稿卻套用了鄰近
-        區間 [10,100) 的 1.5——必須強制觸發重生成修正。"""
+        區間 [10,100) 的 1.5——必須強制觸發重生成修正。這是「命中區間但挑
+        錯值」，不是缺口案例，不該帶 `GAP_REFUSAL_NOTE`（既有查表指令已足夠，
+        2026-09-13 第一輪測試已驗證這種案例修好：0/3→3/3）。"""
         q = "8 小時日時量平均容許濃度為 5 ppm 時，變量係數是多少？"
         result = evaluate_lookup_override(
             q, _VARIANCE_FACTS, "變量係數為 1.5。", is_refusal_text
         )
-        assert result == "force_unsupported"
+        assert result.decision == "force_unsupported"
+        assert result.extra_prompt_note is None
 
     def test_in_range_case_refusal_is_force_unsupported(self):
         """數值明明落在某一列區間內，草稿卻拒答——這也是錯誤（該答卻沒答），
@@ -104,7 +112,7 @@ class TestEvaluateLookupOverride:
         result = evaluate_lookup_override(
             q, _VARIANCE_FACTS, "資料未明確記載，無法確認。", is_refusal_text
         )
-        assert result == "force_unsupported"
+        assert result.decision == "force_unsupported"
 
     def test_no_interval_facts_returns_no_override(self):
         result = evaluate_lookup_override(
@@ -113,13 +121,13 @@ class TestEvaluateLookupOverride:
             "與服務年資無關。",
             is_refusal_text,
         )
-        assert result == "no_override"
+        assert result.decision == "no_override"
 
     def test_no_question_value_returns_no_override(self):
         result = evaluate_lookup_override(
             "特別休假是否與服務年資有關？", _VARIANCE_FACTS, "與服務年資無關。", is_refusal_text
         )
-        assert result == "no_override"
+        assert result.decision == "no_override"
 
     def test_p3_lead_level_open_ended_match(self):
         """P3：12 落在開放句式「十以上」的範圍內，正解「第三級」。這個案例
@@ -133,7 +141,7 @@ class TestEvaluateLookupOverride:
         result = evaluate_lookup_override(
             q, _LEAD_FACTS, "血中鉛濃度為 12 μg/dl 的勞工，屬於第三級管理。", is_refusal_text
         )
-        assert result == "force_supported"
+        assert result.decision == "force_supported"
 
 
 class TestIsRefusalText:

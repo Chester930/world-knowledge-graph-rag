@@ -30,11 +30,27 @@ import cn2an
 
 __all__ = [
     "IntervalFact",
+    "LookupOverride",
     "parse_interval_facts",
     "extract_question_value",
     "evaluate_lookup_override",
     "is_refusal_text",
 ]
+
+# 缺口案例（問題數值未落在任何一列明列區間內）強制重生成時的額外提示——
+# 2026-09-13 真實測試發現：force_unsupported 觸發重生成後，若只沿用既有
+# `_build_constrained_prompt()` 的一般查表指令（「可以取區間對應值作答」），
+# 模型在「必須從清單推導出答案」的壓力下，**沒有誠實拒答，反而編造了一條
+# 事實清單裡不存在的新區間**去湊出一個答案（比原本「挑錯值硬套」更嚴重的
+# 新幻覺型態）。故缺口案例需要明確、不留模糊空間的額外指令，見報告42 §7。
+GAP_REFUSAL_NOTE = (
+    "特別注意：這一題的數值不在事實清單任何一列明列的區間上下界之內"
+    "（不是「挑最接近的」、也不是「不同單位換算後可能對得上」的問題——"
+    "就是沒有任何一列涵蓋它）。正確答案是誠實回答「資料未明確記載，"
+    "無法確認」並說明是哪個數值查不到對應的區間，不要嘗試套用最接近的"
+    "區間、不要推算、也絕對不要為了給出答案而編造事實清單裡沒有出現過的"
+    "新區間或新數值。"
+)
 
 # 拒答措辭偵測（與 `run_refusal_canary.py`／報告32 §9 C 用的同一組標記一致，
 # 避免生產碼與驗證 harness 對「什麼算拒答」認知分歧）。
@@ -133,27 +149,40 @@ def extract_question_value(question: str) -> float | None:
     return with_unit[0] if with_unit else candidates[0][0]
 
 
+@dataclass(frozen=True)
+class LookupOverride:
+    decision: Literal["force_supported", "force_unsupported", "no_override"]
+    # 缺口案例（沒有任何區間命中，正確答案就是拒答）觸發 force_unsupported
+    # 時，帶上 `GAP_REFUSAL_NOTE`——重生成 prompt 要塞這段，明確禁止编造
+    # 新區間；「命中區間但挑錯值」的 force_unsupported 不帶（既有查表指令
+    # 已足夠，見 2026-09-13 第一輪測試 P5 0/3→3/3 的正面結果）。
+    extra_prompt_note: str | None = None
+
+
 def evaluate_lookup_override(
     question: str,
     fact_texts: list[str],
     draft_answer: str,
     is_refusal: Callable[[str], bool],
-) -> Literal["force_supported", "force_unsupported", "no_override"]:
+) -> LookupOverride:
     """回傳對 `chat()` 重生成觸發的覆核建議：
 
     - ``"force_supported"``：確定性判斷認為草稿已經答對（或正確地誠實拒答），
       即使 judge 判未接地，也不該觸發重生成。
     - ``"force_unsupported"``：確定性判斷認為草稿答錯（挑錯值／缺口硬套／
-      該答卻拒答），即使 judge 判已接地，也該觸發重生成去修正。
+      該答卻拒答），即使 judge 判已接地，也該觸發重生成去修正。缺口案例
+      （`extra_prompt_note` 非 None）必須把這段提示塞進重生成 prompt，
+      否則模型可能在「必須從清單推導」的壓力下編造新區間（見上方常數
+      docstring、報告42 §7 的真實案例）。
     - ``"no_override"``：解析不出查表結構、或問題抓不到目標數值——不是
       這類題型，維持 judge 原判。
     """
     intervals = parse_interval_facts(fact_texts)
     if not intervals:
-        return "no_override"
+        return LookupOverride("no_override")
     q_value = extract_question_value(question)
     if q_value is None:
-        return "no_override"
+        return LookupOverride("no_override")
 
     matched: IntervalFact | None = None
     for f in intervals:
@@ -170,17 +199,18 @@ def evaluate_lookup_override(
     normalized_answer = _to_number(draft_answer)
 
     if matched is not None:
-        # 有明確命中的區間——正確答案應該是這一列的值。
+        # 有明確命中的區間——正確答案應該是這一列的值。既有查表指令已足夠
+        # 引導修正，不需要額外提示。
         got_it_right = matched.value in normalized_answer
         if got_it_right and not refused:
-            return "force_supported"
-        return "force_unsupported"
+            return LookupOverride("force_supported")
+        return LookupOverride("force_unsupported")
 
     # 沒有任何區間命中（落在缺口或超出所有已知級距）——正確答案應該是
     # 誠實拒答；草稿若給出任何一個查表值當確定答案，視為挑錯值硬套。
     if refused:
-        return "force_supported"
+        return LookupOverride("force_supported")
     any_value_stated = any(f.value in normalized_answer for f in intervals)
     if any_value_stated:
-        return "force_unsupported"
-    return "no_override"
+        return LookupOverride("force_unsupported", GAP_REFUSAL_NOTE)
+    return LookupOverride("no_override")
