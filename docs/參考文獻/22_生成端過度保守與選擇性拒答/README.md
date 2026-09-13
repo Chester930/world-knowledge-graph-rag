@@ -96,6 +96,22 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 - VERITAS（arXiv:2510.13272）——官方 repo URL 待查（RL 訓練框架，本專案 prompt-only 路線不直接複用，僅問題定位）。
 - RAGAS（[`explodinggradients/ragas`](https://github.com/explodinggradients/ragas)，已在 `docs/參考文獻/05`）——`verify_fact_grounding()` 的方法來源，其官方文件對「可推得但非逐字」的處理即為對照基準。
 
-**G2 狀態**：初版落地 `04a90e8`（窗口診斷 Q8 1/3→3/3），2026-09-08 精讀 RefusalBench/VERITAS 後以 A/B/A′ 收緊（`a04f9ea`，全套 pytest 701 passed）。端到端 FRR/MRR 驗證＝報告32 §9 C，待 DRAIN-DONE 跑 `run_refusal_canary.py`（先 `ed32291` baseline、再 `a04f9ea`）。03 §3.6 G2 段回灌等 C 定案。
-- [ ] `is_claim` 分類本身由核對模型（`qwen2.5:7b`）判定，可能誤判（把真主張判成非主張 → 漏觸發該重生成的情況）——真實觸發率與誤判率待實測（C 的 reducer 會順帶量到 FRR 假陽性分項）。
-- [ ] 若 C 顯示 MRR 上升 → 上 E：`_grounding_prompt` 保持嚴格，Q8 查表改由 `chat()` 內一個確定性 Python 區間檢查（解析 `[區間] → [值]` fact line + 問題數值，嚴格包含才抑制重生成觸發），把弱 judge 移出迴圈。
+**G2 狀態**：初版落地 `04a90e8`（窗口診斷 Q8 1/3→3/3），2026-09-08 精讀 RefusalBench/VERITAS 後以 A/B/A′ 收緊（`a04f9ea`，全套 pytest 701 passed）。**C 已於 DRAIN-DONE 後執行完成（2026-09-13）**，結果：
+
+| Probe | GT | baseline (`ed32291`) | after (`a04f9ea`) |
+|---|---|:---:|:---:|
+| P1 | REFUSE | 3/3 | 3/3 |
+| P2 | REFUSE | 3/3 | 2/3（退步） |
+| P3 | REFUSE | 0/3 | 0/3（無改善——G2 要修的核心情境仍未修好） |
+| P4 | REFUSE | 3/3 | 3/3 |
+| P5 | ANSWER | 0/3 | 1/3 |
+| P6 | ANSWER | 3/3 | 2/3（退步） |
+
+**MRR：0.25（3/12）→ 0.333（4/12），上升**；**FRR：0.5（3/6）→ 0.5 持平，但 P5 護欄（須 3/3 ANSWER）未過（1/3）**。閘門 1／3 皆 FAIL，閘門 4 的觸發條件（MRR 上升）成立。
+
+**⇒ 依預先訂定的規則，觸發 E**：A/B/A′ 收緊沒有解決 P3（缺級距查表例外）的核心情境，反而在 P2／P6 造成新退步——判斷失效不在「規則覆蓋前提不夠嚴」，而在**這類查表判斷本質上不該交給 `qwen2.5:7b` 這個 judge**（呼應 RefusalBench 的實證：Qwen 家族 selective-refusal 準確率全尺寸 <17%）。下一步是 E：`_grounding_prompt` 保持嚴格，查表判斷移出 LLM，改由 `chat()` 內一個確定性 Python 區間檢查（解析 `[區間] → [值]` fact line + 問題數值，嚴格包含才抑制重生成觸發）。
+
+原始輸出：`refusal_canary_output_baseline_ed32291.txt` / `refusal_canary_output_after_a04f9ea.txt`（repo 根目錄）。
+
+- [x] ~~`is_claim` 分類本身由核對模型判定，可能誤判~~ → C 已量到：`ungrounded` 欄位顯示各 run 未接地主張數 0–6 不等，誤判率隨題目波動，非本次 C 的主要瓶頸。
+- [x] ~~若 C 顯示 MRR 上升 → 上 E~~ → **MRR 確實上升，E 已觸發，設計為下一步待辦**（尚未實作，見上）。
