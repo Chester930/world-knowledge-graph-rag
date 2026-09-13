@@ -34,7 +34,8 @@ from services.svo_service import (
     vector_search_entities,
     vector_search_facts,
 )
-from services.verification_service import verify_fact_grounding
+from services.interval_lookup_service import evaluate_lookup_override, is_refusal_text
+from services.verification_service import ClaimGrounding, verify_fact_grounding
 
 # Traceability: 02 §2.4.2／§2.4.3 -> 03 §3.2 -> 04 §4.7.
 # RQ status: this router currently supports single-KG BFS + Fact retrieval (RQ1
@@ -1148,6 +1149,29 @@ async def _generate_from_context_lines(
     final_answer = draft_answer
     regenerated = False
     ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
+
+    # 報告32 §9 G2 方案E（2026-09-13，見 §3.6 §G2、報告42 §6/§7）：「數值區間 →
+    # 對應值」查表判斷改用確定性規則覆核，不再單靠 `judge_llm_provider`。C 驗證
+    # （`run_refusal_canary.py`）證實 A/B/A′ 收緊沒解決核心情境、MRR 反而上升
+    # （RefusalBench：Qwen 家族這類判斷準確率全尺寸 <17%）。只在能明確解析出
+    # 查表結構時介入（`no_override` 時完全不動 judge 原判）。
+    lookup_override = evaluate_lookup_override(
+        question, fact_texts, draft_answer, is_refusal_text
+    )
+    if lookup_override == "force_supported":
+        ungrounded_claims = []
+    elif lookup_override == "force_unsupported" and not ungrounded_claims:
+        ungrounded_claims = [
+            ClaimGrounding(
+                statement=draft_answer,
+                supported=False,
+                reason="G2 方案E：問題數值嚴格落在事實清單某一列區間內，"
+                       "但草稿給出的值與該列不符（或誤答／誤拒答），確定性"
+                       "覆核強制觸發重生成。",
+                is_claim=True,
+            )
+        ]
+
     if grounding_context_present and ungrounded_claims and not disable_grounding_regen:
         if baseline_mode:
             constrained_prompt = await _build_constrained_prompt(

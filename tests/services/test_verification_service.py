@@ -139,26 +139,18 @@ async def test_gracefully_degrades_on_malformed_json():
     assert "格式錯誤" in result[0].reason
 
 
-def test_grounding_prompt_carries_interval_lookup_carve_out():
-    """報告32 §9 G2：`_grounding_prompt()` 要保留「明示查表推論例外」——
-    分段對照表 + 題目數值 → 查表取對應值算 supported，其他推論仍一律 false。
-    這條例外被誤刪會讓 Q8 型答案再度被判未接地、觸發限制性重生成而拒答。"""
+def test_grounding_prompt_no_longer_carries_interval_lookup_carve_out():
+    """報告32 §9 G2 方案E（2026-09-13）：`_grounding_prompt()` 不再給查表推論
+    留指令空間——C 驗證（`run_refusal_canary.py`）證實這類判斷交給 qwen judge
+    不可靠（MRR 上升），改由 `services/interval_lookup_service.py` 的確定性
+    規則在 `chat()` 呼叫端覆核。這條舊例外文字若又被加回來，代表退回了已經
+    驗證失效的設計。"""
     prompt = _grounding_prompt(["某句陳述。"], ["1 以上未滿 10 → 變量係數為 2"])
-    assert "明示查表推論例外" in prompt
-    assert "分段對照表套用到題目給定的數值" in prompt
+    assert "明示查表推論例外" not in prompt
     # 一般禁令仍在（不可因「聽起來合理」就判 true）
     assert "不可因為「聽起來合理」就判定 true" in prompt
-
-
-def test_grounding_prompt_interval_lookup_has_coverage_precondition():
-    """報告32 §9 A/B：查表例外只在數值「嚴格落在明列列的上下界內」時成立，
-    取最近一列／落在間隙／越界 → 一律回到 false（含查表未命中）。級距缺一段
-    卻硬答也算未接地。"""
-    prompt = _grounding_prompt(["某句陳述。"], ["1 以上未滿 10 → 變量係數為 2"])
-    assert "嚴格落在它所引用那一列明列的上下界之內" in prompt
-    assert "false（含查表未命中）" in prompt
-    assert "只出現了部分級距" in prompt
-    assert "挑一列硬套算未接地" in prompt
+    # 明確點名查表判斷已移出本函式
+    assert "確定性規則覆核" in prompt
 
 
 def test_grounding_prompt_includes_question_when_supplied():
