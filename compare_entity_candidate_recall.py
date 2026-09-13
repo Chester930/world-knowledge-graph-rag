@@ -87,6 +87,7 @@ async def create_entity_name_fulltext_index(driver) -> bool:
 
 async def _fetch_candidates_canopy(
     driver, kg_id: UUID, name: str, *, canopy_k: int, fulltext_available: bool,
+    name_vec: list[float] | None = None,
 ) -> list[dict]:
     """報告40 §3 的三 canopy 聯集（本腳本自帶實作，供對照——**非**
     production 程式碼，尚未接線進 `svo_service.py`）。"""
@@ -103,6 +104,8 @@ async def _fetch_candidates_canopy(
         by_name[r["name"]] = {"name": r["name"], "name_embedding": r.get("name_embedding")}
 
     # 3.2 cosine canopy（向量索引）
+    if name_vec is None:
+        name_vec = await get_embedding_provider().encode(name)
     cosine_result = await driver.execute_query(
         f"""
         CALL db.index.vector.queryNodes('{ENTITY_NAME_VECTOR_INDEX}', $k, $vec)
@@ -110,7 +113,7 @@ async def _fetch_candidates_canopy(
         WHERE e.kg_id = $kg_id
         RETURN e.name AS name, e.name_embedding AS name_embedding
         """,
-        k=canopy_k, vec=await get_embedding_provider().encode(name), kg_id=kg_id_str,
+        k=canopy_k, vec=name_vec, kg_id=kg_id_str,
     )
     for r in cosine_result.records:
         by_name.setdefault(r["name"], {"name": r["name"], "name_embedding": r.get("name_embedding")})
@@ -217,11 +220,16 @@ async def _main() -> int:
         mentions = await _sample_mentions(driver, args.kg_id, args.sample_size, args.seed)
         print(f"[compare] 抽樣 {len(mentions)} 個真實 mention（來自 HAS_ENTITY.surface_form）")
 
+        print(f"[compare] 載入舊版全 KG 候選集基準（單次載入，避免 300 次冗餘 socket 傳輸）…", flush=True)
+        old_candidates = await _fetch_entity_candidates(driver, args.kg_id, None)
+        print(f"[compare] 舊版候選集載入完成（共 {len(old_candidates)} 個實體節點）", flush=True)
+
         results: list[MentionResult] = []
         for i, mention in enumerate(mentions, start=1):
-            old_candidates = await _fetch_entity_candidates(driver, args.kg_id, None, mention)
+            mention_vec = await embedding_provider.encode(mention)
             new_candidates = await _fetch_candidates_canopy(
                 driver, args.kg_id, mention, canopy_k=args.canopy_k, fulltext_available=fulltext_ok,
+                name_vec=mention_vec,
             )
 
             old_resolved = await resolve_entity_name(
@@ -241,7 +249,7 @@ async def _main() -> int:
                 for c in cands:
                     if c["name"] == mention or c.get("name_embedding") is None:
                         continue
-                    score = cosine_similarity(await embedding_provider.encode(mention), c["name_embedding"])
+                    score = cosine_similarity(mention_vec, c["name_embedding"])
                     if ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD <= score < ENTITY_DEDUP_COSINE_THRESHOLD:
                         grey = True
                         break
@@ -257,8 +265,8 @@ async def _main() -> int:
                 agree=(old_resolved == new_resolved),
                 grey_zone=grey,
             ))
-            if i % 50 == 0:
-                print(f"[compare] {i}/{len(mentions)}…")
+            if i % 10 == 0 or i == len(mentions):
+                print(f"[compare] {i}/{len(mentions)}…", flush=True)
 
         disagreements = [r for r in results if not r.agree]
         grey_zone_hits = [r for r in results if r.grey_zone]

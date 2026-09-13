@@ -1,0 +1,112 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "results": [
+    {
+      "id": "26-Q1",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "pcode": "N0060029",
+      "gold_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+      "old_scope_size": 3,
+      "new_scope_size": 16,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 10,
+      "new_triple_count": 66,
+      "verdict": "unchanged"
+    },
+    {
+      "id": "26-Q2",
+      "question": "依重體力勞動作業勞工保護措施標準，以人力搬運或揹負重量在多少公斤以上的物體屬於重體力勞動作業？以多少公斤以上的鎚及動力手工具從事敲擊等作業也屬於？",
+      "pcode": "N0060016",
+      "gold_doc_id": "e4111dd9-4ebf-59c1-ba7d-fbd3b519d5e8",
+      "old_scope_size": 1,
+      "new_scope_size": 11,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 18,
+      "new_triple_count": 63,
+      "verdict": "unchanged"
+    },
+    {
+      "id": "26-Q3",
+      "question": "事業單位大量解僱勞工後優先僱用原被解僱勞工，要連續僱用滿多久才能申請僱用獎勵金？獎勵金最多發給幾個月？應在開始僱用之日起幾日內、以及連續僱用滿三個月之日起幾日內分別完成報備與申請？",
+      "pcode": "N0080013",
+      "gold_doc_id": "afbf81c2-36f4-55de-91f4-18541658a1aa",
+      "old_scope_size": 2,
+      "new_scope_size": 15,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 3,
+      "new_triple_count": 39,
+      "verdict": "unchanged"
+    },
+    {
+      "id": "26-Q4",
+      "question": "依事業單位優先僱用經其大量解僱失業勞工獎勵辦法，受僱勞工每週工作時數達多少小時以上，事業單位每人每月可領多少僱用獎勵金？",
+      "pcode": "N0080013",
+      "gold_doc_id": "afbf81c2-36f4-55de-91f4-18541658a1aa",
+      "old_scope_size": 2,
+      "new_scope_size": 23,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 2,
+      "new_triple_count": 50,
+      "verdict": "unchanged"
+    },
+    {
+      "id": "26-Q5",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "pcode": "N0050030",
+      "gold_doc_id": "56556675-a40b-55be-b664-7f8e5ca3030c",
+      "old_scope_size": 4,
+      "new_scope_size": 18,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 13,
+      "new_triple_count": 38,
+      "verdict": "unchanged"
+    },
+    {
+      "id": "26-Q6",
+      "question": "申請繼續加保者原則上應於離職退保當日辦理；如果原投保單位沒有在當日辦理，被保險人最遲應在什麼時候之前辦理繼續加保手續？",
+      "pcode": "N0050011",
+      "gold_doc_id": "cc330684-1a83-5f1b-9c89-4cc9fc4abf38",
+      "old_scope_size": 2,
+      "new_scope_size": 8,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 10,
+      "new_triple_count": 21,
+      "verdict": "unchanged"
+    },
+    {
+      "id": "26-Q7",
+      "question": "依高溫作業勞工作息時間標準，雇主應每幾年為高溫作業勞工安排一次特殊健康檢查？",
+      "pcode": "N0060007",
+      "gold_doc_id": "76598956-d7c5-5433-8f3d-ca23f6cc7b88",
+      "old_scope_size": 3,
+      "new_scope_size": 17,
+      "old_hits_gold": true,
+      "new_hits_gold": false,
+      "old_triple_count": 5,
+      "new_triple_count": 52,
+      "verdict": "regressed"
+    },
+    {
+      "id": "26-Q8",
+      "question": "依勞工作業場所容許暴露標準，某有害物的八小時日時量平均容許濃度為 5 ppm，計算其短時間時量平均容許濃度時，應乘以的變量係數是多少？",
+      "pcode": "N0060004",
+      "gold_doc_id": "2eee3ade-80c7-59ec-b6aa-f1325482870e",
+      "old_scope_size": 1,
+      "new_scope_size": 8,
+      "old_hits_gold": true,
+      "new_hits_gold": true,
+      "old_triple_count": 8,
+      "new_triple_count": 37,
+      "verdict": "unchanged"
+    }
+  ],
+  "target_fixed_count": 0,
+  "regressed_count": 1,
+  "unknown_count": 0
+}

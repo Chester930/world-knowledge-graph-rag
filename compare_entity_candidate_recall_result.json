@@ -1,0 +1,11 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "sample_size": 300,
+  "canopy_k": 50,
+  "fulltext_used": true,
+  "agreement_rate": 1.0,
+  "disagreements": [],
+  "grey_zone_count": 251,
+  "avg_old_candidates": 12096.0,
+  "avg_new_candidates": 605.5933333333334
+}
