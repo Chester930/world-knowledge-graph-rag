@@ -685,6 +685,14 @@ async def _drain(response):
     return [chunk async for chunk in response.body_iterator]
 
 
+async def _empty_seed_doc_ids(driver, kg_id_arg, seed_names):
+    """報告41（L9 V1）：既有測試多半假 driver（如字串 `"fake-driver"`），沒有
+    真的 `HAS_ENTITY` 邊可查。回傳空集合＝模擬「種子文件範圍查不到」，讓
+    `_resolve_doc_scope()` fallback 回語意範圍——維持這些測試原本驗證的
+    「範圍完全由語意 Fact 推導」行為不變（零回歸）。"""
+    return set()
+
+
 # ── _find_seed_entities：字面比對 + 語意 fallback（2026-08-25，見 docs/報告/17）──
 
 class _FakeEntityDriver:
@@ -890,6 +898,7 @@ async def test_chat_runs_semantic_search_before_bfs_and_passes_scope(monkeypatch
     embedding = _FakeEmbeddingProvider([0.1])
     llm = _FakeStreamLLM()
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
@@ -941,6 +950,7 @@ async def test_chat_applies_per_kg_profile_from_file_config_source(monkeypatch, 
         return {}
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
@@ -997,6 +1007,7 @@ async def test_chat_selects_domain_pack_from_kg_node(monkeypatch):
 
     monkeypatch.setattr(agent, "KGRepository", _FakeRepo)
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs)
     monkeypatch.setattr(agent, "vector_search_facts", fake_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
@@ -1045,6 +1056,7 @@ async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(
         return None  # 本測試聚焦 Fact 檢索接線，不驗證關係連結（見專屬測試）
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1294,6 +1306,7 @@ async def test_chat_filters_bfs_triples_by_resolved_relation_type(monkeypatch):
     llm = _FakeStreamLLM()
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1334,6 +1347,7 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
     llm = _FakeStreamLLM()
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1482,6 +1496,7 @@ async def test_chat_yields_sources_event_after_answer_stream(monkeypatch):
     llm = _FakeStreamLLM()
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1527,6 +1542,7 @@ async def test_chat_yields_grounding_event_after_sources(monkeypatch):
     }))
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1577,6 +1593,7 @@ async def test_chat_converts_simplified_chinese_in_final_answer_to_traditional(m
     llm = _FakeStreamLLM(answers=["补助经费额度为八千元。"])
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1617,6 +1634,7 @@ async def test_chat_grounding_check_includes_bfs_triples_not_just_vector_facts(m
     llm = _FakeStreamLLM()
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1657,6 +1675,7 @@ async def test_chat_uses_dedicated_judge_provider_for_grounding_when_configured(
     judge_llm = _FakeStreamLLM()
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
@@ -1699,6 +1718,7 @@ async def test_chat_yields_empty_grounding_event_when_no_facts_retrieved(monkeyp
     llm = _FakeStreamLLM()
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -1734,6 +1754,7 @@ def _chat_common_monkeypatch(monkeypatch, llm, embedding, *, triples=None, facts
         return None
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve_query_relation_type)
@@ -2064,6 +2085,7 @@ def _instrumented_chat_monkeypatch(monkeypatch, llm, embedding, *, triples=None,
         return {}
 
     monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", _empty_seed_doc_ids)
     monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
     monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
     monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
@@ -2094,6 +2116,205 @@ def test_intersect_doc_scopes_empty_intersection_falls_back_to_explicit():
     a, b, c = uuid4(), uuid4(), uuid4()
     # 語意命中的來源不在指定子集內 → 回傳明確子集本身，不放行全庫
     assert agent._intersect_doc_scopes({a}, [b, c]) == {b, c}
+
+
+# ── 報告41（L9 V1）：檢索文件範圍改用種子錨定 ──────────────────────────────
+
+class _FakeDocIdDriver:
+    """回傳 `c.source_doc_id AS doc_id` 形狀的假 driver，供
+    `_relevant_doc_ids_from_seeds()` 測試用（`_FakeEntityDriver` 回傳的是
+    `{"name": ...}`，形狀不同，見上）。"""
+
+    def __init__(self, doc_ids):
+        self._doc_ids = doc_ids
+
+    async def execute_query(self, query, **params):
+        class _Result:
+            def __init__(self, records):
+                self.records = records
+
+        return _Result([{"doc_id": d} for d in self._doc_ids])
+
+
+@pytest.mark.asyncio
+async def test_relevant_doc_ids_from_seeds_queries_has_entity_edge():
+    """`_relevant_doc_ids_from_seeds()`：查 `HAS_ENTITY` 邊找種子實體出現在
+    哪些文件，聚合成不重複的 `source_doc_id` 集合。"""
+    kg_id = uuid4()
+    doc_a, doc_b = uuid4(), uuid4()
+    driver = _FakeDocIdDriver([str(doc_a), str(doc_b), str(doc_a)])
+
+    result = await agent._relevant_doc_ids_from_seeds(driver, kg_id, ["婚假"])
+
+    assert result == {doc_a, doc_b}
+
+
+@pytest.mark.asyncio
+async def test_relevant_doc_ids_from_seeds_empty_seed_names_skips_query():
+    """種子清單為空（`_find_seed_entities` 字面+語意 fallback 都沒命中）→
+    直接回傳空集合，不查 Neo4j——呼叫端 fallback 回語意範圍。"""
+    driver = _FakeDocIdDriver([str(uuid4())])  # 不應被用到
+
+    result = await agent._relevant_doc_ids_from_seeds(driver, uuid4(), [])
+
+    assert result == set()
+
+
+def test_resolve_doc_scope_prefers_seed_over_semantic():
+    """報告41 §3.3：種子文件範圍非空即用，語意範圍不參與（避免雜訊稀釋）——
+    這是修 Q5 類「語意反推被跨文件雜訊帶偏」問題的關鍵行為。"""
+    seed, noise_a, noise_b = uuid4(), uuid4(), uuid4()
+    assert agent._resolve_doc_scope({seed}, {noise_a, noise_b}, None) == {seed}
+
+
+def test_resolve_doc_scope_falls_back_to_semantic_when_seeds_empty():
+    """種子範圍為空（舊 KG 無 `HAS_ENTITY` 邊／種子沒命中）→ fallback 語意
+    範圍——與改造前 `_intersect_doc_scopes(semantic_doc_ids, ...)` 的行為
+    完全一致（零回歸）。"""
+    a, b = uuid4(), uuid4()
+    assert agent._resolve_doc_scope(set(), {a, b}, None) == {a, b}
+
+
+def test_resolve_doc_scope_both_empty_returns_empty():
+    assert agent._resolve_doc_scope(set(), set(), None) == set()
+
+
+def test_resolve_doc_scope_intersects_with_explicit_scope():
+    """種子範圍非空時，仍要與 `payload.scope_doc_ids`（報告39 前導比較的
+    明確子集）取交集，交集邏輯沿用 `_intersect_doc_scopes()`。"""
+    seed_in, seed_out, explicit_only = uuid4(), uuid4(), uuid4()
+    result = agent._resolve_doc_scope({seed_in, seed_out}, set(), [seed_in, explicit_only])
+    assert result == {seed_in}
+
+
+def test_resolve_doc_scope_explicit_scope_with_empty_seed_and_semantic():
+    """種子與語意範圍都空、但有明確範圍 → 回傳明確範圍本身（`_intersect_
+    doc_scopes()` 的「語意為空用明確」分支）。"""
+    explicit = uuid4()
+    assert agent._resolve_doc_scope(set(), set(), [explicit]) == {explicit}
+
+
+@pytest.mark.asyncio
+async def test_chat_seed_anchored_scope_overrides_noisy_semantic_scope(monkeypatch):
+    """報告41 §1.2/§3：`chat()` 端到端驗證——語意 Fact 反推的範圍被跨文件
+    雜訊帶偏（`noise_doc`）時，種子錨定的範圍（`seed_doc`）應該勝出，
+    `bfs_query()` 收到的 `scope_doc_ids` 是種子範圍，不是雜訊語意範圍。"""
+    kg_id = uuid4()
+    seed_doc, noise_doc = uuid4(), uuid4()
+    facts = [{"fact_text": "跟問題概念相近但答非所問", "subject": "X",
+              "rel_type": "RELATED_TO", "object": "Y",
+              "source_doc_id": str(noise_doc), "score": 0.85}]
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return ["婚假"]
+
+    async def fake_relevant_doc_ids_from_seeds(driver, kg_id_arg, seed_names):
+        return {seed_doc}
+
+    calls = {}
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
+        calls["bfs"] = dict(kwargs)
+        return []
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return facts
+
+    async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
+        return None
+
+    async def fake_fetch_document_map(driver, kg_id_arg, triples_arg, fact_results_arg):
+        return {}
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", fake_relevant_doc_ids_from_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_fetch_document_map)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1, 0.2, 0.3]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: _FakeStreamLLM())
+
+    await _drain(await agent.chat(ChatRequest(question="婚假幾天？", kg_id=kg_id)))
+
+    assert calls["bfs"]["scope_doc_ids"] == {seed_doc}  # 種子範圍勝出，雜訊語意範圍沒有參與
+
+
+@pytest.mark.asyncio
+async def test_chat_bfs_only_now_gets_seed_anchored_scope_pushdown(monkeypatch):
+    """報告41 §3.4：`bfs_only` 不跑 `vector_search_facts()`，`semantic_doc_ids`
+    恆空——改造前因此完全沒有範圍下推；改造後種子範圍非空時仍能下推
+    （理論上更精準）。"""
+    kg_id = uuid4()
+    seed_doc = uuid4()
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return ["婚假"]
+
+    async def fake_relevant_doc_ids_from_seeds(driver, kg_id_arg, seed_names):
+        return {seed_doc}
+
+    calls = {}
+
+    async def fake_bfs_query(driver, kg_id_arg, seeds, hops, **kwargs):
+        calls["bfs"] = dict(kwargs)
+        return []
+
+    async def fake_fetch_document_map(driver, kg_id_arg, triples_arg, fact_results_arg):
+        return {}
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", fake_relevant_doc_ids_from_seeds)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs_query)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_fetch_document_map)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1, 0.2, 0.3]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: _FakeStreamLLM())
+
+    await _drain(await agent.chat(ChatRequest(
+        question="婚假幾天？", kg_id=kg_id, retrieval_mode="bfs_only",
+    )))
+
+    assert calls["bfs"]["scope_doc_ids"] == {seed_doc}
+
+
+@pytest.mark.asyncio
+async def test_chat_fact_only_does_not_compute_seeds(monkeypatch):
+    """報告41 §3.4：`fact_only` 不跑 BFS、不算種子——`_find_seed_entities()`
+    不應被呼叫，維持零回歸（範圍完全由語意 Fact 反推決定）。"""
+    kg_id = uuid4()
+    doc_id = uuid4()
+    facts = [{"fact_text": "婚假為八日", "subject": "婚假", "rel_type": "HAS_PROPERTY",
+              "object": "八日", "source_doc_id": str(doc_id), "score": 0.9}]
+    seed_calls = []
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        seed_calls.append(1)
+        return ["婚假"]
+
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+        return facts
+
+    async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
+        return None
+
+    async def fake_fetch_document_map(driver, kg_id_arg, triples_arg, fact_results_arg):
+        return {}
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_vector_search_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_fetch_document_map)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1, 0.2, 0.3]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: _FakeStreamLLM())
+
+    await _drain(await agent.chat(ChatRequest(
+        question="婚假幾天？", kg_id=kg_id, retrieval_mode="fact_only",
+    )))
+
+    assert seed_calls == []
 
 
 @pytest.mark.asyncio

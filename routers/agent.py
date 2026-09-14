@@ -222,6 +222,67 @@ def _intersect_doc_scopes(
     return (semantic_doc_ids & explicit) or explicit
 
 
+async def _relevant_doc_ids_from_seeds(
+    driver: AsyncDriver, kg_id: UUID, seed_names: list[str]
+) -> set[UUID]:
+    """報告41（L9 V1）§3.2：種子實體（`_find_seed_entities()`，已經過
+    `_drop_hub_seeds()` 剔除高 degree 樞紐）出現在哪些文件（`HAS_ENTITY`
+    結構邊），供 `_resolve_doc_scope()` 當「錨定優先」的範圍來源。
+
+    種子名稱是字面/語意 fallback 比對出的具名實體，比 `_relevant_doc_ids_
+    from_facts()`（語意 Fact 相似度反推）更可靠——後者容易被概念相近但
+    答非所問的跨文件雜訊事實帶偏（報告41 §1.2/§1.3）。舊 KG 沒有
+    `HAS_ENTITY` 邊、或種子為空時回傳空集合，呼叫端 fallback 回語意範圍
+    （零回歸，見 `_resolve_doc_scope()`）。
+    """
+    if not seed_names:
+        return set()
+    result = await driver.execute_query(
+        "MATCH (c:Chunk {kg_id: $kg_id})-[:HAS_ENTITY]->(e:Entity {kg_id: $kg_id}) "
+        "WHERE e.name IN $names "
+        "RETURN DISTINCT c.source_doc_id AS doc_id",
+        kg_id=str(kg_id), names=seed_names,
+    )
+    doc_ids: set[UUID] = set()
+    for r in result.records:
+        raw = r["doc_id"]
+        if not raw:
+            continue
+        try:
+            doc_ids.add(UUID(raw) if isinstance(raw, str) else raw)
+        except ValueError:
+            continue
+    return doc_ids
+
+
+def _resolve_doc_scope(
+    seed_doc_ids: set[UUID],
+    semantic_doc_ids: set[UUID],
+    explicit_doc_ids: list[UUID] | None = None,
+) -> set[UUID]:
+    """報告41（L9 V1）§3.3：檢索文件範圍改用「錨定優先」——`seed_doc_ids`
+    非空即直接採用（語意範圍**不參與**，避免雜訊稀釋，見報告41 §3.3
+    「為何不做 seed ∪ semantic 聯集」）；`seed_doc_ids` 空（舊 KG 無
+    `HAS_ENTITY` 邊、或 `_find_seed_entities` 字面+語意 fallback 都沒命中、
+    或 `fact_only` 模式本來就不算種子）時 fallback 回 `semantic_doc_ids`
+    （＝現行行為，零回歸）。再與 `payload.scope_doc_ids`（報告39 前導比較
+    的明確子集）取交集，交集邏輯沿用 `_intersect_doc_scopes()`。
+
+    ⚠️ 真實資料驗證（`compare_doc_scope_retrieval.py`，2026-09-13）：8 題
+    中 7 題新舊皆命中 gold 文件、三元組召回提升 3~25 倍；1 題（26-Q7，
+    誠實拒答 canary）機械化的「gold_doc_id 是否在範圍內」指標判定退步，
+    但 2026-09-14 端到端 `chat()` 對照顯示答案未受影響（仍正確拒答，見
+    memory `project_report39_retrieval_comparison_harness`）——該退步對
+    最終答案是良性的。報告41 §1.2 的原始動機案例（26-Q5「當月一日」）
+    經兩輪查證後確認**不成立**（真因是 `vector_search_facts()` 全域語意
+    排名過低，發生在本函式處理的範圍下推**之前**，本函式救不回它，見
+    報告41 §9）——本改造修的是另一個真實存在、有獨立驗證的問題（BFS
+    範圍被跨文件雜訊帶偏），不再用 Q5 佐證。
+    """
+    base = seed_doc_ids if seed_doc_ids else semantic_doc_ids
+    return _intersect_doc_scopes(base, explicit_doc_ids)
+
+
 def _scope_by_source_doc_ids(items: list, allowed_doc_ids: set[UUID], get_doc_id) -> list:
     """依 `allowed_doc_ids` 做**排除篩選**的共用邏輯（`_filter_triples_by_
     source_doc_ids()`／`_filter_facts_by_source_doc_ids()` 共用）：
@@ -1381,6 +1442,22 @@ async def chat(payload: ChatRequest):
             run_bfs = payload.retrieval_mode in ("both", "bfs_only")
             run_facts = payload.retrieval_mode in ("both", "fact_only")
 
+            # 報告41（L9 V1）§3.1：種子實體提前到語意 Fact 檢索之前算——
+            # 檢索範圍應錨定在可靠的具名實體訊號（`_find_seed_entities()`
+            # 字面比對／`_drop_hub_seeds()` 剔除樞紐），而不是事後才由語意
+            # Fact 相似度反推（後者容易被概念相近但答非所問的跨文件雜訊
+            # 帶偏，見報告41 §1.2/§1.3、ChainRAG／CS-RAG 文獻對照）。
+            # `fact_only` 不跑 BFS、不算種子（報告41 §3.4，零回歸）。
+            seeds: list[str] = []
+            seed_doc_ids: set[UUID] = set()
+            if run_bfs:
+                seeds = await _find_seed_entities(
+                    driver, payload.kg_id, payload.question,
+                    embedding_provider=embedding_provider, question_vector=question_vector,
+                    cfg=cfg,
+                )
+                seed_doc_ids = await _relevant_doc_ids_from_seeds(driver, payload.kg_id, seeds)
+
             # 報告27 L1（2026-09-04）：語意 Fact 檢索提前到 `bfs_query()` 之前，
             # 推出的文件範圍當走訪的**前置**約束（下推到 Cypher），而非只做
             # 事後排除篩選——原順序讓昂貴的無界路徑枚舉先發生、範圍訊號用不上
@@ -1394,21 +1471,19 @@ async def chat(payload: ChatRequest):
             # （`top_k` 提高到 20 後，全 20 筆會被 ~0.80 的跨文件事實稀釋）；
             # 且範圍同時套用到 BFS 三元組與語意 Fact 清單本身（先前只套前者，
             # 導致 Q8 的語意 Fact 清單混入跨文件雜訊、被 LLM 採用成錯誤數字）。
-            # 報告39 §3.1：`bfs_only` 時 `fact_results` 為空 → `semantic_doc_ids`
-            # 自然回空集合＝「不下推」；報告39 §2.3：與 `payload.scope_doc_ids`
-            # （前導比較的 6 份子集）取交集。未帶 `scope_doc_ids` 時
-            # `_intersect_doc_scopes()` 原樣回傳語意範圍（零回歸）。
+            # 報告41（L9 V1）§3.3：`_resolve_doc_scope()` 錨定優先——
+            # `seed_doc_ids` 非空即用（語意範圍不參與），空則 fallback
+            # `semantic_doc_ids`（＝先前 `_intersect_doc_scopes()` 直接吃
+            # `semantic_doc_ids` 的行為，零回歸）；再與 `payload.scope_doc_ids`
+            # （前導比較的 6 份子集）取交集。
             semantic_doc_ids = _relevant_doc_ids_from_facts(
                 fact_results, top_n=cfg.bfs.doc_scope_top_n_facts
             )
-            relevant_doc_ids = _intersect_doc_scopes(semantic_doc_ids, payload.scope_doc_ids)
+            relevant_doc_ids = _resolve_doc_scope(
+                seed_doc_ids, semantic_doc_ids, payload.scope_doc_ids
+            )
 
             if run_bfs:
-                seeds = await _find_seed_entities(
-                    driver, payload.kg_id, payload.question,
-                    embedding_provider=embedding_provider, question_vector=question_vector,
-                    cfg=cfg,
-                )
                 triples = await bfs_query(
                     driver, payload.kg_id, seeds,
                     hops=payload.svo_hops,
