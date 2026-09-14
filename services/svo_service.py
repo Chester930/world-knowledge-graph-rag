@@ -12,6 +12,7 @@ import asyncio
 import difflib
 import json
 import logging
+import math
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -1678,6 +1679,10 @@ def _fact_vector_index_name(kg_id: str) -> str:
     return f"fact_embedding_vector_{str(UUID(kg_id)).replace('-', '_')}"
 
 
+def _fact_fulltext_index_name(kg_id: str) -> str:
+    return f"fact_text_fulltext_{str(UUID(kg_id)).replace('-', '_')}"
+
+
 async def _create_fact_node(
     driver: AsyncDriver,
     kg_id_str: str,
@@ -2040,8 +2045,49 @@ async def create_fact_vector_index(
     )
 
 
+async def create_fact_fulltext_index(driver: AsyncDriver | None = None, kg_id: UUID | None = None) -> None:
+    """建立指定 KG 專屬的 `Fact.fact_text` fulltext 索引（CJK bigram
+    analyzer），供 `vector_search_facts(..., hybrid=True)` 的 BM25 式候選
+    使用（報告43 選項A）。命名與 label 範圍比照 `create_fact_vector_index()`
+    ——每個 KG 各自一個索引，同一租戶隔離理由不重複贅述，見該函式
+    docstring。冪等（`IF NOT EXISTS`），`vector_search_facts()` 只在
+    `hybrid=True` 時才惰性呼叫，非 hybrid 呼叫路徑完全不受影響。"""
+    if driver is None or kg_id is None:
+        return
+    kg_id_str = str(kg_id)
+    await driver.execute_query(
+        f"""
+        CREATE FULLTEXT INDEX {_fact_fulltext_index_name(kg_id_str)} IF NOT EXISTS
+        FOR (f:{_kg_fact_label(kg_id_str)}) ON EACH [f.fact_text]
+        OPTIONS {{ indexConfig: {{ `fulltext.analyzer`: 'cjk' }} }}
+        """,
+    )
+
+
+def _rrf_fuse_fact_ids(id_rankings: list[list[str]], *, k: int = 60) -> list[str]:
+    """Reciprocal Rank Fusion（Cormack, Clarke & Büttcher, 2009, SIGIR）——
+    與 `baseline_rag_service.rrf_fuse()`／`routers.agent._rrf_order()` 同一
+    演算法，這裡另寫一份操作 `elementId` 字串（而非 list index）的版本。
+    三處各自保留一份小型複製、不互相 import，是本專案既有的分層慣例
+    （見 `baseline_rag_service.rrf_fuse()` docstring：避免 services 反向
+    import routers／跨 service 模組耦合），非本次新引入的重複。
+    """
+    scores: dict[str, float] = {}
+    for ranking in id_rankings:
+        for rank, fid in enumerate(ranking):
+            scores[fid] = scores.get(fid, 0.0) + 1.0 / (k + rank)
+    order_hint = {fid: pos for pos, fid in enumerate(id_rankings[0])} if id_rankings else {}
+    return sorted(scores, key=lambda fid: (-scores[fid], order_hint.get(fid, math.inf)))
+
+
 async def vector_search_facts(
-    driver: AsyncDriver, kg_id: UUID, query_vector: list[float], top_k: int
+    driver: AsyncDriver,
+    kg_id: UUID,
+    query_vector: list[float],
+    top_k: int,
+    *,
+    question: str | None = None,
+    hybrid: bool = False,
 ) -> list[dict]:
     """3.1.4 §a `RETRIEVE`：per-KG `Fact` 向量索引 KNN 查詢，比照
     `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳最相近的
@@ -2069,6 +2115,22 @@ async def vector_search_facts(
     再依 `(subject, rel_type, object)` 去重（`_dedupe_facts_by_key()`，
     同一鍵只保留分數最高的一筆），最後截斷回 `top_k`。不改動 Fact 節點的
     建立/儲存邏輯，只在查詢輸出層後處理，對外 `top_k` 契約不變。
+
+    🧪 **`hybrid=True`（報告43 選項A，prototype，預設關）**：`question` 與
+    `hybrid=True` 齊備時，額外對 `Fact.fact_text` 跑一趟 fulltext（CJK
+    analyzer，Lucene 內建排名，近似 BM25）查詢，與上面的 dense cosine 候選
+    池以 `_rrf_fuse_fact_ids()`（Cormack et al. 2009 RRF）融合後再去重/
+    截斷。動機：report41 §9／report43 §1 診斷的 26-Q5 案例——dense
+    cosine 把「起算」這類樣板措辭的跨文件近義事實排得比正解還高，正解被
+    擠出候選池；fulltext 的 IDF 機制對這種「共享虛詞、缺乏內容詞重疊」的
+    情境理論上更有鑑別力（高頻虛詞如「起算」IDF 低、貢獻小，稀有內容詞如
+    「災害發生」IDF 高、貢獻大）。**尚未對真實 KG 驗證**（report43 §3
+    選項A風險項1：短事實文字上 BM25/fulltext 的實際鑑別力待實測），本參數
+    預設 `False`，呼叫端不主動傳入 `hybrid=True` 前對既有行為零影響。
+    `question` 缺席、或 fulltext 索引不支援（`cjk` analyzer 缺席等）時，
+    直接跳過 fulltext 分支退回純 dense——不像 `_fetch_entity_candidates_
+    canopy()` 那樣退回 `CONTAINS`：`fact_text` 是完整句子而非短名稱，對
+    整句問題做 `CONTAINS` 子字串比對幾乎不可能命中，退回沒有意義。
     """
     await create_fact_vector_index(driver, kg_id, dim=len(query_vector))
     candidate_k = top_k * FACT_SEARCH_CANDIDATE_MULTIPLIER
@@ -2076,7 +2138,8 @@ async def vector_search_facts(
         f"""
         CALL db.index.vector.queryNodes('{_fact_vector_index_name(str(kg_id))}', $candidate_k, $vector)
         YIELD node, score
-        RETURN node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
+        RETURN elementId(node) AS fact_id,
+               node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
                node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
                node.source_doc_id AS source_doc_id,
                node.source_svo_chunk_index AS source_svo_chunk_index, score
@@ -2084,7 +2147,41 @@ async def vector_search_facts(
         candidate_k=candidate_k,
         vector=query_vector,
     )
-    records = [dict(r) for r in result.records]
+    dense_records = [dict(r) for r in result.records]
+
+    if not (hybrid and question):
+        records = [{k: v for k, v in r.items() if k != "fact_id"} for r in dense_records]
+        return _dedupe_facts_by_key(records)[:top_k]
+
+    by_id = {r["fact_id"]: r for r in dense_records}
+    dense_order = [r["fact_id"] for r in dense_records]
+    fulltext_order: list[str] = []
+    try:
+        await create_fact_fulltext_index(driver, kg_id)
+        ft_result = await driver.execute_query(
+            f"""
+            CALL db.index.fulltext.queryNodes('{_fact_fulltext_index_name(str(kg_id))}', $q)
+            YIELD node, score
+            RETURN elementId(node) AS fact_id,
+                   node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
+                   node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
+                   node.source_doc_id AS source_doc_id,
+                   node.source_svo_chunk_index AS source_svo_chunk_index, score
+            LIMIT $candidate_k
+            """,
+            q=question,
+            candidate_k=candidate_k,
+        )
+        for r in ft_result.records:
+            rec = dict(r)
+            by_id.setdefault(rec["fact_id"], rec)
+            fulltext_order.append(rec["fact_id"])
+    except Exception:  # noqa: BLE001 -- fulltext 索引缺席/analyzer 不支援，優雅退回純 dense（同 _fetch_entity_candidates_canopy 慣例）
+        logger.warning("vector_search_facts: fulltext 候選查詢失敗，退回純 dense（kg_id=%s）", kg_id)
+        fulltext_order = []
+
+    fused_order = _rrf_fuse_fact_ids([dense_order, fulltext_order]) if fulltext_order else dense_order
+    records = [{k: v for k, v in by_id[fid].items() if k != "fact_id"} for fid in fused_order]
     return _dedupe_facts_by_key(records)[:top_k]
 
 

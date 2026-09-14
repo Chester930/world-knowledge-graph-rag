@@ -3405,6 +3405,144 @@ async def test_vector_search_facts_truncates_deduped_results_to_top_k():
     assert [r["fact_text"] for r in results] == ["事實0", "事實1", "事實2"]
 
 
+# ── vector_search_facts hybrid=True（報告43 選項A，BM25式 fulltext RRF 融合）──
+
+def test_rrf_fuse_fact_ids_rewards_consensus_across_both_rankings():
+    """RRF 只看排名不看原始分數，且獎勵「兩份清單都有一定名次」勝過「只在單一
+    清單裡排第一」——target 在 dense 排名普通（第3）但同時在 fulltext 排第一，
+    總分贏過只在其中一份清單稱冠、另一份缺席的候選。"""
+    fused = svc._rrf_fuse_fact_ids([
+        ["b", "c", "target"],   # dense：target 排第 3（index 2）
+        ["target", "a"],        # fulltext：target 排第 1，dense 序列中缺席
+    ])
+    assert fused[0] == "target"
+
+
+class _FactHybridShapeDriver:
+    """依查詢形狀分派的 Fact 替身，比照 `_CanopyShapeDriver`（報告40）—— dense
+    向量查詢、fulltext 查詢、fulltext 索引建立三種查詢各自回傳指定 records。"""
+
+    def __init__(self, *, dense=None, fulltext=None, fulltext_raises=False):
+        self.dense = dense or []
+        self.fulltext = fulltext or []
+        self.fulltext_raises = fulltext_raises
+        self.calls: list[str] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if stripped.startswith("CREATE FULLTEXT INDEX"):
+            self.calls.append("create_fulltext_index")
+            return FakeResult([])
+        if stripped.startswith("CREATE VECTOR INDEX"):
+            self.calls.append("create_vector_index")
+            return FakeResult([])
+        if "db.index.vector.queryNodes" in stripped:
+            self.calls.append("dense")
+            return FakeResult(self.dense)
+        if "db.index.fulltext.queryNodes" in stripped:
+            self.calls.append("fulltext")
+            if self.fulltext_raises:
+                raise RuntimeError("fulltext index unavailable")
+            return FakeResult(self.fulltext)
+        raise AssertionError(f"unexpected query shape: {stripped[:80]!r}")
+
+
+def _fact_row(fact_id: str, fact_text: str, score: float, **overrides) -> dict:
+    row = {
+        "fact_id": fact_id, "fact_text": fact_text, "verb": "V", "confidence": 1,
+        "subject": f"S-{fact_id}", "object": f"O-{fact_id}", "rel_type": "RELATED_TO",
+        "source_doc_id": "doc-1", "source_svo_chunk_index": 0, "score": score,
+    }
+    row.update(overrides)
+    return row
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_defaults_to_dense_only_without_hybrid_flag():
+    """`hybrid` 預設 False——既有呼叫端（未傳新參數）行為零變化，不發出
+    fulltext 查詢。"""
+    driver = _FactHybridShapeDriver(dense=[_fact_row("f1", "事實一", 0.9)])
+
+    results = await svc.vector_search_facts(driver, uuid4(), [0.1, 0.2], top_k=5)
+
+    assert [r["fact_text"] for r in results] == ["事實一"]
+    assert "fulltext" not in driver.calls
+    assert "fact_id" not in results[0]  # 內部欄位不外洩，維持既有輸出契約
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_hybrid_without_question_skips_fulltext():
+    """`hybrid=True` 但沒給 `question` 時視同未開啟——無法對 fulltext 索引下
+    查詢字串，跳過而非拋錯。"""
+    driver = _FactHybridShapeDriver(dense=[_fact_row("f1", "事實一", 0.9)])
+
+    results = await svc.vector_search_facts(driver, uuid4(), [0.1, 0.2], top_k=5, hybrid=True)
+
+    assert [r["fact_text"] for r in results] == ["事實一"]
+    assert "fulltext" not in driver.calls
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_hybrid_pulls_up_fact_ranked_low_in_dense_but_high_in_fulltext():
+    """核心案例：一條事實在 dense cosine 候選池排名很後面（被語意相近的跨
+    文件雜訊擠壓，對應報告41 §9 的 26-Q5 診斷），但在 fulltext 排名很前面
+    （字面詞重疊度高）——RRF 融合後應該被拉到最終結果的前段，而非被
+    `top_k` 截斷掉。"""
+    noise = [_fact_row(f"noise{i}", f"雜訊事實{i}", 0.85 - i * 0.001) for i in range(5)]
+    target = _fact_row("target", "災害發生之當月一日起 計算 前條所定災後六個月期間", 0.80)
+    driver = _FactHybridShapeDriver(
+        dense=[*noise, target],  # target 是 dense 候選池裡分數最低（排最後）的一筆
+        fulltext=[target],  # target 在 fulltext 排第一，雜訊字面不相關、fulltext 查無結果
+    )
+
+    results = await svc.vector_search_facts(
+        driver, uuid4(), [0.1, 0.2], top_k=3, question="災後保費補助期間從哪天起算？", hybrid=True
+    )
+
+    assert "create_fulltext_index" in driver.calls
+    assert results[0]["fact_text"] == "災害發生之當月一日起 計算 前條所定災後六個月期間"
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_hybrid_falls_back_to_dense_when_fulltext_index_unavailable():
+    """部署的 Neo4j 版本不支援 `cjk` fulltext analyzer（或索引尚未就緒）時，
+    優雅退回純 dense 排序，不讓整次檢索失敗（同 `_fetch_entity_candidates_
+    canopy()` 慣例，但退回目標是「跳過」而非 `CONTAINS`，見
+    `vector_search_facts()` docstring）。"""
+    driver = _FactHybridShapeDriver(
+        dense=[_fact_row("f1", "事實一", 0.9), _fact_row("f2", "事實二", 0.8)],
+        fulltext_raises=True,
+    )
+
+    results = await svc.vector_search_facts(
+        driver, uuid4(), [0.1, 0.2], top_k=5, question="問題", hybrid=True
+    )
+
+    assert [r["fact_text"] for r in results] == ["事實一", "事實二"]  # 純 dense 排序不變
+
+
+@pytest.mark.asyncio
+async def test_create_fact_fulltext_index_noop_without_driver_or_kg_id():
+    assert await svc.create_fact_fulltext_index() is None
+    driver = FakeDriver()
+    await svc.create_fact_fulltext_index(driver)  # kg_id 缺席同樣視為 noop
+    assert driver.calls == []
+
+
+@pytest.mark.asyncio
+async def test_create_fact_fulltext_index_issues_per_kg_create_fulltext_index_query():
+    driver = FakeDriver()
+    kg_id = uuid4()
+
+    await svc.create_fact_fulltext_index(driver, kg_id)
+
+    assert len(driver.calls) == 1
+    query, _ = driver.calls[0]
+    assert svc._fact_fulltext_index_name(str(kg_id)) in query
+    assert f"FOR (f:{svc._kg_fact_label(str(kg_id))}) ON EACH [f.fact_text]" in query
+    assert "cjk" in query
+
+
 # ── backfill_fact_nodes（3.1.4 §b 回填批次任務，2026-08-18）─────────────────
 
 class BackfillFactFakeDriver:
