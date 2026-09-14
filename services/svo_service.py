@@ -23,6 +23,7 @@ from neo4j.exceptions import ConstraintError
 
 from core.constants import (
     COMPARE_COSINE_THRESHOLD,
+    ENTITY_CANDIDATE_CANOPY_K,
     ENTITY_DEDUP_COSINE_THRESHOLD,
     ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
     ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
@@ -91,6 +92,45 @@ async def create_chunk_vector_index(driver: AsyncDriver | None = None, dim: int 
         OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
         """,
         dim=dim,
+    )
+
+
+_ENTITY_NAME_VECTOR_INDEX = "entity_name_vector"
+_ENTITY_NAME_FULLTEXT_INDEX = "entity_name_fulltext"
+
+
+async def create_entity_name_vector_index(driver: AsyncDriver | None = None, dim: int = VECTOR_DIM) -> None:
+    """建立 Entity 節點名稱向量索引（app 啟動時呼叫一次），供
+    `_fetch_entity_candidates()` 的 cosine canopy 使用（見 3.1.4 `DEDUP4`／
+    報告40 §6.1）。`Entity` 仍是全 KG 共用單一 label（未比照 `Fact` 拆 per-KG
+    label），故用全域索引＋查詢時 `WHERE e.kg_id = $kg_id` 後過濾，不像
+    `Fact` 被迫 per-KG——`_fetch_entity_candidates()` 本來就帶 `kg_id` 過濾。"""
+    if driver is None:
+        return
+    await driver.execute_query(
+        f"""
+        CREATE VECTOR INDEX {_ENTITY_NAME_VECTOR_INDEX} IF NOT EXISTS
+        FOR (e:Entity) ON e.name_embedding
+        OPTIONS {{ indexConfig: {{ `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' }} }}
+        """,
+        dim=dim,
+    )
+
+
+async def create_entity_name_fulltext_index(driver: AsyncDriver | None = None) -> None:
+    """建立 Entity 節點名稱 fulltext 索引（CJK bigram analyzer，app 啟動時
+    呼叫一次），供 `_fetch_entity_candidates()` 的字串 canopy 使用（報告40
+    §3.3）。純附加、冪等；部署的 Neo4j 版本若不支援 `cjk` analyzer，
+    `_fetch_entity_candidates()` 會在查詢時偵測失敗並退回 `CONTAINS`
+    （見該函式 docstring），此處不需要回傳成敗旗標。"""
+    if driver is None:
+        return
+    await driver.execute_query(
+        f"""
+        CREATE FULLTEXT INDEX {_ENTITY_NAME_FULLTEXT_INDEX} IF NOT EXISTS
+        FOR (e:Entity) ON EACH [e.name]
+        OPTIONS {{ indexConfig: {{ `fulltext.analyzer`: 'cjk' }} }}
+        """,
     )
 
 
@@ -870,8 +910,79 @@ def _type_set(type_str: str | None) -> set[str]:
     return {t.strip() for t in type_str.split(",") if t.strip()}
 
 
+async def _fetch_entity_candidates_canopy(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    name: str,
+    *,
+    embedding_provider: EmbeddingProvider | None,
+    canopy_k: int,
+) -> list[dict]:
+    """報告40 §3 的三 canopy 聯集：exact（唯一約束）＋ cosine（向量索引
+    top-`canopy_k`，需 `embedding_provider` 才能對 `name` 編碼）＋ 字串
+    （fulltext CJK bigram，索引不存在/不支援時當場退回 `CONTAINS`）。
+    只在 `_fetch_entity_candidates()` 有 `name` 可供 canopy 比對時呼叫。"""
+    kg_id_str = str(kg_id)
+    by_name: dict[str, dict] = {}
+
+    exact = await driver.execute_query(
+        "MATCH (e:Entity {kg_id: $kg_id, name: $name}) "
+        "RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding",
+        kg_id=kg_id_str, name=name,
+    )
+    for r in exact.records:
+        by_name[r["name"]] = {"name": r["name"], "type": r.get("type"), "name_embedding": r.get("name_embedding")}
+
+    if embedding_provider is not None:
+        name_vec = await embedding_provider.encode(name)
+        cosine_result = await driver.execute_query(
+            f"""
+            CALL db.index.vector.queryNodes('{_ENTITY_NAME_VECTOR_INDEX}', $k, $vec)
+            YIELD node AS e, score
+            WHERE e.kg_id = $kg_id
+            RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding
+            """,
+            k=canopy_k, vec=name_vec, kg_id=kg_id_str,
+        )
+        for r in cosine_result.records:
+            by_name.setdefault(
+                r["name"], {"name": r["name"], "type": r.get("type"), "name_embedding": r.get("name_embedding")}
+            )
+
+    try:
+        ft = await driver.execute_query(
+            f"""
+            CALL db.index.fulltext.queryNodes('{_ENTITY_NAME_FULLTEXT_INDEX}', $q)
+            YIELD node AS e
+            WHERE e.kg_id = $kg_id
+            RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding
+            """,
+            q=name, kg_id=kg_id_str,
+        )
+        string_records = ft.records
+    except Exception:  # noqa: BLE001 -- fulltext 索引缺席/analyzer 不支援，優雅退回 CONTAINS（報告40 §3.3）
+        contains = await driver.execute_query(
+            "MATCH (e:Entity {kg_id: $kg_id}) WHERE e.name CONTAINS $name OR $name CONTAINS e.name "
+            "RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding",
+            kg_id=kg_id_str, name=name,
+        )
+        string_records = contains.records
+    for r in string_records:
+        by_name.setdefault(
+            r["name"], {"name": r["name"], "type": r.get("type"), "name_embedding": r.get("name_embedding")}
+        )
+
+    return list(by_name.values())
+
+
 async def _fetch_entity_candidates(
-    driver: AsyncDriver, kg_id: UUID, entity_type: str, name: str | None = None
+    driver: AsyncDriver,
+    kg_id: UUID,
+    entity_type: str,
+    name: str | None = None,
+    *,
+    embedding_provider: EmbeddingProvider | None = None,
+    canopy_k: int = ENTITY_CANDIDATE_CANOPY_K,
 ) -> list[dict]:
     """查詢同 KG 的既有 Entity 節點，依型別集合交集篩選（名稱＋已持久化的
     `name_embedding`，供編輯距離/cosine 比對）。
@@ -894,17 +1005,37 @@ async def _fetch_entity_candidates(
     邏輯再把這個錯誤候選改名成正確名稱時，撞上本來就叫這個名稱的既有
     節點，觸發 `ConstraintError`（見 `merge_entity()` 該段落與
     `docs/論文/03_變更紀錄.md` 對應條目）。
+
+    **2026-09-14 效能改造（見 3.1.4 `DEDUP4` 節點向量化效能改造／報告40，
+    Pass 2 L6 R2）**：`name` 有提供時（正式路徑 `merge_entity()` 恆提供），
+    改用 `_fetch_entity_candidates_canopy()` 的三 canopy 聯集（exact／cosine
+    向量索引 top-`canopy_k`／字串 fulltext-or-CONTAINS），取代全 KG 掃描——
+    候選集從 O(n) 縮到 O(canopy_k)，`resolve_entity_name()` 的判準與門檻
+    完全不變，只是換了候選來源。300-mention 抽樣驗證新舊候選集 100% 一致
+    （`compare_entity_candidate_recall_result.json`）。`name` 缺席（僅供內部
+    直接呼叫型別篩選邏輯的呼叫端）或未提供 `embedding_provider` 時，退回
+    全 KG 掃描／略過 cosine canopy——**行為保守，寧可多掃不可漏候選**。
     """
-    result = await driver.execute_query(
-        "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding",
-        kg_id=str(kg_id),
-    )
+    if name is None:
+        result = await driver.execute_query(
+            "MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name AS name, e.type AS type, e.name_embedding AS name_embedding",
+            kg_id=str(kg_id),
+        )
+        records = [
+            {"name": r["name"], "type": r.get("type"), "name_embedding": r.get("name_embedding")}
+            for r in result.records
+        ]
+    else:
+        records = await _fetch_entity_candidates_canopy(
+            driver, kg_id, name, embedding_provider=embedding_provider, canopy_k=canopy_k
+        )
+
     query_types = _type_set(entity_type)
     if not query_types:
-        return [{"name": r["name"], "name_embedding": r.get("name_embedding")} for r in result.records]
+        return [{"name": r["name"], "name_embedding": r.get("name_embedding")} for r in records]
     return [
         {"name": r["name"], "name_embedding": r.get("name_embedding")}
-        for r in result.records
+        for r in records
         if r["name"] == name or not _type_set(r["type"]) or query_types & _type_set(r["type"])
     ]
 
@@ -1175,7 +1306,7 @@ async def merge_entity(
     實作與第五章消融實驗評估，非本設計階段的阻斷性問題（比照 3.1.1 §a
     未分配池 O(n²) 的既有處理方式）。
     """
-    candidates = await _fetch_entity_candidates(driver, kg_id, entity_type, name)
+    candidates = await _fetch_entity_candidates(driver, kg_id, entity_type, name, embedding_provider=embedding_provider)
     resolved_name = await resolve_entity_name(
         name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider
     )

@@ -38,6 +38,15 @@ ENTITY_DEDUP_EDIT_RATIO_THRESHOLD = 0.70  # 校準參考：「台積電」對「
 ENTITY_DEDUP_COSINE_THRESHOLD = 0.88
 ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD = 0.75
 
+# `_fetch_entity_candidates()` canopy 式候選檢索（見 docs/報告/40，Pass 2 L6 R2）
+# 的 cosine 向量索引 top-k：McCallum, Nigam & Ungar（2000）canopy clustering——
+# 用廉價可索引的相似訊號先圈出候選子集，取代全 KG 掃描，`resolve_entity_name()`
+# 判準本身不變。寧大勿小：只有 > canopy_k 個既有實體同時與這次提及 cosine ≥
+# ENTITY_DEDUP_COSINE_THRESHOLD 才會漏失候選，實務上極罕見。2026-09-14 對 KG#4
+# 236903cf 做 300-mention 抽樣 recall 對照，`canopy_k=50` 與全掃 100% 一致
+# （`compare_entity_candidate_recall_result.json`），候選集平均 12096→605.6（縮 95%）。
+ENTITY_CANDIDATE_CANOPY_K = 50
+
 # SVO 三元組合法語意關係類型——採 ConceptNet 5.5 核心關係集合（Speer, Chin &
 # Havasi, 2017, AAAI 2017；逐字查證清單見 docs/參考文獻/03_資訊抽取與本體設計/README.md），
 # 取代原本自行擬定的 30 類，對應 docs/論文/03_系統設計與方法論.md § 3.1.3「關係類型

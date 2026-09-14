@@ -181,6 +181,30 @@ class InMemoryEntityDriver:
             ]
             return FakeResult(records)
 
+        # 報告40（Pass 2 L6 R2）canopy 候選檢索的三個子查詢——這個測試替身
+        # 沒有真正的向量/全文索引，cosine／fulltext canopy 一律回傳該 KG
+        # 全部既有節點（安全的超集合，等同全掃）；canopy 本身縮小候選集的
+        # 效果由 `_fetch_entity_candidates_canopy` 專屬的獨立測試驗證，這裡
+        # 只需保證既有 DEDUP／merge 測試仍看得到全部既有候選，不因換了
+        # 查詢形狀而漏候選。
+        if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id, name: $name})"):
+            key = (params["kg_id"], params["name"])
+            data = self.entities.get(key)
+            if data is None:
+                return FakeResult([])
+            return FakeResult([
+                {"name": params["name"], "type": data["type"], "name_embedding": data.get("name_embedding")}
+            ])
+
+        if "db.index.vector.queryNodes" in stripped or "db.index.fulltext.queryNodes" in stripped:
+            kg_id = params["kg_id"]
+            records = [
+                {"name": name, "type": data["type"], "name_embedding": data.get("name_embedding")}
+                for (kid, name), data in self.entities.items()
+                if kid == kg_id
+            ]
+            return FakeResult(records)
+
         if stripped.startswith("MERGE (e:Entity {kg_id: $kg_id, name: $name}) ON CREATE SET"):
             key = (params["kg_id"], params["name"])
             self.entities.setdefault(
@@ -1296,6 +1320,133 @@ async def test_fetch_entity_candidates_passes_through_persisted_name_embedding()
     by_name = {c["name"]: c["name_embedding"] for c in candidates}
     assert by_name["台積電"] == [1.0, 0.0]
     assert by_name["鴻海"] is None
+
+
+# ── _fetch_entity_candidates canopy 化（報告40，Pass 2 L6 R2）─────────────
+# `name` 有提供時改用三 canopy（exact／cosine／字串）聯集取代全 KG 掃描，
+# 見 `_fetch_entity_candidates_canopy()` docstring。`FakeDriver` 對所有查詢
+# 一律回傳同一份記錄，無法區分三個子查詢各自的輸入，這裡另建一個依查詢
+# 形狀分派的替身。
+
+class _CanopyShapeDriver:
+    def __init__(self, *, exact=None, cosine=None, fulltext=None, fulltext_raises=False, contains=None):
+        self.exact = exact or []
+        self.cosine = cosine or []
+        self.fulltext = fulltext or []
+        self.fulltext_raises = fulltext_raises
+        self.contains = contains or []
+        self.calls: list[str] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if stripped.startswith("MATCH (e:Entity {kg_id: $kg_id, name: $name})"):
+            self.calls.append("exact")
+            return FakeResult(self.exact)
+        if "db.index.vector.queryNodes" in stripped:
+            self.calls.append("cosine")
+            return FakeResult(self.cosine)
+        if "db.index.fulltext.queryNodes" in stripped:
+            self.calls.append("fulltext")
+            if self.fulltext_raises:
+                raise RuntimeError("fulltext index unavailable")
+            return FakeResult(self.fulltext)
+        if "CONTAINS" in stripped:
+            self.calls.append("contains")
+            return FakeResult(self.contains)
+        raise AssertionError(f"unexpected query shape: {stripped[:80]!r}")
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_canopy_unions_three_sources():
+    """報告40 §3：三個子查詢取聯集去重（依 name 為鍵），取代全 KG 掃描。"""
+    driver = _CanopyShapeDriver(
+        exact=[FakeRecord(name="台積電", type="組織")],
+        cosine=[FakeRecord(name="台積電公司", type="組織")],
+        fulltext=[FakeRecord(name="台積電", type="組織")],  # 與 exact 重複，應被去重
+    )
+
+    candidates = await svc._fetch_entity_candidates(
+        driver, uuid4(), "組織", name="台積電", embedding_provider=FakeEmbedding()
+    )
+
+    assert {c["name"] for c in candidates} == {"台積電", "台積電公司"}
+    assert driver.calls == ["exact", "cosine", "fulltext"]
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_canopy_skips_cosine_without_embedding_provider():
+    """沒有 `embedding_provider` 就無法對 `name` 編碼——略過 cosine canopy，
+    不強行呼叫（寧可少一個 canopy，不可拋例外）。"""
+    driver = _CanopyShapeDriver(exact=[FakeRecord(name="台積電", type="組織")])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "組織", name="台積電")
+
+    assert {c["name"] for c in candidates} == {"台積電"}
+    assert "cosine" not in driver.calls
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_canopy_falls_back_to_contains_when_fulltext_unavailable():
+    """部署的 Neo4j 版本不支援 `cjk` fulltext analyzer 時，字串 canopy 優雅
+    退回 `CONTAINS`（報告40 §3.3），不讓整次候選查詢失敗。"""
+    driver = _CanopyShapeDriver(
+        fulltext_raises=True,
+        contains=[FakeRecord(name="台積電公司", type="組織")],
+    )
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "組織", name="台積電")
+
+    assert {c["name"] for c in candidates} == {"台積電公司"}
+    assert driver.calls == ["exact", "fulltext", "contains"]
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_without_name_still_uses_full_scan():
+    """`name` 缺席（僅供內部直接呼叫型別篩選邏輯）時維持全 KG 掃描，不走
+    canopy——canopy 需要一個 mention 名稱才有東西可以圈候選，`merge_entity()`
+    正式路徑恆提供 `name`，這個分支只服務直接呼叫的測試/內部用途。"""
+    driver = FakeDriver(records=[FakeRecord(name="台積電", type="組織")])
+
+    candidates = await svc._fetch_entity_candidates(driver, uuid4(), "組織")
+
+    assert len(driver.calls) == 1
+    query, _ = driver.calls[0]
+    assert query.strip().startswith("MATCH (e:Entity {kg_id: $kg_id}) RETURN e.name")
+    assert {c["name"] for c in candidates} == {"台積電"}
+
+
+@pytest.mark.asyncio
+async def test_fetch_entity_candidates_canopy_preserves_resolution_when_true_match_retained():
+    """報告40 §6.4 golden test 精神：canopy 把候選集從全掃縮到只含真正
+    命中的候選時，`resolve_entity_name()` 的判定結果應與全掃版一致——
+    canopy 砍掉的應該只是 `resolve_entity_name` 本來也用不到的雜訊候選
+    （這裡的雜訊是「不相關實體」，全掃版看得到但編輯距離/cosine 都比不上
+    「台積電公司」，判定結果不受它存在與否影響）。"""
+    embedding_provider = FakeEmbedding()
+    noise = FakeRecord(name="不相關實體", type="組織")
+    match = FakeRecord(name="台積電公司", type="組織")
+
+    old_driver = FakeDriver(records=[noise, match])
+    old_candidates = await svc._fetch_entity_candidates(old_driver, uuid4(), "組織")
+
+    new_driver = _CanopyShapeDriver(cosine=[match], fulltext=[match])
+    new_candidates = await svc._fetch_entity_candidates(
+        new_driver, uuid4(), "組織", name="台積電", embedding_provider=embedding_provider
+    )
+
+    old_resolved = await svc.resolve_entity_name("台積電", old_candidates, embedding_provider=embedding_provider)
+    new_resolved = await svc.resolve_entity_name("台積電", new_candidates, embedding_provider=embedding_provider)
+    assert old_resolved == new_resolved == "台積電公司"
+
+
+@pytest.mark.asyncio
+async def test_create_entity_name_vector_index_without_driver_is_noop():
+    await svc.create_entity_name_vector_index(None)  # 不應拋出例外
+
+
+@pytest.mark.asyncio
+async def test_create_entity_name_fulltext_index_without_driver_is_noop():
+    await svc.create_entity_name_fulltext_index(None)  # 不應拋出例外
 
 
 # ── resolve_entity_name（DEDUP4＋ESCALATE 純邏輯）──────────────────────────

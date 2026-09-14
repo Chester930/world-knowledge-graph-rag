@@ -70,6 +70,9 @@ async def lifespan(app: FastAPI):
     await svo_service.create_entity_index(get_driver())
     await svo_service.create_chunk_vector_index(get_driver(), embedding.dim)
     await svo_service.create_related_to_vector_index(get_driver(), embedding.dim)
+    # 報告40（Pass 2 L6 R2）：_fetch_entity_candidates() 的 canopy 候選檢索所需索引
+    await svo_service.create_entity_name_vector_index(get_driver(), embedding.dim)
+    await svo_service.create_entity_name_fulltext_index(get_driver())
     # § 3.1.4 §a Fact 向量索引改為 2026-08-19 起每個 KG 各自一個獨立索引
     # （見 svo_service.create_fact_vector_index() docstring），啟動時尚不
     # 知道有哪些 KG，改由 vector_search_facts() 在查詢當下惰性建立
