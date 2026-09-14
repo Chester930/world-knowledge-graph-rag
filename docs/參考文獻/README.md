@@ -34,6 +34,7 @@
 | `25_三元組自然語言化遺漏偵測/` | `docs/報告/26_修正後瓶頸探測問答比對報告.md` § 4 #6（自然語言化小失真真實案例）；`services/svo_service.py::_naturalize_triple()`（報告24 機制） | 🟡 討論中，機制未實作；🟢 已下載精讀 FABLES（Kim et al. 2024, COLM，遺漏錯誤分類法）、RHO（Ji et al. 2023, ACL Findings，Entity Coverage Recall 框架）；交叉引用已下載的 KAPING（`12_`） |
 | `29_佇列恢復與對帳模型/` | 03_系統設計與方法論.md § 3.1.2 `RESTART`／`TRUST`／`REBUILD`（重啟時的佇列恢復模型；2026-09-10 Pass 2 L3 審視 G1 修正） | ✅ 已下載精讀 1 篇（Burns et al. 2016, ACM Queue / CACM）；另查證 Kubernetes controllers／controller-runtime 官方 level-triggered 規範。§3.1.2 既有聲明「佇列實作為本專案自行設計」不受影響，本資料夾僅佐證恢復模型 |
 | `30_生成端精確度流失與引用幻覺/` | `docs/報告/42_全量重抽三階段方法比較與報告39七路評分報告.md` § 6 結論 4／5（2026-09-13 新增，K/K-2b 在 26-Q5「當月一日→當日」精確度流失、K-2b 引用不存在條號） | ✅ 已下載全文並全文搜尋驗證核心定義 2 篇（Maynez et al. 2020, ACL；Dahl et al. 2024, Journal of Legal Analysis）；兩者皆有明確標註誠實侷限（前者非數值型/非法規場景，後者為案例法非台灣成文法條號），僅作分類框架/現象佐證用，非直接方法來源 |
+| `32_法規結構感知切塊與主旨錨定/` | `docs/報告/46_領域可插拔切塊參數化與主旨錨定SDD.md`；`docs/報告/47_Claude_Code交接任務書.md` 任務 B（`ArticleAwareChunking`／`header_anchored`） | 📋 本資料夾不存 PDF，僅 README 記角色＋WebFetch/gh api 即時查證：Prior et al. 2026（arXiv:2605.19806，德國法規切塊比較）、Ford et al. 2026（arXiv:2604.25448，多法域 RAG 系統）、Anthropic Contextual Retrieval、LangChain `MarkdownHeaderTextSplitter`（146,273★）；另附即時查詢的 KG 條文長度分布資料，支撐任務 B 範圍修正結論 |
 
 ## 01_AGI與智慧定義 內容清單
 

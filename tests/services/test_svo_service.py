@@ -2466,6 +2466,77 @@ async def test_trigger_extraction_uses_article_aware_chunking_when_articles_give
 
 
 @pytest.mark.asyncio
+async def test_trigger_extraction_wires_cfg_chunking_into_svogroup_path(tmp_path, monkeypatch):
+    """報告47 任務B：驗證 `cfg.chunking`（`ChunkingConfig(strategy="header_anchored")`）
+    真的從 `trigger_extraction()` 一路傳到 `build_svo_chunks()`，而不是只加了參數
+    卻沒接上——與 `tests/services/test_svo_chunking.py::
+    test_build_svo_chunks_header_anchored_injects_header_to_children_and_preserves_lineage`
+    使用同一組法條文字，但這裡走完整 `trigger_extraction()` 端到端路徑（`articles=None`，
+    即一般文件會走的 `SVOGROUP` 路徑），確認產出的 chunk 檔案本身（而非只有記憶體物件）
+    帶有主旨前綴注入。"""
+    from core.kg_config import ChunkingConfig, KGConfig
+
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    text = (
+        "第40條 雇主有下列情事之一者，處新臺幣三萬元以上十五萬元以下罰鍰："
+        "一、未依法給付加班費。"
+        "二、未依規定置備勞工名卡。"
+        "三、拒絕勞工檢查員檢查。"
+        "四、未依規定發給資遣費。"
+        "五、違反工作時間之限制規定。"
+    )
+    doc_folder, _record = ingestion_service.chunk_and_stage(text, "note.md", kg_folder)
+
+    cfg = KGConfig(chunking=ChunkingConfig(
+        strategy="header_anchored", max_sentences=3, overlap_sentences=0,
+        prepend_header_to_children=True,
+    ))
+    kg_id = uuid4()
+    await svc.trigger_extraction(FakeDriver(), doc_folder, kg_id, cfg=cfg)
+
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    assert len(chunk_files) == 2
+    # write_svo_chunks() 會在正文前加 YAML frontmatter，故用 in 而非 startswith。
+    assert "第40條 雇主有下列情事之一者" in chunk_files[0].read_text(encoding="utf-8")
+    # 款式斷頭被修復：第二塊（第三～五款，本身不含條旨句）應被前綴注入母條文主旨。
+    assert "第40條 雇主有下列情事之一者" in chunk_files[1].read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
+async def test_trigger_extraction_defaults_to_sliding_window_when_cfg_not_passed(tmp_path, monkeypatch):
+    """回歸防護：不傳 `cfg`（既有所有呼叫端現況）時必須維持 `sliding_window`
+    既有行為，不得意外注入主旨前綴——`cfg=None` 等同 `KGConfig()` shipped
+    defaults（`strategy="sliding_window"`），零行為變化。"""
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    text = (
+        "第40條 雇主有下列情事之一者，處新臺幣三萬元以上十五萬元以下罰鍰："
+        "一、未依法給付加班費。"
+        "二、未依規定置備勞工名卡。"
+        "三、拒絕勞工檢查員檢查。"
+        "四、未依規定發給資遣費。"
+        "五、違反工作時間之限制規定。"
+    )
+    doc_folder, _record = ingestion_service.chunk_and_stage(text, "note.md", kg_folder)
+
+    kg_id = uuid4()
+    await svc.trigger_extraction(FakeDriver(), doc_folder, kg_id)  # 不傳 cfg
+
+    chunk_files = sorted(doc_folder.glob("svo-chunk-*.md"))
+    # 真實句子分割器把「條旨：」與其後第一款併為一句（「：」非句尾標點），
+    # 共 5 句；sliding_window 預設 max_sentences=5／overlap_sentences=2
+    # → 單一區間 (0,5) 涵蓋全部句子，僅 1 塊，且條旨只自然出現一次
+    # （不是被規則注入的第二次），確認未觸發款式斷頭防護邏輯。
+    assert len(chunk_files) == 1
+    assert chunk_files[0].read_text(encoding="utf-8").count("第40條") == 1
+
+
+@pytest.mark.asyncio
 async def test_trigger_extraction_is_noop_when_record_missing(tmp_path, monkeypatch):
     """資料夾沒有記錄檔（異常狀態）時不應拋出例外，只是靜默跳過。"""
     monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))

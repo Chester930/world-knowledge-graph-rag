@@ -3101,6 +3101,7 @@ async def trigger_extraction(
     kg_id: UUID,
     *,
     articles: Sequence[Mapping[str, str]] | None = None,
+    cfg: KGConfig | None = None,
 ) -> None:
     """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
     不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
@@ -3139,6 +3140,16 @@ async def trigger_extraction(
     `prepare_svo_ready_chunks()`，改走 `ArticleAwareChunking` 路徑；`None`
     （預設）維持既有行為完全不變。
 
+    `cfg`（2026-09-14 新增，報告47 任務B）：`cfg.chunking` 原樣轉交
+    `prepare_svo_ready_chunks(chunking_config=...)`；比照本模組其餘函式既有的
+    `cfg: KGConfig | None = None` DI 慣例（見 `resolve_query_relation_type()`／
+    `bfs_query()`），**呼叫端不傳就是 `KGConfig()` shipped defaults，行為
+    零變化**。目前 `routers/staging.py`／`knowledge_graph_service.py::
+    build_graph()` 皆尚未傳入真實 `cfg`（即尚未接上 `ConfigLoader` 依 KG
+    的 domain pack 解析出的設定）——先開放本函式接受注入，讓「呼叫端何時
+    真正接上」可以獨立於本函式的正確性驗證分開決定。`articles is not None`
+    時 `cfg.chunking` 不生效（見上方 `articles` 說明的架構侷限）。
+
     ⚠️ 誠實侷限（仍未解決，非本次範圍）：`prepare_svo_ready_chunks()` 仍以
     `mentions=None` 呼叫，跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決
     的上游依賴，見 `services/svo_preprocessing_service.py` docstring）——別名
@@ -3172,6 +3183,7 @@ async def trigger_extraction(
         articles=articles,
         embedding_provider=embedding_provider, pronoun_llm_provider=pronoun_llm_provider,
         pronoun_lexicon=pronoun_lexicon,
+        chunking_config=(cfg or KGConfig()).chunking,
     )
     if not chunks:
         return

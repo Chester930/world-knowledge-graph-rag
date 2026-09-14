@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 from typing import Mapping, Sequence
 
+from core.kg_config import ChunkingConfig
 from core.providers.base import EmbeddingProvider, LLMProvider
 from parser.chunk_writer import document_folder_path
 from services.entity_extraction_service import NerTagger, extract_mentions
@@ -116,6 +117,7 @@ async def prepare_svo_ready_chunks(
     embedding_provider: EmbeddingProvider | None = None,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
+    chunking_config: ChunkingConfig | None = None,
 ) -> tuple[list[Path], list[SVOChunk]]:
     """`CHUNKREADY`：取得句子清單 → （若有 `mentions` 可用）套用文件內別名登記表
     → 代名詞消解 → （若提供 `embedding_provider`）逐句 embedding → SVO 專用
@@ -172,6 +174,17 @@ async def prepare_svo_ready_chunks(
     來源。⚠️ **誠實侷限**：這代表法規全文目前不套用代名詞消解，若之後實測
     發現有跨條文指代需求，需回頭擴充本路徑；`None`（預設）維持既有
     `SVOGROUP` 行為完全不變，本參數只新增一條路徑，不影響任何既有呼叫端。
+
+    `chunking_config`（2026-09-14 新增，報告47 任務B）：`ChunkingConfig`
+    （`strategy`／`header_regex`／`prepend_header_to_children` 等），原樣轉交
+    `build_svo_chunks()`，只在 `articles is None`（走 `SVOGROUP`）時生效。
+    ⚠️ **架構侷限（查證見 `docs/參考文獻/32_法規結構感知切塊與主旨錨定/README.md`）**：
+    `articles is not None` 的 `ArticleAwareChunking` 路徑完全不讀本參數——
+    一條法條固定對一個 chunk、不做固定句數切分，本來就不存在「款式跨塊
+    截斷」問題，`header_anchored` 這個設計是為 `SVOGROUP`（一般文件領域）
+    準備的，套用在法規全文上沒有意義。`None`（預設）＝`ChunkingConfig()`
+    shipped defaults（`strategy="sliding_window"`），與未傳入本參數前的
+    `build_svo_chunks()` 呼叫行為完全相同，零行為變化。
     """
     if articles is not None:
         chunks = ArticleAwareChunking(
@@ -213,6 +226,7 @@ async def prepare_svo_ready_chunks(
     chunks = build_svo_chunks(
         original_sentences, normalized_sentences,
         max_sentences=max_sentences, overlap_sentences=overlap_sentences,
+        config=chunking_config,
     )
     paths = write_svo_chunks(chunks, source, output_dir)
     return paths, chunks
