@@ -1465,6 +1465,44 @@ def _verbalize_fact(subject: str, subject_type: str, verb: str, object_: str, ob
     return f"{subject} {verb} {object_}".strip()
 
 
+def _fact_code_prefix(source: str | None) -> str:
+    """報告43（Fact-RAG 語意排名健壯性）選項B：從 `SVOTriple.source`／
+    citation `source`（工作目錄名稱，法規類文件慣例格式 `<代碼>_<全名>`，
+    見 `SVOTriple.source` 欄位 docstring）取出簡短的文件代碼，供
+    `_fact_text_for_embedding()` 在嵌入前標記文件身分。
+
+    報告41 §9 診斷：多部法規描述同一類概念（如「X 自 Y 起算」）時，
+    `fact_text` 只有裸的 SVO 串接、完全沒有能區分「這是哪部法規」的訊號，
+    語意相近但答非所問的跨文件事實會在全域 cosine 排名裡把正解擠開
+    （26-Q5 案例：正解排名第41，被34條其他法規的近義事實擠出
+    `top_k=20`）。Reuter et al. (2025) 命名同一類失效為 Document-Level
+    Retrieval Mismatch，解法核心原則是「在被嵌入的文字本身注入能區分
+    來源文件身分的上下文」（見 `docs/參考文獻/31_Fact-RAG語意排名健壯性/`）。
+
+    只取底線前的代碼片段（非取整段檔名）——避免法規全名（可能十幾字）
+    稀釋短事實字串裡 SVO 語意的權重比例（報告43 §3 選項B 風險項2）。
+    非「代碼_全名」慣例命名的文件（無底線、或底線前非英數字）回傳空字串，
+    呼叫端不加任何前綴——維持對非法規語料零風險。
+    """
+    if not source:
+        return ""
+    code, sep, _ = source.partition("_")
+    if not sep or not code or not code.isalnum():
+        return ""
+    return code
+
+
+def _fact_text_for_embedding(fact_text: str, source: str | None) -> str:
+    """報告43 選項B：`fact_embedding` 實際嵌入的文字，跟儲存／顯示用的
+    `fact_text` 刻意分開——只有這裡回傳的字串會被送進 embedding provider，
+    `fact_text` 本身（存進 `Fact` 節點、供 `_arrange_fact_lines()` 顯示給
+    LLM、`verify_fact_grounding()` 接地核對比對的原文）完全不受影響，
+    避免這個檢索端最佳化意外波及生成端既有行為。
+    """
+    prefix = _fact_code_prefix(source)
+    return f"（{prefix}）{fact_text}" if prefix else fact_text
+
+
 @lru_cache(maxsize=1)
 def _opencc_s2tw():
     """OpenCC 簡→繁（臺灣標準字）轉換器，惰性初始化。用 `s2tw`（字元級）而非
@@ -1867,7 +1905,9 @@ async def merge_triples_to_graph(
                 source_doc_id=str(triple.source_doc_id),
                 chunk_index=triple.source_svo_chunk_index,
                 fact_text=fact_text,
-                fact_embedding=await embedding_provider.encode(fact_text),
+                fact_embedding=await embedding_provider.encode(
+                    _fact_text_for_embedding(fact_text, triple.source)
+                ),
                 verb=triple.verb,
                 confidence=triple.confidence,
                 article_no=triple.source_article_no,
@@ -2218,7 +2258,9 @@ async def backfill_fact_nodes(
                     source_doc_id=source_doc_id,
                     chunk_index=chunk_index,
                     fact_text=fact_text,
-                    fact_embedding=await embedding_provider.encode(fact_text),
+                    fact_embedding=await embedding_provider.encode(
+                        _fact_text_for_embedding(fact_text, citation.get("source"))
+                    ),
                     verb=citation.get("verb", ""),
                     confidence=citation.get("confidence", 1),
                     article_no=citation.get("article_no"),
@@ -2400,6 +2442,85 @@ async def backfill_fact_text_embeddings(
                 eid=row["eid"],
                 fact_text=new_text,
                 fact_embedding=await embedding_provider.encode(new_text),
+            )
+            updated += 1
+
+        if len(rows) < batch_size:
+            break
+        skip += len(rows)
+
+    return updated
+
+
+async def backfill_fact_embeddings_with_doc_prefix(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    embedding_provider: EmbeddingProvider,
+    *,
+    batch_size: int = 200,
+) -> int:
+    """報告43（Fact-RAG 語意排名健壯性）選項B 回填批次任務：對該 KG 內
+    既有 `Fact` 節點，用 `_fact_text_for_embedding()`（`fact_text` 前加
+    文件代碼前綴）重新 `encode()` 出 `fact_embedding`——**不改動
+    `fact_text` 本身**，只改嵌入的目標字串，修報告41 §9 診斷的問題
+    （多部法規近義樣板條文在向量空間裡難以區分，見
+    `docs/參考文獻/31_Fact-RAG語意排名健壯性/`）。
+
+    跟 `backfill_fact_text_embeddings()`（報告25 發現5）是兩個獨立、
+    互不影響的遷移：那個改的是 `fact_text` 本身的組字方式（移除型別
+    括號＋簡繁正規化），這個完全不動 `fact_text`，只在計算
+    `fact_embedding` 這一步額外注入文件身分前綴。因為 `fact_text` 不變，
+    沒有「跟現值比較就跳過」的冪等判準可用（無法從已存的浮點向量反推
+    是否已含前綴）——**比照人工觸發的一次性遷移腳本定位，每次執行都
+    會重新 encode 全部 `Fact` 節點**，重複執行結果一致但浪費呼叫，不建議
+    重複跑；即時路徑（`merge_triples_to_graph`）已在寫入當下套用前綴，
+    只有既有（本次上線前建立）的 `Fact` 節點需要這個回填。
+
+    先一次查出該 KG 內所有 `Document` 的 `(source_doc_id -> source)`
+    對照表（文件數遠小於 `Fact` 數，避免逐筆 `Fact` 各自查一次 N+1）；
+    `source_doc_id` 缺失或查無對應 `Document`（極舊資料、非本流程建立）
+    時 `_fact_text_for_embedding()` 收到 `None`，回傳原樣 `fact_text`
+    （零前綴，等同未受影響，非阻塞錯誤）。
+
+    回傳實際更新的 `Fact` 節點數（分母＝ KG 內全部 `Fact`，因為每筆都會
+    被重新 `encode()`）。
+    """
+    kg_id_str = str(kg_id)
+    doc_result = await driver.execute_query(
+        "MATCH (d:Document {kg_id: $kg_id}) RETURN d.source_doc_id AS doc_id, d.source AS source",
+        kg_id=kg_id_str,
+    )
+    doc_sources = {str(r["doc_id"]): r["source"] for r in doc_result.records if r["doc_id"]}
+
+    updated = 0
+    skip = 0
+    while True:
+        result = await driver.execute_query(
+            """
+            MATCH (f:Fact {kg_id: $kg_id})
+            RETURN elementId(f) AS eid, f.fact_text AS fact_text, f.source_doc_id AS source_doc_id
+            ORDER BY elementId(f)
+            SKIP $skip LIMIT $batch_size
+            """,
+            kg_id=kg_id_str,
+            skip=skip,
+            batch_size=batch_size,
+        )
+        rows = result.records
+        if not rows:
+            break
+
+        for row in rows:
+            source = doc_sources.get(str(row["source_doc_id"])) if row["source_doc_id"] else None
+            embedding_text = _fact_text_for_embedding(row["fact_text"] or "", source)
+            await driver.execute_query(
+                """
+                MATCH (f:Fact {kg_id: $kg_id}) WHERE elementId(f) = $eid
+                SET f.fact_embedding = $fact_embedding
+                """,
+                kg_id=kg_id_str,
+                eid=row["eid"],
+                fact_embedding=await embedding_provider.encode(embedding_text),
             )
             updated += 1
 

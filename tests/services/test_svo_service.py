@@ -2700,6 +2700,41 @@ def test_verbalize_fact_ignores_type_args_entirely():
     assert svc._verbalize_fact("A", "概念", "導致", "B", "概念") == "A 導致 B"
 
 
+# ── 報告43：Fact-RAG 語意排名健壯性（嵌入前注入文件代碼前綴）───────────────
+
+def test_fact_code_prefix_extracts_code_before_underscore():
+    assert svc._fact_code_prefix("N0050030_災區受災勞工保險費補助辦法") == "N0050030"
+
+
+def test_fact_code_prefix_none_or_empty_source_returns_empty():
+    assert svc._fact_code_prefix(None) == ""
+    assert svc._fact_code_prefix("") == ""
+
+
+def test_fact_code_prefix_no_underscore_returns_empty():
+    """非「代碼_全名」慣例命名（無底線）→ 空字串，不加前綴，維持零風險。"""
+    assert svc._fact_code_prefix("災區受災勞工保險費補助辦法") == ""
+
+
+def test_fact_code_prefix_non_alnum_code_returns_empty():
+    """底線前不是純英數字（例如本身就含空白或標點的怪異檔名）→ 保守回空，
+    不誤把非代碼片段當前綴塞進去。"""
+    assert svc._fact_code_prefix("災區 保險費_辦法") == ""
+
+
+def test_fact_text_for_embedding_adds_prefix_when_code_present():
+    assert svc._fact_text_for_embedding(
+        "災害發生之當月一日起 計算 前條所定災後六個月期間", "N0050030_災區受災勞工保險費補助辦法",
+    ) == "（N0050030）災害發生之當月一日起 計算 前條所定災後六個月期間"
+
+
+def test_fact_text_for_embedding_no_prefix_when_source_missing():
+    """`source` 缺席或非代碼慣例命名 → 嵌入文字與 `fact_text` 原樣相同
+    （零回歸：舊資料／非法規語料不受影響）。"""
+    assert svc._fact_text_for_embedding("A 導致 B", None) == "A 導致 B"
+    assert svc._fact_text_for_embedding("A 導致 B", "普通檔名") == "A 導致 B"
+
+
 def test_to_traditional_normalizes_simplified():
     """報告25 § 4 發現4：簡→繁（臺灣標準字）字元級正規化。"""
     assert svc._to_traditional("补助经费额度 以每人每小时新台币一百元为限") == \
@@ -2877,6 +2912,30 @@ async def test_merge_triples_to_graph_creates_fact_node_with_embedding_when_prov
     expected_text = svc._verbalize_fact("台積電", "組織", "生產", "晶片", "產品")
     assert fact["fact_text"] == expected_text
     assert fact["fact_embedding"] == await embedding.encode(expected_text)
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_embeds_fact_with_doc_code_prefix_but_stores_clean_text():
+    """報告43 選項B：`triple.source` 是「代碼_全名」慣例命名時，`fact_embedding`
+    用帶前綴的文字算，但存進節點、顯示用的 `fact_text` 完全不受影響（維持
+    `verify_fact_grounding()` 等下游消費者比對的是乾淨原文）。"""
+    driver = InMemoryEntityDriver()
+    kg_id = uuid4()
+    doc_id = uuid4()
+    embedding = FakeEmbedding()
+    triple = SVOTriple(
+        subject="災區受災勞工", subject_type="概念", rel_type="RELATED_TO", verb="起算",
+        object="六個月", object_type="概念",
+        source_doc_id=doc_id, source_svo_chunk_index=3,
+        source="N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法",
+    )
+
+    await svc.merge_triples_to_graph(driver, kg_id, [triple], embedding_provider=embedding)
+
+    fact = driver.facts[0]
+    expected_text = svc._verbalize_fact("災區受災勞工", "概念", "起算", "六個月", "概念")
+    assert fact["fact_text"] == expected_text  # 顯示/儲存用文字不變
+    assert fact["fact_embedding"] == await embedding.encode(f"（N0050030）{expected_text}")
 
 
 @pytest.mark.asyncio
@@ -3349,6 +3408,29 @@ async def test_backfill_fact_nodes_creates_fact_for_uncovered_citation():
 
 
 @pytest.mark.asyncio
+async def test_backfill_fact_nodes_uses_doc_code_prefix_for_fact_embedding():
+    """報告43 選項B：citation 的 `source` 欄位（`_new_citation()` 已存）
+    有「代碼_全名」慣例命名時，回填路徑的 `fact_embedding` 也要套用前綴，
+    跟即時路徑（`merge_triples_to_graph`）行為一致。"""
+    doc_id = str(uuid4())
+    edge = _fact_edge(citations=[
+        {
+            "source_doc_id": doc_id, "source_svo_chunk_index": 1, "verb": "導致", "confidence": 3,
+            "source": "N0050030_災區受災勞工保險費補助辦法",
+        },
+    ])
+    driver = BackfillFactFakeDriver(edges=[edge])
+    embedding = FakeEmbedding()
+
+    await svc.backfill_fact_nodes(driver, uuid4(), embedding)
+
+    call = driver.create_calls[0]
+    expected_text = svc._verbalize_fact("A", "概念", "導致", "B", "概念")
+    assert call["fact_text"] == expected_text
+    assert call["fact_embedding"] == await embedding.encode(f"（N0050030）{expected_text}")
+
+
+@pytest.mark.asyncio
 async def test_backfill_fact_nodes_threads_article_no_from_citation():
     """2026-08-24：citation 的 `article_no`（`_new_citation()` 新增欄位）應
     原樣傳入 `_create_fact_node()`，讓法規領域的回填 Fact 同樣能連向
@@ -3652,6 +3734,97 @@ async def test_backfill_fact_text_embeddings_paginates_with_skip():
     driver = BackfillFactTextFakeDriver(nodes=nodes)
 
     count = await svc.backfill_fact_text_embeddings(driver, uuid4(), FakeEmbedding(), batch_size=2)
+
+    assert count == 3
+    assert [c["skip"] for c in driver.scan_calls] == [0, 2]
+
+
+# ── backfill_fact_embeddings_with_doc_prefix（報告43 選項B 回填，2026-09-14）──
+
+class BackfillFactPrefixFakeDriver:
+    """模擬「查 Document 對照表 → 掃描 Fact 節點 → 用文件代碼前綴重算
+    fact_embedding」。`documents` 為 (doc_id, source) 清單；`facts` 為
+    (eid, fact_text, source_doc_id) 清單。"""
+
+    def __init__(self, documents, facts):
+        self._documents = list(documents)
+        self._facts = list(facts)
+        self.scan_calls: list[dict] = []
+        self.set_calls: list[dict] = []
+
+    async def execute_query(self, query: str, **params):
+        stripped = query.strip()
+        if "RETURN d.source_doc_id AS doc_id, d.source AS source" in stripped:
+            return FakeResult([{"doc_id": d[0], "source": d[1]} for d in self._documents])
+        if "RETURN elementId(f) AS eid, f.fact_text AS fact_text, f.source_doc_id AS source_doc_id" in stripped:
+            self.scan_calls.append(params)
+            skip, bs = params["skip"], params["batch_size"]
+            rows = [
+                {"eid": f[0], "fact_text": f[1], "source_doc_id": f[2]}
+                for f in self._facts[skip: skip + bs]
+            ]
+            return FakeResult(rows)
+        if "SET f.fact_embedding = $fact_embedding" in stripped:
+            self.set_calls.append(params)
+            return FakeResult([])
+        return FakeResult([])
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_embeddings_with_doc_prefix_reencodes_with_code():
+    doc_id = str(uuid4())
+    driver = BackfillFactPrefixFakeDriver(
+        documents=[(doc_id, "N0050030_災區受災勞工保險費補助辦法")],
+        facts=[("f1", "災害發生之當月一日起 計算 前條所定災後六個月期間", doc_id)],
+    )
+    embedding = FakeEmbedding()
+
+    count = await svc.backfill_fact_embeddings_with_doc_prefix(driver, uuid4(), embedding)
+
+    assert count == 1
+    assert driver.set_calls[0]["eid"] == "f1"
+    assert driver.set_calls[0]["fact_embedding"] == await embedding.encode(
+        "（N0050030）災害發生之當月一日起 計算 前條所定災後六個月期間"
+    )
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_embeddings_with_doc_prefix_does_not_touch_fact_text():
+    """本回填只改 `fact_embedding`，不應該對 `fact_text` 下任何 SET。"""
+    doc_id = str(uuid4())
+    driver = BackfillFactPrefixFakeDriver(
+        documents=[(doc_id, "N0050030_辦法")],
+        facts=[("f1", "A 導致 B", doc_id)],
+    )
+
+    await svc.backfill_fact_embeddings_with_doc_prefix(driver, uuid4(), FakeEmbedding())
+
+    assert "fact_text" not in driver.set_calls[0]
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_embeddings_with_doc_prefix_missing_document_falls_back_no_prefix():
+    """`source_doc_id` 查無對應 `Document`（極舊資料）→ 零前綴，等同未受
+    影響，不阻塞整個回填。"""
+    driver = BackfillFactPrefixFakeDriver(
+        documents=[],
+        facts=[("f1", "A 導致 B", str(uuid4()))],
+    )
+    embedding = FakeEmbedding()
+
+    count = await svc.backfill_fact_embeddings_with_doc_prefix(driver, uuid4(), embedding)
+
+    assert count == 1
+    assert driver.set_calls[0]["fact_embedding"] == await embedding.encode("A 導致 B")
+
+
+@pytest.mark.asyncio
+async def test_backfill_fact_embeddings_with_doc_prefix_paginates_with_skip():
+    doc_id = str(uuid4())
+    facts = [(f"f{i}", f"S{i} V O", doc_id) for i in range(3)]
+    driver = BackfillFactPrefixFakeDriver(documents=[(doc_id, "N0050030_辦法")], facts=facts)
+
+    count = await svc.backfill_fact_embeddings_with_doc_prefix(driver, uuid4(), FakeEmbedding(), batch_size=2)
 
     assert count == 3
     assert [c["skip"] for c in driver.scan_calls] == [0, 2]
