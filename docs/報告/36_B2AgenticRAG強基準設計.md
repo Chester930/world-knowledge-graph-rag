@@ -56,7 +56,7 @@ B2 = Adaptive 路由（複雜度分類：規則式簡化版或小 LM）
 ```
 
 | 元件 | B1 | B2 | 依據 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 檢索前端 | dense + BM25 + rerank，**單次** | 同前端，**多輪、每輪查詢由 agent 精煉** | Fan 2026（同 infra + agentic wrapper） |
 | query 處理 | 原樣 | **分解 + 逐輪改寫** | Trivedi 2022（IRCoT）、Press 2022（Self-Ask） |
 | 迴圈控制 | 無 | thought→search→observe，≤ 5 輪；資訊不足才續查 | Yao 2023（ReAct）、Jiang 2023（FLARE） |
@@ -69,7 +69,7 @@ B2 = Adaptive 路由（複雜度分類：規則式簡化版或小 LM）
 ## 4. 單一變因控制（§3.8）
 
 | 對照 | 唯一變因 | 固定 |
-|---|---|---|
+| --- | --- | --- |
 | B1 vs B2 | 有無 agentic 多輪迴圈 | 檢索前端、generator、生成 stack、題組 |
 | **B2 vs Full System (KG-BFS)** | agentic 多輪 chunk 檢索（隱式證據結構）vs 單次 KG-BFS（顯式圖結構） | generator、`cfg.domain`、`_arrange_fact_lines` 下游、grounding、方案 B/2b、題組、每題 ×3、§5.5 rubric |
 
@@ -82,7 +82,7 @@ Full System 的 **RQ3 自我精煉迴圈尚未實作**（只有單次 grounded r
 ## 5. 評估（擴 §5.5，Fan 2026 式）
 
 | 面向 | 指標 | 說明 |
-|---|---|---|
+| --- | --- | --- |
 | 答案品質 | §5.5 既有（EM／F1 + 人工 rubric 正確性/完整性，每題 ×3） | 不變 |
 | **離線建構成本** | KG 抽取（drain ~4 天 / 3303 chunk）vs B2 ≈ 0（只需 chunk embedding，B0/B1 已有） | 對照表：建構時間、每題攤提成本（Fan 2026 Table 8 式） |
 | **線上效率** | 端到端延遲 p50/p95、每題 LLM 呼叫數、context 總長度 | B2 = N 次 LLM 呼叫/題（分解 + 每輪 reason + 綜合）；KG-BFS = 1 retrieval + 1 gen；B1 = 1 retrieval + 1 gen |

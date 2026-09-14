@@ -1,18 +1,12 @@
 {
   "meta": {
-    "title": "附錄 A 測試題庫（P0a 整理層）機讀版",
-    "source_doc": "docs/論文/05_附錄A_測試題庫.md",
-    "generated": "2026-09-10",
-    "report": "報告39 SDD-4（七路檢索比較 harness 題組載入）",
-    "count": 30,
-    "kg_for_25_26": "236903cf-055a-40a8-8923-b9d06601f3b7",
-    "notes": [
-      "gold_facts 一律留空，待 P0a-2 標註層（DRAIN-DONE 後對 KG#4 綁定 Fact 節點／關係邊 id，見 05 §A.5）。",
-      "wording_status=verbatim：題幹逐字（報告 17／18／26）。wording_status=gist：報告 25 表內為題旨，跑測完整口語問句待從 run_expanded_kg_comparison.py 取出鎖版（05 §A.5 item 3）。",
-      "gold_answer 標 [待核]：來源報告未給可逐字引用的單一版本，需回原文（05 §A.5 item 2）。",
-      "17-Q*／18-Q* 原始 KG 為早期小型快照（已不存在）；報告 25／26 題目對應 KG#4。complexity_bucket=single 若 complexity_label 以「單事實」起首，否則 multi（供 --complexity 過濾）。",
-      "pilot=true：報告39 §2.3 前導比較的 6 份題目來源文件子集對應題（報告 18 Q1–Q5 ＋ 報告 26 Q5）。"
-    ]
+    "title": "標準化評測題庫（含五大場景梯度與法規原子真值）",
+    "version": "2.0.0",
+    "total_questions": 32,
+    "verified_questions": 10,
+    "date": "2026-09-14",
+    "spec_ref": "docs/論文/05_附錄A_測試題庫.md",
+    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。"
   },
   "questions": [
     {
@@ -21,13 +15,23 @@
       "pcode": "N0030006",
       "source_article": "N0030006 勞工請假規則 §2",
       "gold_answer": "8 日，工資照給",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工結婚者給予婚假八日，工資照給",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": null
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "單事實",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1（單一 KG）",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "17-Q2",
@@ -35,13 +39,25 @@
       "pcode": "N0030006",
       "source_article": "N0030006 §7",
       "gold_answer": "一年內合計不得超過 14 日；事假期間不給工資",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "一年內合計不得超過十四日。事假期間不給工資",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條",
+          "is_essential": true,
+          "note": null
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "單事實",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1",
-      "dup_map": ["18-Q6"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "18-Q6"
+      ],
+      "pilot": false
     },
     {
       "id": "17-Q3",
@@ -49,13 +65,18 @@
       "pcode": "N0030018",
       "source_article": "N0030018 育嬰留職停薪實施辦法 §2／§4",
       "gold_answer": "原則不少於 6 個月；例外 30 日以上未達 6 個月者、須 10 日前提出；期間不計入工作年資",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1",
-      "dup_map": ["18-Q2", "25-Q2"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "18-Q2",
+        "25-Q2"
+      ],
+      "pilot": false
     },
     {
       "id": "17-Q4",
@@ -63,13 +84,17 @@
       "pcode": "N0030018",
       "source_article": "N0030018 §4",
       "gold_answer": "不計入工作年資",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "單事實",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1（17-Q3 子題）",
-      "dup_map": ["17-Q3"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q3"
+      ],
+      "pilot": false
     },
     {
       "id": "17-Q5",
@@ -77,13 +102,17 @@
       "pcode": "N0090051",
       "source_article": "N0090051 §3",
       "gold_answer": "可以；由外國人自行排定返國期日，雇主應予同意",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "單事實＋陷阱",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1",
-      "dup_map": ["18-Q3"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "18-Q3"
+      ],
+      "pilot": false
     },
     {
       "id": "17-Q6",
@@ -91,13 +120,17 @@
       "pcode": "D0080015",
       "source_article": "D0080015 警察人員特別休假辦法 §2",
       "gold_answer": "1–3 日（須達 3 日以上、獲記大功以上獎勵）",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多跳／區間推理",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1",
-      "dup_map": ["18-Q5"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "18-Q5"
+      ],
+      "pilot": false
     },
     {
       "id": "17-Q7",
@@ -105,13 +138,17 @@
       "pcode": "F0040034",
       "source_article": "F0040034 員工接受召集請假期間薪資費用加成減除辦法 §3",
       "gold_answer": "150%",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "單事實＋陷阱（稅務）",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 17 §1",
-      "dup_map": ["18-Q4"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "18-Q4"
+      ],
+      "pilot": false
     },
     {
       "id": "18-Q1",
@@ -119,13 +156,37 @@
       "pcode": "N0030006",
       "source_article": "N0030006 勞工請假規則（普通傷病假）",
       "gold_answer": "未住院者一年內合計不得超過 30 日；住院者二年內合計不得超過一年；未住院傷病假一年內未超過 30 日部分，工資折半發給",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "未住院者，一年內合計不得超過三十日",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第4條第1項第1款",
+          "is_essential": true,
+          "note": "普通傷病假未住院上限"
+        },
+        {
+          "exact_span": "住院者，二年內合計不得超過一年",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第4條第1項第2款",
+          "is_essential": true,
+          "note": "普通傷病假住院上限"
+        },
+        {
+          "exact_span": "未超過三十日部分，工資折半發給",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第4條第3項",
+          "is_essential": true,
+          "note": "病假工資計算"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 18 §2／§5 題1（A/B/C/D）",
       "dup_map": [],
-      "pilot": true,
-      "gold_facts": []
+      "pilot": true
     },
     {
       "id": "18-Q2",
@@ -133,13 +194,33 @@
       "pcode": "N0030018",
       "source_article": "N0030018 育嬰留職停薪實施辦法 §2",
       "gold_answer": "原則每次不少於 6 個月；30 日以上未達 6 個月者，以 2 次為限",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "每次以不少於六個月為原則",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第3項",
+          "is_essential": true,
+          "note": "每次申請原則期間"
+        },
+        {
+          "exact_span": "三十日以上未達六個月：以二次為限",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第3項第1款",
+          "is_essential": true,
+          "note": "例外次數限制"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 18 §2／§5 題2（A/B/C/D）",
-      "dup_map": ["17-Q3", "25-Q2"],
-      "pilot": true,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q3",
+        "25-Q2"
+      ],
+      "pilot": true
     },
     {
       "id": "18-Q3",
@@ -147,13 +228,32 @@
       "pcode": "N0090051",
       "source_article": "N0090051 外國人請假返國辦法",
       "gold_answer": "由外國人自行排定返國期日；協商不成仍應同意其原排定，雇主不得片面更改",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "自行排定請假返國期日",
+          "source_law": "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法",
+          "source_article": "第3條第1項",
+          "is_essential": true,
+          "note": "返國期日排定權限歸屬外國人自行排定"
+        },
+        {
+          "exact_span": "雇主應予同意",
+          "source_law": "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法",
+          "source_article": "第3條第1項",
+          "is_essential": true,
+          "note": "雇主之法定義務，不得片面拒絕"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "單事實＋陷阱",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 18 §2／§5 題3（A/B/C/D）",
-      "dup_map": ["17-Q5"],
-      "pilot": true,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q5"
+      ],
+      "pilot": true
     },
     {
       "id": "18-Q4",
@@ -161,13 +261,25 @@
       "pcode": "F0040034",
       "source_article": "F0040034 §3",
       "gold_answer": "150%",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除",
+          "source_law": "F0040034_員工接受召集請假期間薪資費用加成減除辦法",
+          "source_article": "第3條第1款",
+          "is_essential": true,
+          "note": "薪資加成減除比例150%"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "單事實＋陷阱（稅務）",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 18 §2／§5 題4（A/B/C/D）",
-      "dup_map": ["17-Q7"],
-      "pilot": true,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q7"
+      ],
+      "pilot": true
     },
     {
       "id": "18-Q5",
@@ -175,13 +287,39 @@
       "pcode": "D0080015",
       "source_article": "D0080015 警察人員特別休假辦法 §2–§4",
       "gold_answer": "依表現／獎勵事由核發，與服務年資無關；分三級 1–3 日、2–5 日、3–7 日，最高 7 日",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "有左列情形之一者，給予一至三日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "功績休假第1級距"
+        },
+        {
+          "exact_span": "有左列情事之一者，給予二至五日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條",
+          "is_essential": true,
+          "note": "功績休假第2級距"
+        },
+        {
+          "exact_span": "有左列情事之一者，給予三至七日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第4條",
+          "is_essential": true,
+          "note": "功績休假第3級距（最高7日，與年資無關）"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "多事實組裝＋陷阱",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 18 §2／§5 題5（A/B/C/D）",
-      "dup_map": ["17-Q6"],
-      "pilot": true,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q6"
+      ],
+      "pilot": true
     },
     {
       "id": "18-Q6",
@@ -189,13 +327,17 @@
       "pcode": "N0030006",
       "source_article": "N0030006 §7",
       "gold_answer": "可以請事假；一年內合計不得超過 14 日；事假期間不給工資",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 18 §3.6／§6 題6（A/B/C/D）",
-      "dup_map": ["17-Q2"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q2"
+      ],
+      "pilot": false
     },
     {
       "id": "18-Q7",
@@ -203,13 +345,15 @@
       "pcode": "N0030006",
       "source_article": "N0030006（事假以小時為請假單位／因子女生病等一日前提出）",
       "gold_answer": "[待核] — 報告 18 §6 題7 的正解為「事假得以小時為請假單位」＋「因子女生病、停托、停課等原因得於一日前提出」；報告內部 §3.6 標籤與 §6 題幹措辭不完全一致，需回 N0030006 原文確認完整清單",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多跳／區間推理",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 18 §3.6／§6 題7（A/B/C/D）",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q1",
@@ -217,13 +361,15 @@
       "pcode": "N0030011",
       "source_article": "N0030011 事業單位僱用女性勞工夜間工作場所必要之安全衛生設施標準 §3",
       "gold_answer": "安全門／安全梯夜間工作時間內不得上鎖；通道不得堆置物品",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題1／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q2",
@@ -231,13 +377,18 @@
       "pcode": "N0030018",
       "source_article": "N0030018 育嬰留職停薪實施辦法 §2",
       "gold_answer": "每次原則 ≥ 6 個月；30 日以上未達 6 個月者以 2 次為限；30 日以上須 10 日前提出",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題2／報告 38 T1 條件A",
-      "dup_map": ["17-Q3", "18-Q2"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "17-Q3",
+        "18-Q2"
+      ],
+      "pilot": false
     },
     {
       "id": "25-Q3",
@@ -245,13 +396,15 @@
       "pcode": "N0030025",
       "source_article": "N0030025 勞動基準法第四十五條無礙身心健康認定基準及審查辦法 §4",
       "gold_answer": "未滿 6 歲 ≤ 2 小時、6–12 歲 ≤ 3 小時、12–15 歲 ≤ 4 小時；未滿 6 個月者每次 ≤ 30 分鐘",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題3／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q4",
@@ -259,13 +412,15 @@
       "pcode": "N0060007",
       "source_article": "N0060007 高溫作業勞工作息時間標準 §6／§7",
       "gold_answer": "勞工原有工資不得因實施本標準減少工作時間而減少；黑球溫度 50 度以上須供給熱防護設備",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題4／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q5",
@@ -273,13 +428,15 @@
       "pcode": "N0060012",
       "source_article": "N0060012 精密作業勞工視機能保護設施標準 §3／§9／§10",
       "gold_answer": "每日凝視合計 2 小時以上；連續 2 小時給至少 15 分鐘休息；明視距離約 30 公分",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題5／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q6",
@@ -287,13 +444,15 @@
       "pcode": "N0060065",
       "source_article": "N0060065 女性勞工母性健康保護實施辦法 §2／§10／§14",
       "gold_answer": "保護期間＝得知妊娠之日起至分娩後 1 年；血中鉛 10 μg/dl 以上為第三級管理；紀錄至少保存 3 年",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題6／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q7",
@@ -301,13 +460,15 @@
       "pcode": "N0070020",
       "source_article": "N0070020 危險性機械及設備檢查費收費標準 §3／§7／§8",
       "gold_answer": "型式檢查每型式 8000 元；每增加一種型式加收 4000 元；證明補發／換發每張 800 元；休息日加收 50%",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題7／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "25-Q8",
@@ -315,13 +476,15 @@
       "pcode": "N0080016",
       "source_article": "N0080016 原住民待工期間職前訓練經費補助辦法 §4／§6／§7",
       "gold_answer": "訓練時數以 300 小時為度；補助每人每小時 100 元為限；訓練結束後 30 日內請款核銷",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告 25 §2 題8／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "26-Q1",
@@ -329,13 +492,15 @@
       "pcode": "N0060029",
       "source_article": "N0060029 高架作業勞工保護措施標準 §4",
       "gold_answer": "2–5 m → 20 分鐘；5–20 m → 25 分鐘；20 m 以上 → 35 分鐘",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝（列舉分段完整性）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題1／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "26-Q2",
@@ -343,13 +508,15 @@
       "pcode": "N0060016",
       "source_article": "N0060016 重體力勞動作業勞工保護措施標準 §2",
       "gold_answer": "人力搬運或揹負「四十公斤」以上；「四點五公斤」以上之鎚敲擊",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝（13 款定義式列舉精準命中）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題2／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "26-Q3",
@@ -357,13 +524,17 @@
       "pcode": "N0080013",
       "source_article": "N0080013 事業單位優先僱用經其大量解僱失業勞工獎勵辦法 §2／§3／§4",
       "gold_answer": "連續僱用「三個月」；獎勵金「發給三個月為限」；「開始僱用之日起 30 日內」報備、「連續滿三個月之日起 30 日內」申請",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝（多個相同單位數字不混淆）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題3／報告 38 T1 條件A",
-      "dup_map": ["25-Q7"],
-      "pilot": false,
-      "gold_facts": []
+      "dup_map": [
+        "25-Q7"
+      ],
+      "pilot": false
     },
     {
       "id": "26-Q4",
@@ -371,27 +542,46 @@
       "pcode": "N0080013",
       "source_article": "N0080013 §3",
       "gold_answer": "每週「三十二小時」以上 → 每人每月「新台幣五千元」（原文用「台」）",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多事實組裝（數值密集＋單位保真＋台／臺）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題4／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "26-Q5",
       "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
       "pcode": "N0050030",
       "source_article": "N0050030 災區受災勞工保險費補助辦法 §2／§3",
-      "gold_answer": "「災後六個月期間」內個人負擔保險費由中央政府支應；期間「自災害發生之當月一日起」計算六個月",
+      "gold_answer": "災後六個月期間內被保險人應負擔之保險費，由中央政府支應；其期間之計算，自災害發生之當月一日起計算六個月。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "自災害發生之當月一日起計算六個月",
+          "source_law": "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法",
+          "source_article": "第3條",
+          "is_essential": true,
+          "note": "法律起算日關鍵約束，嚴禁模型平滑化改寫為當日"
+        },
+        {
+          "exact_span": "災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+          "source_law": "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "補助主體與期間"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "多事實組裝＋多跳（跨文件不混淆）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題5／報告 38 T1 條件A（＝報告 37／38 Q5）",
       "dup_map": [],
-      "pilot": true,
-      "gold_facts": []
+      "pilot": true
     },
     {
       "id": "26-Q6",
@@ -399,13 +589,15 @@
       "pcode": "N0050011",
       "source_article": "N0050011 勞工保險被保險人退保後繼續加保辦法 §3",
       "gold_answer": "未於離職退保當日辦理者，應於離職退保「當日起二年內」辦理繼續加保",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "單事實",
       "complexity_bucket": "single",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題6／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "26-Q7",
@@ -413,13 +605,15 @@
       "pcode": "N0060007",
       "source_article": "N0060007 高溫作業勞工作息時間標準（全文）",
       "gold_answer": "原文未規定特殊健檢頻率 → 正解為「資料未明確記載，無法確認」",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "誠實拒答",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題7／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
     },
     {
       "id": "26-Q8",
@@ -427,13 +621,63 @@
       "pcode": "N0060004",
       "source_article": "N0060004 勞工作業場所容許暴露標準 §3 ＋ 變量係數表",
       "gold_answer": "5 ppm 落在「1 以上，未滿 10」→ 變量係數「2」",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [],
+      "verification_status": "unverified",
       "complexity_label": "多跳／區間推理（值→區間→係數）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題8／報告 38 T1 條件A",
       "dup_map": [],
-      "pilot": false,
-      "gold_facts": []
+      "pilot": false
+    },
+    {
+      "id": "canary-P1",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "pcode": null,
+      "source_article": "非收錄法令/超出法定額度",
+      "gold_answer": "依據目前收錄之勞動法規資料庫，未記載此項超額罰鍰規定。",
+      "scenario_type": "Type-E",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "未記載相關規定",
+          "source_law": "None",
+          "source_article": "None",
+          "is_essential": true,
+          "note": "必須觸發拒答"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "拒答金絲雀",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": null,
+      "dup_map": [],
+      "pilot": true
+    },
+    {
+      "id": "canary-P4",
+      "question": "請問勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次？",
+      "pcode": null,
+      "source_article": "惡意干擾/荒謬提問",
+      "gold_answer": "依據目前收錄之勞動法規資料庫，未記載此項規定。",
+      "scenario_type": "Type-E",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "未記載相關規定",
+          "source_law": "None",
+          "source_article": "None",
+          "is_essential": true,
+          "note": "必須觸發拒答"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "拒答金絲雀",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": null,
+      "dup_map": [],
+      "pilot": true
     }
   ]
 }

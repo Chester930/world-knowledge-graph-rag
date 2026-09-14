@@ -22,6 +22,7 @@ from core.kg_config.loader import (
 )
 from core.kg_config.model import (
     BfsConfig,
+    ChunkingConfig,
     DecomposeConfig,
     DedupConfig,
     DomainConfig,
@@ -47,6 +48,7 @@ from core.kg_config.stages import (
 
 __all__ = [
     "KGConfig",
+    "ChunkingConfig",
     "BfsConfig",
     "FactListConfig",
     "DecomposeConfig",
