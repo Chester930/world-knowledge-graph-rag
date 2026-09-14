@@ -260,6 +260,27 @@ async def test_build_constrained_prompt_allows_interval_lookup_inference():
     assert "不可以用推論" in prompt  # 一般禁令仍在
     # 報告32 §9 A/B：越界／缺級距時仍回到規則 2 拒答，不可挑最接近的一列
     assert "不可挑最接近的一列硬套" in prompt
+    # extra_note 未傳入時不應出現任何額外規則 5
+    assert "5." not in prompt.split("請回答上述問題")[-1]
+
+
+@pytest.mark.asyncio
+async def test_build_constrained_prompt_appends_gap_refusal_note_when_supplied():
+    """報告32 §9 G2 方案E（2026-09-13）：確定性覆核判斷「缺口案例」時，
+    `extra_note` 要出現在 prompt 裡（規則 5），明確禁止編造事實清單裡不存在
+    的新區間——真實測試發現沒有這段提示，重生成會在壓力下捏造答案。"""
+    fact_results = [
+        {"fact_text": "1 以上，未滿 10 的容許濃度 變量係數為 2", "subject": "1 以上，未滿 10 的容許濃度", "rel_type": "RELATED_TO", "object": "2"},
+    ]
+    embedding = _FakeSemanticEmbeddingProvider()
+    note = "測試用缺口拒答提示，不要編造新區間。"
+
+    prompt = await agent._build_constrained_prompt(
+        "8 小時容許濃度為 0.5 ppm 時變量係數是多少？", [], fact_results, None,
+        embedding_provider=embedding, extra_note=note,
+    )
+
+    assert "5. " + note in prompt
 
 
 @pytest.mark.asyncio

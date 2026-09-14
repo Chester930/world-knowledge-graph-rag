@@ -34,7 +34,8 @@ from services.svo_service import (
     vector_search_entities,
     vector_search_facts,
 )
-from services.verification_service import verify_fact_grounding
+from services.interval_lookup_service import evaluate_lookup_override, is_refusal_text
+from services.verification_service import ClaimGrounding, verify_fact_grounding
 
 # Traceability: 02 §2.4.2／§2.4.3 -> 03 §3.2 -> 04 §4.7.
 # RQ status: this router currently supports single-KG BFS + Fact retrieval (RQ1
@@ -1008,6 +1009,7 @@ async def _build_constrained_prompt(
     question_vector: list[float] | None = None,
     cfg: KGConfig | None = None,
     context_lines: list[str] | None = None,
+    extra_note: str | None = None,
 ) -> str:
     """方案 B「限制性重新生成」用的強約束 prompt（見 `docs/報告/16_事實接地性核對機制設計報告.md` § 3、9）。
 
@@ -1030,6 +1032,15 @@ async def _build_constrained_prompt(
     讓模型忍不住抄自己剛講過的內容。舊版曾把未接地陳述列出來要求「不要
     重複」，反而正是論文警告的反面案例——先讓模型看到錯誤內容，再指望它
     自己避開。
+
+    `extra_note`（2026-09-13，報告32 §9 G2 方案E）：`services/
+    interval_lookup_service.py` 確定性判斷「缺口案例」（問題數值不在事實
+    清單任何一列明列區間內）觸發重生成時帶上的明確禁止提示。**真實測試
+    發現不加這段會出問題**：只靠既有規則 1 的一般查表指令，模型在「必須
+    從事實清單推導出答案」的壓力下，會在缺口案例編造一條事實清單裡不存在
+    的新區間去湊出答案——比修正前「挑最接近的一列硬套」更嚴重的新幻覺
+    型態。此提示遵守 CoVe factored 原則：只描述「這一類問題該怎麼處理」的
+    通用規則，不透露草稿內容或其具體錯誤。
     """
     _cfg = cfg or KGConfig()
     # 報告39 §3.2：`context_lines` 有值時直接用（harness baseline arm）；
@@ -1052,6 +1063,8 @@ async def _build_constrained_prompt(
         history_lines = "\n".join(f"{m.role}：{m.content}" for m in history[-6:])
         history_block = f"對話歷史：\n{history_lines}\n\n"
 
+    extra_note_block = f"5. {extra_note}\n" if extra_note else ""
+
     return f"""{_cfg.domain.system_context}
 
 以下是從知識圖譜檢索到的事實，這是你這次「唯一」能引用的資訊來源：
@@ -1064,7 +1077,7 @@ async def _build_constrained_prompt(
 2. 若事實清單不足以完整回答問題的某個部分，該部分請回答「資料未明確記載，無法確認」，並簡短說明具體是哪個部分找不到依據（例如：「事實清單中沒有提到婚假的天數」），不要臆測或用自己的知識填補。
 3. 回答前請逐條檢視上方事實清單中每一項，確認是否有跟問題相關卻被你遺漏的事實——事實清單已依與問題的相關性排序，最相關的通常在清單前段。
 4. 若你在回答的任何一部分已經引用某條事實作答，後面的摘要或結論不可以再說這項資訊「未記載」或「無法確認」——同一份事實清單內，已經用過的事實視為確定可用，前後結論必須一致。
-"""
+{extra_note_block}"""
 
 
 class _GenerationResult(NamedTuple):
@@ -1148,12 +1161,47 @@ async def _generate_from_context_lines(
     final_answer = draft_answer
     regenerated = False
     ungrounded_claims = [c for c in grounding if c.is_claim and not c.supported]
+
+    # 報告32 §9 G2 方案E（2026-09-13，見 §3.6 §G2、報告42 §6/§7）：「數值區間 →
+    # 對應值」查表判斷改用確定性規則覆核，不再單靠 `judge_llm_provider`。C 驗證
+    # （`run_refusal_canary.py`）證實 A/B/A′ 收緊沒解決核心情境、MRR 反而上升
+    # （RefusalBench：Qwen 家族這類判斷準確率全尺寸 <17%）。只在能明確解析出
+    # 查表結構時介入（`no_override` 時完全不動 judge 原判）。
+    #
+    # ⚠️ 強制觸發時刻意把「這句話該不該重生成」的判斷跟下方既有的「逐句局部
+    # 修正 vs 整份重生」分支判斷邏輯**完全脫鉤**——後者依 `grounded_claim_count
+    # = claim_count - len(ungrounded_claims)` 決定走哪條路，且逐句重組（下方
+    # `for c in grounding: if c.is_claim and not c.supported`）比對的是**原始**
+    # `grounding` 清單的 `supported` 欄位，不是這裡覆寫後的 `ungrounded_claims`
+    # ——若只塞一則合成 claim，這兩處對不上會讓覆核形同虛設。故 force_unsupported
+    # 時把「所有 is_claim 主張」都納入 `ungrounded_claims`，讓
+    # `grounded_claim_count` 必為 0，保證走下方整份重生分支（不進
+    # `_targeted_correction()` 的逐句修正路徑），行為確定、不受草稿主張數影響。
+    lookup_override = evaluate_lookup_override(
+        question, fact_texts, draft_answer, is_refusal_text
+    )
+    lookup_extra_note: str | None = None
+    if lookup_override.decision == "force_supported":
+        ungrounded_claims = []
+    elif lookup_override.decision == "force_unsupported":
+        lookup_extra_note = lookup_override.extra_prompt_note
+        all_claims = [c for c in grounding if c.is_claim]
+        ungrounded_claims = all_claims or [
+            ClaimGrounding(
+                statement=draft_answer,
+                supported=False,
+                reason="G2 方案E：確定性覆核判斷草稿答錯（缺口硬套／挑錯值／"
+                       "該答卻拒答），強制觸發重生成。",
+                is_claim=True,
+            )
+        ]
+
     if grounding_context_present and ungrounded_claims and not disable_grounding_regen:
         if baseline_mode:
             constrained_prompt = await _build_constrained_prompt(
                 question, triples, fact_results, history,
                 embedding_provider=embedding_provider, question_vector=question_vector,
-                cfg=cfg, context_lines=context_lines,
+                cfg=cfg, context_lines=context_lines, extra_note=lookup_extra_note,
             )
             corrected_parts: list[str] = []
             async for token in llm_provider.stream(constrained_prompt):
@@ -1191,7 +1239,7 @@ async def _generate_from_context_lines(
                 constrained_prompt = await _build_constrained_prompt(
                     question, triples, fact_results, history,
                     embedding_provider=embedding_provider, question_vector=question_vector,
-                    cfg=cfg,
+                    cfg=cfg, extra_note=lookup_extra_note,
                 )
                 corrected_parts: list[str] = []
                 async for token in llm_provider.stream(constrained_prompt):
