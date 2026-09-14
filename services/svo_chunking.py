@@ -7,12 +7,15 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Mapping, Protocol, Sequence
 
+from core.kg_config.model import ChunkingConfig
 from parser.chunk_writer import document_folder_path
 from parser.core import split_into_sentences
+
 
 SVO_INDEX_FILENAME = "svo_index.json"
 SVO_CHUNK_PREFIX = "svo-chunk"
@@ -57,6 +60,7 @@ def build_svo_chunks(
     *,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
+    config: ChunkingConfig | None = None,
 ) -> list[SVOChunk]:
     """依標準化句子聚合 SVO chunk，並保存對應原句範圍。
 
@@ -64,30 +68,51 @@ def build_svo_chunks(
     （起始點以 `max_sentences - overlap_sentences` 為公差遞增，預設值對應
     1-5、4-8、7-11 這組序列）。最後一塊觸底（涵蓋到最後一句）後即停止，
     不會再產生更短的尾端重複塊。
+
+    若傳入 `config: ChunkingConfig`，則依據其 strategy、header_regex、
+    prepend_header_to_children 等宣告式參數驅動切塊與主旨前綴錨定（Header Anchoring）。
     """
     originals = [s.strip() for s in original_sentences if s.strip()]
     normalized = [s.strip() for s in normalized_sentences if s.strip()]
 
     if len(originals) != len(normalized):
         raise ValueError("原句與標準化句數量必須一致，才能建立句子層追溯索引")
-    if max_sentences <= 0:
+
+    effective_max = config.max_sentences if config else max_sentences
+    effective_overlap = config.overlap_sentences if config else overlap_sentences
+    strategy = config.strategy if config else "sliding_window"
+    header_regex = config.header_regex if config else None
+    prepend_header = config.prepend_header_to_children if config else False
+
+    if effective_max <= 0:
         raise ValueError("max_sentences 必須大於 0")
-    if overlap_sentences < 0:
+    if effective_overlap < 0:
         raise ValueError("overlap_sentences 不可為負數")
-    if overlap_sentences >= max_sentences:
+    if effective_overlap >= effective_max:
         raise ValueError("overlap_sentences 必須小於 max_sentences")
     if not normalized:
         return []
+
+    # 建立主旨索引映射（僅在 header_anchored 模式且有 header_regex 時啟用）
+    header_pattern = re.compile(header_regex) if (strategy == "header_anchored" and header_regex) else None
+    headers_at_index: dict[int, str] = {}
+    current_header: str | None = None
+    if header_pattern:
+        for i, s in enumerate(normalized):
+            if header_pattern.search(s):
+                current_header = s
+            if current_header is not None:
+                headers_at_index[i] = current_header
 
     total_sentences = len(normalized)
     ranges: list[tuple[int, int]] = []
     start = 0
     while start < total_sentences:
-        end = min(start + max_sentences, total_sentences)
+        end = min(start + effective_max, total_sentences)
         ranges.append((start, end))
         if end >= total_sentences:
             break
-        next_start = end - overlap_sentences
+        next_start = end - effective_overlap
         start = max(next_start, start + 1)
 
     digits = max(3, len(str(len(ranges))))
@@ -97,15 +122,30 @@ def build_svo_chunks(
         filename = f"{SVO_CHUNK_PREFIX}-{idx:0{digits}d}-of-{total:0{digits}d}.md"
         normalized_slice = normalized[start_idx:end_idx]
         original_slice = originals[start_idx:end_idx]
+
+        article_no = None
+        associated_header = headers_at_index.get(start_idx)
+        if associated_header:
+            m = re.search(r"第[一二三四五六七八九十百千0-9]+條", associated_header)
+            if m:
+                article_no = m.group(0)
+
+        # 款式斷頭防護：當母條文主旨存在且不在當前區塊時，自動前綴注入至 text
+        if prepend_header and associated_header and (associated_header not in normalized_slice):
+            text_content = f"{associated_header}\n" + "\n".join(normalized_slice)
+        else:
+            text_content = "\n".join(normalized_slice)
+
         chunks.append(SVOChunk(
             index=idx,
             total_chunks=total,
             source_sentence_start=start_idx + 1,
             source_sentence_end=end_idx,
-            text="\n".join(normalized_slice),
+            text=text_content,
             original_sentences=original_slice,
             normalized_sentences=normalized_slice,
             filename=filename,
+            article_no=article_no,
         ))
     return chunks
 
@@ -116,13 +156,16 @@ def build_svo_chunks_from_text(
     *,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
+    config: ChunkingConfig | None = None,
 ) -> list[SVOChunk]:
     return build_svo_chunks(
         split_and_clean_sentences(original_text),
         split_and_clean_sentences(normalized_text),
         max_sentences=max_sentences,
         overlap_sentences=overlap_sentences,
+        config=config,
     )
+
 
 
 # 法規全文本身以「（刪除）」／「(刪除)」標記已刪除但保留編號的條文（見
@@ -229,12 +272,13 @@ class ChunkingStrategy(Protocol):
 @dataclass
 class FixedSentenceGroupChunking:
     """`SVOGROUP`：現行固定句數聚合＋重疊窗策略（通用預設），包裝既有
-    `build_svo_chunks()`，行為完全不變。"""
+    `build_svo_chunks()`，行為完全不變。可傳入 `config: ChunkingConfig` 啟用參數驅動。"""
 
     original_sentences: Sequence[str]
     normalized_sentences: Sequence[str]
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES
+    config: ChunkingConfig | None = None
 
     def build_chunks(self) -> list[SVOChunk]:
         return build_svo_chunks(
@@ -242,7 +286,9 @@ class FixedSentenceGroupChunking:
             self.normalized_sentences,
             max_sentences=self.max_sentences,
             overlap_sentences=self.overlap_sentences,
+            config=self.config,
         )
+
 
 
 @dataclass
@@ -334,6 +380,7 @@ def prepare_svo_chunks(
     *,
     max_sentences: int = DEFAULT_SVO_CHUNK_MAX_SENTENCES,
     overlap_sentences: int = DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES,
+    config: ChunkingConfig | None = None,
 ) -> tuple[list[Path], list[SVOChunk]]:
     """從原文/標準化全文建立 SVO chunks 並落地。"""
     chunks = build_svo_chunks_from_text(
@@ -341,6 +388,8 @@ def prepare_svo_chunks(
         normalized_text,
         max_sentences=max_sentences,
         overlap_sentences=overlap_sentences,
+        config=config,
     )
     paths = write_svo_chunks(chunks, source, output_dir)
     return paths, chunks
+

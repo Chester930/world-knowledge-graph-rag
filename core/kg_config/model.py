@@ -13,9 +13,38 @@
 """
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 _FROZEN = ConfigDict(frozen=True, extra="forbid")
+
+
+class ChunkingConfig(BaseModel):
+    """SVO 切塊與主旨前綴錨定（`services/svo_chunking.py`）。"""
+
+    model_config = _FROZEN
+
+    # services/svo_chunking.py::DEFAULT_SVO_CHUNK_MAX_SENTENCES
+    max_sentences: int = Field(default=5, ge=1, le=50, description="每塊最大句數")
+    # services/svo_chunking.py::DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES
+    overlap_sentences: int = Field(default=2, ge=0, le=20, description="相鄰塊重疊句數")
+    strategy: Literal["sliding_window", "header_anchored"] = Field(
+        default="sliding_window",
+        description="切塊策略：sliding_window（純句數滑動視窗）或 header_anchored（主旨前綴錨定）",
+    )
+    header_regex: str | None = Field(
+        default=r"^第[一二三四五六七八九十百千0-9]+條.*",
+        description="主旨/法條識別正則表達式",
+    )
+    prepend_header_to_children: bool = Field(
+        default=True,
+        description="當條文跨 Chunk 切分時，是否自動將母條文首句條旨作為前綴注入至子款項 Chunk",
+    )
+    max_chunk_chars: int = Field(
+        default=1000, ge=100, le=10000, description="單塊字元軟上限",
+    )
+
 
 
 class RoutingConfig(BaseModel):
@@ -157,3 +186,5 @@ class KGConfig(BaseModel):
     reltype: RelTypeConfig = Field(default_factory=RelTypeConfig)
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
     domain: DomainConfig = Field(default_factory=DomainConfig)
+    chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)
+

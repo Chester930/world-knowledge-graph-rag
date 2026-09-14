@@ -67,11 +67,13 @@ def test_helpers_partition_the_registry():
 
 def test_manual_harness_stages_are_the_consolidation_backlog():
     """`harness == MANUAL` 的階段 = 「把報告手動診斷收斂成自動 eval suite」的待辦。
-    目前應是 dedup / reltype / routing / decompose 這幾個（報告19/20/25/27 已有 harness
-    的不算）。"""
+    目前應是 dedup / reltype / routing / decompose / chunking 這幾個（報告19/20/25/27
+    已有 harness 的不算；`ingestion.chunking` 2026-09-14 隨 `ChunkingConfig`（報告45/46）
+    新增，尚無自動 harness，故同屬待辦）。"""
     manual_ids = {s.id for s in stages_without_harness()}
     assert manual_ids == {
         "routing.kg_select", "dedup.entity", "reltype.reconcile", "generation.decompose",
+        "ingestion.chunking",
     }
 
 

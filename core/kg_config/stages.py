@@ -192,6 +192,21 @@ STAGE_REGISTRY: dict[str, Stage] = {
         harness=Harness.MANUAL,
         blocked_by=Blocker.EXTRACTION_SIDE,  # COMPARE 抽取也用；QSIM 半可先做（8c-4）
     ),
+    "ingestion.chunking": Stage(
+        id="ingestion.chunking",
+        description="SVO 切塊策略與主旨錨定參數（報告45/46 SDD；header_anchored 已實作並通過單元測試，"
+                     "尚未接入 prepare_svo_ready_chunks()/trigger_extraction() 實際抽取管線）",
+        config_section="chunking",
+        params=("max_sentences", "overlap_sentences", "max_chunk_chars", "header_regex"),
+        capability_flags=("header_anchored", "prepend_header_to_children"),
+        metrics=(
+            Metric("clause_truncation_rate", "lower_is_better", "ratio", "報告45/46（款式斷頭）"),
+            _HIT,
+        ),
+        gates=(Gate("answer_hit", ">=", "baseline", "切塊策略調整不得使既有正確性退步"),),
+        harness=Harness.MANUAL,
+        blocked_by=Blocker.EXTRACTION_SIDE,
+    ),
     "extraction.completeness": Stage(
         id="extraction.completeness",
         description="抽取完整性自檢門檻（報告19/20）",

@@ -247,3 +247,82 @@ def test_write_svo_chunks_includes_article_no_in_frontmatter_when_present(tmp_pa
     index = json.loads((tmp_path / "D0070148_建築物室內裝修管理辦法" / "svo_index.json").read_text(encoding="utf-8"))
     assert index["chunks"][0]["article_no"] == "第 1 條"
     assert index["chunks"][1]["article_no"] == "第 3 條"
+
+
+def test_build_svo_chunks_with_chunking_config_sliding_window():
+    """驗證 ChunkingConfig sliding_window 策略正確套用參數。"""
+    from core.kg_config.model import ChunkingConfig
+
+    sentences = [f"第{i}句。" for i in range(1, 10)]
+    cfg = ChunkingConfig(strategy="sliding_window", max_sentences=4, overlap_sentences=1)
+
+    chunks = svc.build_svo_chunks(sentences, sentences, config=cfg)
+
+    # 4 句/重疊 1 句：1-4, 4-7, 7-9
+    ranges = [(c.source_sentence_start, c.source_sentence_end) for c in chunks]
+    assert ranges == [(1, 4), (4, 7), (7, 9)]
+
+
+def test_build_svo_chunks_header_anchored_injects_header_to_children_and_preserves_lineage():
+    """驗證 SDD-45 核心：法規款式斷頭防護（主旨前綴注入）與血統不變式（Lineage Invariants）。"""
+    from core.kg_config.model import ChunkingConfig
+
+    sentences = [
+        "第40條 雇主有下列情事之一者，處新臺幣三萬元以上十五萬元以下罰鍰：",  # idx 0 (line 1)
+        "一、未依法給付加班費。",                                          # idx 1 (line 2)
+        "二、未依規定置備勞工名卡。",                                      # idx 2 (line 3)
+        "三、拒絕勞工檢查員檢查。",                                        # idx 3 (line 4)
+        "四、未依規定發給資遣費。",                                        # idx 4 (line 5)
+        "五、違反工作時間之限制規定。",                                    # idx 5 (line 6)
+    ]
+
+    cfg = ChunkingConfig(
+        strategy="header_anchored",
+        max_sentences=3,
+        overlap_sentences=0,
+        prepend_header_to_children=True,
+    )
+
+    chunks = svc.build_svo_chunks(sentences, sentences, config=cfg)
+
+    assert len(chunks) == 2
+
+    # Chunk 0: 涵蓋行 1~3（條旨、第一款、第二款）
+    c0 = chunks[0]
+    assert c0.source_sentence_start == 1
+    assert c0.source_sentence_end == 3
+    assert c0.article_no == "第40條"
+    assert c0.text.startswith("第40條 雇主有下列情事之一者")
+    # 首句本為條旨，不重複注入
+    assert c0.text.count("第40條") == 1
+    assert len(c0.normalized_sentences) == 3
+
+    # Chunk 1: 涵蓋行 4~6（第三款、第四款、第五款）——款式斷頭被修復
+    c1 = chunks[1]
+    # 血統不變式（Lineage Invariants）：原始行號依然為 4~6，不因注入主旨前綴而偏移
+    assert c1.source_sentence_start == 4
+    assert c1.source_sentence_end == 6
+    assert c1.article_no == "第40條"
+    assert len(c1.normalized_sentences) == 3
+    assert c1.normalized_sentences[0] == "三、拒絕勞工檢查員檢查。"
+    # 注入防護驗證：text 開頭成功注入母條文主旨！
+    assert c1.text.startswith("第40條 雇主有下列情事之一者，處新臺幣三萬元以上十五萬元以下罰鍰：\n三、拒絕勞工檢查員檢查。")
+    assert "四、未依規定發給資遣費。" in c1.text
+
+
+def test_fixed_sentence_group_chunking_passes_config_correctly():
+    """驗證 FixedSentenceGroupChunking 支援 config 參數注入。"""
+    from core.kg_config.model import ChunkingConfig
+
+    sentences = [
+        "第5條 違反強制勞動禁止之處罰。",
+        "一、處五年以下有期徒刑。",
+        "二、得併科罰金。",
+    ]
+    cfg = ChunkingConfig(strategy="header_anchored", max_sentences=2, overlap_sentences=0)
+    strategy = svc.FixedSentenceGroupChunking(sentences, sentences, config=cfg)
+    chunks = strategy.build_chunks()
+
+    assert len(chunks) == 2
+    assert chunks[1].text.startswith("第5條 違反強制勞動禁止之處罰。\n二、得併科罰金。")
+

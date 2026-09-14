@@ -67,6 +67,14 @@ def test_kgconfig_defaults_match_live_module_constants():
     assert cfg.domain.target_language == "zh-Hant"
     assert cfg.domain.name == "taiwan-labor-law"
 
+    # services/svo_chunking.py
+    import services.svo_chunking as svo_chunking
+    assert cfg.chunking.max_sentences == svo_chunking.DEFAULT_SVO_CHUNK_MAX_SENTENCES
+    assert cfg.chunking.overlap_sentences == svo_chunking.DEFAULT_SVO_CHUNK_OVERLAP_SENTENCES
+    assert cfg.chunking.strategy == "sliding_window"
+    assert cfg.chunking.prepend_header_to_children is True
+
+
 
 def test_loader_with_no_sources_equals_shipped_defaults():
     assert ConfigLoader().load().model_dump() == KGConfig().model_dump()

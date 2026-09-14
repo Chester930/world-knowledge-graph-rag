@@ -5,7 +5,16 @@
 > **專案路徑**：`d:\Users\666\Desktop\world knowledge graph rag`  
 > **專案狀態**：SDD 階段一至五的核心模組已實作，66 項指定關鍵單元測試 100% 通過；但階段五的 `ChunkingConfig` 主旨錨定尚未完成實際抽取管線接線。論文核心章節已同步記錄設計與模組狀態，正式端到端評測數據仍待任務 A 產出。
 
-> ⚠️ **編號訂正 + 完成狀態核實結果（2026-09-14，入庫時補記）**：本文件原編號 46，建立時只存在主要 checkout 目錄、從未 `git commit`，因與已入庫報告衝突改編號 47。**本文件開頭聲稱的「SDD 階段一至五核心模組已實作、66/66 測試通過」，經另一 Claude session 入庫前逐一核實：`git log --all` 搜遍所有分支、dangling commit、stash 均查無這些模組；改用 Glob 直接查主要 checkout 目錄後，確認這些檔案（`services/lineage_tracker.py`／`atomic_scorer.py`／`cost_analyzer.py`／`deterministic_guard_service.py`／`refusal_guard.py`／`query_classifier.py`／`adaptive_retrieval_service.py`／`data/eval/test_cases.json` 等）確實存在於磁碟，但從未進版控，其程式碼內容與測試是否真的如本文件所述通過，尚待入庫後另外審查——不能只憑本文件的敘述採信「已完成」。**
+> ⚠️ **編號訂正 + 完成狀態核實結果（2026-09-14，入庫時補記，審查已完成）**：本文件原編號 46，建立時只存在主要 checkout 目錄、從未 `git commit`，因與已入庫報告衝突改編號 47。
+>
+> **審查結論**：「SDD 階段一至五核心模組已實作、66/66 測試通過」——**66/66 測試通過屬實**，已把全部檔案複製進 git worktree 實際重跑一次確認；程式碼架構乾淨，`ChunkingConfig`／`header_anchored` 與既有 `KGConfig`／`SVOChunk` 慣例整合良好。跑全套既有 877 題 pytest 時額外發現並修復 1 個真迴歸（新 `chunking` 分區未登記進 `core/kg_config/stages.py` 的 `STAGE_REGISTRY` 一致性檢查）。全套測試現為 897 passed。
+>
+> **審查中發現三個需要留意的問題（已標註在對應檔案，未全部改動邏輯）**：
+> 1. `services/cost_analyzer.py::get_baseline_profile()` 回傳的延遲/儲存/成本數字皆為寫死的**估計值**，docstring 原文「依據…實測數據」與實作不符，已加註記，使用前務必用真實跑測結果覆蓋。
+> 2. `services/query_classifier.py::MULTI_HOP_PATTERNS`（Type-C 多跳判斷）是題庫特定題目主題字串的硬編碼，屬於對已知題庫的過擬合，不是可泛化分類器，已加註記，不可用於任何正式評測結論。
+> 3. `data/eval/test_cases.json` 原始版本 `canary-P1`／`canary-P4` 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——**已修復**，並在 `scripts/eval/upgrade_benchmark_dataset.py` 補上防重複 id 的過濾邏輯（根因：`CANARY_QUESTIONS` 無條件附加，未濾掉 legacy 檔案裡已存在的同 id 條目，重跑腳本會再犯）。
+>
+> **`scripts/eval/run_rq1_comparison.py` 未完整**：`main()` 目前只寫 `manifest.json` 並印一行訊息，`_run_single_query()`／`_render_pareto_summary()` 等實際跑測函式都已寫好但**從未被呼叫**——直接執行本腳本不會產出任何比較結果，已在該檔案頂部加上誠實註記，串接邏輯留給下一輪任務決定。
 
 ---
 
