@@ -33,8 +33,8 @@
 | 確定性守衛接線（`deterministic_guard_service`） | ✅ 已接線（報告51 §6項目4已完成） | `scripts/eval/run_rq1_comparison.py:57,295` |
 | 獨立judge強制要求 | ✅ 已接線（報告51 §6項目3已完成） | `scripts/eval/run_rq1_comparison.py:560-563` |
 | BGE-M3 1024維embedding升級 | ✅ 已完成（報告54目標已達成） | `.env`/`main.py` 動態傳入 |
-| **Noise Rate / SNR 指標** | ❌ 未實作 | — |
-| **Chain Completeness 指標** | ❌ 未實作（但`AtomicGoldFact.source_law`已可支撐分組計算，不需schema改動） | — |
+| **Noise Rate / SNR 指標** | ✅ 已實作（2026-09-15） | `services/lineage_tracker.py::_compute_snr()` |
+| **Chain Completeness 指標** | ✅ 已實作（2026-09-15，`source_law`分組，Type-E synthetic排除，單文件題回傳None不算0分） | `services/lineage_tracker.py::_compute_chain_completeness()` |
 | **Context Quality 是否為主要回報指標** | ❌ 否——`recall_rate`已算出但`_render_pareto_summary()`只彙總`atomic_score`，Context Recall從未進入summary.md | `scripts/eval/run_rq1_comparison.py:348-420` |
 | 題庫場景標籤（複選） | ❌ 目前`scenario_type`是單值欄位，無法一題掛多場景 | `models/eval_schema.py:47` |
 | Type-D（全域聚合）題目 | ❌ 32題中0題 | `docs/附錄A題庫.json` |
@@ -60,19 +60,21 @@
   • Canary Refusal Accuracy = 已有Type-E題目可測
 ```
 
-### 2.2 待實作指標設計
+### 2.2 指標設計（✅ 2026-09-15 已實作）
 
 **Noise Rate / SNR**：
 ```
 SNR = Σ(len(hit_exact_span)) / len(combined_retrieved_text)
 ```
-`RetrievalStageLineage`需新增欄位 `retrieved_char_count: int`（`record_retrieval_async()`計算`combined_text`時順手记录長度，非破壞性schema新增，預設0不影響既有記錄反序列化）。
+`RetrievalStageLineage`新增`retrieved_char_count: int`／`snr: float`兩欄位（`models/eval_schema.py`），`record_retrieval()`/`record_retrieval_async()`計算`combined_text`時順手記錄長度並算SNR，夾在[0,1]內。非破壞性schema新增，預設0不影響既有記錄反序列化。
 
 **Chain Completeness**（僅對`atomic_gold_facts`橫跨 ≥2 個`source_law`的題目有意義，即Type-C/D）：
 ```
 Chain Completeness = 命中至少一個essential fact的 distinct source_law 數 / 該題所需的 distinct source_law 總數
 ```
-不需要schema改動——`AtomicGoldFact.source_law`已存在，只需在`lineage_tracker.py`新增一個依`source_law`分組再算覆蓋率的函式，用既有的`hit_spans`/`missed_spans`資料重新聚合即可。
+不需要schema改動——`AtomicGoldFact.source_law`已存在，`_compute_chain_completeness()`依`source_law`分組再算覆蓋率，用既有的`hit_spans`聚合。單文件題目（僅1個distinct source_law）或未傳入`atomic_gold_facts`回傳`None`（不適用，非0分，避免懲罰單文件題）；Type-E拒答題的synthetic `source_law="None"`比照`evaluation_eligibility.py`慣例排除在分組外。
+
+兩者皆已接線進`scripts/eval/run_rq1_comparison.py`的兩處`record_retrieval()`呼叫點（正常路徑與例外failure record路徑），新增8個單元測試（`tests/services/test_lineage_tracker.py`），全套945 pytest綠燈。
 
 ### 2.3 報表層改動
 

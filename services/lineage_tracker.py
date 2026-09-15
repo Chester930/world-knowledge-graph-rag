@@ -13,12 +13,48 @@ from typing import List, Optional
 
 from core.providers.base import LLMProvider
 from models.eval_schema import (
+    AtomicGoldFact,
     ContextAssemblyLineage,
     FullQueryLineage,
     GenerationStageLineage,
     RetrievalStageLineage,
 )
 from services.semantic_span_matcher import match_spans_with_fallback
+
+
+def _compute_snr(hit_spans: List[str], retrieved_char_count: int) -> float:
+    """報告57 §2.2：Signal/Noise Ratio = Σlen(hit_exact_span) / retrieved_char_count。
+    以清除空白/換行後的字元數計算，與既有逐字比對的清理慣例一致。夾在
+    [0,1] 內（命中片段重疊等邊界情況下分子可能略超過分母，裁掉避免
+    產生不可解讀的比率）。"""
+    if retrieved_char_count <= 0:
+        return 0.0
+    signal_chars = sum(len(span.replace(" ", "").replace("\n", "")) for span in hit_spans)
+    return round(min(signal_chars / retrieved_char_count, 1.0), 4)
+
+
+def _compute_chain_completeness(
+    atomic_gold_facts: Optional[List[AtomicGoldFact]],
+    hit_spans: List[str],
+) -> Optional[float]:
+    """報告57 §2.2：跨文件推論鏈完整度 = 命中≥1個essential fact的distinct
+    source_law數 / 所需distinct source_law總數。題目只涉及單一
+    source_law（或未提供 atomic_gold_facts）時回傳 None（不適用，非0分
+    ——單文件題目不該被這個指標懲罰）。Type-E 拒答題慣用的
+    synthetic source_law="None"（見 `services/evaluation_eligibility.py`
+    同一慣例）不計入分組。"""
+    if not atomic_gold_facts:
+        return None
+    essential = [
+        f for f in atomic_gold_facts
+        if f.is_essential and f.source_law and f.source_law != "None"
+    ]
+    required_laws = {f.source_law for f in essential}
+    if len(required_laws) < 2:
+        return None
+    hit_set = set(hit_spans)
+    hit_laws = {f.source_law for f in essential if f.exact_span in hit_set}
+    return round(len(hit_laws) / len(required_laws), 4)
 
 
 class LineageTracker:
@@ -39,8 +75,12 @@ class LineageTracker:
         latency_ms: float,
         chunk_ids: Optional[List[str]] = None,
         fact_ids: Optional[List[str]] = None,
+        atomic_gold_facts: Optional[List[AtomicGoldFact]] = None,
     ) -> RetrievalStageLineage:
-        """記錄階段一檢索召回結果並判定 Gold Fact 覆蓋率"""
+        """記錄階段一檢索召回結果並判定 Gold Fact 覆蓋率。`atomic_gold_facts`
+        （報告57 §2.2 新增，選填）帶 source_law 分組資訊時才計算
+        `chain_completeness`；未傳入（既有呼叫端）時該欄位維持 None，
+        零行為變化。"""
         combined_text = "".join(retrieved_texts).replace(" ", "").replace("\n", "")
         hit_spans: List[str] = []
         missed_spans: List[str] = []
@@ -53,6 +93,7 @@ class LineageTracker:
                 missed_spans.append(span)
 
         recall = len(hit_spans) / len(gold_spans) if gold_spans else 1.0
+        retrieved_char_count = len(combined_text)
 
         self._retrieval = RetrievalStageLineage(
             arm=self.arm,
@@ -62,6 +103,9 @@ class LineageTracker:
             hit_exact_spans=hit_spans,
             missed_exact_spans=missed_spans,
             recall_rate=round(recall, 4),
+            retrieved_char_count=retrieved_char_count,
+            snr=_compute_snr(hit_spans, retrieved_char_count),
+            chain_completeness=_compute_chain_completeness(atomic_gold_facts, hit_spans),
         )
         return self._retrieval
 
@@ -74,15 +118,18 @@ class LineageTracker:
         fact_ids: Optional[List[str]] = None,
         judge_llm_provider: Optional[LLMProvider] = None,
         question: str = "",
+        atomic_gold_facts: Optional[List[AtomicGoldFact]] = None,
     ) -> RetrievalStageLineage:
         """語意 fallback 版（報告52 後續修正），見 `record_retrieval()` 與
         `services/semantic_span_matcher.py`。逐字比對失敗才補呼叫
-        `judge_llm_provider`；`judge_llm_provider=None` 時結果與同步版一致。"""
+        `judge_llm_provider`；`judge_llm_provider=None` 時結果與同步版一致。
+        `atomic_gold_facts`（報告57 §2.2 新增，選填）用法同 `record_retrieval()`。"""
         combined_text = "\n".join(retrieved_texts)
         hit_spans, missed_spans = await match_spans_with_fallback(
             combined_text, gold_spans, judge_llm_provider, question=question,
         )
         recall = len(hit_spans) / len(gold_spans) if gold_spans else 1.0
+        retrieved_char_count = len(combined_text.replace(" ", "").replace("\n", ""))
 
         self._retrieval = RetrievalStageLineage(
             arm=self.arm,
@@ -92,6 +139,9 @@ class LineageTracker:
             hit_exact_spans=hit_spans,
             missed_exact_spans=missed_spans,
             recall_rate=round(recall, 4),
+            retrieved_char_count=retrieved_char_count,
+            snr=_compute_snr(hit_spans, retrieved_char_count),
+            chain_completeness=_compute_chain_completeness(atomic_gold_facts, hit_spans),
         )
         return self._retrieval
 

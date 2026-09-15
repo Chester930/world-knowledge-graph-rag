@@ -53,6 +53,15 @@ class TestCase(BaseModel):
     source_report: Optional[str] = Field(default=None, description="題組來源報告")
     dup_map: List[str] = Field(default_factory=list, description="重複或鏡像題目列表")
     pilot: bool = Field(default=False, description="是否為前導/核心基準題")
+    mechanism_tags: List[str] = Field(
+        default_factory=list,
+        description=(
+            "檢索機制挑戰標籤（複選，正交於 scenario_type，報告57 §3.2）："
+            "single_fact/multi_fact_assembly/cross_doc_multihop/alias_mapping/"
+            "coreference_resolution/global_aggregation/interval_lookup/"
+            "segmented_enumeration/distractor_adjacent/canary_refusal"
+        ),
+    )
 
 
 class EvaluationDataset(BaseModel):
@@ -72,6 +81,22 @@ class RetrievalStageLineage(BaseModel):
     hit_exact_spans: List[str] = Field(default_factory=list, description="檢索結果中包含的 gold exact_span")
     missed_exact_spans: List[str] = Field(default_factory=list, description="檢索結果中遺漏的 gold exact_span")
     recall_rate: float = Field(default=0.0, description="召回率 (hit / total essential)")
+    retrieved_char_count: int = Field(
+        default=0,
+        description="組裝後檢索文字總字元數（無空白/換行），供 SNR 計算（報告57 §2.2）",
+    )
+    snr: float = Field(
+        default=0.0,
+        description="Signal/Noise Ratio = Σlen(hit_exact_span) / retrieved_char_count（報告57 §2.2）",
+    )
+    chain_completeness: Optional[float] = Field(
+        default=None,
+        description=(
+            "跨文件推論鏈完整度 = 命中≥1個essential fact的distinct source_law數 / "
+            "所需distinct source_law總數；題目只涉及單一source_law時為None（不適用，"
+            "非0分，報告57 §2.2）"
+        ),
+    )
 
 
 class ContextAssemblyLineage(BaseModel):

@@ -10,6 +10,7 @@
 import json
 import pytest
 from pathlib import Path
+from models.eval_schema import AtomicGoldFact
 from services.lineage_tracker import LineageTracker
 
 
@@ -201,3 +202,116 @@ async def test_diagnose_failure_async_stage3_keeps_real_smoothing_error():
     diag = await tracker.diagnose_failure_async(gold_spans, judge_llm_provider=judge)
     assert "Stage 3 Generation Failure" in diag
     assert "Intrinsic Hallucination / Smoothing" in diag
+
+
+# ── 報告57 §2.2：SNR / Chain Completeness ──────────────────────────
+
+
+def test_snr_computed_from_hit_spans_and_retrieved_length():
+    tracker = LineageTracker(query_id="t-snr", arm="M1", question="q")
+    lineage = tracker.record_retrieval(["ABCDEFGHIJ"], ["ABC"], latency_ms=1.0)
+    assert lineage.retrieved_char_count == 10
+    assert lineage.snr == 0.3
+
+
+def test_snr_zero_when_no_retrieved_text():
+    tracker = LineageTracker(query_id="t-snr-empty", arm="M1", question="q")
+    lineage = tracker.record_retrieval([], ["ABC"], latency_ms=1.0)
+    assert lineage.retrieved_char_count == 0
+    assert lineage.snr == 0.0
+
+
+def test_chain_completeness_none_without_atomic_gold_facts():
+    """未傳入 atomic_gold_facts（既有呼叫端）＝零行為變化，不是0分。"""
+    tracker = LineageTracker(query_id="t-cc-none", arm="M1", question="q")
+    lineage = tracker.record_retrieval(["span1"], ["span1"], latency_ms=1.0)
+    assert lineage.chain_completeness is None
+
+
+def test_chain_completeness_none_when_single_source_law():
+    """單一文件題目不適用此指標，回傳None而非懲罰性0分。"""
+    tracker = LineageTracker(query_id="t-cc-single", arm="M1", question="q")
+    facts = [
+        AtomicGoldFact(exact_span="span1", source_law="N0030006", source_article="第2條"),
+        AtomicGoldFact(exact_span="span2", source_law="N0030006", source_article="第7條"),
+    ]
+    lineage = tracker.record_retrieval(
+        ["span1span2"], ["span1", "span2"], latency_ms=1.0, atomic_gold_facts=facts,
+    )
+    assert lineage.chain_completeness is None
+
+
+def test_chain_completeness_partial_across_two_source_laws():
+    """26-Q5類跨文件情境：只召回其中一份文件的事實，鏈完整度0.5。"""
+    tracker = LineageTracker(query_id="26-Q5", arm="K", question="q")
+    facts = [
+        AtomicGoldFact(
+            exact_span="自災害發生之當月一日起計算六個月",
+            source_law="N0050030", source_article="第3條",
+        ),
+        AtomicGoldFact(
+            exact_span="其保費由中央政府補助", source_law="N0050011", source_article="第5條",
+        ),
+    ]
+    gold_spans = [f.exact_span for f in facts]
+    lineage = tracker.record_retrieval(
+        ["自災害發生之當月一日起計算六個月"], gold_spans, latency_ms=1.0, atomic_gold_facts=facts,
+    )
+    assert lineage.chain_completeness == 0.5
+
+
+def test_chain_completeness_full_when_all_source_laws_hit():
+    tracker = LineageTracker(query_id="26-Q5", arm="K", question="q")
+    facts = [
+        AtomicGoldFact(
+            exact_span="自災害發生之當月一日起計算六個月",
+            source_law="N0050030", source_article="第3條",
+        ),
+        AtomicGoldFact(
+            exact_span="其保費由中央政府補助", source_law="N0050011", source_article="第5條",
+        ),
+    ]
+    gold_spans = [f.exact_span for f in facts]
+    lineage = tracker.record_retrieval(
+        gold_spans, gold_spans, latency_ms=1.0, atomic_gold_facts=facts,
+    )
+    assert lineage.chain_completeness == 1.0
+
+
+def test_chain_completeness_excludes_canary_synthetic_source_law():
+    """Type-E拒答題的synthetic source_law='None'不計入分組（同evaluation_eligibility慣例）。"""
+    tracker = LineageTracker(query_id="canary-P1", arm="M1", question="q")
+    facts = [AtomicGoldFact(exact_span="未記載相關規定", source_law="None", source_article="None")]
+    lineage = tracker.record_retrieval(
+        [], ["未記載相關規定"], latency_ms=1.0, atomic_gold_facts=facts,
+    )
+    assert lineage.chain_completeness is None
+
+
+@pytest.mark.asyncio
+async def test_record_retrieval_async_chain_completeness_and_snr_match_sync():
+    facts = [
+        AtomicGoldFact(
+            exact_span="自災害發生之當月一日起計算六個月",
+            source_law="N0050030", source_article="第3條",
+        ),
+        AtomicGoldFact(
+            exact_span="其保費由中央政府補助", source_law="N0050011", source_article="第5條",
+        ),
+    ]
+    gold_spans = [f.exact_span for f in facts]
+    retrieved = ["自災害發生之當月一日起計算六個月"]
+
+    sync_tracker = LineageTracker("26-Q5", "K", "q")
+    sync_lineage = sync_tracker.record_retrieval(
+        retrieved, gold_spans, latency_ms=1.0, atomic_gold_facts=facts,
+    )
+
+    async_tracker = LineageTracker("26-Q5", "K", "q")
+    async_lineage = await async_tracker.record_retrieval_async(
+        retrieved, gold_spans, latency_ms=1.0, judge_llm_provider=None, atomic_gold_facts=facts,
+    )
+
+    assert async_lineage.chain_completeness == sync_lineage.chain_completeness == 0.5
+    assert async_lineage.snr == sync_lineage.snr
+    assert async_lineage.retrieved_char_count == sync_lineage.retrieved_char_count

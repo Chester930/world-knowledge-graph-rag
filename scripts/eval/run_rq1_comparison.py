@@ -268,7 +268,10 @@ async def _run_single_query(
     answer = r["answer"]
 
     # 階段一血統
-    tracker.record_retrieval(retrieved_texts, gold_spans, latency_ms=latency_s * 1000, chunk_ids=chunk_ids, fact_ids=fact_ids)
+    tracker.record_retrieval(
+        retrieved_texts, gold_spans, latency_ms=latency_s * 1000,
+        chunk_ids=chunk_ids, fact_ids=fact_ids, atomic_gold_facts=tc.atomic_gold_facts,
+    )
     # 階段二血統
     full_context_str = "\n".join(context_lines)
     tracker.record_context_assembly(full_context_str, gold_spans, total_tokens=len(full_context_str) // 4)
@@ -475,7 +478,9 @@ def _build_failure_record(
     """將單筆 harness 例外轉成可統計、且仍具三階段 lineage 的 failure record。"""
     gold_spans = [fact.exact_span for fact in tc.atomic_gold_facts]
     tracker = LineageTracker(tc.id, arm, tc.question)
-    tracker.record_retrieval([], gold_spans, latency_ms=latency_s * 1000)
+    tracker.record_retrieval(
+        [], gold_spans, latency_ms=latency_s * 1000, atomic_gold_facts=tc.atomic_gold_facts,
+    )
     tracker.record_context_assembly("", gold_spans, total_tokens=0)
     tracker.record_generation(
         raw_draft="",
