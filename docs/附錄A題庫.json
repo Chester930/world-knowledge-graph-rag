@@ -31,7 +31,10 @@
       "wording_status": "verbatim",
       "source_report": "報告 17 §1（單一 KG）",
       "dup_map": [],
-      "pilot": false
+      "pilot": false,
+      "mechanism_tags": [
+        "single_fact"
+      ]
     },
     {
       "id": "17-Q2",
@@ -57,7 +60,10 @@
       "dup_map": [
         "18-Q6"
       ],
-      "pilot": false
+      "pilot": false,
+      "mechanism_tags": [
+        "single_fact"
+      ]
     },
     {
       "id": "17-Q3",
@@ -146,7 +152,9 @@
         "18-Q5"
       ],
       "pilot": false,
-      "mechanism_tags": ["multi_fact_assembly"]
+      "mechanism_tags": [
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "17-Q7",
@@ -202,7 +210,10 @@
       "wording_status": "verbatim",
       "source_report": "報告 18 §2／§5 題1（A/B/C/D）",
       "dup_map": [],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "18-Q2",
@@ -236,7 +247,10 @@
         "17-Q3",
         "25-Q2"
       ],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "18-Q3",
@@ -269,7 +283,10 @@
       "dup_map": [
         "17-Q5"
       ],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "18-Q4",
@@ -295,7 +312,10 @@
       "dup_map": [
         "17-Q7"
       ],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "single_fact"
+      ]
     },
     {
       "id": "18-Q5",
@@ -335,7 +355,11 @@
       "dup_map": [
         "17-Q6"
       ],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "multi_fact_assembly",
+        "distractor_adjacent"
+      ]
     },
     {
       "id": "18-Q6",
@@ -376,17 +400,19 @@
         "17-Q2"
       ],
       "pilot": false,
-      "mechanism_tags": ["multi_fact_assembly"]
+      "mechanism_tags": [
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "18-Q7",
       "question": "勞工為了親自照顧家庭成員，除了原本一年十四日的事假規定外，法規還給了什麼額外的彈性？",
       "pcode": "N0030006",
       "source_article": "N0030006（事假以小時為請假單位／因子女生病等一日前提出）",
-      "gold_answer": "[待核] — 報告 18 §6 題7 的正解為「事假得以小時為請假單位」＋「因子女生病、停托、停課等原因得於一日前提出」；報告內部 §3.6 標籤與 §6 題幹措辭不完全一致，需回 N0030006 原文確認完整清單",
+      "gold_answer": "[2026-09-15訂正] 原始gold_answer混淆了兩個不同請假類型的規定，非單純文件標籤錯誤：「事假得以小時為請假單位」確實出自N0030006§7（勞工為親自照顧家庭成員，得依前項規定請事假，並得擇定以小時為請假單位）；但「因子女生病、停托、停課等原因得於一日前提出」實際出自N0030018§2（育嬰留職停薪申請提前日數的但書），是完全不同的請假類型（育嬰留職停薪，非事假），報告18原始整理誤把兩者混為同一題問。此題原始設計本身有混淆，標記為disputed，不建議直接驗證後納入正式評分——若要使用，應拆成兩題分別針對N0030006§7與N0030018§2出題。",
       "scenario_type": "Type-B",
       "atomic_gold_facts": [],
-      "verification_status": "unverified",
+      "verification_status": "disputed",
       "complexity_label": "多跳／區間推理",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
@@ -562,7 +588,9 @@
       "source_report": "報告 26 §2 題1／報告 38 T1 條件A；2026-09-15依報告57任務B補驗證",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["segmented_enumeration"]
+      "mechanism_tags": [
+        "segmented_enumeration"
+      ]
     },
     {
       "id": "26-Q2",
@@ -643,7 +671,10 @@
       "wording_status": "verbatim",
       "source_report": "報告 26 §2 題5／報告 38 T1 條件A（＝報告 37／38 Q5）",
       "dup_map": [],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
     },
     {
       "id": "26-Q6",
@@ -715,7 +746,10 @@
       "wording_status": "verbatim",
       "source_report": null,
       "dup_map": [],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "canary_refusal"
+      ]
     },
     {
       "id": "canary-P4",
@@ -739,7 +773,10 @@
       "wording_status": "verbatim",
       "source_report": null,
       "dup_map": [],
-      "pilot": true
+      "pilot": true,
+      "mechanism_tags": [
+        "canary_refusal"
+      ]
     },
     {
       "id": "57-ALIAS1",
@@ -764,7 +801,9 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["alias_mapping"]
+      "mechanism_tags": [
+        "alias_mapping"
+      ]
     },
     {
       "id": "57-ALIAS2",
@@ -794,9 +833,14 @@
       "complexity_bucket": "multi",
       "wording_status": "gist",
       "source_report": "報告57任務B §3.3，2026-09-15新出題（與18-Q3同一底層事實，題幹改口語化測別名映射）",
-      "dup_map": ["18-Q3", "17-Q5"],
+      "dup_map": [
+        "18-Q3",
+        "17-Q5"
+      ],
       "pilot": false,
-      "mechanism_tags": ["alias_mapping"]
+      "mechanism_tags": [
+        "alias_mapping"
+      ]
     },
     {
       "id": "57-ALIAS3",
@@ -819,9 +863,14 @@
       "complexity_bucket": "single",
       "wording_status": "gist",
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
-      "dup_map": ["18-Q4", "17-Q7"],
+      "dup_map": [
+        "18-Q4",
+        "17-Q7"
+      ],
       "pilot": false,
-      "mechanism_tags": ["alias_mapping"]
+      "mechanism_tags": [
+        "alias_mapping"
+      ]
     },
     {
       "id": "57-COREF1",
@@ -860,7 +909,10 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["coreference_resolution", "multi_fact_assembly"]
+      "mechanism_tags": [
+        "coreference_resolution",
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "57-COREF2",
@@ -885,7 +937,9 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["coreference_resolution"]
+      "mechanism_tags": [
+        "coreference_resolution"
+      ]
     },
     {
       "id": "57-COREF3",
@@ -917,7 +971,10 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["coreference_resolution", "multi_fact_assembly"]
+      "mechanism_tags": [
+        "coreference_resolution",
+        "multi_fact_assembly"
+      ]
     },
     {
       "id": "57-DIST1",
@@ -949,7 +1006,9 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["distractor_adjacent"]
+      "mechanism_tags": [
+        "distractor_adjacent"
+      ]
     },
     {
       "id": "57-DIST2",
@@ -981,7 +1040,9 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["distractor_adjacent"]
+      "mechanism_tags": [
+        "distractor_adjacent"
+      ]
     },
     {
       "id": "57-DIST3",
@@ -1013,7 +1074,10 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["distractor_adjacent", "alias_mapping"]
+      "mechanism_tags": [
+        "distractor_adjacent",
+        "alias_mapping"
+      ]
     },
     {
       "id": "57-CANARY1",
@@ -1038,7 +1102,9 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["canary_refusal"]
+      "mechanism_tags": [
+        "canary_refusal"
+      ]
     },
     {
       "id": "57-CANARY2",
@@ -1063,7 +1129,9 @@
       "source_report": "報告57任務B §3.3，2026-09-15新出題",
       "dup_map": [],
       "pilot": false,
-      "mechanism_tags": ["canary_refusal"]
+      "mechanism_tags": [
+        "canary_refusal"
+      ]
     }
   ]
 }

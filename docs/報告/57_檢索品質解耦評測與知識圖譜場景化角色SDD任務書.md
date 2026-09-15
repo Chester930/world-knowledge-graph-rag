@@ -115,7 +115,9 @@ mechanism_tags: List[str] = Field(default_factory=list, description="檢索機�
 
 **題庫從32題擴充到43題，verified從10題增加到24題**（`docs/附錄A題庫.json`＝`data/eval/test_cases.json`，兩檔已核對byte-identical）。全部14題異動的`atomic_gold_facts.exact_span`皆已由我直接查詢Neo4j（KG#4）原文逐字核對過，抽樣8題（含全部5個新維度各1題以上）100%通過，無虛構。`interval_lookup`的放棄理由也已獨立核實屬實（真的是ASCII表格，非偷懶）。
 
-**Side finding（不在本次範圍，記錄留待處理）**：18-Q7的部分`gold_answer`實際出自N0030018而非其標記的N0030006，是既有題庫的錯誤標籤，未動它。
+**✅ 18-Q7 side finding 已查明並修正（2026-09-15）**：查N0030018§2原文後確認**不是單純文件標籤錯誤，是題目設計本身混淆了兩種不同請假類型**——「事假得以小時為請假單位」確實出自N0030006§7（事假彈性）；但「因子女生病、停托、停課等原因得於一日前提出」實際出自N0030018§2（**育嬰留職停薪**申請提前日數的但書，跟事假無關），報告18原始整理把兩者誤併為一題。已更新`gold_answer`記錄此發現，`verification_status`改為`disputed`（沿用既有enum，不影響`evaluation_eligibility.py`既有排除邏輯——非verified本來就會被排除，只是狀態更精確）。若未來要用這題，應拆成兩題分別對應N0030006§7與N0030018§2。
+
+**✅ mechanism_tags 已回填原始10題verified題目**（17-Q1/17-Q2=single_fact；18-Q1/18-Q2/18-Q3=multi_fact_assembly；18-Q4=single_fact；18-Q5=multi_fact_assembly+distractor_adjacent（D0080015§2/§3/§4三級距與57-DIST1/DIST2同一種鄰接陷阱結構）；26-Q5=cross_doc_multihop；canary-P1/canary-P4=canary_refusal）。現在全部24題verified題目皆有至少1個mechanism_tags，無遺漏。
 
 ### 3.3 不需要重抽的部分（✅ 已完成，見上表）
 
@@ -133,9 +135,17 @@ KG#4（`236903cf`）實際有**64份文件**（非僅目前harness用的6份）�
 
 **限制**：這3組用到的文件都在「另外58份未做`check_comparison_readiness.py`驗證」的範圍內——需要重抽（新鮮度/embedding/關係型別索引）才能正式進harness。
 
+**✅ 2026-09-15 已對第1組（健康檢查頻率）4份文件實跑`check_comparison_readiness.py`（不重抽，純檢查）**：
+```
+NEO4J_URI=bolt://localhost:17990 NEO4J_PASSWORD=kg2_test_2026 WORKSPACE_DIR="D:/Users/666/Desktop/kg-runtime" \
+python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b7 \
+  --doc-ids "N0060022_勞工健康保護規則,N0060007_高溫作業勞工作息時間標準,N0060012_精密作業勞工視機能保護設施標準,N0060015_特定化學物質危害預防標準" --arms K
+```
+結果：**只有「抽取新鮮度」一項FAIL**（4份文件最舊chunk皆為2026-09-07，早於現行基準）；其餘全過——`fact_embedding`16736/16736=100%、`Entity.name_embedding`12096/12096=100%、4份文件皆有Fact節點、關係型別向量索引存在、KG與這4份文件皆pending=0。**這代表Stage 0的重抽範圍很窄，只需要針對這4份文件的新鮮度做`force_rebuild=True`重抽（帶embedding provider、`OLLAMA_EMBEDDING_NUM_GPU=0`，在`reextract-v2` HEAD執行），不需要重建embedding/索引基礎設施**——下次要動手時可以直接執行這個補救指令，不用重新盤點現況。
+
 ### 4.2 分階段執行（沿用報告30/37/38的 T0/T1/T2 模式）
 
-**Stage 0（先導切片）**：只選第1組（健康檢查頻率），重抽其中2-3份文件，跑`check_comparison_readiness.py`確認過關，直接讀Neo4j核對條文內容是否真的支撐假設的聚合題。**不寫任何評測程式碼，純驗證corpus假設**。
+**Stage 0（先導切片，重抽動作本身待執行——耗時，使用者選擇下班後再做）**：只選第1組（健康檢查頻率），對上方已確認的4份文件（實際重抽時可先只挑2-3份）跑`force_rebuild=True`重抽，抽完後重跑`check_comparison_readiness.py`應該全過，再直接讀Neo4j核對條文內容是否真的支撐假設的聚合題。**不寫任何評測程式碼，純驗證corpus假設**。
 
 **Stage 1（小樣本設計驗證）**：在這2-3份文件切片上，出1-2題`global_aggregation`題＋人工核實gold，用§2新指標小規模跑一次（1-2題×少數arm），確認Context Recall/SNR/Chain Completeness算得出合理數字——**新指標從未在真實資料上跑過，這步是要在小規模發現設計問題，而不是等26題全出完才發現**。
 
