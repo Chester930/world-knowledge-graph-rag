@@ -6,19 +6,15 @@
 - 全鏈路 LineageTracker 記錄（因果隔離檢索、組裝與生成三階段）。
 - 三階段 CostAnalyzer 生命週期成本報告與 Pareto 矩陣產出。
 
-⚠️ **入庫時審查發現（2026-09-14）**：`main()` 目前只載入題庫、寫出 `manifest.json`、
-印一行「Harness initialized」訊息就結束——`_run_single_query()`／`_render_pareto_summary()`
-等實際跑測與產出報告的函式都已經寫好，但**從未在 `main()` 裡被呼叫**。這代表直接執行
-本腳本**不會**真的跑任何比較、也不會產出報告43(黃金版Benchmark，現編號 44)驗收標準
-要求的結構化結果 JSON——`main()` 需要補上「對 `test_cases × arms × runs` 迴圈呼叫
-`_run_single_query()`，收集結果後呼叫 `_render_pareto_summary()`」這段串接邏輯才能真正
-跑起來。這是下一步待辦，本次入庫只做了誠實標註，未替使用者決定串接的細節
-（例如要不要先跑小樣本、baseline 索引/reranker 的載入時機），留給使用者或下一輪任務決定。
+評測入口依 `docs/報告/48_評測管線文獻與調整設計.md` 執行：正式題目資格先過濾，
+再由 `test_cases × arms × runs` 迴圈產生逐筆 `records.json` 與 Pareto 摘要。
+正式評測預設要求獨立 judge；`--allow-shared-judge` 僅供明確標記的 pilot。
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import statistics
 import subprocess
@@ -48,6 +44,9 @@ from routers import agent
 from services import baseline_rag_service, document_record_service
 from services.atomic_scorer import AtomicScorer
 from services.cost_analyzer import CostAnalyzer
+from services.deterministic_guard_service import DeterministicGuardService
+from services.evaluation_eligibility import split_eligible_test_cases
+from services.evaluation_preflight import run_evaluation_preflight
 from services.lineage_tracker import LineageTracker
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -189,11 +188,14 @@ async def _run_single_query(
     scope_uuids: list[UUID],
     cfg,
     counting: _CountingLLM,
+    judge_counting: _CountingLLM | None,
     baseline_index,
     reranker,
     baseline_top_k: int,
 ) -> dict:
     counting.reset()
+    if judge_counting is not None and judge_counting is not counting:
+        judge_counting.reset()
     t0 = time.perf_counter()
 
     raw_arm = ARM_ALIAS_MAP.get(arm, arm)
@@ -217,13 +219,14 @@ async def _run_single_query(
             reranker=reranker if raw_arm == "B1" else None,
         )
         context_lines = baseline_rag_service.build_context_lines(hits)
-        retrieved_texts = [h.get("text", "") for h in hits]
+        retrieved_texts = [h.get("chunk_text", "") for h in hits]
         chunk_ids = [f"{h.get('source')}_{h.get('chunk_index')}" for h in hits]
 
         gen = None
         async for item in agent._generate_from_context_lines(
             tc.question, history=None, cfg=cfg,
-            llm_provider=counting, judge_llm_provider=counting,
+            llm_provider=counting,
+            judge_llm_provider=judge_counting or counting,
             kg_id=kg_id, use_svo=True, context_lines=context_lines,
         ):
             if isinstance(item, agent._GenerationResult):
@@ -259,18 +262,47 @@ async def _run_single_query(
     # 階段二血統
     full_context_str = "\n".join(context_lines)
     tracker.record_context_assembly(full_context_str, gold_spans, total_tokens=len(full_context_str) // 4)
+
+    # 確定性法律守衛必須在最終答案產生後、AtomicScorer 與 generation lineage
+    # 寫入前執行。guard 失敗只阻斷 question-level perfect，不覆寫原始答案，
+    # 以便後續區分「coverage 足夠但法律關鍵詞被改寫」與「根本沒有召回證據」。
+    guard_result = DeterministicGuardService.verify_draft(
+        context_text=full_context_str,
+        fact_lines=context_lines,
+        question=tc.question,
+        draft_answer=answer,
+        allowed_articles=[tc.source_article] if tc.source_article else None,
+    )
+
     # 階段三血統
     tracker.record_generation(
         raw_draft=answer,
         final_output=answer,
         grounding_passed=all(c.get("supported", False) for c in r["grounding"] if c.get("is_claim")),
         latency_ms=latency_s * 1000,
+        llm_model=_configured_model(settings.llm_provider) or "unknown",
         regenerated=bool(r["regenerated"]),
+        deterministic_guard_triggered=not guard_result.is_valid,
+        guard_reasons=(
+            [guard_result.failure_reason]
+            if guard_result.failure_reason
+            else []
+        ),
     )
 
     # 執行確定性原子事實評分
     refusal_exp = (tc.scenario_type == "Type-E")
-    atomic_eval = AtomicScorer.evaluate(answer, tc.atomic_gold_facts, refusal_expected=refusal_exp)
+    atomic_eval = AtomicScorer.evaluate(
+        answer,
+        tc.atomic_gold_facts,
+        refusal_expected=refusal_exp,
+        deterministic_guard_passed=guard_result.is_valid,
+        guard_failures=(
+            [guard_result.failure_reason]
+            if guard_result.failure_reason
+            else []
+        ),
+    )
 
     full_lineage = tracker.build_full_lineage(gold_spans)
 
@@ -283,10 +315,20 @@ async def _run_single_query(
         "error": r["error"],
         "latency_s": latency_s,
         "llm_calls": counting.calls,
+        "generation_llm_calls": counting.calls,
+        "judge_llm_calls": judge_counting.calls if judge_counting is not None else 0,
+        "generator_provider": settings.llm_provider,
+        "generator_model": _configured_model(settings.llm_provider),
+        "judge_provider": settings.judge_llm_provider or settings.llm_provider,
+        "judge_model": _configured_model(
+            settings.judge_llm_provider or settings.llm_provider,
+            judge=True,
+        ),
         "estimated_tokens": len(full_context_str) // 4 + len(answer) // 4,
         "atomic_score": atomic_eval.model_dump(),
         "lineage": full_lineage.model_dump(),
         "failure_attribution": full_lineage.failure_attribution,
+        "deterministic_guard": guard_result.model_dump(),
     }
 
 
@@ -372,6 +414,224 @@ def _render_pareto_summary(
     print(f"✅ Summary report generated at {out_file}")
 
 
+def _sha256_file(path: Path) -> str | None:
+    if not path.exists() or not path.is_file():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _configured_model(provider: str, *, judge: bool = False) -> str | None:
+    """回傳 manifest 應記錄的 provider model，不暴露 API key。"""
+    if judge and settings.judge_llm_model:
+        return settings.judge_llm_model
+    model_by_provider = {
+        "ollama": settings.ollama_llm_model,
+        "openai": settings.openai_llm_model,
+        "anthropic": settings.anthropic_model,
+        "gemini": settings.gemini_model,
+        "grok": settings.grok_model,
+    }
+    if provider == "local":
+        return settings.local_embedding_model
+    return model_by_provider.get(provider)
+
+
+def _configured_embedding_model(provider: str) -> str | None:
+    model_by_provider = {
+        "local": settings.local_embedding_model,
+        "openai": settings.openai_embedding_model,
+        "ollama": settings.ollama_embedding_model,
+    }
+    return model_by_provider.get(provider)
+
+
+def _build_failure_record(
+    tc: TestCase,
+    arm: str,
+    run_index: int,
+    *,
+    error_code: str,
+    failure_reason: str,
+    guard_name: str,
+    latency_s: float,
+) -> dict:
+    """將單筆 harness 例外轉成可統計、且仍具三階段 lineage 的 failure record。"""
+    gold_spans = [fact.exact_span for fact in tc.atomic_gold_facts]
+    tracker = LineageTracker(tc.id, arm, tc.question)
+    tracker.record_retrieval([], gold_spans, latency_ms=latency_s * 1000)
+    tracker.record_context_assembly("", gold_spans, total_tokens=0)
+    tracker.record_generation(
+        raw_draft="",
+        final_output="",
+        grounding_passed=False,
+        latency_ms=latency_s * 1000,
+    )
+    lineage = tracker.build_full_lineage(gold_spans).model_dump()
+    atomic = AtomicScorer.evaluate(
+        "",
+        tc.atomic_gold_facts,
+        refusal_expected=(tc.scenario_type == "Type-E"),
+        deterministic_guard_passed=False,
+        guard_failures=[f"{guard_name}: {failure_reason}"],
+    ).model_dump()
+    return {
+        "question_id": tc.id,
+        "arm": arm,
+        "raw_arm": ARM_ALIAS_MAP.get(arm, arm),
+        "run": run_index,
+        "scenario_type": tc.scenario_type.value,
+        "answer": "",
+        "error": error_code,
+        "latency_s": latency_s,
+        "llm_calls": None,
+        "generation_llm_calls": None,
+        "judge_llm_calls": None,
+        "estimated_tokens": 0,
+        "atomic_score": atomic,
+        "lineage": lineage,
+        "failure_attribution": failure_reason,
+        "deterministic_guard": {
+            "is_valid": False,
+            "guard_name": guard_name,
+            "failure_reason": failure_reason,
+            "extra_constrained_note": None,
+        },
+    }
+
+
+def _build_timeout_record(tc: TestCase, arm: str, run_index: int, timeout_s: float) -> dict:
+    """將單筆 timeout 轉成可統計的 failure record。"""
+    return _build_failure_record(
+        tc,
+        arm,
+        run_index,
+        error_code=f"harness_timeout_after_{timeout_s}s",
+        failure_reason=f"Harness Timeout after {timeout_s}s",
+        guard_name="HarnessTimeout",
+        latency_s=timeout_s,
+    )
+
+
+def _build_exception_record(
+    tc: TestCase,
+    arm: str,
+    run_index: int,
+    exc: Exception,
+    latency_s: float,
+) -> dict:
+    detail = f"{type(exc).__name__}: {exc}".strip()
+    return _build_failure_record(
+        tc,
+        arm,
+        run_index,
+        error_code="harness_exception",
+        failure_reason=f"Harness Exception: {detail}",
+        guard_name="HarnessException",
+        latency_s=latency_s,
+    )
+
+
+async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest: dict) -> None:
+    """初始化依賴、執行完整 factorial harness，並以 finally 關閉資料庫。"""
+    await connect()
+    try:
+        init_providers()
+        generator = get_llm_provider()
+        judge = get_judge_llm_provider(generator)
+        generator_provider = settings.llm_provider
+        generator_model = _configured_model(generator_provider)
+        judge_provider = settings.judge_llm_provider or generator_provider
+        judge_model = _configured_model(judge_provider, judge=True)
+        same_judge_config = (
+            judge_provider == generator_provider
+            and judge_model == generator_model
+        )
+        if (judge is generator or same_judge_config) and not args.allow_shared_judge:
+            raise SystemExit(
+                "正式評測需要獨立 judge provider；請設定 JUDGE_LLM_PROVIDER，"
+                "且 judge model 不得與生成端相同；或僅在 pilot 明確傳入 "
+                "--allow-shared-judge。"
+            )
+
+        driver = get_driver()
+        kg_meta = await KGRepository(driver).get(UUID(args.kg_id))
+        domain_pack = kg_meta.domain_pack if kg_meta is not None else None
+        cfg = ConfigLoader([FileConfigSource(settings.kg_config_dir)]).load(
+            UUID(args.kg_id), domain_pack=domain_pack,
+        )
+        scope_uuids, sources = _resolve_scope(UUID(args.kg_id), [
+            d.strip() for d in args.doc_ids.split(",") if d.strip()
+        ])
+
+        raw_arms = {ARM_ALIAS_MAP.get(arm, arm) for arm in args.arms}
+        baseline_index = None
+        if raw_arms.intersection({"B0", "B1"}):
+            baseline_index = _load_scoped_baseline_index(
+                UUID(args.kg_id), args.chunk_size, sources,
+            )
+
+        generator_counter = _CountingLLM(generator)
+        judge_counter = _CountingLLM(judge)
+        records: list[dict] = []
+        records_path = out_dir / "records.json"
+        records_path.write_text("[]", encoding="utf-8")
+        for test_case in test_cases:
+            for arm in args.arms:
+                for run_index in range(1, args.runs + 1):
+                    query_started = time.perf_counter()
+                    try:
+                        record = await asyncio.wait_for(
+                            _run_single_query(
+                                test_case,
+                                arm,
+                                UUID(args.kg_id),
+                                scope_uuids,
+                                cfg,
+                                generator_counter,
+                                judge_counter,
+                                baseline_index,
+                                None,
+                                args.baseline_top_k,
+                            ),
+                            timeout=args.query_timeout_s,
+                        )
+                        record["run"] = run_index
+                    except asyncio.TimeoutError:
+                        record = _build_timeout_record(
+                            test_case, arm, run_index, args.query_timeout_s,
+                        )
+                    except Exception as exc:
+                        record = _build_exception_record(
+                            test_case,
+                            arm,
+                            run_index,
+                            exc,
+                            round(time.perf_counter() - query_started, 2),
+                        )
+                    records.append(record)
+                    records_path.write_text(
+                        json.dumps(records, ensure_ascii=False, indent=2),
+                        encoding="utf-8",
+                    )
+
+        records_path.write_text(
+            json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        manifest["status"] = "completed"
+        manifest["records_count"] = len(records)
+        (out_dir / "manifest.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        _render_pareto_summary(out_dir, manifest, records, args.arms, test_cases)
+        print(f"✅ {len(records)} records written to {out_dir / 'records.json'}")
+    finally:
+        await disconnect()
+
+
 def main():
     parser = argparse.ArgumentParser(description="RQ1 統一標準化評測 Harness")
     parser.add_argument("--kg-id", default="236903cf-055a-40a8-8923-b9d06601f3b7")
@@ -380,19 +640,73 @@ def main():
     parser.add_argument("--arms", default="M1,M2,M3,M4")
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--chunk-size", type=int, default=500)
+    parser.add_argument("--baseline-top-k", type=int, default=5)
+    parser.add_argument("--query-timeout-s", type=float, default=180.0)
     parser.add_argument("--complexity", default="all")
     parser.add_argument("--out", default="rq1_eval_results")
+    parser.add_argument(
+        "--allow-shared-judge",
+        action="store_true",
+        help="僅供 pilot；允許生成器與 judge 共用 provider，正式評測不應使用。",
+    )
 
     args = parser.parse_args()
     kg_uuid = UUID(args.kg_id)
     doc_id_list = [d.strip() for d in args.doc_ids.split(",") if d.strip()]
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
+    args.arms = arms
 
-    test_cases = _load_questions(args.questions, args.complexity)
-    print(f"Loaded {len(test_cases)} test cases.")
+    if args.runs < 1 or args.baseline_top_k < 1 or args.query_timeout_s <= 0:
+        raise SystemExit("--runs、--baseline-top-k 與 --query-timeout-s 必須是正數。")
+
+    loaded_test_cases = _load_questions(args.questions, args.complexity)
+    test_cases, excluded = split_eligible_test_cases(loaded_test_cases)
+    if not test_cases:
+        raise SystemExit("沒有符合正式評測資格的題目；請先完成 gold 核驗。")
+    print(
+        f"Loaded {len(loaded_test_cases)} test cases; "
+        f"eligible={len(test_cases)}, excluded={len(excluded)}."
+    )
+
+    dataset_path = (
+        Path(args.questions)
+        if Path(args.questions).is_file()
+        else DEFAULT_TEST_CASES_PATH
+    )
+    dataset_sha256 = _sha256_file(dataset_path)
+    generator_provider = settings.llm_provider
+    generator_model = _configured_model(generator_provider)
+    judge_provider = settings.judge_llm_provider or generator_provider
+    judge_model = _configured_model(judge_provider, judge=True)
+    preflight = run_evaluation_preflight(
+        test_cases=test_cases,
+        arms=arms,
+        generator_provider=generator_provider,
+        generator_model=generator_model,
+        judge_provider=judge_provider,
+        judge_model=judge_model,
+        doc_ids=doc_id_list,
+        dataset_sha256=dataset_sha256,
+        query_timeout_s=args.query_timeout_s,
+        allow_shared_judge=args.allow_shared_judge,
+    )
+    if not preflight.passed:
+        details = "\n".join(f"- {error}" for error in preflight.errors)
+        raise SystemExit(f"Preflight FAILED:\n{details}")
+    print("Preflight PASSED — ready for formal evaluation.")
+    for warning in preflight.warnings:
+        print(f"Preflight WARNING — {warning}")
 
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
+    existing_outputs = [
+        name for name in ("manifest.json", "records.json", "summary.md")
+        if (out_dir / name).exists()
+    ]
+    if existing_outputs:
+        raise SystemExit(
+            f"輸出目錄已有結果檔案 {existing_outputs}；請使用新的 --out，避免覆寫既有實驗。"
+        )
 
     manifest = {
         "kg_id": str(kg_uuid),
@@ -400,16 +714,33 @@ def main():
         "runs": args.runs,
         "chunk_size": args.chunk_size,
         "doc_ids": doc_id_list,
+        "requested_questions_count": len(loaded_test_cases),
         "questions_count": len(test_cases),
+        "eligible_question_ids": [tc.id for tc in test_cases],
+        "excluded_questions": excluded,
+        "formal_evaluation": not args.allow_shared_judge and not (
+            (settings.judge_llm_provider or settings.llm_provider) == settings.llm_provider
+            and _configured_model(
+                settings.judge_llm_provider or settings.llm_provider,
+                judge=True,
+            ) == _configured_model(settings.llm_provider)
+        ),
+        "allow_shared_judge": args.allow_shared_judge,
+        "generator_provider": generator_provider,
+        "generator_model": generator_model,
+        "judge_provider": judge_provider,
+        "judge_model": judge_model,
+        "embedding_provider": settings.embedding_provider,
+        "embedding_model": _configured_embedding_model(settings.embedding_provider),
+        "query_timeout_s": args.query_timeout_s,
+        "dataset_sha256": dataset_sha256,
+        "preflight": preflight.as_dict(),
+        "status": "initialized",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     (out_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Harness initialized for arms: {arms}")
-    print(
-        "⚠️ main() 尚未串接 _run_single_query()/_render_pareto_summary()——"
-        "目前只寫出 manifest.json，沒有實際執行任何比較或產出結果 JSON。"
-        "見本檔案頂部 docstring 的入庫審查註記。"
-    )
+    asyncio.run(_run_harness(args, out_dir, test_cases, manifest))
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ import logging
 from neo4j import AsyncDriver
 
 from core.constants import VECTOR_DIM
+from core.vector_migration import ensure_vector_index
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +19,16 @@ class ConceptRepository:
         self.driver = driver
 
     async def create_vector_index(self, dim: int = VECTOR_DIM) -> None:
-        await self.driver.execute_query(
-            """
-            CREATE VECTOR INDEX concept_q_vector IF NOT EXISTS
-            FOR (c:ConceptNode) ON c.q_vector
-            OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
-            """,
+        await ensure_vector_index(
+            self.driver,
+            index_name="concept_q_vector",
+            legacy_index_names=("concept_embedding_idx",),
             dim=dim,
+            create_query="""
+                CREATE VECTOR INDEX concept_q_vector IF NOT EXISTS
+                FOR (c:ConceptNode) ON c.q_vector
+                OPTIONS { indexConfig: { `vector.dimensions`: $dim, `vector.similarity_function`: 'cosine' } }
+            """,
         )
 
     async def vector_search_concept_ids(self, query_vector: list[float], top_k: int) -> list[str]:

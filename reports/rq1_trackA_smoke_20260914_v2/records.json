@@ -1,0 +1,77 @@
+[
+  {
+    "question_id": "26-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_120.0s",
+    "latency_s": 120.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts. Missed essential: ['自災害發生之當月一日起計算六個月', '災後六個月期間內被保險人應負擔之保險費，由中央政府支應'] Guard failures: ['HarnessTimeout:120.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout:120.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M1",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 120000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 120000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['自災害發生之當月一日起計算六個月', '災後六個月期間內被保險人應負擔之保險費，由中央政府支應'])"
+    },
+    "failure_attribution": "Harness Timeout after 120.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "query exceeded 120.0s",
+      "extra_constrained_note": null
+    }
+  }
+]

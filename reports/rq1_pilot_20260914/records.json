@@ -1,0 +1,234 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假。這8天的工資會照常發放。",
+    "error": null,
+    "latency_s": 91.41,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "llama3.2:3b",
+    "estimated_tokens": 677,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts. Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M1",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 91410.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 656,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 91410.0,
+        "raw_draft": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假。這8天的工資會照常發放。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假。這8天的工資會照常發放。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "17-Q1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['勞工結婚者給予婚假八日，工資照給'] Guard failures: ['HarnessTimeout:180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout:180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M4",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['勞工結婚者給予婚假八日，工資照給'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "query exceeded 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的第3條，各機關團體給付員工請假期間之薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按150%的比例從當年度所得額中減除。",
+    "error": null,
+    "latency_s": 113.72,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "llama3.2:3b",
+    "estimated_tokens": 576,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "M1",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 113720.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_1",
+          "D0080015_警察人員特別休假辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 510,
+        "retained_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 113720.0,
+        "raw_draft": "根據上述事實清單中的第3條，各機關團體給付員工請假期間之薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按150%的比例從當年度所得額中減除。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第3條，各機關團體給付員工請假期間之薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按150%的比例從當年度所得額中減除。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]

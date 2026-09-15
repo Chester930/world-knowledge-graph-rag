@@ -43,6 +43,8 @@ from uuid import UUID
 
 import numpy as np
 
+from core.constants import VECTOR_DIM
+
 try:  # rank-bm25 為 dev 依賴（requirements-dev.txt）；缺席時 hybrid 檢索自動退回 dense-only
     from rank_bm25 import BM25Okapi
 except ImportError:  # pragma: no cover - 僅在未安裝 dev 依賴時觸發
@@ -66,6 +68,11 @@ def load_baseline_index(
     """
     stem = Path(base_dir) / _index_stem(kg_id, chunk_size)
     vectors = np.load(f"{stem}.npy")
+    if vectors.ndim != 2 or vectors.shape[1] != VECTOR_DIM:
+        raise ValueError(
+            f"baseline 向量維度不符：{vectors.shape}，目前模型要求 {VECTOR_DIM} 維；"
+            "請先清理舊索引並用 BGE-M3 重新建立。"
+        )
     meta = json.loads(Path(f"{stem}.json").read_text(encoding="utf-8"))
     return vectors, meta
 

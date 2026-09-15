@@ -1,0 +1,634 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假。這8天的工資會照常發放。",
+    "error": null,
+    "latency_s": 64.13,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "llama3.2:3b",
+    "estimated_tokens": 677,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts. Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M1",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 64129.99999999999,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 656,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 64129.99999999999,
+        "raw_draft": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假。這8天的工資會照常發放。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假。這8天的工資會照常發放。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "17-Q1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['勞工結婚者給予婚假八日，工資照給'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M4",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['勞工結婚者給予婚假八日，工資照給'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的第3條，各機關團體給付員工請假期間之薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按150%的比例從當年度所得額中減除。",
+    "error": null,
+    "latency_s": 98.03,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "llama3.2:3b",
+    "estimated_tokens": 576,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "M1",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 98030.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_1",
+          "D0080015_警察人員特別休假辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 510,
+        "retained_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 98030.0,
+        "raw_draft": "根據上述事實清單中的第3條，各機關團體給付員工請假期間之薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按150%的比例從當年度所得額中減除。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第3條，各機關團體給付員工請假期間之薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按150%的比例從當年度所得額中減除。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "M4",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-B",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "M4",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts. Missed essential: ['自災害發生之當月一日起計算六個月', '災後六個月期間內被保險人應負擔之保險費，由中央政府支應'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M1",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['自災害發生之當月一日起計算六個月', '災後六個月期間內被保險人應負擔之保險費，由中央政府支應'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "M4",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts. Missed essential: ['自災害發生之當月一日起計算六個月', '災後六個月期間內被保險人應負擔之保險費，由中央政府支應'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M4",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['自災害發生之當月一日起計算六個月', '災後六個月期間內被保險人應負擔之保險費，由中央政府支應'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，上述事實中並無直接提到公司違反勞動法令時可處以的罰鍰金額或上限。因此，我將基於臺灣現行法規提供相關資訊。\n\n在臺灣，《勞動檢查法》第34條規定，僱主違反勞工健康、安全或其他勞動條件之規定者，主管機關得對其處新臺幣1萬以上50萬元以下罰鍰。然而，這並不是針對所有勞動法令違規行為的罰鍰標準。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。\n\n因此，根據提供的資訊，無法直接回答公司若違反勞動法令最高可處新臺幣多少億元的罰鍰。但可以確定的是，對於特定類型的違規行為，主管機關有權對僱主處以1萬以上50萬元以下的罰鍰。",
+    "error": null,
+    "latency_s": 88.61,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "llama3.2:3b",
+    "estimated_tokens": 590,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "M1",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 88610.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "N0030018_育嬰留職停薪實施辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 523,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 88610.0,
+        "raw_draft": "根據提供的事實清單，上述事實中並無直接提到公司違反勞動法令時可處以的罰鍰金額或上限。因此，我將基於臺灣現行法規提供相關資訊。\n\n在臺灣，《勞動檢查法》第34條規定，僱主違反勞工健康、安全或其他勞動條件之規定者，主管機關得對其處新臺幣1萬以上50萬元以下罰鍰。然而，這並不是針對所有勞動法令違規行為的罰鍰標準。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。\n\n因此，根據提供的資訊，無法直接回答公司若違反勞動法令最高可處新臺幣多少億元的罰鍰。但可以確定的是，對於特定類型的違規行為，主管機關有權對僱主處以1萬以上50萬元以下的罰鍰。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，上述事實中並無直接提到公司違反勞動法令時可處以的罰鍰金額或上限。因此，我將基於臺灣現行法規提供相關資訊。\n\n在臺灣，《勞動檢查法》第34條規定，僱主違反勞工健康、安全或其他勞動條件之規定者，主管機關得對其處新臺幣1萬以上50萬元以下罰鍰。然而，這並不是針對所有勞動法令違規行為的罰鍰標準。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。\n\n因此，根據提供的資訊，無法直接回答公司若違反勞動法令最高可處新臺幣多少億元的罰鍰。但可以確定的是，對於特定類型的違規行為，主管機關有權對僱主處以1萬以上50萬元以下的罰鍰。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。\n\n這項資訊來自以下事實：\n- 僱主 有下列各款情事之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並限期令其給付\n- 僱主 依規定通報之監測資料 經中央主管機關查核有虛偽不實者，處新臺幣三十萬元以上一百萬元以下罰鍰\n\n上述事實清單中沒有提到超過一百五十萬元罰鍰的規定。因此，根據提供的資訊，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。",
+    "error": null,
+    "latency_s": 127.64,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 0,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "llama3.2:3b",
+    "estimated_tokens": 232,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "M4",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 127640.0,
+        "retrieved_chunk_ids": [
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 178,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 127640.0,
+        "raw_draft": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。\n\n這項資訊來自以下事實：\n- 僱主 有下列各款情事之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並限期令其給付\n- 僱主 依規定通報之監測資料 經中央主管機關查核有虛偽不實者，處新臺幣三十萬元以上一百萬元以下罰鍰\n\n上述事實清單中沒有提到超過一百五十萬元罰鍰的規定。因此，根據提供的資訊，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。\n\n這項資訊來自以下事實：\n- 僱主 有下列各款情事之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並限期令其給付\n- 僱主 依規定通報之監測資料 經中央主管機關查核有虛偽不實者，處新臺幣三十萬元以上一百萬元以下罰鍰\n\n上述事實清單中沒有提到超過一百五十萬元罰鍰的規定。因此，根據提供的資訊，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]

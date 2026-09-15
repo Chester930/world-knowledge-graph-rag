@@ -1,0 +1,78 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實，答案是：勞工結婚可以請八天婚假，工資照給。\n\n（來源：N0030006_勞工請假規則，第2段）",
+    "error": null,
+    "latency_s": 53.17,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "estimated_tokens": 669,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['勞工結婚者給予婚假八日，工資照給']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M1",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 53170.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 656,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 53170.0,
+        "raw_draft": "根據上述事實，答案是：勞工結婚可以請八天婚假，工資照給。\n\n（來源：N0030006_勞工請假規則，第2段）",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實，答案是：勞工結婚可以請八天婚假，工資照給。\n\n（來源：N0030006_勞工請假規則，第2段）",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['勞工結婚者給予婚假八日，工資照給']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['勞工結婚者給予婚假八日，工資照給'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]

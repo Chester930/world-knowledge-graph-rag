@@ -65,7 +65,10 @@ class OllamaLLMProvider(LLMProvider):
                 "POST",
                 f"{self.base_url}/api/generate",
                 json={"model": self.model, "prompt": prompt, "stream": True,
-                      "options": {"num_ctx": self._NUM_CTX}},
+                      "options": {"num_ctx": self._NUM_CTX,
+                                  "temperature": 0.0,
+                                  "num_predict": self._num_predict,
+                                  "seed": self._SEED}},
             ) as r:
                 async for line in r.aiter_lines():
                     if not line:

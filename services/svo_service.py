@@ -498,7 +498,7 @@ async def extract_svo_triples(
             # 事後無法從log得知重跑到底漏了什麼。不拋例外中斷整批抽取
             # （單筆格式錯誤不該讓其他正確三元組也遺失），但至少留下記錄。
             # ⚠️ 2026-09-05 修正：`item` 可能帶上方剛加的 `verb_embedding`
-            # （384 維浮點陣列），原樣 `%r` 會把整條向量印進 log、灌爆日誌
+            # （高維浮點陣列），原樣 `%r` 會把整條向量印進 log、灌爆日誌
             # 檔案（真實跑批次重抽時發現）。記錄前換成長度摘要。
             loggable = {k: (f"<embedding len={len(v)}>" if k == "verb_embedding" else v)
                         for k, v in item.items()}

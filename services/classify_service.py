@@ -1,9 +1,9 @@
 """暫存區文件分類（比對各既有 KG，建議或自動分配歸屬）。
 
-對應 docs/論文/03_系統設計與方法論.md § 3.1.1：分類分數計算採 **Prototypical
-Networks**（Snell, Swersky, Zemel, 2017, NeurIPS）的 centroid 相似度精神——
-每個 KG 的 prototype 向量是其所有成員文件代表向量的平均，新文件的代表向量
-（該文件所有 chunk 向量的平均）與各 KG prototype 的 cosine 相似度即為分類分數。
+對應 docs/論文/03_系統設計與方法論.md § 3.1.1：KG prototype 仍採
+**Prototypical Networks**（Snell, Swersky, Zemel, 2017, NeurIPS）的 centroid
+精神，但新文件分類改用各 chunk 對 prototype 的 cosine 激活投票，允許一份完整
+文件同時掛入多個 KG。
 
 **不採用** v1（智慧知識庫）`concept_engine.compute_match_score()` 的兩兩配對＋
 align/magnitude 加權公式：查證 v1 全 codebase 後發現，該公式的
@@ -33,8 +33,8 @@ services/ingestion_service.py）。**2026-08-04 更新**：`EmbeddingProvider.en
 文件向量快取進資料夾記錄檔（`document_record_service.set_document_vector`）、
 KG prototype 快取進 `_prototype_cache.json`（成員清單改變才失效重算）、
 `classify_all` 批次內以移動平均就地更新剛自動分配的 KG 之 prototype（不再整批
-共用同一份、可能過期的 prototype）、`assign_document_to_kg` 的資料夾搬移與記錄檔
-更新失敗時互相 rollback（不留下位置與記錄檔不一致的中間態）、`classify_by_vector`
+共用同一份、可能過期的 prototype）、`assign_document_to_kg` 的舊式實體搬移與記錄檔
+更新失敗時互相 rollback（不留下位置與記錄檔不一致的中間態；新流程改用 Manifest）、`classify_by_vector`
 新增 `low_confidence` 標記成員數過少（< `CLUSTER_MIN_SIZE`）的 cold-start KG。
 """
 # Traceability: 02 §2.4.1 -> 03 §3.1.1 -> 04 §4.3.2.
@@ -46,19 +46,31 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import shutil
+import tempfile
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
-from uuid import UUID
+from uuid import UUID, NAMESPACE_URL, uuid5
 
 from core.config import settings
-from core.constants import CLASSIFY_AUTO_THRESHOLD, CLASSIFY_MIN_THRESHOLD, CLUSTER_MIN_SIZE
+from core.constants import (
+    CHUNK_ACTIVATION_THRESHOLD,
+    CHUNK_MIN_HITS,
+    CHUNK_MIN_RATIO,
+    CLASSIFY_AUTO_THRESHOLD,
+    CLASSIFY_MIN_THRESHOLD,
+    CLUSTER_MIN_SIZE,
+    ENABLE_VIRTUAL_MANIFEST_ASSIGN,
+)
 from core.providers.factory import get_embedding_provider
 from models.knowledge_graph import ClassifyResult, KGCandidate
 from services import document_record_service
 
 _PROTOTYPE_CACHE_FILENAME = "_prototype_cache.json"
+_MEMBERS_MANIFEST_FILENAME = "_members.json"
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +120,24 @@ def mean_vector(vectors: list[list[float]]) -> list[float] | None:
     return [sum(v[i] for v in vectors) / len(vectors) for i in range(dim)]
 
 
+def compute_document_chunk_vectors(doc_folder: Path) -> list[list[float]] | None:
+    """逐段取得文件向量，供 SDD-51 的 chunk voting 使用。
+
+    這條路徑刻意不做 mean-pooling；`compute_document_vector()` 仍保留給既有
+    prototype／相容呼叫端使用。provider 尚未初始化時回傳 ``None``，與既有文件
+    向量計算的降級行為一致。
+    """
+    bodies = read_chunk_bodies(doc_folder)
+    if not bodies:
+        return None
+    try:
+        embedding = get_embedding_provider()
+    except RuntimeError as e:
+        logger.warning(f"embedding provider 尚未就緒，略過段落投票 [{doc_folder.name}]: {e}")
+        return None
+    return asyncio.run(embedding.encode_batch(bodies))
+
+
 def compute_document_vector(doc_folder: Path) -> list[float] | None:
     """計算文件代表向量：該文件所有 chunk 向量的平均。
 
@@ -151,6 +181,59 @@ def compute_document_vector(doc_folder: Path) -> list[float] | None:
 
 def _prototype_cache_path(kg_folder: Path) -> Path:
     return kg_folder / _PROTOTYPE_CACHE_FILENAME
+
+
+def _members_manifest_path(kg_folder: Path) -> Path:
+    return kg_folder / _MEMBERS_MANIFEST_FILENAME
+
+
+def _read_members_manifest(kg_folder: Path) -> dict:
+    path = _members_manifest_path(kg_folder)
+    if not path.exists():
+        return {"kg_id": None, "assigned_documents": []}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise ValueError(f"Manifest 讀取失敗 [{path}]: {e}") from e
+    if not isinstance(data, dict) or not isinstance(data.get("assigned_documents", []), list):
+        raise ValueError(f"Manifest 格式錯誤 [{path}]")
+    data.setdefault("assigned_documents", [])
+    return data
+
+
+def _write_members_manifest(kg_folder: Path, manifest: dict) -> None:
+    """以同目錄暫存檔＋replace 原子更新 Manifest，不複製文件實體。"""
+    path = _members_manifest_path(kg_folder)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(
+        dir=str(path.parent), prefix=f".{_MEMBERS_MANIFEST_FILENAME}.", suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(manifest, stream, ensure_ascii=False, indent=2)
+        os.replace(temp_name, path)
+    except Exception:
+        Path(temp_name).unlink(missing_ok=True)
+        raise
+
+
+def _manifest_member_sources(kg_folder: Path) -> list[tuple[str, Path]]:
+    """取得虛擬成員的中央來源路徑；同時相容舊式實體子資料夾。"""
+    sources: list[tuple[str, Path]] = []
+    manifest = _read_members_manifest(kg_folder)
+    for item in manifest.get("assigned_documents", []):
+        if not isinstance(item, dict) or not item.get("doc_id"):
+            continue
+        source_path = item.get("source_path")
+        if source_path:
+            sources.append((str(item["doc_id"]), Path(source_path)))
+
+    virtual_ids = {doc_id for doc_id, _ in sources}
+    if kg_folder.exists():
+        for folder in sorted(p for p in kg_folder.iterdir() if p.is_dir()):
+            if folder.name not in virtual_ids:
+                sources.append((folder.name, folder))
+    return sources
 
 
 def _read_prototype_cache(
@@ -226,15 +309,16 @@ def compute_kg_prototype_with_count(kg_folder: Path) -> tuple[list[float] | None
     """
     if not kg_folder.exists():
         return None, 0
-    member_folders = sorted(p.name for p in kg_folder.iterdir() if p.is_dir())
+    member_sources = _manifest_member_sources(kg_folder)
+    member_folders = [member_id for member_id, _ in member_sources]
 
     cached = _read_prototype_cache(kg_folder, member_folders)
     if cached is not None:
         return cached
 
     member_vectors = []
-    for name in member_folders:
-        vec = compute_document_vector(kg_folder / name)
+    for _, source_path in member_sources:
+        vec = compute_document_vector(source_path)
         if vec is not None:
             member_vectors.append(vec)
     prototype = mean_vector(member_vectors)
@@ -244,11 +328,17 @@ def compute_kg_prototype_with_count(kg_folder: Path) -> tuple[list[float] | None
 
 
 def count_kg_members(kg_folder: Path) -> int:
-    """該 KG 資料夾底下的成員文件數，供分類信心判斷（見 `classify_by_vector`
-    的 `kg_member_counts` 參數）使用，與 prototype 計算邏輯分開、各自獨立。"""
+    """計算 KG 的實體子資料夾與 Manifest 虛擬成員聯集數。"""
     if not kg_folder.exists():
         return 0
-    return sum(1 for p in kg_folder.iterdir() if p.is_dir())
+    manifest = _read_members_manifest(kg_folder)
+    member_ids = {
+        str(item["doc_id"])
+        for item in manifest.get("assigned_documents", [])
+        if isinstance(item, dict) and item.get("doc_id")
+    }
+    member_ids.update(p.name for p in kg_folder.iterdir() if p.is_dir())
+    return len(member_ids)
 
 
 # ── 純分數計算（不涉及 I/O，方便以合成向量單元測試）───────────────────────────
@@ -260,6 +350,148 @@ def cosine_similarity(v1: list[float], v2: list[float]) -> float:
     if n1 < 1e-9 or n2 < 1e-9:
         return 0.0
     return max(-1.0, min(1.0, dot / (n1 * n2)))
+
+
+@dataclass(frozen=True)
+class _ChunkVote:
+    """單一 KG 的段落投票結果（內部資料，保留完整命中資訊供 Manifest 使用）。"""
+
+    key: object
+    similarities: tuple[float, ...]
+    hit_indices: tuple[int, ...]
+
+    @property
+    def max_similarity(self) -> float:
+        return max(self.similarities, default=0.0)
+
+
+def _evaluate_chunk_votes(
+    chunk_vectors: list[list[float]],
+    kg_prototypes: dict[object, list[float]],
+    threshold: float,
+    min_hits: int,
+    min_ratio: float,
+) -> list[_ChunkVote]:
+    if not 0.0 <= threshold <= 1.0:
+        raise ValueError("threshold 必須介於 0 與 1 之間")
+    if min_hits < 1:
+        raise ValueError("min_hits 必須至少為 1")
+    if not 0.0 <= min_ratio <= 1.0:
+        raise ValueError("min_ratio 必須介於 0 與 1 之間")
+    if not chunk_vectors:
+        return []
+
+    votes: list[_ChunkVote] = []
+    for key, prototype in kg_prototypes.items():
+        if not prototype:
+            continue
+        similarities = tuple(cosine_similarity(chunk, prototype) for chunk in chunk_vectors)
+        hit_indices = tuple(
+            index for index, similarity in enumerate(similarities)
+            if similarity >= threshold
+        )
+        hit_ratio = len(hit_indices) / len(chunk_vectors)
+        if len(hit_indices) >= min_hits or hit_ratio >= min_ratio:
+            votes.append(_ChunkVote(key, similarities, hit_indices))
+
+    return sorted(votes, key=lambda vote: vote.max_similarity, reverse=True)
+
+
+def _kg_uuid(value: object) -> UUID:
+    """將公開 API 的字串 KG key 穩定轉成既有模型需要的 UUID。"""
+    if isinstance(value, UUID):
+        return value
+    try:
+        return UUID(str(value))
+    except (ValueError, AttributeError):
+        return uuid5(NAMESPACE_URL, f"world-knowledge-graph:kg:{value}")
+
+
+def classify_by_chunk_voting(
+    chunk_vectors: list[list[float]],
+    kg_prototypes: dict[str, list[float]],
+    threshold: float = CHUNK_ACTIVATION_THRESHOLD,
+    min_hits: int = CHUNK_MIN_HITS,
+    min_ratio: float = CHUNK_MIN_RATIO,
+) -> list[ClassifyResult]:
+    """計算各 Chunk 對各 KG prototype 的 cosine，以激活投票決定多重歸屬。
+
+    回傳一個 ``ClassifyResult``／每個被激活的 KG；未通過投票的 KG 不會出現在
+    清單中。因本低階 API 沒有文件名稱參數，結果的 ``filename`` 為空字串；批次
+    入口會使用同一套核心邏輯建立帶有實際文件名稱的聚合結果。
+    """
+    votes = _evaluate_chunk_votes(
+        chunk_vectors, kg_prototypes, threshold, min_hits, min_ratio,
+    )
+    results: list[ClassifyResult] = []
+    for vote in votes:
+        kg_name = str(vote.key)
+        candidate = KGCandidate(
+            kg_id=_kg_uuid(vote.key),
+            kg_name=kg_name,
+            score=round(vote.max_similarity, 4),
+            top_matched_concepts=[f"chunk_{index + 1}" for index in vote.hit_indices],
+        )
+        results.append(ClassifyResult(
+            filename="",
+            candidates=[candidate],
+            matched_kg_id=candidate.kg_id,
+            matched_kg_name=kg_name,
+            score=candidate.score,
+            status="pending",
+        ))
+    return results
+
+
+def _classify_chunk_votes_for_kgs(
+    filename: str,
+    chunk_vectors: list[list[float]] | None,
+    kg_prototypes: dict[KGInfo, list[float] | None],
+    kg_member_counts: dict[KGInfo, int] | None = None,
+) -> tuple[ClassifyResult, dict[KGInfo, _ChunkVote]]:
+    if not chunk_vectors:
+        return ClassifyResult(filename=filename, status="unmatched"), {}
+
+    available = {
+        kg: prototype for kg, prototype in kg_prototypes.items() if prototype is not None
+    }
+    votes = _evaluate_chunk_votes(
+        chunk_vectors, available, CHUNK_ACTIVATION_THRESHOLD, CHUNK_MIN_HITS, CHUNK_MIN_RATIO,
+    )
+    vote_by_kg = {vote.key: vote for vote in votes}
+    candidates = [
+        KGCandidate(
+            kg_id=kg.kg_id,
+            kg_name=kg.kg_name,
+            score=round(vote.max_similarity, 4),
+            top_matched_concepts=[f"chunk_{index + 1}" for index in vote.hit_indices],
+            member_count=(kg_member_counts or {}).get(kg, 0),
+            low_confidence=bool(kg_member_counts)
+            and (kg_member_counts or {}).get(kg, 0) < CLUSTER_MIN_SIZE,
+        )
+        for kg, vote in ((kg, vote_by_kg[kg]) for kg in available if kg in vote_by_kg)
+    ]
+    candidates.sort(key=lambda candidate: candidate.score, reverse=True)
+    if not candidates:
+        # 保留舊 API 的 pending 語意：有一般語意相關性但未達段落激活門檻時，
+        # 可供人工審核，卻絕不會進入自動 Manifest 指派。
+        fallback = classify_by_vector(
+            filename,
+            mean_vector(chunk_vectors),
+            kg_prototypes,
+            kg_member_counts=kg_member_counts,
+        )
+        return fallback, vote_by_kg
+
+    top = candidates[0]
+    return ClassifyResult(
+        filename=filename,
+        candidates=candidates,
+        matched_kg_id=top.kg_id,
+        matched_kg_name=top.kg_name,
+        score=top.score,
+        status="pending",
+    ), vote_by_kg
 
 
 def classify_by_vector(
@@ -309,44 +541,92 @@ def classify_by_vector(
     return result
 
 
-# ── 歸檔動作（實體資料夾搬移＋記錄檔更新）───────────────────────────────────
+# ── 歸檔動作（SSOT 實體來源＋Manifest 虛擬歸屬）───────────────────────────────
 
-def assign_document_to_kg(doc_folder: Path, kg: KGInfo, method: str = "manual") -> Path:
-    """把文件資料夾實際搬移到目標 KG 資料夾底下，並更新記錄檔的歸屬歷史。
+def assign_document_to_kg(
+    doc_folder: Path,
+    kg: KGInfo,
+    method: str = "manual",
+    move_physical: bool = False,
+    matched_reasons: Iterable[str] | None = None,
+    max_similarity: float | None = None,
+) -> Path:
+    """將文件掛入 KG，預設只更新 Manifest，不改變文件實體路徑。
 
-    搬移是同一磁碟分割內的 rename（`shutil.move` 在來源/目的地同分割時即為
-    原子操作），不是複製再刪除，不會有「搬到一半」的中間態。回傳搬移後的
-    新資料夾路徑。
-
-    搬移與記錄檔更新兩步視為一個整體：若記錄檔更新失敗（例如磁碟已滿、權限
-    問題），會把資料夾移回原位再拋出例外，確保「資料夾實際位置」與「記錄檔
-    歸屬歷史」不會不一致——呼叫端看到例外時，資料夾必定還在原本呼叫前的位置，
-    不會出現「已經搬過去但記錄檔沒寫」的中間態。
+    ``move_physical=True`` 是舊版呼叫端的明確相容開關；新流程預設為虛擬歸屬，
+    因此同一份 ``doc_folder`` 可以依序登記到多個 KG。Manifest 只保存 doc_id、
+    原始來源指標與命中中繼資料，絕不以 copy 或 move 產生第二份文件。
     """
-    kg.folder_path.mkdir(parents=True, exist_ok=True)
-    dest = kg.folder_path / doc_folder.name
-    shutil.move(str(doc_folder), str(dest))
+    if not doc_folder.is_dir():
+        raise FileNotFoundError(f"文件資料夾不存在：{doc_folder}")
 
+    use_virtual_manifest = ENABLE_VIRTUAL_MANIFEST_ASSIGN and not move_physical
+    if not use_virtual_manifest:
+        kg.folder_path.mkdir(parents=True, exist_ok=True)
+        dest = kg.folder_path / doc_folder.name
+        shutil.move(str(doc_folder), str(dest))
+        try:
+            document_record_service.append_assignment(
+                dest, kg_id=kg.kg_id, kg_name=kg.kg_name, method=method,
+            )
+        except Exception:
+            shutil.move(str(dest), str(doc_folder))
+            raise
+        return dest
+
+    kg.folder_path.mkdir(parents=True, exist_ok=True)
+    manifest_path = _members_manifest_path(kg.folder_path)
+    had_manifest = manifest_path.exists()
+    old_manifest_text = manifest_path.read_text(encoding="utf-8") if had_manifest else None
+    manifest = _read_members_manifest(kg.folder_path)
+    manifest["kg_id"] = str(kg.kg_id)
+    documents = manifest.setdefault("assigned_documents", [])
+    entry = {
+        "doc_id": doc_folder.name,
+        "source_path": str(doc_folder.resolve()),
+        "matched_reasons": list(matched_reasons or []),
+        "max_similarity": round(max_similarity, 4) if max_similarity is not None else 0.0,
+        "assigned_at": datetime.now(timezone.utc).isoformat(),
+    }
+    existing_index = next(
+        (index for index, item in enumerate(documents)
+         if isinstance(item, dict) and item.get("doc_id") == doc_folder.name),
+        None,
+    )
+    if existing_index is None:
+        documents.append(entry)
+    else:
+        documents[existing_index] = entry
+
+    _write_members_manifest(kg.folder_path, manifest)
     try:
         document_record_service.append_assignment(
-            dest, kg_id=kg.kg_id, kg_name=kg.kg_name, method=method,
+            doc_folder, kg_id=kg.kg_id, kg_name=kg.kg_name, method=method,
         )
     except Exception:
-        shutil.move(str(dest), str(doc_folder))
+        if old_manifest_text is None:
+            manifest_path.unlink(missing_ok=True)
+        else:
+            manifest_path.write_text(old_manifest_text, encoding="utf-8")
         raise
-    return dest
+
+    # Manifest membership changed; invalidate any prototype cache immediately.
+    _prototype_cache_path(kg.folder_path).unlink(missing_ok=True)
+    return doc_folder
 
 
 # ── 批次分類（I/O 入口）─────────────────────────────────────────────────────
 
 def classify_document(doc_folder: Path, known_kgs: Iterable[KGInfo]) -> ClassifyResult:
-    """對暫存區單一文件資料夾計算分類分數（重新計算所有 KG prototype，
-    僅供單筆呼叫使用；批次請用 classify_all 以避免重複計算 prototype）。"""
+    """以段落投票為單位分類單一文件，允許同時命中多個 KG。"""
     known_kgs = list(known_kgs)
-    doc_vector = compute_document_vector(doc_folder)
+    chunk_vectors = compute_document_chunk_vectors(doc_folder)
     prototypes = {kg: compute_kg_prototype(kg.folder_path) for kg in known_kgs}
     member_counts = {kg: count_kg_members(kg.folder_path) for kg in known_kgs}
-    return classify_by_vector(doc_folder.name, doc_vector, prototypes, kg_member_counts=member_counts)
+    result, _ = _classify_chunk_votes_for_kgs(
+        doc_folder.name, chunk_vectors, prototypes, kg_member_counts=member_counts,
+    )
+    return result
 
 
 def _incremental_prototype_update(
@@ -390,27 +670,42 @@ def classify_all(
     results: list[ClassifyResult] = []
     for doc_folder in sorted(p for p in staging_folder.iterdir() if p.is_dir()):
         try:
-            doc_vector = compute_document_vector(doc_folder)
-            result = classify_by_vector(
-                doc_folder.name, doc_vector, prototypes, kg_member_counts=member_counts,
+            chunk_vectors = compute_document_chunk_vectors(doc_folder)
+            result, vote_by_kg = _classify_chunk_votes_for_kgs(
+                doc_folder.name, chunk_vectors, prototypes, kg_member_counts=member_counts,
             )
         except Exception as e:
             logger.warning(f"分類失敗 [{doc_folder.name}]: {e}")
             results.append(ClassifyResult(filename=doc_folder.name, status="error"))
             continue
 
-        if auto_assign and result.matched_kg_id and result.score >= auto_threshold:
-            target = next(k for k in known_kgs if k.kg_id == result.matched_kg_id)
-            assign_document_to_kg(doc_folder, target, method="auto")
-            result.auto_assigned = True
-            result.status = "assigned"
-
-            if doc_vector is not None:
-                prototypes[target] = _incremental_prototype_update(
-                    prototypes.get(target), prototype_vector_counts.get(target, 0), doc_vector,
+        if auto_assign and result.candidates and vote_by_kg:
+            assignments = [
+                candidate for candidate in result.candidates if candidate.score >= auto_threshold
+            ]
+            for candidate in assignments:
+                target = next(k for k in known_kgs if k.kg_id == candidate.kg_id)
+                vote = vote_by_kg[target]
+                assign_document_to_kg(
+                    doc_folder,
+                    target,
+                    method="auto",
+                    matched_reasons=[f"chunk_{index + 1}" for index in vote.hit_indices],
+                    max_similarity=vote.max_similarity,
                 )
-                prototype_vector_counts[target] = prototype_vector_counts.get(target, 0) + 1
+                if chunk_vectors:
+                    # 只用於同一批次內的冷啟動更新；正式 prototype 仍由完整成員
+                    # 文件重算，避免把任何單一段落誤當成文件的唯一代表。
+                    doc_vector = mean_vector(chunk_vectors)
+                    prototypes[target] = _incremental_prototype_update(
+                        prototypes.get(target), prototype_vector_counts.get(target, 0), doc_vector,
+                    )
+                    prototype_vector_counts[target] = prototype_vector_counts.get(target, 0) + 1
                 member_counts[target] = member_counts.get(target, 0) + 1
+
+            if assignments:
+                result.auto_assigned = True
+                result.status = "assigned"
 
         results.append(result)
 

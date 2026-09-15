@@ -1,0 +1,27 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "arms": [
+    "M1"
+  ],
+  "runs": 1,
+  "chunk_size": 500,
+  "doc_ids": [
+    "D0080015_警察人員特別休假辦法",
+    "F0040034_員工接受召集請假期間薪資費用加成減除辦法",
+    "N0030006_勞工請假規則",
+    "N0030018_育嬰留職停薪實施辦法",
+    "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法",
+    "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法"
+  ],
+  "requested_questions_count": 1,
+  "questions_count": 1,
+  "eligible_question_ids": [
+    "26-Q5"
+  ],
+  "excluded_questions": [],
+  "formal_evaluation": true,
+  "allow_shared_judge": false,
+  "dataset_sha256": null,
+  "status": "initialized",
+  "timestamp": "2026-09-14T08:42:18.264895+00:00"
+}

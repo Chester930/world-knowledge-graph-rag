@@ -20,6 +20,8 @@ class AtomicScoreResult(BaseModel):
     atomic_recall: float = Field(default=0.0, description="必要原子事實召回率")
     is_perfect: bool = Field(default=False, description="是否全數精確命中")
     details: str = Field(default="", description="詳細比對報告")
+    deterministic_guard_passed: bool = Field(default=True, description="確定性法律守衛是否通過")
+    guard_failures: List[str] = Field(default_factory=list, description="確定性守衛失敗原因")
 
 
 class AtomicScorer:
@@ -40,6 +42,8 @@ class AtomicScorer:
         answer: str,
         atomic_gold_facts: List[AtomicGoldFact],
         refusal_expected: bool = False,
+        deterministic_guard_passed: bool = True,
+        guard_failures: List[str] | None = None,
     ) -> AtomicScoreResult:
         """評估答案對原子黃金事實之符合程度"""
         if refusal_expected:
@@ -55,16 +59,20 @@ class AtomicScorer:
                 missing_spans=[] if refused else ["REFUSAL_EXPECTED"],
                 atomic_accuracy=1.0 if refused else 0.0,
                 atomic_recall=1.0 if refused else 0.0,
-                is_perfect=refused,
+                is_perfect=refused and deterministic_guard_passed,
                 details="Exact Refusal Passed" if refused else "Failed to Refuse on Type-E Canary",
+                deterministic_guard_passed=deterministic_guard_passed,
+                guard_failures=guard_failures or [],
             )
 
         if not atomic_gold_facts:
             return AtomicScoreResult(
                 atomic_accuracy=1.0,
                 atomic_recall=1.0,
-                is_perfect=True,
+                is_perfect=deterministic_guard_passed,
                 details="No atomic gold facts defined (Unverified / Baseline).",
+                deterministic_guard_passed=deterministic_guard_passed,
+                guard_failures=guard_failures or [],
             )
 
         clean_answer = cls._clean_text(answer)
@@ -87,9 +95,15 @@ class AtomicScorer:
 
         # 精確率：命中事實數 vs 答案中陳述之事實（以 Gold Facts 總數為分母估計）
         accuracy = len(supported) / len(atomic_gold_facts) if atomic_gold_facts else 1.0
-        is_perfect = (len(missing) == 0 and len(supported) >= total_essential)
+        is_perfect = (
+            len(missing) == 0
+            and len(supported) >= total_essential
+            and deterministic_guard_passed
+        )
 
         detail_msg = f"Hit {len(supported)}/{len(atomic_gold_facts)} facts. Missed essential: {missing}"
+        if guard_failures:
+            detail_msg += f" Guard failures: {guard_failures}"
 
         return AtomicScoreResult(
             supported_spans=supported,
@@ -98,4 +112,6 @@ class AtomicScorer:
             atomic_recall=round(recall, 4),
             is_perfect=is_perfect,
             details=detail_msg,
+            deterministic_guard_passed=deterministic_guard_passed,
+            guard_failures=guard_failures or [],
         )
