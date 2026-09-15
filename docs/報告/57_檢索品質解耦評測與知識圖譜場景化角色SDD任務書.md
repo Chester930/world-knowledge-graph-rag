@@ -171,7 +171,17 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 2. `N0060012`（精密作業）**不適合**用在「特殊健康檢查頻率」這個聚合題——但這個「查無」結果本身很適合另外設計一題`canary_refusal`／`distractor_adjacent`題：「精密作業的勞工多久要做一次特殊健康檢查？」正解應是「不適用特殊健康檢查頻率規定，精密作業未列入附表一，仍依一般年齡分級規則辦理一般健康檢查」——測試系統是否會被職安法第十九條的廣泛分類誤導、錯誤套用特殊健檢頻率。
 3. `N0060015`的23項物質清單是否與該標準規範的化學物質逐一對應，Stage 1出題時需再花時間核對（本次只確認品項9與其規範範圍**性質**相符，非逐字比對）。
 
-尚未執行Stage 1（實際出題）。
+**✅ 附表一內容已匯入KG補足語料庫缺口（2026-09-15）**：把附表一12項＋銜接第十九條頻率規則的一句話改寫成prose句子（文字全部逐字/緊密改寫自官方PDF與N0060022已核實條文，未新增法律實質內容），當成新文件`N0060022_附表一_特別危害健康作業`（獨立document_uuid，不改動既有N0060022本體，`articles=None`預設句子切塊）匯入KG#4，4個chunk全數抽取成功、產生53個Fact，含關鍵橋接事實「符合本附表所列作業之勞工依勞工健康保護規則第十九條規定...每年或於變更其作業時...實施特殊健康檢查」。
+
+**✅ Stage 1出題完成（2026-09-15）**：新增3題寫入`data/eval/test_cases.json`＋`docs/附錄A題庫.json`（46題，verified 27題）：
+
+- `57-AGGR1`（`cross_doc_multihop`，Type-C）：「高溫作業的勞工多久要做一次特殊健康檢查？」——跨N0060022_附表一（項次一）+N0060022正文（第19條）2份文件。
+- `57-AGGR2`（`global_aggregation`+`multi_fact_assembly`，Type-D）：「高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？」——跨3個atomic_gold_facts，答案是「一樣」（統一頻率規則不分項次）。
+- `57-CANARY3`（`canary_refusal`+`distractor_adjacent`，Type-E）：「精密作業的勞工需要做特殊健康檢查嗎？」——正解「不適用」，測試系統是否誤把職安法第十九條的廣泛分類當成附表一的窄化特殊健檢清單。
+
+全部7個`atomic_gold_facts`的`exact_span`已用獨立腳本逐字核對三份文件的`original.md`原文（非憑空核對，非透過Fact抽取），全數通過；`models.eval_schema.EvaluationDataset` schema驗證通過；全套**949 pytest維持綠燈**（資料檔異動不影響既有測試）。
+
+**待執行**：Stage 0剩餘82 chunk重抽（`N0060015`+`N0060022`）仍在背景進行，比第一批（23 chunk）慢很多（~0.2 chunk/min vs 先前~0.67 chunk/min），完成後才能用§2新指標（Context Recall/SNR/Chain Completeness）對這3題實際跑一次small-scale驗證（Stage 1原定的「用新指標小規模跑一次」尚未執行，出題本身已完成）。
 
 **Stage 1（小樣本設計驗證）**：在這2-3份文件切片上，出1-2題`global_aggregation`題＋人工核實gold，用§2新指標小規模跑一次（1-2題×少數arm），確認Context Recall/SNR/Chain Completeness算得出合理數字——**新指標從未在真實資料上跑過，這步是要在小規模發現設計問題，而不是等26題全出完才發現**。
 

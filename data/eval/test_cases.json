@@ -2,11 +2,11 @@
   "meta": {
     "title": "標準化評測題庫（含五大場景梯度與法規原子真值）",
     "version": "2.0.0",
-    "total_questions": 43,
-    "verified_questions": 24,
+    "total_questions": 46,
+    "verified_questions": 27,
     "date": "2026-09-15",
     "spec_ref": "docs/論文/05_附錄A_測試題庫.md",
-    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。"
+    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。"
   },
   "questions": [
     {
@@ -1131,6 +1131,117 @@
       "pilot": false,
       "mechanism_tags": [
         "canary_refusal"
+      ]
+    },
+    {
+      "id": "57-AGGR1",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "pcode": "N0060022",
+      "source_article": "N0060022 §19；N0060022_附表一 項次一",
+      "gold_answer": "高溫作業屬於勞工健康保護規則附表一所列特別危害健康作業（附表一項次一），依第十九條規定，雇主應每年或於變更其作業時，依規定項目實施特殊健康檢查。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "source_law": "N0060022_附表一_特別危害健康作業",
+          "source_article": "附表一 項次一",
+          "is_essential": true,
+          "note": "確立高溫作業屬於特別危害健康作業——2026-09-15依law.moj.gov.tw官方PDF（PCode=N0060022，FileId=0000420146）原文匯入補件，原本此連結事實完全未收錄於KG語料庫，見報告57 §4.2"
+        },
+        {
+          "exact_span": "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+          "source_law": "N0060022_勞工健康保護規則",
+          "source_article": "第19條",
+          "is_essential": true,
+          "note": "特殊健康檢查頻率規則"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "跨文件推理鏈（類別認定+頻率規則）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C Stage 1，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-AGGR2",
+      "question": "高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？",
+      "pcode": "N0060022",
+      "source_article": "N0060022 §19；N0060022_附表一 項次一、項次九",
+      "gold_answer": "一樣。高溫作業（附表一項次一）與特定化學物質作業（附表一項次九）皆屬勞工健康保護規則附表一所列特別危害健康作業，依第十九條統一規定：雇主應每年或於變更其作業時，實施特殊健康檢查，法規並未因作業類別不同而規定不同頻率。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "source_law": "N0060022_附表一_特別危害健康作業",
+          "source_article": "附表一 項次一",
+          "is_essential": true,
+          "note": "2026-09-15新匯入補件，見報告57 §4.2"
+        },
+        {
+          "exact_span": "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業",
+          "source_law": "N0060022_附表一_特別危害健康作業",
+          "source_article": "附表一 項次九",
+          "is_essential": true,
+          "note": "確立特定化學物質作業屬於特別危害健康作業，對應N0060015_特定化學物質危害預防標準規範範圍"
+        },
+        {
+          "exact_span": "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+          "source_law": "N0060022_勞工健康保護規則",
+          "source_article": "第19條",
+          "is_essential": true,
+          "note": "統一頻率規則，是本題「頻率是否一樣」的關鍵——法規對所有附表一項次一體適用同一條文，未分項次規定不同頻率"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "跨文件聚合比較（多類別頻率一致性）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C Stage 1，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "global_aggregation",
+        "multi_fact_assembly"
+      ]
+    },
+    {
+      "id": "57-CANARY3",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "pcode": "N0060012",
+      "source_article": "N0060012 §1；N0060022 §2第1款",
+      "gold_answer": "不適用特殊健康檢查頻率規定。精密作業雖依職業安全衛生法第十九條訂定專屬安全衛生標準，但勞工健康保護規則附表一（特別危害健康作業，是否需做特殊健康檢查的認定依據）之12個項次並未列入精密作業，因此不觸發第十九條的特殊健康檢查義務；精密作業勞工仍應依第十七條規定，按年齡分級實施一般健康檢查（60歲以上每年、40歲以上未滿60歲每二年、未滿40歲每三年）。",
+      "scenario_type": "Type-E",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "source_law": "N0060012_精密作業勞工視機能保護設施標準",
+          "source_article": "第1條",
+          "is_essential": true,
+          "note": "精密作業依職安法第十九條訂定，容易被誤認為當然屬於附表一特別危害健康作業（近似誤導型陷阱——職安法第十九條的廣泛保護措施分類≠附表一的窄化特殊健檢清單，兩者不能混為一談，見報告57 §4.2）"
+        },
+        {
+          "exact_span": "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。",
+          "source_law": "N0060022_勞工健康保護規則",
+          "source_article": "第2條第1款",
+          "is_essential": true,
+          "note": "特別危害健康作業之認定依據是附表一，不是職安法第十九條本身——精密作業經law.moj.gov.tw官方PDF逐項核對，確認未列入附表一12個項次（見報告57 §4.2），故不適用特殊健康檢查"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "誠實拒答（近似誤導型，職安法第十九條類別≠附表一類別）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C Stage 1，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "canary_refusal",
+        "distractor_adjacent"
       ]
     }
   ]
