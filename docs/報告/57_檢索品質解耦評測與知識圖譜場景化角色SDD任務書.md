@@ -155,11 +155,10 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 ---
 
-## 5. 執行順序建議
+## 5. 執行順序建議與進度
 
-1. **立即可做、互不相依**：任務B §3.3（別名/代名詞/鄰接陷阱/既有維度補題出題）＋ 任務A §2.2（SNR/Chain Completeness指標實作，可用既有verified題目的資料測試，不必等新題）。
-2. **平行**：任務C Stage 0（健康檢查頻率組先導重抽，2-3份文件）。
-3. **視1、2結果決定**：任務A §2.3報表整合（等指標穩定再接報表，避免報表格式跟著指標調整反覆改）；任務C Stage 1/2（視Stage 0是否驗證通過）。
+1. ✅ **已完成**：任務B §3.3（5個維度、14題異動，逐字核對）、任務A §2.2（SNR/Chain Completeness指標）、任務A §2.3（報表層整合）、18-Q7題目設計混淆訂正、mechanism_tags回填24題verified題目、任務C Stage 0前置檢查（`check_comparison_readiness.py`唯讀確認，補救指令已備妥）。全套946 pytest綠燈，全部commit並push上`worktree-sdd-retrieval-comparison`分支。
+2. **待執行（需要實際重抽，耗時，使用者選擇稍後處理）**：任務C Stage 0實際重抽（健康檢查頻率組2-4份文件，`force_rebuild=True`，指令見§4.1）→ Stage 1小樣本驗證 → Stage 2正式擴大；`cross_doc_multihop`＋`global_aggregation`各自的+4題新出題，都卡在這個重抽動作之後才能進行。
 
 ## 6. 待使用者裁示事項
 
