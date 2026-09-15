@@ -181,7 +181,21 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 全部7個`atomic_gold_facts`的`exact_span`已用獨立腳本逐字核對三份文件的`original.md`原文（非憑空核對，非透過Fact抽取），全數通過；`models.eval_schema.EvaluationDataset` schema驗證通過；全套**949 pytest維持綠燈**（資料檔異動不影響既有測試）。
 
-**待執行**：Stage 0剩餘82 chunk重抽（`N0060015`+`N0060022`）仍在背景進行，比第一批（23 chunk）慢很多（~0.2 chunk/min vs 先前~0.67 chunk/min），完成後才能用§2新指標（Context Recall/SNR/Chain Completeness）對這3題實際跑一次small-scale驗證（Stage 1原定的「用新指標小規模跑一次」尚未執行，出題本身已完成）。
+**✅ Stage 0剩餘82 chunk重抽已完成（2026-09-15，346.9分）**：82/82成功，`check_comparison_readiness.py`對全部4份文件（`N0060007`/`N0060012`/`N0060015`/`N0060022`）+附表一新文件PASS。
+
+**✅ Stage 1 small-scale驗證已跑通（2026-09-15）**：對`57-AGGR1`/`57-AGGR2`/`57-CANARY3`三題跑`K` arm ×1 run。
+
+**過程中發現並修復一個harness既有bug（非本次新增內容造成，先前批次剛好沒觸發）**：`scripts/eval/run_rq1_comparison.py`第262-264行用`dict.get(key, default)`從JSON往返解碼出的dict取`natural_text`/`source_doc_id`/`fact_text`/`fact_id`，但這些鍵在JSON裡永遠存在（`_serialize_sources()`的`fact_id`欄位依`services/svo_service.py::vector_search_facts()`的既有設計本來就恆為null，不外洩內部`elementId`——見該函式測試`test_rrf_fuse_fact_ids...`的「內部欄位不外洩」契約），值為`None`時`dict.get(key, default)`不會套用default——導致`"".join(retrieved_texts)`炸`TypeError`、`RetrievalStageLineage`因`List[str]`欄位收到`None`炸pydantic `ValidationError`。改用`x.get(key) or default`修復，949 pytest維持綠燈，已commit。
+
+**修復後跑出的真實結果（有意義，非崩潰）**：
+
+| 題號 | 檢索recall_rate | 最終答案atomic_recall | 診斷 |
+|---|---|---|---|
+| `57-AGGR1` | 0.0%（literal exact_span無命中） | 50%（語意fallback判定1/2命中） | 答案本身語意正確（「高溫作業每年做一次特殊健康檢查」），但檢索到的Fact文字（SVO自然化後）跟`exact_span`（原始法規逐字文字）不是逐字相同——例如Fact是「雇主使勞工從事特別危害健康作業 每年或於變更其作業時...」（無「，應」、無句號），原文exact_span是「雇主使勞工從事特別危害健康作業，應每年或於變更其作業時...」——語意層fallback判定命中，但lineage_tracker的Stage 1檢索追蹤用的是嚴格逐字比對（`record_retrieval()`同步版，非`record_retrieval_async()`語意fallback版），兩層量測基準不一致 |
+| `57-AGGR2` | 0.0% | 答案內容混亂（「特定化學物質本標準不適用」等不連貫敘述），非retrieval記錄問題，是真實生成品質問題 | 可能是top_k帶進太多N0060015無關的化學物質細項Fact稀釋掉了真正需要的3個關鍵事實（SNR/雜訊問題，正是報告57整個任務A要測的東西） |
+| `57-CANARY3` | 0.0% | 逾時180秒 | 未查明是單純生成較慢還是卡住，需要更長timeout或加log重跑診斷 |
+
+**待使用者裁示**：Stage 1的兩層準確度量測基準不一致（Stage 1 lineage用嚴格逐字比對 vs 最終Atomic Score用語意fallback）是否要統一（例如`lineage_tracker`也改用`record_retrieval_async()`），還是維持現狀（刻意做兩種不同嚴格度的量測，各自服務不同診斷目的）——這是會影響往後所有SNR/recall數字詮釋方式的方法論決策，此次不擅自決定。
 
 **Stage 1（小樣本設計驗證）**：在這2-3份文件切片上，出1-2題`global_aggregation`題＋人工核實gold，用§2新指標小規模跑一次（1-2題×少數arm），確認Context Recall/SNR/Chain Completeness算得出合理數字——**新指標從未在真實資料上跑過，這步是要在小規模發現設計問題，而不是等26題全出完才發現**。
 

@@ -259,9 +259,21 @@ async def _run_single_query(
             retrieval_mode=mode, disable_grounding_regen=(raw_arm == "K-2b"),
             scope_doc_ids=scope_uuids,
         ))
-        retrieved_texts = [t.get("natural_text", "") for t in r["triples"]] + [f.get("fact_text", "") for f in r["facts"]]
-        chunk_ids = [t.get("source_doc_id", "") for t in r["triples"]]
-        fact_ids = [f.get("fact_id", "") for f in r["facts"]]
+        # 報告57任務C Stage 1真實資料發現（2026-09-15）：`r["triples"]`／`r["facts"]`
+        # 是JSON往返解碼出來的dict，`natural_text`/`source_doc_id`/`fact_text`/
+        # `fact_id`這些鍵永遠存在但值可能是JSON null（例如`_serialize_sources()`
+        # 的`fact_id`欄位本來就設計成不外洩、恆為null——見
+        # `services/svo_service.py::vector_search_facts()`與其測試
+        # `test_rrf_fuse_fact_ids...`的「內部欄位不外洩」契約）。`dict.get(key,
+        # default)`只在鍵缺席時套用default，鍵存在但值為None時直接回傳None，
+        # 導致`"".join(retrieved_texts)`炸TypeError、`RetrievalStageLineage`
+        # pydantic驗證因`List[str]`欄位收到None炸ValidationError——先前批次
+        # 剛好沒有問題觸發到足量facts/None欄位，這次三題健康檢查聚合題才第一次
+        # 真實暴露。改用`x.get(key) or default`同時擋掉「鍵缺席」與「值為None」
+        # 兩種情況。
+        retrieved_texts = [(t.get("natural_text") or "") for t in r["triples"]] + [(f.get("fact_text") or "") for f in r["facts"]]
+        chunk_ids = [(t.get("source_doc_id") or "") for t in r["triples"]]
+        fact_ids = [(f.get("fact_id") or "") for f in r["facts"]]
         context_lines = retrieved_texts
 
     latency_s = round(time.perf_counter() - t0, 2)
