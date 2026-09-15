@@ -7,9 +7,10 @@
 """
 import json
 import pytest
-from models.eval_schema import AtomicGoldFact
+from models.eval_schema import AtomicGoldFact, ScenarioType, TestCase as EvalTestCase, VerificationStatus
 from services.atomic_scorer import AtomicScorer
 from services.cost_analyzer import CostAnalyzer
+from services.evaluation_eligibility import assess_test_case
 
 
 class _FakeJudge:
@@ -159,6 +160,40 @@ async def test_atomic_scorer_evaluate_async_canary_unaffected():
     )
     assert res.is_perfect is True
     assert judge.calls == 0  # refusal 分支不呼叫 judge
+
+
+def test_atomic_scorer_guard_failure_blocks_perfect_without_erasing_coverage():
+    fact = AtomicGoldFact(
+        exact_span="自災害發生之當月一日起計算六個月",
+        source_law="N0050030",
+        source_article="第3條",
+        is_essential=True,
+    )
+    res = AtomicScorer.evaluate(
+        "自災害發生之當月一日起計算六個月。",
+        [fact],
+        deterministic_guard_passed=False,
+        guard_failures=["InceptionAnchorGuard: contradictory claim detected"],
+    )
+    assert res.atomic_recall == 1.0
+    assert res.is_perfect is False
+    assert res.deterministic_guard_passed is False
+    assert res.guard_failures
+
+
+def test_unverified_or_empty_gold_is_not_formal_eligible():
+    tc = EvalTestCase(
+        id="unverified-1",
+        question="問題",
+        source_article="第1條",
+        gold_answer="[待核]",
+        verification_status=VerificationStatus.UNVERIFIED,
+        scenario_type=ScenarioType.TYPE_A,
+    )
+    decision = assess_test_case(tc)
+    assert decision.eligible is False
+    assert "missing_atomic_gold_facts" in decision.reasons
+    assert "verification_status=unverified" in decision.reasons
 
 
 def test_cost_analyzer_profiles():

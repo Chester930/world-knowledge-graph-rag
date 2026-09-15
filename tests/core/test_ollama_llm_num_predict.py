@@ -70,3 +70,41 @@ async def test_timeout_is_600(sent):
     await p.generate_json("hi")
     assert 600.0 in timeouts
     assert 300.0 not in timeouts
+
+
+@pytest.mark.asyncio
+async def test_stream_uses_deterministic_generation_options(monkeypatch):
+    calls: list[dict] = []
+
+    class _StreamResponse:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def aiter_lines(self):
+            yield '{"response":"ok","done":true}'
+
+    real_init = httpx.AsyncClient.__init__
+
+    def fake_init(self, *a, **kw):
+        real_init(self, *a, **kw)
+
+    def fake_stream(self, method, url, json=None):  # noqa: A002
+        calls.append(json)
+        return _StreamResponse()
+
+    monkeypatch.setattr(httpx.AsyncClient, "__init__", fake_init)
+    monkeypatch.setattr(httpx.AsyncClient, "stream", fake_stream)
+
+    p = OllamaLLMProvider("http://x", "qwen2.5:7b", num_predict=777)
+    output = "".join([token async for token in p.stream("hi")])
+
+    assert output == "ok"
+    assert calls[0]["options"] == {
+        "num_ctx": 8192,
+        "temperature": 0.0,
+        "num_predict": 777,
+        "seed": 0,
+    }

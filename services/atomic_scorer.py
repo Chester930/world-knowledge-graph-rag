@@ -22,6 +22,8 @@ class AtomicScoreResult(BaseModel):
     atomic_recall: float = Field(default=0.0, description="必要原子事實召回率")
     is_perfect: bool = Field(default=False, description="是否全數精確命中")
     details: str = Field(default="", description="詳細比對報告")
+    deterministic_guard_passed: bool = Field(default=True, description="確定性法律守衛是否通過")
+    guard_failures: List[str] = Field(default_factory=list, description="確定性守衛失敗原因")
 
 
 class AtomicScorer:
@@ -42,8 +44,18 @@ class AtomicScorer:
         answer: str,
         atomic_gold_facts: List[AtomicGoldFact],
         refusal_expected: bool = False,
+        deterministic_guard_passed: bool = True,
+        guard_failures: List[str] | None = None,
     ) -> AtomicScoreResult:
-        """評估答案對原子黃金事實之符合程度"""
+        """評估答案對原子黃金事實之符合程度。
+
+        `deterministic_guard_passed`／`guard_failures`（報告48 §4.1）：呼叫端
+        （`scripts/eval/run_rq1_comparison.py`）在拿到最終答案後先跑
+        `DeterministicGuardService`，把結果傳進來——guard 未通過時
+        `is_perfect` 強制為 False，但 `atomic_accuracy`／`atomic_recall`／
+        `supported_spans` 仍如實反映原始 exact-span coverage，不用任意常數
+        偷偷扣分（見報告48 §4.1「保留原始 atomic coverage，另外記錄 guard
+        failure」）。"""
         if refusal_expected:
             # 若為 Type-E Canary 題目，檢核是否明確觸發法定拒答
             refusal_patterns = [
@@ -57,16 +69,20 @@ class AtomicScorer:
                 missing_spans=[] if refused else ["REFUSAL_EXPECTED"],
                 atomic_accuracy=1.0 if refused else 0.0,
                 atomic_recall=1.0 if refused else 0.0,
-                is_perfect=refused,
+                is_perfect=refused and deterministic_guard_passed,
                 details="Exact Refusal Passed" if refused else "Failed to Refuse on Type-E Canary",
+                deterministic_guard_passed=deterministic_guard_passed,
+                guard_failures=guard_failures or [],
             )
 
         if not atomic_gold_facts:
             return AtomicScoreResult(
                 atomic_accuracy=1.0,
                 atomic_recall=1.0,
-                is_perfect=True,
+                is_perfect=deterministic_guard_passed,
                 details="No atomic gold facts defined (Unverified / Baseline).",
+                deterministic_guard_passed=deterministic_guard_passed,
+                guard_failures=guard_failures or [],
             )
 
         clean_answer = cls._clean_text(answer)
@@ -89,9 +105,15 @@ class AtomicScorer:
 
         # 精確率：命中事實數 vs 答案中陳述之事實（以 Gold Facts 總數為分母估計）
         accuracy = len(supported) / len(atomic_gold_facts) if atomic_gold_facts else 1.0
-        is_perfect = (len(missing) == 0 and len(supported) >= total_essential)
+        is_perfect = (
+            len(missing) == 0
+            and len(supported) >= total_essential
+            and deterministic_guard_passed
+        )
 
         detail_msg = f"Hit {len(supported)}/{len(atomic_gold_facts)} facts. Missed essential: {missing}"
+        if guard_failures:
+            detail_msg += f" Guard failures: {guard_failures}"
 
         return AtomicScoreResult(
             supported_spans=supported,
@@ -100,6 +122,8 @@ class AtomicScorer:
             atomic_recall=round(recall, 4),
             is_perfect=is_perfect,
             details=detail_msg,
+            deterministic_guard_passed=deterministic_guard_passed,
+            guard_failures=guard_failures or [],
         )
 
     @classmethod
@@ -110,18 +134,27 @@ class AtomicScorer:
         refusal_expected: bool = False,
         judge_llm_provider: LLMProvider | None = None,
         question: str = "",
+        deterministic_guard_passed: bool = True,
+        guard_failures: List[str] | None = None,
     ) -> AtomicScoreResult:
         """語意 fallback 版（報告52 後續修正）：`exact_span` 逐字比對失敗時，
         才補呼叫 `judge_llm_provider` 做語意蘊含核對（見
         `services/semantic_span_matcher.py`），救回報告24自然語言化管線改寫過
-        用詞、但內容其實正確的答案（如 17-Q1 案例）。
+        用詞、但內容其實正確的答案（如 17-Q1 案例）。`deterministic_guard_passed`／
+        `guard_failures` 意義與 `evaluate()` 相同（報告48 §4.1），兩者是獨立的
+        修正維度——guard 檢核確定性法律關鍵詞是否被竄改，語意 fallback 只處理
+        exact_span 逐字比對的假陰性，互不覆寫。
 
         `refusal_expected=True` 或 `atomic_gold_facts` 為空的分支與同步版
         `evaluate()` 完全相同（純規則判定，不涉及語意比對，不需 judge LLM）。
         `judge_llm_provider=None` 時退化為與 `evaluate()` 逐字相同的結果。
         """
         if refusal_expected or not atomic_gold_facts:
-            return cls.evaluate(answer, atomic_gold_facts, refusal_expected=refusal_expected)
+            return cls.evaluate(
+                answer, atomic_gold_facts, refusal_expected=refusal_expected,
+                deterministic_guard_passed=deterministic_guard_passed,
+                guard_failures=guard_failures,
+            )
 
         spans = [f.exact_span for f in atomic_gold_facts]
         hit_spans, _ = await match_spans_with_fallback(
@@ -140,13 +173,19 @@ class AtomicScorer:
         hit_essential = len([f for f in essential_facts if f.exact_span in hit_set])
         recall = (hit_essential / total_essential) if total_essential > 0 else 1.0
         accuracy = len(supported) / len(atomic_gold_facts) if atomic_gold_facts else 1.0
-        is_perfect = (len(missing) == 0 and len(supported) >= total_essential)
+        is_perfect = (
+            len(missing) == 0
+            and len(supported) >= total_essential
+            and deterministic_guard_passed
+        )
 
         detail_msg = (
             f"Hit {len(supported)}/{len(atomic_gold_facts)} facts "
             f"(semantic fallback{'' if judge_llm_provider else ' disabled'}). "
             f"Missed essential: {missing}"
         )
+        if guard_failures:
+            detail_msg += f" Guard failures: {guard_failures}"
 
         return AtomicScoreResult(
             supported_spans=supported,
@@ -155,4 +194,6 @@ class AtomicScorer:
             atomic_recall=round(recall, 4),
             is_perfect=is_perfect,
             details=detail_msg,
+            deterministic_guard_passed=deterministic_guard_passed,
+            guard_failures=guard_failures or [],
         )

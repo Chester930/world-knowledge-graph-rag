@@ -166,7 +166,11 @@ async def _main() -> int:
     out_dir = Path(args.out)
     manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
 
-    test_cases, _ = _load_questions(manifest["questions_file"], "all", include_unverified=True)
+    # `_load_questions()` 簽章已隨報告48整合改為只回傳未過濾題目清單（eligibility
+    # 過濾移到 `services.evaluation_eligibility.split_eligible_test_cases()`），
+    # 這裡本來就要拿全部題目（含 unverified）去對應落盤紀錄的 question_id，
+    # 不需要再篩選一次。
+    test_cases = _load_questions(manifest["questions_file"], "all")
     tc_map = {tc.id: tc for tc in test_cases}
 
     init_providers()
