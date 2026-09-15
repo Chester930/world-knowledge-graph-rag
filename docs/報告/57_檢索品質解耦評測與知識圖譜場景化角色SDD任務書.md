@@ -100,24 +100,24 @@ mechanism_tags: List[str] = Field(default_factory=list, description="檢索機�
 
 ### 3.2 十大場景維度（`mechanism_tags`可用值）
 
-| 標籤 | 定義 | 現況（verified題數） | 本SDD目標新增 |
-|---|---|---|---|
-| `single_fact` | 單一事實直接命中 | 3 | 0（已足夠當基準線） |
-| `multi_fact_assembly` | 同文件內多事實組裝 | 4 | +2（從既有22題unverified裡挑題驗證，不必新出題） |
-| `cross_doc_multihop` | 跨文件多跳（母法+子法+施行細則） | **1**（26-Q5，且是已知失敗案例） | **+4**（新出題，至少1題須是KG目前答得對的，避免樣本全是已知缺陷） |
-| `alias_mapping` | 民間用語↔法律用語，題幹刻意不用法條原文詞彙 | **0** | **+4** |
-| `coreference_resolution` | 代名詞/隱含主詞消解，答案所需事實主詞在另一句/另一條 | **0** | **+3** |
-| `global_aggregation` | 全域聚合列舉，答案需跨多份文件蒐集 | **0** | **+4**（見§4，需搭配Stage 0重抽） |
-| `interval_lookup` | 數值→區間→係數查表推理 | 1（unverified） | +2 |
-| `segmented_enumeration` | 分段列舉完整性，需完整抓齊所有分段 | 1（unverified） | +2 |
-| `distractor_adjacent` | 鄰近條文陷阱，測噪聲抗性 | 0（明確以此機制設計的題目） | +3 |
-| `canary_refusal` | 防偽拒答 | 2（皆「完全不存在」型） | +2（新增「近似誤導型」canary） |
+| 標籤 | 定義 | 原現況（verified題數） | 目標新增 | **✅ 2026-09-15 實際完成** |
+|---|---|---|---|---|
+| `single_fact` | 單一事實直接命中 | 3 | 0（已足夠當基準線） | 未動 |
+| `multi_fact_assembly` | 同文件內多事實組裝 | 4 | +2（從既有unverified挑題驗證） | **+3**（18-Q6／17-Q6回頭驗證＋57-COREF1/COREF3附掛此標籤） |
+| `cross_doc_multihop` | 跨文件多跳 | 1（26-Q5，已知失敗案例） | +4 | 0（依規劃排除在本次範圍外，待任務C Stage 0） |
+| `alias_mapping` | 民間用語↔法律用語 | 0 | +4 | **+3**（57-ALIAS1/2/3，逐字核對真實條文） |
+| `coreference_resolution` | 代名詞/隱含主詞消解 | 0 | +3 | **+3**（57-COREF1/2/3） |
+| `global_aggregation` | 全域聚合列舉 | 0 | +4 | 0（依規劃排除，見§4 Stage 0） |
+| `interval_lookup` | 數值→區間→係數查表推理 | 1（unverified） | +2 | **0，明確放棄**——26-Q8（N0060004§3）原文變量係數表是ASCII box-drawing表格格式，無法產生乾淨prose式`exact_span`，維持`unverified`，未強行湊數 |
+| `segmented_enumeration` | 分段列舉完整性 | 1（unverified） | +2 | **+1**（26-Q1回頭驗證，N0060029§4三段休息時間） |
+| `distractor_adjacent` | 鄰近條文陷阱 | 0 | +3 | **+3**（57-DIST1/2/3，含D0080015直轄市vs全國性、N0030006配偶父母vs自己父母） |
+| `canary_refusal` | 防偽拒答 | 2（皆「完全不存在」型） | +2 | **+2**（57-CANARY1/2，近似誤導型：法規確實存在但問題暗示的延展/金額不存在） |
 
-合計規劃新增約26題（多題可能同時掛2個標籤，實際出題數會少於26）。
+**題庫從32題擴充到43題，verified從10題增加到24題**（`docs/附錄A題庫.json`＝`data/eval/test_cases.json`，兩檔已核對byte-identical）。全部14題異動的`atomic_gold_facts.exact_span`皆已由我直接查詢Neo4j（KG#4）原文逐字核對過，抽樣8題（含全部5個新維度各1題以上）100%通過，無虛構。`interval_lookup`的放棄理由也已獨立核實屬實（真的是ASCII表格，非偷懶）。
 
-### 3.3 不需要重抽的部分（可立即開始，不受Stage 0進度阻塞）
+**Side finding（不在本次範圍，記錄留待處理）**：18-Q7的部分`gold_answer`實際出自N0030018而非其標記的N0030006，是既有題庫的錯誤標籤，未動它。
 
-`alias_mapping`／`coreference_resolution`／`distractor_adjacent`／`multi_fact_assembly`補題／`interval_lookup`補題／`segmented_enumeration`補題／`canary_refusal`近似誤導型——**都能在現有64份已抽取文件（含已就緒的6份）裡找天然案例出題，不需要動KG#4資料**。這部分應該最先啟動。
+### 3.3 不需要重抽的部分（✅ 已完成，見上表）
 
 ---
 

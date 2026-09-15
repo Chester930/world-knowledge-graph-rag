@@ -2,11 +2,11 @@
   "meta": {
     "title": "標準化評測題庫（含五大場景梯度與法規原子真值）",
     "version": "2.0.0",
-    "total_questions": 32,
-    "verified_questions": 10,
-    "date": "2026-09-14",
+    "total_questions": 43,
+    "verified_questions": 24,
+    "date": "2026-09-15",
     "spec_ref": "docs/論文/05_附錄A_測試題庫.md",
-    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。"
+    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。"
   },
   "questions": [
     {
@@ -121,16 +121,32 @@
       "source_article": "D0080015 警察人員特別休假辦法 §2",
       "gold_answer": "1–3 日（須達 3 日以上、獲記大功以上獎勵）",
       "scenario_type": "Type-B",
-      "atomic_gold_facts": [],
-      "verification_status": "unverified",
-      "complexity_label": "多跳／區間推理",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "有左列情形之一者，給予一至三日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "第1級距天數區間"
+        },
+        {
+          "exact_span": "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條第3款",
+          "is_essential": true,
+          "note": "具體事由：搶救重大災害達3日以上且獲記大功以上"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
-      "source_report": "報告 17 §1",
+      "source_report": "報告 17 §1；2026-09-15依報告57任務B補驗證，複雜度標籤由「多跳／區間推理」訂正為「多事實組裝」（不需跨條文，第2條開頭+第3款組裝即可）",
       "dup_map": [
         "18-Q5"
       ],
-      "pilot": false
+      "pilot": false,
+      "mechanism_tags": ["multi_fact_assembly"]
     },
     {
       "id": "17-Q7",
@@ -328,16 +344,39 @@
       "source_article": "N0030006 §7",
       "gold_answer": "可以請事假；一年內合計不得超過 14 日；事假期間不給工資",
       "scenario_type": "Type-A",
-      "atomic_gold_facts": [],
-      "verification_status": "unverified",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工因有事故必須親自處理，得請事假",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條第1項",
+          "is_essential": true,
+          "note": "事假資格要件"
+        },
+        {
+          "exact_span": "一年內合計不得超過十四日",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條第1項",
+          "is_essential": true,
+          "note": "年度天數上限"
+        },
+        {
+          "exact_span": "事假期間不給工資",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條第1項",
+          "is_essential": true,
+          "note": "事假無薪"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "多事實組裝",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
-      "source_report": "報告 18 §3.6／§6 題6（A/B/C/D）",
+      "source_report": "報告 18 §3.6／§6 題6（A/B/C/D）；2026-09-15依報告57任務B補驗證",
       "dup_map": [
         "17-Q2"
       ],
-      "pilot": false
+      "pilot": false,
+      "mechanism_tags": ["multi_fact_assembly"]
     },
     {
       "id": "18-Q7",
@@ -493,14 +532,37 @@
       "source_article": "N0060029 高架作業勞工保護措施標準 §4",
       "gold_answer": "2–5 m → 20 分鐘；5–20 m → 25 分鐘；20 m 以上 → 35 分鐘",
       "scenario_type": "Type-B",
-      "atomic_gold_facts": [],
-      "verification_status": "unverified",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "source_law": "N0060029_高架作業勞工保護措施標準",
+          "source_article": "第4條第1款",
+          "is_essential": true,
+          "note": "第1段：2-5公尺"
+        },
+        {
+          "exact_span": "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "source_law": "N0060029_高架作業勞工保護措施標準",
+          "source_article": "第4條第2款",
+          "is_essential": true,
+          "note": "第2段：5-20公尺"
+        },
+        {
+          "exact_span": "高度在二十公尺以上者，至少有三十五分鐘休息",
+          "source_law": "N0060029_高架作業勞工保護措施標準",
+          "source_article": "第4條第3款",
+          "is_essential": true,
+          "note": "第3段：20公尺以上"
+        }
+      ],
+      "verification_status": "verified",
       "complexity_label": "多事實組裝（列舉分段完整性）",
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
-      "source_report": "報告 26 §2 題1／報告 38 T1 條件A",
+      "source_report": "報告 26 §2 題1／報告 38 T1 條件A；2026-09-15依報告57任務B補驗證",
       "dup_map": [],
-      "pilot": false
+      "pilot": false,
+      "mechanism_tags": ["segmented_enumeration"]
     },
     {
       "id": "26-Q2",
@@ -678,6 +740,330 @@
       "source_report": null,
       "dup_map": [],
       "pilot": true
+    },
+    {
+      "id": "57-ALIAS1",
+      "question": "員工如果是在工作時發生意外受傷，需要治療休養，這種情況下可以請的假叫做什麼？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 勞工請假規則 §6",
+      "gold_answer": "公傷病假——勞工因職業災害而致失能、傷害或疾病者，其治療、休養期間，給予公傷病假",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工因職業災害而致失能、傷害或疾病者，其治療、休養期間，給予公傷病假",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第6條",
+          "is_essential": true,
+          "note": "題幹用「工作時發生意外受傷」而非法條用詞「職業災害」，測別名映射"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "單事實（別名映射）",
+      "complexity_bucket": "single",
+      "wording_status": "gist",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["alias_mapping"]
+    },
+    {
+      "id": "57-ALIAS2",
+      "question": "外籍看護工想請特休回自己的國家探親，可以自己決定回國的日期嗎？雇主可以片面更改嗎？",
+      "pcode": "N0090051",
+      "source_article": "N0090051 §3",
+      "gold_answer": "可以自行排定返國期日；雇主應予同意，不得片面更改（僅企業經營或被照顧者急迫需求時得協商調整，協商不成仍應同意原排定日期）",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "得向雇主請求以特別休假返國，並自行排定請假返國期日，雇主應予同意",
+          "source_law": "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法",
+          "source_article": "第3條第1項",
+          "is_essential": true,
+          "note": "題幹用「外籍看護工／回自己國家探親」口語詞，與18-Q3同一事實但測別名映射，非重複驗證"
+        },
+        {
+          "exact_span": "雇主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國",
+          "source_law": "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法",
+          "source_article": "第3條第2項",
+          "is_essential": true,
+          "note": "協商不成時仍以原排定日期為準"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（別名映射）",
+      "complexity_bucket": "multi",
+      "wording_status": "gist",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題（與18-Q3同一底層事實，題幹改口語化測別名映射）",
+      "dup_map": ["18-Q3", "17-Q5"],
+      "pilot": false,
+      "mechanism_tags": ["alias_mapping"]
+    },
+    {
+      "id": "57-ALIAS3",
+      "question": "員工如果收到教召令去受訓，公司照給的薪水，可以從稅上扣抵多少比例？",
+      "pcode": "F0040034",
+      "source_article": "F0040034 §3",
+      "gold_answer": "150%——得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除",
+          "source_law": "F0040034_員工接受召集請假期間薪資費用加成減除辦法",
+          "source_article": "第3條第1款",
+          "is_essential": true,
+          "note": "題幹用「收到教召令去受訓」口語詞，與18-Q4/17-Q7同一事實但測別名映射"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "單事實＋陷阱（別名映射）",
+      "complexity_bucket": "single",
+      "wording_status": "gist",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": ["18-Q4", "17-Q7"],
+      "pilot": false,
+      "mechanism_tags": ["alias_mapping"]
+    },
+    {
+      "id": "57-COREF1",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "pcode": "N0030018",
+      "source_article": "N0030018 育嬰留職停薪實施辦法 §2",
+      "gold_answer": "原則於5日前提出；因子女生病、停托、停課須親自照顧者，得於1日前提出；若連1日前都來不及，得委託他人代辦申請手續",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "未滿三十日：於五日前提出",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第4項第2款",
+          "is_essential": true,
+          "note": "一般情形5日前提出"
+        },
+        {
+          "exact_span": "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第4項第2款但書",
+          "is_essential": true,
+          "note": "但書例外，1日前提出"
+        },
+        {
+          "exact_span": "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第5項",
+          "is_essential": true,
+          "note": "此句「前項第二款但書規定」需回頭消解才知道指的是上面的1日前但書，測代名詞/前指消解"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（代名詞消解）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["coreference_resolution", "multi_fact_assembly"]
+    },
+    {
+      "id": "57-COREF2",
+      "question": "勞工如果因為請普通傷病假而遭受不利處分，要由誰負責證明這個處分跟請假無關？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 §9-1",
+      "gold_answer": "雇主負舉證責任",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第9-1條第2項",
+          "is_essential": true,
+          "note": "「該不利處分」「其」需回頭消解指涉前句的勞工與不利處分，測代名詞消解"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "單事實（代名詞消解）",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["coreference_resolution"]
+    },
+    {
+      "id": "57-COREF3",
+      "question": "勞工為了親自照顧家庭成員而請事假，天數限制、工資規定，跟一般事假一樣嗎？可以用小時計算嗎？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 §7",
+      "gold_answer": "是，適用同一年內合計不得超過14日、不給工資之規定（依前項規定）；並得擇定以小時為請假單位",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "一年內合計不得超過十四日。事假期間不給工資",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條第1項",
+          "is_essential": true,
+          "note": "第2項「前項規定」需回頭消解才能得知完整天數/工資限制"
+        },
+        {
+          "exact_span": "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條第2項",
+          "is_essential": true,
+          "note": "以小時為單位的額外彈性"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（代名詞消解）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["coreference_resolution", "multi_fact_assembly"]
+    },
+    {
+      "id": "57-DIST1",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "pcode": "D0080015",
+      "source_article": "D0080015 §2／§3",
+      "gold_answer": "當選直轄市/縣市級模範警察 → 1-3日；當選全國性模範警察 → 2-5日，兩者天數不同，不可混淆",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條第5款",
+          "is_essential": true,
+          "note": "地方級：1-3日（第2條開頭）"
+        },
+        {
+          "exact_span": "當選全國性模範警察者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條第2款",
+          "is_essential": true,
+          "note": "全國級：2-5日（第3條開頭），與地方級用詞極相似但天數不同，測鄰接陷阱"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（鄰接陷阱）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["distractor_adjacent"]
+    },
+    {
+      "id": "57-DIST2",
+      "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+      "pcode": "D0080015",
+      "source_article": "D0080015 §2／§3",
+      "gold_answer": "當選全國性好人好事代表 → 2-5日；當選直轄市/縣市級好人好事代表 → 1-3日，兩者天數不同",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "當選全國性好人好事代表者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條第3款",
+          "is_essential": true,
+          "note": "全國級：2-5日"
+        },
+        {
+          "exact_span": "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條第5款",
+          "is_essential": true,
+          "note": "地方級：1-3日，與全國級用詞極相似但天數不同，測鄰接陷阱"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（鄰接陷阱）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["distractor_adjacent"]
+    },
+    {
+      "id": "57-DIST3",
+      "question": "太太的爸爸過世，員工可以請幾天喪假？跟自己的爸爸過世請假天數一樣嗎？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 §3",
+      "gold_answer": "配偶之父母喪亡，給予喪假6日；自己父母喪亡則為8日，兩者不同",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "祖父母、子女、配偶之父母、配偶之養父母或繼父母喪亡者，給予喪假六日，工資照給",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第3條第2款",
+          "is_essential": true,
+          "note": "配偶之父母（岳父母/公婆）：6日"
+        },
+        {
+          "exact_span": "父母、養父母、繼父母、配偶喪亡者，給予喪假八日，工資照給",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第3條第1款",
+          "is_essential": true,
+          "note": "自己父母：8日，與配偶之父母用詞相似（都是「父母」）但天數不同，測鄰接陷阱；題幹用「太太的爸爸」口語詞測別名映射"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（鄰接陷阱＋別名映射）",
+      "complexity_bucket": "multi",
+      "wording_status": "gist",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["distractor_adjacent", "alias_mapping"]
+    },
+    {
+      "id": "57-CANARY1",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 §5",
+      "gold_answer": "資料未明確記載得再延長之規定——法規僅規定「留職停薪期間以一年為限」，並未規定屆滿後可再延長，應誠實表示無法確認，不得臆測延長期限",
+      "scenario_type": "Type-E",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "留職停薪期間以一年為限",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第5條",
+          "is_essential": true,
+          "note": "近似誤導型canary：條文確實存在且看似合理會有延長機制，但條文本身未規定任何延長條款，必須觸發誠實拒答而非臆測"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "誠實拒答（近似誤導型）",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["canary_refusal"]
+    },
+    {
+      "id": "57-CANARY2",
+      "question": "警察特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是多少？",
+      "pcode": "D0080015",
+      "source_article": "D0080015 §6",
+      "gold_answer": "資料未明確記載具體金額或計算方式——法規僅規定「得...酌發不休假獎金」，未明定金額或計算公式，應誠實表示無法確認",
+      "scenario_type": "Type-E",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第6條第2項",
+          "is_essential": true,
+          "note": "近似誤導型canary：條文確實規定「得酌發不休假獎金」，但「酌發」為裁量性質，全篇未規定金額或計算方式，不得臆測具體數字"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "誠實拒答（近似誤導型）",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": ["canary_refusal"]
     }
   ]
 }
