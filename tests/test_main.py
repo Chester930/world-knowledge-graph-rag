@@ -47,6 +47,7 @@ async def test_lifespan_starts_and_gracefully_cancels_background_workers(monkeyp
     monkeypatch.setattr(main_module, "disconnect", _noop_async)
     monkeypatch.setattr(main_module, "init_providers", lambda: FakeEmbedding())
     monkeypatch.setattr(main_module, "check_embedding_consistency", _noop_async)
+    monkeypatch.setattr(main_module, "migrate_vector_indexes", _noop_async)
     monkeypatch.setattr(main_module, "ConceptRepository", FakeConceptRepo)
     monkeypatch.setattr(main_module.svo_service, "create_entity_index", _noop_async)
     monkeypatch.setattr(main_module.svo_service, "create_chunk_vector_index", _noop_async)

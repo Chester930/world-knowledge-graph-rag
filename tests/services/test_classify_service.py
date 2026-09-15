@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from uuid import uuid4
 
@@ -210,7 +211,9 @@ class TestAssignDocumentToKg:
         kg_folder = tmp_path / "kg_a"
         kg = svc.KGInfo(kg_id=uuid4(), kg_name="KG-A", folder_path=kg_folder)
 
-        dest = svc.assign_document_to_kg(staging_doc, kg, method="manual")
+        dest = svc.assign_document_to_kg(
+            staging_doc, kg, method="manual", move_physical=True,
+        )
 
         assert dest == kg_folder / "report"
         assert dest.exists()
@@ -366,7 +369,9 @@ class TestAssignDocumentToKgRollback:
         monkeypatch.setattr(document_record_service, "append_assignment", _boom)
 
         with pytest.raises(RuntimeError):
-            svc.assign_document_to_kg(staging_doc, kg, method="manual")
+            svc.assign_document_to_kg(
+                staging_doc, kg, method="manual", move_physical=True,
+            )
 
         assert staging_doc.exists()
         assert not (kg_folder / "report").exists()
@@ -387,8 +392,11 @@ class TestClassifyAll:
 
         assert results[0].status == "assigned"
         assert results[0].auto_assigned is True
-        assert not (staging / "report").exists()
-        assert (kg_folder / "report").exists()
+        assert (staging / "report").exists()
+        manifest = json.loads(
+            (kg_folder / "_members.json").read_text(encoding="utf-8")
+        )
+        assert [item["doc_id"] for item in manifest["assigned_documents"]] == ["report"]
 
     def test_leaves_unmatched_documents_in_staging_pool(self, tmp_path, monkeypatch):
         staging = tmp_path / "staging"
@@ -474,3 +482,63 @@ class TestClassifyAll:
         svc.classify_all(staging, [kg], auto_assign=True, auto_threshold=0.3)
 
         assert captured_old_counts == [1]  # 不是 count_kg_members() 的 2
+
+
+class TestChunkVoting:
+    def test_chunk_voting_multi_label_assignment(self):
+        """兩個主題各有兩個深度命中時，文件應同時命中兩個 KG。"""
+        results = svc.classify_by_chunk_voting(
+            chunk_vectors=[
+                [0.75, 0.0, 0.0],
+                [0.75, 0.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [0.0, 0.72, 0.0],
+                [0.0, 0.72, 0.0],
+            ],
+            kg_prototypes={
+                "KG-A": [1.0, 0.0, 0.0],
+                "KG-B": [0.0, 1.0, 0.0],
+            },
+        )
+
+        assert {result.matched_kg_name for result in results} == {"KG-A", "KG-B"}
+        assert all(result.status == "pending" for result in results)
+
+    def test_single_hit_rejection(self):
+        results = svc.classify_by_chunk_voting(
+            [[1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0],
+             [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]],
+            {"KG-A": [1.0, 0.0]},
+        )
+
+        assert results == []
+
+
+class TestVirtualManifestAssignment:
+    def test_assigns_without_moving_or_copying_physical_document(self, tmp_path, monkeypatch):
+        staging_doc = tmp_path / "staging" / "report"
+        original = staging_doc / "original.txt"
+        original.parent.mkdir(parents=True)
+        original.write_text("完整文件內容", encoding="utf-8")
+        kg_a = svc.KGInfo(uuid4(), "KG-A", tmp_path / "kg_a")
+        kg_b = svc.KGInfo(uuid4(), "KG-B", tmp_path / "kg_b")
+
+        def _move_must_not_be_called(*args, **kwargs):
+            raise AssertionError("virtual manifest assignment must not move files")
+
+        monkeypatch.setattr(svc.shutil, "move", _move_must_not_be_called)
+
+        assert svc.assign_document_to_kg(staging_doc, kg_a) == staging_doc
+        assert svc.assign_document_to_kg(staging_doc, kg_b) == staging_doc
+
+        assert original.read_text(encoding="utf-8") == "完整文件內容"
+        assert list(tmp_path.rglob("original.txt")) == [original]
+        for kg in (kg_a, kg_b):
+            manifest = json.loads(
+                (kg.folder_path / "_members.json").read_text(encoding="utf-8")
+            )
+            assert [item["doc_id"] for item in manifest["assigned_documents"]] == ["report"]
+            assert manifest["assigned_documents"][0]["source_path"] == str(staging_doc.resolve())
+
+        record = document_record_service.read_record(staging_doc)
+        assert {entry.kg_id for entry in record.assignment_history} == {kg_a.kg_id, kg_b.kg_id}

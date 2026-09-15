@@ -3,13 +3,14 @@ import logging
 
 import httpx
 
+from core.constants import VECTOR_DIM
 from core.providers.base import EmbeddingProvider
 
 logger = logging.getLogger(__name__)
 
 
 class OllamaEmbeddingProvider(EmbeddingProvider):
-    """使用 Ollama 本地模型（nomic-embed-text 等）產生 Embedding。"""
+    """使用 Ollama 本地模型（預設為 BGE-M3）產生 Embedding。"""
 
     def __init__(self, base_url: str, model: str, num_gpu: int | None = None):
         self.base_url = base_url.rstrip("/")
@@ -41,8 +42,8 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
             res.raise_for_status()
             return len(res.json()["embedding"])
         except Exception as e:
-            logger.warning(f"OllamaEmbedding 維度探測失敗，預設 768：{e}")
-            return 768
+            logger.warning(f"OllamaEmbedding 維度探測失敗，預設 BGE-M3 維度 {VECTOR_DIM}：{e}")
+            return VECTOR_DIM
 
     @property
     def dim(self) -> int:

@@ -17,6 +17,7 @@ from core.config import settings, task_queue_db_path
 from core.database import connect, disconnect, get_driver
 from core.embedding_guard import check_and_register as check_embedding_consistency
 from core.providers.factory import init_providers
+from core.vector_migration import clear_stale_vector_caches, migrate_vector_indexes
 from repositories.concept_repo import ConceptRepository
 from repositories.kg_repo import KGRepository
 from routers import agent, documents, expand, knowledge_graph, search, staging
@@ -62,10 +63,18 @@ async def _restart_task_queue() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect()
+    removed_caches = clear_stale_vector_caches(Path.cwd())
+    if removed_caches:
+        logger.warning("已清理 %d 個維度不符的向量快取，需重新建立 baseline/prototype", len(removed_caches))
     embedding = init_providers()
     await check_embedding_consistency(
         get_driver(), settings.embedding_provider, embedding.model_name, embedding.dim
     )
+    removed_indexes = await migrate_vector_indexes(
+        get_driver(), dim=embedding.dim, obsolete_index_names=("concept_embedding_idx",)
+    )
+    if removed_indexes:
+        logger.warning("已移除需重建的 Neo4j 向量索引：%s", ", ".join(removed_indexes))
     await ConceptRepository(get_driver()).create_vector_index(embedding.dim)
     await svo_service.create_entity_index(get_driver())
     await svo_service.create_chunk_vector_index(get_driver(), embedding.dim)

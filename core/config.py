@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # ── Ollama（本地）─────────────────────────────────────────────────────────
     ollama_base_url: str = "http://localhost:11434"
     ollama_llm_model: str = "qwen2.5:7b"
-    ollama_embedding_model: str = "nomic-embed-text"
+    ollama_embedding_model: str = "bge-m3"
     # 報告37 ②：VRAM 受限機器（如 8GB，塞不下生成模型＋embedding 模型同時在
     # GPU）可設 `OLLAMA_EMBEDDING_NUM_GPU=0` 把 embedding 模型逼到 CPU，讓生成
     # 模型獨佔 GPU、不再互相逐出重載。None＝不帶此選項，行為與先前完全一致。
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     ollama_llm_num_predict: int = 4096
 
     # ── 本地 Embedding（sentence-transformers）────────────────────────────────
-    local_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    local_embedding_model: str = "BAAI/bge-m3"
 
     # ── 本地語音轉文字（Whisper）── 論文 § 3.1（L1 音檔/影片/YouTube 音軌解析）─
     # parser/core.py 的音檔上傳與 YouTube 無字幕備援皆走本地 Whisper。預設

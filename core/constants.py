@@ -1,6 +1,6 @@
 from uuid import UUID
 
-VECTOR_DIM = 384  # paraphrase-multilingual-MiniLM-L12-v2
+VECTOR_DIM = 1024  # BAAI/bge-m3（8192 max tokens）
 
 # KG 路由門檻（v1 舊公式遺留值，見 docs/論文/03_系統設計與方法論.md § 3.2 §a 注意事項——
 # 待 RQ2 消融實驗重新校準，第五章尚未排入獨立實驗，不可視為已驗證數值）
@@ -16,6 +16,12 @@ MAX_KG_PER_QUERY = 5           # Agent 問答：最多召回幾個 KG
 CLASSIFY_AUTO_THRESHOLD = 0.30  # 自動分配：top score 需超過此值才自動移動
 CLASSIFY_MIN_THRESHOLD = 0.05   # 低於此值視為完全無相關，留在暫存區等待
 
+# Chunk-level Activation & Multi-Folder Assignment (SDD-51)
+CHUNK_ACTIVATION_THRESHOLD: float = 0.68  # 單段落命中相似度門檻
+CHUNK_MIN_HITS: int = 2                    # 最少命中段落數
+CHUNK_MIN_RATIO: float = 0.15              # 命中段落佔比門檻
+ENABLE_VIRTUAL_MANIFEST_ASSIGN: bool = True  # 以 Manifest 登記取代實體搬移
+
 # 兩階段向量粗精篩（Two-Stage Retrieval）
 CONCEPT_COARSE_TOP_K = 100
 
@@ -25,7 +31,8 @@ CLUSTER_MIN_SIZE = 3  # 一個候選分群/新 KG 至少要有幾份文件，依
 # UMAP 降維前處理（見 docs/論文/03_系統設計與方法論.md § 3.1.1 §a「降維前處理的決策」）——
 # 僅在未分配資料夾池規模 ≥ 此值才對 HDBSCAN 的輸入做 UMAP 降維，訂在略高於 UMAP
 # 預設 n_neighbors=15 的門檻：低於此規模時 UMAP 本身的流形估計不穩定，直接對
-# VECTOR_DIM=384 維原始向量分群反而更可靠，並非「越像 BERTopic 越好」。
+# BGE-M3 的 VECTOR_DIM=1024；UMAP 會在足夠樣本時先處理高維向量，並非「越像
+# BERTopic 越好」。
 UMAP_MIN_POOL_SIZE = 20
 UMAP_N_COMPONENTS = 5  # BERTopic (Grootendorst, 2022) 預設值，降維後仍保留分群所需的結構
 

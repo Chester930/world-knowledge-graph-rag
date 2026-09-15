@@ -29,7 +29,7 @@ candidate_folders`）不受影響，使用者審核檔案清單時看到的仍�
 McInnes, Healy & Astels 2017 HDBSCAN 論文作者部分重疊但是不同文獻，注意區分）。
 BERTopic（Grootendorst, 2022，見第二章 2.4.2 可信任專案背書）標準管線在 HDBSCAN
 前固定接一段 UMAP 降維，原因是原始向量維度
-`VECTOR_DIM=384`（`core/constants.py`）偏高，HDBSCAN 賴以判斷密度的 mutual
+`VECTOR_DIM=1024`（`core/constants.py`）偏高，HDBSCAN 賴以判斷密度的 mutual
 reachability distance 在高維空間容易受維度詛咒影響而失真。本模組**採條件式降維**
 而非照抄「一律先 UMAP」：僅在未分配池規模達 `UMAP_MIN_POOL_SIZE`（見
 `core/constants.py`，訂在略高於 UMAP 預設 `n_neighbors=15` 的規模）才套用，因為
@@ -110,7 +110,7 @@ def cluster_vectors(
     標記為雜訊，不呼叫 HDBSCAN（避免對過小輸入的邊界行為做無意義的假設）。
 
     點數達 `UMAP_MIN_POOL_SIZE` 時，先做 UMAP 降維再交給 HDBSCAN——原始向量
-    維度 `VECTOR_DIM=384`（見 `core/constants.py`），HDBSCAN 賴以判斷密度的
+    維度 `VECTOR_DIM=1024`（見 `core/constants.py`），HDBSCAN 賴以判斷密度的
     mutual reachability distance 在高維空間容易受維度詛咒影響而失真，此處仿
     BERTopic（Grootendorst, 2022，見 §a 可信任專案背書段落）的標準管線做法；
     未達門檻時直接對原始向量分群，避免 UMAP 在小樣本下的不穩定估計反而傷害
