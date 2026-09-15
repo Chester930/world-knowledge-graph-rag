@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import re
+import time
 from pathlib import Path
 from typing import NamedTuple
 from uuid import UUID
@@ -393,11 +394,34 @@ def _serialize_document(doc: LawDocument | None) -> dict | None:
     }
 
 
+def _build_retrieval_telemetry(
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    latency_s: float,
+) -> dict:
+    """報告57 §6-1 裁示：正式 `chat()` 路徑加的檢索量體遙測，刻意不算
+    SNR／chain_completeness（那兩個指標需要 gold_spans，真實使用者問題沒有
+    ——見 `services/lineage_tracker.py` 與 `chat()` 內對應註解）。這裡只算
+    不需要正解就能算的量體：檢索到的文字量、triple／fact 筆數、檢索耗時，
+    供之後接生產環境監控時有東西可看；不影響既有 `_serialize_sources()`
+    呼叫端（欄位是新增，非取代）。"""
+    combined_text = "".join(
+        [t.natural_text or "" for t in triples] + [f.get("fact_text") or "" for f in fact_results]
+    ).replace(" ", "").replace("\n", "")
+    return {
+        "retrieved_char_count": len(combined_text),
+        "triple_count": len(triples),
+        "fact_count": len(fact_results),
+        "retrieval_latency_ms": round(latency_s * 1000, 1),
+    }
+
+
 def _serialize_sources(
     triples: list[SVOTriple],
     fact_results: list[dict],
     resolved_rel_type: str | None,
     document_map: dict[str, LawDocument] | None = None,
+    retrieval_telemetry: dict | None = None,
 ) -> dict:
     """把本次檢索到的原始來源（BFS 三元組 + 語意 Fact）整理成可序列化的
     結構，隨 SSE `sources` 事件一併送出——讓呼叫端（CLI 工具、之後的前端）
@@ -409,10 +433,15 @@ def _serialize_sources(
     現況），讓來源標註能顯示「此規定出自哪份法規、現行是否有效」，不需要
     人工再去查一次原始法規；`None`（既有呼叫端未升級）或查無對應
     `Document` 節點時該筆來源的 `document` 為 `None`，行為與新增前一致。
+
+    `retrieval_telemetry`（報告57 §6-1 新增，選填）：`_build_retrieval_telemetry()`
+    產物，`None`（既有呼叫端未升級，如 harness 的 `_serialize_sources()` 呼叫）
+    時該欄位為 `None`，行為與新增前一致。
     """
     document_map = document_map or {}
     return {
         "resolved_rel_type": resolved_rel_type,
+        "retrieval_telemetry": retrieval_telemetry,
         "triples": [
             {
                 "subject": t.subject,
@@ -1435,6 +1464,14 @@ async def chat(payload: ChatRequest):
         triples: list[SVOTriple] = []
         fact_results: list[dict] = []
         resolved_rel_type: str | None = None
+        # 報告57 §6-1 裁示：Context Quality矩陣的SNR/chain_completeness需要
+        # gold_spans才能算（見services/lineage_tracker.py），正式chat()的真實
+        # 使用者問題沒有gold answer，無法比照harness（scripts/eval/
+        # run_rq1_comparison.py）照搬計算。這裡只加「不需要gold answer」的
+        # 檢索量體遙測（字元數／triple・fact筆數／檢索延遲），供之後生產環境
+        # 監控參考；真正的品質指標（SNR/chain_completeness）維持只在離線
+        # harness算，不在此處重算。
+        t_retrieval_start = time.perf_counter()
         if payload.use_svo:
             embedding_provider = get_embedding_provider()
             question_vector = await embedding_provider.encode(payload.question)
@@ -1513,6 +1550,9 @@ async def chat(payload: ChatRequest):
             # `relevant_doc_ids` 為空 → `_filter_*` 的歸零守衛原樣放行（不篩選）。
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
             fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
+        retrieval_telemetry = _build_retrieval_telemetry(
+            triples, fact_results, time.perf_counter() - t_retrieval_start,
+        )
 
         # 報告39 SDD-3：「複合問題分解 → 生成 → 事實接地核對 → 方案 B／2b 重生
         # → G3 列舉完整性 guard → 選擇性轉繁」整段抽成 `_generate_from_context_lines()`
@@ -1547,7 +1587,11 @@ async def chat(payload: ChatRequest):
 
         document_map = await _fetch_document_map(driver, payload.kg_id, triples, fact_results)
         sources_json = json.dumps(
-            _serialize_sources(triples, fact_results, resolved_rel_type, document_map), ensure_ascii=False
+            _serialize_sources(
+                triples, fact_results, resolved_rel_type, document_map,
+                retrieval_telemetry=retrieval_telemetry,
+            ),
+            ensure_ascii=False,
         )
         yield f"event: sources\ndata: {sources_json}\n\n"
 

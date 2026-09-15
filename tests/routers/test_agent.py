@@ -1363,6 +1363,27 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
     assert "C 導致 D" in llm.prompt
 
 
+# ── _build_retrieval_telemetry：報告57 §6-1 檢索量體遙測（gold-independent）───
+
+def test_build_retrieval_telemetry_counts_chars_and_items():
+    triples = [_triple("A", "CAUSES", "B", natural_text="A 導致 B")]
+    fact_results = [{"fact_text": "馬斯克 創立 SpaceX"}]
+
+    telemetry = agent._build_retrieval_telemetry(triples, fact_results, 0.123)
+
+    assert telemetry["triple_count"] == 1
+    assert telemetry["fact_count"] == 1
+    assert telemetry["retrieved_char_count"] == len("A導致B") + len("馬斯克創立SpaceX")
+    assert telemetry["retrieval_latency_ms"] == 123.0
+
+
+def test_build_retrieval_telemetry_empty_when_nothing_retrieved():
+    assert agent._build_retrieval_telemetry([], [], 0.0) == {
+        "retrieved_char_count": 0, "triple_count": 0, "fact_count": 0,
+        "retrieval_latency_ms": 0.0,
+    }
+
+
 # ── _serialize_sources / sources SSE 事件：終端機 CLI 顯示來源用（2026-08-18）──
 
 def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
@@ -1373,6 +1394,7 @@ def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
     serialized = agent._serialize_sources(triples, fact_results, "CAUSES")
 
     assert serialized["resolved_rel_type"] == "CAUSES"
+    assert serialized["retrieval_telemetry"] is None
     assert serialized["triples"] == [{
         "subject": "A", "subject_type": "概念", "verb": "導致", "object": "B",
         "object_type": "概念", "rel_type": "CAUSES", "source": None,
@@ -1387,8 +1409,17 @@ def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
 
 def test_serialize_sources_empty_when_nothing_retrieved():
     assert agent._serialize_sources([], [], None) == {
-        "resolved_rel_type": None, "triples": [], "facts": [],
+        "resolved_rel_type": None, "retrieval_telemetry": None, "triples": [], "facts": [],
     }
+
+
+def test_serialize_sources_passes_through_retrieval_telemetry():
+    telemetry = {"retrieved_char_count": 10, "triple_count": 1, "fact_count": 0,
+                 "retrieval_latency_ms": 5.0}
+
+    serialized = agent._serialize_sources([], [], None, retrieval_telemetry=telemetry)
+
+    assert serialized["retrieval_telemetry"] == telemetry
 
 
 # ── _serialize_sources 引用豐富化：附加 Document 中繼資料（2026-08-25）───────

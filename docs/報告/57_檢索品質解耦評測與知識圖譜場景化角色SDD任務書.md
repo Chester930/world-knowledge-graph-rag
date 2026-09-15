@@ -158,10 +158,11 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 ## 5. 執行順序建議與進度
 
 1. ✅ **已完成**：任務B §3.3（5個維度、14題異動，逐字核對）、任務A §2.2（SNR/Chain Completeness指標）、任務A §2.3（報表層整合）、18-Q7題目設計混淆訂正、mechanism_tags回填24題verified題目、任務C Stage 0前置檢查（`check_comparison_readiness.py`唯讀確認，補救指令已備妥）。全套946 pytest綠燈，全部commit並push上`worktree-sdd-retrieval-comparison`分支。
-2. **待執行（需要實際重抽，耗時，使用者選擇稍後處理）**：任務C Stage 0實際重抽（健康檢查頻率組2-4份文件，`force_rebuild=True`，指令見§4.1）→ Stage 1小樣本驗證 → Stage 2正式擴大；`cross_doc_multihop`＋`global_aggregation`各自的+4題新出題，都卡在這個重抽動作之後才能進行。
+2. ✅ **已完成（2026-09-15追加）**：§6-1「是否接上正式`chat()`路徑」裁示結果為「加檢索量體遙測」——`routers/agent.py::chat()`新增`_build_retrieval_telemetry()`，在`event: sources` SSE事件多帶`retrieval_telemetry`欄位（`retrieved_char_count`／`triple_count`／`fact_count`／`retrieval_latency_ms`），不需要gold answer即可算，對正式使用者問題也能即時輸出。**明確範圍限縮**：SNR／chain_completeness本身仍**不**在`chat()`即時算——這兩個指標依設計需要`atomic_gold_facts`（見`services/lineage_tracker.py::_compute_snr()`/`_compute_chain_completeness()`），真實使用者問題沒有正解可比對，維持只在離線harness（`scripts/eval/run_rq1_comparison.py`）算。新增3個單元測試，全套**949 pytest綠燈**。
+3. **待執行（需要實際重抽，耗時，使用者選擇稍後處理）**：任務C Stage 0實際重抽（健康檢查頻率組4份文件已核准為題材，`force_rebuild=True`，指令見§4.1）→ Stage 1小樣本驗證 → Stage 2正式擴大；`cross_doc_multihop`＋`global_aggregation`各自的+4題新出題，都卡在這個重抽動作之後才能進行。
 
-## 6. 待使用者裁示事項
+## 6. 使用者裁示結果（2026-09-15）
 
-- §2.4提到的「是否接上正式`chat()`路徑」——上一輪對話遺留的分歧點，本SDD明確不處理，但需要使用者知道這個問題還在，之後某個時間點要回頭決定。
-- 任務B §3.2的10個場景維度與新增題數配額，是否要調整（本任務書的數字是討論過程中的建議值，非鐵板一塊）。
-- 任務C 3組候選聚合題材，是否認可「健康檢查頻率」為Stage 0優先選項，或想先看過3組的實際條文內容再決定。
+- **§2.4「是否接上正式`chat()`路徑」**：接上，但範圍限定於gold-independent的檢索量體遙測（見上方§5.2）；SNR/chain_completeness兩個真正的品質指標維持離線only。
+- **任務B §3.2的場景維度與新增題數配額**：仍可再擴充，目前43題（verified 24）非終版。
+- **任務C 3組候選聚合題材**：核准「健康檢查頻率」為Stage 0優先選項，但實際重抽動作使用者選擇稍後執行。
