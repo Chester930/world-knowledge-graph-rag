@@ -423,6 +423,7 @@ def _serialize_sources(
                 "rel_type": t.rel_type,
                 "source": t.source,
                 "source_svo_chunk_file": t.source_svo_chunk_file,
+                "natural_text": t.natural_text,
                 "document": _serialize_document(
                     document_map.get(str(t.source_doc_id)) if t.source_doc_id is not None else None
                 ),
@@ -431,6 +432,7 @@ def _serialize_sources(
         ],
         "facts": [
             {
+                "fact_id": f.get("fact_id"),
                 "fact_text": f.get("fact_text"),
                 "subject": f.get("subject"),
                 "object": f.get("object"),

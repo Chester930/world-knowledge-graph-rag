@@ -1367,7 +1367,7 @@ async def test_chat_keeps_all_triples_when_relation_type_unresolved(monkeypatch)
 
 def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
     triples = [_triple("A", "CAUSES", "B")]
-    fact_results = [{"fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
+    fact_results = [{"fact_id": "4:abc:123", "fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
                       "rel_type": "CREATED_BY", "object": "SpaceX", "score": 0.9}]
 
     serialized = agent._serialize_sources(triples, fact_results, "CAUSES")
@@ -1376,10 +1376,10 @@ def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
     assert serialized["triples"] == [{
         "subject": "A", "subject_type": "概念", "verb": "導致", "object": "B",
         "object_type": "概念", "rel_type": "CAUSES", "source": None,
-        "source_svo_chunk_file": None, "document": None,
+        "source_svo_chunk_file": None, "natural_text": None, "document": None,
     }]
     assert serialized["facts"] == [{
-        "fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
+        "fact_id": "4:abc:123", "fact_text": "馬斯克 創立 SpaceX", "subject": "馬斯克",
         "object": "SpaceX", "rel_type": "CREATED_BY", "score": 0.9,
         "document": None,
     }]

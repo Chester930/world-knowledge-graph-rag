@@ -11,12 +11,14 @@ import json
 from pathlib import Path
 from typing import List, Optional
 
+from core.providers.base import LLMProvider
 from models.eval_schema import (
     ContextAssemblyLineage,
     FullQueryLineage,
     GenerationStageLineage,
     RetrievalStageLineage,
 )
+from services.semantic_span_matcher import match_spans_with_fallback
 
 
 class LineageTracker:
@@ -63,6 +65,36 @@ class LineageTracker:
         )
         return self._retrieval
 
+    async def record_retrieval_async(
+        self,
+        retrieved_texts: List[str],
+        gold_spans: List[str],
+        latency_ms: float,
+        chunk_ids: Optional[List[str]] = None,
+        fact_ids: Optional[List[str]] = None,
+        judge_llm_provider: Optional[LLMProvider] = None,
+        question: str = "",
+    ) -> RetrievalStageLineage:
+        """語意 fallback 版（報告52 後續修正），見 `record_retrieval()` 與
+        `services/semantic_span_matcher.py`。逐字比對失敗才補呼叫
+        `judge_llm_provider`；`judge_llm_provider=None` 時結果與同步版一致。"""
+        combined_text = "\n".join(retrieved_texts)
+        hit_spans, missed_spans = await match_spans_with_fallback(
+            combined_text, gold_spans, judge_llm_provider, question=question,
+        )
+        recall = len(hit_spans) / len(gold_spans) if gold_spans else 1.0
+
+        self._retrieval = RetrievalStageLineage(
+            arm=self.arm,
+            retrieval_latency_ms=latency_ms,
+            retrieved_chunk_ids=chunk_ids or [],
+            retrieved_fact_ids=fact_ids or [],
+            hit_exact_spans=hit_spans,
+            missed_exact_spans=missed_spans,
+            recall_rate=round(recall, 4),
+        )
+        return self._retrieval
+
     def record_context_assembly(
         self,
         final_prompt_context: str,
@@ -81,6 +113,25 @@ class LineageTracker:
             else:
                 dropped.append(span)
 
+        self._context = ContextAssemblyLineage(
+            total_context_tokens=total_tokens,
+            retained_exact_spans=retained,
+            dropped_exact_spans=dropped,
+        )
+        return self._context
+
+    async def record_context_assembly_async(
+        self,
+        final_prompt_context: str,
+        gold_spans: List[str],
+        total_tokens: int = 0,
+        judge_llm_provider: Optional[LLMProvider] = None,
+        question: str = "",
+    ) -> ContextAssemblyLineage:
+        """語意 fallback 版，見 `record_context_assembly()`。"""
+        retained, dropped = await match_spans_with_fallback(
+            final_prompt_context, gold_spans, judge_llm_provider, question=question,
+        )
         self._context = ContextAssemblyLineage(
             total_context_tokens=total_tokens,
             retained_exact_spans=retained,
@@ -157,6 +208,51 @@ class LineageTracker:
 
         return "Success: All gold spans preserved across all 3 stages."
 
+    async def diagnose_failure_async(
+        self,
+        gold_spans: List[str],
+        judge_llm_provider: Optional[LLMProvider] = None,
+        question: str = "",
+    ) -> str:
+        """語意 fallback 版，見 `diagnose_failure()`。Stage 1/2 沿用
+        `self._retrieval`/`self._context` 既有紀錄（呼叫端應已用
+        `record_retrieval_async()`/`record_context_assembly_async()` 產生，
+        本方法不重跑那兩階段）；只有 Stage 3（最終答案 vs gold span）在此
+        補做語意蘊含核對，行為與 `AtomicScorer.evaluate_async()` 一致。"""
+        if not gold_spans:
+            return "No Gold Facts Defined (Verification Not Applicable)"
+
+        if self._retrieval and self._retrieval.missed_exact_spans:
+            return (
+                f"Stage 1 Retrieval Failure: "
+                f"{len(self._retrieval.missed_exact_spans)}/{len(gold_spans)} gold facts missed "
+                f"({self._retrieval.missed_exact_spans})"
+            )
+
+        if self._context and self._context.dropped_exact_spans:
+            return (
+                f"Stage 2 Assembly Failure: "
+                f"{len(self._context.dropped_exact_spans)} gold facts dropped in context assembly "
+                f"({self._context.dropped_exact_spans})"
+            )
+
+        if self._generation:
+            _, missing_in_answer = await match_spans_with_fallback(
+                self._generation.final_output, gold_spans, judge_llm_provider, question=question,
+            )
+            if missing_in_answer:
+                if self._generation.deterministic_guard_triggered:
+                    return (
+                        f"Stage 3 Generation Failure (Guard Intercepted): "
+                        f"LLM deviated from gold spans {missing_in_answer}; guard triggered."
+                    )
+                return (
+                    f"Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): "
+                    f"Facts were present in prompt context, but LLM omitted or smoothed {missing_in_answer}."
+                )
+
+        return "Success: All gold spans preserved across all 3 stages."
+
     def build_full_lineage(self, gold_spans: List[str]) -> FullQueryLineage:
         """構建完整可序列化之血統物件"""
         if not self._retrieval:
@@ -168,6 +264,31 @@ class LineageTracker:
 
         attribution = self.diagnose_failure(gold_spans)
 
+        return FullQueryLineage(
+            query_id=self.query_id,
+            arm=self.arm,
+            question=self.question,
+            stage1_retrieval=self._retrieval,
+            stage2_context=self._context,
+            stage3_generation=self._generation,
+            failure_attribution=attribution,
+        )
+
+    async def build_full_lineage_async(
+        self,
+        gold_spans: List[str],
+        judge_llm_provider: Optional[LLMProvider] = None,
+        question: str = "",
+    ) -> FullQueryLineage:
+        """語意 fallback 版，見 `build_full_lineage()`。要求呼叫端已先用
+        `record_retrieval_async()`/`record_context_assembly()`/
+        `record_generation()` 記錄三階段（本方法不補跑缺漏階段，因為缺漏時
+        代表呼叫端刻意略過——例如報告52後續修正的離線重評分腳本，K arm 的
+        BFS 三元組部分無法重建原文，刻意維持 `record_retrieval()` 同步版的
+        舊判定，不應被這裡靜默覆寫成空白重算）。"""
+        attribution = await self.diagnose_failure_async(
+            gold_spans, judge_llm_provider, question=question,
+        )
         return FullQueryLineage(
             query_id=self.query_id,
             arm=self.arm,

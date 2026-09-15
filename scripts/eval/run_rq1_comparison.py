@@ -231,7 +231,7 @@ async def _run_single_query(
             reranker=reranker if raw_arm == "B1" else None,
         )
         context_lines = baseline_rag_service.build_context_lines(hits)
-        retrieved_texts = [h.get("text", "") for h in hits]
+        retrieved_texts = [h.get("chunk_text", "") for h in hits]
         chunk_ids = [f"{h.get('source')}_{h.get('chunk_index')}" for h in hits]
 
         gen = None

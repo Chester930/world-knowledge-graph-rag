@@ -5,10 +5,21 @@
 2. Type-E Canary 題目拒答核驗。
 3. 成本分析器之 p50/p95 與三階段生命週期報告產出。
 """
+import json
 import pytest
 from models.eval_schema import AtomicGoldFact
 from services.atomic_scorer import AtomicScorer
 from services.cost_analyzer import CostAnalyzer
+
+
+class _FakeJudge:
+    def __init__(self, response: str):
+        self._response = response
+        self.calls = 0
+
+    async def generate_json(self, prompt: str) -> str:
+        self.calls += 1
+        return self._response
 
 
 def test_atomic_scorer_exact_match():
@@ -78,6 +89,76 @@ def test_atomic_scorer_canary_refusal():
     res2 = AtomicScorer.evaluate(guessed_ans, [], refusal_expected=True)
     assert res2.is_perfect is False
     assert res2.atomic_accuracy == 0.0
+
+
+@pytest.mark.asyncio
+async def test_atomic_scorer_evaluate_async_no_judge_matches_sync():
+    """報告52後續修正：judge_llm_provider=None 時，evaluate_async 與 evaluate() 逐位元相同"""
+    facts = [
+        AtomicGoldFact(
+            exact_span="自災害發生之當月一日起計算六個月",
+            source_law="N0050030", source_article="第3條", is_essential=True,
+        ),
+    ]
+    smoothed_ans = "其期間自災害發生之當日起計算六個月。"
+    sync_res = AtomicScorer.evaluate(smoothed_ans, facts)
+    async_res = await AtomicScorer.evaluate_async(smoothed_ans, facts, judge_llm_provider=None)
+    assert async_res.atomic_recall == sync_res.atomic_recall
+    assert async_res.missing_spans == sync_res.missing_spans
+
+
+@pytest.mark.asyncio
+async def test_atomic_scorer_evaluate_async_rescues_paraphrase():
+    """17-Q1 情境：答案內容正確但用詞被自然語言化改寫，語意 fallback 應救回"""
+    facts = [
+        AtomicGoldFact(
+            exact_span="勞工結婚者給予婚假八日，工資照給",
+            source_law="N0030006", source_article="第2條", is_essential=True,
+        ),
+    ]
+    paraphrased_ans = "勞工結婚可以請八日婚假，婚假期間工資照給，不受影響。"
+    judge = _FakeJudge(json.dumps({"results": [{"index": 1, "present": True}]}))
+
+    sync_res = AtomicScorer.evaluate(paraphrased_ans, facts)
+    assert sync_res.is_perfect is False  # 逐字比對本來就會誤判失敗
+
+    async_res = await AtomicScorer.evaluate_async(
+        paraphrased_ans, facts, judge_llm_provider=judge,
+    )
+    assert async_res.is_perfect is True
+    assert async_res.atomic_recall == 1.0
+    assert judge.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_atomic_scorer_evaluate_async_keeps_real_smoothing_error():
+    """26-Q5 情境：「當日」平滑化內容確實不同，judge 判 false 時維持失敗判定"""
+    facts = [
+        AtomicGoldFact(
+            exact_span="自災害發生之當月一日起計算六個月",
+            source_law="N0050030", source_article="第3條", is_essential=True,
+        ),
+    ]
+    smoothed_ans = "其期間自災害發生之當日起計算六個月。"
+    judge = _FakeJudge(json.dumps({"results": [{"index": 1, "present": False}]}))
+
+    async_res = await AtomicScorer.evaluate_async(
+        smoothed_ans, facts, judge_llm_provider=judge,
+    )
+    assert async_res.is_perfect is False
+    assert "自災害發生之當月一日起計算六個月" in async_res.missing_spans
+
+
+@pytest.mark.asyncio
+async def test_atomic_scorer_evaluate_async_canary_unaffected():
+    """refusal_expected 分支不涉及語意比對，async 版與 sync 版行為一致"""
+    refusal_ans = "依據目前收錄之勞動法規資料庫，並未記載此項規定，無法提供確定答覆。"
+    judge = _FakeJudge('{"results":[]}')
+    res = await AtomicScorer.evaluate_async(
+        refusal_ans, [], refusal_expected=True, judge_llm_provider=judge,
+    )
+    assert res.is_perfect is True
+    assert judge.calls == 0  # refusal 分支不呼叫 judge
 
 
 def test_cost_analyzer_profiles():

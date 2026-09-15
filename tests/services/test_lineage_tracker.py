@@ -13,6 +13,16 @@ from pathlib import Path
 from services.lineage_tracker import LineageTracker
 
 
+class _FakeJudge:
+    def __init__(self, response: str):
+        self._response = response
+        self.calls = 0
+
+    async def generate_json(self, prompt: str) -> str:
+        self.calls += 1
+        return self._response
+
+
 def test_lineage_tracker_stage1_failure():
     tracker = LineageTracker(
         query_id="26-Q5",
@@ -127,3 +137,67 @@ def test_lineage_tracker_success_and_export(tmp_path: Path):
     assert data["query_id"] == "26-Q5"
     assert data["stage1_retrieval"]["recall_rate"] == 1.0
     assert "Success" in data["failure_attribution"]
+
+
+@pytest.mark.asyncio
+async def test_record_retrieval_async_no_judge_matches_sync():
+    """報告52後續修正：judge_llm_provider=None 時，async 版與 sync 版逐位元相同"""
+    gold_spans = ["自災害發生之當月一日起計算六個月", "由中央政府支應"]
+    retrieved = ["勞動基準法第38條特別休假規定..."]
+
+    sync_tracker = LineageTracker("26-Q5", "M1", "起算日？")
+    sync_lineage = sync_tracker.record_retrieval(retrieved, gold_spans, latency_ms=120.5)
+
+    async_tracker = LineageTracker("26-Q5", "M1", "起算日？")
+    async_lineage = await async_tracker.record_retrieval_async(
+        retrieved, gold_spans, latency_ms=120.5, judge_llm_provider=None,
+    )
+    assert async_lineage.recall_rate == sync_lineage.recall_rate
+    assert async_lineage.missed_exact_spans == sync_lineage.missed_exact_spans
+
+
+@pytest.mark.asyncio
+async def test_record_retrieval_async_rescues_paraphrased_fact():
+    """17-Q1 情境：Fact-RAG 檢索到的原文被自然語言化改寫，語意 fallback 應救回 Stage 1"""
+    tracker = LineageTracker("17-Q1", "M4", "勞工結婚可以請幾天婚假？")
+    gold_spans = ["勞工結婚者給予婚假八日，工資照給"]
+    retrieved = ["勞工結婚時可以請八日的婚假，這段期間工資照常發給。"]
+
+    judge = _FakeJudge(json.dumps({"results": [{"index": 1, "present": True}]}))
+    lineage = await tracker.record_retrieval_async(
+        retrieved, gold_spans, latency_ms=200.0, judge_llm_provider=judge,
+    )
+    assert lineage.recall_rate == 1.0
+    assert lineage.missed_exact_spans == []
+
+    diag = await tracker.diagnose_failure_async(gold_spans, judge_llm_provider=judge)
+    assert "Success" in diag
+
+
+@pytest.mark.asyncio
+async def test_diagnose_failure_async_stage3_keeps_real_smoothing_error():
+    """26-Q5 情境：Stage1/2都完整，Stage3的「當日」平滑化是真錯誤，語意fallback不該救回"""
+    tracker = LineageTracker("26-Q5", "M4", "災區受災勞工保費補助期間與起算日？")
+    gold_spans = ["自災害發生之當月一日起計算六個月", "由中央政府支應"]
+
+    full_text = (
+        "前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。"
+        "其災後六個月期間內被保險人應負擔之保險費，由中央政府支應。"
+    )
+    await tracker.record_retrieval_async(
+        [full_text], gold_spans, latency_ms=90.0, judge_llm_provider=None,
+    )
+    await tracker.record_context_assembly_async(
+        full_text, gold_spans, total_tokens=200, judge_llm_provider=None,
+    )
+
+    smoothed_answer = "災後六個月期間由中央政府支應，其期間自災害發生當日起計算六個月。"
+    tracker.record_generation(
+        raw_draft=smoothed_answer, final_output=smoothed_answer,
+        grounding_passed=True, latency_ms=1500.0,
+    )
+
+    judge = _FakeJudge(json.dumps({"results": [{"index": 1, "present": False}]}))
+    diag = await tracker.diagnose_failure_async(gold_spans, judge_llm_provider=judge)
+    assert "Stage 3 Generation Failure" in diag
+    assert "Intrinsic Hallucination / Smoothing" in diag

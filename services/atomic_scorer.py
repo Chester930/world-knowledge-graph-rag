@@ -9,7 +9,9 @@ import re
 from typing import List, Tuple
 from pydantic import BaseModel, Field
 
+from core.providers.base import LLMProvider
 from models.eval_schema import AtomicGoldFact
+from services.semantic_span_matcher import match_spans_with_fallback
 
 
 class AtomicScoreResult(BaseModel):
@@ -90,6 +92,61 @@ class AtomicScorer:
         is_perfect = (len(missing) == 0 and len(supported) >= total_essential)
 
         detail_msg = f"Hit {len(supported)}/{len(atomic_gold_facts)} facts. Missed essential: {missing}"
+
+        return AtomicScoreResult(
+            supported_spans=supported,
+            missing_spans=missing,
+            atomic_accuracy=round(accuracy, 4),
+            atomic_recall=round(recall, 4),
+            is_perfect=is_perfect,
+            details=detail_msg,
+        )
+
+    @classmethod
+    async def evaluate_async(
+        cls,
+        answer: str,
+        atomic_gold_facts: List[AtomicGoldFact],
+        refusal_expected: bool = False,
+        judge_llm_provider: LLMProvider | None = None,
+        question: str = "",
+    ) -> AtomicScoreResult:
+        """語意 fallback 版（報告52 後續修正）：`exact_span` 逐字比對失敗時，
+        才補呼叫 `judge_llm_provider` 做語意蘊含核對（見
+        `services/semantic_span_matcher.py`），救回報告24自然語言化管線改寫過
+        用詞、但內容其實正確的答案（如 17-Q1 案例）。
+
+        `refusal_expected=True` 或 `atomic_gold_facts` 為空的分支與同步版
+        `evaluate()` 完全相同（純規則判定，不涉及語意比對，不需 judge LLM）。
+        `judge_llm_provider=None` 時退化為與 `evaluate()` 逐字相同的結果。
+        """
+        if refusal_expected or not atomic_gold_facts:
+            return cls.evaluate(answer, atomic_gold_facts, refusal_expected=refusal_expected)
+
+        spans = [f.exact_span for f in atomic_gold_facts]
+        hit_spans, _ = await match_spans_with_fallback(
+            answer, spans, judge_llm_provider, question=question,
+        )
+        hit_set = set(hit_spans)
+
+        essential_facts = [f for f in atomic_gold_facts if f.is_essential]
+        total_essential = len(essential_facts) if essential_facts else len(atomic_gold_facts)
+
+        supported = [f.exact_span for f in atomic_gold_facts if f.exact_span in hit_set]
+        missing = [
+            f.exact_span for f in atomic_gold_facts
+            if f.exact_span not in hit_set and f.is_essential
+        ]
+        hit_essential = len([f for f in essential_facts if f.exact_span in hit_set])
+        recall = (hit_essential / total_essential) if total_essential > 0 else 1.0
+        accuracy = len(supported) / len(atomic_gold_facts) if atomic_gold_facts else 1.0
+        is_perfect = (len(missing) == 0 and len(supported) >= total_essential)
+
+        detail_msg = (
+            f"Hit {len(supported)}/{len(atomic_gold_facts)} facts "
+            f"(semantic fallback{'' if judge_llm_provider else ' disabled'}). "
+            f"Missed essential: {missing}"
+        )
 
         return AtomicScoreResult(
             supported_spans=supported,
