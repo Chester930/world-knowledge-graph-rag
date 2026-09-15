@@ -1,6 +1,6 @@
 """RQ1 harness 非 timeout 例外的結構化 failure record 測試。"""
 from models.eval_schema import AtomicGoldFact, ScenarioType, TestCase as EvalTestCase, VerificationStatus
-from scripts.eval.run_rq1_comparison import _build_failure_record
+from scripts.eval.run_rq1_comparison import _build_failure_record, _render_pareto_summary
 
 
 def test_build_failure_record_preserves_lineage_and_failure_reason():
@@ -36,3 +36,47 @@ def test_build_failure_record_preserves_lineage_and_failure_reason():
     assert record["lineage"]["stage3_generation"]["raw_draft"] == ""
     assert record["deterministic_guard"]["guard_name"] == "HarnessException"
     assert record["atomic_score"]["is_perfect"] is False
+
+
+def test_render_pareto_summary_includes_context_quality_section(tmp_path):
+    """報告57 §2.3：Context Quality矩陣（Recall/SNR/Chain Completeness）
+    須與既有Atomic Accuracy矩陣並列輸出，不互相取代。"""
+    single_doc_case = EvalTestCase(
+        id="q-single", question="q1", source_article="LAW1 §1", gold_answer="a",
+        scenario_type=ScenarioType.TYPE_A,
+        atomic_gold_facts=[
+            AtomicGoldFact(exact_span="法規原文", source_law="LAW1", source_article="第1條"),
+        ],
+        verification_status=VerificationStatus.VERIFIED,
+    )
+    cross_doc_case = EvalTestCase(
+        id="q-cross", question="q2", source_article="LAW1/LAW2", gold_answer="b",
+        scenario_type=ScenarioType.TYPE_C,
+        atomic_gold_facts=[
+            AtomicGoldFact(exact_span="事實一", source_law="LAW1", source_article="第1條"),
+            AtomicGoldFact(exact_span="事實二", source_law="LAW2", source_article="第2條"),
+        ],
+        verification_status=VerificationStatus.VERIFIED,
+    )
+    rec1 = _build_failure_record(
+        single_doc_case, "M1", 1,
+        error_code="x", failure_reason="x", guard_name="x", latency_s=1.0,
+    )
+    rec2 = _build_failure_record(
+        cross_doc_case, "M1", 1,
+        error_code="x", failure_reason="x", guard_name="x", latency_s=1.0,
+    )
+
+    manifest = {"kg_id": "kg-test", "runs": 1}
+    _render_pareto_summary(
+        tmp_path, manifest, [rec1, rec2], ["M1"], [single_doc_case, cross_doc_case],
+    )
+    content = (tmp_path / "summary.md").read_text(encoding="utf-8")
+
+    assert "Context Quality" in content
+    assert "Chain Completeness" in content
+    # 兩題檢索皆為空（_build_failure_record 走 failure 路徑），single_doc_case
+    # 只涉及1個source_law故chain_completeness=None（不計入平均）；cross_doc_case
+    # 涉及2個source_law、0命中，chain_completeness=0.0，唯一計入樣本 n=1。
+    assert "n=1" in content
+    assert "0.0%" in content

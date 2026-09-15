@@ -393,7 +393,36 @@ def _render_pareto_summary(
 
     summary_lines.extend([
         "",
-        "## 2. 場景梯度細分（Type-A ~ Type-E）表現",
+        "## 2. Context Quality 矩陣（維度I，純檢索品質，不受生成端干擾——報告57 §2）",
+        "",
+        "| 方法代號 | Context Recall | SNR（信噪比） | Chain Completeness（僅跨文件題） |",
+        "|---|---|---|---|",
+    ])
+
+    for arm in arms:
+        arm_recs = [r for r in records if r["arm"] == arm]
+        if not arm_recs:
+            continue
+        stage1_list = [r["lineage"]["stage1_retrieval"] for r in arm_recs]
+        recall_vals = [s["recall_rate"] for s in stage1_list]
+        snr_vals = [s["snr"] for s in stage1_list]
+        chain_vals = [
+            s["chain_completeness"] for s in stage1_list
+            if s.get("chain_completeness") is not None
+        ]
+        recall_avg = statistics.mean(recall_vals) if recall_vals else 0.0
+        snr_avg = statistics.mean(snr_vals) if snr_vals else 0.0
+        if chain_vals:
+            chain_display = f"{statistics.mean(chain_vals)*100:.1f}% (n={len(chain_vals)})"
+        else:
+            chain_display = "N/A（無跨文件題樣本）"
+        summary_lines.append(
+            f"| **{arm}** | {recall_avg*100:.1f}% | {snr_avg*100:.1f}% | {chain_display} |"
+        )
+
+    summary_lines.extend([
+        "",
+        "## 3. 場景梯度細分（Type-A ~ Type-E）表現",
         "",
         "| 題號 | 場景分類 | " + " | ".join(arms) + " |",
         "|---|---| " + " | ".join(["---"] * len(arms)) + " |",
@@ -413,7 +442,7 @@ def _render_pareto_summary(
 
     summary_lines.extend([
         "",
-        "## 3. 典型缺陷全鏈路血統歸因",
+        "## 4. 典型缺陷全鏈路血統歸因",
         "",
         "| 題號 | 方法 | 錯誤診斷 | 歸因原因 |",
         "|---|---|---|---|",

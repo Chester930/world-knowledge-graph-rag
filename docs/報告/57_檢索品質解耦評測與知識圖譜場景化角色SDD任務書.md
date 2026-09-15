@@ -76,9 +76,9 @@ Chain Completeness = 命中至少一個essential fact的 distinct source_law 數
 
 兩者皆已接線進`scripts/eval/run_rq1_comparison.py`的兩處`record_retrieval()`呼叫點（正常路徑與例外failure record路徑），新增8個單元測試（`tests/services/test_lineage_tracker.py`），全套945 pytest綠燈。
 
-### 2.3 報表層改動
+### 2.3 報表層改動（✅ 2026-09-15 已實作）
 
-`scripts/eval/run_rq1_comparison.py::_render_pareto_summary()`（348-420行）目前只彙總`atomic_score`。改動：新增一組「Context Quality矩陣」與現有「Atomic Accuracy矩陣」並列輸出，**兩組都保留、不互相取代**——因為使用者確認的立場是「用檢索資料評價取代答案評分」，但維度II（生成端指標）本身仍是判斷KG系統整體是否可用的必要條件，不能只看檢索端就下產品結論。兩組矩陣分開看，才能回答「檢索是否夠好」跟「整條pipeline是否夠好」這兩個不同但都重要的問題。
+`scripts/eval/run_rq1_comparison.py::_render_pareto_summary()`新增「## 2. Context Quality矩陣」區塊（Context Recall／SNR／Chain Completeness，僅對有跨文件`atomic_gold_facts`的題目計入Chain Completeness平均，並標示樣本數n），插在原本的Pareto矩陣之後、場景梯度細分之前，原有「場景梯度細分」「典型缺陷血統歸因」依序改編號為3/4——**兩組矩陣並列、不互相取代**，維度II（生成端指標）仍是判斷系統整體可用性的必要條件。新增1個單元測試（`tests/scripts/test_rq1_harness_failures.py`），涵蓋單文件題（chain_completeness=None，不計入平均）與跨文件題（0命中→0.0%，n=1）兩種情境，全套946 pytest綠燈。
 
 ### 2.4 明確排除範圍（避免SDD膨脹）
 
