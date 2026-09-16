@@ -1250,6 +1250,116 @@
       "trap_claim_spans": [
         "精密作業的勞工需要做特殊健康檢查"
       ]
+    },
+    {
+      "id": "57-AGGR3",
+      "question": "婚假、普通傷病假、產假這三種假別，請假期間的工資怎麼給？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 §2、§4；N0030001 §50",
+      "gold_answer": "三者工資規定不同，並非統一標準：婚假（勞工請假規則第2條）工資照給；普通傷病假（勞工請假規則第4條）一年內未超過三十日部分，工資折半發給，領有勞工保險普通傷病給付未達工資半數者，由雇主補足之；產假（勞動基準法第50條）則依年資而定——受僱工作在六個月以上者，停止工作期間工資照給，未滿六個月者減半發給。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工結婚者給予婚假八日，工資照給。",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "婚假工資規則——工資照給，無條件"
+        },
+        {
+          "exact_span": "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第4條",
+          "is_essential": true,
+          "note": "普通傷病假工資規則——折半發給，非全額也非不給"
+        },
+        {
+          "exact_span": "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。",
+          "source_law": "N0030001_勞動基準法",
+          "source_article": "第50條",
+          "is_essential": true,
+          "note": "產假工資規則——依年資而定，跟婚假/普通傷病假的規則都不同，2026-09-16重抽驗證後補入N0030001"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "跨文件聚合比較（三類假別工資規則不統一）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第2組候選Stage 1，2026-09-16新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "global_aggregation",
+        "multi_fact_assembly"
+      ]
+    },
+    {
+      "id": "57-AGGR4",
+      "question": "勞工遭遇職業災害，在正式認定為職災之前，請假期間工資怎麼算？認定之後呢？",
+      "pcode": "N0060041",
+      "source_article": "N0060041 §29；N0030006 §4；N0030001 §59第2款",
+      "gold_answer": "認定前：勞工先依勞工請假規則第四條規定請普通傷病假，一年內未超過三十日部分工資折半發給；普通傷病假期滿仍未獲認定，雇主應予留職停薪。認定後：轉為公傷病假處理，依勞動基準法第五十九條第二款，勞工在醫療中不能工作時，雇主應按其原領工資數額（全額）予以補償——認定前後的工資待遇從折半變成全額，且轉銜過程可能經過一段留職停薪期間。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第29條",
+          "is_essential": true,
+          "note": "跨文件橋接條文——連結普通傷病假(N0030006§4)與公傷病假(N0030001§59)兩個階段，2026-09-16 Stage 0已驗證此chunk內容正確"
+        },
+        {
+          "exact_span": "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第4條",
+          "is_essential": true,
+          "note": "職災認定前階段的工資規則（折半）"
+        },
+        {
+          "exact_span": "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。",
+          "source_law": "N0030001_勞動基準法",
+          "source_article": "第59條第2款",
+          "is_essential": true,
+          "note": "職災認定後（公傷病假）階段的工資規則（原領工資全額），N0060041本文完全沒有工資數字，此規則要跨到勞基法才找得到，2026-09-16 Stage 0查證發現"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "跨文件推理鏈（職災認定前後兩階段工資轉銜）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第2組候選Stage 1，2026-09-16新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-CANARY4",
+      "question": "勞工請事假，期間工資怎麼算？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 §7",
+      "gold_answer": "事假期間不給工資。",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "事假期間不給工資。",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第7條",
+          "is_essential": true,
+          "note": "陷阱說明：2026-09-16 Stage 0查證發現此chunk（svo_chunk_index=7）在KG裡被qwen2.5:7b決定性抽成『產假期間不給工資』（主體幻覺成產假，temperature=0+固定seed下可重現、重跑3次結果不變），若系統依賴KG的Fact節點檢索可能誤答成產假規則；本題用來測試檢索到的是原始chunk文字還是被污染的衍生Fact。原始svo-chunk-007-of-013.md文字本身正確無誤。"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "鄰近陷阱（KG衍生Fact已知幻覺污染，測原文vs.衍生Fact的檢索差異）",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第2組候選Stage 1，2026-09-16新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "distractor_adjacent"
+      ]
     }
   ]
 }
