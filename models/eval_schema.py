@@ -62,6 +62,23 @@ class TestCase(BaseModel):
             "segmented_enumeration/distractor_adjacent/canary_refusal"
         ),
     )
+    trap_claim_spans: List[str] = Field(
+        default_factory=list,
+        description=(
+            "僅 Type-E（canary_refusal）題目使用，選填。答案文字裡出現任一則列出的"
+            "字串，視為模型確信斷言了這題設計要抓的錯誤結論（陷阱），即使文字別處"
+            "也出現拒答措辭，仍判定拒答失敗（報告57 §4.3——AtomicScorer.evaluate()"
+            "原本只要答案全文任一處出現拒答關鍵字就判定整題拒答成功，未檢查是否"
+            "同時斷言了陷阱結論，會被『答案結尾夾帶一句無關的拒答用語』騙過）。"
+            "刻意維持純字串比對（不用LLM judge）——RefusalBench（Muhamed et al. "
+            "2025）實測Qwen家族選擇性拒答判斷準確率全尺寸<17%，跟本專案"
+            "services/interval_lookup_service.py既有的G2方案E（查表判斷移出LLM "
+            "改用確定性Python檢查）原則一致。**只在陷阱結論能表達成固定字串時"
+            "才填**——『開放式捏造具體數字』型陷阱（如捏造罰鍰金額、天數）的"
+            "陷阱關鍵詞在正確拒答時也會自然出現（用來否定它），加字串比對反而會"
+            "製造假陰性，這類題目留空。"
+        ),
+    )
 
 
 class EvaluationDataset(BaseModel):

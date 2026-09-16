@@ -92,6 +92,52 @@ def test_atomic_scorer_canary_refusal():
     assert res2.atomic_accuracy == 0.0
 
 
+def test_atomic_scorer_canary_trap_claim_defeats_incidental_refusal_phrase():
+    """報告57 §4.3真實資料發現（57-CANARY3）：多段式答案在核心主張上確信
+    斷言了陷阱結論，卻在文字別處夾帶一句跟核心問題無關的拒答用語——原本
+    的全文關鍵字掃描會被騙過、誤判整題拒答成功。trap_claim_spans命中時應
+    強制判定拒答失敗，即使拒答關鍵字也同時出現在文字別處。"""
+    trapped_ans = (
+        "精密作業的勞工需要做特殊健康檢查。每年或於變更其作業時應實施特殊健康檢查。"
+        "至於一般勞工的健康檢查項目細節等其他部分資料未明確記載，無法確認。"
+    )
+    res = AtomicScorer.evaluate(
+        trapped_ans, [], refusal_expected=True,
+        trap_claim_spans=["精密作業的勞工需要做特殊健康檢查"],
+    )
+    assert res.is_perfect is False
+    assert res.atomic_accuracy == 0.0
+    assert res.details == "Failed to Refuse on Type-E Canary (Trap Claim Asserted)"
+
+
+def test_atomic_scorer_canary_trap_claim_absent_still_passes_genuine_refusal():
+    """trap_claim_spans未命中時，真正的拒答仍應正常判定通過——不能因為多了
+    這個檢查就連正確答案也一起誤判。"""
+    genuine_refusal = (
+        "精密作業並未列入勞工健康保護規則附表一，不適用特殊健康檢查規定。"
+        "精密作業勞工仍應依第十七條按年齡分級實施一般健康檢查，其他更詳細之"
+        "規定並未記載。"
+    )
+    res = AtomicScorer.evaluate(
+        genuine_refusal, [], refusal_expected=True,
+        trap_claim_spans=["精密作業的勞工需要做特殊健康檢查"],
+    )
+    assert res.is_perfect is True
+    assert res.atomic_accuracy == 1.0
+
+
+def test_atomic_scorer_canary_no_trap_claim_spans_unaffected():
+    """trap_claim_spans未提供（None或空list）時，行為與修復前完全一致——
+    既有5題canary題目裡只有57-CANARY3填了trap_claim_spans，其餘4題（開放式
+    捏造具體數字型陷阱，關鍵詞在正確拒答時也會自然出現，加字串比對反而會
+    製造假陰性）刻意留空，不應受這次修復影響。"""
+    refusal_ans = "依據目前收錄之勞動法規資料庫，並未記載此項規定，無法提供確定答覆。"
+    res_none = AtomicScorer.evaluate(refusal_ans, [], refusal_expected=True, trap_claim_spans=None)
+    res_empty = AtomicScorer.evaluate(refusal_ans, [], refusal_expected=True, trap_claim_spans=[])
+    assert res_none.is_perfect is True
+    assert res_empty.is_perfect is True
+
+
 @pytest.mark.asyncio
 async def test_atomic_scorer_evaluate_async_no_judge_matches_sync():
     """報告52後續修正：judge_llm_provider=None 時，evaluate_async 與 evaluate() 逐位元相同"""

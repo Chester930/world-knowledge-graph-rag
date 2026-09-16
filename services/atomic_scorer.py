@@ -46,6 +46,7 @@ class AtomicScorer:
         refusal_expected: bool = False,
         deterministic_guard_passed: bool = True,
         guard_failures: List[str] | None = None,
+        trap_claim_spans: List[str] | None = None,
     ) -> AtomicScoreResult:
         """評估答案對原子黃金事實之符合程度。
 
@@ -55,7 +56,19 @@ class AtomicScorer:
         `is_perfect` 強制為 False，但 `atomic_accuracy`／`atomic_recall`／
         `supported_spans` 仍如實反映原始 exact-span coverage，不用任意常數
         偷偷扣分（見報告48 §4.1「保留原始 atomic coverage，另外記錄 guard
-        failure」）。"""
+        failure」）。
+
+        `trap_claim_spans`（報告57 §4.3，2026-09-16新增，選填）：僅
+        `refusal_expected=True`時生效。真實資料發現：拒答關鍵字比對原本掃描
+        答案「全文任一處」，若多段式答案在核心主張上確信斷言了錯誤結論（陷阱），
+        卻在文字別處（例如次要子問題）夾帶一句無關的拒答用語，會被誤判成整題
+        拒答成功（57-CANARY3實例：模型確信答錯「精密作業需要特殊健康檢查」，
+        但因結尾夾帶「其他部分資料未明確記載，無法確認」而被誤判100%通過）。
+        `trap_claim_spans`非空且答案命中其中任一則字串時，強制`refused=False`
+        （即使拒答關鍵字也命中）——刻意維持純字串比對，不改用LLM judge：
+        RefusalBench（Muhamed et al. 2025）已實測Qwen家族選擇性拒答判斷準確率
+        全尺寸<17%，與`services/interval_lookup_service.py`既有G2方案E（查表
+        判斷移出LLM改確定性Python檢查）同一設計原則。"""
         if refusal_expected:
             # 若為 Type-E Canary 題目，檢核是否明確觸發法定拒答
             refusal_patterns = [
@@ -64,13 +77,22 @@ class AtomicScorer:
             ]
             clean_ans = cls._clean_text(answer)
             refused = any(p in clean_ans for p in refusal_patterns)
+            trap_triggered = any(
+                cls._clean_text(trap) in clean_ans for trap in (trap_claim_spans or []) if trap
+            )
+            if trap_triggered:
+                refused = False
             return AtomicScoreResult(
                 supported_spans=["REFUSAL"] if refused else [],
                 missing_spans=[] if refused else ["REFUSAL_EXPECTED"],
                 atomic_accuracy=1.0 if refused else 0.0,
                 atomic_recall=1.0 if refused else 0.0,
                 is_perfect=refused and deterministic_guard_passed,
-                details="Exact Refusal Passed" if refused else "Failed to Refuse on Type-E Canary",
+                details=(
+                    "Failed to Refuse on Type-E Canary (Trap Claim Asserted)" if trap_triggered
+                    else "Exact Refusal Passed" if refused
+                    else "Failed to Refuse on Type-E Canary"
+                ),
                 deterministic_guard_passed=deterministic_guard_passed,
                 guard_failures=guard_failures or [],
             )
@@ -136,6 +158,7 @@ class AtomicScorer:
         question: str = "",
         deterministic_guard_passed: bool = True,
         guard_failures: List[str] | None = None,
+        trap_claim_spans: List[str] | None = None,
     ) -> AtomicScoreResult:
         """語意 fallback 版（報告52 後續修正）：`exact_span` 逐字比對失敗時，
         才補呼叫 `judge_llm_provider` 做語意蘊含核對（見
@@ -148,12 +171,14 @@ class AtomicScorer:
         `refusal_expected=True` 或 `atomic_gold_facts` 為空的分支與同步版
         `evaluate()` 完全相同（純規則判定，不涉及語意比對，不需 judge LLM）。
         `judge_llm_provider=None` 時退化為與 `evaluate()` 逐字相同的結果。
+        `trap_claim_spans`（報告57 §4.3）原樣轉交`evaluate()`。
         """
         if refusal_expected or not atomic_gold_facts:
             return cls.evaluate(
                 answer, atomic_gold_facts, refusal_expected=refusal_expected,
                 deterministic_guard_passed=deterministic_guard_passed,
                 guard_failures=guard_failures,
+                trap_claim_spans=trap_claim_spans,
             )
 
         spans = [f.exact_span for f in atomic_gold_facts]

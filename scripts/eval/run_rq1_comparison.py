@@ -340,6 +340,7 @@ async def _run_single_query(
             if guard_result.failure_reason
             else []
         ),
+        trap_claim_spans=tc.trap_claim_spans,
     )
 
     full_lineage = await tracker.build_full_lineage_async(

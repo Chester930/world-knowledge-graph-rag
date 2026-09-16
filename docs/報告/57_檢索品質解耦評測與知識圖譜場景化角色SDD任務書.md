@@ -208,7 +208,7 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 - `57-AGGR1`：recall 0.5（2個gold fact命中1個，附表一項次一「高溫作業」連結事實仍未被檢索到，即使語意fallback也判定沒命中——這是真實的檢索缺口，不是量測方法問題）。
 - `57-AGGR2`：recall 0.33、**SNR僅8.5%**——最終答案內容混亂矛盾（先說「特定化學物質本標準不適用」，後又說「雇主使勞工從事特定化學物質作業者...應實施勞工特殊健康檢查」），跟低SNR高度吻合：`top_k`檢索帶進大量`N0060015`裡無關的化學物質細節（防護具、設備監測等），把真正需要的3個關鍵事實稀釋掉，佐證報告57整個SNR指標設計要抓的正是這種「檢索到很多東西但訊號被雜訊淹沒」現象。
 
-### 4.3 🚨 已記錄未修復：canary_refusal評分假陽性（2026-09-15發現，使用者裁示先記錄+收集資料，暫不修復）
+### 4.3 ✅ 已修復：canary_refusal評分假陽性（2026-09-15發現，2026-09-16設計+落地）
 
 **觸發案例**：`57-CANARY3`摘要表顯示100%通過，但讀完整答案發現**模型實際上答錯了**——明確說「精密作業的勞工需要做特殊健康檢查」且編造頻率「每年或於變更其作業時」（正是這題設計要測的陷阱：誤把職安法第十九條的廣泛分類當成附表一窄化清單，模型真的掉進去了），但答案結尾附帶一句跟核心問題無關的「其他部分資料未明確記載，無法確認」。
 
@@ -231,6 +231,23 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 **較有希望的修復方向（未實作，供之後評估）**：`services/verification_service.py::ClaimGrounding`已有逐句/逐主張細粒度分析（`verify_fact_grounding()`回傳每個claim的`statement`/`supported`/`is_claim`），`chat()`正式生成路徑已經在算這份資料。若Type-E拒答檢核改成「檢查題目核心主張對應的那個claim是否被正確判定為不支持/拒答」而非對整段答案文字做關鍵字掃描，理論上能避開「答案其他枝節夾帶拒答用語」的假陽性——但需要先解決「怎麼知道哪個claim對應題目的核心主張」這個新的子問題（目前`AtomicGoldFact`／`TestCase`schema沒有結構化欄位標記這件事），非一行修補。
 
 **估計工時**：**半天到一天（約4-8小時）的專注開發**——涵蓋（1）設計「核心主張claim辨識」機制、（2）改寫`atomic_scorer.py`與`interval_lookup_service.py`兩處call site、（3）新增單元測試、（4）重跑既有5題canary驗證是否有歷史假陽性被抓出來（可能發現更多既有「verified通過」的題目其實沒真的測到）。不是單一函式的小修補，牽動題庫既有canary題的歷史可信度重新核實，故估時偏保守。
+
+**✅ 已落地（2026-09-16）**：
+
+**文獻查證發現這個問題本專案已經打過一輪**——`docs/參考文獻/22_生成端過度保守與選擇性拒答/README.md`已精讀過RefusalBench（Muhamed et al. 2025）、RAGAS Faithfulness（Es et al. 2023）、Context-faithful Prompting（Zhou et al. 2023），且已因同一個「Qwen家族選擇性拒答判斷準確率全尺寸<17%」發現，把`services/interval_lookup_service.py`的區間查表判斷刻意改成確定性Python邏輯（G2方案E），**不交給LLM judge**。這推翻了上面寫的「較有希望的方向是重用ClaimGrounding語意判斷」——正確方向反而是**維持確定性判斷，但把判斷範圍縮小到題目核心主張**，不是換成語意fallback。
+
+**設計＝新增`trap_claim_spans`欄位**（`models/eval_schema.py::TestCase`）：Type-E題目可選填一組「陷阱結論」固定字串，答案裡出現任一則即強制判定拒答失敗，即使拒答關鍵字也同時出現在文字別處。純字串比對，不新增LLM呼叫。
+
+**5題既有canary題目回填結果**：
+- `57-CANARY3`：填入實際觀察到的陷阱句「精密作業的勞工需要做特殊健康檢查」——**唯一有固定可檢查陷阱結論的題目**（類別混淆型陷阱）。
+- `canary-P1`／`canary-P4`／`57-CANARY1`／`57-CANARY2`：刻意留空——這4題是「開放式捏造具體數字」型陷阱（罰鍰金額、火星旅遊次數、留停延長期限、獎金金額），陷阱關鍵詞（如「億元」）在正確拒答時也會自然出現（用來否定它），加字串比對反而會製造假陰性，不強行湊數。
+
+**驗證結果（真實資料，非模擬）**：
+- `services/atomic_scorer.py::evaluate()`／`evaluate_async()`加`trap_claim_spans`參數；新增3個單元測試（`tests/services/test_evaluation_metrics.py`），全套**952 pytest綠燈**。
+- 對`57-CANARY3`重跑真實harness：模型答案不變（仍確信斷言「精密作業的勞工需要做特殊健康檢查」），但這次正確判定`is_perfect=False`，`details`顯示`"Failed to Refuse on Type-E Canary (Trap Claim Asserted)"`——漏洞已堵住。
+- 對全部5題canary做回歸測試：`canary-P4`／`57-CANARY2`維持100%通過（`trap_claim_spans=[]`，數學上零影響，已確認）；`canary-P1`／`57-CANARY1`維持0%——讀答案內容確認這兩題模型直接編造具體數字（「一百五十萬元」「不少於六個月」），答案裡完全沒出現任何拒答關鍵字，走的是修復前後完全相同的判定路徑（`details`為舊版文字，未觸發trap分支），證實無回歸、這兩題的失敗跟本次修復無關（是模型本身選擇性拒答能力不足，呼應RefusalBench的實證發現）。
+
+**尚未處理**：`services/interval_lookup_service.py::is_refusal_text()`（正式`chat()`生產路徑）維持不動——這是數值區間查表這個更窄、已經走過A/B/A′/C/E正式驗證流程（`run_refusal_canary.py`的FRR/MRR門檻）的獨立子系統，若要修，應另外排程、走同一套探針驗證流程，不跟這次的eval評分修復混在一起。
 
 **Stage 1（小樣本設計驗證）**：在這2-3份文件切片上，出1-2題`global_aggregation`題＋人工核實gold，用§2新指標小規模跑一次（1-2題×少數arm），確認Context Recall/SNR/Chain Completeness算得出合理數字——**新指標從未在真實資料上跑過，這步是要在小規模發現設計問題，而不是等26題全出完才發現**。
 
