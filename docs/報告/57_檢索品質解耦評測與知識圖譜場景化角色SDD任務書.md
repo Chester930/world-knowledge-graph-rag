@@ -297,7 +297,19 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 | `57-AGGR4` | `cross_doc_multihop` | 職災認定前後工資轉銜，N0060041§29橋接N0030006§4(認定前折半)+N0030001§59第2款(認定後全額)，真正的3文件推理鏈 |
 | `57-CANARY4` | `distractor_adjacent` | 故意選N0030006§7（已知KG幻覺chunk，Fact被抽成「產假期間不給工資」而非「事假期間不給工資」）出題，測系統實際檢索到的是原始chunk文字還是被污染的衍生Fact——正是本任務整個評測解耦關切的核心 |
 
-**⏸ 待辦（下一輪）**：Stage 1的harness實跑驗證（比照健康檢查頻率組模式，跑K arm小規模驗證新指標算出來的數字是否合理）尚未執行——peer session（fact-rag vector search implementation）同一時間點開始跑他們的K vs K+hybrid+source_doc_cap消融，佔用同一個Ollama資源，故先讓給對方，等其跑完再排這3題的harness驗證。
+**✅ Stage 1 harness實跑驗證已完成（2026-09-16）**：
+
+過程中Ollama基礎設施出了兩個獨立問題並修復——① 殘留的`netsh interface portproxy`規則把`0.0.0.0:11434`轉發到失效的WSL2內部IP，導致連線被重置，使用者以系統管理員權限刪除規則後解決；② 修好連線後發現`qwen2.5:7b`/`bge-m3`兩個模型完全消失（版本從0.11.4自動升級到0.34.1過程中清掉），使用者同意後重新`ollama pull`兩個模型補齊。
+
+**真實跑出的結果（`rq1_stage1_leave_wage_pilot_v3`，K arm，pilot用`--allow-shared-judge`）**：
+
+| 題號 | atomic_accuracy | 診斷 |
+|---|---|---|
+| `57-AGGR3` | 67%（2/3命中） | 漏N0030001§50產假規則；答案裡的「產假期間照給工資」很可能就是N0030006§8已知幻覺Fact被檢索命中（該bug在另一題裡被真實觸發，證實§4.4記錄的警告確有其事） |
+| `57-AGGR4` | 33%（1/3命中） | 只抓到N0030001§59，橋接條文N0060041§29與N0030006§4皆未檢索到，典型跨文件多跳檢索缺口 |
+| `57-CANARY4` | 0%（1/1命中失敗） | 檢索完全沒抓到「事假不給工資」正解，模型誤用一條語意模糊的「工資照給」Fact答反結論——跟原本設計假設的機制略有不同（不是命中被污染的Fact本身，是retrieval完全沒找到相關Fact），但同樣印證了report57「檢索品質vs生成品質」解耦框架的核心價值：錯誤可精確歸因到Stage 1檢索失敗（recall_rate=0%） |
+
+這是SNR/Chain Completeness/Context Recall三個新指標第二次在真實資料上跑出可信數字（第一次是健康檢查頻率組），累積驗證指標設計合理。
 
 ---
 
