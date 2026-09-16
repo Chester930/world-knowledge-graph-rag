@@ -208,7 +208,29 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 - `57-AGGR1`：recall 0.5（2個gold fact命中1個，附表一項次一「高溫作業」連結事實仍未被檢索到，即使語意fallback也判定沒命中——這是真實的檢索缺口，不是量測方法問題）。
 - `57-AGGR2`：recall 0.33、**SNR僅8.5%**——最終答案內容混亂矛盾（先說「特定化學物質本標準不適用」，後又說「雇主使勞工從事特定化學物質作業者...應實施勞工特殊健康檢查」），跟低SNR高度吻合：`top_k`檢索帶進大量`N0060015`裡無關的化學物質細節（防護具、設備監測等），把真正需要的3個關鍵事實稀釋掉，佐證報告57整個SNR指標設計要抓的正是這種「檢索到很多東西但訊號被雜訊淹沒」現象。
 
-**🚨 額外發現一個更嚴重的問題（評分邏輯本身的假陽性，非本題新增內容造成）**：`57-CANARY3`摘要表顯示100%通過，但讀完整答案發現**模型實際上答錯了**——明確說「精密作業的勞工需要做特殊健康檢查」且編造頻率「每年或於變更其作業時」（正是這題設計要測的陷阱：誤把職安法第十九條的廣泛分類當成附表一窄化清單），但答案結尾附帶一句跟核心問題無關的「其他部分資料未明確記載，無法確認」，被`services/atomic_scorer.py::evaluate()`的Type-E拒答檢核（`refusal_patterns`關鍵字比對，第59-76行）**誤判成整題拒答成功**——該檢核邏輯只要答案全文任何位置出現`無法確認`等字樣即判定為拒答，不要求拒答內容對應到題目實際問的核心主張。**這代表所有`canary_refusal`題目（含既有`57-CANARY1`/`57-CANARY2`）的評分都可能有同樣的假陽性風險**，一旦模型在多段式答案裡任何一段夾帶類似措辭，即使核心答案錯誤也會被誤判通過。此問題**尚未修復**，範圍與影響超出本次health check聚合題的任務範圍，需要使用者裁示是否列入下一步處理（會影響題庫既有canary題的歷史評分可信度）。
+### 4.3 🚨 已記錄未修復：canary_refusal評分假陽性（2026-09-15發現，使用者裁示先記錄+收集資料，暫不修復）
+
+**觸發案例**：`57-CANARY3`摘要表顯示100%通過，但讀完整答案發現**模型實際上答錯了**——明確說「精密作業的勞工需要做特殊健康檢查」且編造頻率「每年或於變更其作業時」（正是這題設計要測的陷阱：誤把職安法第十九條的廣泛分類當成附表一窄化清單，模型真的掉進去了），但答案結尾附帶一句跟核心問題無關的「其他部分資料未明確記載，無法確認」。
+
+**根因（兩個獨立call site，同一套naive邏輯）**：
+
+1. `services/atomic_scorer.py::evaluate()`第59-76行——Type-E拒答檢核：
+   ```python
+   refusal_patterns = ["未記載", "無法確認", "無相關規定", "資料未提及", "查無相關",
+                        "未能提供", "並未記載", "沒有提到", "無法提供確定答覆"]
+   refused = any(p in clean_ans for p in refusal_patterns)
+   ```
+   只要答案全文**任何位置**出現這些字樣就判定整題拒答成功，不要求拒答內容對應到題目實際問的核心主張。`57-CANARY3`的答案結尾「無法確認」是針對一個跟題目無關的枝節點，觸發假陽性。
+
+2. `services/interval_lookup_service.py::is_refusal_text()`第57-64行——**同一組標記**（docstring明講「與`run_refusal_canary.py`／報告32 §9 C用的同一組標記一致」），但這個是**正式生產路徑**、非僅評測用：`routers/agent.py:1272`的`evaluate_lookup_override()`在`chat()`的grounding覆核階段呼叫`is_refusal_text(draft_answer)`（僅在題目能解析出「數值區間→對應值」查表結構時介入，`57-CANARY3`這類非數值查表題不會觸發這條路徑，但其他區間查表型canary題可能會）。同樣的假陽性風險若在生產路徑觸發，可能導致`force_supported`覆核誤判，跳過本該觸發的重生成修正。
+
+**範圍**：目前題庫（`data/eval/test_cases.json`）共5題`scenario_type=Type-E`（等同`canary_refusal`）：`canary-P1`、`canary-P4`、`57-CANARY1`、`57-CANARY2`、`57-CANARY3`，全部`verification_status=verified`，但historical/未來評分都可能受這個假陽性影響。
+
+**為什麼不是簡單換成LLM judge就好**：`services/interval_lookup_service.py`開頭docstring明講這個領域已有前例——`run_refusal_canary.py`（報告32 §9 C，2026-09-13）端到端驗證過「純judge判斷是否拒答」，準確率**RefusalBench顯示Qwen家族全尺寸<17%**，才改用現在這套確定性關鍵字比對當退而求其次的方案。單純把判斷換成「問judge這是不是真拒答」不保證更好，且會重蹈已驗證過效果不佳的舊路。
+
+**較有希望的修復方向（未實作，供之後評估）**：`services/verification_service.py::ClaimGrounding`已有逐句/逐主張細粒度分析（`verify_fact_grounding()`回傳每個claim的`statement`/`supported`/`is_claim`），`chat()`正式生成路徑已經在算這份資料。若Type-E拒答檢核改成「檢查題目核心主張對應的那個claim是否被正確判定為不支持/拒答」而非對整段答案文字做關鍵字掃描，理論上能避開「答案其他枝節夾帶拒答用語」的假陽性——但需要先解決「怎麼知道哪個claim對應題目的核心主張」這個新的子問題（目前`AtomicGoldFact`／`TestCase`schema沒有結構化欄位標記這件事），非一行修補。
+
+**估計工時**：**半天到一天（約4-8小時）的專注開發**——涵蓋（1）設計「核心主張claim辨識」機制、（2）改寫`atomic_scorer.py`與`interval_lookup_service.py`兩處call site、（3）新增單元測試、（4）重跑既有5題canary驗證是否有歷史假陽性被抓出來（可能發現更多既有「verified通過」的題目其實沒真的測到）。不是單一函式的小修補，牽動題庫既有canary題的歷史可信度重新核實，故估時偏保守。
 
 **Stage 1（小樣本設計驗證）**：在這2-3份文件切片上，出1-2題`global_aggregation`題＋人工核實gold，用§2新指標小規模跑一次（1-2題×少數arm），確認Context Recall/SNR/Chain Completeness算得出合理數字——**新指標從未在真實資料上跑過，這步是要在小規模發現設計問題，而不是等26題全出完才發現**。
 
