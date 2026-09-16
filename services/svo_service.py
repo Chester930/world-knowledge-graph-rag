@@ -560,7 +560,12 @@ async def _find_uncovered_sentences(
 _QUANTITY_PATTERN = re.compile(
     r"[〇零一二三四五六七八九十百千萬0-9]+"
     r"(?:至[〇零一二三四五六七八九十百千萬0-9]+)?"
-    r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍)"
+    # 「等級」（2026-09-16，任務C第3組候選真實案例）：N0060041 §8「第一等級
+    # 至第七等級」被抽成「第一等級至第十等級」——「十等級」逐字取自同文件
+    # 完全不同的第34條，屬跨條文數字挪用，跟「三至七日」錯抽「一至三日」
+    # （報告19§10）同一種根因，但原本的單位清單沒收「等級」，這個片語從未
+    # 被 `_QUANTITY_PATTERN` 掃描到，數值忠實性核對因此對這筆三元組完全失效。
+    r"(?:日|月|年|次|小時|分鐘|百分之|％|%|元|倍|等級)"
 )
 
 # 比 `_QUANTITY_PATTERN` 更寬的「分段量詞」偵測——多收「歲／人／名／週／度／
@@ -583,7 +588,7 @@ _MEASURE_PATTERN = re.compile(
     # 主詞在 `resolve_entity_name` 沒被守衛擋（全庫掃描實際命中），且 `六個月`
     # 期程不受 `_naturalization_dropped_quantity()` 的逐字核對。放在 `_MEASURE_PATTERN`
     # 而不動 `_QUANTITY_PATTERN`（發現3／報告20 語意較窄，比照發現C）。
-    r"(?:個月|個年|個星期|日|月|年|次|小時|分鐘|百分之|％|%|元|倍|歲|人|名|週|度|種|類|條|款|項|點)"
+    r"(?:個月|個年|個星期|日|月|年|次|小時|分鐘|百分之|％|%|元|倍|等級|歲|人|名|週|度|種|類|條|款|項|點)"
 )
 
 # 數字＋（選配單位）＋「以上／以下／以內／未滿／超過」的比較句式偵測
@@ -652,6 +657,53 @@ def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
     for match in _QUANTITY_PATTERN.finditer(text):
         if match.group() not in source_text:
             return True
+    return False
+
+
+# 假別（請假類型）詞彙家族（2026-09-16，任務C第2組候選真實案例）——
+# N0030006 §7「事假期間不給工資」／§8「公假…工資照給」被抽成「產假期間
+# 不給工資」／「產假期間照給工資」，但整份文件完全沒有「產假」的實質
+# 規定，「產假」一詞只出現在完全不同的條文（§9 流產請假參照句）。跟
+# `_QUANTITY_PATTERN` 抓的數字挪用同一種根因（同文件跨條文借用），差別
+# 只在挪用的是類別名詞而非數字——重跑同一 chunk 3 次結果完全不變，是
+# 決定性 bug 不是隨機雜訊，單純重試無法修正，需要字面比對守衛。
+# 詞彙互斥（同一子句只會屬於其中一種假別），比照 `_rival_quantity()`
+# 的手法，純字串比對，不需 embedding。
+_LEAVE_TYPE_FAMILY: tuple[str, ...] = (
+    "事假", "病假", "公假", "婚假", "喪假", "產假", "陪產假",
+    "育嬰留職停薪", "特別休假", "公傷病假", "普通傷病假",
+)
+
+# 目前只驗證過假別這一組家族；未來若發現其他「同文件跨條文借用類別
+# 名詞」的真實案例（例如職災等級／給付類別），比照這裡加一份新家族
+# tuple 再併進本清單即可，不需改動比對邏輯本身。
+_ENTITY_FAMILIES: tuple[tuple[str, ...], ...] = (_LEAVE_TYPE_FAMILY,)
+
+
+def _rival_family_term(term: str, family: Sequence[str], source_text: str) -> str | None:
+    """`family`（互斥類別詞彙表）裡除了 `term` 以外，是否有其他成員逐字
+    出現在 `source_text`——有的話回傳第一個，代表三元組本該用這個詞彙。"""
+    for other in family:
+        if other != term and other in source_text:
+            return other
+    return None
+
+
+def _contains_ungrounded_family_term(text: str, source_text: str) -> bool:
+    """比照 `_contains_ungrounded_quantity()`：`text`（三元組 subject 或
+    object）裡若含有 `_ENTITY_FAMILIES` 任一互斥類別詞彙表裡的詞，但該詞
+    未逐字出現在 `source_text`（chunk 原文）、且家族裡「另一個」成員卻
+    出現在原文——判定為跨條文借用，回傳 True。
+
+    只在「另一個成員確實存在於原文」時才觸發，避免對『這份文件根本沒提到
+    任何家族詞彙』的正常三元組誤殺（比照報告20/25 的降級哲學：寧可漏抓，
+    不可誤殺）。
+    """
+    for family in _ENTITY_FAMILIES:
+        for term in family:
+            if term in text and term not in source_text:
+                if _rival_family_term(term, family, source_text) is not None:
+                    return True
     return False
 
 
@@ -774,13 +826,16 @@ def _filter_ungrounded_quantity_triples(
     triples: list[SVOTriple], source_text: str,
     original_sentences: Sequence[str] | None = None,
 ) -> list[SVOTriple]:
-    """丟棄含未忠實數量/期限用字的三元組。兩層核對：
+    """丟棄含未忠實數量/期限用字、或跨條文借用類別詞彙的三元組。三層核對：
 
     1. **字詞層級**（報告20）：subject／object 的數量用字未逐字出現於原文
        → 丟（跨條文數字挪用，如「三至七日」錯抽成「一至三日」）。
     2. **子句層級綁定**（報告25 §4 發現3）：數量用字逐字出現在原文、但
        出現它的子句與三元組 subject 的歸屬子句不相交 → 丟（數字錯接到
        別的列舉項目，如 Q7「每增加一種型式加收八千元」實為四千元）。
+    3. **類別詞彙家族**（2026-09-16，任務C第2組候選）：subject／object 含
+       `_ENTITY_FAMILIES` 裡的詞、該詞未逐字出現於原文、但家族裡另一個
+       詞卻出現於原文 → 丟（假別跨條文借用，如「事假」被抽成「產假」）。
 
     寧可漏抓一筆有疑慮的三元組，也不留下錯誤數字污染圖譜（比照 3.1.3
     REJECT 不阻斷整體、report16/19 既有的降級哲學）。
@@ -797,6 +852,14 @@ def _filter_ungrounded_quantity_triples(
         ):
             logger.warning(
                 "[數值忠實性核對] 丟棄疑似跨段落挪用數字的三元組：'%s' -[%s]-> '%s'",
+                t.subject, t.verb, t.object,
+            )
+            continue
+        if _contains_ungrounded_family_term(t.subject, source_text) or _contains_ungrounded_family_term(
+            t.object, source_text
+        ):
+            logger.warning(
+                "[類別詞彙忠實性核對] 丟棄疑似跨條文借用類別詞彙的三元組：'%s' -[%s]-> '%s'",
                 t.subject, t.verb, t.object,
             )
             continue

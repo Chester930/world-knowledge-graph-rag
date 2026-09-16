@@ -1515,6 +1515,9 @@ def test_measure_pattern_is_superset_of_quantity_pattern_units():
     for s in ["六個月", "三個月為限", "六個月為限", "十二個月"]:
         assert svc._MEASURE_PATTERN.search(s)
         assert svc._QUANTITY_PATTERN.search(s) is None
+    # 2026-09-16（任務C第3組候選真實案例）：「等級」兩個 pattern 都收
+    for s in ["第一等級", "第七等級", "第十等級"]:
+        assert svc._QUANTITY_PATTERN.search(s) and svc._MEASURE_PATTERN.search(s)
 
 
 @pytest.mark.asyncio
@@ -4506,6 +4509,15 @@ def test_filter_ungrounded_quantity_triples_drops_only_ungrounded():
     assert result == [grounded]
 
 
+def test_contains_ungrounded_quantity_flags_grade_from_different_article():
+    """任務C第3組候選真實案例（2026-09-16）：N0060041 §8 原文「第一等級至
+    第七等級」被抽成「第一等級至第十等級」——「十等級」逐字取自同文件
+    完全不同的第34條，本 chunk 原文裡並不存在。"""
+    source_text = "因職業災害致遺存障害，符合勞工保險失能給付標準表第一等級至第七等級規定之項目，得請領失能生活津貼。"
+    assert svc._contains_ungrounded_quantity("第一等級至第十等級規定之項目", source_text) is True
+    assert svc._contains_ungrounded_quantity("第一等級至第七等級規定之項目", source_text) is False
+
+
 @pytest.mark.asyncio
 async def test_completeness_check_drops_triple_with_ungrounded_quantity(monkeypatch):
     """端到端：extract_svo_triples_with_completeness_check() 回傳前套用
@@ -4527,6 +4539,49 @@ async def test_completeness_check_drops_triple_with_ungrounded_quantity(monkeypa
 
     assert len(triples) == 1
     assert triples[0].object == "三至七日之特別休假"
+
+
+# --- 2026-09-16（任務C第2組候選真實案例）：假別entity-family grounding ----
+
+_LEAVE_WAGE_SOURCE = "勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。"
+
+
+def test_rival_family_term_finds_other_member_in_source():
+    assert svc._rival_family_term("產假", svc._LEAVE_TYPE_FAMILY, _LEAVE_WAGE_SOURCE) == "事假"
+
+
+def test_rival_family_term_none_when_no_other_member_present():
+    assert svc._rival_family_term("產假", svc._LEAVE_TYPE_FAMILY, "勞工應於十日前提出申請。") is None
+
+
+def test_contains_ungrounded_family_term_flags_leave_type_swap():
+    """N0030006 §7 原文「事假期間不給工資」被抽成「產假期間不給工資」——
+    整份文件沒有「產假」的實質規定，「產假」只在完全不同條文出現。"""
+    assert svc._contains_ungrounded_family_term("產假期間不給工資", _LEAVE_WAGE_SOURCE) is True
+
+
+def test_contains_ungrounded_family_term_passes_correct_leave_type():
+    assert svc._contains_ungrounded_family_term("事假期間不給工資", _LEAVE_WAGE_SOURCE) is False
+
+
+def test_contains_ungrounded_family_term_no_family_word_not_flagged():
+    """subject／object 完全沒有假別詞彙時，無從判定，不誤殺。"""
+    assert svc._contains_ungrounded_family_term("勞工應於十日前提出", _LEAVE_WAGE_SOURCE) is False
+
+
+def test_contains_ungrounded_family_term_absent_family_not_flagged():
+    """文件完全沒提到任何家族成員時（不只是缺 term 本身），不誤殺——
+    避免把『這份文件根本沒規定假別』的正常三元組也丟掉。"""
+    assert svc._contains_ungrounded_family_term("產假期間照給工資", "勞工應依規定辦理登記。") is False
+
+
+def test_filter_ungrounded_quantity_triples_drops_leave_type_swap():
+    grounded = SVOTriple(subject="勞工", verb="請", object="事假期間不給工資")
+    swapped = SVOTriple(subject="勞工", verb="請", object="產假期間不給工資")
+
+    result = svc._filter_ungrounded_quantity_triples([grounded, swapped], _LEAVE_WAGE_SOURCE)
+
+    assert result == [grounded]
 
 
 # --- docs/報告/25 §4 發現3：子句層級綁定核對（2026-09-03 實作） -------------
