@@ -316,9 +316,24 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **處置**：`routers/agent.py`的實驗性改動已還原（`git checkout`），**未commit**——檢索端改善已用獨立測試證實，但完整端到端SNR/答案品質數字尚未拿到，不宜在部分驗證的狀態下改動生產路徑。待Ollama資源空出後（其他終端機重抽跑完），重跑完整RQ1 harness（K arm，`hybrid=True` vs baseline，涵蓋`57-AGGR1`/`57-AGGR2`/`57-CANARY3`三題）取得端到端數字後再決定是否正式接線＋commit。
 
+### 7.4b `source_doc_cap`：規則式同源多樣性上限——已實作＋檢索端驗證有效（2026-09-16）
+
+依§7.4文獻查證（`docs/參考文獻/35_同來源Fact冗餘去噪與多樣性檢索/`）的建議路線，實作MMR/DF-RAG baseline精神的規則式簡化版：`services/svo_service.py::vector_search_facts()`新增`source_doc_cap: int | None = None`參數（prototype，預設關，行為零變化），新增`_apply_source_doc_cap()`——依既有分數排序貪婪走訪，同一`source_doc_id`累計達上限即跳過、留名額給其他來源，若因多樣性不足湊不滿`top_k`則第二輪依原順序補滿（不因追求多樣性而讓清單比`top_k`短）。純計數邏輯，**零額外embedding／LLM呼叫**，比`hybrid=True`更輕量（不需要fulltext索引）。新增6個單元測試，全套**958 pytest綠燈**。
+
+**直接檢索端驗證（繞過LLM生成、不搶Ollama資源）**：對57-AGGR2重跑`vector_search_facts(top_k=20, source_doc_cap=5)`對照無上限版本——
+
+| 版本 | 命中文件數 | 最大單一文件佔比 | 含關鍵詞橋接事實命中 |
+|---|---|---|---|
+| 無上限（baseline） | 5份 | 8筆 | 0 |
+| `source_doc_cap=5` | 8份 | 5筆 | 1（「符合本附表所列作業之勞工...每年或於變更其作業時...實施特殊健康檢查」） |
+
+跟§7.3的`hybrid=True`實驗撈到同一筆關鍵橋接事實，但**這個機制連fulltext索引都不需要，純規則式計數更輕量**——證實「檢索到的來源分散、鑑別力不足」是兩個獨立但互補的噪聲成因，兩個機制原理不同（`hybrid`解決鑑別力、`source_doc_cap`解決來源集中），理論上疊加使用應該互補。
+
+**尚未接線進`chat()`**——`routers/agent.py:1505`目前仍未傳入`source_doc_cap`，本次只驗證檢索端函式本身，跟§7.3的`hybrid=True`一樣需要等Ollama資源空出後，才能跑完整端到端K arm harness（含`hybrid=True`+`source_doc_cap`疊加版）取得SNR/atomic_score數字，再決定正式接線。
+
 ### 7.4 待辦（下一輪接續）
 
 - [ ] Ollama資源空出後，重跑§7.3的完整端到端K vs K+hybrid消融（至少涵蓋57-AGGR1/AGGR2/CANARY3），取得SNR/Context Recall/atomic_score的完整對照數字。
 - [ ] 若證實有效，正式接線`hybrid=True`進`routers/agent.py:1505`（需要同時傳入`question=payload.question`），補單元測試，並評估是否要做成`KGConfig`可調參數而非寫死True。
-- [x] **文獻查證已完成（2026-09-16）**——「同一來源文件的Fact在top-k裡的多樣性上限」文獻已查證，見`docs/參考文獻/35_同來源Fact冗餘去噪與多樣性檢索/README.md`：MMR（Goldstein & Carbonell 1998）經典源頭、Ross et al.（2026）實證「同源冗餘內容對答案準確度無幫助」但未給解法、DF-RAG（Khan et al. 2026）提供可直接參考的`gMMR`公式，其固定λ版本（§3.2 baseline）零額外LLM呼叫，符合簡單版本原則；動態λ版本需要額外LLM Planner/Evaluator呼叫，留待驗證固定版有效後再評估。**尚未實作**，下一步待Ollama資源空出後，先用固定λ／同文件名額上限規則式版本做小規模實驗（比照§7.3的direct單元測試模式，繞過`chat()`先驗證檢索端效果）。
+- [x] **文獻查證＋實作＋檢索端驗證已完成（2026-09-16）**——見§7.4b：`vector_search_facts(source_doc_cap=...)`已實作、958 pytest綠燈、直接測試證實對57-AGGR2有效（命中文件數5→8份、撈回1筆關鍵橋接事實）。**尚未接線進`chat()`**，待Ollama資源空出後跑完整端到端harness（`hybrid=True`+`source_doc_cap`疊加版）取得SNR/atomic_score數字再決定正式接線＋校準`source_doc_cap`實際數值（目前5是未校準的示範值）。
 - [ ] 待Ollama資源允許時，把本節定調（KG角色＝上下文精煉與路由，非推理鏈建構）明確反映進報告58/59的設計原則——報告58的雙軌組裝若真的排入實作，補回原始Chunk的同時必須先做精煉，否則會重蹈57-AGGR2的覆轍（把更多噪聲一起塞進prompt）。

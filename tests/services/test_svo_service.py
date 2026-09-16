@@ -3405,6 +3405,107 @@ async def test_vector_search_facts_truncates_deduped_results_to_top_k():
     assert [r["fact_text"] for r in results] == ["事實0", "事實1", "事實2"]
 
 
+# ── vector_search_facts source_doc_cap（報告57 §7.4，同來源 Fact 多樣性上限）──
+
+def _cap_row(fact_id: str, doc_id: str | None, score: float) -> dict:
+    return {
+        "fact_text": fact_id, "verb": "V", "confidence": 1,
+        "subject": f"S-{fact_id}", "object": f"O-{fact_id}", "rel_type": "RELATED_TO",
+        "source_doc_id": doc_id, "source_svo_chunk_index": 0, "score": score,
+    }
+
+
+def test_apply_source_doc_cap_none_is_plain_truncation_no_behavior_change():
+    """`source_doc_cap=None`——與先前完全一致的純 `[:top_k]` 截斷，
+    不因新參數存在而改變既有呼叫端行為。"""
+    records = [_cap_row(f"f{i}", "doc-1", 1.0 - i * 0.01) for i in range(5)]
+
+    result = svc._apply_source_doc_cap(records, top_k=3, source_doc_cap=None)
+
+    assert [r["fact_text"] for r in result] == ["f0", "f1", "f2"]
+
+
+def test_apply_source_doc_cap_limits_single_source_and_backfills_from_others():
+    """核心案例：doc-A 有 5 筆高分事實、doc-B 只有 1 筆但分數較低——
+    `source_doc_cap=2` 時 doc-A 最多占 2 個名額，doc-B 的那筆應該被保留
+    進最終結果，不被 doc-A 的數量優勢全部擠掉（對應 57-AGGR2：N0060015
+    342 個 Fact 稀釋掉跨文件關鍵事實的真實案例）。"""
+    records = (
+        [_cap_row(f"a{i}", "doc-A", 0.95 - i * 0.01) for i in range(5)]
+        + [_cap_row("b1", "doc-B", 0.70)]
+    )
+
+    result = svc._apply_source_doc_cap(records, top_k=3, source_doc_cap=2)
+
+    assert sum(1 for r in result if r["fact_text"].startswith("a")) == 2
+    assert any(r["fact_text"] == "b1" for r in result)
+    assert len(result) == 3
+
+
+def test_apply_source_doc_cap_backfills_to_top_k_when_diversity_insufficient():
+    """候選池裡本來就沒有足夠的來源多樣性（全部同一來源）時，不能因為
+    湊不滿多樣性名額就讓最終清單比 `top_k` 短——第二輪依原順序補滿，
+    與 `_arrange_fact_lines()` 既有的「餘額讓給另一側」同一設計精神。"""
+    records = [_cap_row(f"f{i}", "doc-1", 1.0 - i * 0.01) for i in range(5)]
+
+    result = svc._apply_source_doc_cap(records, top_k=3, source_doc_cap=1)
+
+    assert len(result) == 3  # 儘管上限是 1，仍補滿到 top_k，不強行只留 1 筆
+    assert [r["fact_text"] for r in result] == ["f0", "f1", "f2"]
+
+
+def test_apply_source_doc_cap_treats_missing_source_doc_id_as_independent():
+    """`source_doc_id` 缺席（2026-08-18 schema 修正前的舊資料）視為各自
+    獨立來源、不受上限限制——與 `_dedupe_facts_by_key()` 對缺欄位記錄的
+    處理原則一致，不強行歸併成同一來源。"""
+    records = [_cap_row(f"f{i}", None, 1.0 - i * 0.01) for i in range(5)]
+
+    result = svc._apply_source_doc_cap(records, top_k=3, source_doc_cap=1)
+
+    assert len(result) == 3
+    assert [r["fact_text"] for r in result] == ["f0", "f1", "f2"]
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_defaults_to_no_source_doc_cap():
+    """`source_doc_cap` 預設 `None`——既有呼叫端（未傳新參數）行為零變化。"""
+    driver = FakeDriver(records=[
+        {"fact_text": f"事實{i}", "verb": "V", "confidence": 1,
+         "subject": f"S{i}", "object": f"O{i}", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": i, "score": 1.0 - i * 0.01}
+        for i in range(5)
+    ])
+
+    results = await svc.vector_search_facts(driver, uuid4(), [0.1, 0.2], top_k=3)
+
+    assert len(results) == 3  # 5 筆同來源，未傳 source_doc_cap 時不受任何多樣性限制
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_source_doc_cap_applies_after_dedupe():
+    """`source_doc_cap` 在 `_dedupe_facts_by_key()` 之後才套用——確認兩層
+    截斷邏輯正確串接，不因加了新參數而繞過既有去重。"""
+    driver = FakeDriver(records=[
+        {"fact_text": "doc-1重複版本一", "verb": "V", "confidence": 1,
+         "subject": "S", "object": "O", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 1, "score": 0.80},
+        {"fact_text": "doc-1重複版本二分數較高", "verb": "V", "confidence": 1,
+         "subject": "S", "object": "O", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-1", "source_svo_chunk_index": 2, "score": 0.90},
+        {"fact_text": "doc-2唯一事實", "verb": "V2", "confidence": 1,
+         "subject": "S2", "object": "O2", "rel_type": "RELATED_TO",
+         "source_doc_id": "doc-2", "source_svo_chunk_index": 1, "score": 0.70},
+    ])
+
+    results = await svc.vector_search_facts(
+        driver, uuid4(), [0.1, 0.2], top_k=5, source_doc_cap=1
+    )
+
+    assert len(results) == 2  # 重複版本先去重成一筆，doc_cap 不影響去重後只剩的 1 筆/doc
+    assert results[0]["fact_text"] == "doc-1重複版本二分數較高"
+    assert results[1]["fact_text"] == "doc-2唯一事實"
+
+
 # ── vector_search_facts hybrid=True（報告43 選項A，BM25式 fulltext RRF 融合）──
 
 def test_rrf_fuse_fact_ids_rewards_consensus_across_both_rankings():

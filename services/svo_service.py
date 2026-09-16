@@ -2088,6 +2088,7 @@ async def vector_search_facts(
     *,
     question: str | None = None,
     hybrid: bool = False,
+    source_doc_cap: int | None = None,
 ) -> list[dict]:
     """3.1.4 §a `RETRIEVE`：per-KG `Fact` 向量索引 KNN 查詢，比照
     `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳最相近的
@@ -2131,6 +2132,18 @@ async def vector_search_facts(
     直接跳過 fulltext 分支退回純 dense——不像 `_fetch_entity_candidates_
     canopy()` 那樣退回 `CONTAINS`：`fact_text` 是完整句子而非短名稱，對
     整句問題做 `CONTAINS` 子字串比對幾乎不可能命中，退回沒有意義。
+
+    🧪 **`source_doc_cap`（報告57 §7.4，prototype，預設 `None`＝關閉）**：
+    限制同一 `source_doc_id` 在最終 `top_k` 名額裡最多占幾筆，解決「單一
+    來源文件內主題相近但答非所問的 Fact 集體擠占名額、稀釋掉跨文件關鍵
+    事實」的問題（`57-AGGR2` 真實案例：N0060015 342 個 Fact 佔滿 20 個
+    名額）。動機文獻見 `docs/參考文獻/35_同來源Fact冗餘去噪與多樣性檢索/`
+    （MMR, Goldstein & Carbonell 1998；DF-RAG 固定 λ baseline, Khan et al.
+    2026）——本實作是規則式簡化版（依 `source_doc_id` 計數上限），不算
+    embedding centroid 距離，零額外 embedding／LLM 呼叫。`None` 時行為
+    與先前完全一致（純 `[:top_k]` 截斷）。**尚未對真實 KG 端到端驗證**
+    （檢索端已用獨立腳本確認`hybrid=True`能撈回目標事實，本參數的實際
+    效果待驗證），預設 `None`，呼叫端不主動傳入前對既有行為零影響。
     """
     await create_fact_vector_index(driver, kg_id, dim=len(query_vector))
     candidate_k = top_k * FACT_SEARCH_CANDIDATE_MULTIPLIER
@@ -2151,7 +2164,7 @@ async def vector_search_facts(
 
     if not (hybrid and question):
         records = [{k: v for k, v in r.items() if k != "fact_id"} for r in dense_records]
-        return _dedupe_facts_by_key(records)[:top_k]
+        return _apply_source_doc_cap(_dedupe_facts_by_key(records), top_k, source_doc_cap)
 
     by_id = {r["fact_id"]: r for r in dense_records}
     dense_order = [r["fact_id"] for r in dense_records]
@@ -2182,7 +2195,7 @@ async def vector_search_facts(
 
     fused_order = _rrf_fuse_fact_ids([dense_order, fulltext_order]) if fulltext_order else dense_order
     records = [{k: v for k, v in by_id[fid].items() if k != "fact_id"} for fid in fused_order]
-    return _dedupe_facts_by_key(records)[:top_k]
+    return _apply_source_doc_cap(_dedupe_facts_by_key(records), top_k, source_doc_cap)
 
 
 async def vector_search_entities(
@@ -2222,6 +2235,45 @@ async def vector_search_entities(
         top_k=top_k,
     )
     return [r["name"] for r in result.records if r["name"]]
+
+
+def _apply_source_doc_cap(
+    records: list[dict], top_k: int, source_doc_cap: int | None
+) -> list[dict]:
+    """`vector_search_facts()` 最終截斷層——`source_doc_cap` 為 `None` 時
+    行為與先前完全一致（純 `records[:top_k]`）。非 `None` 時依既有分數
+    排序貪婪走訪：同一 `source_doc_id` 累計達上限即跳過該筆、留給名額給
+    其他來源；`source_doc_id` 缺席的記錄視為各自獨立來源，不受上限限制
+    （比照 `_dedupe_facts_by_key()` 對缺欄位記錄的處理原則，缺 provenance
+    的舊資料不強行歸併）。若依上限選完仍不足 `top_k`（候選池裡本來就
+    沒有足夠的來源多樣性），第二輪按原順序把被跳過的記錄依序補滿——
+    與 `routers/agent.py::_arrange_fact_lines()` 既有的「任一側不足時
+    把餘額讓給另一側」同一設計精神，不因為湊不滿多樣性名額而讓清單
+    比 `top_k` 短。文獻依據見 `docs/參考文獻/35_同來源Fact冗餘去噪與
+    多樣性檢索/`（MMR／DF-RAG 固定 λ baseline 精神的規則式簡化版）。
+    """
+    if source_doc_cap is None:
+        return records[:top_k]
+
+    kept: list[dict] = []
+    overflow: list[dict] = []
+    doc_counts: dict[str, int] = {}
+    for record in records:
+        doc_id = record.get("source_doc_id")
+        if doc_id is not None and doc_counts.get(doc_id, 0) >= source_doc_cap:
+            overflow.append(record)
+            continue
+        kept.append(record)
+        if doc_id is not None:
+            doc_counts[doc_id] = doc_counts.get(doc_id, 0) + 1
+        if len(kept) >= top_k:
+            return kept[:top_k]
+
+    for record in overflow:
+        if len(kept) >= top_k:
+            break
+        kept.append(record)
+    return kept[:top_k]
 
 
 def _dedupe_facts_by_key(records: list[dict]) -> list[dict]:
