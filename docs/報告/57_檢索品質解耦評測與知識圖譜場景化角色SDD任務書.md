@@ -293,3 +293,32 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 - **§2.4「是否接上正式`chat()`路徑」**：接上，但範圍限定於gold-independent的檢索量體遙測（見上方§5.2）；SNR/chain_completeness兩個真正的品質指標維持離線only。
 - **任務B §3.2的場景維度與新增題數配額**：仍可再擴充，目前43題（verified 24）非終版。
 - **任務C 3組候選聚合題材**：核准「健康檢查頻率」為Stage 0優先選項，但實際重抽動作使用者選擇稍後執行。
+
+## 7. KG角色再收斂：從「推理鏈建構者」變成「上下文精煉與路由者」（2026-09-16）
+
+**使用者定調**：下一輪方法測試與分析的重點不再局限於「最終答案是否正確」，而是「回答前到底引用了哪些參考資料、這個上下文本身夠不夠精準且完整」。背景判斷：現代LLM在小範圍文字內的邏輯推理能力已經足夠，不一定需要KG建立推理鏈；KG真正的價值在於把「足夠精準且完整」的材料送到LLM面前，推理交給LLM自己做。這個定調正是§2的Context Quality矩陣（Context Recall／SNR／Chain Completeness）本來就在量測的東西，只是先前是「診斷用」，現在要把它變成「可介入的優化目標」——在檢索組裝完成、送進LLM之前，主動精煉／篩噪，而不只是事後觀察。
+
+### 7.1 診斷：BFS側精煉已存在，Fact側完全沒有
+
+查證`routers/agent.py::_arrange_fact_lines()`（report25 §4發現6，2026-09-02落地）確認：BFS三元組確實已有問題相關性embedding排序＋截斷（`_score_lines_by_embedding()`＋`_BFS_KEEP_MAX`）、RRF融合（Cormack et al. 2009）、zigzag重排（Jin et al. 2025／Liu et al. 2023 Lost-in-the-Middle）；文獻依據見`docs/參考文獻/21_圖遍歷與向量檢索結果融合/README.md`（SAGE、Han et al. GraphRAG綜述）。但**語意Fact側（`vector_search_facts()`回傳的20筆）完全信任原始dense cosine KNN排序，沒有對應的精煉機制**——`_arrange_fact_lines()`裡`sem_ranked = list(fact_lines)`這行直接照單全收。
+
+### 7.2 根因追蹤：57-AGGR2的低SNR不是BFS造成的
+
+追蹤harness程式碼確認`57-AGGR2`（K arm）是透過`_drain_chat()`直接打生產環境`agent.chat()`，`_arrange_fact_lines()`的BFS精煉機制**確實有執行、不是被繞過**。真正的噪聲來源是`routers/agent.py:1505`的`vector_search_facts(driver, payload.kg_id, question_vector, top_k=payload.top_k)`——`ChatRequest.top_k`預設20，一旦N0060015（342個Fact，內容涵蓋大量同主題但不相關的防護具/監測細項）被判定在文件範圍內，其中主題相近但答非所問的Fact會在dense cosine上跟真正需要的2-3筆事實差不多高，一起擠進20個名額，稀釋掉正解。這是「同一份文件內部主題鄰近噪聲」，跟BFS鄰居爆炸是不同機制，現有精煉對它沒有防禦。
+
+### 7.3 初步實驗：`vector_search_facts(hybrid=True)` 的檢索端驗證（2026-09-16）
+
+`services/svo_service.py::vector_search_facts()`已有一個**現成但預設關閉的prototype**（報告43選項A，2026-08）：`hybrid=True`時額外對`Fact.fact_text`跑一趟BM25式fulltext查詢（CJK analyzer），與dense cosine候選池以RRF融合，動機正是打「dense cosine對高頻樣板虛詞造成的語意過度聚類」（原本為26-Q5案例設計，`docs/論文/02_文獻探討.md`§2.6.2有文獻脈絡）。`routers/agent.py:1505`呼叫時從未傳入`hybrid=True`，此機制此前從未在真實chat()路徑跑過。
+
+**直接單元測試（繞過LLM生成，只測檢索）**：對57-AGGR2的問題直接呼叫`vector_search_facts(..., hybrid=True)`，0.09秒回傳，**top-20命中3個gold fact中的2個**（「雇主使勞工從事特別危害健康作業...實施特殊健康檢查」＋附表一橋接事實），對照純dense基準版本（同一天重跑）**0/3命中**——證實hybrid確實能把被同主題Fact稀釋掉的關鍵句子撈回來，檢索端改善是真實的，不是猜測。
+
+**端到端驗證受阻**：把`hybrid=True`暫時接進`routers/agent.py::chat()`跑完整RQ1 harness（K arm，57-AGGR2），在300秒逾時——檢索本身只花0.09秒，瓶頸在後續LLM生成階段，高度懷疑是跟同時段另一終端機執行的N0030014重抽任務搶Ollama資源（該任務當時已連續執行超過4小時的LLM抽取呼叫），非hybrid機制本身的問題。
+
+**處置**：`routers/agent.py`的實驗性改動已還原（`git checkout`），**未commit**——檢索端改善已用獨立測試證實，但完整端到端SNR/答案品質數字尚未拿到，不宜在部分驗證的狀態下改動生產路徑。待Ollama資源空出後（其他終端機重抽跑完），重跑完整RQ1 harness（K arm，`hybrid=True` vs baseline，涵蓋`57-AGGR1`/`57-AGGR2`/`57-CANARY3`三題）取得端到端數字後再決定是否正式接線＋commit。
+
+### 7.4 待辦（下一輪接續）
+
+- [ ] Ollama資源空出後，重跑§7.3的完整端到端K vs K+hybrid消融（至少涵蓋57-AGGR1/AGGR2/CANARY3），取得SNR/Context Recall/atomic_score的完整對照數字。
+- [ ] 若證實有效，正式接線`hybrid=True`進`routers/agent.py:1505`（需要同時傳入`question=payload.question`），補單元測試，並評估是否要做成`KGConfig`可調參數而非寫死True。
+- [ ] 探索另一個尚未做的精煉方向——「同一來源文件的Fact在top-k裡的多樣性上限（diversity cap，類似MMR精神）」，直接對症「N0060015一份文件霸佔20個名額」這個現象；此方向需要另外查文獻佐證，本輪未開始。
+- [ ] 待Ollama資源允許時，把本節定調（KG角色＝上下文精煉與路由，非推理鏈建構）明確反映進報告58/59的設計原則——報告58的雙軌組裝若真的排入實作，補回原始Chunk的同時必須先做精煉，否則會重蹈57-AGGR2的覆轍（把更多噪聲一起塞進prompt）。
