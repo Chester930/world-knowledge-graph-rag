@@ -320,5 +320,5 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 - [ ] Ollama資源空出後，重跑§7.3的完整端到端K vs K+hybrid消融（至少涵蓋57-AGGR1/AGGR2/CANARY3），取得SNR/Context Recall/atomic_score的完整對照數字。
 - [ ] 若證實有效，正式接線`hybrid=True`進`routers/agent.py:1505`（需要同時傳入`question=payload.question`），補單元測試，並評估是否要做成`KGConfig`可調參數而非寫死True。
-- [ ] 探索另一個尚未做的精煉方向——「同一來源文件的Fact在top-k裡的多樣性上限（diversity cap，類似MMR精神）」，直接對症「N0060015一份文件霸佔20個名額」這個現象；此方向需要另外查文獻佐證，本輪未開始。
+- [x] **文獻查證已完成（2026-09-16）**——「同一來源文件的Fact在top-k裡的多樣性上限」文獻已查證，見`docs/參考文獻/35_同來源Fact冗餘去噪與多樣性檢索/README.md`：MMR（Goldstein & Carbonell 1998）經典源頭、Ross et al.（2026）實證「同源冗餘內容對答案準確度無幫助」但未給解法、DF-RAG（Khan et al. 2026）提供可直接參考的`gMMR`公式，其固定λ版本（§3.2 baseline）零額外LLM呼叫，符合簡單版本原則；動態λ版本需要額外LLM Planner/Evaluator呼叫，留待驗證固定版有效後再評估。**尚未實作**，下一步待Ollama資源空出後，先用固定λ／同文件名額上限規則式版本做小規模實驗（比照§7.3的direct單元測試模式，繞過`chat()`先驗證檢索端效果）。
 - [ ] 待Ollama資源允許時，把本節定調（KG角色＝上下文精煉與路由，非推理鏈建構）明確反映進報告58/59的設計原則——報告58的雙軌組裝若真的排入實作，補回原始Chunk的同時必須先做精煉，否則會重蹈57-AGGR2的覆轍（把更多噪聲一起塞進prompt）。
