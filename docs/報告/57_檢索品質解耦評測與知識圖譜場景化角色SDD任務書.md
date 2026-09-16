@@ -195,7 +195,20 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 | `57-AGGR2` | 0.0% | 答案內容混亂（「特定化學物質本標準不適用」等不連貫敘述），非retrieval記錄問題，是真實生成品質問題 | 可能是top_k帶進太多N0060015無關的化學物質細項Fact稀釋掉了真正需要的3個關鍵事實（SNR/雜訊問題，正是報告57整個任務A要測的東西） |
 | `57-CANARY3` | 0.0% | 逾時180秒 | 未查明是單純生成較慢還是卡住，需要更長timeout或加log重跑診斷 |
 
-**待使用者裁示**：Stage 1的兩層準確度量測基準不一致（Stage 1 lineage用嚴格逐字比對 vs 最終Atomic Score用語意fallback）是否要統一（例如`lineage_tracker`也改用`record_retrieval_async()`），還是維持現狀（刻意做兩種不同嚴格度的量測，各自服務不同診斷目的）——這是會影響往後所有SNR/recall數字詮釋方式的方法論決策，此次不擅自決定。
+**✅ 使用者裁示「統一用語意fallback」已完成（2026-09-15）**：`scripts/eval/run_rq1_comparison.py`的`tracker.record_retrieval()`/`record_context_assembly()`/`build_full_lineage()`（同步、嚴格逐字）改為對應的`_async()`版本（語意fallback，同`AtomicScorer.evaluate_async()`同一套判準，帶`judge_llm_provider=judge_counting or counting`／`question=tc.question`）；`_build_failure_record()`（harness例外時的空白failure record，`retrieved_texts=[]`本來就沒東西可語意比對）維持同步版不動。949 pytest維持綠燈，commit `?`（待補）。
+
+同時把`--query-timeout-s`從預設180拉長到300秒重跑，`57-CANARY3`不再逾時。
+
+**修復後v3跑出的真實結果（已是可信數字）**：
+
+| 方法代號 | Context Recall | SNR | Chain Completeness |
+|---|---|---|---|
+| K | 27.8% | 7.7% | 33.3% (n=3) |
+
+- `57-AGGR1`：recall 0.5（2個gold fact命中1個，附表一項次一「高溫作業」連結事實仍未被檢索到，即使語意fallback也判定沒命中——這是真實的檢索缺口，不是量測方法問題）。
+- `57-AGGR2`：recall 0.33、**SNR僅8.5%**——最終答案內容混亂矛盾（先說「特定化學物質本標準不適用」，後又說「雇主使勞工從事特定化學物質作業者...應實施勞工特殊健康檢查」），跟低SNR高度吻合：`top_k`檢索帶進大量`N0060015`裡無關的化學物質細節（防護具、設備監測等），把真正需要的3個關鍵事實稀釋掉，佐證報告57整個SNR指標設計要抓的正是這種「檢索到很多東西但訊號被雜訊淹沒」現象。
+
+**🚨 額外發現一個更嚴重的問題（評分邏輯本身的假陽性，非本題新增內容造成）**：`57-CANARY3`摘要表顯示100%通過，但讀完整答案發現**模型實際上答錯了**——明確說「精密作業的勞工需要做特殊健康檢查」且編造頻率「每年或於變更其作業時」（正是這題設計要測的陷阱：誤把職安法第十九條的廣泛分類當成附表一窄化清單），但答案結尾附帶一句跟核心問題無關的「其他部分資料未明確記載，無法確認」，被`services/atomic_scorer.py::evaluate()`的Type-E拒答檢核（`refusal_patterns`關鍵字比對，第59-76行）**誤判成整題拒答成功**——該檢核邏輯只要答案全文任何位置出現`無法確認`等字樣即判定為拒答，不要求拒答內容對應到題目實際問的核心主張。**這代表所有`canary_refusal`題目（含既有`57-CANARY1`/`57-CANARY2`）的評分都可能有同樣的假陽性風險**，一旦模型在多段式答案裡任何一段夾帶類似措辭，即使核心答案錯誤也會被誤判通過。此問題**尚未修復**，範圍與影響超出本次health check聚合題的任務範圍，需要使用者裁示是否列入下一步處理（會影響題庫既有canary題的歷史評分可信度）。
 
 **Stage 1（小樣本設計驗證）**：在這2-3份文件切片上，出1-2題`global_aggregation`題＋人工核實gold，用§2新指標小規模跑一次（1-2題×少數arm），確認Context Recall/SNR/Chain Completeness算得出合理數字——**新指標從未在真實資料上跑過，這步是要在小規模發現設計問題，而不是等26題全出完才發現**。
 

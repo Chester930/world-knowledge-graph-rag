@@ -279,14 +279,24 @@ async def _run_single_query(
     latency_s = round(time.perf_counter() - t0, 2)
     answer = r["answer"]
 
-    # 階段一血統
-    tracker.record_retrieval(
+    # 階段一血統（2026-09-15依使用者裁示統一改用語意fallback版——見報告57
+    # §4.2 Stage 1發現：SVO自然化後的Fact文字跟exact_span原文不逐字相同時
+    # （例如少了「，應」連接詞、句號），嚴格逐字比對版本會錯判成「檢索失敗」，
+    # 即使語意上答案已正確且最終AtomicScorer已用語意fallback判定命中——兩層
+    # 量測基準不一致。改用_async版本，逐字比對失敗才補呼叫judge做語意蘊含
+    # 核對，與AtomicScorer.evaluate_async()同一套判準）
+    await tracker.record_retrieval_async(
         retrieved_texts, gold_spans, latency_ms=latency_s * 1000,
-        chunk_ids=chunk_ids, fact_ids=fact_ids, atomic_gold_facts=tc.atomic_gold_facts,
+        chunk_ids=chunk_ids, fact_ids=fact_ids,
+        judge_llm_provider=judge_counting or counting, question=tc.question,
+        atomic_gold_facts=tc.atomic_gold_facts,
     )
-    # 階段二血統
+    # 階段二血統（同上，語意fallback版）
     full_context_str = "\n".join(context_lines)
-    tracker.record_context_assembly(full_context_str, gold_spans, total_tokens=len(full_context_str) // 4)
+    await tracker.record_context_assembly_async(
+        full_context_str, gold_spans, total_tokens=len(full_context_str) // 4,
+        judge_llm_provider=judge_counting or counting, question=tc.question,
+    )
 
     # 確定性法律守衛必須在最終答案產生後、AtomicScorer 與 generation lineage
     # 寫入前執行。guard 失敗只阻斷 question-level perfect，不覆寫原始答案，
@@ -332,7 +342,9 @@ async def _run_single_query(
         ),
     )
 
-    full_lineage = tracker.build_full_lineage(gold_spans)
+    full_lineage = await tracker.build_full_lineage_async(
+        gold_spans, judge_llm_provider=judge_counting or counting, question=tc.question,
+    )
 
     return {
         "question_id": tc.id,
