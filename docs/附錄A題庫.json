@@ -1360,6 +1360,41 @@
       "mechanism_tags": [
         "distractor_adjacent"
       ]
+    },
+    {
+      "id": "57-CANARY5",
+      "question": "《職業災害勞工保護法》現在還適用嗎？",
+      "pcode": "N0050031",
+      "source_article": "N0050031 §101、§106",
+      "gold_answer": "除本法（勞工職業災害保險及保護法）另有規定外，自本法施行之日起，職業災害勞工保護法已不再適用。但仍有少數過渡期例外情形依舊法處理，例如：本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，仍處以補助金額相同額度之罰鍰。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第106條",
+          "is_essential": true,
+          "note": "新舊法交替核心條文——2026-09-16重抽驗證後逐字確認正確；同chunk另外2筆過渡期未終結案件的KG衍生Fact文字有失真，出題時未採用，直接引原文"
+        },
+        {
+          "exact_span": "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第101條",
+          "is_essential": true,
+          "note": "過渡期例外具體案例，逐字確認正確，證明「不再適用」並非全無例外，答案需要同時呈現兩個層次才算完整"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "新舊法交替陷阱（舊法整體已廢止但保留過渡期例外，測系統是否誤答仍完全適用或誤答完全不適用）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第3組候選Stage 1，2026-09-16新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop",
+        "distractor_adjacent"
+      ]
     }
   ]
 }
