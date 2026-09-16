@@ -289,6 +289,16 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **✅ Go/No-Go結論（2026-09-16）**：**Go**。核心工資對照框架（N0030006+N0030014為主體，N0030001§50/§59+N0060041§29作橋接）內容驗證通過，可進Stage 1出題。已知限制：N0030006的§3喪假/§7事假/§8公假這3個chunk有前述決定性幻覺/漏抽bug，出題時必須直接讀`original.md`核實、不能信任KG裡的Fact；其餘章節（§2婚假、§4普通傷病假、N0030014全部、N0030001§50/§59、N0060041§29）皆可信任KG內容。
 
+**✅ Stage 1出題已完成（2026-09-16，commit `771312b`）**：題庫從46題擴充到**49題**。新增3題，6個`exact_span`皆已直接grep `original.md`逐字核對通過，958 pytest綠燈，`docs/附錄A題庫.json`同步保持byte-identical：
+
+| 題號 | mechanism_tags | 內容 |
+|---|---|---|
+| `57-AGGR3` | `global_aggregation`+`multi_fact_assembly` | 婚假(§2工資照給)/普通傷病假(§4折半)/產假(N0030001§50依年資)三類工資規則對照，刻意選規則互不相同的假別測混淆 |
+| `57-AGGR4` | `cross_doc_multihop` | 職災認定前後工資轉銜，N0060041§29橋接N0030006§4(認定前折半)+N0030001§59第2款(認定後全額)，真正的3文件推理鏈 |
+| `57-CANARY4` | `distractor_adjacent` | 故意選N0030006§7（已知KG幻覺chunk，Fact被抽成「產假期間不給工資」而非「事假期間不給工資」）出題，測系統實際檢索到的是原始chunk文字還是被污染的衍生Fact——正是本任務整個評測解耦關切的核心 |
+
+**⏸ 待辦（下一輪）**：Stage 1的harness實跑驗證（比照健康檢查頻率組模式，跑K arm小規模驗證新指標算出來的數字是否合理）尚未執行——peer session（fact-rag vector search implementation）同一時間點開始跑他們的K vs K+hybrid+source_doc_cap消融，佔用同一個Ollama資源，故先讓給對方，等其跑完再排這3題的harness驗證。
+
 ---
 
 ## 5. 執行順序建議與進度
