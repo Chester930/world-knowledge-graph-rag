@@ -363,6 +363,21 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **與K+Hybrid/K+Cap消融的關聯**：`N0060041§25`是繼26-Q5之後第二個獨立確診的「`vector_search_facts()`全域語意排名過低」真實案例，跟報告57 §7的兩個上下文精煉prototype設計動機直接對應，但兩者尚未在此案例上重新驗證（§7.4待辦）。
 
+### 4.7 第4組候選 K+Hybrid/K+Cap 端到端消融（2026-09-17）
+
+針對 `57-AGGR5`／`57-AGGR6`（已確診的 `vector_search_facts()` 全域語意排名過低案例）重新執行 K vs K+hybrid vs K+cap vs K+hybrid+cap 消融，doc-ids 限定 N0060041／N0050031／N0060079，2 題×3 次重複（比照本組既有方法論，非第1組候選的單次 run）：
+
+| 消融組別 | Atomic Acc/Rec | Context Recall | SNR | Chain Completeness | 備註 |
+|---|---|---|---|---|---|
+| K（現行基準，重新跑） | 8.3%／8.3% | 16.7% | 2.0% | 25.0% | `57-AGGR6` 1 次生成端逾時（檢索階段仍正常記錄） |
+| K + hybrid=True | 0.0%／0.0% | 16.7% | 1.8% | 25.0% | 與基準幾乎持平，無明顯幫助也無明顯傷害 |
+| K + source_doc_cap=5 | 12.5%／12.5% | **33.3%** | **4.3%** | **50.0%** | **正面訊號**：`57-AGGR5` 一致漏 2 個→一致只漏 1 個 gold fact |
+| K + hybrid + source_doc_cap=5 | 0.0%／0.0% | 0.0% | 0.0% | 0.0% | 見下方修正說明——非品質下滑，是真實的檢索階段逾時 |
+
+**⚠️ K+Hybrid+Cap 數字需要修正解讀，已直接查 `records.json` 原始 lineage 核實**：`57-AGGR6` 的 stage1_retrieval 有正常記錄（snr=0.0／chain_completeness=0.0，真實檢索失敗，非空值）；但 `57-AGGR5` 三次的 `stage1_retrieval.retrieval_latency_ms` 皆為 `300000.0`、`retrieved_chunk_ids`／`retrieved_fact_ids` 皆為空陣列——**代表檢索階段本身（不是生成階段）直接跑滿 300 秒逾時、完全沒有回傳任何候選**，是 `hybrid=True` 與 `source_doc_cap` 疊加後真實的病態互動（`57-AGGR5` 在單獨 hybrid 或單獨 cap 兩組跑測中檢索皆正常完成），不是資料遺失或量測假象。根本原因未深入排查（可能是 fulltext 候選池建立/查詢與 cap 後處理疊加後在此語料規模下的效能問題），若未來要繼續走接線這條路，此病態互動必須先排除。
+
+**結論**：`source_doc_cap=5` 單獨使用在本組候選上首次出現**正面訊號**（跟第1組候選的「持平」不同方向），`hybrid=True` 單獨使用中性（跟第1組候選的「明顯變差」也不同方向）——**兩個 prototype 對不同題材的效果並不一致**，尚不足以支持任何一個方向的定論。兩者疊加會觸發真實的效能病態互動，目前不建議嘗試接線疊加版本。與第1組候選加總：K+Hybrid 已在 2 組不同題材上分別出現「明顯變差」與「持平」，K+Cap 已出現「持平」與「正面」，暫緩接線 `chat()` 的既有裁示（§7.4）維持不變，但 `source_doc_cap` 值得列入未來優先評估的候選。
+
 ---
 
 ## 5. 執行順序建議與進度
@@ -416,7 +431,7 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 ### 7.4 待辦（下一輪接續）
 
-- [ ] Ollama資源空出後，重跑§7.3的完整端到端K vs K+hybrid消融（至少涵蓋57-AGGR1/AGGR2/CANARY3），取得SNR/Context Recall/atomic_score的完整對照數字。
-- [ ] 若證實有效，正式接線`hybrid=True`進`routers/agent.py:1505`（需要同時傳入`question=payload.question`），補單元測試，並評估是否要做成`KGConfig`可調參數而非寫死True。
-- [x] **文獻查證＋實作＋檢索端驗證已完成（2026-09-16）**——見§7.4b：`vector_search_facts(source_doc_cap=...)`已實作、958 pytest綠燈、直接測試證實對57-AGGR2有效（命中文件數5→8份、撈回1筆關鍵橋接事實）。**尚未接線進`chat()`**，待Ollama資源空出後跑完整端到端harness（`hybrid=True`+`source_doc_cap`疊加版）取得SNR/atomic_score數字再決定正式接線＋校準`source_doc_cap`實際數值（目前5是未校準的示範值）。
+- [x] **端到端 K vs K+hybrid vs K+cap 消融已完成兩輪（2026-09-16／2026-09-17）**——第1組候選（健康檢查頻率，57-AGGR1/AGGR2/CANARY3，n=3單次run）：`hybrid=True`讓Context Quality明顯下滑，`source_doc_cap`持平。第2組候選（母法子法授權鏈，57-AGGR5/AGGR6，n=2×3次重複，見§4.7）：`hybrid=True`持平，`source_doc_cap`首次出現正面訊號；兩者疊加觸發真實檢索階段逾時病態互動。**兩題材結論不一致**，2026-09-16裁示暫緩接線維持不變。
+- [ ] 若要重新評估是否接線，需要更大樣本（`--runs 3`已是本輪標準、但題數仍只有2-3題）或更多候選題材累積訊號；`hybrid+source_doc_cap`疊加的效能病態互動需先排除根因才能考慮接線疊加版本。
+- [x] **文獻查證＋實作＋檢索端驗證已完成（2026-09-16）**——見§7.4b：`vector_search_facts(source_doc_cap=...)`已實作、958 pytest綠燈、直接測試證實對57-AGGR2有效（命中文件數5→8份、撈回1筆關鍵橋接事實）。已接線進兩輪端到端消融驗證（上一條）。
 - [ ] 待Ollama資源允許時，把本節定調（KG角色＝上下文精煉與路由，非推理鏈建構）明確反映進報告58/59的設計原則——報告58的雙軌組裝若真的排入實作，補回原始Chunk的同時必須先做精煉，否則會重蹈57-AGGR2的覆轍（把更多噪聲一起塞進prompt）。
