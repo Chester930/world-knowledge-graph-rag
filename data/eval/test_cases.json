@@ -2,11 +2,11 @@
   "meta": {
     "title": "標準化評測題庫（含五大場景梯度與法規原子真值）",
     "version": "2.0.0",
-    "total_questions": 54,
-    "verified_questions": 35,
+    "total_questions": 56,
+    "verified_questions": 37,
     "date": "2026-09-17",
     "spec_ref": "docs/論文/05_附錄A_測試題庫.md",
-    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。 2026-09-16依報告57 §4.3修復canary_refusal評分假陽性：新增trap_claim_spans欄位，57-CANARY3填入實際觀察到的陷阱結論文字（「精密作業的勞工需要做特殊健康檢查」），其餘4題（canary-P1/P4/57-CANARY1/57-CANARY2，開放式捏造具體數字型陷阱）刻意留空——陷阱關鍵詞在正確拒答時也會自然出現，加字串比對會製造假陰性。 2026-09-16依報告57任務C第4組候選（職災保護辦法群組）Stage 1新增2題（57-AGGR5母法子法授權鏈、57-AGGR6資遣費/退休金新舊法比較），鎖定global_aggregation／cross_doc_multihop兩個題庫最單薄的mechanism_tags維度。同組的新舊法終止條件比較子主題（N0060041§23/24、N0050031§84/85）因2026-09-16重抽後發現抽取品質不足（§24全空、§23/§84皆漏抽公立醫療機構/中央衛生福利主管機關醫院評鑑合格醫院的關鍵認定機構差異）已裁示跳過不出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈）Stage 0+1新增2題（57-AGGR7母法子法授權鏈+具體門檻、57-AGGR8同文件四條文聚合列舉），鎖定N0090055/N0090058此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，發現一個新的漏抽案例（子法§4「全額補助其訓練費用」子句完全未被抽成Fact，僅前半句「參加職業訓練課程」被抽出）並改為避開該子句的出題設計，改用§24/§6（門檻）與§24/§25/§26/§27（聚合列舉）皆已驗證乾淨的條文組裝出題。所有exact_span皆逐字核對original.md原文。"
+    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。 2026-09-16依報告57 §4.3修復canary_refusal評分假陽性：新增trap_claim_spans欄位，57-CANARY3填入實際觀察到的陷阱結論文字（「精密作業的勞工需要做特殊健康檢查」），其餘4題（canary-P1/P4/57-CANARY1/57-CANARY2，開放式捏造具體數字型陷阱）刻意留空——陷阱關鍵詞在正確拒答時也會自然出現，加字串比對會製造假陰性。 2026-09-16依報告57任務C第4組候選（職災保護辦法群組）Stage 1新增2題（57-AGGR5母法子法授權鏈、57-AGGR6資遣費/退休金新舊法比較），鎖定global_aggregation／cross_doc_multihop兩個題庫最單薄的mechanism_tags維度。同組的新舊法終止條件比較子主題（N0060041§23/24、N0050031§84/85）因2026-09-16重抽後發現抽取品質不足（§24全空、§23/§84皆漏抽公立醫療機構/中央衛生福利主管機關醫院評鑑合格醫院的關鍵認定機構差異）已裁示跳過不出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈）Stage 0+1新增2題（57-AGGR7母法子法授權鏈+具體門檻、57-AGGR8同文件四條文聚合列舉），鎖定N0090055/N0090058此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，發現一個新的漏抽案例（子法§4「全額補助其訓練費用」子句完全未被抽成Fact，僅前半句「參加職業訓練課程」被抽出）並改為避開該子句的出題設計，改用§24/§6（門檻）與§24/§25/§26/§27（聚合列舉）皆已驗證乾淨的條文組裝出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第6組候選（就業促進津貼多來源授權鏈）Stage 0+1新增2題（57-AGGR9雙來源母法子法授權鏈、57-AGGR10三種津貼金額同文件聚合對照），鎖定N0090025/N0090001此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，本組內容全數乾淨無抽取缺陷（與第5組候選不同）。所有exact_span皆逐字核對original.md原文。"
   },
   "questions": [
     {
@@ -1569,6 +1569,89 @@
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "global_aggregation",
+        "multi_fact_assembly"
+      ]
+    },
+    {
+      "id": "57-AGGR9",
+      "question": "《就業促進津貼實施辦法》的法源依據是什麼？",
+      "pcode": "N0090025",
+      "source_article": "N0090025 §1；N0090001 §23第2項、§24第4項",
+      "gold_answer": "依據《就業服務法》第23條第2項及第24條第4項共同授權訂定——第23條第2項規定「前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之」；第24條第4項規定「第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之」。這是母法兩條不同條文共同授權同一子法的情形，跟先前各組候選材料常見的單一授權條文不同。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+          "source_law": "N0090025_就業促進津貼實施辦法",
+          "source_article": "第1條",
+          "is_essential": true,
+          "note": "子法明文引用母法兩條不同條文作為授權依據，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。",
+          "source_law": "N0090001_就業服務法",
+          "source_article": "第23條第2項",
+          "is_essential": true,
+          "note": "母法第一個授權來源，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。",
+          "source_law": "N0090001_就業服務法",
+          "source_article": "第24條第4項",
+          "is_essential": true,
+          "note": "母法第二個授權來源，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "雙來源母法子法授權鏈（子法由母法兩條不同條文共同授權，跨2份文件3條條文組裝）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第6組候選（就業促進津貼多來源授權鏈），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-AGGR10",
+      "question": "《就業促進津貼實施辦法》規定的求職交通補助金、臨時工作津貼、職業訓練生活津貼，三者的發給金額或基準各是什麼？",
+      "pcode": "N0090025",
+      "source_article": "N0090025 §8、§12、§20",
+      "gold_answer": "求職交通補助金（第8條）：每人每次發給新臺幣五百元，特殊情形核實發給但不得超過一千二百五十元。臨時工作津貼（第12條）：按中央主管機關公告之每小時最低工資核給，一個月合計不超過月最低工資，最長六個月。職業訓練生活津貼（第20條）：每月按最低工資百分之六十發給，最長六個月，申請人為身心障礙者則最長發給一年。三者雖都以「最低工資」為計算基準，但比例、上限與適用邏輯完全不同。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "source_law": "N0090025_就業促進津貼實施辦法",
+          "source_article": "第8條",
+          "is_essential": true,
+          "note": "求職交通補助金金額，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。",
+          "source_law": "N0090025_就業促進津貼實施辦法",
+          "source_article": "第12條",
+          "is_essential": true,
+          "note": "臨時工作津貼發給基準，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。",
+          "source_law": "N0090025_就業促進津貼實施辦法",
+          "source_article": "第20條",
+          "is_essential": true,
+          "note": "職業訓練生活津貼發給基準，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "同文件內三條文聚合對照（三種津貼皆以最低工資為計算基準但比例/上限不同，測試系統會不會混淆）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第6組候選（就業促進津貼多來源授權鏈），2026-09-17新出題",
       "dup_map": [],
       "pilot": false,
       "mechanism_tags": [
