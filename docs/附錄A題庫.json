@@ -2,11 +2,11 @@
   "meta": {
     "title": "標準化評測題庫（含五大場景梯度與法規原子真值）",
     "version": "2.0.0",
-    "total_questions": 52,
-    "verified_questions": 33,
-    "date": "2026-09-16",
+    "total_questions": 54,
+    "verified_questions": 35,
+    "date": "2026-09-17",
     "spec_ref": "docs/論文/05_附錄A_測試題庫.md",
-    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。 2026-09-16依報告57 §4.3修復canary_refusal評分假陽性：新增trap_claim_spans欄位，57-CANARY3填入實際觀察到的陷阱結論文字（「精密作業的勞工需要做特殊健康檢查」），其餘4題（canary-P1/P4/57-CANARY1/57-CANARY2，開放式捏造具體數字型陷阱）刻意留空——陷阱關鍵詞在正確拒答時也會自然出現，加字串比對會製造假陰性。 2026-09-16依報告57任務C第4組候選（職災保護辦法群組）Stage 1新增2題（57-AGGR5母法子法授權鏈、57-AGGR6資遣費/退休金新舊法比較），鎖定global_aggregation／cross_doc_multihop兩個題庫最單薄的mechanism_tags維度。同組的新舊法終止條件比較子主題（N0060041§23/24、N0050031§84/85）因2026-09-16重抽後發現抽取品質不足（§24全空、§23/§84皆漏抽公立醫療機構/中央衛生福利主管機關醫院評鑑合格醫院的關鍵認定機構差異）已裁示跳過不出題。所有exact_span皆逐字核對original.md原文。"
+    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。 2026-09-16依報告57 §4.3修復canary_refusal評分假陽性：新增trap_claim_spans欄位，57-CANARY3填入實際觀察到的陷阱結論文字（「精密作業的勞工需要做特殊健康檢查」），其餘4題（canary-P1/P4/57-CANARY1/57-CANARY2，開放式捏造具體數字型陷阱）刻意留空——陷阱關鍵詞在正確拒答時也會自然出現，加字串比對會製造假陰性。 2026-09-16依報告57任務C第4組候選（職災保護辦法群組）Stage 1新增2題（57-AGGR5母法子法授權鏈、57-AGGR6資遣費/退休金新舊法比較），鎖定global_aggregation／cross_doc_multihop兩個題庫最單薄的mechanism_tags維度。同組的新舊法終止條件比較子主題（N0060041§23/24、N0050031§84/85）因2026-09-16重抽後發現抽取品質不足（§24全空、§23/§84皆漏抽公立醫療機構/中央衛生福利主管機關醫院評鑑合格醫院的關鍵認定機構差異）已裁示跳過不出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈）Stage 0+1新增2題（57-AGGR7母法子法授權鏈+具體門檻、57-AGGR8同文件四條文聚合列舉），鎖定N0090055/N0090058此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，發現一個新的漏抽案例（子法§4「全額補助其訓練費用」子句完全未被抽成Fact，僅前半句「參加職業訓練課程」被抽出）並改為避開該子句的出題設計，改用§24/§6（門檻）與§24/§25/§26/§27（聚合列舉）皆已驗證乾淨的條文組裝出題。所有exact_span皆逐字核對original.md原文。"
   },
   "questions": [
     {
@@ -1484,6 +1484,96 @@
       "mechanism_tags": [
         "global_aggregation",
         "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-AGGR7",
+      "question": "雇主要幫員工申請中高齡者職業訓練費用補助，具體門檻是什麼？這個門檻的訂定，法源依據是母法哪一條授權的？",
+      "pcode": "N0090058",
+      "source_article": "N0090055 §24；N0090058 §1、§6",
+      "gold_answer": "雇主依《中高齡者及高齡者就業促進法》第24條規定辦理訓練，中央主管機關得予訓練費用補助；具體申請門檻由《失業中高齡者及高齡者就業促進辦法》（依母法第27條授權訂定）第6條規定：最低開班人數應達五人，且訓練時數不得低於八十小時。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+          "source_law": "N0090055_中高齡者及高齡者就業促進法",
+          "source_article": "第24條",
+          "is_essential": true,
+          "note": "母法建立雇主辦理訓練可獲補助的基礎，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。",
+          "source_law": "N0090058_失業中高齡者及高齡者就業促進辦法",
+          "source_article": "第1條",
+          "is_essential": true,
+          "note": "子法明文引用母法第27條（非第24條）作為授權依據，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。",
+          "source_law": "N0090058_失業中高齡者及高齡者就業促進辦法",
+          "source_article": "第6條",
+          "is_essential": true,
+          "note": "子法具體門檻數字，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "母法子法授權鏈+具體門檻查找（母法§24建立補助制度、母法§27授權子法訂定細節、子法§6給出具體門檻，需跨兩份文件三條條文組裝）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-AGGR8",
+      "question": "《中高齡者及高齡者就業促進法》第27條所稱「前三條所定補助、利息補貼、津貼或獎助」，具體是指哪些協助措施？",
+      "pcode": "N0090055",
+      "source_article": "N0090055 §24、§25、§26、§27",
+      "gold_answer": "分別是第24條的職業訓練費用補助、第25條的創業貸款利息補貼（含創業諮詢輔導與創業研習課程），以及第26條對失業之中高齡者及高齡者發給的相關津貼、補助或獎助——這三條規定的申請資格條件、項目、方式等細節事項，依第27條授權由中央主管機關另定辦法。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+          "source_law": "N0090055_中高齡者及高齡者就業促進法",
+          "source_article": "第24條",
+          "is_essential": true,
+          "note": "§27所稱前三條之一：訓練費用補助，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。",
+          "source_law": "N0090055_中高齡者及高齡者就業促進法",
+          "source_article": "第25條",
+          "is_essential": true,
+          "note": "§27所稱前三條之一：創業貸款利息補貼等措施，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。",
+          "source_law": "N0090055_中高齡者及高齡者就業促進法",
+          "source_article": "第26條",
+          "is_essential": true,
+          "note": "§27所稱前三條之一：津貼、補助或獎助，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。",
+          "source_law": "N0090055_中高齡者及高齡者就業促進法",
+          "source_article": "第27條",
+          "is_essential": true,
+          "note": "問題本身引用的條文，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "同文件內四條文聚合列舉（§27「前三條」需組裝§24/§25/§26三條各自的協助措施內容才能完整回答）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "global_aggregation",
+        "multi_fact_assembly"
       ]
     }
   ]
