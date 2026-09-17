@@ -2,11 +2,11 @@
   "meta": {
     "title": "標準化評測題庫（含五大場景梯度與法規原子真值）",
     "version": "2.0.0",
-    "total_questions": 56,
-    "verified_questions": 37,
+    "total_questions": 58,
+    "verified_questions": 39,
     "date": "2026-09-17",
     "spec_ref": "docs/論文/05_附錄A_測試題庫.md",
-    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。 2026-09-16依報告57 §4.3修復canary_refusal評分假陽性：新增trap_claim_spans欄位，57-CANARY3填入實際觀察到的陷阱結論文字（「精密作業的勞工需要做特殊健康檢查」），其餘4題（canary-P1/P4/57-CANARY1/57-CANARY2，開放式捏造具體數字型陷阱）刻意留空——陷阱關鍵詞在正確拒答時也會自然出現，加字串比對會製造假陰性。 2026-09-16依報告57任務C第4組候選（職災保護辦法群組）Stage 1新增2題（57-AGGR5母法子法授權鏈、57-AGGR6資遣費/退休金新舊法比較），鎖定global_aggregation／cross_doc_multihop兩個題庫最單薄的mechanism_tags維度。同組的新舊法終止條件比較子主題（N0060041§23/24、N0050031§84/85）因2026-09-16重抽後發現抽取品質不足（§24全空、§23/§84皆漏抽公立醫療機構/中央衛生福利主管機關醫院評鑑合格醫院的關鍵認定機構差異）已裁示跳過不出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈）Stage 0+1新增2題（57-AGGR7母法子法授權鏈+具體門檻、57-AGGR8同文件四條文聚合列舉），鎖定N0090055/N0090058此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，發現一個新的漏抽案例（子法§4「全額補助其訓練費用」子句完全未被抽成Fact，僅前半句「參加職業訓練課程」被抽出）並改為避開該子句的出題設計，改用§24/§6（門檻）與§24/§25/§26/§27（聚合列舉）皆已驗證乾淨的條文組裝出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第6組候選（就業促進津貼多來源授權鏈）Stage 0+1新增2題（57-AGGR9雙來源母法子法授權鏈、57-AGGR10三種津貼金額同文件聚合對照），鎖定N0090025/N0090001此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，本組內容全數乾淨無抽取缺陷（與第5組候選不同）。所有exact_span皆逐字核對original.md原文。"
+    "note": "入庫時審查發現原始檔案（32 題）canary-P1/canary-P4 各重複出現兩次、內容矛盾（草稿版 Type-A/unverified vs 定版 Type-E/verified）——已移除兩筆草稿版重複，只保留 Type-E/verified 定版，total_questions 由 34 訂正為 32。2026-09-15依報告57任務B §3.3擴充：18-Q6/17-Q6/26-Q1從unverified回頭讀Neo4j原文補上atomic_gold_facts改verified；新增11題（57-ALIAS1~3/57-COREF1~3/57-DIST1~3/57-CANARY1~2）涵蓋alias_mapping/coreference_resolution/distractor_adjacent/canary_refusal四個mechanism_tags維度，全數逐字核對KG#4（236903cf）真實條文；interval_lookup（26-Q8）因源頭為ASCII表格格式無法產生乾淨exact_span，本次未驗證，維持unverified。 2026-09-15依報告57任務C Stage 1新增3題（57-AGGR1/57-AGGR2/57-CANARY3），涵蓋健康檢查頻率跨文件聚合（global_aggregation/cross_doc_multihop）與職安法第十九條類別誤導canary_refusal——前提是先把附表一內容匯入KG（N0060022_附表一_特別危害健康作業，2026-09-15新增文件，見報告57 §4.2），所有exact_span皆逐字核對original.md原文。 2026-09-16依報告57 §4.3修復canary_refusal評分假陽性：新增trap_claim_spans欄位，57-CANARY3填入實際觀察到的陷阱結論文字（「精密作業的勞工需要做特殊健康檢查」），其餘4題（canary-P1/P4/57-CANARY1/57-CANARY2，開放式捏造具體數字型陷阱）刻意留空——陷阱關鍵詞在正確拒答時也會自然出現，加字串比對會製造假陰性。 2026-09-16依報告57任務C第4組候選（職災保護辦法群組）Stage 1新增2題（57-AGGR5母法子法授權鏈、57-AGGR6資遣費/退休金新舊法比較），鎖定global_aggregation／cross_doc_multihop兩個題庫最單薄的mechanism_tags維度。同組的新舊法終止條件比較子主題（N0060041§23/24、N0050031§84/85）因2026-09-16重抽後發現抽取品質不足（§24全空、§23/§84皆漏抽公立醫療機構/中央衛生福利主管機關醫院評鑑合格醫院的關鍵認定機構差異）已裁示跳過不出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第5組候選（中高齡/高齡就業促進母法子法授權鏈）Stage 0+1新增2題（57-AGGR7母法子法授權鏈+具體門檻、57-AGGR8同文件四條文聚合列舉），鎖定N0090055/N0090058此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，發現一個新的漏抽案例（子法§4「全額補助其訓練費用」子句完全未被抽成Fact，僅前半句「參加職業訓練課程」被抽出）並改為避開該子句的出題設計，改用§24/§6（門檻）與§24/§25/§26/§27（聚合列舉）皆已驗證乾淨的條文組裝出題。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第6組候選（就業促進津貼多來源授權鏈）Stage 0+1新增2題（57-AGGR9雙來源母法子法授權鏈、57-AGGR10三種津貼金額同文件聚合對照），鎖定N0090025/N0090001此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽8個chunk後讀Neo4j核對正式Fact，本組內容全數乾淨無抽取缺陷（與第5組候選不同）。所有exact_span皆逐字核對original.md原文。 2026-09-17依報告57任務C第7組候選（勞工退休金雙制度授權鏈）Stage 0+1新增2題（57-AGGR11雙來源母法子法授權鏈、57-AGGR12個人專戶vs年金保險最低提繳比例對照，兩者皆為6%但常被誤判不同），鎖定N0030022/N0030020此前未使用的法規家族；重抽前先讀original.md逐字核對候選內容，targeted重抽5個chunk後讀Neo4j核對正式Fact，發現母法§35第3項第一句（實質授權子句本身：「第一項所定年金保險之收支、核准及其他應遵行事項之辦法，由中央主管機關定之」）完全未被抽成Fact、只有第二句（報請核准義務）被抽出，是第6個獨立確診的漏抽案例；已避開該句，57-AGGR11第2個gold fact只用已驗證存在的後半句。所有exact_span皆逐字核對original.md原文。"
   },
   "questions": [
     {
@@ -1652,6 +1652,82 @@
       "complexity_bucket": "multi",
       "wording_status": "verbatim",
       "source_report": "報告57任務C第6組候選（就業促進津貼多來源授權鏈），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "global_aggregation",
+        "multi_fact_assembly"
+      ]
+    },
+    {
+      "id": "57-AGGR11",
+      "question": "《勞工退休金條例年金保險實施辦法》的法源依據是什麼？",
+      "pcode": "N0030022",
+      "source_article": "N0030022 §1；N0030020 §35第3項、§37",
+      "gold_answer": "依據《勞工退休金條例》第35條第3項及第37條共同授權訂定——第35條第3項規定年金保險之收支、核准及其他應遵行事項之辦法由中央主管機關定之，且事業單位採行年金保險者應報請中央主管機關核准；第37條規定年金保險契約應由雇主擔任要保人、勞工為被保險人及受益人，且保險人之資格由中央主管機關會同該保險業務之主管機關定之。這是母法兩條不同條文共同授權同一子法的情形，與57-AGGR9（就業促進津貼實施辦法）同屬雙來源授權鏈結構。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "source_law": "N0030022_勞工退休金條例年金保險實施辦法",
+          "source_article": "第1條",
+          "is_essential": true,
+          "note": "子法明文引用母法兩條不同條文作為授權依據，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+          "source_law": "N0030020_勞工退休金條例",
+          "source_article": "第35條第3項",
+          "is_essential": true,
+          "note": "母法第一個授權來源——僅取KG實際抽出的後半句，前半句「第一項所定年金保險之收支、核准及其他應遵行事項之辦法，由中央主管機關定之」核對後發現完全未被抽成Fact，是已知漏抽案例（記於3.1.3§b），本題避開該句只用已驗證存在的部分"
+        },
+        {
+          "exact_span": "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。",
+          "source_law": "N0030020_勞工退休金條例",
+          "source_article": "第37條",
+          "is_essential": true,
+          "note": "母法第二個授權來源，全句皆已驗證正確抽出，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "雙來源母法子法授權鏈（子法由母法兩條不同條文共同授權，跨2份文件3條條文組裝）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第7組候選（勞工退休金雙制度授權鏈），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-AGGR12",
+      "question": "雇主為勞工提繳退休金，個人退休金專戶制度（第14條）跟年金保險制度（第36條）的最低提繳比例各是多少？",
+      "pcode": "N0030020",
+      "source_article": "N0030020 §14、§36",
+      "gold_answer": "兩種制度的最低提繳比例其實相同，都是不得低於勞工每月工資的百分之六——個人退休金專戶（第14條）：雇主應為勞工負擔提繳之退休金，不得低於勞工每月工資百分之六；年金保險（第36條）：雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。差別不在比例本身，而在於年金保險制度另需事業單位僱用勞工人數達200人以上、且經工會或勞資會議同意（第35條）才能採行。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "source_law": "N0030020_勞工退休金條例",
+          "source_article": "第14條",
+          "is_essential": true,
+          "note": "個人退休金專戶最低提繳比例，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。",
+          "source_law": "N0030020_勞工退休金條例",
+          "source_article": "第36條",
+          "is_essential": true,
+          "note": "年金保險最低提繳比例，與第14條數字相同，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "同文件內兩條文比例對照（兩種制度比例其實相同，測試系統會不會誤判成不同）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第7組候選（勞工退休金雙制度授權鏈），2026-09-17新出題",
       "dup_map": [],
       "pilot": false,
       "mechanism_tags": [
