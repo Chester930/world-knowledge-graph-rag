@@ -374,9 +374,11 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 | K + source_doc_cap=5 | 12.5%／12.5% | **33.3%** | **4.3%** | **50.0%** | **正面訊號**：`57-AGGR5` 一致漏 2 個→一致只漏 1 個 gold fact |
 | K + hybrid + source_doc_cap=5 | 0.0%／0.0% | 0.0% | 0.0% | 0.0% | 見下方修正說明——非品質下滑，是真實的檢索階段逾時 |
 
-**⚠️ K+Hybrid+Cap 數字需要修正解讀，已直接查 `records.json` 原始 lineage 核實**：`57-AGGR6` 的 stage1_retrieval 有正常記錄（snr=0.0／chain_completeness=0.0，真實檢索失敗，非空值）；但 `57-AGGR5` 三次的 `stage1_retrieval.retrieval_latency_ms` 皆為 `300000.0`、`retrieved_chunk_ids`／`retrieved_fact_ids` 皆為空陣列——**代表檢索階段本身（不是生成階段）直接跑滿 300 秒逾時、完全沒有回傳任何候選**，是 `hybrid=True` 與 `source_doc_cap` 疊加後真實的病態互動（`57-AGGR5` 在單獨 hybrid 或單獨 cap 兩組跑測中檢索皆正常完成），不是資料遺失或量測假象。根本原因未深入排查（可能是 fulltext 候選池建立/查詢與 cap 後處理疊加後在此語料規模下的效能問題），若未來要繼續走接線這條路，此病態互動必須先排除。
+**⚠️ K+Hybrid+Cap 數字需要修正解讀，已直接查 `records.json` 原始 lineage 核實**：`57-AGGR6` 的 stage1_retrieval 有正常記錄（snr=0.0／chain_completeness=0.0，真實檢索失敗，非空值）；但 `57-AGGR5` 三次的 `stage1_retrieval.retrieval_latency_ms` 皆為 `300000.0`、`retrieved_chunk_ids`／`retrieved_fact_ids` 皆為空陣列——代表檢索階段本身（不是生成階段）直接跑滿 300 秒逾時、完全沒有回傳任何候選，不是資料遺失或量測假象。
 
-**結論**：`source_doc_cap=5` 單獨使用在本組候選上首次出現**正面訊號**（跟第1組候選的「持平」不同方向），`hybrid=True` 單獨使用中性（跟第1組候選的「明顯變差」也不同方向）——**兩個 prototype 對不同題材的效果並不一致**，尚不足以支持任何一個方向的定論。兩者疊加會觸發真實的效能病態互動，目前不建議嘗試接線疊加版本。與第1組候選加總：K+Hybrid 已在 2 組不同題材上分別出現「明顯變差」與「持平」，K+Cap 已出現「持平」與「正面」，暫緩接線 `chat()` 的既有裁示（§7.4）維持不變，但 `source_doc_cap` 值得列入未來優先評估的候選。
+**根因排查（2026-09-17）——⚠️ 已訂正先前「確診病態互動」的過度肯定推論**：以獨立診斷腳本逐步重放實際 `chat()` 管線（`_find_seed_entities`→`_relevant_doc_ids_from_seeds`→`vector_search_facts`→doc scope resolve→`bfs_query`→`resolve_query_relation_type`），分別對 K+Cap（已知正常）與 K+Hybrid+Cap（已知逾時）兩種組態逐步計時比對。**結果：兩種組態的檢索管線在隔離環境下皆快速完成（K+Cap 全程約 22 秒、K+Hybrid+Cap 全程約 1.4 秒），完全無法重現 300 秒逾時**。`vector_search_facts()` 本身四種組合（純dense／hybrid／cap／hybrid+cap）在隔離測試中皆在 0.15 秒內完成；文件範圍推導（doc scope resolve）在四種組合下命中文件數皆相近（13–16/20 落在目標 3 份文件內），未出現空範圍觸發昂貴無範圍 BFS fallback 的跡象。**結論**：這不是 `hybrid=True` 與 `source_doc_cap` 疊加後可重現的確定性程式碼互動問題，較可能是 Ollama 在同一 session 連續大量呼叫（4 組×2 題×3 次重複，累計數十次 LLM 呼叫）下偶發的基礎設施 degradation（本專案已知的重複性問題，見報告57 §4.4 記錄過的 Ollama 連線/模型消失事故）恰好落在 K+Hybrid+Cap 這組（四組中排最後執行）。**若未來要重新驗證，建議把 K+Hybrid+Cap 獨立排程執行（不緊接在其他三組之後），或監控該次執行期間 Ollama 的實際負載狀態，才能判斷是否為真正的程式碼層級交互問題。**
+
+**結論**：`source_doc_cap=5` 單獨使用在本組候選上首次出現**正面訊號**（跟第1組候選的「持平」不同方向），`hybrid=True` 單獨使用中性（跟第1組候選的「明顯變差」也不同方向）——**兩個 prototype 對不同題材的效果並不一致**，尚不足以支持任何一個方向的定論。K+Hybrid+Cap 疊加組的逾時**未能重現為確定性程式碼層級交互問題**（見上方根因排查），較可能是 Ollama 基礎設施在連續高負載下的偶發 degradation，不應據此判定「疊加不可行」——若要重新驗證，建議獨立排程執行以排除負載干擾。與第1組候選加總：K+Hybrid 已在 2 組不同題材上分別出現「明顯變差」與「持平」，K+Cap 已出現「持平」與「正面」，暫緩接線 `chat()` 的既有裁示（§7.4）維持不變，但 `source_doc_cap` 值得列入未來優先評估的候選。
 
 ---
 
@@ -431,7 +433,8 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 ### 7.4 待辦（下一輪接續）
 
-- [x] **端到端 K vs K+hybrid vs K+cap 消融已完成兩輪（2026-09-16／2026-09-17）**——第1組候選（健康檢查頻率，57-AGGR1/AGGR2/CANARY3，n=3單次run）：`hybrid=True`讓Context Quality明顯下滑，`source_doc_cap`持平。第2組候選（母法子法授權鏈，57-AGGR5/AGGR6，n=2×3次重複，見§4.7）：`hybrid=True`持平，`source_doc_cap`首次出現正面訊號；兩者疊加觸發真實檢索階段逾時病態互動。**兩題材結論不一致**，2026-09-16裁示暫緩接線維持不變。
-- [ ] 若要重新評估是否接線，需要更大樣本（`--runs 3`已是本輪標準、但題數仍只有2-3題）或更多候選題材累積訊號；`hybrid+source_doc_cap`疊加的效能病態互動需先排除根因才能考慮接線疊加版本。
+- [x] **端到端 K vs K+hybrid vs K+cap 消融已完成兩輪（2026-09-16／2026-09-17）**——第1組候選（健康檢查頻率，57-AGGR1/AGGR2/CANARY3，n=3單次run）：`hybrid=True`讓Context Quality明顯下滑，`source_doc_cap`持平。第2組候選（母法子法授權鏈，57-AGGR5/AGGR6，n=2×3次重複，見§4.7）：`hybrid=True`持平，`source_doc_cap`首次出現正面訊號；兩者疊加組出現一次300秒逾時，**根因排查後未能重現為確定性程式碼交互問題，較可能是Ollama連續高負載下的基礎設施degradation**（見§4.7根因排查段落）。**兩題材結論不一致**，2026-09-16裁示暫緩接線維持不變。
+- [x] **K+Hybrid+Cap逾時根因排查已完成（2026-09-17）**：獨立診斷腳本重放實際檢索管線，K+Cap與K+Hybrid+Cap兩種組態在隔離環境下皆快速完成（約1-22秒），完全無法重現300秒逾時，判定非程式碼層級的確定性交互問題。
+- [ ] 若要重新評估是否接線，需要更大樣本（`--runs 3`已是本輪標準、但題數仍只有2-3題）或更多候選題材累積訊號；若要重新驗證K+Hybrid+Cap疊加組，建議獨立排程執行以排除Ollama負載干擾。
 - [x] **文獻查證＋實作＋檢索端驗證已完成（2026-09-16）**——見§7.4b：`vector_search_facts(source_doc_cap=...)`已實作、958 pytest綠燈、直接測試證實對57-AGGR2有效（命中文件數5→8份、撈回1筆關鍵橋接事實）。已接線進兩輪端到端消融驗證（上一條）。
 - [ ] 待Ollama資源允許時，把本節定調（KG角色＝上下文精煉與路由，非推理鏈建構）明確反映進報告58/59的設計原則——報告58的雙軌組裝若真的排入實作，補回原始Chunk的同時必須先做精煉，否則會重蹈57-AGGR2的覆轍（把更多噪聲一起塞進prompt）。
