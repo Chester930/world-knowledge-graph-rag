@@ -526,14 +526,62 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 ---
 
+### 4.13 Source-scope A/B 與 Fact top_k 精準度掃描（2026-09-18）
+
+**實驗目的**：`57-AGGR17`顯示在 Fact 候選截斷前套用已知文件範圍，可以救回範圍內排名較後的 Fact；但單題單次 pilot 的 context 與延遲都增加。本節檢查這個收益能否跨題型重現，並只在 Fact 檢索端掃描不同 `top_k`，先拆出「檢索到什麼」與生成品質。
+
+**設定與限制**：Source-scope A/B 對 AGGR15/16/17 各做 on/off × 3 次完整 K-arm 問答；同一 Neo4j KG、`qwen2.5:7b` 共用 generator/judge，`formal_evaluation=false`，僅為 pilot。另以 chat 同一套 seed／明確文件範圍解析規則，對 Fact-only 檢索各測 `top_k=5/10/15/20`，每格單次；不跑 BFS 與答案生成。召回使用 `semantic_span_matcher`，與 RQ1 harness 評分路徑一致；另保留 exact-span 診斷值。Fact-only 的結果不可直接等同完整 K-arm Context Recall／Atomic Accuracy。輸出保存在主要 checkout 的 `.claude/tmp/rq1_scope_ab_20260918_n3/`、`.claude/tmp/rq1_fact_topk_sweep_20260918_semantic/` 及 `.claude/tmp/rq1_fact_topk_aggr16_extension_20260918/`；所有執行皆唯讀 Neo4j，沒有生成器呼叫或圖資料異動。
+
+**完整 K-arm scope A/B（各格 n=3，表列中位數）**：
+
+| 題號 | 範圍 | Context Recall | Atomic Accuracy | SNR | Context tokens | K-arm 延遲（秒） | Fact 數 | 檢索延遲（毫秒） |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| `57-AGGR15` | off | 100% | 50% | 18.17% | 146 | 45.01 | 10 | 6202 |
+| `57-AGGR15` | on | 100% | 50% | 10.54% | 254 | 34.99 | 20 | 5653 |
+| `57-AGGR16` | off | 75% | 50% | 11.51% | 197 | 215.93 | 14 | 4534 |
+| `57-AGGR16` | on | 100% | 25% | 9.97% | 263 | 599.75 | 20 | 5190 |
+| `57-AGGR17` | off | 66.7% | 66.7% | 6.21% | 127 | 218.34 | 8 | 4978 |
+| `57-AGGR17` | on | 100% | 100% | 4.86% | 246 | 524.06 | 20 | 4195 |
+
+**解讀**：範圍過濾的收益依題型而異。AGGR17 的召回與答案正確率都提升，但 SNR 下降、context 增加119 tokens，端到端延遲中位數增加；AGGR16 的 Context Recall 由75%升至100%，Atomic Accuracy 卻由50%降至25%，SNR下降且 context 增加66 tokens；AGGR15 召回與準確率均未改善，SNR也下降。AGGR15 的延遲中位數反而較低，不能把另兩題的延遲差異直接歸因於範圍過濾。這三題不支持把 scope filtering 或 top-k 擴大視為所有問題的通用答案；需同時檢查檢索精準度與最終答案品質。
+
+**Fact-only `top_k` 單次掃描**（`Recall`／`SNR` 為語意 judge 結果；檢索時間不含 judge）：
+
+| 題號 | top_k | Semantic Recall | SNR | Fact 數 | 檢索字元 | Fact 檢索（毫秒） |
+|---|---:|---:|---:|---:|---:|---:|
+| `57-AGGR15` | 5 | 50% | 22.74% | 5 | 299 | 33 |
+| `57-AGGR15` | 10 | 100% | 18.53% | 10 | 545 | 1845 |
+| `57-AGGR15` | 15 | 50% | 4.42% | 15 | 746 | 298 |
+| `57-AGGR15` | 20 | 100% | 10.67% | 20 | 947 | 280 |
+| `57-AGGR16` | 5 | 50% | 26.64% | 5 | 274 | 46 |
+| `57-AGGR16` | 10 | 50% | 15.94% | 10 | 458 | 67 |
+| `57-AGGR16` | 15 | 50% | 11.28% | 15 | 647 | 268 |
+| `57-AGGR16` | 20 | 50% | 8.72% | 20 | 837 | 253 |
+| `57-AGGR17` | 5 | 66.7% | 13.04% | 5 | 230 | 78 |
+| `57-AGGR17` | 10 | 100% | 11.42% | 10 | 394 | 211 |
+| `57-AGGR17` | 15 | 100% | 7.64% | 15 | 589 | 52 |
+| `57-AGGR17` | 20 | 100% | 5.61% | 20 | 802 | 256 |
+
+AGGR15/17 在本次單次檢索中，`top_k=10` 已取回全部 gold span，較 `top_k=20` 少約42%／51%的 Fact 文字，SNR 分別高約7.9／5.8個百分點；但不能外推成跨題型全域 top-k。若只用同步逐字 `record_retrieval()` 比對，所有 Fact-only 條件的 exact-span recall 皆為0，因自然語言化 Fact 不會逐字複製法規 span；因此表列 recall 改用 harness 同款語意 matcher。單次 judge 輸出仍有明確漏判：AGGR15 在 k=15 與 k=20 的判定不單調（50%→100%）；AGGR16 的 judge 對 k=20 只計入兩個門檻 span，但人工檢視原始 Fact 清單確認還有第一類顯著風險 Fact，judge 對改寫句的判定偏保守。因此表列語意 Recall/SNR 必須與原始 Fact 清單一併解讀，只供選擇後續重複實驗的候選值，不是正式結論。Fact 搜尋延遲為單次、毫秒級讀值，有單格 1.85 秒離群值；judge 時間另計，不以它代表端到端延遲。
+
+**AGGR16 排名延伸查證**：`top_k=20` 的 Fact 清單包含第一類顯著風險與兩個人數門檻，但缺第二類中度風險；只讀延伸搜尋顯示第二類中度風險 Fact 在文件範圍內排第21。`top_k=25` 才把該 Fact 納入，與兩個門檻及第一類風險合計涵蓋四項 gold 內容；`top_k=30` 沒再增加必要 gold，`top_k=35` 才納入第三類低度風險等其他內容。這是 Fact-only 清單人工核對，沒有額外語意 judge 或答案生成。它說明擴大 k 能補回邊界漏項，代價是多帶入同文件的其他 Fact；完整 K-arm 在 scope-on 的三次實測 Context Recall 為100%，但現有紀錄未把命中 span 分攤至 Fact 與 BFS，不能將補足缺口直接歸因於 BFS。
+
+**優化裁示**：本次不調整全域預設 `top_k=20`，也不把 scope filter 無條件設為所有題型的精準度修正。可把 AGGR15/17 的 Fact top-10、AGGR16 的 Fact top-25 列為下一輪 K-arm ×3 候選，並比較 top_k 10/20/25 的 Context Recall、Atomic Accuracy、SNR、tokens 與端到端延遲。真正待解的是「保住第21名關鍵 Fact，同時壓低其他同文件雜訊」：下一輪優先測候選池擴大後的 Fact-side reranking／精煉，而不是直接把更多文字送進 prompt。`source_doc_cap` 對 AGGR16 這類單一文件範圍沒有直接作用，不列為此題的主變因。
+
+**與報告58/59的優先順序**：報告58的雙軌來源 Chunk 組裝仍是尚未實作的設計提案，既有報告要求先完成來源血統、Manifest-aware resolver、ContextBundle、grounding/sources 傳遞與 K vs K+C 消融；本輪結果進一步顯示，在未建立 Fact 精煉前增加 Chunk 可能放大上下文噪音，故先暫緩接線。報告59的跨 KG Canonical Entity／`ALIGNED_TO` 也是概念設計，須先有跨 KG 黃金對齊集與拒絕錯配測試；本輪三題全是同 KG 局部檢索，沒有證據支持現在施工跨 KG 導航。兩項先保留設計狀態，不視為已排程或已實作。
+
+---
+
 ## 5. 執行順序建議與進度
 
 1. ✅ **已完成**：任務B §3.3（5個維度、14題異動，逐字核對）、任務A §2.2（SNR/Chain Completeness指標）、任務A §2.3（報表層整合）、18-Q7題目設計混淆訂正、mechanism_tags回填24題verified題目、任務C Stage 0前置檢查（`check_comparison_readiness.py`唯讀確認，補救指令已備妥）。全套946 pytest綠燈，全部commit並push上`worktree-sdd-retrieval-comparison`分支。
 2. ✅ **已完成（2026-09-15追加）**：§6-1「是否接上正式`chat()`路徑」裁示結果為「加檢索量體遙測」——`routers/agent.py::chat()`新增`_build_retrieval_telemetry()`，在`event: sources` SSE事件多帶`retrieval_telemetry`欄位（`retrieved_char_count`／`triple_count`／`fact_count`／`retrieval_latency_ms`），不需要gold answer即可算，對正式使用者問題也能即時輸出。**明確範圍限縮**：SNR／chain_completeness本身仍**不**在`chat()`即時算——這兩個指標依設計需要`atomic_gold_facts`（見`services/lineage_tracker.py::_compute_snr()`/`_compute_chain_completeness()`），真實使用者問題沒有正解可比對，維持只在離線harness（`scripts/eval/run_rq1_comparison.py`）算。新增3個單元測試，全套**949 pytest綠燈**。
 3. ✅ **已完成（2026-09-15）**：任務C Stage 0實際重抽（2/4份文件，23 chunk，見§4.2詳述）＋內容驗證＋外部查證（`law.moj.gov.tw`官方附表一PDF）。**結論**：`N0060007`高溫作業＋`N0060015`特定化學物質＋`N0060022`頻率規則三份文件的跨文件推理鏈題型確認成立；`N0060012`精密作業確認**不**適用特殊健康檢查頻率（附表一12項查無精密作業），但這個「查無」結果本身適合另設計一題`canary_refusal`測試系統是否誤套職安法第十九條的廣泛分類。詳見§4.2。Stage 1（實際出題）尚未開始，待使用者確認範圍後執行。
 4. ✅ **已完成（2026-09-17~18）**：任務C第8組（私立就業服務機構許可雙來源授權鏈，§4.11）與第9組（職安衛管理辦法風險分級，§4.12）Stage 0+1全程完成——內容查證、targeted重抽、出題（AGGR13/AGGR14/AGGR15/AGGR16，4題，題庫58→62題，verified 39→43題）、harness驗證（K arm，4題×1次，`.claude/tmp/rq1_aggr13_16_pilot_v2`）。`57-AGGR15`（Context Recall 100%但Atomic Acc 0%）是本任務C最具說明力的評測解耦案例，確診為純生成端幻覺，與本報告§2評測解耦框架的設計動機直接對應。全部異動commit `d219493`。
-5. ✅ **已完成（2026-09-18接續修復）**：修正N0060027 §2第三類低度風險被模糊合併為中度的實體去重問題，定向重抽chunk 3並清除舊別名；新增`57-AGGR17`完整測試三類風險分級。題庫現為63題／44題verified，K-arm單題單次pilot結果記於§4.12及`.claude/tmp/rq1_aggr17_risk_repair_pilot`：Context Recall與Atomic Recall均66.7%，第二類中度風險span未命中，屬已定位的檢索失敗。完整測試973 passed。變更已記錄並提交於`worktree-sdd-retrieval-comparison`；本輪未推送。
-6. ✅ **已完成（2026-09-18檢索補救）**：確認第二類中度 Fact 在 dense 排名第22、被原 top-20 截斷；已知文件範圍現於 Fact 候選去重／截斷前套用。單題 K-arm 範圍 pilot 將 Context Recall／Atomic Accuracy 從66.7%提升到100%（SNR 4.9%、延遲506.77s，詳§4.12；非正式單次結果）。新增3項測試；完整 pytest **976 passed**。變更已記錄並本地提交於`worktree-sdd-retrieval-comparison`，未推送。
+5. ✅ **已完成（2026-09-18接續修復）**：修正N0060027 §2第三類低度風險被模糊合併為中度的實體去重問題，定向重抽chunk 3並清除舊別名；新增`57-AGGR17`完整測試三類風險分級。題庫現為63題／44題verified，K-arm單題單次pilot結果記於§4.12及`.claude/tmp/rq1_aggr17_risk_repair_pilot`：Context Recall與Atomic Recall均66.7%，第二類中度風險span未命中，屬已定位的檢索失敗。完整測試973 passed。此項當時提交為`819472a`；後續已併同`a808391`推送至`origin/worktree-sdd-retrieval-comparison`。
+6. ✅ **已完成（2026-09-18檢索補救）**：確認第二類中度 Fact 在 dense 排名第22、被原 top-20 截斷；已知文件範圍現於 Fact 候選去重／截斷前套用。單題 K-arm 範圍 pilot 將 Context Recall／Atomic Accuracy 從66.7%提升到100%（SNR 4.9%、延遲506.77s，詳§4.12；非正式單次結果）。新增3項測試；完整 pytest **976 passed**。修正提交為`a808391`，已推送至`origin/worktree-sdd-retrieval-comparison`；推送後本地與遠端同步（ahead/behind 0/0）。
+
+7. ✅ **已完成（2026-09-18 scope A/B 與 top_k 精準度掃描）**：AGGR15/16/17 scope on/off 各3次完整K-arm比較；Fact-only top_k 5/10/15/20 單次語意 span 掃描，並將 AGGR16 延伸至 top_k 35確認第二類中度 Fact 排第21（top_k25才納入）。結果與後續精煉建議記於§4.13；未改程式與Neo4j資料。結論是不調整全域top_k、不無條件開啟scope filter，先做 Fact-side 精煉/reranking 候選評估。
 
 ## 6. 使用者裁示結果（2026-09-15）
 
@@ -586,4 +634,4 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 - [x] **K+Hybrid+Cap逾時根因排查已完成（2026-09-17）**：獨立診斷腳本重放實際檢索管線，K+Cap與K+Hybrid+Cap兩種組態在隔離環境下皆快速完成（約1-22秒），完全無法重現300秒逾時，判定非程式碼層級的確定性交互問題。
 - [ ] 若要重新評估是否接線，需要更大樣本（`--runs 3`已是本輪標準、但題數仍只有2-3題）或更多候選題材累積訊號；若要重新驗證K+Hybrid+Cap疊加組，建議獨立排程執行以排除Ollama負載干擾。
 - [x] **文獻查證＋實作＋檢索端驗證已完成（2026-09-16）**——見§7.4b：`vector_search_facts(source_doc_cap=...)`已實作、958 pytest綠燈、直接測試證實對57-AGGR2有效（命中文件數5→8份、撈回1筆關鍵橋接事實）。已接線進兩輪端到端消融驗證（上一條）。
-- [ ] 待Ollama資源允許時，把本節定調（KG角色＝上下文精煉與路由，非推理鏈建構）明確反映進報告58/59的設計原則——報告58的雙軌組裝若真的排入實作，補回原始Chunk的同時必須先做精煉，否則會重蹈57-AGGR2的覆轍（把更多噪聲一起塞進prompt）。
+- [x] **已完成（2026-09-18）**：依§4.13的scope A/B與Fact top_k結果重新檢視報告58/59。先完成Fact-side精煉/reranking候選驗證，再考慮報告58的來源Chunk雙軌消融；報告59待跨KG正反例黃金集與明確使用案例後再排入。評估結論及排序已記入報告57 §4.13與報告60 §1.4，兩份設計提案仍維持未實作狀態。

@@ -15,7 +15,8 @@
 
 **重要定調**：
 1. 本文件建立時的交接範圍是驗證 AGGR13-16；使用者於 2026-09-18 另行核准一項後續工作：修復第三類風險 Fact、增加回歸題 AGGR17、跑一題 pilot、記錄並 commit。
-2. 這項後續工作已完成並提交於 `worktree-sdd-retrieval-comparison`。本輪未推送；只有在使用者明確要求時才 push。
+2. 這項後續工作已提交並依使用者明確同意推送至 `origin/worktree-sdd-retrieval-comparison`。目前遠端 HEAD 為 `a808391`，包含風險分級修復 `819472a` 與範圍檢索修正 `a808391`；本地與遠端 ahead/behind 為 0/0。
+3. 使用者另核准 2026-09-18 後續最佳化評估：完成 AGGR15/16/17 scope on/off ×3，以及 Fact-only `top_k=5/10/15/20` 掃描與 AGGR16 排名延伸查證。結果記於報告57 §4.13；本階段沒有修改產品程式碼或 Neo4j 圖資料。
 
 ---
 
@@ -45,7 +46,17 @@ d219493 docs+data(報告57任務C第8/9組候選): 私立就業服務機構許�
 - 後續診斷：查明 compact enumeration「第一類、第二類及第三類事業」的字面種子只命中第三類；第二類中度 Fact 的原始 dense 排名第22，被 top-20 截斷。Neo4j 的四筆 §2 Fact／來源 chunk 仍正確。
 - 修正：`chat()` 將已知明確／種子文件範圍傳給 Fact vector search，在 4× over-fetch 候選上先過濾來源，再去重／top-k；若候選全不在範圍內則保留舊 fail-open 行為。新增服務層範圍排序、zero-out 與 chat 傳遞測試。
 - 範圍 pilot v2：輸出 `.claude/tmp/rq1_aggr17_scoped_fact_topk_v1/`；Context Recall／Atomic Accuracy **100%（3/3）**、SNR **4.9%**、延遲 **506.77秒**。共享`qwen2.5:7b` generator/judge，單次非正式pilot；context由127增至246 tokens，延遲高於首次pilot，勿視為正式效能結論。
-- 驗證：完整 pytest **976 passed**；兩個受影響測試檔 **389 passed**；`git diff --check` 通過。此次修正將另作本地 commit，分支仍為 `worktree-sdd-retrieval-comparison`，不推送。
+- 驗證：完整 pytest **976 passed**；兩個受影響測試檔 **389 passed**；`git diff --check` 通過。此紀錄建立時，修正已提交為 `a808391`；之後已推送至 `origin/worktree-sdd-retrieval-comparison`，目前本地與遠端同步。
+
+### 1.4 2026-09-18 檢索精準度最佳化評估
+
+- **完整 K-arm scope A/B（AGGR15/16/17，各 on/off ×3）**：AGGR17 scope-on 的 Context Recall／Atomic Accuracy 皆100%，但 SNR 4.86%、context 246 tokens、K-arm延遲中位數524秒；scope-off 為 Recall／Accuracy 66.7%、SNR 6.21%、127 tokens、218秒。AGGR16 scope-on Recall 100%但 Accuracy 25%，scope-off為75%／50%；AGGR15兩種範圍設定均為Recall 100%／Accuracy 50%，scope-on SNR更低、context更大。結論是範圍過濾具題型差異，不能無條件當成全域預設優化。
+- **Fact-only top_k sweep**：每題單次，固定解析後的來源範圍，不跑 BFS／答案生成；用與RQ1 harness相同的語意 span matcher，另記逐字診斷。AGGR15與AGGR17在top_k=10已由judge判定覆蓋全部gold，Fact文字分別比top_k=20少42%與51%，SNR較高；AGGR16在top_k=20尚缺第二類中度風險Fact，唯讀延伸確認它排範圍內第21，top_k=25才涵蓋四項必要內容。AGGR16 judge同時漏判top-20清單中可人工辨識的第一類顯著風險Fact；AGGR15 judge在top_k=15/20的Recall亦不單調。top_k=35才又帶入第三類低度風險相關Fact。故以上只作候選值探索，必須人工覆核原始Fact並以重複實驗驗證，不能作正式評測結論。
+- **報告58（來源Chunk雙軌組裝）**：仍為設計提案，尚需 provenance／Manifest-aware resolver、ContextBundle、grounding與sources端到端支援及K vs K+C消融。本輪 Fact 檢索顯示加大上下文會降低SNR，先做 Fact-side 排序／精煉，再評估是否回補Chunk，避免把更多噪音送入prompt。
+- **報告59（跨KG實體對齊）**：仍為概念記錄，尚無全域對齊資料模型與查詢實作。本輪題目都是單一KG內問題，未顯示跨KG導航的當前需求；等建立跨KG對齊正反例黃金集及明確使用案例後再排入。
+- **建議下一步**：Fact 候選池擴大後做 query-aware reranking／精煉，優先讓AGGR16第21名必要Fact進入有限context；對AGGR15/17比較top_k 10與20，對AGGR16比較top_k 20與25，之後各跑K-arm ×3，量測Context Recall、SNR、Atomic Accuracy、tokens與延遲。未完成重複端到端驗證前，不改全域top_k、不無條件接入scope filter、hybrid、source_doc_cap或Chunk augmentation。
+
+本輪輸出位於主要 checkout 的 `.claude/tmp/rq1_scope_ab_20260918_n3/`、`.claude/tmp/rq1_fact_topk_sweep_20260918_semantic/`、`.claude/tmp/rq1_fact_topk_aggr16_extension_20260918/`；文件修改僅涉及本交接文件與報告57。測試程式碼未變，採 `git diff --check` 驗證文件差異。
 
 ---
 
@@ -95,6 +106,7 @@ d219493 docs+data(報告57任務C第8/9組候選): 私立就業服務機構許�
 - [x] AGGR16: Acc 25%, Context Recall 75.0%, SNR 9.3%, Chain N/A
 - [x] 整體（4題×1次）：Acc 22.9%, Context Recall 68.8%, SNR 6.9%, Chain 75.0%
 - [x] AGGR17修復回歸pilot（K，1題×1次）：Acc／Recall 66.7%，Context Recall 66.7%，SNR 6.2%；漏召回第二類中度span，非正式評測。
+- [x] AGGR17範圍過濾pilot（K，1題×1次）：Acc／Recall與Context Recall 100%，SNR 4.9%，context 246 tokens，延遲506.77秒；召回改善但context與延遲增加，單次非正式結果。
 
 ### 步驟 2：核對題庫與附錄 A 一致性
 - [x] `docs/論文/05_附錄A_測試題庫.md` 之 A.2.5 表格包含 AGGR3 至 AGGR17。
@@ -105,7 +117,7 @@ d219493 docs+data(報告57任務C第8/9組候選): 私立就業服務機構許�
 - [x] 確認 `## 6. 使用者裁示結果` 僅出現一次（行號 526 附近），且下方子項目無重複段落。
 
 ### 步驟 4：執行推送（Git Push）
-本次後續工作只核准 commit，沒有核准 push；如需日後推送，應先確認使用者明確要求，再於 worktree 執行：
+已於 2026-09-18 依使用者明確同意完成推送；推送後驗證本地與遠端 ahead/behind 為 0/0。該次推送指令如下，僅供歷史紀錄：
 ```powershell
 git -C "d:\Users\666\Desktop\world knowledge graph rag\.claude\worktrees\sdd-retrieval-comparison" push origin worktree-sdd-retrieval-comparison
 ```
@@ -117,4 +129,4 @@ git -C "d:\Users\666\Desktop\world knowledge graph rag\.claude\worktrees\sdd-ret
 
 ## 5. 運行環境與約束規範
 - **嚴格遵守不可變性原則**：所有 `exact_span` 必須逐字對應 `original.md`，禁止擅自修改語意。
-- **測試與環境依賴**：本地測試套件共 973 tests 通過；Harness 執行僅依賴 Neo4j 與 Ollama（qwen2.5:7b, bge-m3:latest），不需啟動 FastAPI 伺服器。
+- **測試與環境依賴**：本地測試套件共 976 tests 通過；Harness 執行僅依賴 Neo4j 與 Ollama（qwen2.5:7b, bge-m3:latest），不需啟動 FastAPI 伺服器。
