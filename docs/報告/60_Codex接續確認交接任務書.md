@@ -42,7 +42,10 @@ d219493 docs+data(報告57任務C第8/9組候選): 私立就業服務機構許�
 - Neo4j：定向重抽 N0060027 §2 chunk 3 後重建 4 筆 Fact／來源引用；第一類＝顯著、第二類＝中度、第三類＝低度。移除一條先前留下的低度 surface form→中度 Entity 舊 `HAS_ENTITY` 別名；文件記錄為 completed。
 - 題庫：新增 `57-AGGR17`，只測三類風險分級完整配對；三個 `exact_span` 逐字核對原文及修復後圖譜。`data/eval/test_cases.json` 與 `docs/附錄A題庫.json` 維持 byte-identical；總數63題、verified 44題。
 - Pilot：K arm 1題×1次，輸出 `.claude/tmp/rq1_aggr17_risk_repair_pilot/`；preflight通過，Context Recall 66.7%、SNR 6.2%、Atomic Accuracy／Recall 66.7%，204.34秒。第二類「具中度風險者」未命中；共享 generator/judge，僅供 pilot，不是正式評測。
-- 驗證：完整 pytest 973 passed；`git diff --check` 通過。提交與分支版本以當前 worktree `git log -1` 為準，未 push。
+- 後續診斷：查明 compact enumeration「第一類、第二類及第三類事業」的字面種子只命中第三類；第二類中度 Fact 的原始 dense 排名第22，被 top-20 截斷。Neo4j 的四筆 §2 Fact／來源 chunk 仍正確。
+- 修正：`chat()` 將已知明確／種子文件範圍傳給 Fact vector search，在 4× over-fetch 候選上先過濾來源，再去重／top-k；若候選全不在範圍內則保留舊 fail-open 行為。新增服務層範圍排序、zero-out 與 chat 傳遞測試。
+- 範圍 pilot v2：輸出 `.claude/tmp/rq1_aggr17_scoped_fact_topk_v1/`；Context Recall／Atomic Accuracy **100%（3/3）**、SNR **4.9%**、延遲 **506.77秒**。共享`qwen2.5:7b` generator/judge，單次非正式pilot；context由127增至246 tokens，延遲高於首次pilot，勿視為正式效能結論。
+- 驗證：完整 pytest **976 passed**；兩個受影響測試檔 **389 passed**；`git diff --check` 通過。此次修正將另作本地 commit，分支仍為 `worktree-sdd-retrieval-comparison`，不推送。
 
 ---
 

@@ -1502,8 +1502,16 @@ async def chat(payload: ChatRequest):
             # 事後排除篩選——原順序讓昂貴的無界路徑枚舉先發生、範圍訊號用不上
             # （報告26 §4 #4：Q5/6/7 各 330–440 秒）。
             if run_facts:
+                fact_search_scope = _resolve_doc_scope(
+                    seed_doc_ids, set(), payload.scope_doc_ids
+                )
+                fact_search_kwargs = (
+                    {"allowed_source_doc_ids": fact_search_scope}
+                    if fact_search_scope else {}
+                )
                 fact_results = await vector_search_facts(
-                    driver, payload.kg_id, question_vector, top_k=payload.top_k
+                    driver, payload.kg_id, question_vector, top_k=payload.top_k,
+                    **fact_search_kwargs,
                 )
             # 2026-08-27：語意 Fact 檢索找到的來源文件，反過來當前置篩選範圍。
             # 2026-09-02（報告25 §4 發現1）：範圍只取分數最高的前 N 筆推導

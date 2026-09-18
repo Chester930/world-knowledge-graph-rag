@@ -1073,6 +1073,50 @@ async def test_chat_wires_vector_search_facts_with_question_embedding_and_top_k(
     assert "台積電 生產 晶片" in llm.prompt
 
 
+@pytest.mark.asyncio
+async def test_chat_passes_resolved_doc_scope_to_fact_search(monkeypatch):
+    """已知文件範圍應在向量結果 top_k 截斷前傳給 Fact 檢索。"""
+    kg_id, doc_id = uuid4(), uuid4()
+    captured = {}
+
+    async def fake_find_seeds(driver, kg_id_arg, question, **kwargs):
+        return ["seed"]
+
+    async def fake_seed_docs(driver, kg_id_arg, seeds):
+        return {doc_id}
+
+    async def fake_bfs(driver, kg_id_arg, seeds, hops, **kwargs):
+        return []
+
+    async def fake_facts(driver, kg_id_arg, vector, top_k, **kwargs):
+        captured["scope"] = kwargs.get("allowed_source_doc_ids")
+        return [{"fact_text": "範圍內事實", "subject": "S", "rel_type": "RELATED_TO",
+                 "object": "O", "source_doc_id": str(doc_id)}]
+
+    async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
+        return None
+
+    async def fake_docmap(driver, kg_id_arg, triples, facts):
+        return {}
+
+    monkeypatch.setattr(agent, "_find_seed_entities", fake_find_seeds)
+    monkeypatch.setattr(agent, "_relevant_doc_ids_from_seeds", fake_seed_docs)
+    monkeypatch.setattr(agent, "bfs_query", fake_bfs)
+    monkeypatch.setattr(agent, "vector_search_facts", fake_facts)
+    monkeypatch.setattr(agent, "resolve_query_relation_type", fake_resolve)
+    monkeypatch.setattr(agent, "_fetch_document_map", fake_docmap)
+    monkeypatch.setattr(agent, "get_driver", lambda: "fake-driver")
+    monkeypatch.setattr(agent, "get_embedding_provider", lambda: _FakeEmbeddingProvider([0.1]))
+    monkeypatch.setattr(agent, "get_llm_provider", lambda: _FakeStreamLLM())
+
+    response = await agent.chat(ChatRequest(
+        question="範圍內問題", kg_id=kg_id, scope_doc_ids=[doc_id],
+    ))
+    await _drain(response)
+
+    assert captured["scope"] == {doc_id}
+
+
 def test_chat_request_default_top_k_is_20():
     """報告25 §4 發現1：語意 Fact 檢索預設候選數需 ≥ 事實清單截斷值
     `_FACT_LINE_TRUNCATE_K`（18），否則排序／截斷／重排永遠拿不到足夠候選。
@@ -2104,8 +2148,10 @@ def _instrumented_chat_monkeypatch(monkeypatch, llm, embedding, *, triples=None,
         calls["bfs"] = dict(kwargs)
         return list(triples or [])
 
-    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k, **kwargs):
         calls["facts"] = {"top_k": top_k}
+        if "allowed_source_doc_ids" in kwargs:
+            calls["facts"]["allowed_source_doc_ids"] = kwargs["allowed_source_doc_ids"]
         return list(facts or [])
 
     async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):
@@ -2248,7 +2294,7 @@ async def test_chat_seed_anchored_scope_overrides_noisy_semantic_scope(monkeypat
         calls["bfs"] = dict(kwargs)
         return []
 
-    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k):
+    async def fake_vector_search_facts(driver, kg_id_arg, vector, top_k, **kwargs):
         return facts
 
     async def fake_resolve(question, embedding_provider, *, llm_provider, cfg=None):

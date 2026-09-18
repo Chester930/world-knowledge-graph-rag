@@ -509,6 +509,10 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **`57-AGGR17` K-arm pilot（1題×1次，2026-09-18，非正式評測）**：Preflight通過，Context Recall **66.7%（2/3）**、SNR **6.2%**、Atomic Accuracy／Recall **66.7%（2/3）**、延遲204.34秒。未命中的是第二類「具中度風險者」span；檢索只提供第一類顯著與第三類低度，生成答案因此也未正確說明第二類。此結果顯示修復後圖譜事實與引用正確，但K-arm仍未穩定召回全部三段；本次使用共享`qwen2.5:7b`生成器／judge、單次執行（`formal_evaluation=false`），只作回歸pilot。原始輸出：`.claude/tmp/rq1_aggr17_risk_repair_pilot/`。
 
+**K-arm漏召回診斷與範圍內先過濾修正（2026-09-18）**：唯讀查詢確認 Neo4j 的四筆 §2 Fact 及來源 chunk 正確。根因有兩段：題目寫作「第一類、第二類及第三類事業」，字面種子搜尋只命中完整出現的「第三類事業」；此外，第二類中度 Fact 在 dense 候選排名第22，原 top-k=20 先被截掉。`routers/agent.py::chat()` 現將已解析的明確／種子文件範圍傳給 `vector_search_facts()`；服務在既有 4× over-fetch 候選上先套範圍，再去重及 top-k，保留候選全被排除時的原 zero-out fail-open 行為。
+
+**`57-AGGR17` 範圍過濾後 pilot（1題×1次，非正式評測）**：輸出 `.claude/tmp/rq1_aggr17_scoped_fact_topk_v1/`；Preflight通過，Context Recall **100%（3/3）**、SNR **4.9%**、Atomic Accuracy／Recall **100%（3/3）**、延遲 **506.77秒**，答案覆蓋三類風險。目標 Fact 從原始 dense 排名第22進入文件範圍過濾後 top-20。相較首次 pilot，檢索文字由483增至926字元、context由127增至246 tokens；SNR下降、延遲較長。這是共享`qwen2.5:7b` generator/judge 的單次 pilot（`formal_evaluation=false`），不能據此推論穩態延遲或正式效能；先記錄召回改善及 context 體積代價。新增來源範圍檢索測試，完整測試 **976 passed**。
+
 **✅ Stage 1 harness驗證已完成（同`rq1_aggr13_16_pilot_v2`，2026-09-18）**：
 
 | 題號 | atomic_accuracy | Context Recall | SNR | Chain Completeness | latency | 診斷 |
@@ -529,6 +533,7 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 3. ✅ **已完成（2026-09-15）**：任務C Stage 0實際重抽（2/4份文件，23 chunk，見§4.2詳述）＋內容驗證＋外部查證（`law.moj.gov.tw`官方附表一PDF）。**結論**：`N0060007`高溫作業＋`N0060015`特定化學物質＋`N0060022`頻率規則三份文件的跨文件推理鏈題型確認成立；`N0060012`精密作業確認**不**適用特殊健康檢查頻率（附表一12項查無精密作業），但這個「查無」結果本身適合另設計一題`canary_refusal`測試系統是否誤套職安法第十九條的廣泛分類。詳見§4.2。Stage 1（實際出題）尚未開始，待使用者確認範圍後執行。
 4. ✅ **已完成（2026-09-17~18）**：任務C第8組（私立就業服務機構許可雙來源授權鏈，§4.11）與第9組（職安衛管理辦法風險分級，§4.12）Stage 0+1全程完成——內容查證、targeted重抽、出題（AGGR13/AGGR14/AGGR15/AGGR16，4題，題庫58→62題，verified 39→43題）、harness驗證（K arm，4題×1次，`.claude/tmp/rq1_aggr13_16_pilot_v2`）。`57-AGGR15`（Context Recall 100%但Atomic Acc 0%）是本任務C最具說明力的評測解耦案例，確診為純生成端幻覺，與本報告§2評測解耦框架的設計動機直接對應。全部異動commit `d219493`。
 5. ✅ **已完成（2026-09-18接續修復）**：修正N0060027 §2第三類低度風險被模糊合併為中度的實體去重問題，定向重抽chunk 3並清除舊別名；新增`57-AGGR17`完整測試三類風險分級。題庫現為63題／44題verified，K-arm單題單次pilot結果記於§4.12及`.claude/tmp/rq1_aggr17_risk_repair_pilot`：Context Recall與Atomic Recall均66.7%，第二類中度風險span未命中，屬已定位的檢索失敗。完整測試973 passed。變更已記錄並提交於`worktree-sdd-retrieval-comparison`；本輪未推送。
+6. ✅ **已完成（2026-09-18檢索補救）**：確認第二類中度 Fact 在 dense 排名第22、被原 top-20 截斷；已知文件範圍現於 Fact 候選去重／截斷前套用。單題 K-arm 範圍 pilot 將 Context Recall／Atomic Accuracy 從66.7%提升到100%（SNR 4.9%、延遲506.77s，詳§4.12；非正式單次結果）。新增3項測試；完整 pytest **976 passed**。變更已記錄並本地提交於`worktree-sdd-retrieval-comparison`，未推送。
 
 ## 6. 使用者裁示結果（2026-09-15）
 

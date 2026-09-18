@@ -3337,6 +3337,51 @@ async def test_vector_search_facts_queries_per_kg_index_without_post_filter():
 
 
 @pytest.mark.asyncio
+async def test_vector_search_facts_applies_source_scope_before_top_k():
+    """文件範圍內較低排名的 Fact 不應先被其他來源佔滿 top_k 再遭排除。"""
+    scoped_doc = uuid4()
+    rows = [
+        {"fact_text": f"其他來源事實{i}", "verb": "V", "confidence": 1,
+         "subject": f"Other{i}", "object": f"O{i}", "rel_type": "RELATED_TO",
+         "source_doc_id": str(uuid4()), "source_svo_chunk_index": i, "score": 0.99 - i * 0.01}
+        for i in range(3)
+    ]
+    rows.extend([
+        {"fact_text": "範圍內核心事實", "verb": "V", "confidence": 1,
+         "subject": "核心", "object": "事實", "rel_type": "RELATED_TO",
+         "source_doc_id": str(scoped_doc), "source_svo_chunk_index": 1, "score": 0.80},
+        {"fact_text": "範圍內次要事實", "verb": "V", "confidence": 1,
+         "subject": "次要", "object": "事實", "rel_type": "RELATED_TO",
+         "source_doc_id": str(scoped_doc), "source_svo_chunk_index": 2, "score": 0.79},
+    ])
+    driver = FakeDriver(records=rows)
+
+    results = await svc.vector_search_facts(
+        driver, uuid4(), [0.1, 0.2], top_k=2,
+        allowed_source_doc_ids={scoped_doc},
+    )
+
+    assert [row["fact_text"] for row in results] == ["範圍內核心事實", "範圍內次要事實"]
+
+
+@pytest.mark.asyncio
+async def test_vector_search_facts_keeps_candidates_if_source_scope_would_zero_them():
+    """範圍完全不相交時保留原候選，延續既有的 zero-out fail-open 保護。"""
+    driver = FakeDriver(records=[
+        {"fact_text": "既有事實", "verb": "V", "confidence": 1,
+         "subject": "S", "object": "O", "rel_type": "RELATED_TO",
+         "source_doc_id": str(uuid4()), "source_svo_chunk_index": 1, "score": 0.9},
+    ])
+
+    results = await svc.vector_search_facts(
+        driver, uuid4(), [0.1, 0.2], top_k=2,
+        allowed_source_doc_ids={uuid4()},
+    )
+
+    assert [row["fact_text"] for row in results] == ["既有事實"]
+
+
+@pytest.mark.asyncio
 async def test_vector_search_entities_scopes_to_kg_before_ranking():
     """2026-08-25 v2（見 docs/報告/17）：v1 的全域共用索引＋候選池
     post-filter 在真實測試中被證實無效（開發用 Neo4j 累積多 KG 時，候選池

@@ -2224,6 +2224,25 @@ def _rrf_fuse_fact_ids(id_rankings: list[list[str]], *, k: int = 60) -> list[str
     return sorted(scores, key=lambda fid: (-scores[fid], order_hint.get(fid, math.inf)))
 
 
+def _filter_fact_candidates_by_source_scope(
+    records: list[dict], allowed_source_doc_ids: Collection[UUID] | None,
+) -> list[dict]:
+    """先在 over-fetch 候選中套用來源範圍，再做去重與 top-k 截斷。
+
+    候選全都明確不在範圍內時保留原清單，以延續 agent 的 zero-out fail-open
+    保護；缺少來源 ID 的舊 Fact 也保留，因為無法證明它在範圍外。
+    """
+    if not allowed_source_doc_ids:
+        return records
+    allowed = {str(doc_id) for doc_id in allowed_source_doc_ids}
+    scoped = [
+        record for record in records
+        if record.get("source_doc_id") is None
+        or str(record["source_doc_id"]) in allowed
+    ]
+    return scoped or records
+
+
 async def vector_search_facts(
     driver: AsyncDriver,
     kg_id: UUID,
@@ -2233,6 +2252,7 @@ async def vector_search_facts(
     question: str | None = None,
     hybrid: bool = False,
     source_doc_cap: int | None = None,
+    allowed_source_doc_ids: Collection[UUID] | None = None,
 ) -> list[dict]:
     """3.1.4 §a `RETRIEVE`：per-KG `Fact` 向量索引 KNN 查詢，比照
     `ConceptRepository.vector_search_concept_ids()` 同一套模式，回傳最相近的
@@ -2288,6 +2308,11 @@ async def vector_search_facts(
     與先前完全一致（純 `[:top_k]` 截斷）。**尚未對真實 KG 端到端驗證**
     （檢索端已用獨立腳本確認`hybrid=True`能撈回目標事實，本參數的實際
     效果待驗證），預設 `None`，呼叫端不主動傳入前對既有行為零影響。
+
+    **`allowed_source_doc_ids`**：呼叫端已有明確／種子錨定的文件範圍時，
+    在 over-fetch 候選（預設 top-k 的 4 倍）上先過濾來源，再做 Fact 去重與
+    top-k 截斷，避免其他來源的高分結果先佔滿名額。若候選全都在範圍外，
+    保留原清單以維持既有 zero-out fail-open 行為；未提供範圍時結果不變。
     """
     await create_fact_vector_index(driver, kg_id, dim=len(query_vector))
     candidate_k = top_k * FACT_SEARCH_CANDIDATE_MULTIPLIER
@@ -2308,6 +2333,7 @@ async def vector_search_facts(
 
     if not (hybrid and question):
         records = [{k: v for k, v in r.items() if k != "fact_id"} for r in dense_records]
+        records = _filter_fact_candidates_by_source_scope(records, allowed_source_doc_ids)
         return _apply_source_doc_cap(_dedupe_facts_by_key(records), top_k, source_doc_cap)
 
     by_id = {r["fact_id"]: r for r in dense_records}
@@ -2339,6 +2365,7 @@ async def vector_search_facts(
 
     fused_order = _rrf_fuse_fact_ids([dense_order, fulltext_order]) if fulltext_order else dense_order
     records = [{k: v for k, v in by_id[fid].items() if k != "fact_id"} for fid in fused_order]
+    records = _filter_fact_candidates_by_source_scope(records, allowed_source_doc_ids)
     return _apply_source_doc_cap(_dedupe_facts_by_key(records), top_k, source_doc_cap)
 
 
