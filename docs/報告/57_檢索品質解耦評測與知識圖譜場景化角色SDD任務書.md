@@ -492,6 +492,8 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **抽取品質發現（⚠️ 2026-09-17）**：重抽後讀Neo4j核對發現第三類事業（原文應為「具低度風險者」）被抽成與第二類相同的「具中度風險者」——相鄰列舉項值複製誤植，是此前未出現的新缺陷類型（已記入3.1.3§b，累計第7個獨立案例）。出題刻意**避開第三類事業**，只用已驗證乾淨的第一/第二類定義與對應門檻。
 
+**修復與實測（2026-09-18）**：追查到這筆錯接的直接原因是實體去重：正確抽出的「具低度風險者」與既有「具中度風險者」只差一字，被編輯距離模糊合併，Fact 因而接到中度實體。`services/svo_service.py` 將顯著／中度／低度風險標籤加入 `_ENUM_GUARD_PATTERN`，此封閉級距只做精確比對；另保留抽取端的相鄰類別錯配過濾，並讓空實體名稱跳過 canopy 向量查詢，避免零維查詢向量令 chunk 重抽失敗。以正式 provider 初始化後針對 §2 chunk 3 撤銷並重抽，Neo4j 重建 4 筆 Fact 與來源引用：第一類＝顯著、第二類＝中度、第三類＝低度；第三類不再指向中度 Fact／關係。另清掉重抽前留下的唯一一條「低度」surface form →「中度」Entity 的舊 `HAS_ENTITY` 別名。`_record.json` 維持 `completed`，chunk 3 在完成清單內；完整測試為 **973 passed**。
+
 **Targeted重抽（4 chunk，2026-09-17）**：子法§1＋母法§23第5項＋子法§2（第一/第二類定義，刻意排除第三類）＋子法§2-1（管理單位設置門檻）。重抽後讀Neo4j逐筆核對：第一/第二類定義（§2）與管理單位門檻（§2-1第1款/第2款）皆逐字對應原文；母法§23第5項授權條文正確抽出。
 
 **Stage 1出題（2題，題庫60→62題，2026-09-17，commit `d219493`合入）**：
@@ -502,6 +504,10 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 | `57-AGGR16` | `global_aggregation`+`multi_fact_assembly` | 第一類/第二類事業風險等級與管理單位設置門檻的雙維度配對——同文件§2/§2-1共4個gold facts，測系統能否正確配對「第一類=顯著風險+100人」vs「第二類=中度風險+300人」 |
 
 全部6個`exact_span`逐字grep核對`original.md`通過，964 pytest綠燈。
+
+**修復後回歸題（2026-09-18，題庫62→63題、verified 43→44題）**：新增`57-AGGR17`，獨立詢問三類事業風險等級完整配對，以免原`57-AGGR16`的管理單位門檻題掩蓋第三類漏抽／錯接。三個原子span分別對應§2第1項第1至3款，逐字核對`original.md`及修復後Fact／來源引用；標籤為`segmented_enumeration`+`multi_fact_assembly`。
+
+**`57-AGGR17` K-arm pilot（1題×1次，2026-09-18，非正式評測）**：Preflight通過，Context Recall **66.7%（2/3）**、SNR **6.2%**、Atomic Accuracy／Recall **66.7%（2/3）**、延遲204.34秒。未命中的是第二類「具中度風險者」span；檢索只提供第一類顯著與第三類低度，生成答案因此也未正確說明第二類。此結果顯示修復後圖譜事實與引用正確，但K-arm仍未穩定召回全部三段；本次使用共享`qwen2.5:7b`生成器／judge、單次執行（`formal_evaluation=false`），只作回歸pilot。原始輸出：`.claude/tmp/rq1_aggr17_risk_repair_pilot/`。
 
 **✅ Stage 1 harness驗證已完成（同`rq1_aggr13_16_pilot_v2`，2026-09-18）**：
 
@@ -522,6 +528,7 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 2. ✅ **已完成（2026-09-15追加）**：§6-1「是否接上正式`chat()`路徑」裁示結果為「加檢索量體遙測」——`routers/agent.py::chat()`新增`_build_retrieval_telemetry()`，在`event: sources` SSE事件多帶`retrieval_telemetry`欄位（`retrieved_char_count`／`triple_count`／`fact_count`／`retrieval_latency_ms`），不需要gold answer即可算，對正式使用者問題也能即時輸出。**明確範圍限縮**：SNR／chain_completeness本身仍**不**在`chat()`即時算——這兩個指標依設計需要`atomic_gold_facts`（見`services/lineage_tracker.py::_compute_snr()`/`_compute_chain_completeness()`），真實使用者問題沒有正解可比對，維持只在離線harness（`scripts/eval/run_rq1_comparison.py`）算。新增3個單元測試，全套**949 pytest綠燈**。
 3. ✅ **已完成（2026-09-15）**：任務C Stage 0實際重抽（2/4份文件，23 chunk，見§4.2詳述）＋內容驗證＋外部查證（`law.moj.gov.tw`官方附表一PDF）。**結論**：`N0060007`高溫作業＋`N0060015`特定化學物質＋`N0060022`頻率規則三份文件的跨文件推理鏈題型確認成立；`N0060012`精密作業確認**不**適用特殊健康檢查頻率（附表一12項查無精密作業），但這個「查無」結果本身適合另設計一題`canary_refusal`測試系統是否誤套職安法第十九條的廣泛分類。詳見§4.2。Stage 1（實際出題）尚未開始，待使用者確認範圍後執行。
 4. ✅ **已完成（2026-09-17~18）**：任務C第8組（私立就業服務機構許可雙來源授權鏈，§4.11）與第9組（職安衛管理辦法風險分級，§4.12）Stage 0+1全程完成——內容查證、targeted重抽、出題（AGGR13/AGGR14/AGGR15/AGGR16，4題，題庫58→62題，verified 39→43題）、harness驗證（K arm，4題×1次，`.claude/tmp/rq1_aggr13_16_pilot_v2`）。`57-AGGR15`（Context Recall 100%但Atomic Acc 0%）是本任務C最具說明力的評測解耦案例，確診為純生成端幻覺，與本報告§2評測解耦框架的設計動機直接對應。全部異動commit `d219493`。
+5. ✅ **已完成（2026-09-18接續修復）**：修正N0060027 §2第三類低度風險被模糊合併為中度的實體去重問題，定向重抽chunk 3並清除舊別名；新增`57-AGGR17`完整測試三類風險分級。題庫現為63題／44題verified，K-arm單題單次pilot結果記於§4.12及`.claude/tmp/rq1_aggr17_risk_repair_pilot`：Context Recall與Atomic Recall均66.7%，第二類中度風險span未命中，屬已定位的檢索失敗。完整測試973 passed。變更已記錄並提交於`worktree-sdd-retrieval-comparison`；本輪未推送。
 
 ## 6. 使用者裁示結果（2026-09-15）
 

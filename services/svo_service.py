@@ -622,12 +622,16 @@ _RANGE_COMPARATOR_PATTERN = re.compile(
 # 本身即精確列舉標記，不該跟任何東西模糊合併）。F3a「補 `_MEASURE_PATTERN` 單位表」
 # 刻意不做：`_MEASURE_PATTERN` 已被 `_naturalization_dropped_quantity()`（報告26 §4 #6）
 # 共用，擴大它會連帶讓自然語言化核對更嚴——`級` 走這裡、`公尺／μg/dl` 走 v2 的單位間隔。
+# 2026-09-18（任務C第9組真實重抽）：`具顯著／中度／低度風險者` 是封閉列舉值，彼此只差一字；
+# 曾把原文正確抽出的「具低度風險者」模糊合併成「具中度風險者」，造成第三類事業的 Fact 錯接。
+# 三種風險值加入同一精確比對守衛，防止列舉成員跨值合併。
 _ENUM_GUARD_PATTERN = re.compile(
     r"第[〇零一二三四五六七八九十百千0-9]+級"
     r"|[〇零一二三四五六七八九十百千0-9]+分之[〇零一二三四五六七八九十百千0-9]+"
     r"|[0-9]+\.[0-9]+"
     r"|附表[〇零一二三四五六七八九十0-9]+"
     r"|之[〇零一二三四五六七八九十]+$"
+    r"|(?:顯著|中度|低度)風險"
 )
 
 # 範圍修飾詞守衛（報告29 §4.1／報告32 §9.3，2026-09-07）——「基礎量 vs 遞增量」：
@@ -822,11 +826,72 @@ def _quantity_mis_bound_to_clause(
     return False
 
 
+_RISK_LEVEL_BY_BUSINESS_CATEGORY = {
+    "第一類事業": "顯著風險",
+    "第二類事業": "中度風險",
+    "第三類事業": "低度風險",
+}
+
+
+def _risk_category_misbound_to_clause(
+    triple: SVOTriple, source_text: str, original_sentences: Sequence[str] | None,
+) -> bool:
+    """攔截事業類別與風險等級從相鄰列舉項目錯接的三元組。
+
+    只在三元組明確提到單一類別和單一風險等級、原文同一類別子句含有
+    另一個等級，且抽出的等級實際屬於其他類別子句時才丟棄。這個窄條件
+    避免影響同時比較多個類別的三元組，或來源沒有明確對應關係的內容。
+    """
+    triple_text = _normalize_for_binding(f"{triple.subject} {triple.verb} {triple.object}")
+    categories = [
+        (category, level)
+        for category, level in _RISK_LEVEL_BY_BUSINESS_CATEGORY.items()
+        if _normalize_for_binding(category) in triple_text
+    ]
+    levels = [
+        level for level in _RISK_LEVEL_BY_BUSINESS_CATEGORY.values()
+        if _normalize_for_binding(level) in triple_text
+    ]
+    if len(categories) != 1 or len(levels) != 1:
+        return False
+
+    category, expected_level = categories[0]
+    observed_level = levels[0]
+    if observed_level == expected_level:
+        return False
+
+    units = list(original_sentences) if original_sentences else [source_text]
+    clauses = [
+        _normalize_for_binding(clause)
+        for unit in units
+        for clause in _split_into_clauses(unit)
+    ]
+    category_norm = _normalize_for_binding(category)
+    expected_norm = _normalize_for_binding(expected_level)
+    observed_norm = _normalize_for_binding(observed_level)
+    category_clauses = [clause for clause in clauses if category_norm in clause]
+    if not any(expected_norm in clause for clause in category_clauses):
+        return False
+
+    observed_belongs_to_sibling = any(
+        observed_norm in clause
+        and any(
+            _normalize_for_binding(other_category) in clause
+            for other_category in _RISK_LEVEL_BY_BUSINESS_CATEGORY
+            if other_category != category
+        )
+        for clause in clauses
+    )
+    return observed_belongs_to_sibling
+
+
 def _filter_ungrounded_quantity_triples(
     triples: list[SVOTriple], source_text: str,
     original_sentences: Sequence[str] | None = None,
 ) -> list[SVOTriple]:
-    """丟棄含未忠實數量/期限用字、或跨條文借用類別詞彙的三元組。三層核對：
+    """丟棄含未忠實數量/期限用字、跨條文借用類別詞彙、或列舉值錯接的三元組。
+
+    四層核對：
 
     1. **字詞層級**（報告20）：subject／object 的數量用字未逐字出現於原文
        → 丟（跨條文數字挪用，如「三至七日」錯抽成「一至三日」）。
@@ -836,6 +901,9 @@ def _filter_ungrounded_quantity_triples(
     3. **類別詞彙家族**（2026-09-16，任務C第2組候選）：subject／object 含
        `_ENTITY_FAMILIES` 裡的詞、該詞未逐字出現於原文、但家族裡另一個
        詞卻出現於原文 → 丟（假別跨條文借用，如「事假」被抽成「產假」）。
+    4. **列舉子句類別值綁定**（2026-09-18，任務C第9組候選）：三元組將
+       正確出現在同一 chunk 的風險等級接到錯誤事業類別，且來源子句明確
+       顯示該值屬於相鄰類別 → 丟（「第三類事業」被配成「具中度風險者」）。
 
     寧可漏抓一筆有疑慮的三元組，也不留下錯誤數字污染圖譜（比照 3.1.3
     REJECT 不阻斷整體、report16/19 既有的降級哲學）。
@@ -866,6 +934,12 @@ def _filter_ungrounded_quantity_triples(
         if _quantity_mis_bound_to_clause(t, source_text, original_sentences):
             logger.warning(
                 "[數值忠實性核對] 丟棄數字錯接到別的列舉子句的三元組：'%s' -[%s]-> '%s'",
+                t.subject, t.verb, t.object,
+            )
+            continue
+        if _risk_category_misbound_to_clause(t, source_text, original_sentences):
+            logger.warning(
+                "[列舉類別值忠實性核對] 丟棄類別與值錯接的三元組：'%s' -[%s]-> '%s'",
                 t.subject, t.verb, t.object,
             )
             continue
@@ -996,6 +1070,11 @@ async def _fetch_entity_candidates_canopy(
     )
     for r in exact.records:
         by_name[r["name"]] = {"name": r["name"], "type": r.get("type"), "name_embedding": r.get("name_embedding")}
+
+    if not name.strip():
+        # Ollama 對空字串回傳 0 維 embedding，Neo4j vector index 不接受；空字串
+        # 的 CONTAINS canopy 也會匹配過多節點，因此只保留精確名稱結果。
+        return list(by_name.values())
 
     if embedding_provider is not None:
         name_vec = await embedding_provider.encode(name)
@@ -1153,6 +1232,8 @@ async def resolve_entity_name(
     # 比對、不做模糊合併——理由見 `_RANGE_COMPARATOR_PATTERN` 定義處註解。
     # 2026-09-07（報告32 §9.3 F3b）：序數／分數／小數／附表列舉主詞（`第三級管理`／
     # `二分之一`／`30.6℃`／`附表一`／`精密作業之一`），前兩個守衛都抓不到，加進同一處早退。
+    # 2026-09-18（任務C第9組）：事業風險等級（`具顯著／中度／低度風險者`）也是封閉列舉值；
+    # 不得把正確抽出的第三類「低度」模糊合併成既有第二類「中度」實體。
     if (
         _MEASURE_PATTERN.search(name)
         or _RANGE_COMPARATOR_PATTERN.search(name)

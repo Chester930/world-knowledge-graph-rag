@@ -1386,6 +1386,22 @@ async def test_fetch_entity_candidates_canopy_skips_cosine_without_embedding_pro
 
 
 @pytest.mark.asyncio
+async def test_fetch_entity_candidates_canopy_skips_non_exact_search_for_empty_name():
+    """Ollama 對空字串回傳 0 維向量；空名稱只做精確查詢，略過 cosine 與全文
+    canopy，避免把空向量送進 Neo4j vector index。"""
+    driver = _CanopyShapeDriver(exact=[FakeRecord(name="", type="概念")])
+    embedding = FakeEmbedding()
+
+    candidates = await svc._fetch_entity_candidates(
+        driver, uuid4(), "概念", name="", embedding_provider=embedding,
+    )
+
+    assert {c["name"] for c in candidates} == {""}
+    assert driver.calls == ["exact"]
+    assert embedding._index == {}
+
+
+@pytest.mark.asyncio
 async def test_fetch_entity_candidates_canopy_falls_back_to_contains_when_fulltext_unavailable():
     """部署的 Neo4j 版本不支援 `cjk` fulltext analyzer 時，字串 canopy 優雅
     退回 `CONTAINS`（報告40 §3.3），不讓整次候選查詢失敗。"""
@@ -1600,7 +1616,8 @@ def test_enum_guard_pattern_matches_ordinal_fraction_decimal_enumerations():
     （要比較詞）都抓不到的列舉主詞——序數（第N級、附表N、…之N）、分數、小數。"""
     for s in ["第三級管理", "屬於第三級管理者", "第一級管理", "第二級管理",
               "二分之一", "五分之一", "30.6℃", "32.6℃", "1.25", "1.5",
-              "附表一", "附表二", "精密作業之一", "精密作業之三"]:
+              "附表一", "附表二", "精密作業之一", "精密作業之三",
+              "具顯著風險者", "具中度風險者", "具低度風險者"]:
         assert svc._ENUM_GUARD_PATTERN.search(s)
     # 一般名稱與已被其他守衛涵蓋的量詞名稱不應誤觸發
     for s in ["台積電", "勞動基準法", "育嬰留職停薪", "新臺幣四千元",
@@ -1619,6 +1636,10 @@ async def test_resolve_entity_name_enum_guard_no_fuzzy_merge():
     assert await svc.resolve_entity_name(
         "二分之一", [{"name": "五分之一", "alias_counts_json": "{}"}],
     ) == "二分之一"
+    # §2 的三種風險等級只差一字；錯誤合併會把正確抽出的「低度」Fact 接成「中度」。
+    assert await svc.resolve_entity_name(
+        "具低度風險者", [{"name": "具中度風險者", "alias_counts_json": "{}"}],
+    ) == "具低度風險者"
 
 
 def test_scope_modifier_pattern_matches_increment_words():
@@ -4580,6 +4601,65 @@ def test_filter_ungrounded_quantity_triples_drops_leave_type_swap():
     swapped = SVOTriple(subject="勞工", verb="請", object="產假期間不給工資")
 
     result = svc._filter_ungrounded_quantity_triples([grounded, swapped], _LEAVE_WAGE_SOURCE)
+
+    assert result == [grounded]
+
+
+# --- 2026-09-18（任務C第9組候選）：列舉類別與風險等級錯配 --------------------
+
+_RISK_CATEGORY_SENTENCES = [
+    "本辦法之事業，依危害風險之不同區分如下：",
+    "一、第一類事業：具顯著風險者。",
+    "二、第二類事業：具中度風險者。",
+    "三、第三類事業：具低度風險者。",
+    "前項各款事業之例示，如附表一。",
+]
+_RISK_CATEGORY_SOURCE = "\n".join(_RISK_CATEGORY_SENTENCES)
+
+
+def test_risk_category_guard_flags_sibling_value_copy():
+    """N0060027 §2 的第三類原文為「具低度風險者」，但 Neo4j 曾把第二類
+    的「具中度風險者」複製到第三類；應依類別所屬子句辨識此錯配。"""
+    misplaced = SVOTriple(subject="第三類事業", verb="區分", object="具中度風險者")
+
+    assert svc._risk_category_misbound_to_clause(
+        misplaced, _RISK_CATEGORY_SOURCE, _RISK_CATEGORY_SENTENCES,
+    ) is True
+
+
+@pytest.mark.parametrize(
+    ("subject", "risk_level"),
+    [
+        ("第一類事業", "具顯著風險者"),
+        ("第二類事業", "具中度風險者"),
+        ("第三類事業", "具低度風險者"),
+    ],
+)
+def test_risk_category_guard_passes_correct_category_value(subject, risk_level):
+    grounded = SVOTriple(subject=subject, verb="區分", object=risk_level)
+
+    assert svc._risk_category_misbound_to_clause(
+        grounded, _RISK_CATEGORY_SOURCE, _RISK_CATEGORY_SENTENCES,
+    ) is False
+
+
+def test_risk_category_guard_skips_multi_category_comparison():
+    comparison = SVOTriple(
+        subject="第一類事業", verb="風險高於", object="第二類事業具中度風險者",
+    )
+
+    assert svc._risk_category_misbound_to_clause(
+        comparison, _RISK_CATEGORY_SOURCE, _RISK_CATEGORY_SENTENCES,
+    ) is False
+
+
+def test_filter_drops_risk_category_value_copy_but_keeps_correct_values():
+    grounded = SVOTriple(subject="第三類事業", verb="區分", object="具低度風險者")
+    misplaced = SVOTriple(subject="第三類事業", verb="區分", object="具中度風險者")
+
+    result = svc._filter_ungrounded_quantity_triples(
+        [grounded, misplaced], _RISK_CATEGORY_SOURCE, _RISK_CATEGORY_SENTENCES,
+    )
 
     assert result == [grounded]
 
