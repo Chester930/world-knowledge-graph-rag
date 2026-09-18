@@ -1,5 +1,7 @@
 # Codex 接手確認導引（Handover Guide for Codex）
 
+> **目前進度請先讀**：[跨 Agent 接續進度 HANDOVER.md](HANDOVER.md)。本檔案記錄較早的 Codex 交接狀態與 checklist；若狀態或建議與 HANDOVER.md 不同，以 HANDOVER.md 及最新報告為準，不要照舊 checklist 直接推送。
+
 > **建立日期**：2026-09-18  
 > **交接對象**：CODEX / 接續工程師  
 > **目標 Worktree**：`d:\Users\666\Desktop\world knowledge graph rag\.claude\worktrees\sdd-retrieval-comparison`  

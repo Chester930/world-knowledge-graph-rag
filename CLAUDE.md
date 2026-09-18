@@ -1,5 +1,7 @@
 # CLAUDE.md — World Knowledge Graph RAG
 
+> **跨 Agent 接續必讀**：開始新工作階段前先讀 [HANDOVER.md](HANDOVER.md)。它是 Claude Code、Codex、Gemini 與其他 agent 共用的目前進度來源；下方專案概覽部分內容是較早的架構基線，若與 HANDOVER.md 矛盾，以 HANDOVER.md 和最新報告為準。
+
 本檔案提供 Claude Code CLI Agent 理解此專案所需的背景。
 
 ## 專案概覽

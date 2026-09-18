@@ -1,5 +1,9 @@
 # World Knowledge Graph RAG
 
+## 接續既有工作
+
+若在新的終端機或不同 AI agent 中接續任務，請先閱讀根目錄 [`HANDOVER.md`](HANDOVER.md)。它記錄目前 worktree／分支、已完成實驗、原始輸出位置、未完成步驟與 Git 狀態；`AGENTS.md`、`CLAUDE.md`、`GEMINI.md` 皆指向同一份交接紀錄。
+
 多場景知識圖譜 RAG 系統。將文件轉化為結構化 SVO 知識圖譜，透過雙層路由（ConceptNode + BFS 圖遍歷）提供精準問答。
 
 > 本專案（World Knowledge Graph RAG）是 [knowledge-base-ai](https://github.com/Chester930/knowledge-base-ai)（智慧知識庫，個人研究專案）的重新架構與品牌化版本，同時作為論文研究的實作載體。原專案驗證了核心概念的可行性；本專案的目標是在架構嚴謹度、可測試性與可維護性上系統性提升，並發展為涵蓋網頁與軟體、可支撐產品化的完整平台。
