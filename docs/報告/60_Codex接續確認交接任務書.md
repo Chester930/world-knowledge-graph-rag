@@ -54,9 +54,38 @@ d219493 docs+data(報告57任務C第8/9組候選): 私立就業服務機構許�
 - **Fact-only top_k sweep**：每題單次，固定解析後的來源範圍，不跑 BFS／答案生成；用與RQ1 harness相同的語意 span matcher，另記逐字診斷。AGGR15與AGGR17在top_k=10已由judge判定覆蓋全部gold，Fact文字分別比top_k=20少42%與51%，SNR較高；AGGR16在top_k=20尚缺第二類中度風險Fact，唯讀延伸確認它排範圍內第21，top_k=25才涵蓋四項必要內容。AGGR16 judge同時漏判top-20清單中可人工辨識的第一類顯著風險Fact；AGGR15 judge在top_k=15/20的Recall亦不單調。top_k=35才又帶入第三類低度風險相關Fact。故以上只作候選值探索，必須人工覆核原始Fact並以重複實驗驗證，不能作正式評測結論。
 - **報告58（來源Chunk雙軌組裝）**：仍為設計提案，尚需 provenance／Manifest-aware resolver、ContextBundle、grounding與sources端到端支援及K vs K+C消融。本輪 Fact 檢索顯示加大上下文會降低SNR，先做 Fact-side 排序／精煉，再評估是否回補Chunk，避免把更多噪音送入prompt。
 - **報告59（跨KG實體對齊）**：仍為概念記錄，尚無全域對齊資料模型與查詢實作。本輪題目都是單一KG內問題，未顯示跨KG導航的當前需求；等建立跨KG對齊正反例黃金集及明確使用案例後再排入。
-- **建議下一步**：Fact 候選池擴大後做 query-aware reranking／精煉，優先讓AGGR16第21名必要Fact進入有限context；對AGGR15/17比較top_k 10與20，對AGGR16比較top_k 20與25，之後各跑K-arm ×3，量測Context Recall、SNR、Atomic Accuracy、tokens與延遲。未完成重複端到端驗證前，不改全域top_k、不無條件接入scope filter、hybrid、source_doc_cap或Chunk augmentation。
+- **接續 pilot 結果（2026-09-18）**：原建議的 dense selected-k（AGGR15/17 top_k=10、AGGR16 top_k=25）與 Hybrid RRF（top_k=20）已各跑 AGGR15/16/17 ×3，兩組皆 9/9 完成、零 harness error/timeout，詳報告57 §4.14。Dense selected-k 在 AGGR15/17 分別將 tokens 減少約42.5%／47.2%、SNR提高7.63／4.40個百分點，Recall／Accuracy不變；AGGR16則由 baseline Recall 100%跌至75%，SNR下降且連續三次漏掉第二類中度風險 Fact。Hybrid RRF 的 AGGR16 Atomic Accuracy由25%升至50%，AGGR15/17與baseline相同；但 AGGR16 Recall仍降至75%，只有AGGR15 SNR微升（10.54%→11.40%），AGGR16/17 SNR下降。不建議全域接線。未修改產品程式或Fact資料；Hybrid呼叫路徑可能惰性確保fulltext schema index。
+- **修訂後下一步**：先用唯讀檢索對齊 Fact-only 掃描與完整 chat 路徑，追蹤 AGGR16 的 scope IDs、top-候選 Fact/score、來源過濾、去重及截斷；Fact-only 顯示中度風險 Fact 排第21且 top_k=25可納入，但完整 chat dense top_k=25與 Hybrid top_k=20皆三次漏失。釐清後再固定候選池測 query-aware reranking，評估是否同時保住必要span與SNR。暫不改全域 top_k、無條件啟用 scope filter／Hybrid／source_doc_cap，也先不做報告58 Chunk augmentation；報告59仍待跨KG黃金對齊集與明確用例。
 
-本輪輸出位於主要 checkout 的 `.claude/tmp/rq1_scope_ab_20260918_n3/`、`.claude/tmp/rq1_fact_topk_sweep_20260918_semantic/`、`.claude/tmp/rq1_fact_topk_aggr16_extension_20260918/`；文件修改僅涉及本交接文件與報告57。測試程式碼未變，採 `git diff --check` 驗證文件差異。
+- **2026-09-19 校正（取代上面 pilot 的 baseline 對照與下一步）**：目前 worktree HEAD `8afb1e5` 以 dense `top_k=20` 重跑 AGGR15/16/17 K-arm ×3，9/9 完成、零錯誤；每題中位數為 Recall/Accuracy、SNR、context tokens、延遲：AGGR15 100%/50%、10.54%、254、23.74秒；AGGR16 75%/50%、8.65%、265、50.38秒；AGGR17 100%/100%、5.10%、236、119.39秒。§4.13原scope-on baseline出自主要 checkout HEAD `682917d`，早於 `a808391` 的來源先過濾再top-k修正，不可用該舊數字判定 selected-k／Hybrid 的 Recall 退步。AGGR16唯讀追蹤結果：單方法文件 Fact-only 排第21；完整 chat 方法＋母法 scope 去重後排第24，初始20 Fact＋11 BFS候選被18行上限分為14 Fact＋4 BFS，目標 Fact 第24與等價 BFS 第5均未入 context。另以程序內 monkeypatch 將 `min_bfs_slots` 4→5、固定18行預算跑 K-arm ×3：AGGR16 Context Recall仍75%、SNR 8.65%、265 tokens，Atomic Accuracy中位數50%→100%（2/3次全答對、1/3次50%）；AGGR15/17的 Recall、Accuracy、SNR、tokens中位數不變。AGGR16延遲中位數升至108.37秒，僅記為本輪觀察值。下一步改測固定18行下的 Fact-side query-aware reranking／候選替換，讓第24名逐字必要 Fact 進 context；目前不調全域 top_k、scope filter、Hybrid、source_doc_cap 或 BFS 預設名額，報告58/59仍維持設計／待用例狀態。
+
+本輪 scope/top-k 輸出位於主要 checkout 的 `.claude/tmp/rq1_scope_ab_20260918_n3/`、`.claude/tmp/rq1_fact_topk_sweep_20260918_semantic/`、`.claude/tmp/rq1_fact_topk_aggr16_extension_20260918/`。後續兩組 K-arm pilot 輸出位於 `.claude/tmp/rq1_fact_ranking_20260918/{dense_selected_k,hybrid_rrf}/`，執行包裝器為 worktree `_run_fact_rank_eval_20260918.py`。本次只更新本交接文件與報告57；測試程式碼未變，文件差異以 `git diff --check` 驗證。
+
+2026-09-19 新增同版本 dense baseline 與 BFS名額 pilot 輸出於 `.claude/tmp/rq1_fact_ranking_20260918/{current_dense_top_k20,bfs_slots_5}/`；AGGR16追蹤輸出 `.claude/tmp/rq1_fact_candidate_trace_20260918.json`，runner 為 worktree `_run_bfs_slots_eval_20260919.py`。本輪產品程式、KG設定及 Fact 資料皆未修改。
+
+2026-09-19 後續完成 Fact embedding rerank 與一格邊界交換診斷（取代上一段預定的 rerank 工作）。top-25候選經同鍵 Fact 優先去重與既有 query embedding scorer 排序後，AGGR16目標 Fact 紀錄由rank24升至15，仍超過14條 Fact 名額；K-arm ×3 的 Context Recall均75%、Atomic Accuracy中位數75%（50%／75%／75%）、SNR 7.52%、306 tokens、延遲中位數145.03秒。固定18行下再交換入rank14、擠出第三類3000人門檻 Fact，三次 Atomic Accuracy均100%，但 Context Recall仍75%、SNR 7.52%、306 tokens，延遲中位數47.54秒。目標 Fact 是自然語言化表述，不是 gold 逐字 span；答案三次皆加入500人門檻，且把僅適用於設有總機構時的第二類500人「一級管理單位」錯稱為「專責一級」。Atomic scorer未懲罰 gold 外錯誤主張，故不構成乾淨的品質提升。詳報告57 §4.14；下一步先增加額外主張與條件錯置評分，再以更多題驗證，暫不接線或修改全域設定。
+
+新增結果位於主要 checkout `.claude/tmp/rq1_fact_ranking_20260918/{fact_side_embedding_rerank,fact_boundary_swap}/`；runner 為 worktree `_run_fact_side_rerank_eval_20260919.py` 與 `_run_fact_boundary_swap_eval_20260919.py`。統計依 `records.json` 及 `swap_diagnostics.json`；raw prompt/context lines 未保存。未修改正式產品程式、KG設定或 Neo4j Fact 資料。
+
+2026-09-19 已把風險審查規則納入題庫契約：`TestCase` 新增 `answer_scope`、`required_claims`、`claim_audit_rules`，AGGR15/16/17 已填入題目範圍與條件／角色規則；新增 `services/claim_scope_auditor.py`，RQ1 runner 每筆輸出新增 `scope_audit`。`data/eval/test_cases.json` 與 `docs/附錄A題庫.json` 已確認鏡像相等（63題）。新增 auditor 測試 3/3 通過，harness failure tests 在工作區暫存目錄 2/2 通過。這是離線評測基礎設施，沒有改正式 `chat()`、AtomicScorer、KG或全域設定。
+
+2026-09-19 依上述結論新增 deterministic gold 外主張／條件錯置閘門，離線審查既有 AGGR15/16/17 輸出：原子正確且無範圍風險的通過數為 current dense 1/9、BFS slots 5 為3/9、Fact embedding rerank 為2/9；boundary-swap 僅跑 AGGR16，為0/3。這不是替代 AtomicScorer 的正式指標，而是確認100% Atomic Accuracy不能掩蓋額外法律主張。規則與逐筆結果位於 `.claude/tmp/rq1_fact_ranking_20260918/claim_risk_audit.json`，執行器為 `_audit_aggr16_claim_risk_20260919.py`。下一步先把條件錯置規則整理成可審核題庫欄位，再擴充多題 boundary-swap；暫不接線。
+
+### 1.5 2026-09-19 題庫 scope audit 與多題 boundary-swap
+
+- AGGR15/16/17 K-arm ×3 已重新執行，9/9完成、零錯誤；三題 scope audit 通過數依序為3/3、0/3、1/3。新批次詳報告57 §4.17，包含 Recall、Atomic Accuracy、SNR、tokens及逐題風險結果。
+- 另以相同 top-25 候選、Fact-first 去重、embedding rerank及18行context上限，跑 no-swap matched control與一格 boundary-swap，兩組各9/9完成。AGGR16 是唯一觸發交換的題：目標 Fact 排第15、Fact budget=14，交換後入第14並擠出第三類三千人門檻 Fact。AGGR15目標已在rank5/budget16；AGGR17目標已在rank1/budget14，兩題均不交換。
+- matched control vs swap：AGGR16 Atomic Accuracy中位數75%→100%，Context Recall仍75%、SNR 7.52%、306 tokens不變；scope audit仍0/3通過，因答案繼續漏列500人規則的「事業設有總機構」前提，並把第二類500人管理單位寫成「專責」。AGGR15/17兩組結果相同；AGGR17 scope audit的3/3通過來自 top-25 rerank control，不能歸功於交換。
+- 結論：固定名額交換在 AGGR16 有原子正確率訊號，卻未改善 Recall/SNR，也未消除法條範圍與角色風險；仍不符合接線門檻，不改正式 `chat()`、全域檢索預設或 Neo4j。三組使用共享 generator/judge，屬 pilot；診斷記錄按 prompt 組裝呼叫列項，複合題及重生可能令每個 harness run 產生多列。
+- 輸出：主要 checkout `.claude/tmp/rq1_scope_audit_20260919/{k_baseline,fact_rerank_control_3q,fact_boundary_swap_3q}/`；runner為 worktree `_run_fact_boundary_swap_3q_eval_20260919.py`，`--control`執行 no-swap control。測試：scope auditor 3/3、harness failure tests 2/2通過，相關腳本 `py_compile` 通過；完整 pytest 本輪未重跑。
+- **接續建議**：暫停正式接線討論；下一輪先擴大自動 scope audit 契約覆蓋的已驗證題目，再累積跨題配對樣本。報告58 Chunk雙軌組裝與報告59跨KG仍維持待用例／待驗證狀態。
+
+### 1.6 2026-09-19 無逐題人工審查的自動離線判定
+
+- 已新增可重跑的 `scripts/eval/compare_scope_audit_runs.py`，直接重評 §1.5 三組已保存輸出，不重跑生成、不做人工逐題審查。按題號與重複次數自動彙總 Atomic Accuracy、Context Recall、SNR、scope audit，完整結果見報告57 §4.18；新增測試6/6通過。
+- 自動採用閘門判定 boundary-swap **NO-GO**：AGGR16 Atomic Accuracy雖由 matched control 的75%升至100%，Context Recall仍75%、scope audit仍0/3；AGGR15/17沒有因 swap 變好。最新 matched-v2 的 control 與 swap 均9/9完成且題庫雜湊相同（`46b7…a035`）；dense baseline 重跑仍為另一雜湊（`a638…bae2`），因此工具將 baseline comparison 標為不可比，沒有據此推論跨組變化。
+- 題庫共63題，其中只有3題有 `required_claims`／`claim_audit_rules`，自動範圍判定目前限 AGGR15/16/17。此流程免除每一輪人工覆核，但評分依賴既有 gold 與規則，不能宣稱自動驗證了規則本身的法律正確性。
+- **新接續建議**：matched control／swap 已重跑完成，兩者同資料集可直接比較；gate 仍因 AGGR16 scope audit 0/3 判 NO-GO。下一個有效離線實驗應固定檢索 context，測試生成端條件完整性修正／拒答或再生成，並用同 hash control/candidate 各跑×3後自動 gate。若需和 dense baseline 比較，先凍結單一題庫快照再重跑全部組別。擴大 scope 契約覆蓋前，保持離線，不改正式 `chat()`／全域預設。報告58與59仍維持待用例／待驗證。
 
 ---
 

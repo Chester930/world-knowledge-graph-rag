@@ -1850,6 +1850,40 @@
       "pilot": false,
       "mechanism_tags": [
         "cross_doc_multihop"
+      ],
+      "answer_scope": "只回答《職業安全衛生管理辦法》的法源授權鏈；不延伸回答事業分類、人數門檻或管理系統要求。",
+      "required_claims": [
+        "子法第1條引用職業安全衛生法第23條第5項",
+        "母法第23條第5項授權中央主管機關訂定辦法"
+      ],
+      "claim_audit_rules": [
+        {
+          "id": "aggr15-risk-classification-out-of-scope",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "第一類",
+            "第二類",
+            "第三類"
+          ],
+          "trigger_mode": "any",
+          "description": "法源依據題不應延伸回答事業風險分類。"
+        },
+        {
+          "id": "aggr15-worker-threshold-out-of-scope",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "一百人",
+            "二百人",
+            "三百人",
+            "五百人",
+            "100人",
+            "200人",
+            "300人",
+            "500人"
+          ],
+          "trigger_mode": "any",
+          "description": "法源依據題不應延伸回答人數門檻。"
+        }
       ]
     },
     {
@@ -1899,6 +1933,66 @@
       "mechanism_tags": [
         "global_aggregation",
         "multi_fact_assembly"
+      ],
+      "answer_scope": "只回答第2條的第一／第二類風險等級與第2-1條一般事業單位管理單位門檻；不混入第6條總機構規則。第二類第2-1條門檻為一級管理單位，非專責。",
+      "required_claims": [
+        "第一類具顯著風險與100人專責一級管理單位門檻",
+        "第二類具中度風險與300人一級管理單位門檻"
+      ],
+      "claim_audit_rules": [
+        {
+          "id": "aggr16-head-office-500-condition",
+          "kind": "conditional",
+          "trigger_patterns": [
+            "五百人",
+            "500人"
+          ],
+          "trigger_mode": "any",
+          "required_condition_patterns": [
+            "事業設有總機構"
+          ],
+          "description": "第6條500人規則須明示事業設有總機構的適用前提。"
+        },
+        {
+          "id": "aggr16-second-category-500-role",
+          "kind": "role_mismatch",
+          "trigger_patterns": [
+            "第二類",
+            "五百人",
+            "專責"
+          ],
+          "trigger_mode": "all",
+          "description": "第二類500人總機構規則是設一級管理單位，不是專責一級。"
+        },
+        {
+          "id": "aggr16-first-category-200-threshold",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "第一類",
+            "二百人"
+          ],
+          "trigger_mode": "all",
+          "description": "本題第一類一般事業單位門檻是100人；200人不是本題答案。"
+        },
+        {
+          "id": "aggr16-management-system-out-of-scope",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "CNS 45001"
+          ],
+          "trigger_mode": "any",
+          "description": "管理系統建置不是本題要求的管理單位門檻答案。"
+        },
+        {
+          "id": "aggr16-refusal-with-gold",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "資料未明確記載",
+            "無法確認"
+          ],
+          "trigger_mode": "any",
+          "description": "已提供必要 Fact 時，不應宣稱無法確認風險等級或門檻。"
+        }
       ]
     },
     {
@@ -1941,6 +2035,27 @@
       "mechanism_tags": [
         "segmented_enumeration",
         "multi_fact_assembly"
+      ],
+      "answer_scope": "只回答第一類、第二類、第三類事業各自的風險等級；不延伸回答人數門檻、管理單位或總機構規則。",
+      "required_claims": [
+        "第一類具顯著風險",
+        "第二類具中度風險",
+        "第三類具低度風險"
+      ],
+      "claim_audit_rules": [
+        {
+          "id": "aggr17-management-threshold-out-of-scope",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "管理單位",
+            "總機構",
+            "CNS 45001",
+            "第2-1條",
+            "人數"
+          ],
+          "trigger_mode": "any",
+          "description": "風險分類題不應延伸回答管理組織或人數門檻。"
+        }
       ]
     }
   ]

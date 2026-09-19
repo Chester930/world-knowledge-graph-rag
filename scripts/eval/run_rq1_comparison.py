@@ -53,6 +53,7 @@ from repositories.kg_repo import KGRepository
 from routers import agent
 from services import baseline_rag_service, document_record_service
 from services.atomic_scorer import AtomicScorer
+from services.claim_scope_auditor import audit_answer_scope
 from services.cost_analyzer import CostAnalyzer
 from services.deterministic_guard_service import DeterministicGuardService
 from services.evaluation_eligibility import split_eligible_test_cases
@@ -342,6 +343,7 @@ async def _run_single_query(
         ),
         trap_claim_spans=tc.trap_claim_spans,
     )
+    scope_audit = audit_answer_scope(answer, tc)
 
     full_lineage = await tracker.build_full_lineage_async(
         gold_spans, judge_llm_provider=judge_counting or counting, question=tc.question,
@@ -367,6 +369,7 @@ async def _run_single_query(
         ),
         "estimated_tokens": len(full_context_str) // 4 + len(answer) // 4,
         "atomic_score": atomic_eval.model_dump(),
+        "scope_audit": scope_audit,
         "lineage": full_lineage.model_dump(),
         "failure_attribution": full_lineage.failure_attribution,
         "deterministic_guard": guard_result.model_dump(),
@@ -564,6 +567,13 @@ def _build_failure_record(
         "judge_llm_calls": None,
         "estimated_tokens": 0,
         "atomic_score": atomic,
+        "scope_audit": {
+            "checked_rule_count": len(tc.claim_audit_rules),
+            "issue_count": None,
+            "issues": [],
+            "passed": None,
+            "status": "not_evaluated",
+        },
         "lineage": lineage,
         "failure_attribution": failure_reason,
         "deterministic_guard": {

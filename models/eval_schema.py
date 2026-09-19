@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 
@@ -37,6 +37,30 @@ class AtomicGoldFact(BaseModel):
     note: Optional[str] = Field(default=None, description="備註說明（如推論依據）")
 
 
+class ClaimAuditRule(BaseModel):
+    """題目範圍與條件前提的 deterministic 答案審查規則。
+
+    這些規則只供離線評測使用，不會改變正式 chat 的生成或接地流程。
+    ``trigger_patterns`` 是答案文字中要掃描的字串；條件規則若缺少
+    ``required_condition_patterns`` 任一條件，就會產生風險事件。
+    """
+
+    id: str = Field(description="規則唯一識別碼")
+    kind: Literal["out_of_scope", "conditional", "role_mismatch"] = Field(
+        description="規則類型：範圍外、條件缺漏或角色／門檻錯置"
+    )
+    trigger_patterns: List[str] = Field(
+        default_factory=list, description="觸發規則的答案文字片段"
+    )
+    trigger_mode: Literal["all", "any"] = Field(
+        default="all", description="trigger_patterns 須全部或任一命中"
+    )
+    required_condition_patterns: List[str] = Field(
+        default_factory=list, description="conditional 規則要求答案明示的條件片段"
+    )
+    description: str = Field(default="", description="人工核對規則說明")
+
+
 class TestCase(BaseModel):
     """標準化評測題目"""
     id: str = Field(description="題目唯一識別碼，如 26-Q5")
@@ -61,6 +85,17 @@ class TestCase(BaseModel):
             "coreference_resolution/global_aggregation/interval_lookup/"
             "segmented_enumeration/distractor_adjacent/canary_refusal"
         ),
+    )
+    answer_scope: Optional[str] = Field(
+        default=None, description="答案應涵蓋的範圍與適用條件（離線審查用）"
+    )
+    required_claims: List[str] = Field(
+        default_factory=list,
+        description="人工定義的必要主張標籤；原子逐字真值仍以 atomic_gold_facts 為準",
+    )
+    claim_audit_rules: List[ClaimAuditRule] = Field(
+        default_factory=list,
+        description="題目範圍外主張與條件／角色錯置的 deterministic 審查規則",
     )
     trap_claim_spans: List[str] = Field(
         default_factory=list,
