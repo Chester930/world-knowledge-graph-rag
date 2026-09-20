@@ -657,6 +657,30 @@ AGGR15/17 在本次單次檢索中，`top_k=10` 已取回全部 gold span，較 
 - **重現資料與自動工具**：主要 checkout `.claude/tmp/rq1_scope_audit_20260919/{k_baseline_matched_v2,fact_rerank_control_matched_v2,fact_boundary_swap_matched_v2}/records.json`；評分器為 `scripts/eval/compare_scope_audit_runs.py`，決策 JSON 存於 worktree `.claude/tmp/scope_audit_auto_gate_matched_v2.json`。工具讀取 `atomic_score.atomic_accuracy`、`lineage.stage1_retrieval.recall_rate`、`lineage.stage1_retrieval.snr`、`scope_audit.passed`，並驗證 manifest、題庫雜湊、模型設定、arm及run編號。control與swap同雜湊 `46b7…a035`；baseline為 `a638…bae2`，比較器拒絕跨版本比較。新工具測試6/6通過，`py_compile`通過；完整 pytest 未重跑。
 - **下一步**：不要再重跑已完成且同雜湊的 control/swap。優先為 AGGR16 設計離線生成端條件完整性修正／拒答或再生成策略，維持相同檢索 context，以 matched control 與候選各跑3次並經自動 gate 評估；scope audit 未通過前不接入 `chat()`。若要回答與 dense baseline 的跨版本差異，再先凍結單一題庫快照並重跑全部組別。另將可驗證契約逐步擴至更多已驗證題目；覆蓋不足時不調正式檢索預設。
 
+### 4.19 第4組候選「終止條件比較」子題重啟：`57-AGGR18`／`57-AGGR19`（2026-09-20）
+
+**背景**：§4.6 曾因「§24 全空、§23/§84 漏抽認定機構差異」把這個子題跳過。附錄C 查明那是抽取執行失敗造成的不完整，12 個 failed／pending chunk 重抽補齊後（§24 由 0 筆變 5 筆，認定機構差異都抽到了），子題重啟。
+
+**出題前核對抓到一個錯誤假設**：原本設想「新法新增了預告規定（準用勞基法預告勞工／雇主）」。讀原文才發現**舊法第26條早已有同樣的兩項規定**，新法只是把它們併入第84條第2項與第85條第2項，實質相同。若照原假設出題，gold answer 會是錯的。改為以此作為「新舊法實質相同、只是位置不同」的錯誤前提陷阱題。
+
+| 題號 | mechanism_tags | 內容 |
+|---|---|---|
+| `57-AGGR18` | `cross_doc_multihop`＋`distractor_adjacent` | 認定「身心障礙不堪勝任工作」的機構：舊法為公立醫療機構（§23第2款、§24第1款），新法為中央衛生福利主管機關醫院評鑑合格醫院（§84第1項第2款、§85第1項第1款）；雇主與勞工兩方向的相鄰條文含同一句式 |
+| `57-AGGR19` | `cross_doc_multihop`＋`multi_fact_assembly` | 準用勞基法預告的規定：舊法在§26，新法在§84第2項與§85第2項，實質相同、不是新法新增 |
+
+兩題皆填入 `answer_scope` 與 `required_claims`（沿用 Codex 的題庫欄位）。8 個 exact_span 逐字核對 `original.md`，並讀 Neo4j 確認對應 Fact 存在（舊法 §26 的 Fact 措辭偏破碎但語意在）；題庫 63→65 題、verified 44→46。
+
+**K arm 基準（n=1，`--query-timeout-s 900`，共享 generator/judge，僅 pilot）**：
+
+| 題號 | Atomic Accuracy | Stage 1 Recall | SNR | 延遲 | 診斷 |
+|---|---|---|---|---|---|
+| `57-AGGR18` | **100%**（4/4） | 100% | 10.5% | 103秒 | **檢索與原子評分都滿分，但答案把新舊法寫反**：「新法規定由公立醫療機構認定，而舊法則規定由中央衛生福利主管機關醫院評鑑合格醫院認定」 |
+| `57-AGGR19` | 50%（2/4） | 100% | 12.3% | 196秒 | 4 個 gold fact 都進入 prompt，但答案宣稱「事實清單中並未明確指出這些規定在哪一條文中有明文規定」，並混入無關內容（例如「疑似有身心障礙」）；缺勞工預告的兩個 span |
+
+**最重要的觀察——原子評分的盲點**：`57-AGGR18` 的四個 gold span 只是**文字**出現在答案裡，AtomicScorer 就判為 supported，並不檢查「哪一部法對應哪個機構」。所以一個結論完全相反的答案得到 100%。這正是 Codex 的 scope audit（`role_mismatch`）要補的缺口。我依這次**實際觀察到的錯答**為 `57-AGGR18` 寫了一條規則（`aggr18-institution-swapped`），對存檔的真實答案會觸發、對標準答案與正確改寫不會觸發，並加了回歸測試。**限制**：規則是子字串比對，只涵蓋已觀察到的幾種句型，高精確度、低召回，屬 pilot；正式做法應是語意層面的歸屬核對。`57-AGGR19` 沒有觀察到我原先擔心的「誤稱新法新增」，而是另一種失敗（有事實卻宣稱沒記載），因此未為它寫規則。
+
+**限制**：單次執行、共享 generator/judge；同題重複執行結果可能不同（見 §4.11 補充觀察）。新增兩題改變了題庫雜湊，Codex 先前的 matched-v2 對照產物（舊題庫雜湊）仍自洽，但日後與新題庫的執行不可直接互比。
+
 ---
 
 ## 5. 執行順序建議與進度

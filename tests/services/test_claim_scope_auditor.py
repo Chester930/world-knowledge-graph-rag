@@ -72,3 +72,44 @@ def test_any_trigger_rule_accepts_one_matching_pattern():
 
     assert result["passed"] is False
     assert result["issue_count"] == 1
+
+
+def _bank_case(question_id: str) -> EvalTestCase:
+    import json
+    from pathlib import Path
+
+    bank = Path(__file__).resolve().parents[2] / "data" / "eval" / "test_cases.json"
+    data = json.loads(bank.read_text(encoding="utf-8"))
+    row = next(q for q in data["questions"] if q["id"] == question_id)
+    return EvalTestCase(**row)
+
+
+def test_aggr18_swapped_institution_answer_is_flagged_even_when_atomic_facts_present():
+    # 2026-09-20 K-arm 基準跑實際觀察到的答案：四個 gold span 的文字都出現，
+    # 但新舊法歸屬寫反，Atomic Accuracy 仍為 100%。
+    observed_wrong = (
+        "新法（勞工職業災害保險及保護法）：\n"
+        "- 職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作\n\n"
+        "舊法（職業災害勞工保護法）：\n"
+        "- 職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作\n\n"
+        "因此，新法規定由公立醫療機構認定，而舊法則規定由中央衛生福利主管機關醫院評鑑合格醫院認定。"
+    )
+    case = _bank_case("57-AGGR18")
+
+    result = audit_answer_scope(observed_wrong, case)
+
+    assert result["passed"] is False
+    assert result["issues"][0]["rule_id"] == "aggr18-institution-swapped"
+
+
+def test_aggr18_gold_answer_and_correct_paraphrase_pass():
+    case = _bank_case("57-AGGR18")
+    correct_paraphrase = (
+        "舊法（職業災害勞工保護法）：\n"
+        "- 職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作\n\n"
+        "新法（勞工職業災害保險及保護法）：\n"
+        "- 職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作\n"
+    )
+
+    assert audit_answer_scope(case.gold_answer, case)["passed"] is True
+    assert audit_answer_scope(correct_paraphrase, case)["passed"] is True
