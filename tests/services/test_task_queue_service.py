@@ -93,6 +93,76 @@ class TestNextPending:
         assert svc.next_pending(db_path, "kg-1") is None
 
 
+class TestClaimNextPending:
+    """`claim_next_pending()`：多 Worker 版的原子「挑選 + 認領」。"""
+
+    def test_claims_lowest_chunk_index_and_marks_processing(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        svc.enqueue(db_path, "kg-1", "doc.txt", [3, 1, 2])
+
+        assert svc.claim_next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 1)
+        # 認領後該列已是 processing，下一次 claim 應拿到 chunk 2
+        assert svc.claim_next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 2)
+        # next_pending() 也看得到剩下的 pending（chunk 3）
+        assert svc.next_pending(db_path, "kg-1") == ("kg-1", "doc.txt", 3)
+
+    def test_returns_none_when_no_pending(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        assert svc.claim_next_pending(db_path, "kg-1") is None
+        svc.enqueue(db_path, "kg-1", "doc.txt", [1])
+        svc.update_status(db_path, "kg-1", "doc.txt", 1, "processing")
+        assert svc.claim_next_pending(db_path, "kg-1") is None
+
+    def test_kg_scoped_claim_ignores_other_kg(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        svc.enqueue(db_path, "kg-2", "doc-b.txt", [1])
+        svc.enqueue(db_path, "kg-1", "doc-a.txt", [5])
+
+        assert svc.claim_next_pending(db_path, "kg-1") == ("kg-1", "doc-a.txt", 5)
+        # kg-2 的項目未被碰到
+        assert svc.next_pending(db_path, "kg-2") == ("kg-2", "doc-b.txt", 1)
+
+    def test_unscoped_claim_spans_all_kg(self, tmp_path):
+        db_path = _db_path(tmp_path)
+        svc.enqueue(db_path, "kg-2", "doc-b.txt", [5])
+        svc.enqueue(db_path, "kg-1", "doc-a.txt", [1])
+
+        assert svc.claim_next_pending(db_path) == ("kg-1", "doc-a.txt", 1)
+
+    def test_concurrent_claims_never_hand_out_the_same_chunk(self, tmp_path):
+        """核心保證：多個 Worker 執行緒同時 `claim_next_pending()`，每個
+        (kg_id, source, chunk_index) 只會被認領一次——不會重複抽取、產生
+        重複 Fact 節點。這是 `next_pending()`（SELECT 後由呼叫端另外轉
+        processing）在多 Worker 下做不到的。"""
+        import threading
+
+        db_path = _db_path(tmp_path)
+        total = 300
+        svc.enqueue(db_path, "kg-1", "doc.txt", list(range(total)))
+
+        claimed: list[tuple[str, str, int]] = []
+        lock = threading.Lock()
+
+        def worker() -> None:
+            while True:
+                item = svc.claim_next_pending(db_path, "kg-1")
+                if item is None:
+                    return
+                with lock:
+                    claimed.append(item)
+
+        threads = [threading.Thread(target=worker) for _ in range(4)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=30)
+
+        assert all(not t.is_alive() for t in threads), "worker 執行緒逾時（可能死鎖）"
+        assert len(claimed) == total, f"認領數 {len(claimed)} != {total}"
+        assert len(set(claimed)) == total, "有 chunk 被認領超過一次"
+        assert svc.next_pending(db_path, "kg-1") is None
+
+
 class TestInterruptionHandling:
     def test_reset_stuck_processing_reverts_to_pending(self, tmp_path):
         db_path = _db_path(tmp_path)
