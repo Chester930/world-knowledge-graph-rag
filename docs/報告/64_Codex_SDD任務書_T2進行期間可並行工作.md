@@ -31,7 +31,7 @@ sdd 分支相對 `master` 改動的檔案（`git diff --stat master...worktree-s
 | TASK-A A 案：事實行加來源標籤（實作＋評測） | 報告63 §8.4、§10.5 | **不可** | ① 需 T2 完成（Ollama）；② 需使用者裁示（§6）；③ 與 sdd 分支 `routers/agent.py` 衝突（T0 已改 `_build_prompt(trace_sink=)`）；必須從 sdd 最新狀態接續 | 暫不派工 |
 | TASK-B few-shot 參數化（報告33「3b」） | 報告63 §10 斷點1 | **不可** | R4 風險（空 few-shot 使 qwen 抽取變差）需 eval；需 Ollama；`KGConfig` 目前全為 scalar，首個 list 欄位須設計為 `tuple`（§6）；需使用者裁示 | 暫不派工 |
 | TASK-C 實體型別「概念」成因診斷 | 報告63 §9.4 | **不可** | 需以現行 prompt＋`qwen2.5:7b` 小樣本重抽（不寫入）→ 需 Ollama 空閒 | 待 T2 完成 |
-| TASK-D Fact 層級雙時態（RQ5） | 報告63 §9.6 | **不啟動** | 資料先於模型：`Document.effective_date` 目前為 `None`、`law_histories` 未匯入 | 不派工 |
+| TASK-D Fact 層級雙時態（RQ5） | 報告63 §9.6 | **不啟動** | 資料先於模型：`Document.effective_date` 僅 15/64 有值（AGGR18 涉及的兩部法皆為 `None`）、`law_histories` 未匯入 | 不派工 |
 | TASK-E Worker／`trigger_extraction()` 讀取 per-KG 設定 | 報告63 §10 斷點2 | **不可** | 需 TASK-1 完成；且改變產線讀設定行為，需使用者裁示 | 暫不派工 |
 | TASK-F 三份 Gemini 檔案整理入庫／校正版缺口紀錄表 | 報告63 §9.5 | **需使用者決策** | 是否入庫、是否編號 | 待裁示 |
 
@@ -224,7 +224,7 @@ T2 Stage A 正在執行（42 題、`top_k=40`、每題 1 次；輸出 `…\.clau
 
 - `data/eval/test_cases.json`：`questions[]`，每題含 `id`、`question`、`scenario_type`、`atomic_gold_facts[]`（每筆含 `exact_span`、`source_law`（如 `N0060041_職業災害勞工保護法`）、`source_article`）、`mechanism_tags`。**共 65 題**。
 - `data/eval/baseline_runs/20260920_frozen/frozen_manifest.json`：`eligible_ids`（**42 題**凍結範圍）、`kg_id`（`236903cf-055a-40a8-8923-b9d06601f3b7`）、`kg_fact_total`（16826）、`kg_entity_total`（12290）。**不得修改**。
-- Neo4j（唯讀）：`Fact {kg_id}` 屬性有 `fact_text, subject, verb, object, source_doc_id, source_svo_chunk_index, rel_type, confidence`（**沒有 `article_no`**，條號在 `SUPPORTED_BY` 邊到 `LawArticle.article_no`；`Document.title` 為法規名；`Document.effective_date` 目前為 `None`）；`fact_embedding` 是大向量欄位，**查詢時不得回傳**。
+- Neo4j（唯讀）：`Fact {kg_id}` 屬性有 `fact_text, subject, verb, object, source_doc_id, source_svo_chunk_index, rel_type, confidence`（**沒有 `article_no`**，條號在 `SUPPORTED_BY` 邊到 `LawArticle.article_no`；`Document.title` 為法規名；`Document.effective_date` 僅 15/64 有值，AGGR18 涉及的兩部法為 `None`）；`fact_embedding` 是大向量欄位，**查詢時不得回傳**。
 - 連線設定：本 worktree 沒有 `.env`。請從主 checkout 的 `.env` 讀取 `NEO4J_URI`／`NEO4J_USER`／`NEO4J_PASSWORD`（目前 `bolt://localhost:17990`），**不得印出、記錄或 commit 任何憑證**；以環境變數或讀取後只留在記憶體使用。
 - Phase 2 輸入：`…\.claude\worktrees\sdd-retrieval-comparison\data\eval\candidate_runs\t2_k1_topk40_stage_a\records.json`（T2 Stage A 輸出，**只讀**，且要等 Stage A 完整跑完；每筆 `lineage` 內有 `prompt_context_lines` 與 `retrieval_trace[]`，欄位 `kind, rank, text, score, source_doc_id, source_svo_chunk_index, article_no, in_prompt`）。
 
@@ -285,7 +285,7 @@ T2 Stage A 正在執行（42 題、`top_k=40`、每題 1 次；輸出 `…\.clau
 - [ ] Neo4j 只用 READ session；沒有寫入、沒有建索引；查詢不回傳向量欄位；分批、總耗時與列數已記錄。
 - [ ] Phase 1 三項產出齊全；**未配對 span、找不到的題目 ID 都有列出**。
 - [ ] 42 題範圍以 `frozen_manifest.json` 的 `eligible_ids` 為準（不是 65 題）。
-- [ ] `summary.md` 明列所有定義（正規化、Jaccard、句框重疊、同文異源、多法規字眼清單）與**限制**（例如：`Document.effective_date` 全 `None`；Jaccard 與句框重疊都只是字面度量、未涵蓋語意相似；句框重疊是依 AGGR18 形態設計的探索性度量，未經驗證為歧義判準）。
+- [ ] `summary.md` 明列所有定義（正規化、Jaccard、句框重疊、同文異源、多法規字眼清單）與**限制**（例如：`Document.effective_date` 僅 15/64 有值（**2026-09-21 更正：原任務書誤寫「全 `None`」**）；Jaccard 與句框重疊都只是字面度量、未涵蓋語意相似；句框重疊是依 AGGR18 形態設計的探索性度量，未經驗證為歧義判準）。
 - [ ] 沒有呼叫 LLM／embedding、沒有修改題庫或凍結目錄、沒有 commit 憑證或大量原始 KG 資料（輸出只含統計與範例）。
 - [ ] 新增測試全通過，且全套 `pytest` 無新增失敗。
 
@@ -312,7 +312,7 @@ T2 Stage A 正在執行（42 題、`top_k=40`、每題 1 次；輸出 `…\.clau
 ### TASK-A A 案（事實行加來源標籤）— 解鎖條件
 
 1. T2 Stage A（含其依 `adaptive_repeat.py` 的補跑）已完成，Ollama 空閒。
-2. **使用者裁示**（報告63 §8.4、§10.5）：(a) 是否接續；(b) 採用規則的數值與判定（AGGR18 ≥3 次且歸屬**人工核對**；凍結 42 題達標數不低於 12 且原達標 12 題不得新增失敗）；(c) 標籤第一版只放「法規名＋條號」（實測 `Document.effective_date` 全 `None`）；(d) 旗標位置：建議放 `KGConfig.domain`、評測以 `ConfigLoader.load(..., request_overrides=)` 切換，而非新增 `ChatRequest` 欄位。
+2. **使用者裁示**（報告63 §8.4、§10.5）：(a) 是否接續；(b) 採用規則的數值與判定（AGGR18 ≥3 次且歸屬**人工核對**；凍結 42 題達標數不低於 12 且原達標 12 題不得新增失敗）；(c) 標籤第一版只放「法規名＋條號」（實測 AGGR18 涉及的兩部法 `effective_date` 皆為 `None`；全 KG 僅 15/64 有值）；(d) 旗標位置：建議放 `KGConfig.domain`、評測以 `ConfigLoader.load(..., request_overrides=)` 切換，而非新增 `ChatRequest` 欄位。
 3. 基底必須是 **sdd 分支最新 commit**（不是 `master`），因為 `routers/agent.py` 的 `_build_prompt()` 已被 T0 改動。
 4. TASK-3 的候選題清單可作為評測題目來源（避免 n=1）。
 5. 必須用**同一個格式函式**同時服務 `chat()`（`_split_fact_lines()`）與 harness K 臂（把 `retrieved_texts` 原樣當 `context_lines`，報告62 §10.2）兩條路徑。

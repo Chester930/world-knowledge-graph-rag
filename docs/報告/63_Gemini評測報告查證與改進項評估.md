@@ -244,7 +244,7 @@
 | 04 | P0 | 條件與法效果割裂（舉特休分段句為例） | ❌ | **KG 實查**：「特別休假 五年以上十年未滿者 每年十五日」是**同一筆 Fact**，條件與天數已綁定（見 (c)）。通用的分段綁定弱點屬已知議題（論文 §3.1.3 三道守衛、報告32 分段），但 Gemini 舉的例子不成立 |
 | 05 | P1 | 實體型別貧血 | ⚠️ | 機制存在（§2.1），但**實測 65.3% 為預設「概念」、6.5% 為空**（見 §9.4）——初版判「不成立」已更正。另：`entity_registry_service` 在法規路徑被略過（同 GAP-02 出處），Gemini 指的模組不是問題所在 |
 | 06 | P0 | 缺 Relator，導致主體歸屬錯置（AGGR18 根因） | ❌ | **診斷不成立**：AGGR18 的 4 筆 Fact 都能經 `SUPPORTED_BY→LawArticle→Document` 回溯到正確法規名與條號（見 (b)）——**歸屬資訊完整存在於圖中，只是沒有送進 prompt**。所引 `HANDOVER.md` 該段只記載「評分器不檢查歸屬」，**沒有**「LLM 自行排列組合」這個因果論述，那是 Gemini 的推測 |
-| 07 | P0 | Fact 缺雙時態；且稱 Fact 有 `source_article_no` | ✅／⚠️ | 缺口屬實，且已在論文 §3.5 RQ5 規劃。**但**：Fact 節點屬性實查為 `kg_id, source_doc_id, verb, confidence, fact_embedding, fact_text, subject, rel_type, source_svo_chunk_index, object`——**沒有 `article_no`**（條號在 `SUPPORTED_BY→LawArticle`）；且**這 4 部法的 `Document.effective_date` 全為 `None`**，依施行日的機制目前拿不到值 |
+| 07 | P0 | Fact 缺雙時態；且稱 Fact 有 `source_article_no` | ✅／⚠️ | 缺口屬實，且已在論文 §3.5 RQ5 規劃。**但**：Fact 節點屬性實查為 `kg_id, source_doc_id, verb, confidence, fact_embedding, fact_text, subject, rel_type, source_svo_chunk_index, object`——**沒有 `article_no`**（條號在 `SUPPORTED_BY→LawArticle`）；且 **AGGR18 涉及的兩部法（4 筆 Fact）的 `Document.effective_date` 皆為 `None`**（全 KG 64 個 Document 中僅 15 個有值，見 §11.2），依施行日的機制對這兩部法拿不到值。*（2026-09-21 更正：初版誤寫「這 4 部法」——實為 2 部法、4 筆 Fact；並補上全 KG 分布。）* |
 | 08 | P1 | 原子評分器不檢查歸屬 | ✅ | 屬實且已知（報告57 §4.19／§4.20），已有 `role_mismatch` pilot 規則；`atomic_scorer.py` 已有語意 fallback（報告55），Gemini 說「只比字串」略過時，但歸屬確實不檢查 |
 | 09 | P2 | 範圍審查器僅規則式硬比對 | ✅ | 屬實且為刻意設計：`claim_scope_auditor.py:1-7, 36-37` 自述 deterministic、offline、never calls an LLM，正規化後子字串比對。加 NLI 二次複查的方向合理，可重用報告55 的語意比對層 |
 
@@ -298,7 +298,7 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 ### 9.6 對 §8 A 案與待裁示事項的影響
 
 1. **診斷證據升級（§8.2）**：除 T0 trace 外，KG 層也確認 **Fact 文字本身不含法規名**（§9.3(b)），且來源可經兩跳取得。「prompt 缺來源標籤」由「程式碼推論＋trace 旁證」升為「KG 直接證據」。仍缺的是 AGGR18 **本題**的 `prompt_context_lines`（T2 Stage A 尚未跑到）與「加標籤會降低歸屬錯誤」的**因果驗證**（仍須對照實驗）。
-2. **§8.4 待裁示 (c)「標籤第一版只用法規名＋條號」**：實測這 4 部法的 `effective_date` 皆為 `None`，**放施行日無資料可用**，所以第一版只放法規名＋條號是**資料面的必然，不只是偏好**。建議裁示為同意。
+2. **§8.4 待裁示 (c)「標籤第一版只用法規名＋條號」**：實測 AGGR18 涉及的兩部法（新法與舊法）`effective_date` 皆為 `None`（全 KG 64 個 Document 僅 15 個有值），**對這兩部法放施行日無資料可用**，所以第一版只放法規名＋條號是**資料面的必然，不只是偏好**。建議裁示為同意。*（更正：初版誤寫「這 4 部法」，實為 2 部法。）*
 3. **B 案（雙時態）受資料限制**：`Document.effective_date` 為 `None` 且來源只到整份法規層級精度（論文 §3.5 已誠實標註）；要做逐條時態，必須先匯入 `law_histories`，這是**資料工程先於模型設計**。
 4. **C 案優先序小幅上修**（§9.4），但仍在 A 之後。
 
@@ -401,3 +401,58 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 ### 11.5 本輪未做
 
 未實作任何項目；未檢查該計畫所稱的「手動驗證」情境；未查 `law_histories` 是否可取得；未評估 `legislationLegalForce` 類屬性的實際資料來源。
+
+## 12. Codex 任務審核紀錄（依報告 64；審核者：Claude，2026-09-21）
+
+審核方式：把 Codex 的分支以 `git archive` 匯出到暫存目錄（不動其分支），**獨立重跑完整測試、對關鍵邏輯做突變測試、獨立重算輸出數字**。未修改 Codex 的分支。
+
+### 12.1 TASK-1 抽取端門檻接線（`codex/task1-extraction-cfg-wiring`，`75f1777`，已推送）——**驗收通過**
+
+| 項目 | 結果 |
+|---|---|
+| 完整測試 | 動工前 1011 → 完成後 **1022 passed**（獨立重跑相同） |
+| 既有測試 | `tests/` 只新增 1 檔（325 行）、0 行刪除 |
+| 接線 | 五個門檻全改讀 `cfg`（`cfg=None`＝`KGConfig()`＝原常數）；兩次補抽共用同一 `cfg`；只有 `expand_worker.commit_and_backfill()` 增加選填轉傳；外部呼叫端皆未傳 `cfg` |
+| **突變測試** | 破壞 10 處（還原 6 個門檻讀取、拆掉 4 個轉傳）→ **10/10 被新測試抓到**，無存活 |
+| 額外檢查 | 移除 `svo_service` 對 `ENTITY_DEDUP_*` 的 import（超出任務書明文）：搜尋 sdd、reextract-v2、Codex 分支，無 `svo_service.ENTITY_DEDUP_*` 的引用 |
+| 小問題 | ① Codex 回報「台積電／台積電公司 編輯比率註解為 0.833」不成立——0.833 是「新臺幣四千元／八千元」的註解，台積電的比率為 0.75，任務書無誤；② `COMPARE_COSINE_THRESHOLD` 在 `svo_service.py` 只剩為既有測試保留的 import；③ 每次呼叫新建 `KGConfig()`（含逐實體的 `resolve_entity_name`），未量測成本，與既有 `resolve_query_relation_type` 同寫法 |
+
+### 12.2 TASK-3 Phase 1 來源歧義盤點（`codex/task3-source-ambiguity-audit`，`39b7301`，已推送）——**有條件通過：需一次小修**
+
+**獨立驗證通過的部分**
+- 完整測試 **1025 passed**（動工前 1011＋新增 14），獨立重跑相同。
+- 安全面：Neo4j 只用 `READ_ACCESS` session、串流分批、無寫入語句；輸出檔不含憑證或向量欄位。
+- **獨立重算 P1-a**：我以不同方法（不經 `LawArticle` join，改用 `Fact.source_doc_id`；另用 Codex 的 join 母體各算一次）重算，**同文異源文字 189、涉及 Fact 439 兩種母體都吻合**；相異正規化文字 16,180（join 母體）吻合。
+- AGGR18 驗算基準（Jaccard 0.489／0.262、frame_overlap 0.806／0.632 等）在**真實 KG** 上與預期一致；四個主配對條號 §23／§24／§84／§85 正確。
+- 我先前手算的推論成立且被如實回報：舊法 §23 的 span 會額外配到同法 §24（並另配到 §18），新法 §84 的 span 會配到舊法 §18。
+
+**突變測試：11 個突變中 3 個存活（新測試的缺口，需補）**
+
+| 存活突變 | 意義 |
+|---|---|
+| M3：配對最短長度 8→1 | 任務書 §5.5 要求「長度 <8 → 不配對」的測試，實際沒有涵蓋 |
+| M5：跨文件度量改為只比同文件的配對 | 「同文件不計入跨文件度量」沒有被測試保護（真實輸出正確，但回歸時抓不到） |
+| M11：單一法規題也計算跨文件度量 | 任務書 §5.5 要求「`n_source_laws=1` → 三個跨法度量為 `null`」的測試，實際沒有涵蓋 |
+
+其餘 8 個突變（frame_overlap 的上限與後綴、主配對條號反轉、候選門檻、同文異源門檻、正規化空白、Jaccard 分母、候選排序方向）皆被抓到。
+
+**輸出內容的問題與發現**
+1. **summary 的限制聲明有誤**：寫「`Document.effective_date` 全 `None`」。這是**我任務書的錯誤**（§11 實查為 15/64 有值），Codex 照抄。已於報告 64 更正；Codex 的 `summary.md` 也需更正。
+2. **53 筆 Fact 差異未診斷**：全 KG 16,826 筆、Codex 取得 16,773 筆。我查出：**這 53 筆全來自同一份文件（`source_doc_id=c8298529-91e4-56b3-bf2b-32e847635de4`），沒有 `SUPPORTED_BY→LawArticle`，因此被 join 排除**；內容含「附表一之項次…」「有機溶劑作業場所 包含…」等附表類事實（與報告 63 §9.3(e) 的附表跡象同一類）。碰撞數字不受影響（兩種母體皆 189／439），但 summary 應記載原因。
+3. **`gold_exact_collision` 為真的題只有 `57-AGGR10`**，但它不是候選（`n_source_laws<2`），summary 沒有單獨列出。這是「gold 事實本身在另一部法規有同文」的直接暴露案例，應另列。
+4. **span 配對覆蓋不完整**：101 個 gold span 中 **35 個（34.7%）未配對**；19 題全配對、23 題有未配對、**8 題完全沒配對**（例如 `57-AGGR5`、`57-AGGR17` 的多個 span）。配對規則刻意保守（互相包含且 ≥8 字、不用 embedding），**未配對不等於 KG 沒有該事實**——可能是抽取後措辭與原文句子不同。
+5. **A 案可評測的題目只有 3 題，且全是同一對法規**：候選（`n_source_laws≥2` 且題目含對照字眼）為 `57-AGGR18`（frame_overlap 0.806）、`57-AGGR19`（0.467）、`57-AGGR6`（無跨文件度量——其舊法側 2 個 span 未配對）。**A 案評測不會再只有 n=1，但是 n=3，而且全是「職業災害勞工保護法 vs 勞工職業災害保險及保護法」這一對**，外推性很弱。要擴充需新增題目，而新增題目會改變題庫雜湊（`HANDOVER.md` 第 8 點凍結條件）。
+6. 全域碰撞的量級：涉及碰撞的 Fact 439／16,773＝**2.6%**；前幾名多為跨法規的樣板句（「本法施行細則 由 中央主管機關定之」8 部法、「主管機關 在中央為 勞動部」7 部法）。**這是「無標籤裸行」在 KG 全域確實同文異源的量化證據，但比例不大**；AGGR18 這類「同句框不同槽位」的歧義不在這 2.6% 之內。
+
+### 12.3 待 Codex 的一次小修（TASK-3 收尾，建議一個 commit）
+
+1. 補三個測試（§12.2 M3／M5／M11），並在回報中證明它們能抓到對應突變。
+2. 更正 `summary.md`：`effective_date` 為 15/64 有值（AGGR18 兩部法為 `None`）。
+3. `summary.md` 補：53 筆 Fact 差異的原因（單一文件、無 `LawArticle`、含附表類事實，對碰撞統計無影響）；單獨列出 `gold_exact_collision` 題（`57-AGGR10`）；明列「35/101 span 未配對、8 題完全未配對」為主要限制。
+4. 不需要重新查詢 Neo4j（以上皆可由既有輸出與本節資訊補充）；若需要重跑腳本，請維持原有唯讀約束。
+
+### 12.4 對報告 §8 A 案的影響
+
+- 評測題目：見 §12.2 第 5 點——**n=3、單一法規對**，比原本 n=1 好，但仍窄。
+- **全 KG 有 2.6% 的 Fact 與他法同文**，標籤對這類事實的作用是確定的；對 AGGR18 型「同句框」的作用仍需靠對照實驗。
+- 這些量化結果**不能證明標籤有效**，只界定了「哪裡可能有效」與「能用幾題檢驗」。
