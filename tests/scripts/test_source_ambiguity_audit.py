@@ -9,6 +9,7 @@ from scripts.analysis.source_ambiguity_audit import (
     article_number,
     build_question_audit,
     candidate_questions,
+    complete_aggr18_article_matches,
     frame_overlap,
     global_collision_report,
     jaccard_similarity,
@@ -206,6 +207,55 @@ def test_aggr18_preflight_requires_four_expected_main_facts_and_metrics():
         "84": ["84"],
         "85": ["84", "85"],
     }
+
+
+def test_complete_aggr18_matches_preserve_short_fact_and_cross_law_extra():
+    citations = [
+        *aggr18_citations(),
+        make_citation(
+            "18",
+            "職業災害勞工 經醫療終止後",
+            "N0060041",
+            "職業災害勞工保護法",
+        ),
+    ]
+    audit = analyze_question(aggr18_question(), citations, {})
+    matches = complete_aggr18_article_matches(audit)
+
+    assert matches == [
+        {
+            "source_article": "第23條第2款",
+            "gold_article_no": "23",
+            "primary_article_nos": ["23"],
+            "extra_same_law_article_nos": ["18", "24"],
+            "other_law_article_nos": [],
+            "unresolved_law_article_nos": [],
+        },
+        {
+            "source_article": "第24條第1款",
+            "gold_article_no": "24",
+            "primary_article_nos": ["24"],
+            "extra_same_law_article_nos": ["23"],
+            "other_law_article_nos": [],
+            "unresolved_law_article_nos": [],
+        },
+        {
+            "source_article": "第84條第1項第2款",
+            "gold_article_no": "84",
+            "primary_article_nos": ["84"],
+            "extra_same_law_article_nos": [],
+            "other_law_article_nos": ["18"],
+            "unresolved_law_article_nos": [],
+        },
+        {
+            "source_article": "第85條第1項第1款",
+            "gold_article_no": "85",
+            "primary_article_nos": ["85"],
+            "extra_same_law_article_nos": ["84"],
+            "other_law_article_nos": [],
+            "unresolved_law_article_nos": [],
+        },
+    ]
 
 
 def test_question_analysis_uses_gold_laws_and_null_metrics_for_single_law():

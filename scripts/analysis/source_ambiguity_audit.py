@@ -777,6 +777,56 @@ def build_question_audit(
     return [analyze_question(question, unique, docs_by_text) for question in questions]
 
 
+def complete_aggr18_article_matches(question_audit: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """從完整 P1-b Fact 集合整理 AGGR18 條號主配對、同法額外與跨法文字配對。"""
+    complete_matches = []
+    for span in question_audit.get("span_results", []):
+        matches = span.get("matches", [])
+        complete_matches.append(
+            {
+                "source_article": span.get("source_article"),
+                "gold_article_no": span.get("gold_article_no"),
+                "primary_article_nos": sorted(
+                    {
+                        match["matched_article_no"]
+                        for match in matches
+                        if match["matched_article_equals_gold"]
+                        and match["matched_article_no"]
+                    },
+                    key=lambda value: (int(value.split("-")[0]), value),
+                ),
+                "extra_same_law_article_nos": sorted(
+                    {
+                        match["matched_article_no"]
+                        for match in matches
+                        if match["pair_type"] == "額外配對（同法他條）"
+                        and match["matched_article_no"]
+                    },
+                    key=lambda value: (int(value.split("-")[0]), value),
+                ),
+                "other_law_article_nos": sorted(
+                    {
+                        match["matched_article_no"]
+                        for match in matches
+                        if match["pair_type"] == "其他法規文字配對"
+                        and match["matched_article_no"]
+                    },
+                    key=lambda value: (int(value.split("-")[0]), value),
+                ),
+                "unresolved_law_article_nos": sorted(
+                    {
+                        match["matched_article_no"]
+                        for match in matches
+                        if match["pair_type"] == "法規歸屬未能判定"
+                        and match["matched_article_no"]
+                    },
+                    key=lambda value: (int(value.split("-")[0]), value),
+                ),
+            }
+        )
+    return complete_matches
+
+
 def candidate_questions(question_audits: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     candidates = [
         audit
@@ -1013,9 +1063,9 @@ def _build_summary_markdown(
 |---|---:|---:|---:|---:|
 {preflight_metrics}
 
-同法條號包含配對（實際 KG）：
+完整 KG 配對（由 P1-b 全域 Fact 結果計算；「其他法規」保留分列）：
 
-{chr(10).join('- ' + item['source_article'] + ' → same-law articles ' + ', '.join('§' + article for article in item['matched_same_law_article_nos']) for item in preflight['matched_same_law_articles_by_span'])}
+{chr(10).join('- ' + item['source_article'] + ' → 主配對 ' + (', '.join('§' + article for article in item['primary_article_nos']) or '無') + '；同法額外 ' + (', '.join('§' + article for article in item['extra_same_law_article_nos']) or '無') + '；其他法規 ' + (', '.join('§' + article for article in item['other_law_article_nos']) or '無') for item in preflight['complete_matched_articles_by_span'])}
 
 ## P1-a：KG 全域同文異源
 
@@ -1166,6 +1216,15 @@ def run_phase1(
         )
 
     question_audits = build_question_audit(questions, citations)
+    aggr18_audit = next(
+        (audit for audit in question_audits if audit["id"] == "57-AGGR18"),
+        None,
+    )
+    if aggr18_audit is None:
+        raise RuntimeError("完整題目盤點找不到 57-AGGR18")
+    preflight["complete_matched_articles_by_span"] = complete_aggr18_article_matches(
+        aggr18_audit
+    )
     candidate_report = candidate_questions(question_audits)
     generated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     current_commit = git_commit()
@@ -1193,6 +1252,7 @@ def run_phase1(
         "extra_pair_rule": "gold 法規相同但 LawArticle.article_no 不同",
         "questions": question_audits,
         "candidate_report": candidate_report,
+        "aggr18_preflight": preflight,
     }
     summary = _build_summary_markdown(
         generated_at=generated_at,
