@@ -3123,6 +3123,7 @@ async def backfill_related_to_edges(
     *,
     llm_provider: LLMProvider | None = None,
     top_k: int = 100,
+    cfg: KGConfig | None = None,
 ) -> int:
     """3.1.3 §a-1 BACKFILL：`EXPAND` 核准新型別後，對該 KG 既有的 `RELATED_TO`
     邊做一次向量索引查詢，把 `verb_embedding` 與新型別描述句夠相似
@@ -3149,6 +3150,7 @@ async def backfill_related_to_edges(
     不改寫任何邊（回傳 0）**，不會退回「純 cosine 分數即可改寫」的舊行為——
     這是刻意的保守預設，不是遺漏。
     """
+    _cfg = cfg or KGConfig()
     query_vector = await embedding_provider.encode(new_type_description)
     result = await driver.execute_query(
         """
@@ -3162,7 +3164,7 @@ async def backfill_related_to_edges(
         kg_id=str(kg_id),
         top_k=top_k,
         query_vector=query_vector,
-        threshold=COMPARE_COSINE_THRESHOLD,
+        threshold=_cfg.reltype.compare_cosine_threshold,
     )
 
     if llm_provider is None:

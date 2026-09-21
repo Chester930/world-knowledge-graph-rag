@@ -268,3 +268,30 @@ async def test_merge_triples_to_graph_forwards_cfg_to_both_entities(monkeypatch)
     await svc.merge_triples_to_graph(FakeDriver(), kg_id, [triple], cfg=cfg)
 
     assert received_cfgs == [None, None, cfg, cfg]
+
+
+@pytest.mark.asyncio
+async def test_backfill_related_to_edges_uses_cfg_compare_threshold():
+    class FakeEmbedding:
+        async def encode(self, text: str) -> list[float]:
+            return [1.0]
+
+    class FakeDriver:
+        def __init__(self):
+            self.calls = []
+
+        async def execute_query(self, query, **kwargs):
+            self.calls.append((query, kwargs))
+            return SimpleNamespace(records=[])
+
+    driver = FakeDriver()
+    args = (driver, uuid4(), "NEW_TYPE", "new type description", FakeEmbedding())
+    default_count = await svc.backfill_related_to_edges(*args)
+    explicit_default_count = await svc.backfill_related_to_edges(*args, cfg=KGConfig())
+    overridden_count = await svc.backfill_related_to_edges(
+        *args, cfg=KGConfig(reltype=RelTypeConfig(compare_cosine_threshold=0.91)),
+    )
+
+    thresholds = [params["threshold"] for _, params in driver.calls]
+    assert default_count == explicit_default_count == overridden_count == 0
+    assert thresholds == [0.75, 0.75, 0.91]
