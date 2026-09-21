@@ -990,12 +990,49 @@ def _build_summary_markdown(
     if not candidate_lines:
         candidate_lines.append("| — | 無符合條件題目 | — | — | — | — | — | — |")
 
+    candidate_ids = set(candidates["candidate_ids_in_rank_order"])
+    exact_collision_lines = []
+    for audit in question_audits:
+        if not audit.get("gold_exact_collision"):
+            continue
+        if audit["id"] in candidate_ids:
+            status = f"列入候選（rank={audit['candidate_rank']}）。"
+        else:
+            exclusions = []
+            if audit["n_source_laws"] < 2:
+                exclusions.append(
+                    f"n_source_laws={audit['n_source_laws']}，低於候選門檻 n_source_laws >= 2"
+                )
+            if not audit["q_mentions_multi_law"]:
+                exclusions.append("q_mentions_multi_law=false")
+            status = "未列為候選：" + ("；".join(exclusions) or "未符合候選條件。")
+        exact_collision_lines.append(
+            f"- `{audit['id']}`：`gold_exact_collision=true`；{status}"
+        )
+    if not exact_collision_lines:
+        exact_collision_lines.append("- 無 `gold_exact_collision=true` 的題目。")
+
     unmatched_lines = []
     for audit in question_audits:
         for span in audit["unmatched_spans"]:
             unmatched_lines.append(f"- `{audit['id']}`：{span}")
     if not unmatched_lines:
         unmatched_lines.append("- 無未配對 span。")
+
+    total_gold_span_count = sum(len(audit["span_results"]) for audit in question_audits)
+    unmatched_gold_span_count = sum(audit["unmatched_span_count"] for audit in question_audits)
+    fully_unmatched_question_count = sum(
+        bool(audit["span_results"])
+        and audit["unmatched_span_count"] == len(audit["span_results"])
+        for audit in question_audits
+    )
+    partially_unmatched_question_count = sum(
+        0 < audit["unmatched_span_count"] < len(audit["span_results"])
+        for audit in question_audits
+    )
+    unmatched_gold_span_ratio = (
+        unmatched_gold_span_count / total_gold_span_count if total_gold_span_count else 0.0
+    )
 
     without_mention_lines = [
         f"- `{item['id']}`（n_source_laws={item['n_source_laws']}）：{item['question']}"
@@ -1075,6 +1112,7 @@ def _build_summary_markdown(
 - 碰撞文字數 / Fact 數：{kg_stats['same_text_cross_document_text_ratio_by_facts']:.4%}
 - 碰撞文字數 / 相異正規化文字數：{kg_stats['same_text_cross_document_text_ratio_by_distinct_texts']:.4%}
 - 查詢列數 {query_stats['returned_row_count']}（與 manifest 差異 {query_stats['returned_row_count_difference_ratio']:.4%}）；不同 Fact {kg_stats['actual_fact_count']}（差異 {query_stats['distinct_fact_count_difference_ratio']:.4%}）；manifest `kg_fact_total` 為 {manifest.get('kg_fact_total')}。
+- 與 manifest 相差的 {manifest.get('kg_fact_total', 0) - kg_stats['actual_fact_count']} 筆 Fact 全來自 `source_doc_id=c8298529-91e4-56b3-bf2b-32e847635de4`：沒有 `SUPPORTED_BY`→`LawArticle` 關係，因此被本次查詢的 join 排除；其內容包含「附表一之項次」及「有機溶劑作業場所 包含」。這些 Fact 未進入碰撞統計，故不影響碰撞數字。
 
 前 20 個跨 Document 同文範例（含 Document 標題與條號）：
 
@@ -1098,6 +1136,10 @@ def _build_summary_markdown(
 
 `57-AGGR18` 候選狀態：`{json.dumps(candidates['aggr18_candidate_status'], ensure_ascii=False, sort_keys=True)}`。
 
+`gold_exact_collision=true` 的題目（獨立於候選清單）：
+
+{chr(10).join(exact_collision_lines)}
+
 僅 `n_source_laws >= 2`、題目沒有多法規提示字眼的清單：
 
 {chr(10).join(without_mention_lines)}
@@ -1105,8 +1147,8 @@ def _build_summary_markdown(
 ## 限制與可比性
 
 - Jaccard 與句框重疊是字面度量，未涵蓋語意相似；句框重疊是依 AGGR18 形態設計的探索性度量，未經驗證為歧義判準。
-- 配對使用文字互相包含規則，會配到同法相鄰條號；因此另外用 gold 條號標記主配對與額外配對。未配對 span 已列出，不假設所有 gold 都能配到。
-- Document `effective_date` 全 `None`（依任務書已知現況；本次不以生效日期分辨新舊法）。
+- 配對使用文字互相包含規則，會配到同法相鄰條號；因此另外用 gold 條號標記主配對與額外配對。未配對 span 已列出；本次 {total_gold_span_count} 個 gold span 中有 {unmatched_gold_span_count} 個（{unmatched_gold_span_ratio:.1%}）未配對，遍及 {fully_unmatched_question_count + partially_unmatched_question_count} 題（{fully_unmatched_question_count} 題的所有 span 均未配對，另有 {partially_unmatched_question_count} 題部分未配對）。未配對不代表 KG 沒有該事實，只表示它未依本次文字與條號配對規則配上。
+- 全 KG 64 個 Document 中有 15 個 `effective_date` 有值；`57-AGGR18` 涉及的兩部法之 Document 欄位皆為 `None`，本次不以生效日期分辨新舊法。
 - 此結果只盤點文字與來源歧義；不是檢索品質或答對率比較。
 - Phase 2 未執行，待 T2 Stage A 完整結束後另行處理。
 """

@@ -48,6 +48,7 @@
 - 碰撞文字數 / Fact 數：1.1268%
 - 碰撞文字數 / 相異正規化文字數：1.1681%
 - 查詢列數 16773（與 manifest 差異 0.3150%）；不同 Fact 16773（差異 0.3150%）；manifest `kg_fact_total` 為 16826。
+- 與 manifest 相差的 53 筆 Fact 全來自 `source_doc_id=c8298529-91e4-56b3-bf2b-32e847635de4`：沒有 `SUPPORTED_BY`→`LawArticle` 關係，因此被本次查詢的 join 排除；其內容包含「附表一之項次」及「有機溶劑作業場所 包含」。這些 Fact 未進入碰撞統計，故不影響碰撞數字。
 
 前 20 個跨 Document 同文範例（含 Document 標題與條號）：
 
@@ -126,6 +127,10 @@
 
 `57-AGGR18` 候選狀態：`{"candidate_count": 3, "included": true, "rank": 1, "rank_fraction": 0.3333333333333333}`。
 
+`gold_exact_collision=true` 的題目（獨立於候選清單）：
+
+- `57-AGGR10`：`gold_exact_collision=true`；未列為候選：n_source_laws=1，低於候選門檻 n_source_laws >= 2；q_mentions_multi_law=false
+
 僅 `n_source_laws >= 2`、題目沒有多法規提示字眼的清單：
 
 - `57-AGGR1`（n_source_laws=2）：高溫作業的勞工多久要做一次特殊健康檢查？
@@ -143,7 +148,7 @@
 ## 限制與可比性
 
 - Jaccard 與句框重疊是字面度量，未涵蓋語意相似；句框重疊是依 AGGR18 形態設計的探索性度量，未經驗證為歧義判準。
-- 配對使用文字互相包含規則，會配到同法相鄰條號；因此另外用 gold 條號標記主配對與額外配對。未配對 span 已列出，不假設所有 gold 都能配到。
-- Document `effective_date` 全 `None`（依任務書已知現況；本次不以生效日期分辨新舊法）。
+- 配對使用文字互相包含規則，會配到同法相鄰條號；因此另外用 gold 條號標記主配對與額外配對。未配對 span 已列出；本次 101 個 gold span 中有 35 個（34.7%）未配對，遍及 23 題（8 題的所有 span 均未配對，另有 15 題部分未配對）。未配對不代表 KG 沒有該事實，只表示它未依本次文字與條號配對規則配上。
+- 全 KG 64 個 Document 中有 15 個 `effective_date` 有值；`57-AGGR18` 涉及的兩部法之 Document 欄位皆為 `None`，本次不以生效日期分辨新舊法。
 - 此結果只盤點文字與來源歧義；不是檢索品質或答對率比較。
 - Phase 2 未執行，待 T2 Stage A 完整結束後另行處理。

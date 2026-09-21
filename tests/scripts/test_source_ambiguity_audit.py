@@ -3,6 +3,7 @@ import json
 import pytest
 
 from scripts.analysis.source_ambiguity_audit import (
+    _cross_document_metric_values,
     AGGR18_EXPECTED_FACT_TEXTS,
     FactCitation,
     analyze_question,
@@ -182,6 +183,19 @@ def test_span_pairing_requires_eight_chars_and_records_one_to_many_candidates():
     assert {match["matched_article_no"] for match in long_matches} == {"23", "24"}
 
 
+def test_short_normalized_span_does_not_match_aggr18_facts_by_containment():
+    assert pair_span_to_facts("公立醫療", aggr18_citations(), OLD_LAW, "第23條") == []
+
+
+def test_aggr18_cross_document_metrics_compare_only_different_law_documents():
+    metrics = _cross_document_metric_values(aggr18_citations(), source_law_count=2)
+
+    # Four cross-law combinations count; the §23×§24 and §84×§85 same-law pairs do not.
+    assert metrics["cross_doc_pair_count"] == 4
+    assert metrics["max_cross_doc_jaccard"] == pytest.approx(0.489, abs=0.01)
+    assert metrics["max_cross_doc_frame_overlap"] == pytest.approx(0.806, abs=0.01)
+
+
 def test_aggr18_preflight_requires_four_expected_main_facts_and_metrics():
     result = validate_aggr18_preflight(aggr18_question(), [
         {
@@ -280,6 +294,37 @@ def test_question_analysis_uses_gold_laws_and_null_metrics_for_single_law():
     assert audit["max_cross_doc_frame_overlap"] is None
     assert audit["primary_match_count"] == 1
     assert "matched_fact_count" not in audit
+
+
+def test_single_law_question_keeps_all_cross_document_metrics_null():
+    question = {
+        "id": "single-law-duplicate-text",
+        "question": "勞動基準法如何規定？",
+        "atomic_gold_facts": [
+            {
+                "exact_span": "雇主應依規定給付工資。",
+                "source_law": "N0030001_勞動基準法",
+                "source_article": "第22條",
+            }
+        ],
+    }
+    citations = [
+        make_citation("22", "雇主應依規定給付工資。", "doc-a", "勞動基準法"),
+        make_citation("22", "雇主應依規定給付工資。", "doc-b", "勞動基準法"),
+    ]
+
+    audit = analyze_question(question, citations, {})
+
+    assert audit["n_source_laws"] == 1
+    assert audit["primary_match_count"] == 2
+    assert audit["primary_only_metrics"] == {
+        "cross_doc_pair_count": 0,
+        "max_cross_doc_jaccard": None,
+        "max_cross_doc_frame_overlap": None,
+    }
+    assert audit["including_extra_same_law_metrics"] == audit["primary_only_metrics"]
+    assert audit["max_cross_doc_jaccard"] is None
+    assert audit["max_cross_doc_frame_overlap"] is None
 
 
 def test_unmatched_gold_span_is_explicitly_returned():
