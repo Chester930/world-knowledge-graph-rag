@@ -69,6 +69,10 @@ class ChatRequest(BaseModel):
     `bfs_only`＝只跑 `bfs_query()`、關掉 `vector_search_facts()`（報告39 G arm）。
     `bfs_only` 時語意 Fact 推導的文件範圍下推與 §3.2§c 關係型別後篩選一併
     退化為「不下推、不篩選」（純圖遍歷）。"""
+    include_retrieval_trace: bool = False
+    """報告62 T0：在 SSE `sources` 事件附上 `retrieval_trace`（檢索到的每筆證據的
+    順位／分數／來源，以及實際組進 prompt 的事實行）。**只記錄，不影響檢索、排序、
+    截斷或生成**；預設關閉時 `sources` 內該欄位為 None，行為與新增前一致。"""
     disable_grounding_regen: bool = False
     """關掉接地核對觸發的限制性重新生成（方案 B ＋ 2b 定向修訂）。仍會做核對、
     仍送出 `event: grounding` 診斷，只是不因未接地而重寫答案（報告39 K−2b arm）。

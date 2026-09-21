@@ -125,12 +125,40 @@ class EvaluationDataset(BaseModel):
 
 # ── 血統追蹤器資料結構（Lineage Tracking）───────────────────────────
 
+class RetrievedEvidence(BaseModel):
+    """檢索 trace 的單筆證據（報告62 T0）：實際撈到什麼、排第幾、是否進了 prompt。
+
+    `retrieved_fact_ids` 在既有 records 是空字串（`vector_search_facts()` 刻意
+    不外洩 `fact_id`），無法事後核對排名；這裡改記可對照的內容欄位。`rank` 為
+    該來源清單內的 0 起算順位（Fact＝`vector_search_facts()` 檢索順序、triple＝
+    `bfs_query()` 走訪順序，兩者**不共用名次**）。`article_no` 目前 `Fact` 檢索
+    結果不帶條號，恆為 None，保留給 T3 條文層級擴充使用。
+    """
+    kind: str = Field(description="fact／triple")
+    rank: int
+    text: str
+    score: Optional[float] = None
+    source_doc_id: Optional[str] = None
+    source_svo_chunk_index: Optional[int] = None
+    article_no: Optional[str] = None
+    in_prompt: Optional[bool] = Field(
+        default=None,
+        description="是否出現在實際組進 prompt 的事實行（`_arrange_fact_lines()` 截斷／重排後）；"
+                    "未量測（無 prompt trace）時為 None",
+    )
+
+
 class RetrievalStageLineage(BaseModel):
     """階段一：檢索召回血統"""
     arm: str
     retrieval_latency_ms: float
     retrieved_chunk_ids: List[str] = Field(default_factory=list)
     retrieved_fact_ids: List[str] = Field(default_factory=list)
+    retrieval_trace: List[RetrievedEvidence] = Field(
+        default_factory=list,
+        description="報告62 T0：實際檢索到的證據（含順位、分數、來源、是否進 prompt）。"
+                    "凍結基準的舊 records 沒有此欄位（反序列化為空清單）。",
+    )
     hit_exact_spans: List[str] = Field(default_factory=list, description="檢索結果中包含的 gold exact_span")
     missed_exact_spans: List[str] = Field(default_factory=list, description="檢索結果中遺漏的 gold exact_span")
     recall_rate: float = Field(default=0.0, description="召回率 (hit / total essential)")
@@ -158,6 +186,14 @@ class ContextAssemblyLineage(BaseModel):
     retained_exact_spans: List[str] = Field(default_factory=list, description="最終 Prompt 中仍保留的 exact_span")
     dropped_exact_spans: List[str] = Field(default_factory=list, description="在排序或截斷中被丟棄的 exact_span")
     verbalization_omissions: List[str] = Field(default_factory=list, description="自然語言化遺漏的關鍵細節")
+    prompt_context_lines: List[List[str]] = Field(
+        default_factory=list,
+        description=(
+            "報告62 T0：實際組進 prompt 的事實行，每個元素是一次 prompt 組裝（單一問題＝1 份；"
+            "複合問題每個子問題各 1 份）。既有的 retained／dropped／total_context_tokens 仍以"
+            "『檢索到的全部』計算（與凍結基準同定義），此欄位才是截斷後真正被模型看到的內容。"
+        ),
+    )
 
 
 class GenerationStageLineage(BaseModel):

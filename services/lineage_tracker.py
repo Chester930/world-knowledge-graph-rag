@@ -18,6 +18,7 @@ from models.eval_schema import (
     FullQueryLineage,
     GenerationStageLineage,
     RetrievalStageLineage,
+    RetrievedEvidence,
 )
 from services.semantic_span_matcher import match_spans_with_fallback
 
@@ -76,8 +77,10 @@ class LineageTracker:
         chunk_ids: Optional[List[str]] = None,
         fact_ids: Optional[List[str]] = None,
         atomic_gold_facts: Optional[List[AtomicGoldFact]] = None,
+        retrieval_trace: Optional[List[RetrievedEvidence]] = None,
     ) -> RetrievalStageLineage:
-        """記錄階段一檢索召回結果並判定 Gold Fact 覆蓋率。`atomic_gold_facts`
+        """記錄階段一檢索召回結果並判定 Gold Fact 覆蓋率。`retrieval_trace`
+        （報告62 T0，選填）原樣存進 lineage，不參與任何判定。`atomic_gold_facts`
         （報告57 §2.2 新增，選填）帶 source_law 分組資訊時才計算
         `chain_completeness`；未傳入（既有呼叫端）時該欄位維持 None，
         零行為變化。"""
@@ -100,6 +103,7 @@ class LineageTracker:
             retrieval_latency_ms=latency_ms,
             retrieved_chunk_ids=chunk_ids or [],
             retrieved_fact_ids=fact_ids or [],
+            retrieval_trace=retrieval_trace or [],
             hit_exact_spans=hit_spans,
             missed_exact_spans=missed_spans,
             recall_rate=round(recall, 4),
@@ -119,6 +123,7 @@ class LineageTracker:
         judge_llm_provider: Optional[LLMProvider] = None,
         question: str = "",
         atomic_gold_facts: Optional[List[AtomicGoldFact]] = None,
+        retrieval_trace: Optional[List[RetrievedEvidence]] = None,
     ) -> RetrievalStageLineage:
         """語意 fallback 版（報告52 後續修正），見 `record_retrieval()` 與
         `services/semantic_span_matcher.py`。逐字比對失敗才補呼叫
@@ -136,6 +141,7 @@ class LineageTracker:
             retrieval_latency_ms=latency_ms,
             retrieved_chunk_ids=chunk_ids or [],
             retrieved_fact_ids=fact_ids or [],
+            retrieval_trace=retrieval_trace or [],
             hit_exact_spans=hit_spans,
             missed_exact_spans=missed_spans,
             recall_rate=round(recall, 4),
@@ -150,8 +156,11 @@ class LineageTracker:
         final_prompt_context: str,
         gold_spans: List[str],
         total_tokens: int = 0,
+        prompt_context_lines: Optional[List[List[str]]] = None,
     ) -> ContextAssemblyLineage:
-        """記錄階段二 Context 組裝（重排/截斷）後 Gold Fact 是否仍存活"""
+        """記錄階段二 Context 組裝（重排/截斷）後 Gold Fact 是否仍存活。
+        `prompt_context_lines`（報告62 T0，選填）＝實際組進 prompt 的事實行，
+        原樣存入，不參與 retained／dropped 判定（維持與凍結基準同定義）。"""
         clean_context = final_prompt_context.replace(" ", "").replace("\n", "")
         retained: List[str] = []
         dropped: List[str] = []
@@ -167,6 +176,7 @@ class LineageTracker:
             total_context_tokens=total_tokens,
             retained_exact_spans=retained,
             dropped_exact_spans=dropped,
+            prompt_context_lines=prompt_context_lines or [],
         )
         return self._context
 
@@ -177,6 +187,7 @@ class LineageTracker:
         total_tokens: int = 0,
         judge_llm_provider: Optional[LLMProvider] = None,
         question: str = "",
+        prompt_context_lines: Optional[List[List[str]]] = None,
     ) -> ContextAssemblyLineage:
         """語意 fallback 版，見 `record_context_assembly()`。"""
         retained, dropped = await match_spans_with_fallback(
@@ -186,6 +197,7 @@ class LineageTracker:
             total_context_tokens=total_tokens,
             retained_exact_spans=retained,
             dropped_exact_spans=dropped,
+            prompt_context_lines=prompt_context_lines or [],
         )
         return self._context
 

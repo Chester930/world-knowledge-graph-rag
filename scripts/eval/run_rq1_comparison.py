@@ -48,7 +48,7 @@ from core.providers.factory import (
     init_providers,
 )
 from models.document import ChatRequest
-from models.eval_schema import AtomicGoldFact, EvaluationDataset, TestCase
+from models.eval_schema import AtomicGoldFact, EvaluationDataset, RetrievedEvidence, TestCase
 from repositories.kg_repo import KGRepository
 from routers import agent
 from services import baseline_rag_service, document_record_service
@@ -188,6 +188,7 @@ async def _drain_chat(payload: ChatRequest) -> dict:
         "regenerated": regenerated,
         "triples": (sources or {}).get("triples", []),
         "facts": (sources or {}).get("facts", []),
+        "retrieval_trace": (sources or {}).get("retrieval_trace"),
         "grounding": grounding or [],
     }
 
@@ -259,6 +260,7 @@ async def _run_single_query(
             question=tc.question, kg_id=kg_id, use_svo=True,
             retrieval_mode=mode, disable_grounding_regen=(raw_arm == "K-2b"),
             scope_doc_ids=scope_uuids,
+            include_retrieval_trace=True,  # 報告62 T0：純記錄，不影響檢索／生成
         ))
         # 報告57任務C Stage 1真實資料發現（2026-09-15）：`r["triples"]`／`r["facts"]`
         # 是JSON往返解碼出來的dict，`natural_text`/`source_doc_id`/`fact_text`/
@@ -286,17 +288,23 @@ async def _run_single_query(
     # 即使語意上答案已正確且最終AtomicScorer已用語意fallback判定命中——兩層
     # 量測基準不一致。改用_async版本，逐字比對失敗才補呼叫judge做語意蘊含
     # 核對，與AtomicScorer.evaluate_async()同一套判準）
+    trace = r.get("retrieval_trace") or {}
+    retrieval_trace = [
+        RetrievedEvidence(**e) for e in (trace.get("facts") or []) + (trace.get("triples") or [])
+    ]
     await tracker.record_retrieval_async(
         retrieved_texts, gold_spans, latency_ms=latency_s * 1000,
         chunk_ids=chunk_ids, fact_ids=fact_ids,
         judge_llm_provider=judge_counting or counting, question=tc.question,
         atomic_gold_facts=tc.atomic_gold_facts,
+        retrieval_trace=retrieval_trace,
     )
     # 階段二血統（同上，語意fallback版）
     full_context_str = "\n".join(context_lines)
     await tracker.record_context_assembly_async(
         full_context_str, gold_spans, total_tokens=len(full_context_str) // 4,
         judge_llm_provider=judge_counting or counting, question=tc.question,
+        prompt_context_lines=trace.get("prompt_lines") or [],
     )
 
     # 確定性法律守衛必須在最終答案產生後、AtomicScorer 與 generation lineage
