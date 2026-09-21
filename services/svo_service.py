@@ -381,6 +381,7 @@ async def _reconcile_rel_type(
     llm_provider: LLMProvider | None,
     kg_id: str | None = None,
     calibration_db_path: Path | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """COMPARE＋ESCALATE3：`SIM` 判斷是否與 LLM 自報的 rel_type 一致，見
     docs/論文/03_系統設計與方法論.md § 3.1.3 主圖。
@@ -404,11 +405,12 @@ async def _reconcile_rel_type(
     沒有「最終仲裁結果」可比對，不需要記錄。任一參數缺席時完全跳過記錄，
     行為與先前版本一致（向後相容）。
     """
+    _cfg = cfg or KGConfig()
     if embedding_provider is None:
         return llm_rel_type
 
     best_type, best_score = await classify_relation_by_embedding(verb, embedding_provider)
-    if best_type == llm_rel_type and best_score >= COMPARE_COSINE_THRESHOLD:
+    if best_type == llm_rel_type and best_score >= _cfg.reltype.compare_cosine_threshold:
         return llm_rel_type
 
     if llm_provider is None:
