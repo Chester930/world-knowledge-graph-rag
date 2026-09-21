@@ -417,7 +417,7 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 | 額外檢查 | 移除 `svo_service` 對 `ENTITY_DEDUP_*` 的 import（超出任務書明文）：搜尋 sdd、reextract-v2、Codex 分支，無 `svo_service.ENTITY_DEDUP_*` 的引用 |
 | 小問題 | ① Codex 回報「台積電／台積電公司 編輯比率註解為 0.833」不成立——0.833 是「新臺幣四千元／八千元」的註解，台積電的比率為 0.75，任務書無誤；② `COMPARE_COSINE_THRESHOLD` 在 `svo_service.py` 只剩為既有測試保留的 import；③ 每次呼叫新建 `KGConfig()`（含逐實體的 `resolve_entity_name`），未量測成本，與既有 `resolve_query_relation_type` 同寫法 |
 
-### 12.2 TASK-3 Phase 1 來源歧義盤點（`codex/task3-source-ambiguity-audit`，`39b7301`，已推送）——**有條件通過：需一次小修**
+### 12.2 TASK-3 Phase 1 來源歧義盤點（`codex/task3-source-ambiguity-audit`，`39b7301`，已推送）——**有條件通過：需一次小修（小修已完成並複驗通過，見 §12.5）**
 
 **獨立驗證通過的部分**
 - 完整測試 **1025 passed**（動工前 1011＋新增 14），獨立重跑相同。
@@ -456,3 +456,15 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 - 評測題目：見 §12.2 第 5 點——**n=3、單一法規對**，比原本 n=1 好，但仍窄。
 - **全 KG 有 2.6% 的 Fact 與他法同文**，標籤對這類事實的作用是確定的；對 AGGR18 型「同句框」的作用仍需靠對照實驗。
 - 這些量化結果**不能證明標籤有效**，只界定了「哪裡可能有效」與「能用幾題檢驗」。
+
+### 12.5 TASK-3 小修複驗（`6661684`，已推送）——**驗收通過**
+
+| 項目 | 結果 |
+|---|---|
+| 新增測試 | 3 個；新測試檔 **17 passed**（原 14＋3） |
+| **突變測試（重跑同一組 11 個）** | **11/11 被抓到，無存活**（原 M3、M5、M11 現在都失敗） |
+| summary 更正 | `effective_date` 改為「全 KG 64 個 Document 中 15 個有值；AGGR18 涉及的兩部法皆為 `None`」；補 53 筆 Fact 差異原因（單一文件 `c8298529-…`、無 `SUPPORTED_BY→LawArticle`、含附表類事實）；單獨列出 `gold_exact_collision` 題（`57-AGGR10`，未列候選原因：`n_source_laws=1` 且題目無對照字眼）；明列「101 個 span 中 35 個（34.7%）未配對，23 題，其中 8 題全未配對」 |
+| 範圍 | 只動 `summary.md`、產生器、測試三檔；`kg_wide.json`／`questions_frozen42.json` 未變動；**未重跑 Neo4j 查詢**（由既有輸出離線重建，符合小修指示） |
+| 小問題 | 產生器把兩個資料事實**寫死在樣板文字裡**：「全 KG 64 個 Document 中有 15 個 `effective_date` 有值」與 53 筆差異的 `source_doc_id`。日後若 KG 內容變動並重跑，summary 會照舊寫出這兩句而不反映新資料。屬可接受的一次性報告，但若要長期重用此腳本，應改為由查詢結果計算 |
+
+**Phase 1 結論**：TASK-3 Phase 1 完成並驗收；Phase 2（讀取 T2 Stage A 的 `prompt_context_lines`／`retrieval_trace`）待 T2 完整結束後另行通知。
