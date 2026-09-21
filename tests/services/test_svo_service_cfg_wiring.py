@@ -2,7 +2,7 @@
 
 import pytest
 
-from core.kg_config import ExtractionConfig, KGConfig, RelTypeConfig
+from core.kg_config import DedupConfig, ExtractionConfig, KGConfig, RelTypeConfig
 from models.knowledge_graph import SVOTriple
 from services import svo_service as svc
 
@@ -23,6 +23,17 @@ class FixedEmbedding:
 
     async def encode_batch(self, texts: list[str]) -> list[list[float]]:
         return [self.vectors[text] for text in texts]
+
+
+class ScoredEmbedding:
+    def __init__(self, mention: str, candidate: str, score: float):
+        self.vectors = {
+            mention: [1.0, 0.0],
+            candidate: [score, (1 - score**2) ** 0.5],
+        }
+
+    async def encode(self, text: str) -> list[float]:
+        return self.vectors[text]
 
 
 @pytest.mark.asyncio
@@ -135,3 +146,70 @@ async def test_completeness_check_forwards_same_cfg_to_both_extraction_passes(mo
 
     assert len(result) == 2
     assert received_cfgs == [cfg, cfg]
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_uses_cfg_edit_ratio_threshold():
+    mention, candidate = "台積電", "台積電公司"
+    ratio = svc._edit_ratio(mention, candidate)
+    assert 0.70 <= ratio < 0.90
+
+    default_result = await svc.resolve_entity_name(mention, [{"name": candidate}])
+    explicit_default_result = await svc.resolve_entity_name(
+        mention, [{"name": candidate}], cfg=KGConfig(),
+    )
+    overridden_result = await svc.resolve_entity_name(
+        mention, [{"name": candidate}],
+        cfg=KGConfig(dedup=DedupConfig(edit_ratio_threshold=0.90)),
+    )
+
+    assert default_result == explicit_default_result == candidate
+    assert overridden_result == mention
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_uses_cfg_cosine_threshold():
+    mention, candidate = "mention", "candidate"
+    embedding = ScoredEmbedding(mention, candidate, 0.90)
+    candidates = [{"name": candidate}]
+
+    default_result = await svc.resolve_entity_name(
+        mention, candidates, embedding_provider=embedding,
+    )
+    explicit_default_result = await svc.resolve_entity_name(
+        mention, candidates, embedding_provider=embedding, cfg=KGConfig(),
+    )
+    overridden_result = await svc.resolve_entity_name(
+        mention, candidates, embedding_provider=embedding,
+        cfg=KGConfig(dedup=DedupConfig(cosine_threshold=0.95, escalate_low_threshold=0.95)),
+    )
+
+    assert default_result == explicit_default_result == candidate
+    assert overridden_result == mention
+
+
+@pytest.mark.asyncio
+async def test_resolve_entity_name_uses_cfg_escalate_low_threshold():
+    mention, candidate = "mention", "candidate"
+    embedding = ScoredEmbedding(mention, candidate, 0.80)
+    candidates = [{"name": candidate}]
+    default_llm = RecordingLLM("是")
+    explicit_default_llm = RecordingLLM("是")
+    overridden_llm = RecordingLLM("是")
+
+    default_result = await svc.resolve_entity_name(
+        mention, candidates, embedding_provider=embedding, llm_provider=default_llm,
+    )
+    explicit_default_result = await svc.resolve_entity_name(
+        mention, candidates, embedding_provider=embedding, llm_provider=explicit_default_llm,
+        cfg=KGConfig(),
+    )
+    overridden_result = await svc.resolve_entity_name(
+        mention, candidates, embedding_provider=embedding, llm_provider=overridden_llm,
+        cfg=KGConfig(dedup=DedupConfig(escalate_low_threshold=0.85)),
+    )
+
+    assert default_result == explicit_default_result == candidate
+    assert len(default_llm.prompts) == len(explicit_default_llm.prompts) == 1
+    assert overridden_result == mention
+    assert overridden_llm.prompts == []

@@ -1208,6 +1208,7 @@ async def resolve_entity_name(
     *,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """DEDUP4＋ESCALATE：決定這次提及該歸屬到哪個既有 Entity 名稱。
 
@@ -1222,6 +1223,7 @@ async def resolve_entity_name(
     不重新呼叫 `embedding_provider.encode()`；只有尚未回填的舊候選才
     fallback 即時編碼——比對邏輯與門檻本身不變，純粹省去重複編碼成本。
     """
+    _cfg = cfg or KGConfig()
     if not candidates:
         return name
 
@@ -1283,7 +1285,7 @@ async def resolve_entity_name(
     best_edit_ratio = 0.0
     for c in fuzzy_candidates:
         ratio = _edit_ratio(name, c["name"])
-        if ratio >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD and ratio > best_edit_ratio:
+        if ratio >= _cfg.dedup.edit_ratio_threshold and ratio > best_edit_ratio:
             best_edit_ratio = ratio
             best_edit_name = c["name"]
     if best_edit_name is not None:
@@ -1304,10 +1306,10 @@ async def resolve_entity_name(
 
     if best_name is None:
         return name
-    if best_score >= ENTITY_DEDUP_COSINE_THRESHOLD:
+    if best_score >= _cfg.dedup.cosine_threshold:
         return best_name
 
-    if llm_provider is not None and best_score >= ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD:
+    if llm_provider is not None and best_score >= _cfg.dedup.escalate_low_threshold:
         prompt = (
             f"「{name}」與「{best_name}」是否為同一個真實世界的實體/對象？"
             "只回答「是」或「否」，不要有其他文字。"
