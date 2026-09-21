@@ -1,0 +1,131 @@
+[
+  {
+    "question_id": "17-Q6",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-B",
+    "answer": "資料未明確記載，無法確認。\n\n根據提供的事實清單，並未提到警察因搶救重大災害表現優異可獲得特別休假的相關規定。清單中列出了多種情形可以獲得特別休假，但並未包括因搶救重大災害表現優異的情況。因此，無法根據現有資訊回答此問題。",
+    "error": null,
+    "latency_s": 130.33,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 294,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts (semantic fallback). Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q6",
+      "arm": "K",
+      "question": "警察因搶救重大災害表現優異，可以獲得幾天特別休假？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 130330.00000000001,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假"
+        ],
+        "missed_exact_spans": [
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 993,
+        "snr": 0.0201,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 267,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假"
+        ],
+        "dropped_exact_spans": [
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 130330.00000000001,
+        "raw_draft": "資料未明確記載，無法確認。\n\n根據提供的事實清單，並未提到警察因搶救重大災害表現優異可獲得特別休假的相關規定。清單中列出了多種情形可以獲得特別休假，但並未包括因搶救重大災害表現優異的情況。因此，無法根據現有資訊回答此問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認。\n\n根據提供的事實清單，並未提到警察因搶救重大災害表現優異可獲得特別休假的相關規定。清單中列出了多種情形可以獲得特別休假，但並未包括因搶救重大災害表現優異的情況。因此，無法根據現有資訊回答此問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]
