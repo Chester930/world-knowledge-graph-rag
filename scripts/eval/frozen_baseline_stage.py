@@ -89,6 +89,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         "--allow-shared-judge",
         "--out", args.out,
     ]
+    if getattr(args, "k_top_k", None) is not None:  # 報告62 T1 候選臂；預設不傳＝凍結基準
+        cmd += ["--k-top-k", str(args.k_top_k)]
     base_url = env["OLLAMA_BASE_URL"]
     actual_version = fetch_ollama_version(base_url)
     if not ollama_version_matches(manifest.get("ollama_version"), actual_version):
@@ -112,6 +114,8 @@ def main() -> None:
     run.add_argument("--frozen-dir", required=True)
     run.add_argument("--questions", required=True)
     run.add_argument("--out", required=True)
+    run.add_argument("--k-top-k", type=int, default=None,
+                     help="報告62 T1 候選臂的語意 Fact 筆數；預設不傳＝凍結基準（20）。")
     args = parser.parse_args()
     if args.command == "remaining":
         cmd_remaining(args)

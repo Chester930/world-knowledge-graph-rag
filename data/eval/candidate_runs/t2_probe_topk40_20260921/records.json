@@ -1,0 +1,894 @@
+[
+  {
+    "question_id": "57-AGGR1",
+    "arm": "K",
+    "raw_arm": "K",
+    "k_top_k": 40,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，高溫作業的勞工並未直接提到特殊健康檢查的頻率。\n事實清單中提到的是：\n- 在高溫場所工作之勞工每日工作時間不得超過六小時。\n高溫作業的勞工每年要做一次特殊健康檢查。\n因此，根據提供的事實清單，無法直接得出高溫作業勞工特殊健康檢查的頻率。\n然而，可以推論一般健康檢查的頻率：\n- 雇主對在職勞工應定期實施一般健康檢查。\n事實清單中並未明確指出高溫作業勞工特殊健康檢查的頻率，因此無法根據提供的事實清單得出具體答案。\n若需進一步了解，建議參閱勞動基準法或其他相關法規。",
+    "error": null,
+    "latency_s": 152.36,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 601,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+      ],
+      "missing_spans": [
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR1",
+      "arm": "K",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 152360.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "雇主 實施 勞工特殊健康檢查",
+            "score": 0.8447599411010742,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 1,
+            "text": "雇主 對高壓氣體特定設備、高壓氣體容器及第一種壓力容器應每月依下列規定定期實施檢查一次 一次",
+            "score": 0.8209753036499023,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 47,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 2,
+            "text": "雇主 對高空工作車應每月依下列規定定期實施檢查一次 作業裝置及油壓裝置有無異常",
+            "score": 0.8202285766601562,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 28,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 3,
+            "text": "雇主 另應 特殊體格檢查",
+            "score": 0.8199224472045898,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 16,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 4,
+            "text": "雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查",
+            "score": 0.818122386932373,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 19,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 5,
+            "text": "符合本附表所列作業之勞工 依勞工健康保護規則第十九條規定，雇主應每年或於變更其作業時，依規定項目實施特殊健康檢查",
+            "score": 0.8154468536376953,
+            "source_doc_id": "c8298529-91e4-56b3-bf2b-32e847635de4",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 6,
+            "text": "雇主 對高空工作車應每月依下列規定定期實施檢查一次 安全裝置有無異常",
+            "score": 0.8153982162475586,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 28,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 7,
+            "text": "雇主 對在職勞工應定期實施 一般健康檢查",
+            "score": 0.8139767646789551,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 17,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 8,
+            "text": "在高溫場所工作之勞工 每日工作時間不得超過 六小時",
+            "score": 0.8125295639038086,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": 20,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 9,
+            "text": "雇主 使勞工接受定期特殊健康檢查 將勞工作業內容、最近一次之作業環境監測紀錄及危害暴露情形等作業經歷資料交予醫師",
+            "score": 0.8105258941650391,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 19,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 10,
+            "text": "雇主 對高空工作車應每月依下列規定定期實施檢查一次 制動裝置、離合器及操作裝置有無異常",
+            "score": 0.8098049163818359,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 28,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 11,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 油壓泵、油壓馬達、汽缸、安全閥及其他油壓裝置",
+            "score": 0.8086018562316895,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 12,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 伸臂、升降裝置、屈折裝置、平衡裝置、工作台及其他作業裝置",
+            "score": 0.8069977760314941,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 13,
+            "text": "雇主 對乾燥設備、以氣體燃料或液體燃料等為熱源之加熱設備及其附屬設備（含排氣裝置、排風導管等） 每年依下列規定定期實施檢查一次",
+            "score": 0.805534839630127,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 40,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 14,
+            "text": "應訂定勞工健康服務計劃 每年評估成效及檢討",
+            "score": 0.8046765327453613,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 12,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 15,
+            "text": "未滿四十歲者 每三年檢查一次",
+            "score": 0.8038287162780762,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 17,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 16,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 離合器、變速箱、差速齒輪、傳動軸及其他動力傳動裝置",
+            "score": 0.8028364181518555,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 17,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 轉向器之左右回轉角度、肘節、軸、臂及其他操作裝置",
+            "score": 0.8022723197937012,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 18,
+            "text": "雇主 得訂定 勞工健康檢查及管理",
+            "score": 0.8015947341918945,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 13,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 19,
+            "text": "受檢勞工之歷年健康檢查紀錄 彙整",
+            "score": 0.8015851974487305,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 24,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 20,
+            "text": "年滿六十歲者 每年檢查一次",
+            "score": 0.8005533218383789,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 17,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 21,
+            "text": "雇主 使勞工從事特別危害健康作業時 建立其暴露評估及健康管理資料",
+            "score": 0.8000917434692383,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 22,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 22,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 車體、操作裝置、安全裝置、連鎖裝置、警報裝置、方向指示器、燈號裝置及儀表",
+            "score": 0.7991814613342285,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 23,
+            "text": "四十歲以上未滿六十歲者 每二年檢查一次",
+            "score": 0.7989048957824707,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 17,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 24,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 主動輪、從動輪、上下轉輪、履帶、輪胎、車輪軸承及其他走行裝置",
+            "score": 0.7974686622619629,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 25,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 壓縮壓力、閥間隙及其他原動機",
+            "score": 0.79693603515625,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 26,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 電壓、電流及其他電氣系統",
+            "score": 0.7968778610229492,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 27,
+            "text": "勞工之離職 要求提供其健康檢查有關資料時 雇主",
+            "score": 0.7952113151550293,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 26,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 28,
+            "text": "雇主 應委託 勞工健康服務專業機構",
+            "score": 0.7951431274414062,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 13,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 29,
+            "text": "甲醛 屬於 作業之各項特殊體格（健康）檢查",
+            "score": 0.7937474250793457,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 21,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 30,
+            "text": "特殊體格（健康）檢查紀錄 應至少保存 三十年",
+            "score": 0.7926373481750488,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 21,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 31,
+            "text": "雇主 實施 安全衛生管理及自動檢查",
+            "score": 0.7916111946105957,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 32,
+            "text": "雇主 對高空工作車，應每年就下列事項實施檢查一次 制動能力、制動鼓、制動塊及其他制動裝置",
+            "score": 0.7907781600952148,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 27,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 33,
+            "text": "發現勞工健康狀況異常，需進一步評估或追蹤檢查者 應由醫護人員提供其健康指導",
+            "score": 0.7904796600341797,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 24,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 34,
+            "text": "雇主 使勞工從事 本法第十九條規定之高溫度、異常氣壓、高架、精密或重體力勞動作業",
+            "score": 0.7902765274047852,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 25,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 35,
+            "text": "雇主 對異常氣壓之再壓室或減壓艙，應就下列事項，每個月依下列規定定期實施檢查一次 電器、機械器具及配線有無損傷",
+            "score": 0.7893848419189453,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 56,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 36,
+            "text": "雇主 對電氣機車等 每三年就整體定期實施檢查一次",
+            "score": 0.7889580726623535,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 24,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 37,
+            "text": "雇主 實施 必要之臨場健康服務",
+            "score": 0.7884917259216309,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": 13,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 38,
+            "text": "雇主 對高壓氣體消費設備，應於使用開始前及使用終了後，檢點該設備有無異常 一日一次以上就該設備之動作狀況實施檢點",
+            "score": 0.7876629829406738,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 79,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 39,
+            "text": "雇主 對於低壓電氣設備應每年依下列規定定期實施檢查一次",
+            "score": 0.7867097854614258,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": 44,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。",
+            "score": null,
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 1,
+            "text": "特殊健康檢查屬於健康檢查種類。",
+            "score": null,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 2,
+            "text": "健康檢查 管理及促進",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 3,
+            "text": "健康檢查分列為一般健康檢查、特殊健康檢查及特定項目之健康檢查。",
+            "score": null,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 4,
+            "text": "健康檢查若發現勞工有異常情形，應由醫護人員提供其健康指導。",
+            "score": null,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 5,
+            "text": "僱主對在職勞工施行健康檢查。",
+            "score": null,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 6,
+            "text": "所稱之高溫作業勞工作息時間標準是指高溫作業。",
+            "score": null,
+            "source_doc_id": "c8298529-91e4-56b3-bf2b-32e847635de4",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 7,
+            "text": "僱主在對特定化學設備或其附屬設備開始使用、改造或修理時，應依規定實施一次重點檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 8,
+            "text": "檢查 每年進行一次",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 9,
+            "text": "檢查乙炔熔接裝置（除此等裝置之配管埋設於地下之部分外）之損傷、變形、腐蝕及其性能。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 10,
+            "text": "事業單位不得拒絕出示檢查證。",
+            "score": null,
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 11,
+            "text": "檢查執行職務時，就本法規定事項要求事業單位提出必要之報告、紀錄、帳冊及有關文件或書面說明。",
+            "score": null,
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 12,
+            "text": "需抽取物料、樣品或資料時，應事先通知僱主或其代理人並掣給收據。",
+            "score": null,
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 13,
+            "text": "僱主應每月對前項之簡易提升機定期實施一次檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 14,
+            "text": "中央主管機關或勞動檢查機構對於各事業單位勞動場所得實施檢查。",
+            "score": null,
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 15,
+            "text": "繩索是否有無損傷被檢查了。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 16,
+            "text": "過捲預防裝置、警報裝置、制動器、離合器及其他安全裝置有無異常均會被檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 17,
+            "text": "鋼索、吊鏈及吊具需檢查有無損傷。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 18,
+            "text": "吊鉤、抓鬥等吊具是否有無損傷需進行檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 19,
+            "text": "配線、集電裝置、配電盤及開關等機械電氣項目是否有異常，將進行檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 20,
+            "text": "檢查捲揚機之安置狀況有無異常。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 21,
+            "text": "導索之結頭部分有無異常被檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 22,
+            "text": "導軌之狀況有無異常進行檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 23,
+            "text": "過捲預防裝置、制動器、控制裝置及其他安全裝置是否有異常均需檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 24,
+            "text": "其他保持性能之必要事項為檢查空氣清淨裝置之性能。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 25,
+            "text": "構造部分之磨損、腐蝕及其他損壞之狀況及程度將進行檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 26,
+            "text": "除塵裝置內部塵埃堆積之狀況已進行檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 27,
+            "text": "濾布式除塵裝置有濾布之破損及安裝部分鬆弛之狀況，需進行檢查。",
+            "score": null,
+            "source_doc_id": "7d69d891-0e8a-5309-92e0-1201d275ce0b",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 28,
+            "text": "事業單位不得拒絕出示檢查證，並須配合當地主管機關或警察機關進行強制檢查。",
+            "score": null,
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": false
+          }
+        ],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2026,
+        "snr": 0.0247,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 541,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 雇主 實施 勞工特殊健康檢查",
+            "- 雇主 對高空工作車應每月依下列規定定期實施檢查一次 作業裝置及油壓裝置有無異常",
+            "- 雇主 另應 特殊體格檢查",
+            "- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查",
+            "- 符合本附表所列作業之勞工 依勞工健康保護規則第十九條規定，雇主應每年或於變更其作業時，依規定項目實施特殊健康檢查",
+            "- 雇主 對在職勞工應定期實施 一般健康檢查",
+            "- 雇主 使勞工接受定期特殊健康檢查 將勞工作業內容、最近一次之作業環境監測紀錄及危害暴露情形等作業經歷資料交予醫師",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 油壓泵、油壓馬達、汽缸、安全閥及其他油壓裝置",
+            "- 雇主 對乾燥設備、以氣體燃料或液體燃料等為熱源之加熱設備及其附屬設備（含排氣裝置、排風導管等） 每年依下列規定定期實施檢查一次",
+            "- 未滿四十歲者 每三年檢查一次",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 轉向器之左右回轉角度、肘節、軸、臂及其他操作裝置",
+            "- 受檢勞工之歷年健康檢查紀錄 彙整",
+            "- 雇主 使勞工從事特別危害健康作業時 建立其暴露評估及健康管理資料",
+            "- 四十歲以上未滿六十歲者 每二年檢查一次",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 壓縮壓力、閥間隙及其他原動機",
+            "- 勞工之離職 要求提供其健康檢查有關資料時 雇主",
+            "- 甲醛 屬於 作業之各項特殊體格（健康）檢查",
+            "- 雇主 實施 安全衛生管理及自動檢查",
+            "- 特殊體格（健康）檢查紀錄 應至少保存 三十年",
+            "- 雇主 應委託 勞工健康服務專業機構",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 電壓、電流及其他電氣系統",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 主動輪、從動輪、上下轉輪、履帶、輪胎、車輪軸承及其他走行裝置",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 車體、操作裝置、安全裝置、連鎖裝置、警報裝置、方向指示器、燈號裝置及儀表",
+            "- 年滿六十歲者 每年檢查一次",
+            "- 雇主 得訂定 勞工健康檢查及管理",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 離合器、變速箱、差速齒輪、傳動軸及其他動力傳動裝置",
+            "- 應訂定勞工健康服務計劃 每年評估成效及檢討",
+            "- 雇主 對高空工作車，應每年就下列事項實施檢查一次 伸臂、升降裝置、屈折裝置、平衡裝置、工作台及其他作業裝置",
+            "- 雇主 對高空工作車應每月依下列規定定期實施檢查一次 制動裝置、離合器及操作裝置有無異常",
+            "- 在高溫場所工作之勞工 每日工作時間不得超過 六小時",
+            "- 雇主 對高空工作車應每月依下列規定定期實施檢查一次 安全裝置有無異常",
+            "- 所稱之高溫作業勞工作息時間標準是指高溫作業。",
+            "- 僱主在對特定化學設備或其附屬設備開始使用、改造或修理時，應依規定實施一次重點檢查。",
+            "- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。",
+            "- 檢查 每年進行一次"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 152360.0,
+        "raw_draft": "根據提供的事實清單，高溫作業的勞工並未直接提到特殊健康檢查的頻率。\n事實清單中提到的是：\n- 在高溫場所工作之勞工每日工作時間不得超過六小時。\n高溫作業的勞工每年要做一次特殊健康檢查。\n因此，根據提供的事實清單，無法直接得出高溫作業勞工特殊健康檢查的頻率。\n然而，可以推論一般健康檢查的頻率：\n- 雇主對在職勞工應定期實施一般健康檢查。\n事實清單中並未明確指出高溫作業勞工特殊健康檢查的頻率，因此無法根據提供的事實清單得出具體答案。\n若需進一步了解，建議參閱勞動基準法或其他相關法規。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，高溫作業的勞工並未直接提到特殊健康檢查的頻率。\n事實清單中提到的是：\n- 在高溫場所工作之勞工每日工作時間不得超過六小時。\n高溫作業的勞工每年要做一次特殊健康檢查。\n因此，根據提供的事實清單，無法直接得出高溫作業勞工特殊健康檢查的頻率。\n然而，可以推論一般健康檢查的頻率：\n- 雇主對在職勞工應定期實施一般健康檢查。\n事實清單中並未明確指出高溫作業勞工特殊健康檢查的頻率，因此無法根據提供的事實清單得出具體答案。\n若需進一步了解，建議參閱勞動基準法或其他相關法規。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]
