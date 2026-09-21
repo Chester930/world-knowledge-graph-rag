@@ -1,0 +1,300 @@
+{
+  "questions": [
+    {
+      "id": "57-AGGR16",
+      "question": "《職業安全衛生管理辦法》規定的第一類事業與第二類事業，風險等級與應設置管理單位的人數門檻各是什麼？",
+      "pcode": "N0060027",
+      "source_article": "N0060027 §2、§2-1",
+      "gold_answer": "第一類事業：具顯著風險者，事業單位勞工人數在100人以上者，應設直接隸屬雇主之專責一級管理單位。第二類事業：具中度風險者，勞工人數在300人以上者，應設直接隸屬雇主之一級管理單位（非專責）。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "第一類事業：具顯著風險者。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2條第1項第1款",
+          "is_essential": true,
+          "note": "第一類事業風險等級，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "第二類事業：具中度風險者。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2條第1項第2款",
+          "is_essential": true,
+          "note": "第二類事業風險等級，2026-09-17重抽驗證後逐字確認正確。⚠️第三類事業（原文應為「具低度風險者」）在KG中被誤抽成與第二類相同的「具中度風險者」——相鄰列舉項值複製誤植的新缺陷類型，記入3.1.3§b，本題刻意避開第三類不用"
+        },
+        {
+          "exact_span": "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2-1條第1項第1款",
+          "is_essential": true,
+          "note": "第一類事業管理單位設置門檻，2026-09-17重抽驗證後逐字確認正確"
+        },
+        {
+          "exact_span": "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2-1條第1項第2款",
+          "is_essential": true,
+          "note": "第二類事業管理單位設置門檻，2026-09-17重抽驗證後逐字確認正確"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "同文件內風險分級+對應組織門檻聚合（兩類事業各自的風險等級與人數門檻需正確配對，不可互換）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第9組候選（職安衛管理辦法風險分級），2026-09-17新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "global_aggregation",
+        "multi_fact_assembly"
+      ],
+      "answer_scope": "只回答第2條的第一／第二類風險等級與第2-1條一般事業單位管理單位門檻；不混入第6條總機構規則。第二類第2-1條門檻為一級管理單位，非專責。",
+      "required_claims": [
+        "第一類具顯著風險與100人專責一級管理單位門檻",
+        "第二類具中度風險與300人一級管理單位門檻"
+      ],
+      "claim_audit_rules": [
+        {
+          "id": "aggr16-head-office-500-condition",
+          "kind": "conditional",
+          "trigger_patterns": [
+            "五百人",
+            "500人"
+          ],
+          "trigger_mode": "any",
+          "required_condition_patterns": [
+            "事業設有總機構"
+          ],
+          "description": "第6條500人規則須明示事業設有總機構的適用前提。"
+        },
+        {
+          "id": "aggr16-second-category-500-role",
+          "kind": "role_mismatch",
+          "trigger_patterns": [
+            "第二類",
+            "五百人",
+            "專責"
+          ],
+          "trigger_mode": "all",
+          "description": "第二類500人總機構規則是設一級管理單位，不是專責一級。"
+        },
+        {
+          "id": "aggr16-first-category-200-threshold",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "第一類",
+            "二百人"
+          ],
+          "trigger_mode": "all",
+          "description": "本題第一類一般事業單位門檻是100人；200人不是本題答案。"
+        },
+        {
+          "id": "aggr16-management-system-out-of-scope",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "CNS 45001"
+          ],
+          "trigger_mode": "any",
+          "description": "管理系統建置不是本題要求的管理單位門檻答案。"
+        },
+        {
+          "id": "aggr16-refusal-with-gold",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "資料未明確記載",
+            "無法確認"
+          ],
+          "trigger_mode": "any",
+          "description": "已提供必要 Fact 時，不應宣稱無法確認風險等級或門檻。"
+        }
+      ]
+    },
+    {
+      "id": "57-AGGR17",
+      "question": "《職業安全衛生管理辦法》將第一類、第二類及第三類事業各自歸為何種風險等級？",
+      "pcode": "N0060027",
+      "source_article": "N0060027 §2",
+      "gold_answer": "第一類事業：具顯著風險者；第二類事業：具中度風險者；第三類事業：具低度風險者。",
+      "scenario_type": "Type-D",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "一、第一類事業：具顯著風險者。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2條第1項第1款",
+          "is_essential": true,
+          "note": "風險分級列舉；2026-09-18依 original.md 與修復後 Neo4j Fact／來源引用逐字核對。"
+        },
+        {
+          "exact_span": "二、第二類事業：具中度風險者。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2條第1項第2款",
+          "is_essential": true,
+          "note": "風險分級列舉；2026-09-18依 original.md 與修復後 Neo4j Fact／來源引用逐字核對。"
+        },
+        {
+          "exact_span": "三、第三類事業：具低度風險者。",
+          "source_law": "N0060027_職業安全衛生管理辦法",
+          "source_article": "第2條第1項第3款",
+          "is_essential": true,
+          "note": "修復回歸重點；2026-09-18依 original.md 與修復後 Neo4j Fact／來源引用逐字核對。"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "同文件三類事業風險分級完整列舉，逐類配對風險值",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第9組候選（職安衛管理辦法風險分級），2026-09-18修復後新增回歸題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "segmented_enumeration",
+        "multi_fact_assembly"
+      ],
+      "answer_scope": "只回答第一類、第二類、第三類事業各自的風險等級；不延伸回答人數門檻、管理單位或總機構規則。",
+      "required_claims": [
+        "第一類具顯著風險",
+        "第二類具中度風險",
+        "第三類具低度風險"
+      ],
+      "claim_audit_rules": [
+        {
+          "id": "aggr17-management-threshold-out-of-scope",
+          "kind": "out_of_scope",
+          "trigger_patterns": [
+            "管理單位",
+            "總機構",
+            "CNS 45001",
+            "第2-1條",
+            "人數"
+          ],
+          "trigger_mode": "any",
+          "description": "風險分類題不應延伸回答管理組織或人數門檻。"
+        }
+      ]
+    },
+    {
+      "id": "57-AGGR18",
+      "question": "職業災害勞工經醫療終止後，若要認定其「身心障礙不堪勝任工作」，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於由哪種機構認定的規定有什麼不同？",
+      "pcode": "N0050031",
+      "source_article": "N0060041 §23第2款、§24第1款；N0050031 §84第1項第2款、§85第1項第1款",
+      "gold_answer": "舊法（職業災害勞工保護法）規定由「公立醫療機構」認定（第23條第2款為雇主預告終止的情形、第24條第1款為勞工終止的情形）；新法（勞工職業災害保險及保護法）改為由「中央衛生福利主管機關醫院評鑑合格醫院」認定（第84條第1項第2款、第85條第1項第1款）。雇主終止與勞工終止兩個方向，認定機構的改變是一致的。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第23條第2款",
+          "is_essential": true,
+          "note": "舊法雇主預告終止情形的認定機構，2026-09-20失敗chunk重抽後逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第24條第1款",
+          "is_essential": true,
+          "note": "舊法勞工終止情形的認定機構；此句同時是第23條第2款的子字串（原文出現2次），以條號區分"
+        },
+        {
+          "exact_span": "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第84條第1項第2款",
+          "is_essential": true,
+          "note": "新法雇主預告終止情形的認定機構，2026-09-20失敗chunk重抽後逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第85條第1項第1款",
+          "is_essential": true,
+          "note": "新法勞工終止情形的認定機構；此句同時是第84條第1項第2款的子字串（原文出現2次），以條號區分"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "新舊法對照（終止事由結構相同，僅認定機構由公立醫療機構改為中央衛生福利主管機關醫院評鑑合格醫院；雇主與勞工兩方向的相鄰條文含同一句式，易混）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第4組候選「終止條件比較」子題重啟（2026-09-20，12個failed chunk重抽後）",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop",
+        "distractor_adjacent"
+      ],
+      "answer_scope": "只回答認定「身心障礙不堪勝任工作」的機構要求（舊法公立醫療機構、新法中央衛生福利主管機關醫院評鑑合格醫院）；不延伸回答終止事由的其他款項、預告規定或資遣費、退休金規則。",
+      "required_claims": [
+        "舊法由公立醫療機構認定",
+        "新法由中央衛生福利主管機關醫院評鑑合格醫院認定"
+      ],
+      "claim_audit_rules": [
+        {
+          "id": "aggr18-institution-swapped",
+          "kind": "role_mismatch",
+          "trigger_patterns": [
+            "新法規定由公立醫療機構",
+            "舊法則規定由中央衛生福利主管機關醫院評鑑合格醫院",
+            "新法（勞工職業災害保險及保護法）：-職業災害勞工經醫療終止後，經公立醫療機構",
+            "舊法（職業災害勞工保護法）：-職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院"
+          ],
+          "trigger_mode": "any",
+          "required_condition_patterns": [],
+          "description": "認定機構的新舊法歸屬顛倒：舊法（職業災害勞工保護法）為公立醫療機構、新法（勞工職業災害保險及保護法）為中央衛生福利主管機關醫院評鑑合格醫院。2026-09-20 K-arm 基準跑實際觀察到答案把兩者寫反（Atomic Accuracy 仍為100%，因為四個 gold span 的文字都出現在答案中）。只涵蓋已觀察到的幾種句型，高精確度、低召回，屬 pilot 規則。"
+        }
+      ]
+    },
+    {
+      "id": "57-AGGR19",
+      "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）分別規定在哪些條文？兩者的實質內容有沒有不同？",
+      "pcode": "N0050031",
+      "source_article": "N0060041 §26；N0050031 §84第2項、§85第2項",
+      "gold_answer": "實質內容相同，只是條文位置不同，這不是新法新增的規定。舊法集中規定在第26條：雇主依第23條規定預告終止時，準用勞動基準法規定預告勞工（第1項）；職業災害勞工依第24條第1款規定終止時，準用勞動基準法規定預告雇主（第2項）。新法則分別併入各自的條文：雇主預告終止的規定在第84條第2項；職業災害勞工終止的規定在第85條第2項（同樣僅限依第1款，即醫院認定不堪勝任工作的情形）。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第26條第1項",
+          "is_essential": true,
+          "note": "舊法雇主預告規定，2026-09-20逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第26條第2項",
+          "is_essential": true,
+          "note": "舊法勞工預告規定，2026-09-20逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第84條第2項",
+          "is_essential": true,
+          "note": "新法雇主預告規定（併入第84條），2026-09-20逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第85條第2項",
+          "is_essential": true,
+          "note": "新法勞工預告規定（併入第85條），2026-09-20逐字核對original.md與Neo4j"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "新舊法對照的錯誤前提陷阱（預告規定新舊法實質相同、僅條文位置不同；系統若誤稱新法新增或舊法沒有即為錯誤）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第4組候選「終止條件比較」子題重啟（2026-09-20，12個failed chunk重抽後）",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop",
+        "multi_fact_assembly"
+      ],
+      "answer_scope": "只回答預告規定在新舊法的所在條文，以及實質內容是否相同；不延伸回答資遣費、退休金（舊法第25條、新法第86條）或終止事由。",
+      "required_claims": [
+        "舊法的預告規定在第26條",
+        "新法的預告規定在第84條第2項與第85條第2項",
+        "新舊法實質內容相同，不是新法新增"
+      ]
+    }
+  ]
+}
