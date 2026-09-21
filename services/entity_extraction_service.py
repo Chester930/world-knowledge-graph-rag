@@ -41,10 +41,12 @@ from typing import Protocol
 from services.entity_registry_service import Mention
 
 # spaCy NER 標籤 → 本系統既有的粗粒度中文分類。entity_type 目前系統全域無
-# 強制分類清單（core/constants.py 未定義任何實體類型常數，其餘欄位皆預設
-# 「概念」，見 09 報告與 entity_registry_service 模組 docstring），此處只做
-# 低成本的常見類別對應，其餘標籤一律歸「概念」，不追求完整覆蓋 spaCy 全部
-# 標籤——分類粒度對 §a 的 PROMOTE／ALIASCHECK 邏輯無影響（皆只用字面比對），
+# 強制分類清單（`core/constants.py::ENTITY_TYPES` 是 SVO 抽取 prompt 用的
+# 非強制參考清單——52 類 schema.org 常用型別，經 `svo_service.resolve_entity_type()`
+# 正規化，不做白名單驗證；此處暫存區用的是另一套粗粒度中文標籤，兩者詞彙不同，
+# 其餘欄位皆預設「概念」，見 09 報告與 entity_registry_service 模組 docstring），
+# 此處只做低成本的常見類別對應，其餘標籤一律歸「概念」，不追求完整覆蓋 spaCy
+# 全部標籤——分類粒度對 §a 的 PROMOTE／ALIASCHECK 邏輯無影響（皆只用字面比對），
 # 純粹是 metadata。
 _SPACY_LABEL_MAP: dict[str, str] = {
     "PERSON": "人物",

@@ -12,7 +12,7 @@
 2. **「實體型別貧血」不成立**：Gemini 讀的是暫存區模組（`entity_registry_service.py`），沒看到主管線早已實作 Schema.org 型別標註（52 類核心庫＋939 類擴充庫）。
 3. **「缺 Relator 導致 AGGR18 新舊法寫反」的診斷與證據不符**。檢索是滿分，問題出在生成端；而且存檔顯示，留存的 gold span（事實句）**不帶法規名**，因此更可能的真因是「prompt 缺來源標籤」（推論，尚待用 T0 trace 直接驗證），這比新增 Relator 節點便宜得多（§3）。
 4. **Gemini 建議的 `governing_status='active'` 硬過濾會破壞現有題目**：AGGR18、AGGR19 就是要同時比較新舊法。
-5. 查證過程附帶發現一個**過時註解**（`entity_extraction_service.py:43-48`），與程式現況矛盾。
+5. 查證過程附帶發現一個**部分過時的註解**（`entity_extraction_service.py:43-48` 括號內「未定義任何實體類型常數」與現況矛盾；已於 §8 修正）。
 
 ## 1. 被查證的四項主張
 
@@ -40,7 +40,7 @@
 
 **但有一個 Gemini 沒講到、確實存在的真缺口**（先前已在對話記錄中討論過，非本次新發現）：ENTITY_TYPES 的排序來源是商業網頁（Offer、Restaurant、Recipe、Hotel…），對法規文本的**抽象法律角色**（雇主、勞工、主管機關）貼合度差。`core/constants.py` 註解已誠實聲明這個取捨。這是「型別清單不合領域」，不是「沒有型別」。
 
-**附帶發現（過時註解）**：`services/entity_extraction_service.py:43-48` 寫著「`entity_type` 目前系統全域無強制分類清單（`core/constants.py` 未定義任何實體類型常數…）」——這與 `ENTITY_TYPES` 已存在的事實矛盾，是註解沒跟上程式碼。屬於既有的 stale-doc 類問題。
+**附帶發現（過時註解）**：`services/entity_extraction_service.py:43-48` 寫著「`entity_type` 目前系統全域無強制分類清單（`core/constants.py` 未定義任何實體類型常數…）」——括號內「未定義任何實體類型常數」與 `ENTITY_TYPES` 已存在的事實矛盾，是註解沒跟上程式碼；但「無**強制**分類清單」這半句仍然正確（`ENTITY_TYPES` 是非強制參考清單，不做白名單驗證）。**§8 已只修正錯的那一半。**
 
 **限制**：我只核對程式碼路徑，**沒有連 Neo4j 抽樣統計 `e.type` 實際填充率與分布**。「主管線有型別」是程式碼層級的結論，實際 KG 裡有多少實體帶型別、品質如何，未驗證。
 
@@ -126,7 +126,7 @@
 | C | 實體型別加法律角色（雇主、勞工、主管機關） | ENTITY_TYPES 偏商業網頁，法律角色貼合度差 | 中 | 弱：型別目前只參與去重，未進檢索排序 | 低優先。放進 per-KG config 較符合既有架構；價值待驗證 |
 | D | 擴充法律關係詞彙（義務／權利／條件） | 關係表達力 | 很高：改 `SVO_REL_TYPES`、抽取 prompt、`QSIM` 向量，牽動論文「以 ConceptNet 為依據」論述，並需全量重抽 | 無 | 不建議 |
 | E | Relator／OntoClean 本體層 | Gemini 的理論解法 | 研究級 | 無 | 不建議：與論文「診斷 KG 何時有增益」（報告61）的定位相比，會大幅擴大範圍 |
-| F | 修正過時註解 `entity_extraction_service.py:43-48` | 文件與程式碼矛盾 | 極低 | 已直接驗證 | 建議順手處理，可獨立進行 |
+| F | 修正過時註解 `entity_extraction_service.py:43-48` | 文件與程式碼矛盾 | 極低 | 已直接驗證 | ✅ 已於 §8 完成（僅註解，測試 5 項通過） |
 
 ### A 案的注意事項（若使用者決定推進）
 
@@ -160,3 +160,63 @@
 > **注意**：報告61、62 撰寫本報告時**只存在於 `worktree-sdd-retrieval-comparison` 分支**，尚未進入 `master`（`master` 最新編號為 60）；本報告 §2.3、§4 對它們的引用，是以該分支上的檔案內容核對過的。這兩份合併進 `master` 前，上述連結在 `master` 上是懸空的。
 - 論文 `03_系統設計與方法論.md` §3.1.4（實體型別）、§3.5（RQ5 雙時態）
 - `HANDOVER.md` 第4、6、8點
+- `docs/參考文獻/37_生成端來源標註與情境元資料/`（本報告 §8 的文獻與專案查證）
+
+## 8. 後續處理紀錄（2026-09-21，使用者要求「處理較好處理的項目、先收集文獻與專案」）
+
+**執行環境約束**：另一個終端機正在跑 T2 Stage A（42 題、`top_k=40`，`sdd-retrieval-comparison` 分支，佔用 Ollama）。因此本輪**不跑任何 LLM 評測**，只做文獻／專案查證、唯讀診斷、文件與註解修正；所有改動都在本報告所在的獨立 worktree。
+
+### 8.1 F：過時註解——已完成
+
+`services/entity_extraction_service.py:43-48`：重讀後發現只有括號內「`core/constants.py` 未定義任何實體類型常數」是錯的；「全域無**強制**分類清單」仍正確。已只修正錯的那一半，並註明暫存區用的是另一套粗粒度中文標籤、與 `ENTITY_TYPES` 詞彙不同。**純註解變更**，`tests/services/test_entity_extraction_service.py` 5 項通過。
+
+### 8.2 A：直接證據升級——prompt 事實行確實不帶來源
+
+§2.3 原本只能從程式碼與 gold span「推論」。這輪讀了 T0 trace（`sdd-retrieval-comparison` 分支 `data/eval/candidate_runs/`，唯讀）的 `prompt_context_lines`——**實際送進 LLM 的事實行**：
+
+- `57-AGGR1`（K arm）與 `17-Q1`（T2 Stage A 已寫入的第 1 題）的 prompt 行**全部是裸句**，例如 `- 雇主 對高空工作車應每月依下列規定定期實施檢查一次 作業裝置及油壓裝置有無異常`、`- 事假 一年內合計不得超過 十四日`：**沒有法規名、沒有條號、沒有施行日**。
+- 同一份 trace 的每筆證據已帶 `source_doc_id` 與 `article_no`（欄位：`kind, rank, text, score, source_doc_id, source_svo_chunk_index, article_no, in_prompt`），**資料已在手，只是沒有進 prompt**。
+
+**限制**：目前直接看到的是 AGGR1 與 17-Q1，**不是 AGGR18 本身**（Stage A 尚未跑到）。事實行由同一組函式產生、格式一致，所以「AGGR18 的行也不帶來源」是很強的推論，但直接證據要等 Stage A 寫入 `57-AGGR18` 的紀錄後讀取（免費，不需另跑 LLM；注意那是 `top_k=40` 而非凍結基準的 `top_k=20`，只能回答「行有沒有標籤」，不能拿來比較答對率）。
+
+**這也是「接地核對抓不到歸屬錯誤」的另一個面向**：`grounding_passed: true`（§2.3 表格）——標籤缺失使兩句話單獨看都成立，核對機制沒有歸屬資訊可比。
+
+### 8.3 文獻與專案（已入庫 `docs/參考文獻/37_生成端來源標註與情境元資料/`）
+
+| 項目 | 一句話 | 查證層級 |
+|---|---|---|
+| ALCE（Gao et al. 2023, EMNLP） | 官方 prompt 模板 `Document [{ID}](Title: {T}): {P}`：每筆 context 都帶編號與標題——**標示來源是既有標準做法** | ✅ 讀官方 repo 一手檔案；論文本身 🟡 abstract 層級 |
+| Feng & Steinhardt (2023) | 語言模型需把實體綁到屬性（binding ID 機制），為「並列無標籤事實難以歸屬」提供機制層面的研究基礎 | 🟡 abstract 層級；**合成任務、Pythia／LLaMA，非 qwen2.5:7b，僅能類比** |
+| Anthropic Contextual Retrieval (2024-09-19) | 嵌入前前置 chunk 情境；失敗率 5.7%→3.7%（−35%）→2.9%（−49%）→1.9%（−67%，加 reranking） | ✅ 內文即時核對；⚠️ 自家實驗，**檢索端**、非中文非法律 |
+| Reuter et al. (2025) SAC | 檢索端注入文件層級摘要（沿用資料夾31） | 🟡 |
+| dsRAG（1,588★、MIT） | AutoContext 標頭前置；README 自稱可減少下游 LLM 誤解文字 | ✅ 專案存在與 README 原文；**無公開量化數據，不可當證據** |
+| LlamaIndex（52,253★、MIT） | `MetadataMode`＋`excluded_llm_metadata_keys`：「進嵌入的 metadata」與「進 LLM prompt 的 metadata」是兩個獨立開關 | ✅ 原始碼 `schema.py:242-245, 294-298` |
+
+**結論（與報告61 同一立場）**：文獻與專案支持「標示來源是標準做法」與「問題有研究基礎」，但**沒有任何一項直接證明「在本系統事實行加標籤會降低新舊法歸屬錯誤」**——該命題必須靠本專案自己的對照實驗。已查但不採用：Multi-Meta-RAG（檢索前資料庫過濾，非生成端標籤，abstract 無數字）。
+
+### 8.4 A：設計草案與待裁示的採用規則（**尚未實作**）
+
+**為什麼這輪不寫程式碼**：
+1. 報告62 T0 已在 `sdd-retrieval-comparison` 分支改動 `_build_prompt()`（新增 `trace_sink`）；我在 `master` 基底的 worktree 改同一函式會產生合併衝突，且 T2 正在跑，那個分支不該被打擾。A 案應在 T2 完成後，**從 sdd 分支的最新狀態**接續。
+2. 沒有 Ollama 可用來驗證，只寫碼不驗證不符合本專案「採用規則先定、再跑」的慣例（報告62 T4）。
+
+**設計草案**（供裁示）：
+- **標籤內容**：`【{Document.title} 第{article_no}條】`前綴於事實行。資料來源：`source_doc_id` → `_fetch_document_map()`（`routers/agent.py` 已有，供引用顯示用）；`article_no` 已在 trace 證據裡。**第一版不放施行日**（避免 token 膨脹與範圍蔓延；施行日屬 B 案）。
+- **降級行為**：無 `Document`（一般文件、舊 KG）→ 不加標籤，與現行逐位元相同。
+- **預設關閉**：`ChatRequest` 新增 opt-in 旗標（暫名 `include_source_labels`），預設 `False`，比照 T0 的作法，使預設行為與凍結基準可比。
+- **兩條路徑都要處理**：正式 `chat()` 走 `_split_fact_lines()`；harness K 臂是把 `retrieved_texts` 原樣當 `context_lines`（報告62 §10.2）**繞過** `_split_fact_lines()`。標籤注入點必須讓兩條路徑一致，否則評測結果無法代表 `chat()`。
+- **token 影響（估算，未實測）**：每行約多 15–25 個中文字，35 行約 +500–900 字元；AGGR18 基準的 context 約 368 tokens，比例不小，需要一併記錄。
+
+**建議的採用規則（建議值，需使用者裁示；比照報告62 T4，須在跑評測前定案）**：
+1. **主要指標**：`57-AGGR18` 在重複執行（建議 ≥3 次）中，**歸屬正確**的比例高於無標籤版本。歸屬須以**人工／獨立核對**判定，**不可只靠** `aggr18-institution-swapped` 這條子字串規則（它是「已觀察錯答」的高精確度低召回規則，標籤可能讓模型改用規則沒涵蓋的句型犯錯）。
+2. **不退步**：凍結基準 42 題同條件（`e178c4c`、題庫 `404cde9f…`、Windows Ollama 0.34.2）下，達標題數不低於 12，且原本達標的 12 題不得有新增失敗。
+3. **成本只記錄不設門檻**：token 增量、延遲。
+4. **對照方式**：同批題、同 `top_k`，只切換旗標（有／無標籤），避免與 T2 的 `top_k=40` 效果混淆。
+
+**待使用者裁示**：（a）是否同意 A 案在 T2 完成後接續；（b）上列採用規則的數值與判定方式；（c）標籤第一版是否只用「法規名＋條號」。
+
+### 8.5 未做與遺留
+
+- 論文附錄的參考文獻信任分級表（`docs/論文/附錄與參考文獻.md`）**未更新**：專案慣例要求新增文獻時同步更新，但該表目前也未收錄資料夾31 的 Reuter／Louis 兩篇，屬既有落差；待使用者決定是否一併補齊。
+- 兩份新入庫 PDF 皆 🟡（abstract 層級），因環境無 `poppler-utils`；若要當機制層級依據需補精讀。
+- AGGR18 本身的實際 prompt 行：待 T2 Stage A 寫入後讀取。
