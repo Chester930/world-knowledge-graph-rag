@@ -206,7 +206,7 @@
 **設計草案**（供裁示）：
 - **標籤內容**：`【{Document.title} 第{article_no}條】`前綴於事實行。資料來源：`source_doc_id` → `_fetch_document_map()`（`routers/agent.py` 已有，供引用顯示用）；`article_no` 已在 trace 證據裡。**第一版不放施行日**（避免 token 膨脹與範圍蔓延；施行日屬 B 案）。
 - **降級行為**：無 `Document`（一般文件、舊 KG）→ 不加標籤，與現行逐位元相同。
-- **預設關閉**：`ChatRequest` 新增 opt-in 旗標（暫名 `include_source_labels`），預設 `False`，比照 T0 的作法，使預設行為與凍結基準可比。
+- **預設關閉**：旗標預設 `False`，使預設行為與凍結基準可比。**旗標放哪裡（更新於 §10.5）**：原草案是在 `ChatRequest` 新增 opt-in 欄位（比照 T0）；查證專案的四層設定後，**更貼合架構的做法是放進 `KGConfig.domain`**，評測時以 `ConfigLoader.load(..., request_overrides=)` 切換，不需改 API。此項併入待裁示。
 - **兩條路徑都要處理**：正式 `chat()` 走 `_split_fact_lines()`；harness K 臂是把 `retrieved_texts` 原樣當 `context_lines`（報告62 §10.2）**繞過** `_split_fact_lines()`。標籤注入點必須讓兩條路徑一致，否則評測結果無法代表 `chat()`。
 - **token 影響（估算，未實測）**：每行約多 15–25 個中文字，35 行約 +500–900 字元；AGGR18 基準的 context 約 368 tokens，比例不小，需要一併記錄。
 
@@ -308,3 +308,54 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 - 未對其他 KG（`76bc98ff`）、`Fact` 全量做統計；型別「概念」的成因未以重抽驗證。
 - 未逐條檢查 `PRODUCT` 等型別的實際內容品質。
 - 未實作任何改進項；A 案仍待使用者裁示與 T2 完成（§8.4）。
+
+## 10. 第三份 Gemini 報告查證：《知識圖譜分層客製化架構現況與接續任務報告書 v1.0》（2026-09-21）
+
+### 10.1 檔案與性質
+
+- **位置**：`docs/報告/知識圖譜分層客製化架構現況與接續任務報告書_v1.0.md`（主 checkout，**未追蹤、無編號**；本報告未複製或 commit）。
+- **性質**：與前兩份不同，這份**不是評測缺陷清單，而是對「四層設定疊合（`core/kg_config/`）」的現況盤點與接續施工指引**：宣稱整體約 70%、四層引擎與查詢端 100%、抽取端 40%；列 4 個「斷點」（P0／P1／P1／P2）、3 個施工步驟（含程式碼草稿）與 3 條驗收標準。
+- **重要背景**：專案**已有**這條路線的設計與逐步落地紀錄——`docs/報告/33_設定分層與領域可插拔化設計報告.md`（§6 逐步標註 as-built）。所以查證重點是：Gemini 的盤點與 33 相符幾成、哪些是它新增的、新增的對不對。
+- **方法**：對照 `core/kg_config/{model,loader,sources,stages}.py`、`config/`、`routers/agent.py`、`services/{svo_service,extraction_worker,svo_preprocessing_service,knowledge_graph_service,deterministic_guard_service}.py`、`models/eval_schema.py`、報告 33／56；並實測一段最小 pydantic 程式驗證其草稿的一個風險。全程唯讀、不呼叫 LLM。
+
+### 10.2 逐項判定
+
+| 主張 | 判定 | 證據 |
+|---|---|---|
+| 四層疊合引擎「100% 完工」：遞迴合併、`schema_version` 相容檢查、`frozen` 不可變模型 | ✅ | `loader.py:90-122` 四層 deep-merge；`model.py:20` `_FROZEN = ConfigDict(frozen=True, extra="forbid")`；`config/README.md` 的 schema 版本表；golden test `tests/core/test_kg_config.py` |
+| 查詢／生成端「100% 接線」：`BfsConfig`／`FactListConfig`／`DomainConfig` | ✅ 大致，⚠️ 細節有誤 | 報告33 §6 步驟 2、8b′、3a 皆標 ✅；`chat()` 於 `routers/agent.py:1451` 載入設定。**細節錯誤**：`BfsConfig` 沒有「走訪跳數」欄位（實際為 `seed_entity_limit`、`seed_max_degree`、`per_seed_limit`、`doc_scope_top_n_facts`、`expand_when_below`、`prize_top_k`）；「14 Fact＋4 BFS」實為 `truncate_k=18`、`min_bfs_slots=4` 的推算值 |
+| 「已完工並跑通」 | ⚠️ 半數 | **第四層（per-request 覆蓋）只在引擎內**：`request_overrides` 全專案只出現在 `loader.py` 與一個測試，`chat()` 呼叫 `.load(kg_id, domain_pack=…)` **未傳入**，API 也沒有對應欄位。**per-KG 層目前沒有任何設定檔**：`config/kg/` 只有 `.gitkeep`（`config/README.md` 的 KG#4 範例不是真檔案）；只有 `generic`、`taiwan-labor-law` 兩個 domain pack。也就是四層中實際在產線上有內容的只有「預設值＋domain pack」兩層 |
+| `KnowledgeGraph` 具 `domain_pack`、`pronoun_lexicon_exclude` | ✅ | `models/knowledge_graph.py:47` 起；報告33 §6 步驟 5 |
+| **斷點1（P0）**：SVO 抽取 few-shot 硬寫在程式碼，無法依 KG 客製 | ✅ 屬實，但**就是報告33 §6 的「3b ⏳」** | `_svo_prompt(text)`（`svo_service.py:211`）規則 6–9 與範例寫死；`extract_svo_triples` 無 `cfg` 參數（`:444-451`）；`generic.json` 的 `_note` 也自承「svo 抽取少樣本…仍為第 3b–4 步待抽項」。**Gemini 沒提**報告33 §5 **R4**（空 few-shot 會讓 qwen 抽取品質下降，引文獻16「少樣本提示範例干擾」與報告32 §9.6「qwen 對 prompt 敏感」，結論是「不宣稱 generic 等同已驗證路徑，品質列入 per-stage eval gate」），也沒提該步驟的閘控（待 drain、待 eval suite）。標 P0 並暗示照 Step 1–2 即可，**低估了風險** |
+| **斷點2（P1）**：`extraction_worker.py` 啟動切塊時不讀 `ChunkingConfig` | ⚠️ 事實對，**位置與影響有誤** | `extraction_worker.py` 沒有任何 `cfg`，但**它不切塊**——`_process_one`（`:54`）只處理已排隊的 chunk。切塊發生在 `svo_service.trigger_extraction()`→`prepare_svo_ready_chunks()`（`svo_service.py:3501`，已接受 `chunking_config=(cfg or KGConfig()).chunking`），其呼叫端 `routers/staging.py`（3 處）與 `knowledge_graph_service.py:122` **都不傳 `cfg`**。報告56 §3 **刻意**不改呼叫端（維持零行為變化，待有真實通用文件 KG 需求再接）。且對法規路徑（`articles is not None`）`cfg.chunking` **完全不生效**（`svo_preprocessing_service.py:181-187`），報告56 記錄「系統裡沒有走 SVOGROUP 路徑的 KG」→ **目前沒有任何受影響的 KG** |
+| **斷點3（P1）**：`claim_audit_rules` 應抽成 `<name>.guard.json` 於線上常態攔截 | ❌ **與現行設計相反** | `models/eval_schema.py:40-43`：`ClaimAuditRule` docstring 明說「這些規則只供離線評測使用，不會改變正式 chat 的生成或接地流程」。規則是**逐題**的（id 如 `aggr18-institution-swapped`）且來自「已觀察到的錯答」（報告57 §4.19：子字串、高精確度低召回、pilot）——搬到線上等於把單題過擬合規則當通用護欄。專案**另有**線上向的 `DeterministicGuardService`（起算日／條號／區間三道守衛），但它由 `adaptive_retrieval_service` 與評測腳本呼叫，**不在 `routers/agent.py` 的 `chat()` 路徑**（`routers/` 內無引用）。該服務的正則是台灣法規專用、寫死的（`deterministic_guard_service.py:29-35`）——**這才是與「領域可插拔」相關的真缺口**，但 Gemini 指錯了對象；報告33 §6 我只確認到「抽取端 guard_profile」，**未見生成端守衛 config 化的條目**（未逐段通讀全文，僅讀 §6） |
+| **斷點4（P2）**：`PosTagger`／`NerTagger` 無法在設定檔宣告（jieba／CKIP） | ⚠️ 屬實但無需求 | Protocol 存在，但 `SpacyPosTagger` **沒有任何呼叫端**建立或傳入 `pos_tagger`／`ner_tagger`（`svo_preprocessing_service.py:161-166` 自承 spaCy 未安裝驗證、尚未接進 `trigger_extraction()`），法規路徑又直接略過這兩階段（§9.3(a)）；`jieba`／CKIP 的實作在 repo 裡不存在。為休眠路徑加設定入口為時過早 |
+| 整體進度「約 70%」、抽取端「40%」 | ❌ 無計算依據 | 報告33 §6 才是逐步標註的權威紀錄：✅ 步驟 1、2、8b′、3a、4（查詢半）、5、5b；⏳ 3b、4（抽取半）、per-stage eval suite（骨架 ✅、4 個 `MANUAL` 階段待做）。百分比是估的 |
+| **Gemini 漏列的真實待辦** | — | ①**抽取端半**：`KGConfig` 已宣告 `dedup`（`edit_ratio`／`cosine`／`escalate_low`）、`reltype.compare_cosine_threshold`、`extraction.uncovered_sentence_threshold`，但 `services/` 內**沒有任何一處讀取**（搜尋 `cfg.dedup`／`cfg.extraction`／`compare_cosine` 皆無；只有 `reltype.qsim_*` 在查詢端 `svo_service.py:362-365` 被讀）——**已宣告未接線**，是最低風險的一步。②per-stage eval suite 的 4 個 `MANUAL` 階段（`stages.py`） |
+
+### 10.3 施工草稿的問題（Step 1–3）
+
+1. **Step 1 會破壞專案的深度不可變不變式（已實測）**：Gemini 草稿 `svo_fewshots: list[SvoFewShot] = Field(default_factory=list)` 放進 frozen 模型。我用最小 pydantic 程式驗證：frozen 模型內的 `list` 欄位**可以 `.append()` 成功**（`len` 由 1 變 2），只有整體重指派才拋 `ValidationError`。`model.py:3-5` 的設計宣稱「任一層（含巢狀）寫入都拋」，報告33 §5 R3 要求 deep-freeze 並有測試把關；`KGConfig` 目前**全部是 scalar**（`model.py:10`「第 1 步只收 scalar 常數」），這會是**第一個 list 欄位**。要用 `tuple[SvoFewShot, ...]`，並處理 `deep_merge`（`loader.py:70-86`）對非 mapping 值一律**整體取代**的語意（domain pack 與 per-KG profile 的 few-shot 清單會互相取代、不會串接，需決定這是否符合預期），以及 `model_dump()`→`model_validate()` 往返（`loader.py:107, 122`）。
+2. **Step 2 的名稱與簽章與現況不符**：`_format_fewshots`、`_DEFAULT_FEWSHOTS`、`_build_svo_prompt` **都不存在**（實際是 `_svo_prompt(text)`，`svo_service.py:211`）；`extract_svo_triples` 的真實簽章含 `embedding_provider`、`kg_id`、`calibration_db_path`（`:444-451`），草稿省略了它們；另有 `extract_svo_triples_with_completeness_check`（`:950`）與其補抽路徑同樣要貫穿 `cfg`。且範例與規則交織在同一段 prompt（規則 6–9 每條含反例＋正例），不是可乾淨抽出的獨立清單，拆分本身就需要設計。
+3. **Step 3（Worker 載入設定）**：模式與 `chat()`（`routers/agent.py:1451`）一致，可行；但落點應在 `trigger_extraction()`／`_process_one` 的呼叫鏈上，且 Worker 是**逐 chunk** 處理，需注意每個 chunk 都重新讀設定檔的成本（我沒有量測，僅提醒設計時要考量快取）。
+
+### 10.4 驗收標準（DoD）評估
+
+| DoD | 評估 |
+|---|---|
+| 1. 零設定向後相容，Golden Test 100%、benchmark 不退步 | golden test 已存在（`tests/core/test_kg_config.py`，逐欄位比對 live 常數，`model.py:7-8`）。但「benchmark 分數不得退步」**不適用抽取端**：抽取端改動只影響**新抽取**，既有 KG 不變，要比較必須重抽；且日後與凍結基準對照須守 `HANDOVER.md` 第 8 點的凍結條件，不可混比 |
+| 2. 新增 `medical.json` 驗證「完全按醫療規則運行」 | 沒有醫療語料與評測，**只能驗「設定被讀取」的機制，不能驗品質**；報告33 R4 已明說不宣稱 generic 品質 |
+| 3. 高併發兩個 domain pack 的 KG 互不污染 | 已由 frozen＋R3 測試支撐，但 Gemini 自己的 `list` 草稿會**削弱**它（§10.3 第 1 點） |
+
+### 10.5 整體評估與對前面章節的影響
+
+- **這份報告是報告33 §6 的現況摘要加改寫**，方向與 33 一致，核心盤點（引擎完成、查詢端接線、抽取端未接線）大致正確。**新增的部分品質較差**：斷點 2 位置錯、斷點 3 與現行設計相反、斷點 4 無需求、Step 1 程式碼會破壞不變式、進度百分比無依據；同時**漏掉**報告33 裡真正的兩項待辦（抽取端半、eval suite）與最重要的風險（R4）。
+- **可採納**：斷點 1（=3b）的方向與報告33 一致；**最低風險的下一步是把已宣告的 `dedup`／`compare_cosine`／`extraction` 欄位接上讀取**（純接線、預設值等於現值、golden test 把關）。這是我的建議，不是查證結論。
+- **關於 3b 的阻塞條件**：報告33 標「待 drain 完」。依 `HANDOVER.md`（2026-09-20）KG#4 佇列已 3307/3307 `completed`，**該條件字面上已滿足**；但 T2 與凍結基準對照仍在進行、R4（qwen 對 prompt 敏感）未解，且改動抽取 prompt 會使新抽取與凍結基準不可比。所以「可以開始」與「該現在做」是兩回事，仍需使用者裁示。
+- **對 §8 A 案的設計啟發（重要）**：§8.4 原提議在 `ChatRequest` 新增 `include_source_labels` 旗標。既然專案已有四層設定，**更貼合架構的做法是把開關放進 `KGConfig.domain`**（預設 `False`＝零行為變化，符合報告33 不變式），評測時由 harness／評測腳本以 `ConfigLoader.load(..., request_overrides={...})` 切換——這些腳本本來就自己呼叫 `ConfigLoader`（`scripts/eval/run_rq1_comparison.py:645`、`run_retrieval_comparison.py:382`），**不需要改 API、不需要新增 `ChatRequest` 欄位**；日後若要對某 KG 常態開啟，再寫進該 KG 的 domain pack。附帶：此舉也自然補上了「第四層目前沒有任何呼叫端」的現況。**限制**：harness K 臂把 `retrieved_texts` 原樣當 `context_lines` 傳入（報告62 §10.2），標籤仍須在 harness 路徑與 `chat()` 路徑用**同一個格式函式**產生，否則兩邊不可比。此為設計建議，尚待使用者裁示（併入 §8.4 待裁示項）。
+
+### 10.6 本輪未做
+
+- 未逐段通讀報告33 全文（僅讀 §1、§5 風險表、§6 落地順序與相關搜尋命中），對「生成端守衛 config 化是否已有規劃」下的是「我未見」而非「沒有」。
+- 未量測 Worker 逐 chunk 載入設定的成本。
+- 未修改 Gemini 的報告書，也未實作任何接線。
