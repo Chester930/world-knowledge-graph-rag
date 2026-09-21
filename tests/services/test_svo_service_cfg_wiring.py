@@ -1,8 +1,9 @@
 """離線驗證 KGConfig 門檻可沿 SVO 抽取鏈讀取。"""
 
-import pytest
-from uuid import uuid4
 from types import SimpleNamespace
+from uuid import uuid4
+
+import pytest
 
 from core.kg_config import DedupConfig, ExtractionConfig, KGConfig, RelTypeConfig
 from models.knowledge_graph import SVOTriple
