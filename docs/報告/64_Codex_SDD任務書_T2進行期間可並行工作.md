@@ -226,7 +226,7 @@ T2 Stage A 正在執行（42 題、`top_k=40`、每題 1 次；輸出 `…\.clau
 - `data/eval/baseline_runs/20260920_frozen/frozen_manifest.json`：`eligible_ids`（**42 題**凍結範圍）、`kg_id`（`236903cf-055a-40a8-8923-b9d06601f3b7`）、`kg_fact_total`（16826）、`kg_entity_total`（12290）。**不得修改**。
 - Neo4j（唯讀）：`Fact {kg_id}` 屬性有 `fact_text, subject, verb, object, source_doc_id, source_svo_chunk_index, rel_type, confidence`（**沒有 `article_no`**，條號在 `SUPPORTED_BY` 邊到 `LawArticle.article_no`；`Document.title` 為法規名；`Document.effective_date` 僅 15/64 有值，AGGR18 涉及的兩部法為 `None`）；`fact_embedding` 是大向量欄位，**查詢時不得回傳**。
 - 連線設定：本 worktree 沒有 `.env`。請從主 checkout 的 `.env` 讀取 `NEO4J_URI`／`NEO4J_USER`／`NEO4J_PASSWORD`（目前 `bolt://localhost:17990`），**不得印出、記錄或 commit 任何憑證**；以環境變數或讀取後只留在記憶體使用。
-- Phase 2 輸入：`…\.claude\worktrees\sdd-retrieval-comparison\data\eval\candidate_runs\t2_k1_topk40_stage_a\records.json`（T2 Stage A 輸出，**只讀**，且要等 Stage A 完整跑完；每筆 `lineage` 內有 `prompt_context_lines` 與 `retrieval_trace[]`，欄位 `kind, rank, text, score, source_doc_id, source_svo_chunk_index, article_no, in_prompt`）。
+- Phase 2 輸入：`…\.claude\worktrees\sdd-retrieval-comparison\data\eval\candidate_runs\t2_k1_topk40_stage_*\records.json`（**2026-09-21 更正：T2 Stage A 實際被拆成多個輸出資料夾**——`stage_a`、`stage_a2`、`stage_a3`、`stage_b`、`stage_b2a`…，因中斷續跑與分批而產生；原任務書只寫 `stage_a` 是錯的，例如 `57-AGGR18` 在 `stage_a2`。Phase 2 須**讀取全部 `t2_k1_topk40_stage_*` 資料夾**，以 `question_id` 合併；同一題出現在多個資料夾（重跑／補跑）時**全部保留並標示來源資料夾**，不得靜默擇一。**只讀**，且要等 T2 完整結束；每筆 `lineage` 內有 `prompt_context_lines` 與 `retrieval_trace[]`，欄位 `kind, rank, text, score, source_doc_id, source_svo_chunk_index, article_no, in_prompt`）。
 
 ### 5.3 目標與非目標
 
@@ -262,7 +262,7 @@ T2 Stage A 正在執行（42 題、`top_k=40`、每題 1 次；輸出 `…\.clau
 **Phase 2（T2 Stage A 完成後）**
 - 對 Stage A 每題 `prompt_context_lines`（注意它是**巢狀 list**，複合問題每個子問題一份，請處理）：統計 prompt 內「與同題另一行同文、但 `source_doc_id` 不同」的行數與比例；有 ≥1 個碰撞的題數／占比；另報告跨文件行對 `frame_overlap` 的分位數（不設門檻）；並**逐字輸出 `57-AGGR18` 的實際 prompt 行**（報告63 §9.6 第 1 項尚缺的直接證據）。**注意**：`prompt_context_lines` 是純文字（帶 `- ` 前綴），**來源文件資訊在 `retrieval_trace[]`**（`in_prompt=true` 的項目，欄位 `text`、`source_doc_id`、`article_no`）；兩者需以正規化文字比對對應，**配不到的行要列為 unmatched 並計入統計，不得丟棄**。
 - **可比性聲明（必須寫入 summary）**：Stage A 是 `top_k=40`，與凍結基準（`top_k=20`）不同；本統計只回答「行有沒有歧義」，**不得用來比較答對率**。
-- 若 Stage A 尚未完成，Phase 2 **不要執行**（不要讀取半成品當結論），在 §8 標「Phase 2 待 T2 完成」。
+- 若 T2 尚未完整結束，Phase 2 **不要執行**（不要以尚在增加中的資料夾當結論），在 §8 標「Phase 2 待 T2 完成」。**是否結束以使用者通知為準**，不要自行判斷（各資料夾的最後寫入時間不代表整體進度）。
 
 ### 5.5 測試計畫
 
