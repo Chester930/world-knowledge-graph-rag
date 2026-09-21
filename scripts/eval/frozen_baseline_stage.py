@@ -1,0 +1,98 @@
+"""Run / resume stages of a frozen RQ1 baseline using only files in the frozen dir.
+
+The frozen dir holds ``frozen_manifest.json`` (code commit, bank hash, eligible ids,
+scope docs, KG id) plus per-stage outputs.  Two subcommands:
+
+  remaining  -- emit the eligible questions that have no result yet in the given
+                records files (used to resume an interrupted stage)
+  run        -- run one stage of the harness with the exact frozen settings
+
+Typical resume:
+    python scripts/eval/frozen_baseline_stage.py remaining --frozen-dir D \
+        --records D/stage_b/records.json --emit D/stage_b_rest.json
+    python scripts/eval/frozen_baseline_stage.py run --frozen-dir D \
+        --questions D/stage_b_rest.json --out D/stage_b_2
+
+Export WORKSPACE_DIR / NEO4J_URI / NEO4J_PASSWORD in the environment first (the
+worktree .env uses a relative WORKSPACE_DIR); ``run`` fills the values used for
+the 2026-09-20 baseline only if they are unset.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_ENV = {
+    "WORKSPACE_DIR": "D:/Users/666/Desktop/kg-runtime",
+    "NEO4J_URI": "bolt://localhost:17990",
+    "NEO4J_PASSWORD": "kg2_test_2026",
+}
+
+
+def load_manifest(frozen_dir: Path) -> dict:
+    return json.loads((frozen_dir / "frozen_manifest.json").read_text(encoding="utf-8"))
+
+
+def remaining_question_ids(eligible_ids: list[str], record_paths: list[Path]) -> list[str]:
+    done: set[str] = set()
+    for path in record_paths:
+        for record in json.loads(path.read_text(encoding="utf-8")):
+            done.add(record["question_id"])
+    return [q for q in eligible_ids if q not in done]
+
+
+def cmd_remaining(args: argparse.Namespace) -> None:
+    manifest = load_manifest(Path(args.frozen_dir))
+    ids = remaining_question_ids(manifest["eligible_ids"], [Path(p) for p in args.records])
+    bank = json.loads((REPO_ROOT / "data/eval/test_cases.json").read_text(encoding="utf-8"))
+    selected = [q for q in bank["questions"] if q["id"] in set(ids)]
+    Path(args.emit).write_text(
+        json.dumps({"questions": selected}, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"eligible {len(manifest['eligible_ids'])}, remaining {len(selected)}: {ids}")
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    manifest = load_manifest(Path(args.frozen_dir))
+    env = dict(os.environ)
+    for key, value in DEFAULT_ENV.items():
+        env.setdefault(key, value)
+    cmd = [
+        sys.executable, "-u", str(REPO_ROOT / "scripts" / "eval" / "run_rq1_comparison.py"),
+        "--kg-id", manifest["kg_id"],
+        "--doc-ids", ",".join(manifest["scope_doc_ids"]),
+        "--questions", args.questions,
+        "--arms", "K", "--runs", "1",
+        "--query-timeout-s", "900",
+        "--allow-shared-judge",
+        "--out", args.out,
+    ]
+    print("frozen commit:", manifest["git_commit"], "| bank sha256:", manifest["bank_sha256"][:16], flush=True)
+    return subprocess.run(cmd, cwd=REPO_ROOT, env=env).returncode
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="command", required=True)
+    rem = sub.add_parser("remaining")
+    rem.add_argument("--frozen-dir", required=True)
+    rem.add_argument("--records", action="append", default=[])
+    rem.add_argument("--emit", required=True)
+    run = sub.add_parser("run")
+    run.add_argument("--frozen-dir", required=True)
+    run.add_argument("--questions", required=True)
+    run.add_argument("--out", required=True)
+    args = parser.parse_args()
+    if args.command == "remaining":
+        cmd_remaining(args)
+    else:
+        sys.exit(cmd_run(args))
+
+
+if __name__ == "__main__":
+    main()

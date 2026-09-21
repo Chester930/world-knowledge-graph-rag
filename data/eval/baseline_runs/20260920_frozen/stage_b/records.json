@@ -1,0 +1,515 @@
+[
+  {
+    "question_id": "17-Q6",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-B",
+    "answer": "資料未明確記載，無法確認。\n\n根據提供的事實清單，並未提到警察因搶救重大災害表現優異可獲得特別休假的相關規定。清單中列出了多種情形可以獲得特別休假，但並未包括因搶救重大災害表現優異的情況。因此，無法根據現有資訊回答此問題。",
+    "error": null,
+    "latency_s": 139.94,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 294,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts (semantic fallback). Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q6",
+      "arm": "K",
+      "question": "警察因搶救重大災害表現優異，可以獲得幾天特別休假？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 139940.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假"
+        ],
+        "missed_exact_spans": [
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 993,
+        "snr": 0.0201,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 267,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假"
+        ],
+        "dropped_exact_spans": [
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 139940.0,
+        "raw_draft": "資料未明確記載，無法確認。\n\n根據提供的事實清單，並未提到警察因搶救重大災害表現優異可獲得特別休假的相關規定。清單中列出了多種情形可以獲得特別休假，但並未包括因搶救重大災害表現優異的情況。因此，無法根據現有資訊回答此問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認。\n\n根據提供的事實清單，並未提到警察因搶救重大災害表現優異可獲得特別休假的相關規定。清單中列出了多種情形可以獲得特別休假，但並未包括因搶救重大災害表現優異的情況。因此，無法根據現有資訊回答此問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q1",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-B",
+    "answer": "1. 勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？\n根據提供的事實清單，勞工請「普通傷病假」，未住院者一年內合計不得超過三十日。\n\n2. 住院者二年內合計上限是多少？\n資料未明確記載，無法確認。\n\n根據提供的事實清單，清單中主要討論的是未住院者的傷病假相關規定，並未提到住院者二年內合計的上限。因此，根據規則，無法確認住院者二年內合計上限為多少。\n\n3. 工資怎麼給付？\n根據提供的事實清單，關於工資的給付方式如下：\n\n1. 雇主應予普通傷病假留職停薪。\n2. 雇主為相關人事考核時，仍應以其工作能力、工作態度及實際績效等綜合考量。\n3. 勞工請普通傷病假超過第一項規定日數者，雇主不得僅以請普通傷病假日數作為考量因素。\n4. 勞工一年內請普通傷病假日數未超過十日。\n5. 普通傷病假一年內未超過三十日部分，領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n6. 前項傷病給付前二個月按被保險人平均月投保薪資發給，第三個月起按被保險人平均月投保薪資百分之七十發給。\n7. 雇主一次給付四十個月之平均工資後，免除此項工資補償責任。\n8. 勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。\n9. 事假一年內合計不得超過十四日。\n\n事實清單中沒有提到婚假的天數，因此無法確認婚假期間的工資給付方式。",
+    "error": null,
+    "latency_s": 324.55,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 409,
+    "atomic_score": {
+      "supported_spans": [
+        "未住院者，一年內合計不得超過三十日",
+        "未超過三十日部分，工資折半發給"
+      ],
+      "missing_spans": [
+        "住院者，二年內合計不得超過一年"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['住院者，二年內合計不得超過一年']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q1",
+      "arm": "K",
+      "question": "勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？住院者二年內合計上限是多少？工資怎麼給付？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 324550.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1009,
+        "snr": 0.0466,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 270,
+        "retained_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 324550.0,
+        "raw_draft": "1. 勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？\n根據提供的事實清單，勞工請「普通傷病假」，未住院者一年內合計不得超過三十日。\n\n2. 住院者二年內合計上限是多少？\n資料未明確記載，無法確認。\n\n根據提供的事實清單，清單中主要討論的是未住院者的傷病假相關規定，並未提到住院者二年內合計的上限。因此，根據規則，無法確認住院者二年內合計上限為多少。\n\n3. 工資怎麼給付？\n根據提供的事實清單，關於工資的給付方式如下：\n\n1. 雇主應予普通傷病假留職停薪。\n2. 雇主為相關人事考核時，仍應以其工作能力、工作態度及實際績效等綜合考量。\n3. 勞工請普通傷病假超過第一項規定日數者，雇主不得僅以請普通傷病假日數作為考量因素。\n4. 勞工一年內請普通傷病假日數未超過十日。\n5. 普通傷病假一年內未超過三十日部分，領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n6. 前項傷病給付前二個月按被保險人平均月投保薪資發給，第三個月起按被保險人平均月投保薪資百分之七十發給。\n7. 雇主一次給付四十個月之平均工資後，免除此項工資補償責任。\n8. 勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。\n9. 事假一年內合計不得超過十四日。\n\n事實清單中沒有提到婚假的天數，因此無法確認婚假期間的工資給付方式。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "1. 勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？\n根據提供的事實清單，勞工請「普通傷病假」，未住院者一年內合計不得超過三十日。\n\n2. 住院者二年內合計上限是多少？\n資料未明確記載，無法確認。\n\n根據提供的事實清單，清單中主要討論的是未住院者的傷病假相關規定，並未提到住院者二年內合計的上限。因此，根據規則，無法確認住院者二年內合計上限為多少。\n\n3. 工資怎麼給付？\n根據提供的事實清單，關於工資的給付方式如下：\n\n1. 雇主應予普通傷病假留職停薪。\n2. 雇主為相關人事考核時，仍應以其工作能力、工作態度及實際績效等綜合考量。\n3. 勞工請普通傷病假超過第一項規定日數者，雇主不得僅以請普通傷病假日數作為考量因素。\n4. 勞工一年內請普通傷病假日數未超過十日。\n5. 普通傷病假一年內未超過三十日部分，領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n6. 前項傷病給付前二個月按被保險人平均月投保薪資發給，第三個月起按被保險人平均月投保薪資百分之七十發給。\n7. 雇主一次給付四十個月之平均工資後，免除此項工資補償責任。\n8. 勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。\n9. 事假一年內合計不得超過十四日。\n\n事實清單中沒有提到婚假的天數，因此無法確認婚假期間的工資給付方式。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['住院者，二年內合計不得超過一年']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['住院者，二年內合計不得超過一年'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q2",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-B",
+    "answer": "受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n根據提供的事實清單，受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n這項資訊來自以下事實：\n- 留職停薪期間 原則上每次以不少於 六個月為單位\n如果只需要 30 日以上未達六個月，最多可以申請二次。\n根據提供的事實清單，對於「30 日以上未達六個月」的育嬰留職停薪期間，最多可以申請兩次。\n相關事實如下：\n- 三十日以上未達六個月 以二次為限 每次申請育嬰留職停薪之期間及次數如下\n這條事實明確指出，30 日以上未達六個月的育嬰留職停薪期間，可以申請兩次。\n因此，答案是最多可以申請兩次。",
+    "error": null,
+    "latency_s": 127.92,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 286,
+    "atomic_score": {
+      "supported_spans": [
+        "每次以不少於六個月為原則",
+        "三十日以上未達六個月：以二次為限"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q2",
+      "arm": "K",
+      "question": "受僱者申請育嬰留職停薪，原則上每次不少於幾個月？如果只需要 30 日以上未達六個月，最多可以申請幾次？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 127920.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "三十日以上未達六個月：以二次為限",
+          "每次以不少於六個月為原則"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 804,
+        "snr": 0.0348,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 219,
+        "retained_exact_spans": [
+          "三十日以上未達六個月：以二次為限",
+          "每次以不少於六個月為原則"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 127920.0,
+        "raw_draft": "受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n根據提供的事實清單，受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n這項資訊來自以下事實：\n- 留職停薪期間 原則上每次以不少於 六個月為單位\n如果只需要 30 日以上未達六個月，最多可以申請二次。\n根據提供的事實清單，對於「30 日以上未達六個月」的育嬰留職停薪期間，最多可以申請兩次。\n相關事實如下：\n- 三十日以上未達六個月 以二次為限 每次申請育嬰留職停薪之期間及次數如下\n這條事實明確指出，30 日以上未達六個月的育嬰留職停薪期間，可以申請兩次。\n因此，答案是最多可以申請兩次。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n根據提供的事實清單，受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n這項資訊來自以下事實：\n- 留職停薪期間 原則上每次以不少於 六個月為單位\n如果只需要 30 日以上未達六個月，最多可以申請二次。\n根據提供的事實清單，對於「30 日以上未達六個月」的育嬰留職停薪期間，最多可以申請兩次。\n相關事實如下：\n- 三十日以上未達六個月 以二次為限 每次申請育嬰留職停薪之期間及次數如下\n這條事實明確指出，30 日以上未達六個月的育嬰留職停薪期間，可以申請兩次。\n因此，答案是最多可以申請兩次。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-A",
+    "answer": "外國人若要用特別休假返國，返國期日是由誰排定？\n根據提供的事實清單，特別休假返國期日是由勞工排定的。\n特別休假的排定是由勞工排定之。\n因此，外國人若要用特別休假返國，返國期日是由勞工本人排定的。\n特別休假期日由勞工排定之。\n資料未明確記載，無法確認。缺的是雇主是否可以片面更改勞工的特別休假安排。\n特別休假的排定是由勞工自行排定的，而非雇主單方面決定。\n這意味著雇主不能單方面更改勞工的特別休假日期。\n1. 特別休假的排定**：根據事實清單中的「特別休假期日由勞工排定之」，特別休假的排定是由勞工自行排定的，而非雇主單方面決定。\n2. 雇主的調整權限**：事實清單中的「雇主得在工作時間內，另行調配其休息時間」表明雇主有權調整勞工的休息時間，但這並未明確指出雇主可以單方面更改特別休假的日期。\n3. **例外情況**：事實清單中的「雇主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日」表明在特定情況下，雇主可以與勞工協商調整特別休假的日期。\n因此，雇主不能單方面更改勞工的特別休假日期。",
+    "error": null,
+    "latency_s": 208.63,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 441,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日"
+      ],
+      "missing_spans": [
+        "雇主應予同意"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['雇主應予同意']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "K",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 208630.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1247,
+        "snr": 0.0128,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 329,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 208630.0,
+        "raw_draft": "外國人若要用特別休假返國，返國期日是由誰排定？\n根據提供的事實清單，特別休假返國期日是由勞工排定的。\n特別休假的排定是由勞工排定之。\n因此，外國人若要用特別休假返國，返國期日是由勞工本人排定的。\n特別休假期日由勞工排定之。\n資料未明確記載，無法確認。缺的是雇主是否可以片面更改勞工的特別休假安排。\n特別休假的排定是由勞工自行排定的，而非雇主單方面決定。\n這意味著雇主不能單方面更改勞工的特別休假日期。\n1. 特別休假的排定**：根據事實清單中的「特別休假期日由勞工排定之」，特別休假的排定是由勞工自行排定的，而非雇主單方面決定。\n2. 雇主的調整權限**：事實清單中的「雇主得在工作時間內，另行調配其休息時間」表明雇主有權調整勞工的休息時間，但這並未明確指出雇主可以單方面更改特別休假的日期。\n3. **例外情況**：事實清單中的「雇主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日」表明在特定情況下，雇主可以與勞工協商調整特別休假的日期。\n因此，雇主不能單方面更改勞工的特別休假日期。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "外國人若要用特別休假返國，返國期日是由誰排定？\n根據提供的事實清單，特別休假返國期日是由勞工排定的。\n特別休假的排定是由勞工排定之。\n因此，外國人若要用特別休假返國，返國期日是由勞工本人排定的。\n特別休假期日由勞工排定之。\n資料未明確記載，無法確認。缺的是雇主是否可以片面更改勞工的特別休假安排。\n特別休假的排定是由勞工自行排定的，而非雇主單方面決定。\n這意味著雇主不能單方面更改勞工的特別休假日期。\n1. 特別休假的排定**：根據事實清單中的「特別休假期日由勞工排定之」，特別休假的排定是由勞工自行排定的，而非雇主單方面決定。\n2. 雇主的調整權限**：事實清單中的「雇主得在工作時間內，另行調配其休息時間」表明雇主有權調整勞工的休息時間，但這並未明確指出雇主可以單方面更改特別休假的日期。\n3. **例外情況**：事實清單中的「雇主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日」表明在特定情況下，雇主可以與勞工協商調整特別休假的日期。\n因此，雇主不能單方面更改勞工的特別休假日期。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['雇主應予同意']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['雇主應予同意'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]
