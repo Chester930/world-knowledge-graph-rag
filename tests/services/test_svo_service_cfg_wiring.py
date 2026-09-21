@@ -2,7 +2,8 @@
 
 import pytest
 
-from core.kg_config import KGConfig, RelTypeConfig
+from core.kg_config import ExtractionConfig, KGConfig, RelTypeConfig
+from models.knowledge_graph import SVOTriple
 from services import svo_service as svc
 
 
@@ -14,6 +15,14 @@ class RecordingLLM:
     async def generate(self, prompt: str) -> str:
         self.prompts.append(prompt)
         return self.response
+
+
+class FixedEmbedding:
+    def __init__(self, vectors: dict[str, list[float]]):
+        self.vectors = vectors
+
+    async def encode_batch(self, texts: list[str]) -> list[list[float]]:
+        return [self.vectors[text] for text in texts]
 
 
 @pytest.mark.asyncio
@@ -71,3 +80,33 @@ async def test_extract_svo_triples_forwards_cfg_to_relation_reconciliation(monke
 
     assert len(triples) == 1
     assert received_cfgs == [cfg]
+
+
+@pytest.mark.asyncio
+async def test_find_uncovered_sentences_threshold_precedence():
+    sentence = "甲乙丙"
+    triple = SVOTriple(subject="甲", verb="關係", object="乙")
+    triple_text = "甲關係乙"
+    embedding = FixedEmbedding({
+        sentence: [1.0, 0.0],
+        triple_text: [0.65, (1 - 0.65**2) ** 0.5],
+    })
+    cfg = KGConfig(extraction=ExtractionConfig(uncovered_sentence_threshold=0.70))
+
+    explicit_threshold = await svc._find_uncovered_sentences(
+        [sentence], [triple], embedding, threshold=0.70,
+    )
+    config_threshold = await svc._find_uncovered_sentences(
+        [sentence], [triple], embedding, cfg=cfg,
+    )
+    explicit_threshold_wins = await svc._find_uncovered_sentences(
+        [sentence], [triple], embedding, threshold=0.60, cfg=cfg,
+    )
+    default_without_cfg = await svc._find_uncovered_sentences([sentence], [triple], embedding)
+    default_with_cfg = await svc._find_uncovered_sentences(
+        [sentence], [triple], embedding, cfg=KGConfig(),
+    )
+
+    assert explicit_threshold == config_threshold == [sentence]
+    assert explicit_threshold_wins == []
+    assert default_without_cfg == default_with_cfg == []

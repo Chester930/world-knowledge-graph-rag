@@ -526,7 +526,8 @@ async def _find_uncovered_sentences(
     triples: list[SVOTriple],
     embedding_provider: EmbeddingProvider,
     *,
-    threshold: float = UNCOVERED_SENTENCE_THRESHOLD,
+    threshold: float | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[str]:
     """比照 ProMem《Beyond Static Summarization》(arXiv:2601.04463) §Memory
     Completion 的語意涵蓋比對：對每一句原文，計算它與「已抽出三元組」的最高
@@ -541,7 +542,12 @@ async def _find_uncovered_sentences(
 
     `triples` 為空（第一階段完全沒抽到任何三元組）時，全部句子視為未涵蓋；
     `original_sentences` 為空時直接回傳空清單，不做無意義的比對。
+
+    門檻依序採用明確的 `threshold`、`cfg.extraction.uncovered_sentence_threshold`，
+    最後才是 `KGConfig()` 的預設值（與既有常數相同）。
     """
+    _cfg = cfg or KGConfig()
+    threshold = threshold if threshold is not None else _cfg.extraction.uncovered_sentence_threshold
     if not original_sentences:
         return []
     if not triples:
