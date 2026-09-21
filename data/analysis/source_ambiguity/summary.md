@@ -9,7 +9,7 @@
 - Neo4j 存取：`READ` session；每批 200 rows，批次間隔 0.15s；查詢只回傳 Fact 文字、Document 標題／來源 ID、LawArticle 條號與內部暫用 Fact ID，未查詢或回傳 `fact_embedding`。
 - 全域查詢：回傳列數 16773；相異 Fact 節點 16773；實際查詢耗時 16.29s。
 - 未找到的題目 ID：無。
-- 本次只完成 Phase 1（P1-a、P1-b、P1-c）；未讀取 T2 Stage A 輸出，Phase 2 待 T2 完成。
+- 本段記錄 Phase 1（P1-a、P1-b、P1-c）；Phase 2 使用凍結快照後另列於下方。
 
 ## 共同定義
 
@@ -151,4 +151,206 @@
 - 配對使用文字互相包含規則，會配到同法相鄰條號；因此另外用 gold 條號標記主配對與額外配對。未配對 span 已列出；本次 101 個 gold span 中有 35 個（34.7%）未配對，遍及 23 題（8 題的所有 span 均未配對，另有 15 題部分未配對）。未配對不代表 KG 沒有該事實，只表示它未依本次文字與條號配對規則配上。
 - 全 KG 64 個 Document 中有 15 個 `effective_date` 有值；`57-AGGR18` 涉及的兩部法之 Document 欄位皆為 `None`，本次不以生效日期分辨新舊法。
 - 此結果只盤點文字與來源歧義；不是檢索品質或答對率比較。
-- Phase 2 未執行，待 T2 Stage A 完整結束後另行處理。
+
+## Phase 2：Stage A prompt 來源歧義與多來源行
+
+### 執行資訊與凍結輸入
+
+- 產出時間（UTC）：`2026-09-21T17:05:20+00:00`；執行時 commit：`952cfa9db50939512bff3480e9d9b186a60056b1`。
+- 凍結題目範圍：`frozen_manifest.json` 的 `eligible_ids`，共 42 題；只納入這些題目。
+- 使用快照：`D:\Users\666\Desktop\world knowledge graph rag\.claude\worktrees\codex-task3\.claude\tmp\task3_phase2_snapshot_20260922`。分析只讀快照副本，未讀取之後新增的資料夾／檔案。
+- 每個 records.json 的快照大小與 SHA-256：
+
+| 資料夾 | bytes | SHA-256 | 記錄數 |
+|---|---:|---|---:|
+| `t2_k1_topk40_stage_a` | 1,250,087 | `eeb95903996e9072513cff85725a178897c9a3d0a229f168a05e58f16bc4c28b` | 28 |
+| `t2_k1_topk40_stage_a2` | 676,315 | `34426098406586572006431459f803f29549199c40d256f6d06f512fb5112530` | 14 |
+| `t2_k1_topk40_stage_a3` | 57,565 | `fe748b86ecba2aa068892188356f0ecc3cbe826e9bbaff3cfe45c357915492cc` | 1 |
+| `t2_k1_topk40_stage_b` | 441,388 | `57c4b6d8706c18091fd0b1e7792ecb6ddb1c402fab9f801020114543cc3adecd` | 12 |
+| `t2_k1_topk40_stage_b2a` | 545,248 | `5b1c9e33095ffc36451bfe76bc705ccdd7232260f536d2df2d078a5c333f4a36` | 8 |
+| `t2_k1_topk40_stage_b2b` | 406,983 | `ce3a11adb3b61191fa8a5371fdbf792ab876511d48a8fca4561016d49a13e028` | 7 |
+| `t2_k1_topk40_stage_b2c` | 291,735 | `c21423ae936e746fbe76ed5b6530991c3b9202ddde9fb7e876baf5d61255a8fb` | 7 |
+| `t2_k1_topk40_stage_c` | 189,006 | `20bc71435872420e6af548a6a0bb3159e5cefda7b3d6592b7195c4fe18c4b1b1` | 2 |
+
+- 未納入的非 eligible 記錄：0 筆；清單見下方。
+- 缺少 `prompt_context_lines` 欄位的 eligible 記錄：0 筆。
+
+### 配對規則與分母
+
+- 巢狀 list 每個內層 list 視為一個子問題組；扁平 list 視為單一組；空 list 計 0 行。合併階段只按 `question_id` 納入／排除，所有資料夾與重跑記錄保留來源資料夾和 record 序號。
+- 將 prompt 行開頭單一 `- ` 去除後，使用 Phase 1 `normalize_text` 與該筆 `retrieval_trace` 中 `in_prompt=true` 的 `text` 比對；不以相同字串以外的條件推測配對。
+- **唯一歸屬行**：所有匹配 trace 都有 `source_doc_id`，且不同 ID 恰為 1。**多來源合併行**：同一 prompt 行匹配到至少 2 個不同 `source_doc_id`。**同文件重複**：匹配 trace 多筆，但只有 1 個不同 `source_doc_id`；不計歧義。**unmatched**：沒有匹配到任何符合條件 trace；列出並計入總行。匹配 trace 但缺來源 ID 者另列 `source_unresolved`。
+- 獨立碰撞行只在同一執行、同一子問題組內計算：兩條以上各自唯一歸屬的 prompt 行正規化同文，且 source_doc_id 不同。跨資料夾／跨重跑不互相比對。依已確認的集合式文字配對，同一正規化鍵的行共享相同 trace 候選；若候選跨文件便列為多來源合併行，不任選一個來源，因此獨立碰撞行另外計數但不會把多來源行拆開。
+- 以下狀態分別以總 prompt 行數為分母；同文件重複與獨立碰撞行是唯一歸屬行的子集。總行數 3993；唯一歸屬 3981（99.70%）；多來源合併 7（0.18%）；unmatched 5（0.13%）；來源未解 0（0.00%）；同文件重複 65；獨立跨來源碰撞行 0（0.00%）。獨立碰撞文字組 0 組。
+- 有至少一條獨立跨來源碰撞行的題目：0 / 42（0.00%）：無。
+
+### 多來源合併行（主要指標）
+
+- 總數：7；占總 prompt 行數 3993 的 0.18%。
+- 前 20 個範例（按快照中出現次數排序；只提供 Phase 1 輸出已能確認的法規名）：
+
+1. "- 經認定結果為職業災害者 再以公傷病假處理" — `a4c0d396-d8e9-5a83-8655-e5b7c673100d` (勞工職業災害保險及保護法); `b90844e9-08c1-5886-8d35-a1fecaff511a` (職業災害勞工保護法)；出現 7 次；題目 57-AGGR18, 57-AGGR6, 57-CANARY5, 57-COREF2。
+
+AGGR18 的多來源行是否為 gold exact span：
+
+- 行 "- 經認定結果為職業災害者 再以公傷病假處理"：gold exact span=false。
+
+### 逐題分布
+
+| 題目 | prompt 行 | 唯一歸屬 | 多來源合併 | unmatched | 同文件重複 | 獨立跨來源碰撞行 |
+|---|---:|---:|---:|---:|---:|---:|
+| `17-Q1` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `17-Q2` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `17-Q6` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `18-Q1` | 210 | 210 | 0 | 0 | 10 | 0 |
+| `18-Q2` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `18-Q3` | 140 | 140 | 0 | 0 | 2 | 0 |
+| `18-Q4` | 70 | 70 | 0 | 0 | 2 | 0 |
+| `18-Q5` | 210 | 210 | 0 | 0 | 6 | 0 |
+| `18-Q6` | 210 | 210 | 0 | 0 | 0 | 0 |
+| `26-Q1` | 35 | 35 | 0 | 0 | 2 | 0 |
+| `26-Q5` | 70 | 69 | 0 | 1 | 0 | 0 |
+| `57-AGGR1` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-AGGR10` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-AGGR11` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-AGGR12` | 35 | 35 | 0 | 0 | 0 | 0 |
+| `57-AGGR13` | 70 | 70 | 0 | 0 | 2 | 0 |
+| `57-AGGR14` | 70 | 70 | 0 | 0 | 2 | 0 |
+| `57-AGGR15` | 36 | 36 | 0 | 0 | 0 | 0 |
+| `57-AGGR16` | 70 | 70 | 0 | 0 | 4 | 0 |
+| `57-AGGR17` | 70 | 70 | 0 | 0 | 2 | 0 |
+| `57-AGGR18` | 35 | 34 | 1 | 0 | 4 | 0 |
+| `57-AGGR19` | 210 | 210 | 0 | 0 | 0 | 0 |
+| `57-AGGR2` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-AGGR3` | 70 | 70 | 0 | 0 | 2 | 0 |
+| `57-AGGR4` | 140 | 138 | 0 | 2 | 4 | 0 |
+| `57-AGGR5` | 140 | 140 | 0 | 0 | 4 | 0 |
+| `57-AGGR6` | 105 | 102 | 3 | 0 | 3 | 0 |
+| `57-AGGR7` | 140 | 140 | 0 | 0 | 6 | 0 |
+| `57-AGGR8` | 70 | 70 | 0 | 0 | 4 | 0 |
+| `57-AGGR9` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-CANARY1` | 140 | 140 | 0 | 0 | 0 | 0 |
+| `57-CANARY2` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-CANARY3` | 140 | 140 | 0 | 0 | 2 | 0 |
+| `57-CANARY4` | 70 | 70 | 0 | 0 | 0 | 0 |
+| `57-CANARY5` | 70 | 68 | 2 | 0 | 0 | 0 |
+| `57-COREF1` | 140 | 140 | 0 | 0 | 0 | 0 |
+| `57-COREF2` | 35 | 34 | 1 | 0 | 0 | 0 |
+| `57-COREF3` | 72 | 72 | 0 | 0 | 0 | 0 |
+| `57-DIST1` | 140 | 140 | 0 | 0 | 2 | 0 |
+| `57-DIST2` | 140 | 140 | 0 | 0 | 2 | 0 |
+| `canary-P1` | 70 | 68 | 0 | 2 | 0 | 0 |
+| `canary-P4` | 70 | 70 | 0 | 0 | 0 | 0 |
+
+### Trace kind 分層與 frame_overlap
+
+- 全部唯一歸屬行中，僅在同一執行／子問題組內配對不同 `source_doc_id` 的行對；共有 41754 對。frame_overlap 分位數（線性插值）：`{"p0": 0.0, "p100": 1.0, "p25": 0.0, "p50": 0.0, "p75": 0.0, "p90": 0.09523809523809523, "p95": 0.18181818181818182}`。此處只使用唯一歸屬行。
+- `fact`／`bfs` 分層以該 kind 的匹配 trace 單獨判定歸屬；有多 kind trace 的 prompt 行可能出現在多層。實際快照觀察到的 trace kind：fact, triple。本次 `bfs` 沒有 `in_prompt=true` trace；另有 trace kind 依原值另列。unmatched 行沒有可用 trace kind，故只在總計列出。各 kind 的 prompt 行分母是至少有一筆該 kind 匹配 trace 的行數；同一行可能出現在多個 kind。每層 frame_overlap 僅使用該 kind 下唯一歸屬且跨文件的行對。
+
+| kind | 有該 kind trace 的 prompt 行 | 唯一歸屬 | 多來源 | unmatched | 同文件重複 | 獨立碰撞行 | 跨文件行對 | frame_overlap 分位數 |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| fact | 3418 | 3411 | 7 | 0 | 20 | 0 | 30651 | {"p0": 0.0, "p100": 1.0, "p25": 0.0, "p50": 0.0, "p75": 0.0, "p90": 0.08695652173913043, "p95": 0.16} |
+| bfs | 0 | 0 | 0 | 0 | 0 | 0 | 0 | {"p0": null, "p100": null, "p25": null, "p50": null, "p75": null, "p90": null, "p95": null} |
+| triple | 615 | 615 | 0 | 0 | 0 | 0 | 772 | {"p0": 0.0, "p100": 1.0, "p25": 0.0, "p50": 0.0, "p75": 0.17780748663101603, "p90": 0.2857142857142857, "p95": 0.35714285714285715} |
+
+### unmatched prompt 行
+
+以下所有 unmatched 行都保留並計入總 prompt 行及 unmatched 分母：
+
+- `26-Q5` / `t2_k1_topk40_stage_a` record #10 / 子問題組 2 / 行 34："- 期間適用於就業促進津貼實施辦法第三條、第十八條至第二十一條及第二十六條規定"
+- `canary-P1` / `t2_k1_topk40_stage_a` record #11 / 子問題組 1 / 行 32："- 公司法有關公司重整之債務免責規定屬於規定。"
+- `57-AGGR4` / `t2_k1_topk40_stage_a` record #24 / 子問題組 2 / 行 32："- 期間適用於就業促進津貼實施辦法第三條、第十八條至第二十一條及第二十六條規定"
+- `canary-P1` / `t2_k1_topk40_stage_b` record #6 / 子問題組 1 / 行 32："- 公司法有關公司重整之債務免責規定屬於規定。"
+- `57-AGGR4` / `t2_k1_topk40_stage_b2a` record #6 / 子問題組 2 / 行 32："- 期間適用於就業促進津貼實施辦法第三條、第十八條至第二十一條及第二十六條規定"
+
+### 快照中不在凍結 42 題的記錄（僅列出，不納入統計）
+
+- 無。
+
+### 57-AGGR18 實際 prompt 行與對應 trace
+
+每個 prompt 字串以 JSON 字串格式逐字保留，trace 來自同筆紀錄中 `in_prompt=true` 且正規化文字匹配的項目。
+
+### 執行 1：`t2_k1_topk40_stage_a2`，record #13
+子問題組 1：
+- 行 1（unique）："- 職業災害勞工 經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 1, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工 經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作"}
+- 行 2（unique）："- 職業災害勞工 經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 2, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "職業災害勞工 經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作"}
+- 行 3（unique）："- 職業災害勞工 經醫療終止後 疑似有身心障礙"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 3, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工 經醫療終止後 疑似有身心障礙"}
+  - trace：{"article_no": null, "in_prompt": true, "kind": "triple", "rank": 7, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工經醫療終止後，疑似有身心障礙。"}
+- 行 4（unique）："- 勞工保險被保險人或受益人 於本法施行前發生職業災害傷病、失能或死亡保險事故，符合下列情形之一申請補助者 不得依本法施行前職業災害勞工保護法申請補助"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 4, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "勞工保險被保險人或受益人 於本法施行前發生職業災害傷病、失能或死亡保險事故，符合下列情形之一申請補助者 不得依本法施行前職業災害勞工保護法申請補助"}
+- 行 5（multi_source）："- 經認定結果為職業災害者 再以公傷病假處理"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 5, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "經認定結果為職業災害者 再以公傷病假處理"}
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 20, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "經認定結果為職業災害者 再以公傷病假處理"}
+- 行 6（unique）："- 職業災難醫療期間終止勞動合同並退出醫療保險人員的行為  得以特定主體作為被保人身份延續強傷病患常規理賠資格直到達到退休金申請標准的日子。不遵循《中華人民共和國社會保障法》第6條的規定。（此句拆分後補充完整信息得出的關系和對象）。"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 7, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災難醫療期間終止勞動合同並退出醫療保險人員的行為  得以特定主體作為被保人身份延續強傷病患常規理賠資格直到達到退休金申請標准的日子。不遵循《中華人民共和國社會保障法》第6條的規定。（此句拆分後補充完整信息得出的關系和對象）。"}
+- 行 7（unique）："- 本法施行前，仍參加勞工保險職業災害保險或就業保險之被保險人 有未繳清勞工保險職業災害保險之保險費或滯納金者 准用前二項規定"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 11, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "本法施行前，仍參加勞工保險職業災害保險或就業保險之被保險人 有未繳清勞工保險職業災害保險之保險費或滯納金者 准用前二項規定"}
+- 行 8（unique）："- 直轄市、縣（市）主管機關 發現 職業災害勞工疑似有身心障礙"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 13, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "直轄市、縣（市）主管機關 發現 職業災害勞工疑似有身心障礙"}
+- 行 9（unique）："- 主管機關 於本法施行後 不得依本法施行前職業災害勞工保護法申請補助"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 16, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "主管機關 於本法施行後 不得依本法施行前職業災害勞工保護法申請補助"}
+- 行 10（unique）："- 職業災害勞工 得終止勞動契約"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 18, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工 得終止勞動契約"}
+- 行 11（unique）："- 勞工因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者 處以 第六條補助金額之相同額度之罰鍰"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 21, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "勞工因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者 處以 第六條補助金額之相同額度之罰鍰"}
+- 行 12（unique）："- 勞工 發生職業災害事故致死亡或失能"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 23, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "勞工 發生職業災害事故致死亡或失能"}
+- 行 13（unique）："- 職業災害勞工 經醫療終止後"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 25, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工 經醫療終止後"}
+- 行 14（unique）："- 勞工 因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 27, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "勞工 因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者"}
+- 行 15（unique）："- 雇主 處以補助金額相同額度之罰鍰 勞工發生職業災害事故致死亡或失能經依本法施行前職業災害勞工保護法第六條規定發給補助者"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 29, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "雇主 處以補助金額相同額度之罰鍰 勞工發生職業災害事故致死亡或失能經依本法施行前職業災害勞工保護法第六條規定發給補助者"}
+- 行 16（unique）："- 其他違反本法或本辦法之規定  不予發給僱用職業災害勞工補助"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 31, "source_doc_id": "de1995ed-8bbd-551b-b91a-39bf12eeb05e", "text": "其他違反本法或本辦法之規定  不予發給僱用職業災害勞工補助"}
+- 行 17（unique）："- 因職業災害致喪失全部或部分生活自理能力 確需他人照顧 且未依其他法令規定領取有關補助"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 34, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "因職業災害致喪失全部或部分生活自理能力 確需他人照顧 且未依其他法令規定領取有關補助"}
+- 行 18（unique）："- 經醫師診斷罹患職業疾病 喪失部分或全部工作能力 經請領勞工保險各項職業災害給付後"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 37, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "經醫師診斷罹患職業疾病 喪失部分或全部工作能力 經請領勞工保險各項職業災害給付後"}
+- 行 19（unique）："- 前項保險費率 於本法施行時 依中央主管機關公告之最近一次勞工保險職業災害保險適用行業別及費率表辦理"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 35, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "前項保險費率 於本法施行時 依中央主管機關公告之最近一次勞工保險職業災害保險適用行業別及費率表辦理"}
+- 行 20（unique）："- 雇主 一次給付四十個月之平均工資後，免除此項工資補償責任 勞工經治療終止後，經指定之醫院診斷，審定為喪失原有工作能力，且不合第三款之失能給付標準者"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 33, "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d", "text": "雇主 一次給付四十個月之平均工資後，免除此項工資補償責任 勞工經治療終止後，經指定之醫院診斷，審定為喪失原有工作能力，且不合第三款之失能給付標準者"}
+- 行 21（unique）："- 因職業災害致遺存障害 喪失部分或全部工作能力 符合勞工保險失能給付標準表第一等級至第七等級規定之項目"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 30, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "因職業災害致遺存障害 喪失部分或全部工作能力 符合勞工保險失能給付標準表第一等級至第七等級規定之項目"}
+- 行 22（unique）："- 前項勞工 於保護期間因工作條件、作業程序變更、當事人健康異常或有不適反應 經醫師評估確認不適原有工作者，雇主應依前項規定重新辦理之"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 28, "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33", "text": "前項勞工 於保護期間因工作條件、作業程序變更、當事人健康異常或有不適反應 經醫師評估確認不適原有工作者，雇主應依前項規定重新辦理之"}
+- 行 23（unique）："- 身心障礙不堪勝任工作者  情形之一"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 26, "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d", "text": "身心障礙不堪勝任工作者  情形之一"}
+- 行 24（unique）："- 已依職業災害勞工保護法第十一條或第十三條等規定受理職業疾病認定或鑑定 其處理程序未終結"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 24, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "已依職業災害勞工保護法第十一條或第十三條等規定受理職業疾病認定或鑑定 其處理程序未終結"}
+- 行 25（unique）："- 事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 雇主"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 22, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 雇主"}
+- 行 26（unique）："- 勞工保險被保險人或受益人 於本法施行前 已依勞工保險條例規定請領職業災害給付"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 19, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "勞工保險被保險人或受益人 於本法施行前 已依勞工保險條例規定請領職業災害給付"}
+- 行 27（unique）："- 勞工保險條例 有關 職業災害保險規定"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 17, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "勞工保險條例 有關 職業災害保險規定"}
+- 行 28（unique）："- 主管機關 發現 職業災害勞工疑似有身心障礙情形"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 14, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "主管機關 發現 職業災害勞工疑似有身心障礙情形"}
+- 行 29（unique）："- 勞工保險被保險人或受益人 不得依本法施行前職業災害勞工保護法 申請補助"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 12, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "勞工保險被保險人或受益人 不得依本法施行前職業災害勞工保護法 申請補助"}
+- 行 30（unique）："- 自本法施行之日起 職業災害勞工保護法不再適用"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 8, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "自本法施行之日起 職業災害勞工保護法不再適用"}
+- 行 31（unique）："- 事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 新雇主"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 6, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 新雇主"}
+- 行 32（unique）："- 職業災害勞工依第二十四條第一款規定勞動契約終止。"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "triple", "rank": 2, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工依第二十四條第一款規定勞動契約終止。"}
+- 行 33（unique）："- 職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 32, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議"}
+  - trace：{"article_no": null, "in_prompt": true, "kind": "triple", "rank": 1, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議"}
+- 行 34（unique）："- 職業災害勞工 經醫療終止後，雇主應依前條第一項所定復工計畫，並協助其恢復原工作 原工作"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 15, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "職業災害勞工 經醫療終止後，雇主應依前條第一項所定復工計畫，並協助其恢復原工作 原工作"}
+  - trace：{"article_no": null, "in_prompt": true, "kind": "triple", "rank": 14, "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d", "text": "職業災害勞工 經醫療終止後，雇主應依前條第一項所定復工計畫，並協助其恢復原工作 原工作"}
+- 行 35（unique）："- 職業災害勞工經醫療終止後，疑似有身心障礙。"
+  - trace：{"article_no": null, "in_prompt": true, "kind": "fact", "rank": 3, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工 經醫療終止後 疑似有身心障礙"}
+  - trace：{"article_no": null, "in_prompt": true, "kind": "triple", "rank": 7, "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a", "text": "職業災害勞工經醫療終止後，疑似有身心障礙。"}
+
+### 限制與可比性
+
+- 這是 `top_k=40`，不是凍結基準的 `top_k=20`；本統計只回答 prompt 行的來源是否唯一／多來源，不可用來比較答對率。
+- 「source_doc_id 對應到多個 prompt 行」是觀察到的輸出關係；本統計無法單獨證實或否證 `vector_search_facts` 的 `(subject, rel_type, object)` 去重鍵如何影響候選到 prompt 行的轉換，故不據此宣稱成因。
+- `frame_overlap` 是字面句框度量，不代表語意相同或有錯答風險；trace 以正規化文字對應，無法匹配者列為 unmatched。
