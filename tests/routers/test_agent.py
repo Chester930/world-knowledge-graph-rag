@@ -1453,7 +1453,8 @@ def test_serialize_sources_includes_triples_facts_and_resolved_rel_type():
 
 def test_serialize_sources_empty_when_nothing_retrieved():
     assert agent._serialize_sources([], [], None) == {
-        "resolved_rel_type": None, "retrieval_telemetry": None, "triples": [], "facts": [],
+        "resolved_rel_type": None, "retrieval_telemetry": None, "retrieval_trace": None,
+        "triples": [], "facts": [],
     }
 
 
@@ -1464,6 +1465,116 @@ def test_serialize_sources_passes_through_retrieval_telemetry():
     serialized = agent._serialize_sources([], [], None, retrieval_telemetry=telemetry)
 
     assert serialized["retrieval_telemetry"] == telemetry
+
+
+# ── 報告62 T0：檢索 trace（只記錄，不改行為）────────────────────────────
+
+def test_chat_request_include_retrieval_trace_defaults_off():
+    assert ChatRequest(question="x").include_retrieval_trace is False
+
+
+def test_serialize_sources_passes_through_retrieval_trace():
+    trace = {"facts": [], "triples": [], "prompt_lines": [["- a"]]}
+
+    assert agent._serialize_sources([], [], None, retrieval_trace=trace)["retrieval_trace"] == trace
+
+
+def test_build_retrieval_trace_records_rank_score_and_source():
+    doc_id = uuid4()
+    fact_results = [
+        {"fact_text": "甲 規定 乙", "score": 0.91, "source_doc_id": str(doc_id),
+         "source_svo_chunk_index": 3},
+        {"fact_text": "丙 規定 丁", "score": 0.85, "source_doc_id": None,
+         "source_svo_chunk_index": None},
+    ]
+    triples = [SVOTriple(subject="A", subject_type="概念", rel_type="CAUSES", verb="導致",
+                         object="B", object_type="概念", source_doc_id=doc_id)]
+
+    trace = agent._build_retrieval_trace(triples, fact_results, prompt_lines=None)
+
+    assert [f["rank"] for f in trace["facts"]] == [0, 1]
+    assert trace["facts"][0] == {
+        "kind": "fact", "rank": 0, "text": "甲 規定 乙", "score": 0.91,
+        "source_doc_id": str(doc_id), "source_svo_chunk_index": 3,
+        "article_no": None, "in_prompt": None,
+    }
+    assert trace["facts"][1]["source_doc_id"] is None
+    assert trace["triples"][0]["kind"] == "triple"
+    assert trace["triples"][0]["text"] == "A 導致 B"
+    assert trace["triples"][0]["source_doc_id"] == str(doc_id)
+    assert trace["triples"][0]["score"] is None
+
+
+def test_build_retrieval_trace_in_prompt_none_means_not_measured():
+    """沒有收集 prompt 行時 in_prompt 必須是 None（未量測），不可誤標成 False。"""
+    trace = agent._build_retrieval_trace([], [{"fact_text": "甲 規定 乙"}], prompt_lines=None)
+
+    assert trace["facts"][0]["in_prompt"] is None
+    assert trace["prompt_lines"] is None
+
+
+def test_build_retrieval_trace_marks_in_prompt_by_rendered_line():
+    facts = [{"fact_text": "甲 規定 乙（概念）"}, {"fact_text": "丙 規定 丁"}]
+
+    trace = agent._build_retrieval_trace([], facts, prompt_lines=[["- 甲 規定 乙"]])
+
+    # 型別標記會在組 prompt 時被清掉，trace 的判斷要與渲染規則一致
+    assert trace["facts"][0]["in_prompt"] is True
+    assert trace["facts"][1]["in_prompt"] is False
+    assert trace["facts"][0]["text"] == "甲 規定 乙（概念）"  # trace 保留原文
+
+
+def test_build_retrieval_trace_rendering_matches_split_fact_lines():
+    """trace 用來判定 in_prompt 的渲染規則必須與真正組 prompt 的
+    `_split_fact_lines()` 一致，否則 in_prompt 會系統性判錯。"""
+    triples = [_triple("台積電", "CAUSES", "晶片", verb="生產", natural_text="台積電生產晶片（產品）")]
+    facts = [{"fact_text": "馬斯克 創立 SpaceX（組織）", "subject": "馬斯克",
+              "rel_type": "CREATED_BY", "object": "SpaceX"}]
+
+    bfs_lines, fact_lines = agent._split_fact_lines(triples, facts)
+    trace = agent._build_retrieval_trace(triples, facts, prompt_lines=[bfs_lines + fact_lines])
+
+    assert trace["triples"][0]["in_prompt"] is True
+    assert trace["facts"][0]["in_prompt"] is True
+
+
+@pytest.mark.asyncio
+async def test_build_prompt_trace_sink_does_not_change_prompt_and_records_lines():
+    fact_results = [
+        {"fact_text": f"主體{i} 規定 內容{i}", "subject": f"主體{i}", "rel_type": "R",
+         "object": f"內容{i}"}
+        for i in range(30)
+    ]
+    embedding = _FakeSemanticEmbeddingProvider()
+    sink: list[list[str]] = []
+
+    with_sink = await agent._build_prompt(
+        "問題", [], fact_results, None, embedding_provider=embedding, trace_sink=sink,
+    )
+    without_sink = await agent._build_prompt(
+        "問題", [], fact_results, None, embedding_provider=embedding,
+    )
+
+    assert with_sink == without_sink  # 純記錄：prompt 逐字相同
+    assert len(sink) == 1
+    assert 0 < len(sink[0]) < len(fact_results)  # 超過截斷值時 prompt 行少於檢索筆數
+    trace = agent._build_retrieval_trace([], fact_results, prompt_lines=sink)
+    kept = sum(1 for f in trace["facts"] if f["in_prompt"])
+    assert kept == len(sink[0])
+    assert kept < len(fact_results)  # 有些檢索到的 Fact 沒進 prompt——正是要能看見的現象
+
+
+@pytest.mark.asyncio
+async def test_build_prompt_trace_sink_untouched_in_baseline_context_mode():
+    """baseline arm 直接給 context_lines，不經 `_arrange_fact_lines()`，不收集。"""
+    sink: list[list[str]] = []
+
+    await agent._build_prompt(
+        "問題", [], [], None, embedding_provider=None,
+        context_lines=["- 已排好的行"], trace_sink=sink,
+    )
+
+    assert sink == []
 
 
 # ── _serialize_sources 引用豐富化：附加 Document 中繼資料（2026-08-25）───────

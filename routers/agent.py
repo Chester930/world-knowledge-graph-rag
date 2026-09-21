@@ -416,12 +416,72 @@ def _build_retrieval_telemetry(
     }
 
 
+def _build_retrieval_trace(
+    triples: list[SVOTriple],
+    fact_results: list[dict],
+    prompt_lines: list[list[str]] | None,
+) -> dict:
+    """報告62 T0：把「檢索到什麼、排第幾、有沒有進 prompt」整理成可序列化的 trace。
+
+    **純記錄，不改動任何檢索／排序／截斷結果。** `fact_results`／`triples` 傳入的是
+    `chat()` 範圍過濾後、`_arrange_fact_lines()` 截斷**之前**的完整清單，所以
+    `rank` 是檢索順位（Fact＝`vector_search_facts()` 順序、triple＝`bfs_query()`
+    走訪順序，兩者不共用名次）；`in_prompt` 才反映截斷結果。
+
+    `prompt_lines`：`_build_prompt(trace_sink=)` 收集的實際 prompt 事實行（每次
+    prompt 組裝一份）。`None`（呼叫端沒有收集）時 `in_prompt` 一律為 None，
+    表示「未量測」而不是「沒進 prompt」。判斷方式是比對渲染後的行文字
+    （`- ` + 去型別標記後的文字，與 `_split_fact_lines()` 一致）；被
+    `_split_fact_lines()` 去重／過濾掉的證據本來就不會出現在任何 prompt 行，
+    因此 `in_prompt=False`，不等於「被截斷」——兩種情況要看 `prompt_lines`
+    與 rank 一起判讀。
+    """
+    prompt_set = (
+        {ln for lines in prompt_lines for ln in lines} if prompt_lines is not None else None
+    )
+
+    def _in_prompt(rendered: str) -> bool | None:
+        return None if prompt_set is None else rendered in prompt_set
+
+    fact_entries = []
+    for rank, f in enumerate(fact_results):
+        text = f.get("fact_text") or ""
+        idx = f.get("source_svo_chunk_index")
+        fact_entries.append({
+            "kind": "fact",
+            "rank": rank,
+            "text": text,
+            "score": f.get("score"),
+            "source_doc_id": str(f["source_doc_id"]) if f.get("source_doc_id") is not None else None,
+            "source_svo_chunk_index": int(idx) if idx is not None else None,
+            "article_no": None,
+            "in_prompt": _in_prompt(f"- {_strip_type_markers(text)}"),
+        })
+
+    triple_entries = []
+    for rank, t in enumerate(triples):
+        raw = t.natural_text if t.natural_text else f"{t.subject} {t.verb} {t.object}".rstrip()
+        triple_entries.append({
+            "kind": "triple",
+            "rank": rank,
+            "text": raw or "",
+            "score": None,
+            "source_doc_id": str(t.source_doc_id) if t.source_doc_id is not None else None,
+            "source_svo_chunk_index": None,
+            "article_no": None,
+            "in_prompt": _in_prompt(f"- {_strip_type_markers(raw or '')}"),
+        })
+
+    return {"facts": fact_entries, "triples": triple_entries, "prompt_lines": prompt_lines}
+
+
 def _serialize_sources(
     triples: list[SVOTriple],
     fact_results: list[dict],
     resolved_rel_type: str | None,
     document_map: dict[str, LawDocument] | None = None,
     retrieval_telemetry: dict | None = None,
+    retrieval_trace: dict | None = None,
 ) -> dict:
     """把本次檢索到的原始來源（BFS 三元組 + 語意 Fact）整理成可序列化的
     結構，隨 SSE `sources` 事件一併送出——讓呼叫端（CLI 工具、之後的前端）
@@ -437,11 +497,15 @@ def _serialize_sources(
     `retrieval_telemetry`（報告57 §6-1 新增，選填）：`_build_retrieval_telemetry()`
     產物，`None`（既有呼叫端未升級，如 harness 的 `_serialize_sources()` 呼叫）
     時該欄位為 `None`，行為與新增前一致。
+
+    `retrieval_trace`（報告62 T0 新增，選填）：`_build_retrieval_trace()` 產物，
+    只有 `ChatRequest.include_retrieval_trace=True` 才有值，否則為 `None`。
     """
     document_map = document_map or {}
     return {
         "resolved_rel_type": resolved_rel_type,
         "retrieval_telemetry": retrieval_telemetry,
+        "retrieval_trace": retrieval_trace,
         "triples": [
             {
                 "subject": t.subject,
@@ -873,6 +937,7 @@ async def _generate_decomposed_answer(
     question_vector: list[float] | None,
     llm_provider: LLMProvider,
     cfg: KGConfig | None = None,
+    trace_sink: list[list[str]] | None = None,
 ) -> str:
     """報告27 C#2 M1：每個子問題各自獨立生成一次完整答案（同一份已檢索事實
     清單、不重新檢索），彼此在生成當下互相看不到——這正是避免「回答子問題
@@ -897,6 +962,7 @@ async def _generate_decomposed_answer(
         sub_prompt = await _build_prompt(
             sub_q, triples, fact_results, history=None,
             embedding_provider=embedding_provider, question_vector=None, cfg=cfg,
+            trace_sink=trace_sink,
         )
         tokens = [tok async for tok in llm_provider.stream(sub_prompt)]
         answer = "".join(tokens).strip()
@@ -1017,10 +1083,15 @@ async def _build_prompt(
     question_vector: list[float] | None = None,
     cfg: KGConfig | None = None,
     context_lines: list[str] | None = None,
+    trace_sink: list[list[str]] | None = None,
 ) -> str:
     """`context_lines`（報告39 §3.2）：harness baseline arm（B0/B1/D）直接給
     已排好的 context 行，跳過 `_split_fact_lines()`／`_arrange_fact_lines()`
-    （那是 KG 事實專用的重排）；`context_lines=None` 時行為與抽取前逐位元相同。"""
+    （那是 KG 事實專用的重排）；`context_lines=None` 時行為與抽取前逐位元相同。
+
+    `trace_sink`（報告62 T0，選填）：提供時把這次**實際組進 prompt 的事實行**
+    （`_arrange_fact_lines()` 截斷／重排後）append 進去，供 `include_retrieval_trace`
+    紀錄「撈到的」與「模型看到的」差異。純記錄，`None` 時行為與新增前逐位元相同。"""
     _cfg = cfg or KGConfig()
     if context_lines is None:
         bfs_lines, fact_lines = _split_fact_lines(triples, fact_results)
@@ -1029,6 +1100,8 @@ async def _build_prompt(
             question, bfs_lines, fact_lines,
             embedding_provider=embedding_provider, question_vector=question_vector, cfg=_cfg,
         ) if has_context else []
+        if trace_sink is not None:
+            trace_sink.append(list(arranged))
     else:
         arranged = list(context_lines)
         has_context = bool(arranged)
@@ -1195,11 +1268,16 @@ async def _generate_from_context_lines(
     embedding_provider: EmbeddingProvider | None = None,
     question_vector: list[float] | None = None,
     context_lines: list[str] | None = None,
+    prompt_trace: list[list[str]] | None = None,
 ):
     """把 `chat()` 的「context → 生成 → 事實接地核對 → 方案 B／2b 重生 → 選擇性
     轉繁」尾段抽成共用**非同步產生器**，供 `chat()` 自身與報告39 harness 的
     B0／B1／D arm 共用同一生成 stack（§5.4.1：生成端逐位元相同，才分得出
     「贏在檢索」還是「贏在生成端機制」）。
+
+    `prompt_trace`（報告62 T0，選填）：見 `_build_prompt(trace_sink=)`；只記錄
+    **初稿生成**那次（單一問題 1 份、複合問題每個子問題 1 份）的實際 prompt
+    事實行，不含接地失敗後限制性重生的 prompt。`None` 時行為與新增前相同。
 
     以 SSE 字串 yield 出 `event: status`（phase `generating`／`verifying`）給
     `chat()` 原樣轉發；**最後一個 yield** 是一個 `_GenerationResult`。
@@ -1225,13 +1303,13 @@ async def _generate_from_context_lines(
         draft_answer = await _generate_decomposed_answer(
             sub_questions, triples, fact_results,
             embedding_provider=embedding_provider, question_vector=question_vector,
-            llm_provider=llm_provider, cfg=cfg,
+            llm_provider=llm_provider, cfg=cfg, trace_sink=prompt_trace,
         )
     else:
         prompt = await _build_prompt(
             question, triples, fact_results, history,
             embedding_provider=embedding_provider, question_vector=question_vector,
-            cfg=cfg, context_lines=context_lines,
+            cfg=cfg, context_lines=context_lines, trace_sink=prompt_trace,
         )
         draft_parts: list[str] = []
         async for token in llm_provider.stream(prompt):
@@ -1571,6 +1649,8 @@ async def chat(payload: ChatRequest):
         # 這裡把它 yield 出的 `event: status`（generating／verifying）原樣轉發，
         # 最後拿到 `_GenerationResult`。行為與抽取前逐位元相同。
         gen_result: _GenerationResult | None = None
+        # 報告62 T0：只在 `include_retrieval_trace` 時才收集實際 prompt 事實行（純記錄）。
+        prompt_trace: list[list[str]] | None = [] if payload.include_retrieval_trace else None
         async for _item in _generate_from_context_lines(
             payload.question,
             history=payload.history,
@@ -1584,6 +1664,7 @@ async def chat(payload: ChatRequest):
             fact_results=fact_results,
             embedding_provider=embedding_provider,
             question_vector=question_vector,
+            prompt_trace=prompt_trace,
         ):
             if isinstance(_item, _GenerationResult):
                 gen_result = _item
@@ -1601,6 +1682,10 @@ async def chat(payload: ChatRequest):
             _serialize_sources(
                 triples, fact_results, resolved_rel_type, document_map,
                 retrieval_telemetry=retrieval_telemetry,
+                retrieval_trace=(
+                    _build_retrieval_trace(triples, fact_results, prompt_trace)
+                    if payload.include_retrieval_trace else None
+                ),
             ),
             ensure_ascii=False,
         )

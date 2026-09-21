@@ -10,7 +10,12 @@
 import json
 import pytest
 from pathlib import Path
-from models.eval_schema import AtomicGoldFact
+from models.eval_schema import (
+    AtomicGoldFact,
+    FullQueryLineage,
+    RetrievalStageLineage,
+    RetrievedEvidence,
+)
 from services.lineage_tracker import LineageTracker
 
 
@@ -315,3 +320,69 @@ async def test_record_retrieval_async_chain_completeness_and_snr_match_sync():
     assert async_lineage.chain_completeness == sync_lineage.chain_completeness == 0.5
     assert async_lineage.snr == sync_lineage.snr
     assert async_lineage.retrieved_char_count == sync_lineage.retrieved_char_count
+
+
+# ── 報告62 T0：檢索 trace 欄位（只記錄、不參與判定、舊 records 相容）──────────
+
+def test_record_retrieval_stores_trace_without_affecting_scores():
+    gold = ["由中央政府支應"]
+    evidence = [
+        RetrievedEvidence(kind="fact", rank=0, text="由中央政府支應", score=0.9,
+                          source_doc_id="d1", source_svo_chunk_index=2, in_prompt=True),
+        RetrievedEvidence(kind="fact", rank=1, text="無關", score=0.5, in_prompt=False),
+    ]
+    plain = LineageTracker("q", "K", "問").record_retrieval(["由中央政府支應", "無關"], gold, 1.0)
+    traced = LineageTracker("q", "K", "問").record_retrieval(
+        ["由中央政府支應", "無關"], gold, 1.0, retrieval_trace=evidence,
+    )
+
+    assert traced.retrieval_trace == evidence
+    assert plain.retrieval_trace == []
+    assert (traced.recall_rate, traced.snr, traced.retrieved_char_count) == (
+        plain.recall_rate, plain.snr, plain.retrieved_char_count)
+
+
+def test_record_context_assembly_stores_prompt_lines_without_affecting_retention():
+    gold = ["由中央政府支應"]
+    tracker = LineageTracker("q", "K", "問")
+    ctx = tracker.record_context_assembly(
+        "- 由中央政府支應", gold, total_tokens=4,
+        prompt_context_lines=[["- 無關"]],  # prompt 行不含 gold，但既有判定仍只看傳入的 context 字串
+    )
+
+    assert ctx.prompt_context_lines == [["- 無關"]]
+    assert ctx.retained_exact_spans == gold  # 判定維持與凍結基準同定義
+
+
+@pytest.mark.asyncio
+async def test_async_variants_accept_trace_fields():
+    tracker = LineageTracker("q", "K", "問")
+    ev = [RetrievedEvidence(kind="triple", rank=0, text="A 導致 B")]
+
+    r = await tracker.record_retrieval_async(["A 導致 B"], [], 1.0, retrieval_trace=ev)
+    c = await tracker.record_context_assembly_async("A 導致 B", [], prompt_context_lines=[["- A 導致 B"]])
+
+    assert r.retrieval_trace == ev
+    assert c.prompt_context_lines == [["- A 導致 B"]]
+
+
+def test_old_records_without_trace_fields_still_deserialize():
+    """凍結基準的 records 沒有 retrieval_trace／prompt_context_lines，必須能反序列化。"""
+    old = {
+        "query_id": "q", "arm": "K", "question": "問",
+        "stage1_retrieval": {"arm": "K", "retrieval_latency_ms": 1.0,
+                             "retrieved_chunk_ids": [], "retrieved_fact_ids": ["", ""],
+                             "hit_exact_spans": [], "missed_exact_spans": [], "recall_rate": 0.0,
+                             "retrieved_char_count": 0, "snr": 0.0, "chain_completeness": None},
+        "stage2_context": {"total_context_tokens": 0, "retained_exact_spans": [],
+                           "dropped_exact_spans": [], "verbalization_omissions": []},
+        "stage3_generation": {"llm_model": "m", "generation_latency_ms": 1.0, "raw_draft": "",
+                              "grounding_passed": True, "final_output": ""},
+        "failure_attribution": None,
+    }
+
+    lineage = FullQueryLineage(**old)
+
+    assert lineage.stage1_retrieval.retrieval_trace == []
+    assert lineage.stage2_context.prompt_context_lines == []
+    assert isinstance(lineage.stage1_retrieval, RetrievalStageLineage)
