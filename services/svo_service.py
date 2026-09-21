@@ -450,6 +450,7 @@ async def extract_svo_triples(
     *,
     kg_id: str | None = None,
     calibration_db_path: Path | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[SVOTriple]:
     """用 LLM 抽取受控關係 SVO triples。
 
@@ -480,6 +481,7 @@ async def extract_svo_triples(
                 llm_provider=llm_provider,
                 kg_id=kg_id,
                 calibration_db_path=calibration_db_path,
+                cfg=cfg,
             )
         item["rel_type"] = rel_type
         # 3.1.3 §a-1 BACKFILL：僅 RELATED_TO 兜底的三元組才需要保留 verb embedding，
