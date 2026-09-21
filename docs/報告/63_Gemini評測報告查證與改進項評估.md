@@ -359,3 +359,45 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 - 未逐段通讀報告33 全文（僅讀 §1、§5 風險表、§6 落地順序與相關搜尋命中），對「生成端守衛 config 化是否已有規劃」下的是「我未見」而非「沒有」。
 - 未量測 Worker 逐 chunk 載入設定的成本。
 - 未修改 Gemini 的報告書，也未實作任何接線。
+
+## 11. 第四份 Gemini 報告查證：《法規 KG 時序支援實作計畫（Temporal Awareness Plan）》（2026-09-21）
+
+### 11.1 來源與性質
+
+- **來源**：使用者於對話貼上，**未存檔於 repo**。內容是三個 Phase 的實作計畫：Phase 1 資料層（`SVOTriple`／Fact 節點加 `law_effective_date`／`law_repealed_date`／`law_version_tag`，`vector_search_facts()` 加 `active_only`，`ingestion_service` 由檔名推導版本）；Phase 2 查詢層（`QueryClassifier` 加 Type-F，`ScenarioType` 加 `TYPE_F`）；Phase 3 守衛層（`DeterministicGuardService` 加 `check_version_conflict()`）。自稱「Phase 1 單獨上線即可解決 80% 的版本混答問題」。
+- **性質**：這是報告 63 §9 GAP-07（缺 Fact 層時態）的具體施工方案；它**沒有**先驗證資料面能否支撐。
+- **方法**：對照 `master` 程式碼；唯讀 Neo4j 查 KG#4 的 `Document` 節點；把它的 Type-F 正則實際套用到 65 題題庫。全程唯讀，未呼叫 LLM。
+
+### 11.2 判定
+
+| 計畫內容 | 查證 | 判定 |
+|---|---|---|
+| **資料來源**：`law_repealed_date`、`law_effective_date` 要從哪裡來 | KG#4 的 64 個 `Document` 節點屬性鍵為 `content_hash, effective_date, effective_note, kg_id, record_type, source, source_doc_id, source_url, title, update_date`——**沒有任何廢止／現行狀態欄位**；`update_date`（公布／異動日）64/64 有值，`effective_date` 只有 15/64。舊法「職業災害勞工保護法」`effective_date=None`、`update_date=20181121`；新法「勞工職業災害保險及保護法」`effective_date=None`、`update_date=20210430` | ❌ **`law_repealed_date` 目前沒有資料來源**，全部會是 `None`；欄位加了也填不出值 |
+| Phase 1b：`ingestion_service` 由檔名（如 `勞基法_2024修正.pdf`）推導版本 | `services/ingestion_service.py` 的內容是文件解析與 `chunk_and_stage()` 暫存區銜接；法規語料是**結構化 JSON（`pcode`）經匯入腳本進入**，不是檔名帶版本的 PDF。`SVOTriple` 由抽取 Worker 依 chunk 產生（`source_article_no` 亦是如此填入），不由 `ingestion_service` 建立 | ❌ 落點與資料形態都不符 |
+| Phase 1a：把三個版本欄位放在每個 Fact 上 | Fact 已可經 `SUPPORTED_BY→LawArticle→Document` 回溯到文件層級中繼資料（報告63 §9.3(b) 實查）。**且 `vector_search_facts()` 已有 `allowed_source_doc_ids` 參數**（`svo_service.py:2255`；over-fetch 候選後依來源過濾）——要做「只檢索現行法規」，只需在 Document 層級補一個狀態屬性、算出允許的 `source_doc_id` 集合傳入，**不必改動 16,826 筆既有 Fact**。計畫的 Fact 欄位只有**新抽取**才會有值，既有 KG 需重抽或回填 | ⚠️ 與既有結構重複，且更貴 |
+| Phase 1a 的回填路徑 | 計畫提醒「即時路徑與 `backfill_fact_nodes` 共用 `_create_fact_node()`」（正確），但回填是從邊上的 `citations_json` 重建 Fact；citation 內容由 `_citation_payload` 組成（`svo_service.py` 約 1570–1582 行，含 `article_no` 但無版本欄位）。計畫**沒有列入 citation 欄位**，回填出的 Fact 會遺失版本標注 | ⚠️ 遺漏 |
+| Phase 1c：`vector_search_facts` 加 `active_only`，Cypher 寫 `WHERE (f.law_repealed_date IS NULL)` | 函式位置（`:2246`）正確、選填旗標預設關符合專案慣例。但實際查詢的節點別名是 **`node`**（不是 `f`），且有 **dense 與 hybrid fulltext 兩條查詢路徑**（`:2319`、`:2345`）需要一致處理；`RETURN` 子句**沒有**版本欄位，Phase 3 守衛讀 `f.get("law_version_tag")` 會恆為 `None` | ⚠️ 細節不符，Phase 3 因此拿不到資料 |
+| Phase 2：`QueryClassifier` 加 Type-F、推薦 `M4_TEMPORAL` | `QueryClassifier` 只被 `services/adaptive_retrieval_service.py` 使用，而後者**除測試外沒有任何匯入者**——不在 `chat()` 路徑。該檔 docstring 自承其 Type-C 正則是「對已知題庫的過擬合」；新增的 Type-F 是同一類手寫正則。`ScenarioType` 定義在 `models/eval_schema.py`，是**題庫題型標籤**；sdd 分支同檔已改動（+43 行），加值會衝突 | ⚠️ 落在休眠程式碼 |
+| **Phase 2 的正則實測（65 題題庫）** | 計畫的四條 Type-F 正則共命中 **3 題，全在凍結 42 題內**：`57-AGGR6`、`57-AGGR18`、`57-AGGR19`——**全是「新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）」對照題**（命中的是規則 [1]「新法／舊法」）。這三題**需要同時檢索新舊兩部法規**，被導向 `M4_TEMPORAL`＋`active_only=True` 後，舊法事實會被過濾掉。**真正的「現行／目前…規定」型題目在題庫中命中 0 題** | ❌ **會把最需要新舊並陳的三題導向會排除舊法的路徑**；且題庫沒有它想解決的題型 |
+| Phase 3：`check_version_conflict()` | `verify_draft()` 簽章為 `(context_text, fact_lines, question, draft_answer, allowed_articles)`，**沒有 `retrieved_facts` 參數**，計畫未提簽章變更；回傳型別 `GuardVerificationResult` 只有 `is_valid／guard_name／failure_reason／extra_constrained_note`，「不阻斷、只注入警示」需要新機制；`DeterministicGuardService` 同樣只被 `adaptive_retrieval_service` 與評測腳本呼叫，**不在 `chat()`**；測試檔實際名稱是 `tests/services/test_deterministic_guards.py`（計畫寫 `test_deterministic_guard_service.py`）；現有資料沒有任何 `law_version_tag`，守衛**不會觸發** | ⚠️ 介面不符、資料面缺、不在產線 |
+| 「Phase 1 單獨上線即可解決 80%」 | 無任何計算或評測依據。我查閱的評測（報告57 §4.19／§4.20、凍結基準）中，**沒有「因引用已廢止規定而答錯」的已確認案例**；新舊法對照題（AGGR6/18/19）的失敗屬歸屬寫反（報告63 §2.3）與檢索失效，不是版本過濾能解 | ❌ 無依據 |
+| 「不引入雙時態，單時態即可」 | 與論文 §3.5 RQ5（T-GRAG／Graphiti 雙時態設計）取向不同，屬論文範圍決定，不是工程細節 | 需使用者裁示 |
+| 可取之處 | 新欄位全選填（None＝舊資料）、`active_only` 預設關（符合零行為變化慣例）、`_create_fact_node()` 兩條路徑共用的判斷、三個 Phase 可獨立上線、明確排除不改 BFS 與去重鍵 | ✅ |
+
+### 11.3 我的評估與較務實的替代（建議，非查證結論）
+
+1. **先補資料，再談機制**：在 `Document` 層級補「現行／已廢止」屬性（來源：`law_histories`、法規主管機關的狀態資料；對應 schema.org `legislationLegalForce`，見既有討論）。沒有這個資料，計畫的三個 Phase 都只是空欄位。
+2. **用既有的 `allowed_source_doc_ids` 做 opt-in 的「僅現行」過濾**：由 Document 狀態算出允許集合，不改 Fact、對既有 16,826 筆立即生效；**預設關閉**。
+3. **對照題必須排除在過濾之外**：AGGR6／AGGR18／AGGR19 應作為「**不得被過濾**」的回歸守衛。時序處理對這類題應是「標示版本」，不是「排除舊版」（與報告 §8 A 案的來源標籤是同一方向；`update_date` 64/64 有值，可作版本線索，**但它是公布／異動日、不是施行日**）。
+4. Phase 2、3 落在不在 `chat()` 路徑的休眠程式碼，且 Type-F 正則對題庫的實測結果為負面，**不建議現在做**。
+
+### 11.4 「好像剛剛有自動執行」的查核（2026-09-21 17:14）
+
+- **沒有任何人實作這份計畫**：全專案搜尋 `law_version_tag`、`law_effective_date`、`law_repealed_date`、`active_only`、`check_version_conflict`、`M4_TEMPORAL`、`_extract_law_version_meta` 的唯一命中是 `svo_service.py` 的 `_LEAVE_TYPE_FAMILY`（`TYPE_F` 子字串巧合，與時序無關）。
+- 主 checkout 在 15:25（兩份未追蹤的 Gemini 檔案）之後**沒有任何檔案被修改**；`master` 仍為 `b1c620e`；本分支乾淨且與 origin 同步。
+- **預期內的活動**：Codex 已把 `codex/task1-extraction-cfg-wiring` 推送到 origin（`75f1777`，依先前指示）；`codex-task3` worktree 與分支**尚未建立**（TASK-3 未開始）。我這邊的背景驗證（完整 pytest、突變測試）只在 job 暫存目錄操作，不影響任何分支。
+- **T2 Stage A**：records 已寫入 28/42 題（最後一題 `57-AGGR5`；`57-AGGR18` 尚未輪到；`17-Q2` 有 `error` 欄位），檔案最後寫入 16:30:40，距查核時已 44 分鐘。**我無法判斷是仍在跑慢題還是已中斷**（`57-AGGR5/6` 先前單題可達數百秒），該終端機不是我控制的，未做任何操作。
+
+### 11.5 本輪未做
+
+未實作任何項目；未檢查該計畫所稱的「手動驗證」情境；未查 `law_histories` 是否可取得；未評估 `legislationLegalForce` 類屬性的實際資料來源。
