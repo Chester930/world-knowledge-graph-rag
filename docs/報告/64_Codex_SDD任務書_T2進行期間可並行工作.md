@@ -354,7 +354,18 @@ pytest：動工前 N passed → 完成後 M passed（失敗數）
 （待填）
 
 ### 8.3 TASK-3
-（待填；Phase 1／Phase 2 分別記錄）
+
+任務：TASK-3 Phase 1（P1-a、P1-b、P1-c；Phase 2 未執行）
+分支／worktree：`codex/task3-source-ambiguity-audit`／`.claude/worktrees/codex-task3`
+基底 commit：`26362c3`（`worktree-report-gemini-review` tip）
+最終 commit（清單）：`a2f3882`（新增盤點腳本與離線測試）、`4e063f2`（補全 AGGR18 全域條號配對）；本 docs／結果 commit 回填本節與三份 Phase 1 產出。
+pytest：動工前 1011 passed → 完成後 1025 passed（0 failed，8 warnings）；新增測試 14 passed。`py_compile` 通過。
+新增／修改檔案：`scripts/analysis/source_ambiguity_audit.py`、`tests/scripts/test_source_ambiguity_audit.py`、`data/analysis/source_ambiguity/{kg_wide.json,questions_frozen42.json,summary.md}`、本節 §8.3。
+是否觸碰禁止項（Ollama／Neo4j 寫入／sdd worktree／凍結物件）：否。Neo4j 僅用 READ session；查詢未回傳 `fact_embedding`；未呼叫 LLM／embedding，未讀取 Stage A 半成品、未啟停服務。憑證僅從主 checkout `.env` 讀入程序記憶體，沒有輸出或提交。
+與任務書描述不符的現況：AGGR18 的四筆主配對 Fact 與 §5.4 文字、Jaccard／frame_overlap 預期值（±0.01）吻合，跨法規精確同文為否。題庫所述配對成立，但完整 KG 另有短 Fact「職業災害勞工 經醫療終止後」：舊法 §23 span 也配到同法 §18；新法 §84 span 另配到舊法 §18。AGGR18 主配對仍恰為 §23、§24、§84、§85 四筆；相鄰條號都分別計為額外配對。全域回傳 16,773 rows／distinct Facts，較 manifest 16,826 少 53（0.315%，未超過 1% 停止門檻）。
+範圍外發現（未處理）：Phase 2 等 T2 Stage A 完整結束；未讀取其 records，也未產生 `prompt_level_stageA.json`。未修改題庫或凍結目錄。
+驗收清單逐項結果：42/42 eligible 題載入，無遺漏 ID；未配對 span 明列（35 spans、分布於 23 題）。P1-a：16,180 個相異正規化文字、189 個同文異源文字、439 個涉及碰撞 Fact（2.6173%）；輸出前 20 範例含法規名與條號。P1-b：條號相同列主配對、同法其他條號列額外配對，`n_source_laws` 只依 gold；主配對跨文件 max Jaccard/frame_overlap 為 0.4894/0.8065，含同法額外配對對照為 0.4894/1.0000。P1-c 候選依 frame_overlap 排序為 `57-AGGR18`、`57-AGGR19`、`57-AGGR6`；AGGR18 排第 1。三份輸出只含統計、題庫 gold 配對及前 20 範例，未含大批原始 KG 或憑證。
+未完成／未驗證：Phase 2 待 T2 Stage A 完整結束。為補入完整 AGGR18 條號包含配對並用最終腳本版本重產結果，P1-a 全域唯讀查詢循序執行兩次；每次均為單一 query、每批 200 rows、批次間隔 0.15 秒，兩次列數一致（16,773）。輸出使用第二次結果。markdownlint-cli 對整份任務書仍回報既有錯誤；本節新增內容僅有 MD013 長行告警。新 summary.md 的告警只有既有 MD013／MD060 類型，未引入新規則類型。
 
 ## 9. 使用者待裁示
 
