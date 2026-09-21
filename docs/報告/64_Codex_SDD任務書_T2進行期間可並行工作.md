@@ -348,7 +348,18 @@ pytest：動工前 N passed → 完成後 M passed（失敗數）
 ## 8. 結果紀錄（由執行者回填）
 
 ### 8.1 TASK-1
-（待填）
+
+任務：TASK-1
+分支／worktree：`codex/task1-extraction-cfg-wiring`／`.claude/worktrees/codex-task1`
+基底 commit：`26362c3`（`worktree-report-gemini-review` tip；父 commit `2749518`）
+最終 commit（清單）：`074052f`、`ab409a5`、`c9c92d6`、`a8fbf23`、`a90683c`、`ec26675`、`5b72e7b`、`6141de2`、`95898d8`、`2adcdd9`、`421bfca`、`a8c7cbb`；本 docs commit 更新本節與報告33 §6。
+pytest：動工前 1011 passed → 完成後 1022 passed（0 failed，8 warnings）。首輪完整測試曾發現既有測試依賴 `svo_service.COMPARE_COSINE_THRESHOLD` 模組別名；已恢復匯入、未改測試，最終完整測試通過。
+新增／修改檔案（相對基底 `git diff --stat`）：`services/svo_service.py`、`services/expand_worker.py`、新增 `tests/services/test_svo_service_cfg_wiring.py`（11 tests）、本文件 §8.1、報告33 §6。
+是否觸碰禁止項（Ollama／Neo4j 寫入／sdd worktree／凍結物件）：否。新增測試使用 fake LLM／embedding／driver；沒有啟停相關服務或寫入 Neo4j。
+與任務書描述不符的現況：`台積電`／`台積電公司` 的編輯比率在程式註解為 0.833，任務書估約 0.75；兩者皆介於測試使用的 0.70 與 0.90 之間，覆蓋行為相同。其餘指定函式、行號與呼叫鏈吻合。
+範圍外發現（未處理）：`config/README.md` 說明 domain pack 的套用選擇，未列出本任務五個門檻的生效狀態，因此未修改。主 checkout 的未追蹤 Gemini 報告未加入或變更。
+驗收清單逐項結果：五個門檻改讀 `cfg`；`cfg=None` 與 `KGConfig()` 預設等價；句子涵蓋明確 `threshold` 優先。新增 11 個離線測試覆蓋 §3.5 的門檻覆寫、仲裁呼叫次數、雙階段同一 `cfg`、回填 kwargs 與預設等價；覆寫測試斷言與預設路徑相反的決策／呼叫次數，移除接線即會失敗。既有測試未修改或刪除；外部呼叫端未傳入 `cfg`；報告33 §6 已更新。全套 pytest 最終 1022 passed。
+未完成／未驗證：未做程式碼突變測試；以覆寫值會改變決策或呼叫次數的斷言驗證接線。全套測試有 8 個既有相依套件警告。markdownlint-cli 對兩份文件仍回報錯誤；變更段落的格式告警為已知 MD013 長行規則，未引入新的規則類型。
 
 ### 8.2 TASK-2
 （待填）
