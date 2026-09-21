@@ -110,3 +110,28 @@ async def test_find_uncovered_sentences_threshold_precedence():
     assert explicit_threshold == config_threshold == [sentence]
     assert explicit_threshold_wins == []
     assert default_without_cfg == default_with_cfg == []
+
+
+@pytest.mark.asyncio
+async def test_completeness_check_forwards_same_cfg_to_both_extraction_passes(monkeypatch):
+    cfg = KGConfig()
+    received_cfgs = []
+
+    async def fake_extract(text, llm_provider, embedding_provider, **kwargs):
+        received_cfgs.append(kwargs["cfg"])
+        return [SVOTriple(subject=f"甲{len(received_cfgs)}", verb="提供", object="乙")]
+
+    async def fake_find_uncovered(original_sentences, triples, embedding_provider, **kwargs):
+        assert kwargs["cfg"] is cfg
+        return list(original_sentences)
+
+    monkeypatch.setattr(svc, "extract_svo_triples", fake_extract)
+    monkeypatch.setattr(svc, "_find_uncovered_sentences", fake_find_uncovered)
+    monkeypatch.setattr(svc, "_filter_ungrounded_quantity_triples", lambda triples, *_: triples)
+
+    result = await svc.extract_svo_triples_with_completeness_check(
+        "甲提供乙。", ["甲提供乙。"], RecordingLLM(""), object(), cfg=cfg,
+    )
+
+    assert len(result) == 2
+    assert received_cfgs == [cfg, cfg]

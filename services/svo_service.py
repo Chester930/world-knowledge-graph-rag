@@ -965,6 +965,7 @@ async def extract_svo_triples_with_completeness_check(
     *,
     kg_id: str | None = None,
     calibration_db_path: Path | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[SVOTriple]:
     """`extract_svo_triples()` 的完整性自我核對版本（`docs/報告/19_SVO抽取
     完整性自我核對機制設計報告.md` §3／§3.1，2026-08-31 設計，同日實作）。
@@ -1000,12 +1001,15 @@ async def extract_svo_triples_with_completeness_check(
     """
     triples = await extract_svo_triples(
         text, llm_provider, embedding_provider, kg_id=kg_id, calibration_db_path=calibration_db_path,
+        cfg=cfg,
     )
 
     if not original_sentences or embedding_provider is None:
         return _filter_ungrounded_quantity_triples(triples, text, original_sentences or None)
 
-    uncovered = await _find_uncovered_sentences(original_sentences, triples, embedding_provider)
+    uncovered = await _find_uncovered_sentences(
+        original_sentences, triples, embedding_provider, cfg=cfg,
+    )
     if not uncovered:
         return _filter_ungrounded_quantity_triples(triples, text, original_sentences)
 
@@ -1013,6 +1017,7 @@ async def extract_svo_triples_with_completeness_check(
     supplement_triples = await extract_svo_triples(
         supplement_text, llm_provider, embedding_provider,
         kg_id=kg_id, calibration_db_path=calibration_db_path,
+        cfg=cfg,
     )
 
     seen = {(t.subject, t.verb, t.object) for t in triples}
