@@ -1,0 +1,43 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "arms": [
+    "K"
+  ],
+  "runs": 1,
+  "chunk_size": 500,
+  "doc_ids": [
+    "N0060007_高溫作業勞工作息時間標準",
+    "N0060012_精密作業勞工視機能保護設施標準",
+    "N0060015_特定化學物質危害預防標準",
+    "N0060022_勞工健康保護規則",
+    "N0060022_附表一_特別危害健康作業"
+  ],
+  "requested_questions_count": 3,
+  "questions_count": 3,
+  "eligible_question_ids": [
+    "57-AGGR1",
+    "57-AGGR2",
+    "57-CANARY3"
+  ],
+  "excluded_questions": [],
+  "formal_evaluation": false,
+  "allow_shared_judge": true,
+  "generator_provider": "ollama",
+  "generator_model": "qwen2.5:7b",
+  "judge_provider": "ollama",
+  "judge_model": "qwen2.5:7b",
+  "embedding_provider": "ollama",
+  "embedding_model": "bge-m3",
+  "query_timeout_s": 300.0,
+  "dataset_sha256": "458ce75fd13f6ebdbfa5c31ddc78b6b2321f7da2a29b34f576a5396c371adf3f",
+  "preflight": {
+    "passed": true,
+    "errors": [],
+    "warnings": [
+      "shared generator/judge configuration: pilot only, not formal evaluation"
+    ]
+  },
+  "status": "completed",
+  "timestamp": "2026-09-16T09:37:25.789318+00:00",
+  "records_count": 3
+}

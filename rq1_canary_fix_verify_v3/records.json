@@ -1,0 +1,98 @@
+[
+  {
+    "question_id": "57-CANARY3",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "1. 精密作業的勞工需要做特殊健康檢查嗎？\n根據提供的事實清單，精密作業的勞工需要做特殊健康檢查。相關事實如下：\n\n- 精密作業係指僱主使勞工每日從事下列凝視作業二小時以上者。\n- 雇主 使勞工從事精密作業時 應縮短工作時間\n- 雇主 使勞工從事精密作業時，應注意 勞工作業姿態\n- 雇主 對在職勞工應定期實施 一般健康檢查\n- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。\n- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查\n\n因此，精密作業的勞工需要做特殊健康檢查。\n\n2. 多久一次？\n根據提供的事實清單：\n\n- 雇主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 未滿四十歲者每三年檢查一次。\n\n因此，對於特別危害健康作業的勞工，雇主應每年或於變更其作業時實施特殊健康檢查。至於一般勞工，未滿四十歲者每三年檢查一次。其他部分資料未明確記載，無法確認。",
+    "error": null,
+    "latency_s": 426.72,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 228,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary (Trap Claim Asserted)",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "K",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 426720.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 421,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 113,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 426720.0,
+        "raw_draft": "1. 精密作業的勞工需要做特殊健康檢查嗎？\n根據提供的事實清單，精密作業的勞工需要做特殊健康檢查。相關事實如下：\n\n- 精密作業係指僱主使勞工每日從事下列凝視作業二小時以上者。\n- 雇主 使勞工從事精密作業時 應縮短工作時間\n- 雇主 使勞工從事精密作業時，應注意 勞工作業姿態\n- 雇主 對在職勞工應定期實施 一般健康檢查\n- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。\n- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查\n\n因此，精密作業的勞工需要做特殊健康檢查。\n\n2. 多久一次？\n根據提供的事實清單：\n\n- 雇主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 未滿四十歲者每三年檢查一次。\n\n因此，對於特別危害健康作業的勞工，雇主應每年或於變更其作業時實施特殊健康檢查。至於一般勞工，未滿四十歲者每三年檢查一次。其他部分資料未明確記載，無法確認。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "1. 精密作業的勞工需要做特殊健康檢查嗎？\n根據提供的事實清單，精密作業的勞工需要做特殊健康檢查。相關事實如下：\n\n- 精密作業係指僱主使勞工每日從事下列凝視作業二小時以上者。\n- 雇主 使勞工從事精密作業時 應縮短工作時間\n- 雇主 使勞工從事精密作業時，應注意 勞工作業姿態\n- 雇主 對在職勞工應定期實施 一般健康檢查\n- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。\n- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查\n\n因此，精密作業的勞工需要做特殊健康檢查。\n\n2. 多久一次？\n根據提供的事實清單：\n\n- 雇主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 未滿四十歲者每三年檢查一次。\n\n因此，對於特別危害健康作業的勞工，雇主應每年或於變更其作業時實施特殊健康檢查。至於一般勞工，未滿四十歲者每三年檢查一次。其他部分資料未明確記載，無法確認。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['本標準依職業安全衛生法第六條及第十九條規定訂定之。', '特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['本標準依職業安全衛生法第六條及第十九條規定訂定之。', '特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]

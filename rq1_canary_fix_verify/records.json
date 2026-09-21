@@ -1,0 +1,79 @@
+[
+  {
+    "question_id": "57-CANARY3",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-E",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "K",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['本標準依職業安全衛生法第六條及第十九條規定訂定之。', '特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  }
+]

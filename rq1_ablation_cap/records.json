@@ -1,0 +1,282 @@
+[
+  {
+    "question_id": "57-AGGR1",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，高溫作業勞工的特殊健康檢查頻率為每年一次或於變更其作業時實施。\n\n相關事實如下：\n- 僱主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 所稱之高溫作業勞工作息時間標準是指高溫作業。\n\n因此，高溫作業的勞工應每年做一次特殊健康檢查。",
+    "error": null,
+    "latency_s": 44.27,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 128,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-AGGR1",
+      "arm": "K",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 44270.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 344,
+        "snr": 0.1453,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 91,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 44270.0,
+        "raw_draft": "根據提供的事實清單，高溫作業勞工的特殊健康檢查頻率為每年一次或於變更其作業時實施。\n\n相關事實如下：\n- 僱主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 所稱之高溫作業勞工作息時間標準是指高溫作業。\n\n因此，高溫作業的勞工應每年做一次特殊健康檢查。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，高溫作業勞工的特殊健康檢查頻率為每年一次或於變更其作業時實施。\n\n相關事實如下：\n- 僱主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 所稱之高溫作業勞工作息時間標準是指高溫作業。\n\n因此，高溫作業的勞工應每年做一次特殊健康檢查。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR2",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單：\n\n1. 高溫作業勞工作息時間標準是指高溫作業。\n2. 特定化學物質為丙類第一種物質、丁類物質、鉻酸及其鹽類或重鉣酸及其鹽類。\n3. 符合本附表所列作業之勞工 依勞工健康保護規則第十九條規定，僱主應每年或於變更其作業時，依規定項目實施特殊健康檢查。\n4. 電解液、三氯乙烯及四氯乙烯 屬於 作業之各項特殊體格（健康）檢查。\n5. 僱主 實施 勞工特殊健康檢查。\n6. 電解液、鉻酸與其鹽類、重鉣酸及其鹽類 屬於 作業之各項特殊體格（健康）檢查。\n\n上述事實清單中並未明確記載高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。因此，根據規則2，資料未明確記載，無法確認高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。",
+    "error": null,
+    "latency_s": 175.01,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 216,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-AGGR2",
+      "arm": "K",
+      "question": "高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 175010.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 497,
+        "snr": 0.1006,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 134,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 175010.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 高溫作業勞工作息時間標準是指高溫作業。\n2. 特定化學物質為丙類第一種物質、丁類物質、鉻酸及其鹽類或重鉣酸及其鹽類。\n3. 符合本附表所列作業之勞工 依勞工健康保護規則第十九條規定，僱主應每年或於變更其作業時，依規定項目實施特殊健康檢查。\n4. 電解液、三氯乙烯及四氯乙烯 屬於 作業之各項特殊體格（健康）檢查。\n5. 僱主 實施 勞工特殊健康檢查。\n6. 電解液、鉻酸與其鹽類、重鉣酸及其鹽類 屬於 作業之各項特殊體格（健康）檢查。\n\n上述事實清單中並未明確記載高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。因此，根據規則2，資料未明確記載，無法確認高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單：\n\n1. 高溫作業勞工作息時間標準是指高溫作業。\n2. 特定化學物質為丙類第一種物質、丁類物質、鉻酸及其鹽類或重鉣酸及其鹽類。\n3. 符合本附表所列作業之勞工 依勞工健康保護規則第十九條規定，僱主應每年或於變更其作業時，依規定項目實施特殊健康檢查。\n4. 電解液、三氯乙烯及四氯乙烯 屬於 作業之各項特殊體格（健康）檢查。\n5. 僱主 實施 勞工特殊健康檢查。\n6. 電解液、鉻酸與其鹽類、重鉣酸及其鹽類 屬於 作業之各項特殊體格（健康）檢查。\n\n上述事實清單中並未明確記載高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。因此，根據規則2，資料未明確記載，無法確認高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY3",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-E",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "K",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['本標準依職業安全衛生法第六條及第十九條規定訂定之。', '特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  }
+]

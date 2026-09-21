@@ -1,0 +1,40 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "arms": [
+    "K"
+  ],
+  "runs": 3,
+  "chunk_size": 500,
+  "doc_ids": [
+    "N0060041_職業災害勞工保護法",
+    "N0050031_勞工職業災害保險及保護法",
+    "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法"
+  ],
+  "requested_questions_count": 2,
+  "questions_count": 2,
+  "eligible_question_ids": [
+    "57-AGGR5",
+    "57-AGGR6"
+  ],
+  "excluded_questions": [],
+  "formal_evaluation": false,
+  "allow_shared_judge": true,
+  "generator_provider": "ollama",
+  "generator_model": "qwen2.5:7b",
+  "judge_provider": "ollama",
+  "judge_model": "qwen2.5:7b",
+  "embedding_provider": "ollama",
+  "embedding_model": "bge-m3",
+  "query_timeout_s": 300.0,
+  "dataset_sha256": "77b3ff350260607969c411351189b37b52cb38a3797baf1032f8ae6c4c897992",
+  "preflight": {
+    "passed": true,
+    "errors": [],
+    "warnings": [
+      "shared generator/judge configuration: pilot only, not formal evaluation"
+    ]
+  },
+  "status": "completed",
+  "timestamp": "2026-09-17T06:26:24.554451+00:00",
+  "records_count": 6
+}

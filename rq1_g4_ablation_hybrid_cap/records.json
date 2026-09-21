@@ -1,0 +1,611 @@
+[
+  {
+    "question_id": "57-AGGR5",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+        "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+        "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。', '前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-AGGR5",
+      "arm": "K",
+      "question": "《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據哪一部法律的哪一條文授權訂定的？該辦法對輔助設施補助金額有沒有上限？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。', '前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "57-AGGR5",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 2,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+        "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+        "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。', '前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-AGGR5",
+      "arm": "K",
+      "question": "《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據哪一部法律的哪一條文授權訂定的？該辦法對輔助設施補助金額有沒有上限？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。', '前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "57-AGGR5",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 3,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+        "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+        "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。', '前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-AGGR5",
+      "arm": "K",
+      "question": "《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據哪一部法律的哪一條文授權訂定的？該辦法對輔助設施補助金額有沒有上限？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。', '前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "57-AGGR6",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-C",
+    "answer": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+    "error": null,
+    "latency_s": 136.21,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 260,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+        "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+        "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+        "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/4 facts (semantic fallback). Missed essential: ['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-AGGR6",
+      "arm": "K",
+      "question": "職業災害勞工終止勞動契約時，新法（勞工職業災害保險及保護法）跟舊法（職業災害勞工保護法）對資遣費／退休金的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 136210.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 873,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 232,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 136210.0,
+        "raw_draft": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR6",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-C",
+    "answer": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+    "error": null,
+    "latency_s": 156.95,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 260,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+        "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+        "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+        "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/4 facts (semantic fallback). Missed essential: ['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-AGGR6",
+      "arm": "K",
+      "question": "職業災害勞工終止勞動契約時，新法（勞工職業災害保險及保護法）跟舊法（職業災害勞工保護法）對資遣費／退休金的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 156950.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 873,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 232,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 156950.0,
+        "raw_draft": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 2
+  },
+  {
+    "question_id": "57-AGGR6",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-C",
+    "answer": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+    "error": null,
+    "latency_s": 154.22,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 260,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+        "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+        "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+        "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/4 facts (semantic fallback). Missed essential: ['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-AGGR6",
+      "arm": "K",
+      "question": "職業災害勞工終止勞動契約時，新法（勞工職業災害保險及保護法）跟舊法（職業災害勞工保護法）對資遣費／退休金的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 154220.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 873,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 232,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 154220.0,
+        "raw_draft": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對資遣費／退休金的規定有何不同。\n\n事實清單中並未提及關於資遣費或退休金在新舊法之間的差異。因此，根據提供的資訊來源，無法確認兩者間的具體區別。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。', '雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。', '雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。', '但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 3
+  }
+]

@@ -1,0 +1,481 @@
+[
+  {
+    "question_id": "canary-P1",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。\n\n這項資訊來自以下幾條事實：\n- 違反中央主管機關或勞動檢查機構依第三十六條第一項所發停工之通知 處三年以下有期徒刑、拘役或科或併科新臺幣一百萬元以下罰金\n- 雇主 有下列各款情事之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並限期令其給付\n- 雇主 有下列情形之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並令其限期給付\n\n上述事實清單中提到的最高罰鍰為新臺幣一百五十萬元。",
+    "error": null,
+    "latency_s": 128.53,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 247,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "K",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 128530.0,
+        "retrieved_chunk_ids": [
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 705,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 189,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 128530.0,
+        "raw_draft": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。\n\n這項資訊來自以下幾條事實：\n- 違反中央主管機關或勞動檢查機構依第三十六條第一項所發停工之通知 處三年以下有期徒刑、拘役或科或併科新臺幣一百萬元以下罰金\n- 雇主 有下列各款情事之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並限期令其給付\n- 雇主 有下列情形之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並令其限期給付\n\n上述事實清單中提到的最高罰鍰為新臺幣一百五十萬元。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣一百五十萬元的罰鍰。\n\n這項資訊來自以下幾條事實：\n- 違反中央主管機關或勞動檢查機構依第三十六條第一項所發停工之通知 處三年以下有期徒刑、拘役或科或併科新臺幣一百萬元以下罰金\n- 雇主 有下列各款情事之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並限期令其給付\n- 雇主 有下列情形之一者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，並令其限期給付\n\n上述事實清單中提到的最高罰鍰為新臺幣一百五十萬元。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "canary-P4",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "根據您提供的事實清單，可以發現其中並沒有提到關於勞工每工作滿五年，雇主應強制補助至火星旅遊考察的相關規定。\n事實清單主要涉及的是健康檢查、補助措施以及勞工保險等內容。\n因此，根據上述事實清單，無法回答勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次這個問題。\n這部分資訊並未包含在提供的事實清單中。\n總結來說，根據所提供的事實清單，我們可以得知：\n1. 雇主應定期實施一般健康檢查。\n2. 事業單位得向勞工保險局申請補助。\n3. 勞工可經同意一併進行癌症篩檢。\n（此部分）資料未明確記載，無法確認。缺的是問題中的「火星旅遊考察」相關資訊。\n但對於問題中提到的火星旅遊考察補助，事實清單並未提供相關資訊。\n因此無法回答該問題。",
+    "error": null,
+    "latency_s": 259.89,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 123,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "canary-P4",
+      "arm": "K",
+      "question": "請問勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 259890.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "未記載相關規定"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 155,
+        "snr": 0.0452,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 44,
+        "retained_exact_spans": [
+          "未記載相關規定"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 259890.0,
+        "raw_draft": "根據您提供的事實清單，可以發現其中並沒有提到關於勞工每工作滿五年，雇主應強制補助至火星旅遊考察的相關規定。\n事實清單主要涉及的是健康檢查、補助措施以及勞工保險等內容。\n因此，根據上述事實清單，無法回答勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次這個問題。\n這部分資訊並未包含在提供的事實清單中。\n總結來說，根據所提供的事實清單，我們可以得知：\n1. 雇主應定期實施一般健康檢查。\n2. 事業單位得向勞工保險局申請補助。\n3. 勞工可經同意一併進行癌症篩檢。\n（此部分）資料未明確記載，無法確認。缺的是問題中的「火星旅遊考察」相關資訊。\n但對於問題中提到的火星旅遊考察補助，事實清單並未提供相關資訊。\n因此無法回答該問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據您提供的事實清單，可以發現其中並沒有提到關於勞工每工作滿五年，雇主應強制補助至火星旅遊考察的相關規定。\n事實清單主要涉及的是健康檢查、補助措施以及勞工保險等內容。\n因此，根據上述事實清單，無法回答勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次這個問題。\n這部分資訊並未包含在提供的事實清單中。\n總結來說，根據所提供的事實清單，我們可以得知：\n1. 雇主應定期實施一般健康檢查。\n2. 事業單位得向勞工保險局申請補助。\n3. 勞工可經同意一併進行癌症篩檢。\n（此部分）資料未明確記載，無法確認。缺的是問題中的「火星旅遊考察」相關資訊。\n但對於問題中提到的火星旅遊考察補助，事實清單並未提供相關資訊。\n因此無法回答該問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？\n根據提供的事實清單，可以回答勞工普通傷病假留職停薪屆滿一年還沒痊癒是否可以申請延長留職停薪的問題。\n普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者 留職停薪：\n留職停薪期間 以一年為限：\n因此，勞工在留職停薪一年後仍未痊癒的情況下，可以申請延長留職停薪。\n根據上述兩條事實，勞工普通傷病假留職停薪屆滿一年還沒痊癒，是可以申請延長留職停薪的。\n勞工可以在留職停薪期滿後與雇主協商，提出延長留職停薪的申請。\n最多可以延長多久？\n根據提供的事實清單，我們可以分析以下幾點來回答問題：\n普通傷病假方面，勞工一年內請普通傷病假日數未超過十日，且三十日以上未達六個月以二次為限。\n這部分不涉及延長問題。\n留職停薪期間方面，原則上每次以不少於六個月為單位，受僱者得與雇主協商提前或延後復職。\n因此，根據提供的事實清單，最多可以延長的時間是留職停薪期間，原則上每次以不少於六個月為單位。\n如果需要延長，則需與雇主協商並取得同意。",
+    "error": null,
+    "latency_s": 332.36,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 0,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 237,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "K",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 332360.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 464,
+        "snr": 0.0237,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 125,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 332360.0,
+        "raw_draft": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？\n根據提供的事實清單，可以回答勞工普通傷病假留職停薪屆滿一年還沒痊癒是否可以申請延長留職停薪的問題。\n普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者 留職停薪：\n留職停薪期間 以一年為限：\n因此，勞工在留職停薪一年後仍未痊癒的情況下，可以申請延長留職停薪。\n根據上述兩條事實，勞工普通傷病假留職停薪屆滿一年還沒痊癒，是可以申請延長留職停薪的。\n勞工可以在留職停薪期滿後與雇主協商，提出延長留職停薪的申請。\n最多可以延長多久？\n根據提供的事實清單，我們可以分析以下幾點來回答問題：\n普通傷病假方面，勞工一年內請普通傷病假日數未超過十日，且三十日以上未達六個月以二次為限。\n這部分不涉及延長問題。\n留職停薪期間方面，原則上每次以不少於六個月為單位，受僱者得與雇主協商提前或延後復職。\n因此，根據提供的事實清單，最多可以延長的時間是留職停薪期間，原則上每次以不少於六個月為單位。\n如果需要延長，則需與雇主協商並取得同意。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？\n根據提供的事實清單，可以回答勞工普通傷病假留職停薪屆滿一年還沒痊癒是否可以申請延長留職停薪的問題。\n普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者 留職停薪：\n留職停薪期間 以一年為限：\n因此，勞工在留職停薪一年後仍未痊癒的情況下，可以申請延長留職停薪。\n根據上述兩條事實，勞工普通傷病假留職停薪屆滿一年還沒痊癒，是可以申請延長留職停薪的。\n勞工可以在留職停薪期滿後與雇主協商，提出延長留職停薪的申請。\n最多可以延長多久？\n根據提供的事實清單，我們可以分析以下幾點來回答問題：\n普通傷病假方面，勞工一年內請普通傷病假日數未超過十日，且三十日以上未達六個月以二次為限。\n這部分不涉及延長問題。\n留職停薪期間方面，原則上每次以不少於六個月為單位，受僱者得與雇主協商提前或延後復職。\n因此，根據提供的事實清單，最多可以延長的時間是留職停薪期間，原則上每次以不少於六個月為單位。\n如果需要延長，則需與雇主協商並取得同意。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY2",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "資料未明確記載，無法確認特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是什麼。\n\n根據提供的事實清單，可以得知警察機關有權隨時令其特別休假人員銷假，但並未提及在這種情況下應發放的不休假獎金金額或計算方式。",
+    "error": null,
+    "latency_s": 141.5,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 130,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-CANARY2",
+      "arm": "K",
+      "question": "警察特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是多少？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 141500.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 385,
+        "snr": 0.0857,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 103,
+        "retained_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 141500.0,
+        "raw_draft": "資料未明確記載，無法確認特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是什麼。\n\n根據提供的事實清單，可以得知警察機關有權隨時令其特別休假人員銷假，但並未提及在這種情況下應發放的不休假獎金金額或計算方式。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是什麼。\n\n根據提供的事實清單，可以得知警察機關有權隨時令其特別休假人員銷假，但並未提及在這種情況下應發放的不休假獎金金額或計算方式。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY3",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-E",
+    "answer": "1. 精密作業的勞工需要做特殊健康檢查嗎？\n根據提供的事實清單，精密作業的勞工需要做特殊健康檢查。相關事實如下：\n\n- 精密作業係指僱主使勞工每日從事下列凝視作業二小時以上者。\n- 雇主 使勞工從事精密作業時 應縮短工作時間\n- 雇主 使勞工從事精密作業時，應注意 勞工作業姿態\n- 雇主 對在職勞工應定期實施 一般健康檢查\n- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。\n- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查\n\n因此，精密作業的勞工需要做特殊健康檢查。\n\n2. 多久一次？\n根據提供的事實清單：\n\n- 雇主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 未滿四十歲者每三年檢查一次。\n\n因此，對於特別危害健康作業的勞工，雇主應每年或於變更其作業時實施特殊健康檢查。至於一般勞工，未滿四十歲者每三年檢查一次。其他部分資料未明確記載，無法確認。",
+    "error": null,
+    "latency_s": 393.34,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 228,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary (Trap Claim Asserted)",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "K",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 393340.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 421,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 113,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 393340.0,
+        "raw_draft": "1. 精密作業的勞工需要做特殊健康檢查嗎？\n根據提供的事實清單，精密作業的勞工需要做特殊健康檢查。相關事實如下：\n\n- 精密作業係指僱主使勞工每日從事下列凝視作業二小時以上者。\n- 雇主 使勞工從事精密作業時 應縮短工作時間\n- 雇主 使勞工從事精密作業時，應注意 勞工作業姿態\n- 雇主 對在職勞工應定期實施 一般健康檢查\n- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。\n- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查\n\n因此，精密作業的勞工需要做特殊健康檢查。\n\n2. 多久一次？\n根據提供的事實清單：\n\n- 雇主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 未滿四十歲者每三年檢查一次。\n\n因此，對於特別危害健康作業的勞工，雇主應每年或於變更其作業時實施特殊健康檢查。至於一般勞工，未滿四十歲者每三年檢查一次。其他部分資料未明確記載，無法確認。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "1. 精密作業的勞工需要做特殊健康檢查嗎？\n根據提供的事實清單，精密作業的勞工需要做特殊健康檢查。相關事實如下：\n\n- 精密作業係指僱主使勞工每日從事下列凝視作業二小時以上者。\n- 雇主 使勞工從事精密作業時 應縮短工作時間\n- 雇主 使勞工從事精密作業時，應注意 勞工作業姿態\n- 雇主 對在職勞工應定期實施 一般健康檢查\n- 特殊健康檢查應將辦理期程、作業類別與辦理勞工體格及健康檢查之醫療機構等內容登錄於中央主管機關公告之相關指引中。\n- 雇主 使勞工從事特別危害健康作業 每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查\n\n因此，精密作業的勞工需要做特殊健康檢查。\n\n2. 多久一次？\n根據提供的事實清單：\n\n- 雇主使勞工從事特別危害健康作業每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n- 未滿四十歲者每三年檢查一次。\n\n因此，對於特別危害健康作業的勞工，雇主應每年或於變更其作業時實施特殊健康檢查。至於一般勞工，未滿四十歲者每三年檢查一次。其他部分資料未明確記載，無法確認。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['本標準依職業安全衛生法第六條及第十九條規定訂定之。', '特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/2 gold facts missed (['本標準依職業安全衛生法第六條及第十九條規定訂定之。', '特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]

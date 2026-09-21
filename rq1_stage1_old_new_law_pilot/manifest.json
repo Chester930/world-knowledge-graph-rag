@@ -1,0 +1,38 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "arms": [
+    "K"
+  ],
+  "runs": 1,
+  "chunk_size": 500,
+  "doc_ids": [
+    "N0060041_職業災害勞工保護法",
+    "N0050031_勞工職業災害保險及保護法"
+  ],
+  "requested_questions_count": 1,
+  "questions_count": 1,
+  "eligible_question_ids": [
+    "57-CANARY5"
+  ],
+  "excluded_questions": [],
+  "formal_evaluation": false,
+  "allow_shared_judge": true,
+  "generator_provider": "ollama",
+  "generator_model": "qwen2.5:7b",
+  "judge_provider": "ollama",
+  "judge_model": "qwen2.5:7b",
+  "embedding_provider": "ollama",
+  "embedding_model": "bge-m3",
+  "query_timeout_s": 300.0,
+  "dataset_sha256": "47823bc687aeb3c1603d51356b14112e924fb160499d4c3076b6049c9a15e6f3",
+  "preflight": {
+    "passed": true,
+    "errors": [],
+    "warnings": [
+      "shared generator/judge configuration: pilot only, not formal evaluation"
+    ]
+  },
+  "status": "completed",
+  "timestamp": "2026-09-16T13:42:54.814963+00:00",
+  "records_count": 1
+}

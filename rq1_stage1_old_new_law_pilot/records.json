@@ -1,0 +1,122 @@
+[
+  {
+    "question_id": "57-CANARY5",
+    "arm": "K",
+    "raw_arm": "K",
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，可以得出以下結論：\n\n1. **《職業災害勞工保護法》現在是否還適用？**\n\n   - 根據事實清單中的「自本法施行之日起 職業災害勞工保護法不再適用」，可以確定《職業災害勞工保護法》自本法（指《勞動基準法》）施行之日起不再適用。\n\n因此，《職業災害勞工保護法》現在已經不再適用。",
+    "error": null,
+    "latency_s": 81.03,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 316,
+    "atomic_score": {
+      "supported_spans": [
+        "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。"
+      ],
+      "missing_spans": [
+        "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "57-CANARY5",
+      "arm": "K",
+      "question": "《職業災害勞工保護法》現在還適用嗎？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 81030.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hit_exact_spans": [
+          "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。"
+        ],
+        "missed_exact_spans": [
+          "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 1055,
+        "snr": 0.0303,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 279,
+        "retained_exact_spans": [
+          "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。"
+        ],
+        "dropped_exact_spans": [
+          "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 81030.0,
+        "raw_draft": "根據提供的事實清單，可以得出以下結論：\n\n1. **《職業災害勞工保護法》現在是否還適用？**\n\n   - 根據事實清單中的「自本法施行之日起 職業災害勞工保護法不再適用」，可以確定《職業災害勞工保護法》自本法（指《勞動基準法》）施行之日起不再適用。\n\n因此，《職業災害勞工保護法》現在已經不再適用。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，可以得出以下結論：\n\n1. **《職業災害勞工保護法》現在是否還適用？**\n\n   - 根據事實清單中的「自本法施行之日起 職業災害勞工保護法不再適用」，可以確定《職業災害勞工保護法》自本法（指《勞動基準法》）施行之日起不再適用。\n\n因此，《職業災害勞工保護法》現在已經不再適用。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]

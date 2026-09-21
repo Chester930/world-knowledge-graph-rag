@@ -1,0 +1,239 @@
+[
+  {
+    "question_id": "57-AGGR3",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-D",
+    "answer": "",
+    "error": "harness_exception",
+    "latency_s": 3.36,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工結婚者給予婚假八日，工資照給。",
+        "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['勞工結婚者給予婚假八日，工資照給。', '普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。'] Guard failures: ['HarnessException: Harness Exception: ReadError:']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessException: Harness Exception: ReadError:"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-AGGR3",
+      "arm": "K",
+      "question": "婚假、普通傷病假、產假這三種假別，請假期間的工資怎麼給？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 3360.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給。",
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給。",
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 3360.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['勞工結婚者給予婚假八日，工資照給。', '普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。'])"
+    },
+    "failure_attribution": "Harness Exception: ReadError:",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessException",
+      "failure_reason": "Harness Exception: ReadError:",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "57-AGGR4",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_exception",
+    "latency_s": 2.87,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。",
+        "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。', '普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。'] Guard failures: ['HarnessException: Harness Exception: ReadError:']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessException: Harness Exception: ReadError:"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-AGGR4",
+      "arm": "K",
+      "question": "勞工遭遇職業災害，在正式認定為職災之前，請假期間工資怎麼算？認定之後呢？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 2870.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。",
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。",
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 2870.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。', '普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。'])"
+    },
+    "failure_attribution": "Harness Exception: ReadError:",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessException",
+      "failure_reason": "Harness Exception: ReadError:",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "57-CANARY4",
+    "arm": "K",
+    "raw_arm": "K",
+    "run": 1,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_exception",
+    "latency_s": 2.98,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "事假期間不給工資。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['事假期間不給工資。'] Guard failures: ['HarnessException: Harness Exception: ReadError:']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessException: Harness Exception: ReadError:"
+      ]
+    },
+    "lineage": {
+      "query_id": "57-CANARY4",
+      "arm": "K",
+      "question": "勞工請事假，期間工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "K",
+        "retrieval_latency_ms": 2980.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "事假期間不給工資。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "事假期間不給工資。"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 2980.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['事假期間不給工資。'])"
+    },
+    "failure_attribution": "Harness Exception: ReadError:",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessException",
+      "failure_reason": "Harness Exception: ReadError:",
+      "extra_constrained_note": null
+    }
+  }
+]

@@ -1,0 +1,42 @@
+{
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "arms": [
+    "K"
+  ],
+  "runs": 1,
+  "chunk_size": 500,
+  "doc_ids": [
+    "N0030006_勞工請假規則",
+    "N0030014_性別平等工作法",
+    "N0030001_勞動基準法",
+    "N0060041_職業災害勞工保護法"
+  ],
+  "requested_questions_count": 3,
+  "questions_count": 3,
+  "eligible_question_ids": [
+    "57-AGGR3",
+    "57-AGGR4",
+    "57-CANARY4"
+  ],
+  "excluded_questions": [],
+  "formal_evaluation": false,
+  "allow_shared_judge": true,
+  "generator_provider": "ollama",
+  "generator_model": "qwen2.5:7b",
+  "judge_provider": "ollama",
+  "judge_model": "qwen2.5:7b",
+  "embedding_provider": "ollama",
+  "embedding_model": "bge-m3",
+  "query_timeout_s": 300.0,
+  "dataset_sha256": "d9ccc9aebf0f62a8c7130dc270c444df1334167653d1482fdef50c051fd4c1ba",
+  "preflight": {
+    "passed": true,
+    "errors": [],
+    "warnings": [
+      "shared generator/judge configuration: pilot only, not formal evaluation"
+    ]
+  },
+  "status": "completed",
+  "timestamp": "2026-09-16T11:54:05.313531+00:00",
+  "records_count": 3
+}
