@@ -2,6 +2,7 @@
 
 import pytest
 from uuid import uuid4
+from types import SimpleNamespace
 
 from core.kg_config import DedupConfig, ExtractionConfig, KGConfig, RelTypeConfig
 from models.knowledge_graph import SVOTriple
@@ -243,3 +244,27 @@ async def test_merge_entity_forwards_optional_cfg(monkeypatch):
 
     assert default_result == explicit_default_result == "甲"
     assert received_cfgs == [None, cfg]
+
+
+@pytest.mark.asyncio
+async def test_merge_triples_to_graph_forwards_cfg_to_both_entities(monkeypatch):
+    received_cfgs = []
+
+    async def fake_merge_entity(*args, **kwargs):
+        received_cfgs.append(kwargs["cfg"])
+        return args[2]
+
+    class FakeDriver:
+        async def execute_query(self, query, **kwargs):
+            records = [{"citations_json": "[]"}] if "RETURN r.citations_json" in query else []
+            return SimpleNamespace(records=records)
+
+    monkeypatch.setattr(svc, "merge_entity", fake_merge_entity)
+    triple = SVOTriple(subject="甲", verb="連結", object="乙")
+    kg_id = uuid4()
+
+    await svc.merge_triples_to_graph(FakeDriver(), kg_id, [triple])
+    cfg = KGConfig()
+    await svc.merge_triples_to_graph(FakeDriver(), kg_id, [triple], cfg=cfg)
+
+    assert received_cfgs == [None, None, cfg, cfg]

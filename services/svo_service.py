@@ -1933,6 +1933,7 @@ async def merge_triples_to_graph(
     *,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> None:
     """將 SVO triples 的主客實體解析對齊後，MERGE 進 Neo4j Entity Graph。
 
@@ -1980,14 +1981,14 @@ async def merge_triples_to_graph(
             source_doc_id=triple.source_doc_id,
             source_svo_chunk_index=triple.source_svo_chunk_index,
             source_svo_chunk_file=triple.source_svo_chunk_file,
-            embedding_provider=embedding_provider, llm_provider=llm_provider,
+            embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
         )
         object_name = await merge_entity(
             driver, kg_id, triple.object, triple.object_type, triple.object,
             source_doc_id=triple.source_doc_id,
             source_svo_chunk_index=triple.source_svo_chunk_index,
             source_svo_chunk_file=triple.source_svo_chunk_file,
-            embedding_provider=embedding_provider, llm_provider=llm_provider,
+            embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
         )
 
         get_or_create = await driver.execute_query(
