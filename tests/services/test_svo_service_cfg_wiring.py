@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 from core.kg_config import DedupConfig, ExtractionConfig, KGConfig, RelTypeConfig
 from models.knowledge_graph import SVOTriple
-from services import svo_service as svc
+from services import expand_worker, svo_service as svc
 
 
 class RecordingLLM:
@@ -295,3 +295,30 @@ async def test_backfill_related_to_edges_uses_cfg_compare_threshold():
     thresholds = [params["threshold"] for _, params in driver.calls]
     assert default_count == explicit_default_count == overridden_count == 0
     assert thresholds == [0.75, 0.75, 0.91]
+
+
+@pytest.mark.asyncio
+async def test_commit_and_backfill_forwards_optional_cfg(monkeypatch):
+    received_cfgs = []
+
+    async def fake_backfill(*args, **kwargs):
+        received_cfgs.append(kwargs["cfg"])
+        return 7
+
+    monkeypatch.setattr(expand_worker, "task_queue_db_path", lambda: ":memory:")
+    monkeypatch.setattr(expand_worker.expand_governance_service, "mark_committed", lambda *args: None)
+    monkeypatch.setattr(expand_worker, "backfill_related_to_edges", fake_backfill)
+
+    args = (
+        object(), uuid4(), object(), RecordingLLM(""),
+    )
+    kwargs = {
+        "type_name": "NEW_TYPE", "description": "new type", "member_verbs": ["connect"],
+        "reused_from_registry": True,
+    }
+    default_count = await expand_worker.commit_and_backfill(*args, **kwargs)
+    cfg = KGConfig()
+    explicit_default_count = await expand_worker.commit_and_backfill(*args, **kwargs, cfg=cfg)
+
+    assert default_count == explicit_default_count == 7
+    assert received_cfgs == [None, cfg]
