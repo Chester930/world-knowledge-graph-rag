@@ -1,0 +1,42 @@
+baseline pass: 12 | candidate pass: 14 | n = 42
+GAINS  (cand pass, base fail): ['18-Q1', '18-Q6', '26-Q5', '57-AGGR6', '57-AGGR18', '57-AGGR19']
+LOSSES (base pass, cand fail): ['18-Q4', 'canary-P1', '57-DIST1', '57-DIST2']
+net: 2
+baseline stable_pass -> candidate stable_fail: ['57-DIST1', '57-DIST2']
+baseline single_pass -> candidate stable_fail: ['18-Q4', 'canary-P1']
+paired diff mean=+0.0476  SE=0.0758  95% CI=(-0.1010, +0.1963)
+discordant: gains=6 losses=4  exact McNemar two-sided p=0.7539
+bootstrap net-count 95% CI: -4 8
+
+--- metrics (question-level mean of run means, n questions)
+Recall               base=0.6825 (n=42)  cand=0.7401 (n=42)
+SNR                  base=0.0379 (n=42)  cand=0.0301 (n=42)
+AtomicAcc            base=0.5020 (n=42)  cand=0.5079 (n=42)
+retrieved_chars      base=1129.9286 (n=42)  cand=1726.4048 (n=42)
+chain_completeness   base=0.5238 (n=14)  cand=0.5357 (n=14)
+SNR ratio cand/base = 0.795  (floor 0.5)
+
+Type-E questions: 5 | base pass 2 | cand pass 1
+  Type-E changes: [('canary-P1', True, False)]
+
+--- pass by scenario type (base -> cand)
+Type-A: n=6 base=4 cand=5
+Type-B: n=10 base=5 cand=3
+Type-C: n=13 base=0 cand=4
+Type-D: n=8 base=1 cand=1
+Type-E: n=5 base=2 cand=1
+
+--- trace decomposition (candidate runs with trace)
+{'f_in': 29.81, 'f_late_in': 13.97, 'bfs_in': 6.55, 'bfs_all': 25.38, 'runs': 78, 'prompt_lines': 51.19}
+
+--- per gain/loss question: candidate hit spans found in prompt facts rank>=20 (substring, approximate)
+GAIN 18-Q1: recall base=1.00 cand=1.00 | gold 3: substr-in-rank<20=0 rank>=20=0 | bfs_in_prompt=8
+GAIN 18-Q6: recall base=1.00 cand=1.00 | gold 3: substr-in-rank<20=0 rank>=20=0 | bfs_in_prompt=10
+GAIN 26-Q5: recall base=1.00 cand=1.00 | gold 2: substr-in-rank<20=1 rank>=20=0 | bfs_in_prompt=8
+GAIN 57-AGGR6: recall base=0.50 cand=0.75 | gold 4: substr-in-rank<20=0 rank>=20=0 | bfs_in_prompt=4
+GAIN 57-AGGR18: recall base=1.00 cand=1.00 | gold 4: substr-in-rank<20=0 rank>=20=0 | bfs_in_prompt=4
+GAIN 57-AGGR19: recall base=0.50 cand=1.00 | gold 4: substr-in-rank<20=0 rank>=20=0 | bfs_in_prompt=12
+LOSS 18-Q4: recall base=1.00 cand=1.00 | gold 1: substr-in-rank<20=1 rank>=20=0 | bfs_in_prompt=4
+LOSS canary-P1: recall base=0.00 cand=0.00 | gold 1: substr-in-rank<20=0 rank>=20=0 | bfs_in_prompt=4
+LOSS 57-DIST1: recall base=1.00 cand=1.00 | gold 2: substr-in-rank<20=1 rank>=20=0 | bfs_in_prompt=9
+LOSS 57-DIST2: recall base=1.00 cand=1.00 | gold 2: substr-in-rank<20=1 rank>=20=0 | bfs_in_prompt=8

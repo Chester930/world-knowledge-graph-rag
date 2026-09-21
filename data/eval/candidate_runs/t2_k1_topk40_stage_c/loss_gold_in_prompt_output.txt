@@ -1,0 +1,19 @@
+======== 57-DIST1 | prompt line sets [35, 35]
+ gold: 當選直轄市、縣（市）級模範警察或好人好事代表者...
+   substring in prompt lines: True | in retrieved trace entries: [('fact', 0, True)]
+ gold: 當選全國性模範警察者...
+   substring in prompt lines: True | in retrieved trace entries: [('fact', 1, False), ('triple', 11, True)]
+ judge hit: ['當選直轄市、縣（市）級模範警察或好人好事代表者', '當選全國性模範警察者'] | judge missed: []
+ retained_after_stage2(retrieved-basis): ['當選直轄市、縣（市）級模範警察或好人好事代表者', '當選全國性模範警察者']
+======== 57-DIST2 | prompt line sets [35, 35]
+ gold: 當選全國性好人好事代表者...
+   substring in prompt lines: True | in retrieved trace entries: [('fact', 1, False), ('triple', 12, True)]
+ gold: 當選直轄市、縣（市）級模範警察或好人好事代表者...
+   substring in prompt lines: True | in retrieved trace entries: [('fact', 0, True)]
+ judge hit: ['當選全國性好人好事代表者', '當選直轄市、縣（市）級模範警察或好人好事代表者'] | judge missed: []
+ retained_after_stage2(retrieved-basis): ['當選全國性好人好事代表者', '當選直轄市、縣（市）級模範警察或好人好事代表者']
+======== 18-Q4 | prompt line sets [35]
+ gold: 得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除...
+   substring in prompt lines: True | in retrieved trace entries: [('fact', 0, True)]
+ judge hit: ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減'] | judge missed: []
+ retained_after_stage2(retrieved-basis): ['得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減']
