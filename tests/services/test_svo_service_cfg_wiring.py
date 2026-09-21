@@ -1,6 +1,7 @@
 """離線驗證 KGConfig 門檻可沿 SVO 抽取鏈讀取。"""
 
 import pytest
+from uuid import uuid4
 
 from core.kg_config import DedupConfig, ExtractionConfig, KGConfig, RelTypeConfig
 from models.knowledge_graph import SVOTriple
@@ -213,3 +214,32 @@ async def test_resolve_entity_name_uses_cfg_escalate_low_threshold():
     assert len(default_llm.prompts) == len(explicit_default_llm.prompts) == 1
     assert overridden_result == mention
     assert overridden_llm.prompts == []
+
+
+@pytest.mark.asyncio
+async def test_merge_entity_forwards_optional_cfg(monkeypatch):
+    received_cfgs = []
+
+    async def fake_fetch_candidates(*args, **kwargs):
+        return []
+
+    async def fake_resolve(name, candidates, **kwargs):
+        received_cfgs.append(kwargs["cfg"])
+        return name
+
+    async def fake_execute(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(svc, "_fetch_entity_candidates", fake_fetch_candidates)
+    monkeypatch.setattr(svc, "resolve_entity_name", fake_resolve)
+    monkeypatch.setattr(svc, "_execute_with_constraint_retry", fake_execute)
+
+    kg_id = uuid4()
+    default_result = await svc.merge_entity(object(), kg_id, "甲", "概念", "甲")
+    cfg = KGConfig()
+    explicit_default_result = await svc.merge_entity(
+        object(), kg_id, "甲", "概念", "甲", cfg=cfg,
+    )
+
+    assert default_result == explicit_default_result == "甲"
+    assert received_cfgs == [None, cfg]

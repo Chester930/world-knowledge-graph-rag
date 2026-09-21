@@ -1444,6 +1444,7 @@ async def merge_entity(
     source_svo_chunk_file: str | None = None,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """解析並合併一個實體節點，回傳這次寫入後的最終 Entity.name。
 
@@ -1470,7 +1471,7 @@ async def merge_entity(
     """
     candidates = await _fetch_entity_candidates(driver, kg_id, entity_type, name, embedding_provider=embedding_provider)
     resolved_name = await resolve_entity_name(
-        name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider
+        name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
     )
 
     if source_doc_id is None or source_svo_chunk_index is None:
