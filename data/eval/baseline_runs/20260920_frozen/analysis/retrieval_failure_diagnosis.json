@@ -1,0 +1,1378 @@
+[
+  {
+    "question_id": "17-Q6",
+    "n_runs": 2,
+    "seeds": [
+      "特別休假",
+      "休假",
+      "假"
+    ],
+    "prod_scope_size": 3,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者",
+        "essential": true,
+        "source_law": "D0080015_警察人員特別休假辦法",
+        "source_article": "第2條第3款",
+        "candidate_scope": "條文 第2條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.762,
+            "rank": 1,
+            "text": "處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者 給予 一至三日之特別休假"
+          },
+          {
+            "cos": 0.747,
+            "rank": 3,
+            "text": "奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者 給予 一至三日之特別休假"
+          },
+          {
+            "cos": 0.746,
+            "rank": 10,
+            "text": "對主辦業務有重大革新，提出具體方案，經採納確具成效，獲記大功以上之獎勵者 給予 一至三日之特別休假"
+          },
+          {
+            "cos": 0.569,
+            "rank": 2,
+            "text": "當選直轄市、縣（市）級模範警察或好人好事代表者 給予 一至三日之特別休假"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "18-Q5",
+    "n_runs": 2,
+    "seeds": [
+      "特別休假",
+      "辦法",
+      "人員",
+      "休假",
+      "假"
+    ],
+    "prod_scope_size": 7,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "有左列情事之一者，給予三至七日之特別休假",
+        "essential": true,
+        "source_law": "D0080015_警察人員特別休假辦法",
+        "source_article": "第4條",
+        "candidate_scope": "條文 第4條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.824,
+            "rank": 37,
+            "text": "左列情事之一者 給予 特別休假"
+          },
+          {
+            "cos": 0.736,
+            "rank": 6,
+            "text": "因特別貢獻或特殊功績受頒勳章者 給予 三至七日之特別休假"
+          },
+          {
+            "cos": 0.71,
+            "rank": 10,
+            "text": "因特殊功績榮獲晉階者 給予 三至七日之特別休假"
+          },
+          {
+            "cos": 0.699,
+            "rank": 8,
+            "text": "主動破獲叛亂組織，人證俱獲者 給予 三至七日之特別休假"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "有左列情事之一者，給予二至五日之特別休假",
+        "essential": true,
+        "source_law": "D0080015_警察人員特別休假辦法",
+        "source_article": "第3條",
+        "candidate_scope": "條文 第3條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.783,
+            "rank": 35,
+            "text": "左列情事 給予 特別休假"
+          },
+          {
+            "cos": 0.606,
+            "rank": 17,
+            "text": "主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者 給予 特別休假"
+          },
+          {
+            "cos": 0.588,
+            "rank": 76,
+            "text": "當選全國性好人好事代表者 給予 特別休假"
+          },
+          {
+            "cos": 0.586,
+            "rank": 7,
+            "text": "當選全國性模範警察者 給予 特別休假"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR1",
+    "n_runs": 2,
+    "seeds": [
+      "特殊健康檢查",
+      "健康檢查",
+      "高溫作業",
+      "作業",
+      "一次",
+      "檢查",
+      "一"
+    ],
+    "prod_scope_size": 5,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "essential": true,
+        "source_law": "N0060022_附表一_特別危害健康作業",
+        "source_article": "附表一 項次一",
+        "candidate_scope": "整份文件（無法對應條文）",
+        "n_candidate_facts": 53,
+        "top_candidates": [
+          {
+            "cos": 0.823,
+            "rank": 85,
+            "text": "高溫作業勞工作息時間標準 所稱之 高溫作業"
+          },
+          {
+            "cos": 0.779,
+            "rank": null,
+            "text": "勞工健康保護規則第二條 稱特別危害健康作業之認定依據 本附表"
+          },
+          {
+            "cos": 0.729,
+            "rank": null,
+            "text": "附表一之項次四 為異常氣壓危害預防標準所稱之 異常氣壓作業"
+          },
+          {
+            "cos": 0.693,
+            "rank": null,
+            "text": "附表一之項次七 為粉塵危害預防標準所稱之 粉塵作業"
+          },
+          {
+            "cos": 0.682,
+            "rank": null,
+            "text": "勞工噪音暴露工作日八小時日時量平均音壓級在八十五分貝以上之噪音作業 為 附表一之項次二"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR2",
+    "n_runs": 2,
+    "seeds": [
+      "特定化學物質作業",
+      "特定化學物質",
+      "特殊健康檢查",
+      "健康檢查",
+      "高溫作業",
+      "作業",
+      "檢查"
+    ],
+    "prod_scope_size": 5,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "essential": true,
+        "source_law": "N0060022_附表一_特別危害健康作業",
+        "source_article": "附表一 項次一",
+        "candidate_scope": "整份文件（無法對應條文）",
+        "n_candidate_facts": 53,
+        "top_candidates": [
+          {
+            "cos": 0.823,
+            "rank": 91,
+            "text": "高溫作業勞工作息時間標準 所稱之 高溫作業"
+          },
+          {
+            "cos": 0.779,
+            "rank": 271,
+            "text": "勞工健康保護規則第二條 稱特別危害健康作業之認定依據 本附表"
+          },
+          {
+            "cos": 0.729,
+            "rank": null,
+            "text": "附表一之項次四 為異常氣壓危害預防標準所稱之 異常氣壓作業"
+          },
+          {
+            "cos": 0.693,
+            "rank": null,
+            "text": "附表一之項次七 為粉塵危害預防標準所稱之 粉塵作業"
+          },
+          {
+            "cos": 0.682,
+            "rank": null,
+            "text": "勞工噪音暴露工作日八小時日時量平均音壓級在八十五分貝以上之噪音作業 為 附表一之項次二"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業",
+        "essential": true,
+        "source_law": "N0060022_附表一_特別危害健康作業",
+        "source_article": "附表一 項次九",
+        "candidate_scope": "整份文件（無法對應條文）",
+        "n_candidate_facts": 53,
+        "top_candidates": [
+          {
+            "cos": 0.996,
+            "rank": 288,
+            "text": "附表一之項次九 為 製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+          },
+          {
+            "cos": 0.85,
+            "rank": null,
+            "text": "特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業 包含 苯"
+          },
+          {
+            "cos": 0.847,
+            "rank": 185,
+            "text": "特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業 包含 鈹"
+          },
+          {
+            "cos": 0.847,
+            "rank": 185,
+            "text": "特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業 包含 鈹"
+          },
+          {
+            "cos": 0.82,
+            "rank": 197,
+            "text": "特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業 包含 汞"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR3",
+    "n_runs": 2,
+    "seeds": [
+      "普通傷病假",
+      "請假期間",
+      "婚假",
+      "傷病",
+      "假期",
+      "期間",
+      "請假"
+    ],
+    "prod_scope_size": 7,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。",
+        "essential": true,
+        "source_law": "N0030001_勞動基準法",
+        "source_article": "第50條",
+        "candidate_scope": "條文 第50條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.908,
+            "rank": 171,
+            "text": "女工 受僱工作未滿六個月者，停止工作期間 工資減半發給"
+          },
+          {
+            "cos": 0.887,
+            "rank": 147,
+            "text": "女工 受僱工作在六個月以上者，停止工作期間 工資照給"
+          },
+          {
+            "cos": 0.617,
+            "rank": 62,
+            "text": "妊娠三個月以上流產者 應停止工作 產假八星期"
+          },
+          {
+            "cos": 0.599,
+            "rank": 68,
+            "text": "女工 分娩前後應停止工作 產假八星期"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "essential": true,
+        "source_law": "N0030006_勞工請假規則",
+        "source_article": "第4條",
+        "candidate_scope": "條文 第4條",
+        "n_candidate_facts": 7,
+        "top_candidates": [
+          {
+            "cos": 0.963,
+            "rank": 26,
+            "text": "普通傷病假一年內未超過三十日部分 領有勞工保險普通傷病給付未達工資半數者，由雇主補足之 工資"
+          },
+          {
+            "cos": 0.831,
+            "rank": 5,
+            "text": "普通傷病假一年內未超過三十日部分 工資折半發給"
+          },
+          {
+            "cos": 0.763,
+            "rank": 8,
+            "text": "勞工 因普通傷害、疾病或生理原因必須治療或休養者，得請 普通傷病假"
+          },
+          {
+            "cos": 0.651,
+            "rank": 25,
+            "text": "未住院傷病假與住院傷病假 二年內合計不得超過 一年"
+          },
+          {
+            "cos": 0.645,
+            "rank": 52,
+            "text": "罹患癌症（含原位癌）採門診方式治療或懷孕期間需安胎休養者 其治療或休養期間，併入住院傷病假計算 普通傷病假"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR4",
+    "n_runs": 2,
+    "seeds": [
+      "遭遇職業災害",
+      "請假期間",
+      "職業災害",
+      "假期",
+      "期間",
+      "請假"
+    ],
+    "prod_scope_size": 7,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。",
+        "essential": true,
+        "source_law": "N0030001_勞動基準法",
+        "source_article": "第59條第2款",
+        "candidate_scope": "條文 第59條",
+        "n_candidate_facts": 15,
+        "top_candidates": [
+          {
+            "cos": 0.962,
+            "rank": 28,
+            "text": "雇主 按其原領工資數額予以補償 勞工在醫療中不能工作時"
+          },
+          {
+            "cos": 0.818,
+            "rank": 37,
+            "text": "雇主 應補償其必需之醫療費用 勞工受傷或罹患職業病時"
+          },
+          {
+            "cos": 0.764,
+            "rank": 7,
+            "text": "雇主 應依下列規定予以補償 勞工因遭遇職業災害而致死亡、失能、傷害或疾病時"
+          },
+          {
+            "cos": 0.754,
+            "rank": 46,
+            "text": "雇主 一次給付四十個月之平均工資後，免除此項工資補償責任 勞工經治療終止後，經指定之醫院診斷，審定為喪失原有工作能力，且不合第三款之失能給付標準者"
+          },
+          {
+            "cos": 0.74,
+            "rank": 220,
+            "text": "雇主 一次給予失能補償 勞工經治療終止後，經指定之醫院診斷，審定其遺存障害者"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "essential": true,
+        "source_law": "N0030006_勞工請假規則",
+        "source_article": "第4條",
+        "candidate_scope": "條文 第4條",
+        "n_candidate_facts": 7,
+        "top_candidates": [
+          {
+            "cos": 0.963,
+            "rank": 23,
+            "text": "普通傷病假一年內未超過三十日部分 領有勞工保險普通傷病給付未達工資半數者，由雇主補足之 工資"
+          },
+          {
+            "cos": 0.831,
+            "rank": 33,
+            "text": "普通傷病假一年內未超過三十日部分 工資折半發給"
+          },
+          {
+            "cos": 0.763,
+            "rank": 58,
+            "text": "勞工 因普通傷害、疾病或生理原因必須治療或休養者，得請 普通傷病假"
+          },
+          {
+            "cos": 0.651,
+            "rank": 106,
+            "text": "未住院傷病假與住院傷病假 二年內合計不得超過 一年"
+          },
+          {
+            "cos": 0.645,
+            "rank": null,
+            "text": "罹患癌症（含原位癌）採門診方式治療或懷孕期間需安胎休養者 其治療或休養期間，併入住院傷病假計算 普通傷病假"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR5",
+    "n_runs": 2,
+    "seeds": [
+      "輔助設施補助",
+      "職業災害勞工",
+      "職業災害",
+      "補助金",
+      "直轄市",
+      "辦法",
+      "補助"
+    ],
+    "prod_scope_size": 8,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+        "essential": true,
+        "source_law": "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法",
+        "source_article": "第1條",
+        "candidate_scope": "條文 第1條",
+        "n_candidate_facts": 1,
+        "top_candidates": [
+          {
+            "cos": 0.95,
+            "rank": 46,
+            "text": "本辦法 依 勞工職業災害保險及保護法第六十九條第二項規定訂定"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR6",
+    "n_runs": 2,
+    "seeds": [
+      "勞工職業災害保險",
+      "職業災害勞工",
+      "終止勞動契約",
+      "勞動契約",
+      "職業災害",
+      "退休金",
+      "資遣費"
+    ],
+    "prod_scope_size": 9,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。",
+        "essential": true,
+        "source_law": "N0050031_勞工職業災害保險及保護法",
+        "source_article": "第86條",
+        "candidate_scope": "條文 第86條",
+        "n_candidate_facts": 6,
+        "top_candidates": [
+          {
+            "cos": 0.968,
+            "rank": 126,
+            "text": "勞工 同時符合勞動基準法第五十三條規定 雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金"
+          },
+          {
+            "cos": 0.824,
+            "rank": 2,
+            "text": "雇主 依第八十四條第一項第二款，或勞工依前條第一項第一款規定終止勞動契約 發給勞工退休金及適用勞動基準法規定發給勞工資遣費"
+          },
+          {
+            "cos": 0.751,
+            "rank": 18,
+            "text": "不適用勞動基準法之勞工 依前條，或其雇主依第八十四條規定終止勞動契約 雇主應以不低於勞工退休金條例規定之資遣費計算標準發給離職金"
+          },
+          {
+            "cos": 0.722,
+            "rank": 15,
+            "text": "雇主 依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約 發給勞工資遣費"
+          },
+          {
+            "cos": 0.617,
+            "rank": 300,
+            "text": "雇主 於終止勞動契約後三十日內發給 離職金"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+        "essential": true,
+        "source_law": "N0060041_職業災害勞工保護法",
+        "source_article": "第25條",
+        "candidate_scope": "條文 第25條",
+        "n_candidate_facts": 7,
+        "top_candidates": [
+          {
+            "cos": 0.825,
+            "rank": null,
+            "text": "雇主 依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者 勞工"
+          },
+          {
+            "cos": 0.824,
+            "rank": 210,
+            "text": "雇主 依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者 勞工"
+          },
+          {
+            "cos": 0.809,
+            "rank": 160,
+            "text": "勞工 應依勞動基準法之規定，發給 退休金"
+          },
+          {
+            "cos": 0.769,
+            "rank": null,
+            "text": "雇主 應依勞動基準法之規定，發給 勞工"
+          },
+          {
+            "cos": 0.769,
+            "rank": null,
+            "text": "雇主 應依勞動基準法之規定，發給 勞工"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR7",
+    "n_runs": 2,
+    "seeds": [
+      "訓練費用補助",
+      "中高齡者",
+      "職業訓練",
+      "高齡者",
+      "員工",
+      "訓練",
+      "費用"
+    ],
+    "prod_scope_size": 5,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。",
+        "essential": true,
+        "source_law": "N0090058_失業中高齡者及高齡者就業促進辦法",
+        "source_article": "第6條",
+        "candidate_scope": "條文 第6條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.78,
+            "rank": null,
+            "text": "最低開班人數 應達 五人"
+          },
+          {
+            "cos": 0.758,
+            "rank": 253,
+            "text": "訓練時數 不得低於 八十小時"
+          },
+          {
+            "cos": 0.75,
+            "rank": 12,
+            "text": "雇主 依本法第二十四條第二項規定辦理 訓練"
+          },
+          {
+            "cos": 0.694,
+            "rank": 5,
+            "text": "訓練 申請補助 費用"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR8",
+    "n_runs": 2,
+    "seeds": [
+      "中高齡者及高齡者就業",
+      "中高齡者及高齡者",
+      "中高齡者",
+      "利息補貼",
+      "高齡者",
+      "就業",
+      "津貼",
+      "利息"
+    ],
+    "prod_scope_size": 5,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+        "essential": true,
+        "source_law": "N0090055_中高齡者及高齡者就業促進法",
+        "source_article": "第24條",
+        "candidate_scope": "條文 第24條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.824,
+            "rank": 228,
+            "text": "中央主管機關 得予 訓練費用補助"
+          },
+          {
+            "cos": 0.731,
+            "rank": 204,
+            "text": "中央主管機關 為促進 就業"
+          },
+          {
+            "cos": 0.724,
+            "rank": 136,
+            "text": "雇主 依僱用人力需求，得自行或委託辦理 失業之中高齡者及高齡者職業訓練"
+          },
+          {
+            "cos": 0.627,
+            "rank": 100,
+            "text": "中央主管機關 為提升 中高齡者及高齡者工作技能"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR9",
+    "n_runs": 2,
+    "seeds": [
+      "就業",
+      "津貼",
+      "辦法"
+    ],
+    "prod_scope_size": 7,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。",
+        "essential": true,
+        "source_law": "N0090001_就業服務法",
+        "source_article": "第23條第2項",
+        "candidate_scope": "條文 第23條",
+        "n_candidate_facts": 6,
+        "top_candidates": [
+          {
+            "cos": 0.955,
+            "rank": 46,
+            "text": "中央主管機關 定之 前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法"
+          },
+          {
+            "cos": 0.759,
+            "rank": 91,
+            "text": "中央主管機關 視實際需要 辦理創業貸款利息補貼等輔導措施"
+          },
+          {
+            "cos": 0.628,
+            "rank": 24,
+            "text": "必要時 發給相關津貼或補助金 促進其就業"
+          },
+          {
+            "cos": 0.599,
+            "rank": 133,
+            "text": "中央主管機關 視實際需要 加強實施職業訓練或採取創造臨時就業機會"
+          },
+          {
+            "cos": 0.488,
+            "rank": 209,
+            "text": "中央主管機關 於經濟不景氣致大量失業時鼓勵 雇主協商工會或勞工"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+        "essential": true,
+        "source_law": "N0090025_就業促進津貼實施辦法",
+        "source_article": "第1條",
+        "candidate_scope": "條文 第1條",
+        "n_candidate_facts": 1,
+        "top_candidates": [
+          {
+            "cos": 0.982,
+            "rank": 52,
+            "text": "本辦法 依 就業服務法第二十三條第二項及第二十四條第四項規定訂定"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。",
+        "essential": true,
+        "source_law": "N0090001_就業服務法",
+        "source_article": "第24條第4項",
+        "candidate_scope": "條文 第24條",
+        "n_candidate_facts": 19,
+        "top_candidates": [
+          {
+            "cos": 0.931,
+            "rank": 58,
+            "text": "第一項津貼或補助金之申請資格 由主管機關定之 辦法"
+          },
+          {
+            "cos": 0.913,
+            "rank": 59,
+            "text": "第一項津貼或補助金之其他相關事項 由主管機關定之 辦法"
+          },
+          {
+            "cos": 0.911,
+            "rank": 19,
+            "text": "第一項津貼或補助金之經費來源 由主管機關定之 辦法"
+          },
+          {
+            "cos": 0.907,
+            "rank": 56,
+            "text": "第一項津貼或補助金之金額 由主管機關定之 辦法"
+          },
+          {
+            "cos": 0.896,
+            "rank": 78,
+            "text": "第一項津貼或補助金之期間 由主管機關定之 辦法"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR10",
+    "n_runs": 2,
+    "seeds": [
+      "職業訓練生活津貼",
+      "求職交通補助金",
+      "臨時工作津貼",
+      "職業訓練",
+      "生活津貼",
+      "臨時工作",
+      "補助金",
+      "就業"
+    ],
+    "prod_scope_size": 6,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+        "essential": true,
+        "source_law": "N0090025_就業促進津貼實施辦法",
+        "source_article": "第8條",
+        "candidate_scope": "條文 第8條",
+        "n_candidate_facts": 5,
+        "top_candidates": [
+          {
+            "cos": 0.884,
+            "rank": 111,
+            "text": "補助金 每人每次得發給 新臺幣五百元"
+          },
+          {
+            "cos": 0.882,
+            "rank": 120,
+            "text": "補助金 每人每次不得超過 新臺幣一千二百五十元"
+          },
+          {
+            "cos": 0.778,
+            "rank": 170,
+            "text": "補助金 每人每年度以發給 四次為限"
+          },
+          {
+            "cos": 0.703,
+            "rank": 160,
+            "text": "每人 得發給 補助金"
+          },
+          {
+            "cos": 0.658,
+            "rank": 189,
+            "text": "情形特殊者 得核實發給 補助金"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。",
+        "essential": true,
+        "source_law": "N0090025_就業促進津貼實施辦法",
+        "source_article": "第20條",
+        "candidate_scope": "條文 第20條",
+        "n_candidate_facts": 8,
+        "top_candidates": [
+          {
+            "cos": 0.883,
+            "rank": 182,
+            "text": "第十八條津貼 最長以六個月為限"
+          },
+          {
+            "cos": 0.856,
+            "rank": 54,
+            "text": "第十八條津貼 每月按最低工資百分之六十發給"
+          },
+          {
+            "cos": 0.801,
+            "rank": 51,
+            "text": "第十八條津貼 依受訓學員參加訓練期間以三十日為一個月計算 一個月以上始發給"
+          },
+          {
+            "cos": 0.74,
+            "rank": null,
+            "text": "申請人 最長發給一年"
+          },
+          {
+            "cos": 0.714,
+            "rank": 140,
+            "text": "二十日以上且訓練時數達六十小時 發給 一個月"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。",
+        "essential": true,
+        "source_law": "N0090025_就業促進津貼實施辦法",
+        "source_article": "第12條",
+        "candidate_scope": "條文 第12條",
+        "n_candidate_facts": 3,
+        "top_candidates": [
+          {
+            "cos": 0.869,
+            "rank": 30,
+            "text": "津貼 按中央主管機關公告之每小時最低工資核給"
+          },
+          {
+            "cos": 0.792,
+            "rank": 110,
+            "text": "前條津貼發給基準 最長 六個月"
+          },
+          {
+            "cos": 0.666,
+            "rank": 177,
+            "text": "一個月合計 不超過 月最低工資"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR11",
+    "n_runs": 2,
+    "seeds": [
+      "退休金",
+      "辦法",
+      "保險",
+      "退休"
+    ],
+    "prod_scope_size": 7,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+        "essential": true,
+        "source_law": "N0030020_勞工退休金條例",
+        "source_article": "第35條第3項",
+        "candidate_scope": "條文 第35條",
+        "n_candidate_facts": 5,
+        "top_candidates": [
+          {
+            "cos": 0.96,
+            "rank": 5,
+            "text": "事業單位 應報請中央主管機關核准 採行前項規定之年金保險"
+          },
+          {
+            "cos": 0.726,
+            "rank": 61,
+            "text": "勞工人數二百人以上 經工會議同意後，得為以書面選擇投保年金保險之勞工 投保符合保險法規定之年金保險"
+          },
+          {
+            "cos": 0.634,
+            "rank": 12,
+            "text": "雇主 得不依第六條第一項規定為其提繳勞工退休金 選擇投保年金保險之勞工"
+          },
+          {
+            "cos": 0.568,
+            "rank": null,
+            "text": "年金保險費 平均收益率不得低於第二十三條之標准 第二十三條之標准"
+          },
+          {
+            "cos": 0.528,
+            "rank": null,
+            "text": "事業單位 僱用 勞工人數二百人以上"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。",
+        "essential": true,
+        "source_law": "N0030020_勞工退休金條例",
+        "source_article": "第37條",
+        "candidate_scope": "條文 第37條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.843,
+            "rank": 171,
+            "text": "年金保險之契約 勞工為被保險人及受益人 被保險人, 受益人"
+          },
+          {
+            "cos": 0.834,
+            "rank": 29,
+            "text": "年金保險之契約 應由雇主擔任要保人 要保人"
+          },
+          {
+            "cos": 0.775,
+            "rank": null,
+            "text": "保險人  資格由中央主管機關會同該保險業務之主管機關定之"
+          },
+          {
+            "cos": 0.678,
+            "rank": null,
+            "text": "事業單位 以向一保險人投保為限"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+        "essential": true,
+        "source_law": "N0030022_勞工退休金條例年金保險實施辦法",
+        "source_article": "第1條",
+        "candidate_scope": "條文 第1條",
+        "n_candidate_facts": 1,
+        "top_candidates": [
+          {
+            "cos": 0.966,
+            "rank": 47,
+            "text": "本辦法 依 勞工退休金條例第三十五條第三項及第三十七條規定"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR13",
+    "n_runs": 2,
+    "seeds": [
+      "私立就業服務機構許可及管理辦法",
+      "私立就業服務機構",
+      "就業",
+      "辦法",
+      "機構",
+      "許可"
+    ],
+    "prod_scope_size": 9,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。",
+        "essential": true,
+        "source_law": "N0090001_就業服務法",
+        "source_article": "第40條第2項",
+        "candidate_scope": "條文 第40條",
+        "n_candidate_facts": 22,
+        "top_candidates": [
+          {
+            "cos": 0.907,
+            "rank": null,
+            "text": "人數,比率及查核方式 由 中央主管機關定之"
+          },
+          {
+            "cos": 0.58,
+            "rank": null,
+            "text": "對主管機關規定之報表 未依規定填寫或填寫不實"
+          },
+          {
+            "cos": 0.565,
+            "rank": null,
+            "text": "接受委任引進之外國人入國三個月內發生行蹤不明之情事 並於一年內達一定之人數及比率者"
+          },
+          {
+            "cos": 0.527,
+            "rank": null,
+            "text": "接受委任辦理聘僱外國人之申請許可、招募、引進或管理事項，提供不實資料或健康檢查檢體 提供不實資料或健康檢查檢體"
+          },
+          {
+            "cos": 0.493,
+            "rank": null,
+            "text": "經主管機關處分停止營業 其期限尚未屆滿即自行繼續營業"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+        "essential": true,
+        "source_law": "N0090002_私立就業服務機構許可及管理辦法",
+        "source_article": "第1條",
+        "candidate_scope": "條文 第1條",
+        "n_candidate_facts": 1,
+        "top_candidates": [
+          {
+            "cos": 0.982,
+            "rank": 124,
+            "text": "本辦法 依 就業服務法第三十四條第三項及第四十條第二項規定訂定"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR15",
+    "n_runs": 2,
+    "seeds": [
+      "安全衛生",
+      "辦法",
+      "衛生",
+      "安全"
+    ],
+    "prod_scope_size": 4,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": false,
+        "span": "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。",
+        "essential": true,
+        "source_law": "N0060001_職業安全衛生法",
+        "source_article": "第23條第5項",
+        "candidate_scope": "條文 第23條",
+        "n_candidate_facts": 8,
+        "top_candidates": [
+          {
+            "cos": 0.891,
+            "rank": null,
+            "text": "中央主管機關 定之 第一項及第二項所定安全衛生管理、規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法"
+          },
+          {
+            "cos": 0.741,
+            "rank": null,
+            "text": "事業單位 達一定規模或有第十五條第一項所定之工作場所時 應建置職業安全衛生管理系統"
+          },
+          {
+            "cos": 0.731,
+            "rank": null,
+            "text": "雇主 應依其事業單位之規模、性質設置 安全衛生組織、人員"
+          },
+          {
+            "cos": 0.659,
+            "rank": null,
+            "text": "中央主管機關 對前項職業安全衛生管理系統得實施訪查 其管理績效良好得公開表揚之"
+          },
+          {
+            "cos": 0.632,
+            "rank": null,
+            "text": "雇主代理人 綜理 第一項及第二項所定安全衛生管理"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": false,
+        "span": "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "essential": true,
+        "source_law": "N0060027_職業安全衛生管理辦法",
+        "source_article": "第1條",
+        "candidate_scope": "條文 第1條",
+        "n_candidate_facts": 1,
+        "top_candidates": [
+          {
+            "cos": 0.978,
+            "rank": null,
+            "text": "本辦法 依 職業安全衛生法第二十三條第五項規定訂定"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR16",
+    "n_runs": 2,
+    "seeds": [
+      "第一類事業",
+      "第二類事業",
+      "管理單位",
+      "安全衛生",
+      "風險等級",
+      "單位",
+      "辦法",
+      "事業"
+    ],
+    "prod_scope_size": 9,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "第二類事業：具中度風險者。",
+        "essential": true,
+        "source_law": "N0060027_職業安全衛生管理辦法",
+        "source_article": "第2條第1項第2款",
+        "candidate_scope": "條文 第2條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.857,
+            "rank": 31,
+            "text": "第二類事業 區分 具中度風險者"
+          },
+          {
+            "cos": 0.706,
+            "rank": 56,
+            "text": "第三類事業 區分 具低度風險者"
+          },
+          {
+            "cos": 0.677,
+            "rank": 30,
+            "text": "第一類事業 區分 具顯著風險者"
+          },
+          {
+            "cos": 0.546,
+            "rank": null,
+            "text": "本辦法之事業 區分如下"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-AGGR19",
+    "n_runs": 3,
+    "seeds": [
+      "勞工職業災害保險",
+      "職業災害勞工",
+      "終止勞動契約",
+      "勞動基準法",
+      "勞動契約",
+      "職業災害"
+    ],
+    "prod_scope_size": 9,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+        "essential": true,
+        "source_law": "N0050031_勞工職業災害保險及保護法",
+        "source_article": "第85條第2項",
+        "candidate_scope": "條文 第85條",
+        "n_candidate_facts": 6,
+        "top_candidates": [
+          {
+            "cos": 0.942,
+            "rank": 1,
+            "text": "職業災害勞工 終止勞動契約時 準用勞動基準法規定預告雇主"
+          },
+          {
+            "cos": 0.747,
+            "rank": 30,
+            "text": "職業災害勞工 得終止勞動契約 之一"
+          },
+          {
+            "cos": 0.699,
+            "rank": 46,
+            "text": "職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議"
+          },
+          {
+            "cos": 0.698,
+            "rank": 26,
+            "text": "職業災害勞工 雇主未依第六十七條第一項規定協助勞工恢復原工作或安置適當之工作"
+          },
+          {
+            "cos": 0.676,
+            "rank": 91,
+            "text": "職業災害勞工 事業單位改組或轉讓，致事業單位消滅"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+        "essential": true,
+        "source_law": "N0060041_職業災害勞工保護法",
+        "source_article": "第26條第2項",
+        "candidate_scope": "條文 第26條",
+        "n_candidate_facts": 4,
+        "top_candidates": [
+          {
+            "cos": 0.86,
+            "rank": 15,
+            "text": "職業災害勞工 依第二十四條第一款規定終止 勞動契約"
+          },
+          {
+            "cos": 0.848,
+            "rank": 2,
+            "text": "與職業災害勞工之勞動契約 準用 勞動基準法規定預告勞工"
+          },
+          {
+            "cos": 0.827,
+            "rank": 3,
+            "text": "雇主 依第二十三條規定預告終止 與職業災害勞工之勞動契約"
+          },
+          {
+            "cos": 0.793,
+            "rank": 6,
+            "text": "勞動契約 準用 勞動基準法規定預告雇主"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-CANARY3",
+    "n_runs": 2,
+    "seeds": [
+      "特殊健康檢查",
+      "精密作業",
+      "健康檢查",
+      "作業",
+      "一次",
+      "檢查",
+      "一"
+    ],
+    "prod_scope_size": 5,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "本標準依職業安全衛生法第六條及第十九條規定訂定之。",
+        "essential": true,
+        "source_law": "N0060012_精密作業勞工視機能保護設施標準",
+        "source_article": "第1條",
+        "candidate_scope": "條文 第1條",
+        "n_candidate_facts": 1,
+        "top_candidates": [
+          {
+            "cos": 0.988,
+            "rank": null,
+            "text": "本標準 依 職業安全衛生法第六條及第十九條規定訂定"
+          }
+        ]
+      },
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。",
+        "essential": true,
+        "source_law": "N0060022_勞工健康保護規則",
+        "source_article": "第2條第1款",
+        "candidate_scope": "條文 第2條",
+        "n_candidate_facts": 7,
+        "top_candidates": [
+          {
+            "cos": 0.993,
+            "rank": 188,
+            "text": "特別危害健康作業 指符合附表一之物理性及化學性危害之作業"
+          },
+          {
+            "cos": 0.653,
+            "rank": null,
+            "text": "第一類事業 指職業安全衛生管理辦法第二條及其附表所定之事業"
+          },
+          {
+            "cos": 0.623,
+            "rank": 277,
+            "text": "特約勞工健康服務人員 指從事勞工健康服務之醫師、護理人員、心理師、物理治療師、職能治療師或公共衛生師"
+          },
+          {
+            "cos": 0.605,
+            "rank": null,
+            "text": "第二類事業 指職業安全衛生管理辦法第二條及其附表所定之事業"
+          },
+          {
+            "cos": 0.601,
+            "rank": null,
+            "text": "第三類事業 指職業安全衛生管理辦法第二條及其附表所定之事業"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-CANARY5",
+    "n_runs": 2,
+    "seeds": [
+      "職業災害勞工",
+      "職業災害",
+      "適用"
+    ],
+    "prod_scope_size": 5,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。",
+        "essential": true,
+        "source_law": "N0050031_勞工職業災害保險及保護法",
+        "source_article": "第101條",
+        "candidate_scope": "條文 第101條",
+        "n_candidate_facts": 3,
+        "top_candidates": [
+          {
+            "cos": 0.893,
+            "rank": 78,
+            "text": "雇主 處以補助金額相同額度之罰鍰 勞工發生職業災害事故致死亡或失能經依本法施行前職業災害勞工保護法第六條規定發給補助者"
+          },
+          {
+            "cos": 0.761,
+            "rank": 37,
+            "text": "雇主 依法應為所屬勞工辦理參加勞工保險而未辦理"
+          },
+          {
+            "cos": 0.692,
+            "rank": 12,
+            "text": "勞工 發生職業災害事故致死亡或失能"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "57-COREF1",
+    "n_runs": 2,
+    "seeds": [
+      "留職停薪",
+      "受僱者",
+      "申請",
+      "原則",
+      "子女",
+      "3",
+      "一",
+      "或"
+    ],
+    "prod_scope_size": 9,
+    "spans": [
+      {
+        "gold_doc_in_prod_scope": true,
+        "span": "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續",
+        "essential": true,
+        "source_law": "N0030018_育嬰留職停薪實施辦法",
+        "source_article": "第2條第5項",
+        "candidate_scope": "條文 第2條",
+        "n_candidate_facts": 16,
+        "top_candidates": [
+          {
+            "cos": 0.894,
+            "rank": 33,
+            "text": "前項第二款但書規定 受僱者因突發情形不及於一日前提出者 得委托他人代辦申請手續"
+          },
+          {
+            "cos": 0.726,
+            "rank": 3,
+            "text": "但因子女生病、停托、停課，受僱者須親自照顧時 得於一日前提出"
+          },
+          {
+            "cos": 0.63,
+            "rank": 158,
+            "text": "受僱者及雇主 應事先約定以書面、電子郵件、通訊軟體或其他科技設備傳送方式為之 提出方式"
+          },
+          {
+            "cos": 0.598,
+            "rank": 16,
+            "text": "受僱者 申請 留職停薪"
+          },
+          {
+            "cos": 0.597,
+            "rank": 2,
+            "text": "育嬰留職停薪期間三十日以上 於十日前提出"
+          }
+        ]
+      }
+    ]
+  }
+]
