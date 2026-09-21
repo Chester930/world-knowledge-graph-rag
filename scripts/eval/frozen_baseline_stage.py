@@ -31,7 +31,24 @@ DEFAULT_ENV = {
     "WORKSPACE_DIR": "D:/Users/666/Desktop/kg-runtime",
     "NEO4J_URI": "bolt://localhost:17990",
     "NEO4J_PASSWORD": "kg2_test_2026",
+    # 這台機器同時有 Windows(127.0.0.1) 與 WSL(::1) 兩個 Ollama，用 "localhost" 會打到哪個不固定。
+    "OLLAMA_BASE_URL": "http://127.0.0.1:11434",
 }
+
+
+def ollama_version_matches(expected: str | None, actual: str | None) -> bool:
+    """凍結資訊未記錄版本時不檢查；記錄了就必須一致。"""
+    return expected is None or expected == actual
+
+
+def fetch_ollama_version(base_url: str) -> str | None:
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(f"{base_url.rstrip('/')}/api/version", timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8")).get("version")
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def load_manifest(frozen_dir: Path) -> dict:
@@ -72,7 +89,15 @@ def cmd_run(args: argparse.Namespace) -> int:
         "--allow-shared-judge",
         "--out", args.out,
     ]
-    print("frozen commit:", manifest["git_commit"], "| bank sha256:", manifest["bank_sha256"][:16], flush=True)
+    base_url = env["OLLAMA_BASE_URL"]
+    actual_version = fetch_ollama_version(base_url)
+    if not ollama_version_matches(manifest.get("ollama_version"), actual_version):
+        raise SystemExit(
+            f"Ollama 版本與凍結資訊不符：端點 {base_url} 為 {actual_version}，"
+            f"凍結為 {manifest.get('ollama_version')}。請確認連到正確的 Ollama 實例。"
+        )
+    print("frozen commit:", manifest["git_commit"], "| bank sha256:", manifest["bank_sha256"][:16],
+          "| ollama:", base_url, actual_version, flush=True)
     return subprocess.run(cmd, cwd=REPO_ROOT, env=env).returncode
 
 

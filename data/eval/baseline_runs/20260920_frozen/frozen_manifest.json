@@ -81,6 +81,14 @@
   "provider": "ollama",
   "model": "bge-m3"
  },
+ "ollama_endpoint": "http://127.0.0.1:11434",
+ "ollama_version": "0.34.2",
+ "ollama_model_digests": {
+  "qwen2.5:7b": "845dbda0ea48",
+  "bge-m3:latest": "790764642607"
+ },
+ "ollama_provenance_note": "2026-09-21 發現本機同時有 Windows Ollama 0.34.2（127.0.0.1）與 WSL Ollama 0.11.4（::1 經 wslrelay），'localhost' 可能打到任一個；兩邊模型 digest 相同、僅執行版本不同。以 Windows 0.34.2 為標準。stage_a、stage_a2 依當時 Windows 端行程判定為 Windows；stage_a3、stage_b 的服務實例無法證明，已擱置並改在標準實例重跑（紀錄保留於原目錄但不納入判定）。",
+ "quarantined_stages": ["stage_a3", "stage_b"],
  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
  "kg_fact_total": 16826,
  "kg_entity_total": 12290,

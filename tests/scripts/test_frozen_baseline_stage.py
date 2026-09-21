@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.eval.frozen_baseline_stage import remaining_question_ids
+from scripts.eval.frozen_baseline_stage import ollama_version_matches, remaining_question_ids
 
 
 class RemainingQuestionTests(unittest.TestCase):
@@ -28,6 +28,17 @@ class RemainingQuestionTests(unittest.TestCase):
         a.write_text(json.dumps([{"question_id": "Q1", "error": "harness_timeout_after_900s"}]), encoding="utf-8")
 
         self.assertEqual(remaining_question_ids(["Q1", "Q2"], [a]), ["Q2"])
+
+
+class OllamaVersionTests(unittest.TestCase):
+    def test_unrecorded_version_is_not_checked(self):
+        self.assertTrue(ollama_version_matches(None, "0.11.4"))
+        self.assertTrue(ollama_version_matches(None, None))
+
+    def test_recorded_version_must_match_exactly(self):
+        self.assertTrue(ollama_version_matches("0.34.2", "0.34.2"))
+        self.assertFalse(ollama_version_matches("0.34.2", "0.11.4"))
+        self.assertFalse(ollama_version_matches("0.34.2", None))
 
 
 if __name__ == "__main__":
