@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
 import time
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from itertools import combinations
@@ -20,6 +21,18 @@ DEFAULT_ENV_FILE = PRIMARY_CHECKOUT / ".env"
 DEFAULT_FROZEN_DIR = ROOT / "data" / "eval" / "baseline_runs" / "20260920_frozen"
 DEFAULT_TEST_CASES = ROOT / "data" / "eval" / "test_cases.json"
 DEFAULT_OUTPUT_DIR = ROOT / "data" / "analysis" / "source_ambiguity"
+DEFAULT_PHASE2_SNAPSHOT_DIR = ROOT / ".claude" / "tmp" / "task3_phase2_snapshot_20260922"
+
+PHASE2_STAGE_DIRECTORIES = (
+    "t2_k1_topk40_stage_a",
+    "t2_k1_topk40_stage_a2",
+    "t2_k1_topk40_stage_a3",
+    "t2_k1_topk40_stage_b",
+    "t2_k1_topk40_stage_b2a",
+    "t2_k1_topk40_stage_b2b",
+    "t2_k1_topk40_stage_b2c",
+    "t2_k1_topk40_stage_c",
+)
 
 EXPECTED_KG_ID = "236903cf-055a-40a8-8923-b9d06601f3b7"
 EXPECTED_KG_FACT_TOTAL = 16826
@@ -181,6 +194,426 @@ def frame_overlap(left: str | None, right: str | None) -> float:
 
     overlap_chars = min(common_prefix + common_suffix, shorter_length)
     return overlap_chars / shorter_length
+
+
+def _prompt_groups(value: Any) -> list[list[str]]:
+    """將單層或巢狀 prompt_context_lines 統一為子問題行清單。"""
+    if not isinstance(value, list) or not value:
+        return []
+    if all(isinstance(line, str) for line in value):
+        return [[line for line in value]]
+    groups: list[list[str]] = []
+    for item in value:
+        if isinstance(item, list):
+            groups.append([str(line) for line in item if isinstance(line, str)])
+        elif isinstance(item, str):
+            groups.append([item])
+    return groups
+
+
+def _prompt_line_text_and_key(line: str) -> tuple[str, str]:
+    """回傳逐字 prompt 行與去除單一「- 」前綴後的正規化比對鍵。"""
+    match_text = line[2:] if line.startswith("- ") else line
+    return line, normalize_text(match_text)
+
+
+def _trace_document_ids(traces: Sequence[Mapping[str, Any]]) -> list[str]:
+    return sorted(
+        {
+            str(trace["source_doc_id"]).strip()
+            for trace in traces
+            if trace.get("source_doc_id") is not None
+            and str(trace.get("source_doc_id")).strip()
+        }
+    )
+
+
+def _classify_trace_matches(traces: Sequence[Mapping[str, Any]]) -> str:
+    """分類文字匹配結果；無來源 ID 的 trace 不會被視為唯一歸屬。"""
+    if not traces:
+        return "unmatched"
+    document_ids = _trace_document_ids(traces)
+    has_missing_document = any(
+        trace.get("source_doc_id") is None or not str(trace.get("source_doc_id")).strip()
+        for trace in traces
+    )
+    if len(document_ids) >= 2:
+        return "multi_source"
+    if len(document_ids) == 1 and not has_missing_document:
+        return "unique"
+    return "source_unresolved"
+
+
+def _linear_quantiles(values: Sequence[float]) -> dict[str, float | None]:
+    """計算可重現的線性插值分位數（與 NumPy method='linear' 一致）。"""
+    if not values:
+        return {f"p{percentile}": None for percentile in (0, 25, 50, 75, 90, 95, 100)}
+    ordered = sorted(float(value) for value in values)
+    results: dict[str, float] = {}
+    for percentile in (0, 25, 50, 75, 90, 95, 100):
+        position = (len(ordered) - 1) * percentile / 100
+        lower = int(position)
+        upper = min(lower + 1, len(ordered) - 1)
+        fraction = position - lower
+        results[f"p{percentile}"] = ordered[lower] * (1 - fraction) + ordered[upper] * fraction
+    return results
+
+
+def _sha256_and_size(path: Path) -> tuple[str, int]:
+    digest = hashlib.sha256()
+    size = 0
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+            size += len(block)
+    return digest.hexdigest(), size
+
+
+def load_phase2_snapshot(snapshot_dir: Path) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any]]:
+    """只從指定快照讀 records.json，並驗證 allowlist、大小與 SHA-256。"""
+    manifest_path = snapshot_dir / "snapshot_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    included = manifest.get("included_directories")
+    if tuple(included or ()) != PHASE2_STAGE_DIRECTORIES:
+        raise ValueError("snapshot manifest directories do not match the Phase 2 allowlist")
+    file_entries = {entry.get("directory"): entry for entry in manifest.get("files", [])}
+    if set(file_entries) != set(PHASE2_STAGE_DIRECTORIES):
+        raise ValueError("snapshot manifest must contain exactly the eight allowed records files")
+
+    records_by_folder: dict[str, list[dict[str, Any]]] = {}
+    verified_files: list[dict[str, Any]] = []
+    for directory in PHASE2_STAGE_DIRECTORIES:
+        entry = file_entries[directory]
+        if entry.get("status") != "snapshot_copy":
+            raise ValueError(f"{directory}: manifest entry is not a snapshot copy")
+        path = snapshot_dir / directory / "records.json"
+        digest, size = _sha256_and_size(path)
+        if digest != entry.get("sha256") or size != entry.get("bytes"):
+            raise ValueError(f"{directory}: snapshot records.json hash or size mismatch")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, list) or any(not isinstance(row, dict) for row in payload):
+            raise ValueError(f"{directory}: records.json must contain a list of objects")
+        records_by_folder[directory] = payload
+        verified_files.append(
+            {
+                "directory": directory,
+                "snapshot": f"{directory}/records.json",
+                "sha256": digest,
+                "bytes": size,
+                "record_count": len(payload),
+            }
+        )
+    return records_by_folder, {**manifest, "verified_files": verified_files}
+
+
+def analyze_prompt_records(
+    records_by_folder: Mapping[str, Sequence[Mapping[str, Any]]],
+    eligible_ids: Iterable[str],
+    document_names: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
+    """離線分析每筆執行的 prompt 行與 in-prompt retrieval trace 來源。"""
+    eligible = {str(question_id) for question_id in eligible_ids}
+    law_names = dict(document_names or {})
+    prompt_rows: list[dict[str, Any]] = []
+    out_of_scope_records: list[dict[str, Any]] = []
+    missing_prompt_context_records: list[dict[str, Any]] = []
+    aggr18_attempts: list[dict[str, Any]] = []
+    folder_record_counts: dict[str, int] = {}
+    eligible_prompt_record_keys: set[tuple[str, int]] = set()
+
+    for folder, records in records_by_folder.items():
+        folder_record_counts[folder] = len(records)
+        for record_index, record in enumerate(records):
+            question_id = str(record.get("question_id") or "")
+            location = {
+                "source_folder": folder,
+                "record_index": record_index,
+                "question_id": question_id or None,
+            }
+            if question_id not in eligible:
+                out_of_scope_records.append(location)
+                continue
+            eligible_prompt_record_keys.add((folder, record_index))
+
+            lineage = record.get("lineage") if isinstance(record.get("lineage"), Mapping) else {}
+            context = lineage.get("stage2_context")
+            context = context if isinstance(context, Mapping) else {}
+            if "prompt_context_lines" not in context:
+                missing_prompt_context_records.append(location)
+                raw_groups: Any = []
+            else:
+                raw_groups = context.get("prompt_context_lines")
+            groups = _prompt_groups(raw_groups)
+
+            retrieval = lineage.get("stage1_retrieval")
+            retrieval = retrieval if isinstance(retrieval, Mapping) else {}
+            traces = retrieval.get("retrieval_trace")
+            trace_by_text: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            if isinstance(traces, list):
+                for trace in traces:
+                    if not isinstance(trace, Mapping) or trace.get("in_prompt") is not True:
+                        continue
+                    trace_text = trace.get("text")
+                    trace_key = normalize_text(str(trace_text)) if trace_text is not None else ""
+                    if not trace_key:
+                        continue
+                    trace_by_text[trace_key].append(
+                        {
+                            "kind": str(trace.get("kind") or "").lower(),
+                            "text": trace_text,
+                            "source_doc_id": trace.get("source_doc_id"),
+                            "article_no": trace.get("article_no"),
+                            "rank": trace.get("rank"),
+                            "in_prompt": True,
+                        }
+                    )
+
+            aggr18_attempt = {
+                **location,
+                "subquestions": [],
+            } if question_id == "57-AGGR18" else None
+            for group_index, group in enumerate(groups):
+                aggr18_group = {"subquestion_index": group_index, "prompt_lines": []}
+                for line_index, line in enumerate(group):
+                    exact_line, key = _prompt_line_text_and_key(line)
+                    matched = list(trace_by_text.get(key, [])) if key else []
+                    status = _classify_trace_matches(matched)
+                    source_ids = _trace_document_ids(matched)
+                    row = {
+                        **location,
+                        "subquestion_index": group_index,
+                        "line_index": line_index,
+                        "prompt_line": exact_line,
+                        "normalized_text": key,
+                        "status": status,
+                        "source_doc_ids": source_ids,
+                        "documents": [
+                            {"source_doc_id": source_id, "law_name": law_names.get(source_id)}
+                            for source_id in source_ids
+                        ],
+                        "matched_traces": matched,
+                        "trace_kinds": sorted({trace["kind"] for trace in matched if trace["kind"]}),
+                        "same_document_duplicate": status == "unique" and len(matched) > 1,
+                    }
+                    prompt_rows.append(row)
+                    if aggr18_attempt is not None:
+                        aggr18_group["prompt_lines"].append(
+                            {
+                                "line_index": line_index,
+                                "prompt_line": exact_line,
+                                "status": status,
+                                "matched_traces": matched,
+                            }
+                        )
+                if aggr18_attempt is not None:
+                    aggr18_attempt["subquestions"].append(aggr18_group)
+            if aggr18_attempt is not None:
+                aggr18_attempts.append(aggr18_attempt)
+
+    total_lines = len(prompt_rows)
+    status_counts = Counter(row["status"] for row in prompt_rows)
+    by_question: dict[str, Counter[str]] = {question_id: Counter() for question_id in sorted(eligible)}
+    for row in prompt_rows:
+        stats = by_question[row["question_id"]]
+        stats["prompt_lines"] += 1
+        stats[row["status"]] += 1
+        if row["same_document_duplicate"]:
+            stats["same_document_duplicate"] += 1
+
+    # Collision is evaluated inside one execution and one subquestion, never across reruns.
+    run_groups: dict[tuple[str, int, int, str], list[dict[str, Any]]] = defaultdict(list)
+    for row in prompt_rows:
+        run_groups[(row["source_folder"], row["record_index"], row["subquestion_index"], row["question_id"])].append(row)
+    collision_rows: list[dict[str, Any]] = []
+    collision_groups = 0
+    for rows in run_groups.values():
+        by_text: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for row in rows:
+            if row["status"] == "unique":
+                by_text[row["normalized_text"]].append(row)
+        for same_text_rows in by_text.values():
+            if len({row["source_doc_ids"][0] for row in same_text_rows}) > 1:
+                collision_groups += 1
+                collision_rows.extend(same_text_rows)
+    for row in collision_rows:
+        by_question[row["question_id"]]["independent_cross_source_collision"] += 1
+
+    def build_kind_metrics(kind: str | None) -> dict[str, Any]:
+        kind_rows: list[dict[str, Any]] = []
+        for row in prompt_rows:
+            candidate_traces = [
+                trace for trace in row["matched_traces"]
+                if kind is None or trace.get("kind") == kind
+            ]
+            if kind is not None and not candidate_traces:
+                continue
+            kind_rows.append(
+                {
+                    **row,
+                    "kind_status": _classify_trace_matches(candidate_traces),
+                    "kind_source_doc_ids": _trace_document_ids(candidate_traces),
+                    "kind_trace_count": len(candidate_traces),
+                }
+            )
+
+        kind_counts = Counter(row["kind_status"] for row in kind_rows)
+        duplicate_count = sum(
+            row["kind_status"] == "unique" and row["kind_trace_count"] > 1
+            for row in kind_rows
+        )
+        kind_collision_rows: list[dict[str, Any]] = []
+        for rows in run_groups.values():
+            rows_by_text: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            for row in rows:
+                traces_for_kind = [
+                    trace for trace in row["matched_traces"]
+                    if kind is None or trace.get("kind") == kind
+                ]
+                if (kind is None or traces_for_kind) and _classify_trace_matches(traces_for_kind) == "unique":
+                    rows_by_text[row["normalized_text"]].append(
+                        {**row, "kind_source_doc_ids": _trace_document_ids(traces_for_kind)}
+                    )
+            for repeated_rows in rows_by_text.values():
+                if len({row["kind_source_doc_ids"][0] for row in repeated_rows}) > 1:
+                    kind_collision_rows.extend(repeated_rows)
+
+        frame_values: list[float] = []
+        frame_pair_count = 0
+        for rows in run_groups.values():
+            attributable: list[dict[str, Any]] = []
+            for row in rows:
+                traces_for_kind = [
+                    trace for trace in row["matched_traces"]
+                    if kind is None or trace.get("kind") == kind
+                ]
+                if (kind is None or traces_for_kind) and _classify_trace_matches(traces_for_kind) == "unique":
+                    attributable.append(
+                        {**row, "kind_source_doc_ids": _trace_document_ids(traces_for_kind)}
+                    )
+            for left, right in combinations(attributable, 2):
+                if left["kind_source_doc_ids"][0] == right["kind_source_doc_ids"][0]:
+                    continue
+                frame_values.append(frame_overlap(left["prompt_line"], right["prompt_line"]))
+                frame_pair_count += 1
+
+        return {
+            "prompt_line_count": len(kind_rows),
+            "uniquely_attributed_line_count": kind_counts["unique"],
+            "multi_source_merged_line_count": kind_counts["multi_source"],
+            "unmatched_line_count": kind_counts["unmatched"],
+            "source_unresolved_line_count": kind_counts["source_unresolved"],
+            "same_document_duplicate_line_count": duplicate_count,
+            "independent_cross_source_collision_line_count": len(kind_collision_rows),
+            "independent_cross_source_collision_group_count": len(
+                {
+                    (row["source_folder"], row["record_index"], row["subquestion_index"], row["normalized_text"])
+                    for row in kind_collision_rows
+                }
+            ),
+            "cross_document_frame_overlap_pair_count": frame_pair_count,
+            "cross_document_frame_overlap_quantiles": _linear_quantiles(frame_values),
+        }
+
+    merged_examples: dict[tuple[str, tuple[str, ...]], dict[str, Any]] = {}
+    for row in prompt_rows:
+        if row["status"] != "multi_source":
+            continue
+        key = (row["normalized_text"], tuple(row["source_doc_ids"]))
+        example = merged_examples.setdefault(
+            key,
+            {
+                "prompt_line": row["prompt_line"],
+                "normalized_text": row["normalized_text"],
+                "documents": row["documents"],
+                "occurrence_count": 0,
+                "question_ids": set(),
+                "source_folders": set(),
+            },
+        )
+        example["occurrence_count"] += 1
+        example["question_ids"].add(row["question_id"])
+        example["source_folders"].add(row["source_folder"])
+    top_examples = sorted(
+        (
+            {
+                **example,
+                "question_ids": sorted(example["question_ids"]),
+                "source_folders": sorted(example["source_folders"]),
+            }
+            for example in merged_examples.values()
+        ),
+        key=lambda item: (-item["occurrence_count"], item["normalized_text"], tuple(doc["source_doc_id"] for doc in item["documents"])),
+    )[:20]
+
+    eligible_count = len(eligible)
+    question_distribution = {
+        question_id: {
+            "prompt_line_count": values["prompt_lines"],
+            "uniquely_attributed_line_count": values["unique"],
+            "multi_source_merged_line_count": values["multi_source"],
+            "unmatched_line_count": values["unmatched"],
+            "source_unresolved_line_count": values["source_unresolved"],
+            "same_document_duplicate_line_count": values["same_document_duplicate"],
+            "independent_cross_source_collision_line_count": values["independent_cross_source_collision"],
+        }
+        for question_id, values in sorted(by_question.items())
+    }
+    collision_question_ids = sorted(
+        question_id for question_id, values in by_question.items()
+        if values["independent_cross_source_collision"]
+    )
+    all_kind_metrics = build_kind_metrics(None)
+    observed_kinds = sorted(
+        {kind for row in prompt_rows for kind in row["trace_kinds"] if kind}
+    )
+    by_trace_kind = {"fact": build_kind_metrics("fact"), "bfs": build_kind_metrics("bfs")}
+    for kind in observed_kinds:
+        if kind not in by_trace_kind:
+            by_trace_kind[kind] = build_kind_metrics(kind)
+    return {
+        "eligible_question_count": eligible_count,
+        "analyzed_prompt_record_count": len(eligible_prompt_record_keys),
+        "prompt_line_count": total_lines,
+        "prompt_line_status_counts": {
+            "uniquely_attributed": status_counts["unique"],
+            "multi_source_merged": status_counts["multi_source"],
+            "unmatched": status_counts["unmatched"],
+            "source_unresolved": status_counts["source_unresolved"],
+        },
+        "prompt_line_status_ratios_of_all_prompt_lines": {
+            "uniquely_attributed": status_counts["unique"] / total_lines if total_lines else 0.0,
+            "multi_source_merged": status_counts["multi_source"] / total_lines if total_lines else 0.0,
+            "unmatched": status_counts["unmatched"] / total_lines if total_lines else 0.0,
+            "source_unresolved": status_counts["source_unresolved"] / total_lines if total_lines else 0.0,
+        },
+        "same_document_duplicate_line_count": sum(row["same_document_duplicate"] for row in prompt_rows),
+        "independent_cross_source_collision_line_count": len(collision_rows),
+        "independent_cross_source_collision_line_ratio": len(collision_rows) / total_lines if total_lines else 0.0,
+        "independent_cross_source_collision_group_count": collision_groups,
+        "questions_with_independent_cross_source_collision": collision_question_ids,
+        "questions_with_independent_cross_source_collision_count": len(collision_question_ids),
+        "questions_with_independent_cross_source_collision_ratio_of_eligible": len(collision_question_ids) / eligible_count if eligible_count else 0.0,
+        "multi_source_merged_examples_top20": top_examples,
+        "multi_source_merged_question_distribution": {
+            question_id: values["multi_source_merged_line_count"]
+            for question_id, values in question_distribution.items()
+        },
+        "question_distribution": question_distribution,
+        "by_trace_kind": {
+            **by_trace_kind,
+        },
+        "observed_trace_kinds": observed_kinds,
+        "cross_document_frame_overlap_pair_count": all_kind_metrics["cross_document_frame_overlap_pair_count"],
+        "cross_document_frame_overlap_quantiles": all_kind_metrics["cross_document_frame_overlap_quantiles"],
+        "out_of_scope_records": out_of_scope_records,
+        "missing_prompt_context_records": missing_prompt_context_records,
+        "folder_record_counts": folder_record_counts,
+        "unmatched_prompt_rows": [
+            {key: row[key] for key in ("source_folder", "record_index", "question_id", "subquestion_index", "line_index", "prompt_line")}
+            for row in prompt_rows if row["status"] == "unmatched"
+        ],
+        "aggr18_prompt_attempts": aggr18_attempts,
+    }
 
 
 def article_number(value: str | int | None) -> str | None:
@@ -1080,7 +1513,7 @@ def _build_summary_markdown(
 - Neo4j 存取：`READ` session；每批 {BATCH_SIZE} rows，批次間隔 {BATCH_PAUSE_SECONDS:.2f}s；查詢只回傳 Fact 文字、Document 標題／來源 ID、LawArticle 條號與內部暫用 Fact ID，未查詢或回傳 `fact_embedding`。
 - 全域查詢：回傳列數 {query_stats['returned_row_count']}；相異 Fact 節點 {kg_stats['actual_fact_count']}；實際查詢耗時 {query_stats['elapsed_seconds']:.2f}s。
 - 未找到的題目 ID：{', '.join(missing_question_ids) if missing_question_ids else '無'}。
-- 本次只完成 Phase 1（P1-a、P1-b、P1-c）；未讀取 T2 Stage A 輸出，Phase 2 待 T2 完成。
+- 本段記錄 Phase 1（P1-a、P1-b、P1-c）；Phase 2 使用凍結快照後另列於下方。
 
 ## 共同定義
 
@@ -1163,6 +1596,286 @@ def _write_json(path: Path, value: Mapping[str, Any]) -> None:
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
+
+
+def _phase1_document_names(kg_wide: Mapping[str, Any], questions: Mapping[str, Any]) -> dict[str, str]:
+    """僅從 Phase 1 已有輸出建立 source_doc_id→法規名對照。"""
+    titles: dict[str, set[str]] = defaultdict(set)
+
+    def visit(value: Any) -> None:
+        if isinstance(value, Mapping):
+            source_id = value.get("source_doc_id")
+            title = value.get("title") or value.get("document_title") or value.get("law_name")
+            if source_id and title:
+                titles[str(source_id).strip()].add(str(title).strip())
+            for child in value.values():
+                visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    visit(kg_wide)
+    visit(questions)
+    return {source_id: sorted(names)[0] for source_id, names in titles.items() if names}
+
+
+def _phase2_summary_markdown(
+    *,
+    result: Mapping[str, Any],
+    snapshot_manifest: Mapping[str, Any],
+    generated_at: str,
+    commit: str,
+) -> str:
+    folder_lines = [
+        f"| `{item['directory']}` | {item['bytes']:,} | `{item['sha256']}` | {item['record_count']} |"
+        for item in result["source_snapshot"]["verified_files"]
+    ]
+    folder_lines = folder_lines or ["| — | — | — | — |"]
+    counts = result["prompt_line_status_counts"]
+    ratios = result["prompt_line_status_ratios_of_all_prompt_lines"]
+    kind_lines = []
+    kind_order = [kind for kind in ("fact", "bfs") if kind in result["by_trace_kind"]]
+    kind_order.extend(kind for kind in result["by_trace_kind"] if kind not in kind_order)
+    for kind in kind_order:
+        item = result["by_trace_kind"][kind]
+        kind_lines.append(
+            f"| {kind} | {item['prompt_line_count']} | {item['uniquely_attributed_line_count']} | "
+            f"{item['multi_source_merged_line_count']} | {item['unmatched_line_count']} | "
+            f"{item['same_document_duplicate_line_count']} | "
+            f"{item['independent_cross_source_collision_line_count']} | "
+            f"{item['cross_document_frame_overlap_pair_count']} | "
+            f"{json.dumps(item['cross_document_frame_overlap_quantiles'], ensure_ascii=False, sort_keys=True)} |"
+        )
+    question_lines = [
+        f"| `{question_id}` | {item['prompt_line_count']} | {item['uniquely_attributed_line_count']} | "
+        f"{item['multi_source_merged_line_count']} | {item['unmatched_line_count']} | "
+        f"{item['same_document_duplicate_line_count']} | "
+        f"{item['independent_cross_source_collision_line_count']} |"
+        for question_id, item in result["question_distribution"].items()
+    ] or ["| — | 0 | 0 | 0 | 0 | 0 | 0 |"]
+    example_lines = []
+    for index, item in enumerate(result["multi_source_merged_examples_top20"], start=1):
+        docs = "; ".join(
+            f"`{doc['source_doc_id']}` ({doc['law_name'] or 'Phase 1 未提供法規名'})"
+            for doc in item["documents"]
+        )
+        example_lines.append(
+            f"{index}. {json.dumps(item['prompt_line'], ensure_ascii=False)} — {docs}；"
+            f"出現 {item['occurrence_count']} 次；題目 {', '.join(item['question_ids'])}。"
+        )
+    if not example_lines:
+        example_lines.append("沒有多來源合併行。")
+
+    aggr18_lines: list[str] = []
+    for attempt_index, attempt in enumerate(result["aggr18_prompt_attempts"], start=1):
+        aggr18_lines.append(
+            f"### 執行 {attempt_index}：`{attempt['source_folder']}`，record #{attempt['record_index']}"
+        )
+        for group in attempt["subquestions"]:
+            aggr18_lines.append(f"子問題組 {group['subquestion_index'] + 1}：")
+            for line in group["prompt_lines"]:
+                aggr18_lines.append(
+                    f"- 行 {line['line_index'] + 1}（{line['status']}）："
+                    f"{json.dumps(line['prompt_line'], ensure_ascii=False)}"
+                )
+                for trace in line["matched_traces"]:
+                    aggr18_lines.append(
+                        "  - trace："
+                        + json.dumps(
+                            {
+                                "kind": trace["kind"],
+                                "text": trace["text"],
+                                "source_doc_id": trace["source_doc_id"],
+                                "article_no": trace["article_no"],
+                                "rank": trace["rank"],
+                                "in_prompt": trace["in_prompt"],
+                            },
+                            ensure_ascii=False,
+                            sort_keys=True,
+                        )
+                    )
+                if not line["matched_traces"]:
+                    aggr18_lines.append("  - trace：無（unmatched）")
+    if not aggr18_lines:
+        aggr18_lines.append("快照中沒有 57-AGGR18 執行紀錄。")
+
+    gold_checks = result.get("aggr18_multi_source_gold_checks", [])
+    gold_lines = [
+        f"- 行 {json.dumps(item['prompt_line'], ensure_ascii=False)}："
+        f"gold exact span={str(item['matches_gold_exact_span']).lower()}。"
+        for item in gold_checks
+    ] or ["- AGGR18 沒有多來源合併行可比對 gold exact span。"]
+    excluded_lines = [
+        f"- `{item['source_folder']}` record #{item['record_index']}：`{item['question_id'] or '(無 question_id)'}`"
+        for item in result["out_of_scope_records"]
+    ] or ["- 無。"]
+    unmatched_lines = [
+        f"- `{item['question_id']}` / `{item['source_folder']}` record #{item['record_index']} / "
+        f"子問題組 {item['subquestion_index'] + 1} / 行 {item['line_index'] + 1}："
+        f"{json.dumps(item['prompt_line'], ensure_ascii=False)}"
+        for item in result["unmatched_prompt_rows"]
+    ] or ["- 無。"]
+
+    frame_quantiles = json.dumps(
+        result["cross_document_frame_overlap_quantiles"], ensure_ascii=False, sort_keys=True
+    )
+    return f"""## Phase 2：Stage A prompt 來源歧義與多來源行
+
+### 執行資訊與凍結輸入
+
+- 產出時間（UTC）：`{generated_at}`；執行時 commit：`{commit}`。
+- 凍結題目範圍：`frozen_manifest.json` 的 `eligible_ids`，共 {result['eligible_question_count']} 題；只納入這些題目。
+- 使用快照：`{snapshot_manifest.get('snapshot_root')}`。分析只讀快照副本，未讀取之後新增的資料夾／檔案。
+- 每個 records.json 的快照大小與 SHA-256：
+
+| 資料夾 | bytes | SHA-256 | 記錄數 |
+|---|---:|---|---:|
+{chr(10).join(folder_lines)}
+
+- 未納入的非 eligible 記錄：{len(result['out_of_scope_records'])} 筆；清單見下方。
+- 缺少 `prompt_context_lines` 欄位的 eligible 記錄：{len(result['missing_prompt_context_records'])} 筆。
+
+### 配對規則與分母
+
+- 巢狀 list 每個內層 list 視為一個子問題組；扁平 list 視為單一組；空 list 計 0 行。合併階段只按 `question_id` 納入／排除，所有資料夾與重跑記錄保留來源資料夾和 record 序號。
+- 將 prompt 行開頭單一 `- ` 去除後，使用 Phase 1 `normalize_text` 與該筆 `retrieval_trace` 中 `in_prompt=true` 的 `text` 比對；不以相同字串以外的條件推測配對。
+- **唯一歸屬行**：所有匹配 trace 都有 `source_doc_id`，且不同 ID 恰為 1。**多來源合併行**：同一 prompt 行匹配到至少 2 個不同 `source_doc_id`。**同文件重複**：匹配 trace 多筆，但只有 1 個不同 `source_doc_id`；不計歧義。**unmatched**：沒有匹配到任何符合條件 trace；列出並計入總行。匹配 trace 但缺來源 ID 者另列 `source_unresolved`。
+- 獨立碰撞行只在同一執行、同一子問題組內計算：兩條以上各自唯一歸屬的 prompt 行正規化同文，且 source_doc_id 不同。跨資料夾／跨重跑不互相比對。依已確認的集合式文字配對，同一正規化鍵的行共享相同 trace 候選；若候選跨文件便列為多來源合併行，不任選一個來源，因此獨立碰撞行另外計數但不會把多來源行拆開。
+- 以下狀態分別以總 prompt 行數為分母；同文件重複與獨立碰撞行是唯一歸屬行的子集。總行數 {result['prompt_line_count']}；唯一歸屬 {counts['uniquely_attributed']}（{ratios['uniquely_attributed']:.2%}）；多來源合併 {counts['multi_source_merged']}（{ratios['multi_source_merged']:.2%}）；unmatched {counts['unmatched']}（{ratios['unmatched']:.2%}）；來源未解 {counts['source_unresolved']}（{ratios['source_unresolved']:.2%}）；同文件重複 {result['same_document_duplicate_line_count']}；獨立跨來源碰撞行 {result['independent_cross_source_collision_line_count']}（{result['independent_cross_source_collision_line_ratio']:.2%}）。獨立碰撞文字組 {result['independent_cross_source_collision_group_count']} 組。
+- 有至少一條獨立跨來源碰撞行的題目：{result['questions_with_independent_cross_source_collision_count']} / {result['eligible_question_count']}（{result['questions_with_independent_cross_source_collision_ratio_of_eligible']:.2%}）：{', '.join(result['questions_with_independent_cross_source_collision']) or '無'}。
+
+### 多來源合併行（主要指標）
+
+- 總數：{counts['multi_source_merged']}；占總 prompt 行數 {result['prompt_line_count']} 的 {ratios['multi_source_merged']:.2%}。
+- 前 20 個範例（按快照中出現次數排序；只提供 Phase 1 輸出已能確認的法規名）：
+
+{chr(10).join(example_lines)}
+
+AGGR18 的多來源行是否為 gold exact span：
+
+{chr(10).join(gold_lines)}
+
+### 逐題分布
+
+| 題目 | prompt 行 | 唯一歸屬 | 多來源合併 | unmatched | 同文件重複 | 獨立跨來源碰撞行 |
+|---|---:|---:|---:|---:|---:|---:|
+{chr(10).join(question_lines)}
+
+### Trace kind 分層與 frame_overlap
+
+- 全部唯一歸屬行中，僅在同一執行／子問題組內配對不同 `source_doc_id` 的行對；共有 {result['cross_document_frame_overlap_pair_count']} 對。frame_overlap 分位數（線性插值）：`{frame_quantiles}`。此處只使用唯一歸屬行。
+- `fact`／`bfs` 分層以該 kind 的匹配 trace 單獨判定歸屬；有多 kind trace 的 prompt 行可能出現在多層。實際快照觀察到的 trace kind：{', '.join(result['observed_trace_kinds']) or '無'}。本次 `bfs` 沒有 `in_prompt=true` trace；另有 trace kind 依原值另列。unmatched 行沒有可用 trace kind，故只在總計列出。各 kind 的 prompt 行分母是至少有一筆該 kind 匹配 trace 的行數；同一行可能出現在多個 kind。每層 frame_overlap 僅使用該 kind 下唯一歸屬且跨文件的行對。
+
+| kind | 有該 kind trace 的 prompt 行 | 唯一歸屬 | 多來源 | unmatched | 同文件重複 | 獨立碰撞行 | 跨文件行對 | frame_overlap 分位數 |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+{chr(10).join(kind_lines)}
+
+### unmatched prompt 行
+
+以下所有 unmatched 行都保留並計入總 prompt 行及 unmatched 分母：
+
+{chr(10).join(unmatched_lines)}
+
+### 快照中不在凍結 42 題的記錄（僅列出，不納入統計）
+
+{chr(10).join(excluded_lines)}
+
+### 57-AGGR18 實際 prompt 行與對應 trace
+
+每個 prompt 字串以 JSON 字串格式逐字保留，trace 來自同筆紀錄中 `in_prompt=true` 且正規化文字匹配的項目。
+
+{chr(10).join(aggr18_lines)}
+
+### 限制與可比性
+
+- 這是 `top_k=40`，不是凍結基準的 `top_k=20`；本統計只回答 prompt 行的來源是否唯一／多來源，不可用來比較答對率。
+- 「source_doc_id 對應到多個 prompt 行」是觀察到的輸出關係；本統計無法單獨證實或否證 `vector_search_facts` 的 `(subject, rel_type, object)` 去重鍵如何影響候選到 prompt 行的轉換，故不據此宣稱成因。
+- `frame_overlap` 是字面句框度量，不代表語意相同或有錯答風險；trace 以正規化文字對應，無法匹配者列為 unmatched。
+"""
+
+
+def run_phase2(
+    *,
+    snapshot_dir: Path = DEFAULT_PHASE2_SNAPSHOT_DIR,
+    frozen_dir: Path = DEFAULT_FROZEN_DIR,
+    output_dir: Path = DEFAULT_OUTPUT_DIR,
+) -> dict[str, Any]:
+    """分析已凍結的 Stage A 輸出，不存取 Neo4j 或 T2 原始工作目錄。"""
+    records_by_folder, snapshot_manifest = load_phase2_snapshot(snapshot_dir)
+    frozen_manifest = json.loads((frozen_dir / "frozen_manifest.json").read_text(encoding="utf-8"))
+    eligible_ids = frozen_manifest.get("eligible_ids")
+    if not isinstance(eligible_ids, list) or not eligible_ids:
+        raise ValueError("frozen_manifest.json must contain eligible_ids")
+    kg_wide = json.loads((output_dir / "kg_wide.json").read_text(encoding="utf-8"))
+    phase1_questions = json.loads(
+        (output_dir / "questions_frozen42.json").read_text(encoding="utf-8")
+    )
+    analysis = analyze_prompt_records(
+        records_by_folder,
+        eligible_ids,
+        _phase1_document_names(kg_wide, phase1_questions),
+    )
+    aggr18 = next(
+        (question for question in phase1_questions.get("questions", []) if question.get("id") == "57-AGGR18"),
+        {},
+    )
+    gold_span_keys = {
+        normalize_text(span.get("exact_span"))
+        for span in aggr18.get("span_results", [])
+        if span.get("exact_span")
+    }
+    gold_checks = []
+    for attempt in analysis["aggr18_prompt_attempts"]:
+        for group in attempt["subquestions"]:
+            for line in group["prompt_lines"]:
+                if line["status"] == "multi_source":
+                    _, key = _prompt_line_text_and_key(line["prompt_line"])
+                    gold_checks.append(
+                        {
+                            "source_folder": attempt["source_folder"],
+                            "record_index": attempt["record_index"],
+                            "prompt_line": line["prompt_line"],
+                            "matches_gold_exact_span": key in gold_span_keys,
+                        }
+                    )
+    generated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    analysis["aggr18_multi_source_gold_checks"] = gold_checks
+    result: dict[str, Any] = {
+        "generated_at_utc": generated_at,
+        "git_commit": git_commit(),
+        "snapshot_root": str(snapshot_dir),
+        "source_snapshot": {
+            "included_directories": list(PHASE2_STAGE_DIRECTORIES),
+            "verified_files": snapshot_manifest["verified_files"],
+        },
+        "matching_rule": "strip one leading '- '; normalize_text equality with in_prompt=true retrieval_trace.text",
+        "scope_rule": "question_id in frozen_manifest.eligible_ids; preserve all runs and folders",
+        **analysis,
+    }
+
+    summary_path = output_dir / "summary.md"
+    previous_summary = summary_path.read_text(encoding="utf-8")
+    previous_summary = previous_summary.replace(
+        "- 本次只完成 Phase 1（P1-a、P1-b、P1-c）；未讀取 T2 Stage A 輸出，Phase 2 待 T2 完成。",
+        "- 本段記錄 Phase 1（P1-a、P1-b、P1-c）；Phase 2 使用凍結快照後另列於下方。",
+    )
+    previous_summary = previous_summary.replace(
+        "\n- Phase 2 未執行，待 T2 Stage A 完整結束後另行處理。", ""
+    )
+    phase2_marker = "\n## Phase 2：Stage A prompt 來源歧義與多來源行\n"
+    if phase2_marker in previous_summary:
+        previous_summary = previous_summary.split(phase2_marker, 1)[0]
+    phase2_summary = _phase2_summary_markdown(
+        result=result,
+        snapshot_manifest=snapshot_manifest,
+        generated_at=generated_at,
+        commit=result["git_commit"],
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(output_dir / "prompt_level_stageA.json", result)
+    summary_path.write_text(previous_summary.rstrip() + "\n\n" + phase2_summary, encoding="utf-8")
+    result["summary"] = phase2_summary
+    return result
 
 
 def run_phase1(
@@ -1321,13 +2034,40 @@ def run_phase1(
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--phase", choices=("1", "2"), default="1")
     parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     parser.add_argument("--frozen-dir", type=Path, default=DEFAULT_FROZEN_DIR)
     parser.add_argument("--test-cases", type=Path, default=DEFAULT_TEST_CASES)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--snapshot-dir", type=Path, default=DEFAULT_PHASE2_SNAPSHOT_DIR)
     parser.add_argument("--batch-pause-seconds", type=float, default=BATCH_PAUSE_SECONDS)
     args = parser.parse_args(argv)
     try:
+        if args.phase == "2":
+            result = run_phase2(
+                snapshot_dir=args.snapshot_dir,
+                frozen_dir=args.frozen_dir,
+                output_dir=args.output_dir,
+            )
+            print(
+                "TASK-3 Phase 2 完成："
+                + json.dumps(
+                    {
+                        "output_files": [
+                            str(args.output_dir / "prompt_level_stageA.json"),
+                            str(args.output_dir / "summary.md"),
+                        ],
+                        "prompt_line_count": result["prompt_line_count"],
+                        "multi_source_merged_line_count": result["prompt_line_status_counts"]["multi_source_merged"],
+                        "unmatched_line_count": result["prompt_line_status_counts"]["unmatched"],
+                        "out_of_scope_record_count": len(result["out_of_scope_records"]),
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            return 0
         result = run_phase1(
             env_file=args.env_file,
             frozen_dir=args.frozen_dir,
@@ -1344,7 +2084,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     except Exception as error:  # noqa: BLE001 - 不顯示 driver 例外內容，避免洩漏連線資訊
         print(
-            f"Phase 1 停止：{type(error).__name__}；未輸出連線憑證或錯誤細節。",
+            f"Phase {args.phase} 停止：{type(error).__name__}；未輸出連線憑證或錯誤細節。",
             flush=True,
         )
         return 1

@@ -1,11 +1,14 @@
+import hashlib
 import json
 
 import pytest
 
 from scripts.analysis.source_ambiguity_audit import (
     _cross_document_metric_values,
+    PHASE2_STAGE_DIRECTORIES,
     AGGR18_EXPECTED_FACT_TEXTS,
     FactCitation,
+    analyze_prompt_records,
     analyze_question,
     article_number,
     build_question_audit,
@@ -14,6 +17,7 @@ from scripts.analysis.source_ambiguity_audit import (
     frame_overlap,
     global_collision_report,
     jaccard_similarity,
+    load_phase2_snapshot,
     normalize_text,
     pair_span_to_facts,
     validate_aggr18_preflight,
@@ -408,3 +412,155 @@ def test_question_audit_json_has_no_vector_or_credential_fields():
 
     assert "fact_embedding" not in serialized
     assert "NEO4J_PASSWORD" not in serialized
+
+
+def phase2_record(question_id, prompt_context_lines, traces):
+    return {
+        "question_id": question_id,
+        "lineage": {
+            "stage2_context": {"prompt_context_lines": prompt_context_lines},
+            "stage1_retrieval": {"retrieval_trace": traces},
+        },
+    }
+
+
+def phase2_trace(text, source_doc_id, kind="fact", *, in_prompt=True, article_no="第1條"):
+    return {
+        "kind": kind,
+        "text": text,
+        "source_doc_id": source_doc_id,
+        "article_no": article_no,
+        "in_prompt": in_prompt,
+    }
+
+
+def test_prompt_analysis_handles_nested_flat_and_empty_prompt_lists():
+    records = {
+        "nested": [
+            phase2_record(
+                "q1",
+                [["- 第一行"], ["- 第二行"]],
+                [phase2_trace("第一行", "doc-a"), phase2_trace("第二行", "doc-b")],
+            )
+        ],
+        "flat": [
+            phase2_record("q1", ["- 第三行"], [phase2_trace("第三行", "doc-c")]),
+            phase2_record("q1", [], []),
+        ],
+    }
+
+    result = analyze_prompt_records(records, {"q1"})
+
+    assert result["prompt_line_count"] == 3
+    assert result["prompt_line_status_counts"] == {
+        "uniquely_attributed": 3,
+        "multi_source_merged": 0,
+        "unmatched": 0,
+        "source_unresolved": 0,
+    }
+    assert result["by_trace_kind"]["fact"]["prompt_line_count"] == 3
+    assert result["analyzed_prompt_record_count"] == 3
+
+
+def test_prompt_analysis_separates_merged_duplicates_unmatched_and_independent_collisions():
+    records = {
+        "stage_a": [
+            phase2_record(
+                "q1",
+                [[
+                    "- 同 文。",
+                    "- 同文",
+                    "- 合併",
+                    "- 重複",
+                    "- 找不到",
+                    "- 單獨",
+                ]],
+                [
+                    phase2_trace("同文", "doc-a"),
+                    phase2_trace("同文。", "doc-b"),
+                    phase2_trace("合併", "doc-c"),
+                    phase2_trace("合併", "doc-d"),
+                    phase2_trace("重複", "doc-e", "fact"),
+                    phase2_trace("重複", "doc-e", "bfs"),
+                    phase2_trace("單獨", "doc-f", "triple"),
+                ],
+            )
+        ]
+    }
+
+    result = analyze_prompt_records(records, {"q1"})
+
+    assert result["prompt_line_count"] == 6
+    assert result["prompt_line_status_counts"] == {
+        "uniquely_attributed": 2,
+        "multi_source_merged": 3,
+        "unmatched": 1,
+        "source_unresolved": 0,
+    }
+    assert result["same_document_duplicate_line_count"] == 1
+    assert result["independent_cross_source_collision_line_count"] == 0
+    assert result["independent_cross_source_collision_group_count"] == 0
+    assert result["unmatched_prompt_rows"][0]["prompt_line"] == "- 找不到"
+    assert result["cross_document_frame_overlap_pair_count"] == 1
+    assert result["by_trace_kind"]["fact"]["multi_source_merged_line_count"] == 3
+    assert result["by_trace_kind"]["fact"]["independent_cross_source_collision_line_count"] == 0
+    assert result["by_trace_kind"]["bfs"]["prompt_line_count"] == 1
+    assert result["by_trace_kind"]["bfs"]["same_document_duplicate_line_count"] == 0
+    assert result["by_trace_kind"]["triple"]["uniquely_attributed_line_count"] == 1
+    assert result["questions_with_independent_cross_source_collision"] == []
+    assert result["questions_with_independent_cross_source_collision_ratio_of_eligible"] == 0.0
+
+
+def test_same_question_across_folders_keeps_all_runs_without_cross_run_collision():
+    records = {
+        "stage_a": [phase2_record("q1", ["- 同句"], [phase2_trace("同句", "doc-a")])],
+        "stage_b": [
+            phase2_record("q1", ["- 同句"], [phase2_trace("同句", "doc-b")]),
+            phase2_record("outside", ["- 不納入"], [phase2_trace("不納入", "doc-c")]),
+        ],
+    }
+
+    result = analyze_prompt_records(records, {"q1"})
+
+    assert result["prompt_line_count"] == 2
+    assert result["analyzed_prompt_record_count"] == 2
+    assert result["question_distribution"]["q1"]["prompt_line_count"] == 2
+    assert result["independent_cross_source_collision_line_count"] == 0
+    assert result["out_of_scope_records"] == [
+        {"source_folder": "stage_b", "record_index": 1, "question_id": "outside"}
+    ]
+
+
+def test_phase2_snapshot_loader_verifies_allowlist_size_and_sha256(tmp_path):
+    files = []
+    for directory in PHASE2_STAGE_DIRECTORIES:
+        records_path = tmp_path / directory / "records.json"
+        records_path.parent.mkdir(parents=True)
+        records_path.write_text("[]\n", encoding="utf-8")
+        payload = records_path.read_bytes()
+        files.append(
+            {
+                "directory": directory,
+                "status": "snapshot_copy",
+                "sha256": hashlib.sha256(payload).hexdigest(),
+                "bytes": len(payload),
+            }
+        )
+    (tmp_path / "snapshot_manifest.json").write_text(
+        json.dumps(
+            {"included_directories": list(PHASE2_STAGE_DIRECTORIES), "files": files},
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    records, manifest = load_phase2_snapshot(tmp_path)
+
+    assert list(records) == list(PHASE2_STAGE_DIRECTORIES)
+    assert all(records[directory] == [] for directory in PHASE2_STAGE_DIRECTORIES)
+    assert len(manifest["verified_files"]) == 8
+    assert manifest["verified_files"][0]["bytes"] == 4
+    changed_file = tmp_path / PHASE2_STAGE_DIRECTORIES[0] / "records.json"
+    changed_file.write_text("[]", encoding="utf-8")
+    with pytest.raises(ValueError, match="hash or size mismatch"):
+        load_phase2_snapshot(tmp_path)
