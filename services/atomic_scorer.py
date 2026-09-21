@@ -47,6 +47,7 @@ class AtomicScorer:
         deterministic_guard_passed: bool = True,
         guard_failures: List[str] | None = None,
         trap_claim_spans: List[str] | None = None,
+        extra_refusal_patterns: List[str] | None = None,
     ) -> AtomicScoreResult:
         """評估答案對原子黃金事實之符合程度。
 
@@ -75,6 +76,8 @@ class AtomicScorer:
                 "未記載", "無法確認", "無相關規定", "資料未提及", "查無相關", "未能提供",
                 "並未記載", "沒有提到", "無法提供確定答覆"
             ]
+            # 事後重算專用（報告57 §4.20）：預設為空，不改變任何既有評分結果。
+            refusal_patterns = refusal_patterns + list(extra_refusal_patterns or [])
             clean_ans = cls._clean_text(answer)
             refused = any(p in clean_ans for p in refusal_patterns)
             trap_triggered = any(

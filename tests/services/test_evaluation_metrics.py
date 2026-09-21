@@ -261,3 +261,31 @@ def test_cost_analyzer_profiles():
     assert serving.latency_p50_ms == 350.0
     assert serving.latency_p95_ms == 1200.0
     assert serving.estimated_cost_per_1k_queries_usd > 0.0
+
+
+_SUBSTANTIVE_REFUSAL = "事實清單中沒有相關資訊可以作答，因此無法回答這個問題。"
+
+
+def test_extra_refusal_patterns_default_does_not_change_scoring():
+    """報告57 §4.20：實質拒答但用語不在預設清單，預設評分維持判失敗（凍結基準的結果不可變）。"""
+    res = AtomicScorer.evaluate(_SUBSTANTIVE_REFUSAL, [], refusal_expected=True)
+    assert res.is_perfect is False
+
+
+def test_extra_refusal_patterns_recognises_substantive_refusal_for_posthoc_rescoring():
+    res = AtomicScorer.evaluate(
+        _SUBSTANTIVE_REFUSAL, [], refusal_expected=True, extra_refusal_patterns=["沒有相關資訊"]
+    )
+    assert res.is_perfect is True
+    assert res.details == "Exact Refusal Passed"
+
+
+def test_extra_refusal_patterns_do_not_override_trap_claim():
+    """放寬關鍵字不能讓「先斷言陷阱、別處夾帶拒答用語」的答案過關。"""
+    trapped = "精密作業的勞工需要做特殊健康檢查。其他部分沒有相關資訊。"
+    res = AtomicScorer.evaluate(
+        trapped, [], refusal_expected=True,
+        trap_claim_spans=["精密作業的勞工需要做特殊健康檢查"],
+        extra_refusal_patterns=["沒有相關資訊"],
+    )
+    assert res.is_perfect is False
