@@ -1,0 +1,450 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "run": 1,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['勞工結婚者給予婚假八日，工資照給'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M2",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['勞工結婚者給予婚假八日，工資照給'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "17-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "scenario_type": "Type-A",
+    "answer": "We need to answer: \"勞工結婚可以請幾天婚假？工資怎麼算？\" Using only facts from the provided list. Must not infer beyond facts. Must strictly follow rules.\n\nWe have facts from the list:\n\nFrom 【來源：N0030006_勞工請假規則，第0段】\n\n第 2 條:\n\n\"勞工結婚者給予婚假八日，工資照給。\"\n\nSo answer: 婚假八日, 工資照給 (i.e., wages paid in full). So we can state that.\n\nWe also have other relevant facts: maybe about other types of leave, but question only asks about baihe (marriage) days and how wages are calculated.\n\nWe must not add extra info beyond facts. Must not use inference. Must answer using only facts from list.\n\nWe need to answer in Traditional Chinese, no simplified.\n\nWe must not cite other sources. Just answer concisely.\n\nWe must follow rule 1: Only state facts explicitly present. So we can say:\n\n- 勞工結婚者給予婚假八日，工資照給。\n\nThat's enough.\n\nBut the question: \"勞工結婚可以請幾天婚假？工資怎麼算？\" So answer: 婚假八日，工資照給（即全工資付款）。\n\nWe must not add extra details not in facts.\n\nWe must not use any other facts.\n\nWe must not violate rule 2: If insufficient data, say \"資料未明確記載，無法確認\". But we have the data: we have the fact that marriage leave is eight days, wages paid. So we can answer.\n\nWe must not add extra statements like \"According to the rule...\"? We can phrase answer using the facts.\n\nWe must avoid using any other numbers not in facts. The fact says eight days, wages paid. So we can say:\n\n- 婚假期限：8 天。\n- 工資計算方式：工資全部支付（照給）。\n\nThat's fine.\n\nMake sure not to add extra info like \"工資照給\" is clear.\n\nWe must not use any other facts not present.\n\nWe must not mention other sections.\n\nWe must answer in Traditional Chinese.\n\nWe should keep answer concise.\n\nProbably something like:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nThat's fine.\n\nCheck rule 1: Only state facts explicitly present. Yes.\n\nWe have the fact from N0030006_勞工請假規則，第0段第2條.\n\nWe can just state the answer using that fact.\n\nWe must not add any extra reasoning.\n\nThus final answer:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nMake sure no extra words beyond needed.\n\nWe can phrase:\n\n- 婚假期限：8 天。\n- 工資計算方式：全工資付給（照給）。\n\nBut that's okay.\n\nWe must not use bullet points? Not required. But fine.\n\nWe'll answer in clear sentences.\n\nLet's produce answer.\n</think>\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。",
+    "error": null,
+    "latency_s": 122.63,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "granite4.2:3b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen3:4b",
+    "estimated_tokens": 1144,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M2",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 122630.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0030006_勞工請假規則_2"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 607,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "granite4.2:3b",
+        "generation_latency_ms": 122630.0,
+        "raw_draft": "We need to answer: \"勞工結婚可以請幾天婚假？工資怎麼算？\" Using only facts from the provided list. Must not infer beyond facts. Must strictly follow rules.\n\nWe have facts from the list:\n\nFrom 【來源：N0030006_勞工請假規則，第0段】\n\n第 2 條:\n\n\"勞工結婚者給予婚假八日，工資照給。\"\n\nSo answer: 婚假八日, 工資照給 (i.e., wages paid in full). So we can state that.\n\nWe also have other relevant facts: maybe about other types of leave, but question only asks about baihe (marriage) days and how wages are calculated.\n\nWe must not add extra info beyond facts. Must not use inference. Must answer using only facts from list.\n\nWe need to answer in Traditional Chinese, no simplified.\n\nWe must not cite other sources. Just answer concisely.\n\nWe must follow rule 1: Only state facts explicitly present. So we can say:\n\n- 勞工結婚者給予婚假八日，工資照給。\n\nThat's enough.\n\nBut the question: \"勞工結婚可以請幾天婚假？工資怎麼算？\" So answer: 婚假八日，工資照給（即全工資付款）。\n\nWe must not add extra details not in facts.\n\nWe must not use any other facts.\n\nWe must not violate rule 2: If insufficient data, say \"資料未明確記載，無法確認\". But we have the data: we have the fact that marriage leave is eight days, wages paid. So we can answer.\n\nWe must not add extra statements like \"According to the rule...\"? We can phrase answer using the facts.\n\nWe must avoid using any other numbers not in facts. The fact says eight days, wages paid. So we can say:\n\n- 婚假期限：8 天。\n- 工資計算方式：工資全部支付（照給）。\n\nThat's fine.\n\nMake sure not to add extra info like \"工資照給\" is clear.\n\nWe must not use any other facts not present.\n\nWe must not mention other sections.\n\nWe must answer in Traditional Chinese.\n\nWe should keep answer concise.\n\nProbably something like:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nThat's fine.\n\nCheck rule 1: Only state facts explicitly present. Yes.\n\nWe have the fact from N0030006_勞工請假規則，第0段第2條.\n\nWe can just state the answer using that fact.\n\nWe must not add any extra reasoning.\n\nThus final answer:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nMake sure no extra words beyond needed.\n\nWe can phrase:\n\n- 婚假期限：8 天。\n- 工資計算方式：全工資付給（照給）。\n\nBut that's okay.\n\nWe must not use bullet points? Not required. But fine.\n\nWe'll answer in clear sentences.\n\nLet's produce answer.\n</think>\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "We need to answer: \"勞工結婚可以請幾天婚假？工資怎麼算？\" Using only facts from the provided list. Must not infer beyond facts. Must strictly follow rules.\n\nWe have facts from the list:\n\nFrom 【來源：N0030006_勞工請假規則，第0段】\n\n第 2 條:\n\n\"勞工結婚者給予婚假八日，工資照給。\"\n\nSo answer: 婚假八日, 工資照給 (i.e., wages paid in full). So we can state that.\n\nWe also have other relevant facts: maybe about other types of leave, but question only asks about baihe (marriage) days and how wages are calculated.\n\nWe must not add extra info beyond facts. Must not use inference. Must answer using only facts from list.\n\nWe need to answer in Traditional Chinese, no simplified.\n\nWe must not cite other sources. Just answer concisely.\n\nWe must follow rule 1: Only state facts explicitly present. So we can say:\n\n- 勞工結婚者給予婚假八日，工資照給。\n\nThat's enough.\n\nBut the question: \"勞工結婚可以請幾天婚假？工資怎麼算？\" So answer: 婚假八日，工資照給（即全工資付款）。\n\nWe must not add extra details not in facts.\n\nWe must not use any other facts.\n\nWe must not violate rule 2: If insufficient data, say \"資料未明確記載，無法確認\". But we have the data: we have the fact that marriage leave is eight days, wages paid. So we can answer.\n\nWe must not add extra statements like \"According to the rule...\"? We can phrase answer using the facts.\n\nWe must avoid using any other numbers not in facts. The fact says eight days, wages paid. So we can say:\n\n- 婚假期限：8 天。\n- 工資計算方式：工資全部支付（照給）。\n\nThat's fine.\n\nMake sure not to add extra info like \"工資照給\" is clear.\n\nWe must not use any other facts not present.\n\nWe must not mention other sections.\n\nWe must answer in Traditional Chinese.\n\nWe should keep answer concise.\n\nProbably something like:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nThat's fine.\n\nCheck rule 1: Only state facts explicitly present. Yes.\n\nWe have the fact from N0030006_勞工請假規則，第0段第2條.\n\nWe can just state the answer using that fact.\n\nWe must not add any extra reasoning.\n\nThus final answer:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nMake sure no extra words beyond needed.\n\nWe can phrase:\n\n- 婚假期限：8 天。\n- 工資計算方式：全工資付給（照給）。\n\nBut that's okay.\n\nWe must not use bullet points? Not required. But fine.\n\nWe'll answer in clear sentences.\n\nLet's produce answer.\n</think>\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 2
+  },
+  {
+    "question_id": "17-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "scenario_type": "Type-A",
+    "answer": "We need to answer: \"勞工結婚可以請幾天婚假？工資怎麼算？\" Using only facts from the provided list. Must not infer beyond facts. Must strictly follow rules.\n\nWe have facts from the list:\n\nFrom 【來源：N0030006_勞工請假規則，第0段】\n\n第 2 條:\n\n\"勞工結婚者給予婚假八日，工資照給。\"\n\nSo answer: 婚假八日, 工資照給 (i.e., wages paid in full). So we can state that.\n\nWe also have other relevant facts: maybe about other types of leave, but question only asks about baihe (marriage) days and how wages are calculated.\n\nWe must not add extra info beyond facts. Must not use inference. Must answer using only facts from list.\n\nWe need to answer in Traditional Chinese, no simplified.\n\nWe must not cite other sources. Just answer concisely.\n\nWe must follow rule 1: Only state facts explicitly present. So we can say:\n\n- 勞工結婚者給予婚假八日，工資照給。\n\nThat's enough.\n\nBut the question: \"勞工結婚可以請幾天婚假？工資怎麼算？\" So answer: 婚假八日，工資照給（即全工資付款）。\n\nWe must not add extra details not in facts.\n\nWe must not use any other facts.\n\nWe must not violate rule 2: If insufficient data, say \"資料未明確記載，無法確認\". But we have the data: we have the fact that marriage leave is eight days, wages paid. So we can answer.\n\nWe must not add extra statements like \"According to the rule...\"? We can phrase answer using the facts.\n\nWe must avoid using any other numbers not in facts. The fact says eight days, wages paid. So we can say:\n\n- 婚假期限：8 天。\n- 工資計算方式：工資全部支付（照給）。\n\nThat's fine.\n\nMake sure not to add extra info like \"工資照給\" is clear.\n\nWe must not use any other facts not present.\n\nWe must not mention other sections.\n\nWe must answer in Traditional Chinese.\n\nWe should keep answer concise.\n\nProbably something like:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nThat's fine.\n\nCheck rule 1: Only state facts explicitly present. Yes.\n\nWe have the fact from N0030006_勞工請假規則，第0段第2條.\n\nWe can just state the answer using that fact.\n\nWe must not add any extra reasoning.\n\nThus final answer:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nMake sure no extra words beyond needed.\n\nWe can phrase:\n\n- 婚假期限：8 天。\n- 工資計算方式：全工資付給（照給）。\n\nBut that's okay.\n\nWe must not use bullet points? Not required. But fine.\n\nWe'll answer in clear sentences.\n\nLet's produce answer.\n</think>\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。",
+    "error": null,
+    "latency_s": 53.53,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "granite4.2:3b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen3:4b",
+    "estimated_tokens": 1144,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M2",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 53530.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0030006_勞工請假規則_2"
+        ],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 607,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "granite4.2:3b",
+        "generation_latency_ms": 53530.0,
+        "raw_draft": "We need to answer: \"勞工結婚可以請幾天婚假？工資怎麼算？\" Using only facts from the provided list. Must not infer beyond facts. Must strictly follow rules.\n\nWe have facts from the list:\n\nFrom 【來源：N0030006_勞工請假規則，第0段】\n\n第 2 條:\n\n\"勞工結婚者給予婚假八日，工資照給。\"\n\nSo answer: 婚假八日, 工資照給 (i.e., wages paid in full). So we can state that.\n\nWe also have other relevant facts: maybe about other types of leave, but question only asks about baihe (marriage) days and how wages are calculated.\n\nWe must not add extra info beyond facts. Must not use inference. Must answer using only facts from list.\n\nWe need to answer in Traditional Chinese, no simplified.\n\nWe must not cite other sources. Just answer concisely.\n\nWe must follow rule 1: Only state facts explicitly present. So we can say:\n\n- 勞工結婚者給予婚假八日，工資照給。\n\nThat's enough.\n\nBut the question: \"勞工結婚可以請幾天婚假？工資怎麼算？\" So answer: 婚假八日，工資照給（即全工資付款）。\n\nWe must not add extra details not in facts.\n\nWe must not use any other facts.\n\nWe must not violate rule 2: If insufficient data, say \"資料未明確記載，無法確認\". But we have the data: we have the fact that marriage leave is eight days, wages paid. So we can answer.\n\nWe must not add extra statements like \"According to the rule...\"? We can phrase answer using the facts.\n\nWe must avoid using any other numbers not in facts. The fact says eight days, wages paid. So we can say:\n\n- 婚假期限：8 天。\n- 工資計算方式：工資全部支付（照給）。\n\nThat's fine.\n\nMake sure not to add extra info like \"工資照給\" is clear.\n\nWe must not use any other facts not present.\n\nWe must not mention other sections.\n\nWe must answer in Traditional Chinese.\n\nWe should keep answer concise.\n\nProbably something like:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nThat's fine.\n\nCheck rule 1: Only state facts explicitly present. Yes.\n\nWe have the fact from N0030006_勞工請假規則，第0段第2條.\n\nWe can just state the answer using that fact.\n\nWe must not add any extra reasoning.\n\nThus final answer:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nMake sure no extra words beyond needed.\n\nWe can phrase:\n\n- 婚假期限：8 天。\n- 工資計算方式：全工資付給（照給）。\n\nBut that's okay.\n\nWe must not use bullet points? Not required. But fine.\n\nWe'll answer in clear sentences.\n\nLet's produce answer.\n</think>\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "We need to answer: \"勞工結婚可以請幾天婚假？工資怎麼算？\" Using only facts from the provided list. Must not infer beyond facts. Must strictly follow rules.\n\nWe have facts from the list:\n\nFrom 【來源：N0030006_勞工請假規則，第0段】\n\n第 2 條:\n\n\"勞工結婚者給予婚假八日，工資照給。\"\n\nSo answer: 婚假八日, 工資照給 (i.e., wages paid in full). So we can state that.\n\nWe also have other relevant facts: maybe about other types of leave, but question only asks about baihe (marriage) days and how wages are calculated.\n\nWe must not add extra info beyond facts. Must not use inference. Must answer using only facts from list.\n\nWe need to answer in Traditional Chinese, no simplified.\n\nWe must not cite other sources. Just answer concisely.\n\nWe must follow rule 1: Only state facts explicitly present. So we can say:\n\n- 勞工結婚者給予婚假八日，工資照給。\n\nThat's enough.\n\nBut the question: \"勞工結婚可以請幾天婚假？工資怎麼算？\" So answer: 婚假八日，工資照給（即全工資付款）。\n\nWe must not add extra details not in facts.\n\nWe must not use any other facts.\n\nWe must not violate rule 2: If insufficient data, say \"資料未明確記載，無法確認\". But we have the data: we have the fact that marriage leave is eight days, wages paid. So we can answer.\n\nWe must not add extra statements like \"According to the rule...\"? We can phrase answer using the facts.\n\nWe must avoid using any other numbers not in facts. The fact says eight days, wages paid. So we can say:\n\n- 婚假期限：8 天。\n- 工資計算方式：工資全部支付（照給）。\n\nThat's fine.\n\nMake sure not to add extra info like \"工資照給\" is clear.\n\nWe must not use any other facts not present.\n\nWe must not mention other sections.\n\nWe must answer in Traditional Chinese.\n\nWe should keep answer concise.\n\nProbably something like:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nThat's fine.\n\nCheck rule 1: Only state facts explicitly present. Yes.\n\nWe have the fact from N0030006_勞工請假規則，第0段第2條.\n\nWe can just state the answer using that fact.\n\nWe must not add any extra reasoning.\n\nThus final answer:\n\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。\n\nMake sure no extra words beyond needed.\n\nWe can phrase:\n\n- 婚假期限：8 天。\n- 工資計算方式：全工資付給（照給）。\n\nBut that's okay.\n\nWe must not use bullet points? Not required. But fine.\n\nWe'll answer in clear sentences.\n\nLet's produce answer.\n</think>\n勞工結婚者可請得婚假 8 天，且工資全部付給勞工（照給）。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 3
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "run": 1,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['一年內合計不得超過十四日。事假期間不給工資'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "M2",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['一年內合計不得超過十四日。事假期間不給工資'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "run": 2,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['一年內合計不得超過十四日。事假期間不給工資'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "M2",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['一年內合計不得超過十四日。事假期間不給工資'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "run": 3,
+    "scenario_type": "Type-A",
+    "answer": "",
+    "error": "harness_timeout_after_180.0s",
+    "latency_s": 180.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/1 facts. Missed essential: ['一年內合計不得超過十四日。事假期間不給工資'] Guard failures: ['HarnessTimeout: Harness Timeout after 180.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 180.0s"
+      ]
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "M2",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 180000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "recall_rate": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "verbalization_omissions": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 180000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['一年內合計不得超過十四日。事假期間不給工資'])"
+    },
+    "failure_attribution": "Harness Timeout after 180.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 180.0s",
+      "extra_constrained_note": null
+    }
+  }
+]
