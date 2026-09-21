@@ -17,7 +17,7 @@
 | 檔案 | 文獻 | 來源 | 狀態 |
 |---|---|---|---|
 | `zhou-et-al-2023-context-faithful-prompting.pdf` | Zhou, Zhang, Poon & Chen (2023), *Context-faithful Prompting for Large Language Models*，Findings of EMNLP 2023（USC + Microsoft Research） | [arXiv:2303.11315v2](https://arxiv.org/abs/2303.11315)；[ACL Anthology 2023.findings-emnlp.968](https://aclanthology.org/2023.findings-emnlp.968/)；[GitHub wzhouad/context-faithful-llm](https://github.com/wzhouad/context-faithful-llm) | ✅ 🟢 已下載全文精讀（6 頁正文 + 附錄） |
-| `muhamed-et-al-2025-refusalbench.pdf` | Muhamed, Ribeiro, Dreyer, Smith & Diab (2025), *RefusalBench: Generative Evaluation of Selective Refusal in Grounded Language Models* | [arXiv:2510.10390](https://arxiv.org/abs/2510.10390)（2025-10-12） | ✅ 🟢 §1–§4.3 精讀（2026-09-08，實為 44 頁）——見下「G2 文獻 §5」。六類不確定性、MissingInfo/Ambiguity 最難、Qwen 家族 refusal <17% 全尺寸、FRR/MRR 指標 |
+| `muhamed-et-al-2025-refusalbench.pdf` | Muhamed, Ribeiro, Dreyer, Smith & Diab (2025), *RefusalBench: Generative Evaluation of Selective Refusal in Grounded Language Models* | [arXiv:2510.10390](https://arxiv.org/abs/2510.10390)（2025-10-12） | ✅ 🟢 §1–§4.3 精讀（2026-09-08，實為 44 頁）——見下「G2 文獻 §5」。六類不確定性、MissingInfo/Ambiguity 最難、Qwen 家族 refusal <17% 全尺寸（**僅限單文件基準 RefusalBench-NQ**；2026-09-21 重查，多文件 GaRAGe 在可取得的內文中未見 Qwen 數字）、FRR/MRR 指標 |
 
 **參考文獻查證（不下載全文，僅記書目）**：
 - **"Not All Needles Are Found: How Fact Distribution and Don't Make It Up Prompts Shape Literal Extraction, Logical Inference, and Hallucination Risks in Long-Context LLMs"**（[arXiv:2601.02023](https://arxiv.org/abs/2601.02023)，2026-01）——🟡 搜尋結果層級：「Don't Make It Up」型 prompt 在「literal extraction vs hallucination」之間的權衡，與本專案 `_grounding_prompt()`／`_build_constrained_prompt()` 的嚴格措辭直接相關。
@@ -78,7 +78,7 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 
 - **六類資訊不確定性**：Ambiguity / Contradiction / **MissingInfo** / FalsePremise / **GranularityMismatch** / EpistemicMismatch。報26 Q7（問法規沒寫的健檢頻率）= **MissingInfo**；「值落在對照表沒有的級距」= **GranularityMismatch**。
 - **MissingInfo 與 Ambiguity 是所有模型最難的兩類**（Fig 4）。模型**把 REFUSE_INFO_MISSING 當 catch-all**，而 **GranularityMismatch 被系統性誤分類**（Fig 8 混淆矩陣：GranMism→MisInfo 0.819）——正是 G2 例外會踩的邊界。
-- **⚠️ Qwen 家族 selective-refusal 準確率全尺寸 <17%，不隨規模改善**（Fig 9）。本專案 `qwen2.5:7b` **同時當生成端與 grounding judge**——負責執行「每一列必須逐字」的那個 judge，實證上是最不會做這種判斷的家族。
+- **⚠️ Qwen 家族 selective-refusal 準確率全尺寸 <17%，不隨規模改善**（Fig 9；**僅限單文件基準 RefusalBench-NQ**）。**適用範圍要講準**：這是「模型在脈絡有缺陷時是否會適當拒答」的生成行為，不是「判斷一段答案／查表是否正確」的分類任務。本專案 `qwen2.5:7b` **同時當生成端與 grounding judge**，負責執行「每一列必須逐字」的那個 judge——它在這類判斷上可能有類似弱點，但**這是推論，不是該論文直接量測的結果**；直接證據是下方 G2 的金絲雀驗證（2026-09-21 校正，見報告61 §3.1）。
 - 降 FRR 幾乎必然抬 MRR（"dangerous over-confidence or over-caution"，無模型兩維皆 >80%）。G2 壓 False-Refusal → 預期 Missed-Refusal 上升。
 - **可借指標**（Appendix D）：**False Refusal Rate (FRR)**、**Missed Refusal Rate (MRR)**、Refusal Detection F1 → 已用於報告32 §9 C 的 `run_refusal_canary.py`。
 
@@ -109,7 +109,7 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 
 **MRR：0.25（3/12）→ 0.333（4/12），上升**；**FRR：0.5（3/6）→ 0.5 持平，但 P5 護欄（須 3/3 ANSWER）未過（1/3）**。閘門 1／3 皆 FAIL，閘門 4 的觸發條件（MRR 上升）成立。
 
-**⇒ 依預先訂定的規則，觸發 E**：A/B/A′ 收緊沒有解決 P3（缺級距查表例外）的核心情境，反而在 P2／P6 造成新退步——判斷失效不在「規則覆蓋前提不夠嚴」，而在**這類查表判斷本質上不該交給 `qwen2.5:7b` 這個 judge**（呼應 RefusalBench 的實證：Qwen 家族 selective-refusal 準確率全尺寸 <17%）。下一步是 E：`_grounding_prompt` 保持嚴格，查表判斷移出 LLM，改由 `chat()` 內一個確定性 Python 區間檢查（解析 `[區間] → [值]` fact line + 問題數值，嚴格包含才抑制重生成觸發）。
+**⇒ 依預先訂定的規則，觸發 E**：A/B/A′ 收緊沒有解決 P3（缺級距查表例外）的核心情境，反而在 P2／P6 造成新退步——判斷失效不在「規則覆蓋前提不夠嚴」，而在**這類查表判斷本質上不該交給 `qwen2.5:7b` 這個 judge**（**直接證據是這次金絲雀驗證：MRR 0.25→0.333、P3 缺級距 0/3→0/3**；RefusalBench 在單文件基準 RefusalBench-NQ 上報告 Qwen 各尺寸的拒答準確率皆 <17%，方向一致，但量的是脈絡有缺陷時是否適當拒答，只是間接參考）。下一步是 E：`_grounding_prompt` 保持嚴格，查表判斷移出 LLM，改由 `chat()` 內一個確定性 Python 區間檢查（解析 `[區間] → [值]` fact line + 問題數值，嚴格包含才抑制重生成觸發）。
 
 原始輸出：`refusal_canary_output_baseline_ed32291.txt` / `refusal_canary_output_after_a04f9ea.txt`（repo 根目錄）。
 
@@ -122,7 +122,7 @@ RAGAS 的 Faithfulness 指標：**先從回答抽取事實主張（claims），�
 
 **觸發**：健康檢查頻率聚合題（`57-CANARY3`）真實跑測發現，`services/atomic_scorer.py::evaluate()` 的 Type-E 拒答檢核只要答案全文**任一處**出現拒答關鍵字（`未記載`／`無法確認`等）就判定整題拒答成功，不要求拒答對應到題目核心主張——模型確信斷言了陷阱結論（精密作業需要特殊健康檢查），卻在文字別處夾帶一句跟核心問題無關的「無法確認」，被誤判 100% 通過。
 
-**跟本節上方 G2/RefusalBench 的關係**：這是**同一批文獻、同一個核心發現（Qwen 家族 selective-refusal 準確率 <17%）在另一個 call site 的重演**——修復時一度考慮「改用 `verify_fact_grounding()` 既有的 `ClaimGrounding` 逐主張語意判斷」，但這正是 G2 已經驗證過**效果不佳、才改走方案 E（確定性 Python 檢查、移出 LLM judge）**的同一條路。故本次修復**不換成語意判斷**，改為新增 `trap_claim_spans`（`models/eval_schema.py::TestCase`）：Type-E 題目選填一組「陷阱結論」固定字串，答案命中任一則即強制判定拒答失敗，純字串比對、零額外 LLM 呼叫，與 G2 方案 E 同一設計原則的延伸應用（把「該不該判定為拒答」的確定性檢查範圍從「查表數值」推廣到「canary 陷阱結論」）。
+**跟本節上方 G2/RefusalBench 的關係**：這是**同一類設計取捨在另一個 call site 的重演**——修復時一度考慮「改用 `verify_fact_grounding()` 既有的 `ClaimGrounding` 逐主張語意判斷」，但 G2 的直接經驗是「查表判斷交給 LLM judge，收緊 prompt 後效果仍不佳（金絲雀驗證），才改走方案 E（確定性 Python 檢查、移出 LLM judge）」，RefusalBench 對 Qwen 拒答行為的報告只是間接參考。**要注意：陷阱結論判斷與查表判斷是不同任務，本專案尚未直接驗證 LLM judge 在這個任務上的表現**（2026-09-21 校正，見報告61 §3.1）。故本次修復**選擇確定性優先、不換成語意判斷**，改為新增 `trap_claim_spans`（`models/eval_schema.py::TestCase`）：Type-E 題目選填一組「陷阱結論」固定字串，答案命中任一則即強制判定拒答失敗，純字串比對、零額外 LLM 呼叫，與 G2 方案 E 同一設計原則的延伸應用（把「該不該判定為拒答」的確定性檢查範圍從「查表數值」推廣到「canary 陷阱結論」）。
 
 **結果**：5 題既有 canary 題目回填——只有 `57-CANARY3`（類別混淆型陷阱）有固定可檢查的陷阱結論；`canary-P1`/`canary-P4`/`57-CANARY1`/`57-CANARY2`（開放式捏造具體數字型陷阱）刻意留空，因為陷阱關鍵詞在正確拒答時也會自然出現（用來否定它），加字串比對反而製造假陰性。真實 harness 重跑確認：`57-CANARY3` 漏洞已堵住（模型答案不變，但正確判定失敗）；其餘 4 題零回歸（`canary-P4`/`57-CANARY2` 維持通過，`canary-P1`/`57-CANARY1` 讀答案確認是模型直接編造具體數字、走的是修復前後相同的判定路徑，證實跟本次修復無關——這兩題暴露的是模型本身選擇性拒答能力不足，再次呼應 RefusalBench 的核心發現）。
 

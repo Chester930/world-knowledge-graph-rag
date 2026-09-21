@@ -226,7 +226,7 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **範圍**：目前題庫（`data/eval/test_cases.json`）共5題`scenario_type=Type-E`（等同`canary_refusal`）：`canary-P1`、`canary-P4`、`57-CANARY1`、`57-CANARY2`、`57-CANARY3`，全部`verification_status=verified`，但historical/未來評分都可能受這個假陽性影響。
 
-**為什麼不是簡單換成LLM judge就好**：`services/interval_lookup_service.py`開頭docstring明講這個領域已有前例——`run_refusal_canary.py`（報告32 §9 C，2026-09-13）端到端驗證過「純judge判斷是否拒答」，準確率**RefusalBench顯示Qwen家族全尺寸<17%**，才改用現在這套確定性關鍵字比對當退而求其次的方案。單純把判斷換成「問judge這是不是真拒答」不保證更好，且會重蹈已驗證過效果不佳的舊路。
+**為什麼不是簡單換成LLM judge就好**：`services/interval_lookup_service.py`開頭docstring記載了這個領域的前例，但要分清楚兩種證據：**直接證據**是`run_refusal_canary.py`（報告32 §9 C，2026-09-13）的端到端驗證——那次驗證的是「**查表判斷**（數值是否落在區間）交給judge，收緊prompt後MRR 0.25→0.333、P3缺級距0/3→0/3」，才把查表判斷改成確定性Python邏輯；**它驗證的不是「判斷答案是不是拒答」**。**間接參考**是RefusalBench在單文件基準RefusalBench-NQ上報告Qwen各尺寸的拒答準確率皆<17%，但量的是模型在脈絡有缺陷時是否適當拒答（生成行為），不是判斷一段答案是否為拒答（2026-09-21校正，見報告61 §3.1）。所以**「問judge這是不是真拒答」是否比關鍵字比對差，目前沒有直接證據**；選擇確定性關鍵字比對是「確定性優先」的設計取捨，而且已知有漏判代價（見§4.21.1）。
 
 **較有希望的修復方向（未實作，供之後評估）**：`services/verification_service.py::ClaimGrounding`已有逐句/逐主張細粒度分析（`verify_fact_grounding()`回傳每個claim的`statement`/`supported`/`is_claim`），`chat()`正式生成路徑已經在算這份資料。若Type-E拒答檢核改成「檢查題目核心主張對應的那個claim是否被正確判定為不支持/拒答」而非對整段答案文字做關鍵字掃描，理論上能避開「答案其他枝節夾帶拒答用語」的假陽性——但需要先解決「怎麼知道哪個claim對應題目的核心主張」這個新的子問題（目前`AtomicGoldFact`／`TestCase`schema沒有結構化欄位標記這件事），非一行修補。
 
@@ -234,7 +234,7 @@ python check_comparison_readiness.py --kg-id 236903cf-055a-40a8-8923-b9d06601f3b
 
 **✅ 已落地（2026-09-16）**：
 
-**文獻查證發現這個問題本專案已經打過一輪**——`docs/參考文獻/22_生成端過度保守與選擇性拒答/README.md`已精讀過RefusalBench（Muhamed et al. 2025）、RAGAS Faithfulness（Es et al. 2023）、Context-faithful Prompting（Zhou et al. 2023），且已因同一個「Qwen家族選擇性拒答判斷準確率全尺寸<17%」發現，把`services/interval_lookup_service.py`的區間查表判斷刻意改成確定性Python邏輯（G2方案E），**不交給LLM judge**。這推翻了上面寫的「較有希望的方向是重用ClaimGrounding語意判斷」——正確方向反而是**維持確定性判斷，但把判斷範圍縮小到題目核心主張**，不是換成語意fallback。
+**文獻查證發現這個問題本專案已經打過一輪**——`docs/參考文獻/22_生成端過度保守與選擇性拒答/README.md`已精讀過RefusalBench（Muhamed et al. 2025）、RAGAS Faithfulness（Es et al. 2023）、Context-faithful Prompting（Zhou et al. 2023），且已因G2的金絲雀驗證結果（查表判斷交給judge、收緊prompt後仍未改善；RefusalBench單文件基準上Qwen各尺寸拒答準確率<17%僅作間接參考），把`services/interval_lookup_service.py`的區間查表判斷刻意改成確定性Python邏輯（G2方案E），**不交給LLM judge**。這使「重用ClaimGrounding語意判斷」的方向缺乏直接支持——目前較穩妥的方向是**維持確定性判斷，但把判斷範圍縮小到題目核心主張**，不是換成語意fallback。**注意**：金絲雀驗證的是查表判斷，不是本節的拒答／陷阱判斷，LLM judge 在後者的表現尚未直接驗證（2026-09-21校正，見報告61 §3.1）。
 
 **設計＝新增`trap_claim_spans`欄位**（`models/eval_schema.py::TestCase`）：Type-E題目可選填一組「陷阱結論」固定字串，答案裡出現任一則即強制判定拒答失敗，即使拒答關鍵字也同時出現在文字別處。純字串比對，不新增LLM呼叫。
 
