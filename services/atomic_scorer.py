@@ -66,10 +66,17 @@ class AtomicScorer:
         拒答成功（57-CANARY3實例：模型確信答錯「精密作業需要特殊健康檢查」，
         但因結尾夾帶「其他部分資料未明確記載，無法確認」而被誤判100%通過）。
         `trap_claim_spans`非空且答案命中其中任一則字串時，強制`refused=False`
-        （即使拒答關鍵字也命中）——刻意維持純字串比對，不改用LLM judge：
-        RefusalBench（Muhamed et al. 2025）已實測Qwen家族選擇性拒答判斷準確率
-        全尺寸<17%，與`services/interval_lookup_service.py`既有G2方案E（查表
-        判斷移出LLM改確定性Python檢查）同一設計原則。"""
+        （即使拒答關鍵字也命中）——刻意維持純字串比對，不改用LLM judge，這是
+        「確定性優先」的設計選擇，與`services/interval_lookup_service.py`既有G2
+        方案E（查表判斷移出LLM改確定性Python檢查）同一原則。
+
+        **文獻依據的準確範圍（報告61 §3.1，2026-09-21查證）**：RefusalBench
+        （Muhamed et al. 2025，arXiv:2510.10390）在單文件基準RefusalBench-NQ上
+        報告「Qwen各尺寸皆<17%」，但它量的是模型**在脈絡有缺陷時是否會適當拒答**
+        （生成行為），不是**判斷一段已存在的答案是不是拒答**（分類任務），所以只是
+        間接參考，並未直接證明LLM judge不適合本評分器；本專案也尚未自行比較關鍵字
+        法與LLM判斷的準確率。已知代價：關鍵字清單會漏判實質拒答（凍結基準中Type-E
+        有4/8筆被漏判，見報告57 §4.21.1，事後重算用`extra_refusal_patterns`）。"""
         if refusal_expected:
             # 若為 Type-E Canary 題目，檢核是否明確觸發法定拒答
             refusal_patterns = [
