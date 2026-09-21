@@ -1,0 +1,135 @@
+[
+ {
+  "question_id": "57-DIST2",
+  "arm": "cand",
+  "stage": "t2_k1_topk40_stage_b",
+  "type": "Type-B",
+  "gold_span": "當選直轄市、縣（市）級模範警察或好人好事代表者",
+  "scorer": "missing",
+  "overlap": 0.895,
+  "window": "定當選「全國性」好人好事代表者可以獲得幾天特別休假。 事實清單只有部分級距，查不到題目數值對應的那一段。 跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？ 根據提供的事實清單，當選「直轄市／縣市級」好人好事代表者可以獲得一至三日之特別休假，而當選「全國性」模範警察或好人好事代表",
+  "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 2,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ },
+ {
+  "question_id": "57-DIST1",
+  "arm": "cand",
+  "stage": "t2_k1_topk40_stage_a",
+  "type": "Type-B",
+  "gold_span": "當選全國性模範警察者",
+  "scorer": "missing",
+  "overlap": 0.889,
+  "window": "1. 警察當選「直轄市」模範警察，可以獲得幾天特別休假？ 根據提供的事實清單，當選直轄市模範警察可以獲得一至三日之特別休假。 2. 跟當選「全國性」模範警察的天數一樣嗎？ 根據提供的事實清單，當選「全國性模範警察」會獲得特別休假，但清單中並未明確指出其特別休假的天數。因此，資料未",
+  "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 7,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ },
+ {
+  "question_id": "26-Q5",
+  "arm": "base",
+  "stage": "stage_a",
+  "type": "Type-C",
+  "gold_span": "災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+  "scorer": "missing",
+  "overlap": 0.875,
+  "window": "災區受災勞工保險與勞工職業災害保險及就業保險之被保險人，於災區因天然災害致傷病不能工作，未能取得原有薪資者，得自治療之日起向勞保局請領傷病給付。此部分資料未明確記載，無法確認個人應負擔的保險費由中央政府支應的期間。 根據提供的事實清單，災區受災勞工在災後六個月期間內，個人應負擔的",
+  "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 11,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ },
+ {
+  "question_id": "57-DIST2",
+  "arm": "cand",
+  "stage": "t2_k1_topk40_stage_a",
+  "type": "Type-B",
+  "gold_span": "當選直轄市、縣（市）級模範警察或好人好事代表者",
+  "scorer": "missing",
+  "overlap": 0.895,
+  "window": "定當選「全國性」好人好事代表者可以獲得幾天特別休假。 事實清單只有部分級距，查不到題目數值對應的那一段。 跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？ 根據提供的事實清單，當選「直轄市／縣市級」好人好事代表者可以獲得一至三日之特別休假，而當選「全國性」模範警察或好人好事代表",
+  "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 13,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ },
+ {
+  "question_id": "57-DIST1",
+  "arm": "cand",
+  "stage": "t2_k1_topk40_stage_b",
+  "type": "Type-B",
+  "gold_span": "當選全國性模範警察者",
+  "scorer": "missing",
+  "overlap": 0.889,
+  "window": "1. 警察當選「直轄市」模範警察，可以獲得幾天特別休假？ 根據提供的事實清單，當選直轄市模範警察可以獲得一至三日之特別休假。 2. 跟當選「全國性」模範警察的天數一樣嗎？ 根據提供的事實清單，當選「全國性模範警察」會獲得特別休假，但清單中並未明確指出其特別休假的天數。因此，資料未",
+  "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 20,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ },
+ {
+  "question_id": "57-AGGR19",
+  "arm": "cand",
+  "stage": "t2_k1_topk40_stage_a3",
+  "type": "Type-C",
+  "gold_span": "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+  "scorer": "missing",
+  "overlap": 0.774,
+  "window": "護法）與舊法（職業災害勞工保護法）分別規定在第八十四條第二項及第二十三條。 根據提供的事實清單，我們可以找到相關條文如下： 1. **新法（勞工職業災害保險及保護法）**： - 事實清單中提到「職業災害勞工終止勞動契約時，準用勞動基準法規定預告僱主」，這條信息來自「職業災害勞工 ",
+  "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 25,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ },
+ {
+  "question_id": "26-Q5",
+  "arm": "base",
+  "stage": "stage_b4",
+  "type": "Type-C",
+  "gold_span": "災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+  "scorer": "missing",
+  "overlap": 0.875,
+  "window": "災區受災勞工保險與勞工職業災害保險及就業保險之被保險人，於災區因天然災害致傷病不能工作，未能取得原有薪資者，得自治療之日起向勞保局請領傷病給付。此部分資料未明確記載，無法確認個人應負擔的保險費由中央政府支應的期間。 根據提供的事實清單，災區受災勞工在災後六個月期間內，個人應負擔的",
+  "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+  "group": "fn_candidate",
+  "group_size": 37,
+  "id": 28,
+  "claude_truth_supported": true,
+  "model_votes": {
+   "granite4.2:3b": false,
+   "qwen3.5:4b": false
+  }
+ }
+]

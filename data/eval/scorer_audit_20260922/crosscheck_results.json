@@ -1,0 +1,558 @@
+{
+ "granite4.2:3b": {
+  "0": {
+   "supported": true,
+   "reason": "答案明確指出無法進一步細分其他請假類型的工資計算方式，但已完整回應了標準命題的兩個部分（前提與後期）。"
+  },
+  "1": {
+   "supported": true,
+   "reason": "答案明確列出了具體的協助措施，並直接對應標準命題。"
+  },
+  "2": {
+   "supported": false,
+   "reason": "無法確定天數是否相同，且事實未明確指出具體天數。"
+  },
+  "3": {
+   "supported": true,
+   "reason": "答案明確指出住院者二年內合計上限未提及，因此不支持標準命題。"
+  },
+  "4": {
+   "supported": true,
+   "reason": "答案明確指出無法進一步細分其他請假類型的工資計算方式，但已完整回應了標準命題的兩個部分（前期與認定後）。"
+  },
+  "5": {
+   "supported": null,
+   "reason": "{\"supported\": false, \"reason\": \"答案未直接以相同條件、數字或標記陳述標準命題；其內容偏於"
+  },
+  "6": {
+   "supported": true,
+   "reason": "答案明確指出第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+  },
+  "7": {
+   "supported": false,
+   "reason": "答案未明確指出直轄市模範警察的休假天數與全國性模範警察是否相同，且未直接回答標準命題。"
+  },
+  "8": {
+   "supported": true,
+   "reason": "答案明確指出法源依據為中央主管機關定之規定，與標準命題內容相符。"
+  },
+  "9": {
+   "supported": false,
+   "reason": "答案未直接以相同條件、數字、條號與主體陳述證明標準命題。"
+  },
+  "10": {
+   "supported": true,
+   "reason": "答案明確指出一年內事假不得超過十四日，符合標準命題 '一年內合計不得超過十四日'。"
+  },
+  "11": {
+   "supported": false,
+   "reason": "無法確認期間起算日期，且未明確記載期間起算邊界。"
+  },
+  "12": {
+   "supported": true,
+   "reason": "答案明確指出法源依據為中央主管機關定之規定，與標準命題內容相符。"
+  },
+  "13": {
+   "supported": false,
+   "reason": "無法確定天數是否相同，且事實未明確指出具體天數。"
+  },
+  "14": {
+   "supported": false,
+   "reason": "資料未明確記載，無法確認。"
+  },
+  "15": {
+   "supported": false,
+   "reason": "答案未明確回答標準命題，且未提供所需門檻資訊。"
+  },
+  "16": {
+   "supported": true,
+   "reason": "答案明確列出了具體的協助措施，且與標準命題相符。"
+  },
+  "17": {
+   "supported": true,
+   "reason": "答案明確指出新法與舊法在資遣費／退休金規定上的具體不同，並引用標準命題內容，符合標準命題要求。"
+  },
+  "18": {
+   "supported": true,
+   "reason": "答案明確指出新法與舊法在資遣費／退休金規定上的具體不同點，並對應標準命題內容。"
+  },
+  "19": {
+   "supported": false,
+   "reason": "第一個問題無法確認，第二個問題有上限，但答案未明確指出是否有上限。"
+  },
+  "20": {
+   "supported": false,
+   "reason": "答案未直接以相同條件、數字或標記陳述標準命題；而是分開回答兩個子問題，且未明確指出是否支持原命題。"
+  },
+  "21": {
+   "supported": true,
+   "reason": "答案明確指出每年一次特殊健康檢查，符合標準命題。"
+  },
+  "22": {
+   "supported": true,
+   "reason": "答案明確指出一年內事假不得超過十四日，符合標準命題 '一年內合計不得超過十四日'。"
+  },
+  "23": {
+   "supported": true,
+   "reason": "答案明確指出每年一次，符合標準命題。"
+  },
+  "24": {
+   "supported": false,
+   "reason": "答案未明確指出新法或舊法中的具體條文，且未直接回答標準命題。"
+  },
+  "25": {
+   "supported": false,
+   "reason": "答案未明確指出標準命題的內容，且未直接以相同條件、數字或標記陳述該命題。"
+  },
+  "26": {
+   "supported": true,
+   "reason": "答案明確指出新法與舊法在資遣費／退休金規定上的具體不同，並引用標準命題內容，符合標準命題要求。"
+  },
+  "27": {
+   "supported": false,
+   "reason": "資料未明確記載，無法確認。"
+  },
+  "28": {
+   "supported": false,
+   "reason": "無法確認期間起算日期，且未明確記載期間起算邏輯。"
+  },
+  "29": {
+   "supported": false,
+   "reason": "第一個問題無法確認，第二個問題有上限，但答案未明確陳述原命題要求的內容。"
+  },
+  "30": {
+   "supported": null,
+   "reason": "{\"supported\": false, \"reason\": \"答案未直接以相同條件、數字或標號陳述標準命題；並未明確指"
+  },
+  "31": {
+   "supported": true,
+   "reason": "答案明確指出新法與舊法在資遣費／退休金規定上有所不同，並引用標準命題內容，符合標準命題要求。"
+  },
+  "32": {
+   "supported": false,
+   "reason": "答案未明確指出標準命題的內容，且未直接以相同條文陳述標準命題。"
+  },
+  "33": {
+   "supported": null,
+   "reason": "{\"supported\": false, \"reason\": \"答案未直接以相同條件、數字或標記陳述標準命題；其內容偏於"
+  },
+  "34": {
+   "supported": true,
+   "reason": "答案明確指出新法與舊法在資遣費／退休金規定上有所不同，並引用標準命題內容，符合標準命題要求。"
+  },
+  "35": {
+   "supported": true,
+   "reason": "答案明確指出住院者二年內合計上限未提及，因此不支持標準命題。"
+  },
+  "36": {
+   "supported": null,
+   "reason": "{\"supported\": false, \"reason\": \"答案未直接以相同條件、數字或標號陳述標準命題；並未明確指"
+  },
+  "37": {
+   "supported": true,
+   "reason": "答案明確指出最高為三十日，符合標準命題。"
+  },
+  "38": {
+   "supported": true,
+   "reason": "答案明確指出前後兩個條件的工資計算方式，符合標準命題要求。"
+  },
+  "39": {
+   "supported": true,
+   "reason": "答案明確指出具體協助措施，且與標準命題相符。"
+  },
+  "40": {
+   "supported": true,
+   "reason": "答案明確指出高溫作業勞工每年一次健康檢查，符合標準命題。"
+  },
+  "41": {
+   "supported": true,
+   "reason": "答案明確指出具體協助措施，且與標準命題相符。"
+  },
+  "42": {
+   "supported": true,
+   "reason": "答案明確指出婚假期間工资照给。"
+  },
+  "43": {
+   "supported": false,
+   "reason": "答案未明確指出工資給付方式，且包含「未明確記載」內容，不符合標準命題。"
+  },
+  "44": {
+   "supported": true,
+   "reason": "答案明確指出高溫作業勞工每年一次健康檢查，符合標準命題。"
+  },
+  "45": {
+   "supported": false,
+   "reason": "答案未明確給出工資給付方式，且包含「未明確記載」內容。"
+  },
+  "46": {
+   "supported": true,
+   "reason": "答案明確指出最高為三十日，符合標準命題。"
+  },
+  "47": {
+   "supported": true,
+   "reason": "答案明確指出前後兩個條件的工資計算方式，符合標準命題要求。"
+  },
+  "48": {
+   "supported": true,
+   "reason": "答案明確指出婚假期間工资照给。"
+  },
+  "49": {
+   "supported": false,
+   "reason": "答案未明確指出法律是否仍適用，且多次陳述相同結論但未直接回答標準命題。"
+  },
+  "50": {
+   "supported": true,
+   "reason": "答案明確指出高度在二公尺以上未滿五公尺者的休息時間為至少二十分鐘，與標準命題相符。"
+  },
+  "51": {
+   "supported": true,
+   "reason": "答案明確指出雇主負責證明處分與假無關。"
+  },
+  "52": {
+   "supported": true,
+   "reason": "答案明確指出在突發狀況下需要提前一日提出申請，符合標準命題。"
+  },
+  "53": {
+   "supported": true,
+   "reason": "答案明確包含標準命題內容。"
+  },
+  "54": {
+   "supported": false,
+   "reason": "答案未直接指出標準命題，且未明確給出所需數量。"
+  },
+  "55": {
+   "supported": true,
+   "reason": "答案明確指出第二類事業具中度風險者，與標準命題相符。"
+  },
+  "56": {
+   "supported": true,
+   "reason": "答案明確指出返國期日由勞工自行排定，且雇主不能單方面更改。"
+  },
+  "57": {
+   "supported": null,
+   "reason": "{\"supported\": true, \"reason\": \"答案明確指出新法由公立醫療機構認定，舊法由中央衛生福利主管"
+  },
+  "58": {
+   "supported": true,
+   "reason": "答案明確指出法源依據是中央主管機關。"
+  },
+  "59": {
+   "supported": true,
+   "reason": "答案明確指出法源依據為中央主管機關定之規定，與標準命題相符。"
+  },
+  "60": {
+   "supported": true,
+   "reason": "答案明確列出了具體的協助措施，符合標準命題要求。"
+  },
+  "61": {
+   "supported": false,
+   "reason": "資料未明確記載，無法確認高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是否一樣。"
+  },
+  "62": {
+   "supported": false,
+   "reason": "無法確認法源依據。"
+  },
+  "63": {
+   "supported": false,
+   "reason": "資料未明確記載，無法確認該標準命題。"
+  },
+  "64": {
+   "supported": false,
+   "reason": "答案未直接以相同條件陳述標準命題，且包含未明確記載的部分。"
+  },
+  "65": {
+   "supported": false,
+   "reason": "無法確認"
+  },
+  "66": {
+   "supported": false,
+   "reason": "答案未直接引用或明確指出標準命題中的法源依據內容。"
+  },
+  "67": {
+   "supported": true,
+   "reason": "答案明確列出了具體協助措施，且符合標準命題要求。"
+  },
+  "68": {
+   "supported": false,
+   "reason": "無法確認"
+  }
+ },
+ "qwen3.5:4b": {
+  "0": {
+   "supported": false,
+   "reason": "答案未明確斷言原領工資補償條件。"
+  },
+  "1": {
+   "supported": false,
+   "reason": "答案將條號誤為勞動基準法第 27 條，且未列舉前三條具體內容。"
+  },
+  "2": {
+   "supported": false,
+   "reason": "答案未明確指出天數及與縣市級是否相同。"
+  },
+  "3": {
+   "supported": false,
+   "reason": "答案未明確記載住院者上限"
+  },
+  "4": {
+   "supported": false,
+   "reason": "答案未明確斷言原領工資補償條件。"
+  },
+  "5": {
+   "supported": false,
+   "reason": "答案未明確提及第二十三條第二款與第二十四條第一款。"
+  },
+  "6": {
+   "supported": false,
+   "reason": "答案未明確斷言第二類事業三百人以上應設一級管理單位。"
+  },
+  "7": {
+   "supported": false,
+   "reason": "答案未陳述直轄市與全國性天數相同，僅表示無法確認。"
+  },
+  "8": {
+   "supported": true,
+   "reason": "答案明確引用相同條文內容，支持命題。"
+  },
+  "9": {
+   "supported": false,
+   "reason": "答案未明確斷言條文號及主體，僅推論舊法第二十三條。"
+  },
+  "10": {
+   "supported": true,
+   "reason": "答案明確陳述一年內事假不得累計超過十四日。"
+  },
+  "11": {
+   "supported": false,
+   "reason": "答案明確表示無法確認該期間起算日。"
+  },
+  "12": {
+   "supported": true,
+   "reason": "答案明確引用相同條文內容，支持命題。"
+  },
+  "13": {
+   "supported": false,
+   "reason": "答案未明確指出天數及與縣市級是否相同。"
+  },
+  "14": {
+   "supported": false,
+   "reason": "答案明確表示「資料未明確記載，無法確認」"
+  },
+  "15": {
+   "supported": false,
+   "reason": "答案未明確記載第二類事業三百人以上應設管理單位。"
+  },
+  "16": {
+   "supported": false,
+   "reason": "答案將條號誤為勞動基準法第 27 條，且未列舉前三條具體內容。"
+  },
+  "17": {
+   "supported": false,
+   "reason": "條號與主體不符，未明確支持。"
+  },
+  "18": {
+   "supported": false,
+   "reason": "條號與主體陳述不符，未支持標準命題。"
+  },
+  "19": {
+   "supported": true,
+   "reason": "答案明確陳述補助上限為新臺幣二十萬元。"
+  },
+  "20": {
+   "supported": false,
+   "reason": "答案未陳述直轄市與全國性天數相同，僅表示無法確認。"
+  },
+  "21": {
+   "supported": true,
+   "reason": "答案明確支持每年檢查頻率。"
+  },
+  "22": {
+   "supported": true,
+   "reason": "答案明確陳述一年內事假不得累計超過十四日。"
+  },
+  "23": {
+   "supported": true,
+   "reason": "答案明確支持每年檢查頻率。"
+  },
+  "24": {
+   "supported": false,
+   "reason": "答案未明確斷言條號為第二十四條第一款。"
+  },
+  "25": {
+   "supported": false,
+   "reason": "答案斷言不得預告終止，與標準命題主張相反。"
+  },
+  "26": {
+   "supported": false,
+   "reason": "答案未提及第二十三條、二十四條，且新舊法條號寫反。"
+  },
+  "27": {
+   "supported": false,
+   "reason": "答案未明確斷言條號與主體完全一致。"
+  },
+  "28": {
+   "supported": false,
+   "reason": "答案明確表示無法確認該期間起算日。"
+  },
+  "29": {
+   "supported": true,
+   "reason": "答案明確陳述補助上限為新臺幣二十萬元。"
+  },
+  "30": {
+   "supported": false,
+   "reason": "答案未明確陳述認定後工資折半發給，且誤導性提及事假無薪。"
+  },
+  "31": {
+   "supported": false,
+   "reason": "條號與主體不符，未明確斷言標準命題。"
+  },
+  "32": {
+   "supported": false,
+   "reason": "答案未明確提及第二十四條第一款。"
+  },
+  "33": {
+   "supported": false,
+   "reason": "答案未明確提及第二十三條第二款與第二十四條第一款。"
+  },
+  "34": {
+   "supported": false,
+   "reason": "條號與主體不符，未明確斷言標準命題。"
+  },
+  "35": {
+   "supported": false,
+   "reason": "答案未明確記載住院者上限"
+  },
+  "36": {
+   "supported": false,
+   "reason": "答案未明確陳述認定後工資折半發給，且誤導性提及事假無薪。"
+  },
+  "37": {
+   "supported": false,
+   "reason": "答案未提及條號且主體不符。"
+  },
+  "38": {
+   "supported": false,
+   "reason": "答案未提及條號第四條，且將事假誤列為照給工資。"
+  },
+  "39": {
+   "supported": false,
+   "reason": "答案將命題主體由「雇主」改為「中央主管機關」。"
+  },
+  "40": {
+   "supported": false,
+   "reason": "答案未提及標準命題中的附表一、項次一及高溫作業定義。"
+  },
+  "41": {
+   "supported": false,
+   "reason": "答案將命題主體由「雇主」改為「中央主管機關」。"
+  },
+  "42": {
+   "supported": true,
+   "reason": "答案明確支持婚假工資照給。"
+  },
+  "43": {
+   "supported": true,
+   "reason": "答案明確陳述婚假工資照給，符合標準命題。"
+  },
+  "44": {
+   "supported": false,
+   "reason": "答案未提及標準命題中的附表一、項次一及高溫作業定義。"
+  },
+  "45": {
+   "supported": true,
+   "reason": "答案明確陳述婚假、傷病假及產假期間工資照給，符合標準命題。"
+  },
+  "46": {
+   "supported": false,
+   "reason": "答案未提及條號且主體不符。"
+  },
+  "47": {
+   "supported": false,
+   "reason": "答案未提及條號第四條，且將事假誤列為照給工資。"
+  },
+  "48": {
+   "supported": true,
+   "reason": "答案明確支持婚假工資照給。"
+  },
+  "49": {
+   "supported": true,
+   "reason": "答案多次明確斷言自本法施行之日起不再適用。"
+  },
+  "50": {
+   "supported": true,
+   "reason": "答案明確支持該命題的條件與內容。"
+  },
+  "51": {
+   "supported": true,
+   "reason": "答案明確指出由雇主負責證明處分與請假無關。"
+  },
+  "52": {
+   "supported": true,
+   "reason": "答案明確引用條文與數字，完全支持命題。"
+  },
+  "53": {
+   "supported": true,
+   "reason": "答案明確陳述高度二十公尺以上者至少休息三十五分鐘。"
+  },
+  "54": {
+   "supported": true,
+   "reason": "答案明確陳述六人以上十人以下者至少二人，與標準命題一致。"
+  },
+  "55": {
+   "supported": true,
+   "reason": "答案明確陳述第二類事業具中度風險。"
+  },
+  "56": {
+   "supported": true,
+   "reason": "答案明確斷言由勞工自行排定且雇主不可單方面更改。"
+  },
+  "57": {
+   "supported": true,
+   "reason": "答案明確指出舊法由中央衛生福利主管機關醫院評鑑合格醫院認定。"
+  },
+  "58": {
+   "supported": true,
+   "reason": "答案第 5 點與標準命題完全一致，明確支持。"
+  },
+  "59": {
+   "supported": false,
+   "reason": "答案未提及第十七款，僅陳述第一項內容。"
+  },
+  "60": {
+   "supported": false,
+   "reason": "答案列舉具體措施，未提及申請資格等辦法定由中央主管機關。"
+  },
+  "61": {
+   "supported": false,
+   "reason": "答案未提及附表一，僅談及頻率差異。"
+  },
+  "62": {
+   "supported": false,
+   "reason": "答案明確表示無法確認，未斷言命題內容。"
+  },
+  "63": {
+   "supported": false,
+   "reason": "答案未提及授權法律條文及主體。"
+  },
+  "64": {
+   "supported": false,
+   "reason": "答案僅提及婚假與傷病假，未包含產假照給內容。"
+  },
+  "65": {
+   "supported": false,
+   "reason": "答案未提及母法第二十七條授權依據。"
+  },
+  "66": {
+   "supported": false,
+   "reason": "答案未提及職業安全衛生法第二十三條第五項。"
+  },
+  "67": {
+   "supported": false,
+   "reason": "答案列舉九項措施，未明確提及「職業訓練費用補助」。"
+  },
+  "68": {
+   "supported": false,
+   "reason": "答案明確表示資料未記載，不支持命題。"
+  }
+ }
+}
