@@ -999,6 +999,20 @@
           "source_article": "第3條第2款",
           "is_essential": true,
           "note": "全國級：2-5日（第3條開頭），與地方級用詞極相似但天數不同，測鄰接陷阱"
+        },
+        {
+          "exact_span": "給予一至三日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "報告62 §14.7：地方級天數（第2條開頭）。gold 原本只有事由 span、缺天數，答案光靠既有 span 就能過關而不需正確答出天數；本題核心是『地方 vs 全國天數不同，不可混淆』（鄰接陷阱），兩個天數都應是必要事實，補此 span 修正"
+        },
+        {
+          "exact_span": "給予二至五日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條",
+          "is_essential": true,
+          "note": "報告62 §14.7：全國級天數（第3條開頭），同上，另見已核實的偽陰性案例（57-DIST1/2）"
         }
       ],
       "verification_status": "verified",
@@ -1033,6 +1047,20 @@
           "source_article": "第2條第5款",
           "is_essential": true,
           "note": "地方級：1-3日，與全國級用詞極相似但天數不同，測鄰接陷阱"
+        },
+        {
+          "exact_span": "給予一至三日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "報告62 §14.7：地方級天數（第2條開頭）。gold 原本只有事由 span、缺天數，答案光靠既有 span 就能過關而不需正確答出天數；本題核心是『地方 vs 全國天數不同，不可混淆』（鄰接陷阱），兩個天數都應是必要事實，補此 span 修正"
+        },
+        {
+          "exact_span": "給予二至五日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條",
+          "is_essential": true,
+          "note": "報告62 §14.7：全國級天數（第3條開頭），同上，另見已核實的偽陰性案例（57-DIST1/2）"
         }
       ],
       "verification_status": "verified",
