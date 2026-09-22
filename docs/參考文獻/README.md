@@ -37,6 +37,7 @@
 | `32_法規結構感知切塊與主旨錨定/` | `docs/報告/46_領域可插拔切塊參數化與主旨錨定SDD.md`；`docs/報告/47_Claude_Code交接任務書.md` 任務 B（`ArticleAwareChunking`／`header_anchored`） | 📋 本資料夾不存 PDF，僅 README 記角色＋WebFetch/gh api 即時查證：Prior et al. 2026（arXiv:2605.19806，德國法規切塊比較）、Ford et al. 2026（arXiv:2604.25448，多法域 RAG 系統）、Anthropic Contextual Retrieval、LangChain `MarkdownHeaderTextSplitter`（146,273★）；另附即時查詢的 KG 條文長度分布資料，支撐任務 B 範圍修正結論 |
 | `36_法律領域RAG基準/` | `docs/報告/61_做法與文獻來源查證報告.md`（2026-09-21 新增；與 `32_` 互補：`32_` 談法規切塊，本資料夾談法律領域的檢索評測基準） | 🟡 已下載 1 篇（Pipitone & Alami 2024，LegalBench-RAG），僅核對摘要頁、未全文精讀；英文基準，只佐證評測原則。另 `05_評估方法論/` 同日新增 RAGChecker、Miller 2024 兩篇（同為僅核對摘要） |
 | `37_三元組條件限定詞與超關係表示/` | `docs/報告/65_抽取粒度修復設計SDD任務書.md`（2026-09-22 新增，F 設計提案**尚未實作，待使用者核准**）；`02_文獻探討.md` § 2.4.4／§ 2.6.2 | 🟡 本資料夾不存 PDF，僅 README 記角色＋WebSearch 即時查證：Chen et al. (2023/2024) Dense X Retrieval 去脈絡化判準（既有引用之延伸用途）、Galkin et al. (2020) StarE 超關係 KG／qualifier（新增）、Krótkiewicz et al. (2026) 法律規範顯式範圍表示（新增，摘要層級，全文付費牆未取得）、OPIEC 語料庫（Gashteovski et al. 2019，弱佐證） |
+| `38_檢索embedding非決定性與可重現性/` | HANDOVER.md 2026-09-22「獨立judge pilot」段落（`57-CANARY5` Stage 1檢索recall在judge/KG不變下兩次執行間變動，疑似embedding非決定性）；`02_文獻探討.md` § 2.6.2 | 🟡 本資料夾不存 PDF，僅 README 記角色＋WebSearch 即時查證：Wang et al. (2025) ReproRAG可重現性研究（新增，核心發現＋embedding caching建議解法）、Yuan et al. (2025) LLM推論數值非決定性根因（新增，延伸既有Horace He引用）、Lopez Fune (2026) 高維embedding空間對比度塌縮（新增，弱佐證，單一作者預印本） |
 
 ## 01_AGI與智慧定義 內容清單
 

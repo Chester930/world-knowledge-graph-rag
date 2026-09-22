@@ -205,7 +205,15 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 
 **關鍵異常，判定「不可信」的理由**：`57-CANARY5` 的 **Stage 1 檢索** recall 從1.0掉到0.5——但 judge 模型理論上完全不會影響檢索階段，同一KG同一問題不該因為換judge就檢索到不同東西。這代表 run1／run2 之間存在**跟judge無關、但幅度大到蓋過待測效果**的雜訊，很可能是檢索/embedding層的非決定性。`57-DIST1`（原本最想驗證的案例）在 run2 仍是 `regenerated=true`、仍缺一個gold span——「限制性重生成→不完整引用」的模式**沒有消失**，數字變好較可能是單次隨機波動。
 
-**判定**：n=1的pilot設計無法把「judge效果」跟「檢索非決定性雜訊」分開，**不建議據此採用或否決獨立judge**。若要繼續驗證，正確做法是用報告62 T0已有的機制（`prompt_context_lines`/固定prompt重放），排除檢索階段變因，只測生成+judge本身。**本輪不建議直接重跑**——先查文獻與參考專案，看業界對這類「檢索/embedding非決定性」問題的診斷與解法（見下段待補查證），再決定下一步實驗設計。
+**判定**：n=1的pilot設計無法把「judge效果」跟「檢索非決定性雜訊」分開，**不建議據此採用或否決獨立judge**。若要繼續驗證，正確做法是用報告62 T0已有的機制（`prompt_context_lines`/固定prompt重放），排除檢索階段變因，只測生成+judge本身。
+
+**文獻查證結果（2026-09-22，新資料夾 `docs/參考文獻/38_檢索embedding非決定性與可重現性/`，已同步登錄 `02_文獻探討.md` §2.6.2 三筆新條目）**：
+
+- **根因有文獻支持，且不是本專案程式錯誤**：Wang, Zhao, Tallent & Guo (2025) *On The Reproducibility Limitations of RAG Systems*（arXiv:2509.18869）系統性研究RAG檢索管線可重現性，明確指出「**核心ANN檢索演算法本身通常可達到完全的run-to-run可重現性**，真正的雜訊來源是每次重新呼叫embedding model時的生成變異」——跟本專案報告20已引用的Horace He/Thinking Machines Lab（LLM生成非決定性根因：batch size依賴）同一機制家族，只是這次發生在embedding端。Yuan et al. (2025)（arXiv:2506.09501）延伸佐證這個根因的普遍性。Lopez Fune (2026)（arXiv:2606.28330，弱佐證，單一作者預印本）補充機制性解釋：高維embedding空間cosine分數集中／對比度塌縮，使排名邊界的候選對微小擾動特別敏感——這正好解釋了觀察到的現象模式（排名邊界的gold fact掉出top-k，不是隨機亂跳）。
+- **建議解法（Wang et al. 2025明確提出，低成本可行）**：**Embedding caching**——問題的query embedding只算一次、之後重複執行/多臂比較都重用同一份，避免每次重新呼叫embedding provider引入變異。這是唯一不需要改動Ollama/bge-m3底層、可以直接在應用層（harness層）實作的緩解措施。
+- **不建議**：修改Ollama/bge-m3推論精度或批次設定追求完全決定性——本專案透過Ollama黑盒呼叫，沒有掌控這層的能力，文獻顯示即使做到（如LayerCast）也需要修改推論引擎內部，成本遠高於應用層的embedding cache。
+
+**下一步建議**：若要繼續驗證獨立judge或任何「固定檢索、只換其他變因」的pilot，優先在harness層加一個query embedding cache（同一次比較的兩個臂共用同一份embedding），或直接沿用報告62 T0的`prompt_context_lines`重放機制（已經是「固定住檢索結果」的等價做法，只是原本設計動機不同，剛好也能排除這裡發現的embedding變因）。**本輪暫不排入實作，待使用者決定要不要繼續投入這條驗證路線。**
 
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
