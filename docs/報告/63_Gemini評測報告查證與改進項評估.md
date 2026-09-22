@@ -549,3 +549,55 @@ Fact 出邊為 `HAS_SUBJECT→Entity`、`HAS_OBJECT→Entity`、`SUPPORTED_BY→
 ### 14.6 對 TASK-3 Phase 2 的影響
 
 T2 已結束，Phase 2 的前置條件（T2 完整結束）已滿足；**建議由使用者確認後再派**。Phase 2 須讀取全部 `t2_k1_topk40_stage_*` 資料夾（報告 64 已更正），`stage_a` 內的 `records.backup_before_resume.json` 為續跑前備份，**不得讀入**；同題出現在多個資料夾時全部保留並標示來源。
+
+## 16. Codex TASK-3 Phase 2 審核紀錄（`952cfa9`／`c8366d4`／`b6443eb`，小修 `ec3ac9e`）——**驗收通過**
+
+審核方式同 §12：`git archive` 匯出到暫存目錄，獨立重跑測試、對關鍵邏輯做突變測試、**另外獨立重寫一份重算腳本**直接對原始 T2 records 重算整套統計。
+
+### 16.1 獨立重算：四個核心數字位元級吻合
+
+用不依賴 Codex 程式碼的獨立腳本，對 8 個 `t2_k1_topk40_stage_*` 資料夾（42 題範圍）重算：
+
+| 指標 | Codex 回報 | 我獨立重算 |
+|---|---|---|
+| 總 prompt 行數 | 3993 | 3993 |
+| 唯一歸屬 | 3981 | 3981 |
+| 多來源合併 | 7 | 7 |
+| unmatched | 5 | 5 |
+
+**執行數的差異與解釋**：我第一次重算得到 78 次執行，Codex 回報 79。查出原因：`57-…／17-Q2` 在 `t2_k1_topk40_stage_a` 那次執行 T2 當時出錯（`error` 欄位非空），`prompt_context_lines` 為空清單；該題在 `stage_a2` 有成功重跑（70 行，與逐題分布表一致）。**Codex 正確地把這次零行但仍存在的執行算進 79**，我的重算腳本一開始把它漏算，不是 Codex 的錯誤，反而印證了它對邊界情況（空清單 vs 缺欄位）處理正確。
+
+### 16.2 突變測試（首次 6 個、小修後全跑）
+
+首次（`952cfa9`）：4 killed／2 survived（P2 前綴、P6 缺來源 ID）。要求 Codex 補測試後（`ec3ac9e`）：
+
+| 突變 | 首次 | 小修後 |
+|---|---|---|
+| P1 多來源門檻 | killed | killed |
+| P2 不去除「- 」前綴 | survived | **仍 survived（見 16.3，非真缺陷）** |
+| P3 移除 `in_prompt=true` 篩選 | survived | **killed**（新測試 `test_prompt_analysis_ignores_matching_trace_when_in_prompt_is_false`） |
+| P4 frame_overlap 跨文件排除條件反轉 | killed | killed |
+| P5 獨立碰撞門檻 | killed | killed |
+| P6 缺來源 ID 誤判為 unique | survived | **仍 survived（見 16.3，殘留真實缺口）** |
+
+### 16.3 P2、P6 的進一步查證
+
+- **P2（不成立）**：直接測試 `normalize_text("- 第一行") == normalize_text("第一行")` → `True`。`normalize_text` 本身會把 `-` 當標點（Unicode 類別 `P`）移除，所以 `_prompt_line_text_and_key()` 手動 `line[2:]` 的前綴去除是**縱深防禦，不是唯一防線**；移除它不影響實際行為。**P2 不是缺陷，撤回。**
+- **P6（真實殘留缺口，已查證）**：Codex 補的 `test_prompt_analysis_marks_matching_trace_without_source_doc_id_as_unresolved` 只涵蓋「**兩筆 trace 都缺** `source_doc_id`」（`document_ids` 為空集合）。我的突變測的是**混合情境**——一筆有效來源＋一筆缺來源（`document_ids` 長度為 1、但 `has_missing_document=True`）。我另外寫了一個獨立腳本，對**未突變**的程式碼餵這個混合情境：正確結果是 `source_unresolved`（程式邏輯本身是對的），但**目前沒有任何測試守著這條路徑**，`_classify_trace_matches()` 的 `has_missing_document` 判斷仍可能被無聲破壞。
+
+### 16.4 完整測試
+
+獨立重跑：新測試 23 passed；完整測試 **1034 passed，0 failed**。與 Codex 回報一致。
+
+### 16.5 結論
+
+**TASK-3（Phase 1＋Phase 2）驗收通過，可視為完成。** P6 的殘留測試缺口風險低（程式邏輯已驗證正確，只是少一條回歸測試），不影響本次交付的統計結果可信度，**不要求立即再修**；記錄於此供之後任何人修改 `_classify_trace_matches()` 時參考。P2 已確認不是問題，不需處理。
+
+### 16.6 對 A 案的最終資料基礎
+
+至此，A 案（事實行加來源標籤）已有三層獨立驗證的資料基礎：
+1. KG 唯讀查詢（報告 63 §9.3(b)）：AGGR18 四筆 Fact 可經 `SUPPORTED_BY→LawArticle→Document` 回溯正確法規名與條號。
+2. T0/T2 trace 單題核對（§13）：AGGR18 實際 prompt 行不帶法規名，答案配反。
+3. **Phase 1+2 的 42 題全量統計（本節與 §12）**：42 題中僅 `57-AGGR18`（frame_overlap 0.806）、`57-AGGR19`（0.467）、`57-AGGR6` 三題適合當 A 案候選；全 KG 有 2.6% 的 Fact 存在跨法規同文，但 AGGR18 型「同句框不同槽位」不在此列；prompt 層級的多來源合併行僅 0.18%（7/3993），且非 gold。
+
+三層資料一致，沒有互相矛盾之處。A 案是否推進，仍待使用者對報告 §8.4、§10.5 待裁示項的裁決；本節只是把證據基礎補齊到可以做決策的程度。
