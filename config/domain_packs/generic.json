@@ -1,5 +1,5 @@
 {
-  "_note": "領域中性的 domain pack。把生成 prompt 前綴從『台灣勞動法規顧問』換成不綁特定法域的版本。載入此 pack 是唯一會偏離『行為零變化』的地方（論文 §2.6.8 已聲明）。target_language 保留為 zh-Hant 預設；若語料非繁中，請在此覆蓋，並注意 svo 抽取少樣本（_svo_prompt）與簡→繁正規化仍為第 3b–4 步待抽項。",
+  "_note": "領域中性的 domain pack。把生成 prompt 前綴從『台灣勞動法規顧問』換成不綁特定法域的版本。載入此 pack 是唯一會偏離『行為零變化』的地方（論文 §2.6.8 已聲明）。target_language 保留為 zh-Hant 預設；svo_fewshots 已可在此覆蓋，但本 pack 不覆蓋，故沿用 shipped defaults；簡→繁正規化仍是另一個未參數化項目。",
   "schema_version": 1,
   "domain": {
     "name": "generic",

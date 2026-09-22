@@ -289,3 +289,50 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告62：下一階段任務書（檢索排名與條文擴充驗證）](docs/報告/62_下一階段任務書_檢索排名與條文擴充驗證.md)
 - [報告65：抽取粒度修復設計SDD任務書（F，方向A已核准並落地，定向重抽驗證背景執行中）](docs/報告/65_抽取粒度修復設計SDD任務書.md)
 - [報告66：SVO抽取少樣本領域包參數化SDD任務書（交付Codex，須等報告65驗證完成才開始）](docs/報告/66_SVO抽取少樣本領域包參數化SDD任務書.md)
+
+### 2026-09-22 報告66 T1–T6：SVO 少樣本領域包參數化已實作
+
+本段完成報告66 的 T1–T6；沒有執行任何 KG 重抽，也沒有修改 Neo4j、
+`guard_profile` 或 `_NATURALIZE_PROMPT_TEMPLATE`。
+
+#### 實作內容
+
+1. **T1／設定模型**：`svo_fewshots` 放在 `core/kg_config/model.py::DomainConfig`，型別為
+   `tuple[str, ...]`，由 `_DEFAULT_SVO_FEWSHOTS` 集中保存規則 6–10 的 shipped
+   內容。選 `DomainConfig` 是因為這些例句是 domain pack 的語意覆蓋，不是抽取門檻；
+   也避免 `svo_service.py` 與設定模型各維護一份長字串。
+2. **T2／prompt 組裝**：`services/svo_service.py::_svo_prompt()` 接受 keyword-only
+   `fewshots`；`None` 使用 shipped defaults，指定 tuple/list 時從規則 6 開始動態編號。
+   規則 1–5 保持共用骨架；為維持 35f95ab（含報告65規則10）的逐字相容，保留既有
+   規則 6 與規則 7 之間的單換行、其後例句之間的空行差異。
+3. **T3／抽取 API**：`extract_svo_triples()` 與
+   `extract_svo_triples_with_completeness_check()` 新增 optional keyword-only `cfg`，
+   初抽與未涵蓋句補抽都沿用同一份 `cfg.domain.svo_fewshots`；未傳 `cfg` 時仍為
+   shipped defaults，既有呼叫端相容。
+4. **T4／抽取端佈線**：`services/extraction_worker.py` 比照
+   `routers/agent.py::chat()` 使用 `ConfigLoader([FileConfigSource(settings.kg_config_dir)])`
+   讀取 KG 的 `domain_pack`，再把 `cfg` 傳給完整性抽取函式。設定檔缺失、格式錯誤或
+   loader 失敗時記錄例外並 fallback 到 `KGConfig()`，不讓單一設定阻斷 worker。
+5. **T5／domain pack**：`taiwan-labor-law` 不新增覆蓋，故組出的 prompt 使用同一組
+   shipped defaults；`generic` 的說明更新為「可覆蓋但目前沿用 shipped defaults」。
+6. **T6／驗證**：新增 shipped default 與 `taiwan-labor-law` domain pack 的 prompt
+   golden test；兩者針對 `測試` 的 SHA-256 均為
+   `40a8417833e67e343f9e3164c090b1032512620d68e36340aec986b0d56a7fb3`。另測試自訂
+   fewshots 編號、抽取 cfg 傳遞、worker domain pack 路由與 fallback。
+
+#### 成本與未接線事項
+
+- 每個抽取 chunk 目前會載入一次設定並建構一個 immutable `KGConfig`；這是小量的
+  Python／檔案讀取成本，沒有額外 LLM call。若日後量測到大量 chunk 的設定讀取成本，
+  可再按 KG 做 cache，但本次先保留正確性與設定變更可見性。
+- 這個解耦只參數化 SVO prompt 的 domain fewshots，不會新增 provider、模型載入或
+  Ollama 呼叫；因此不會改變生成延遲。T-B 的生成模型／grounding judge provider 解耦
+  仍維持先前評估結論，未在本段接線。
+- 尚未在本段宣稱任何模型能力改善；後續是否執行 T-C，仍須由使用者決定並以修好的
+  `think:false`、凍結題庫與公平條件重跑。
+
+#### 驗證紀錄
+
+- `python -m pytest tests/services/test_svo_service.py tests/core/test_kg_config.py -q -p no:cacheprovider`：292 passed。
+- `python -m pytest tests/services/test_extraction_worker.py -q -p no:cacheprovider`：9 passed。
+- 完整命令 `python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py`：1055 passed，8 warnings，59.02s。
