@@ -47,6 +47,14 @@ def test_make_llm_provider_defaults_to_settings_model_when_no_override(monkeypat
     assert prov.model == "qwen2.5:7b"
 
 
+def test_make_llm_provider_wires_ollama_think_setting(monkeypatch):
+    from core.config import settings
+
+    monkeypatch.setattr(settings, "ollama_llm_think", False, raising=False)
+    prov = factory._make_llm_provider("ollama", None)
+    assert prov._think is False
+
+
 def test_make_llm_provider_rejects_unknown_provider():
     with pytest.raises(ValueError):
         factory._make_llm_provider("not-a-provider")

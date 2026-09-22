@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # 報告37 Bug1：SVO 抽取的 generate_json 輸出被 num_predict 截斷 → JSON 沒
     # 收尾 → json.loads 失敗。列舉條文 chunk 常 >1024 token。預設 4096。
     ollama_llm_num_predict: int = 4096
+    # Ollama thinking mode；None＝不傳參數，保留 Ollama/model 的既有預設行為。
+    ollama_llm_think: bool | None = None
 
     # ── 本地 Embedding（sentence-transformers）────────────────────────────────
     local_embedding_model: str = "BAAI/bge-m3"

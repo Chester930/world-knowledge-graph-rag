@@ -11,7 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class OllamaLLMProvider(LLMProvider):
-    def __init__(self, base_url: str, model: str, num_predict: int = 4096):
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        num_predict: int = 4096,
+        think: bool | None = None,
+    ):
         self.base_url = base_url.rstrip("/")
         self.model = model
         # 報告37 Bug1：SVO 抽取走 generate_json（Ollama format=json），輸出被
@@ -21,6 +27,7 @@ class OllamaLLMProvider(LLMProvider):
         # 全新 KG 重抽的 9 個 failed chunk 有 8 個是這個。預設拉到 4096；可用
         # `OLLAMA_LLM_NUM_PREDICT` 覆寫。
         self._num_predict = num_predict
+        self._think = think
 
     # RAG prompt 通常 8000-20000 字元，需要足夠的 context window
     _NUM_CTX = 8192
@@ -36,13 +43,33 @@ class OllamaLLMProvider(LLMProvider):
     # 可能超過 300s（N0030001 c11 撞 httpx.ReadTimeout）。拉到 600s。
     _TIMEOUT = 600.0
 
+    def _generate_payload(
+        self, prompt: str, *, stream: bool, json_format: bool = False
+    ) -> dict:
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": stream,
+            "options": {
+                "num_ctx": self._NUM_CTX,
+                "temperature": 0.0,
+                "num_predict": self._num_predict,
+                "seed": self._SEED,
+            },
+        }
+        if json_format:
+            payload["format"] = "json"
+        if self._think is not None:
+            # Ollama expects `think` at the /api/generate payload root, not in
+            # `options`. Omit it when unset to preserve legacy behavior.
+            payload["think"] = self._think
+        return payload
+
     async def generate(self, prompt: str) -> str:
         async with httpx.AsyncClient(timeout=self._TIMEOUT) as client:
             res = await client.post(
                 f"{self.base_url}/api/generate",
-                json={"model": self.model, "prompt": prompt, "stream": False,
-                      "options": {"num_ctx": self._NUM_CTX, "temperature": 0.0,
-                                  "num_predict": self._num_predict, "seed": self._SEED}},
+                json=self._generate_payload(prompt, stream=False),
             )
             res.raise_for_status()
             return res.json().get("response", "")
@@ -52,9 +79,7 @@ class OllamaLLMProvider(LLMProvider):
         async with httpx.AsyncClient(timeout=self._TIMEOUT) as client:
             res = await client.post(
                 f"{self.base_url}/api/generate",
-                json={"model": self.model, "prompt": prompt, "stream": False,
-                      "format": "json", "options": {"num_ctx": self._NUM_CTX, "temperature": 0.0,
-                                                     "num_predict": self._num_predict, "seed": self._SEED}},
+                json=self._generate_payload(prompt, stream=False, json_format=True),
             )
             res.raise_for_status()
             return res.json().get("response", "")
@@ -64,11 +89,7 @@ class OllamaLLMProvider(LLMProvider):
             async with client.stream(
                 "POST",
                 f"{self.base_url}/api/generate",
-                json={"model": self.model, "prompt": prompt, "stream": True,
-                      "options": {"num_ctx": self._NUM_CTX,
-                                  "temperature": 0.0,
-                                  "num_predict": self._num_predict,
-                                  "seed": self._SEED}},
+                json=self._generate_payload(prompt, stream=True),
             ) as r:
                 async for line in r.aiter_lines():
                     if not line:
