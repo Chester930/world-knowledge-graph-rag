@@ -46,6 +46,7 @@ from core.providers.factory import (
     get_judge_llm_provider,
     get_llm_provider,
     init_providers,
+    override_embedding_provider_for_eval,
 )
 from models.document import ChatRequest
 from models.eval_schema import AtomicGoldFact, EvaluationDataset, RetrievedEvidence, TestCase
@@ -59,6 +60,7 @@ from services.deterministic_guard_service import DeterministicGuardService
 from services.evaluation_eligibility import split_eligible_test_cases
 from services.evaluation_preflight import run_evaluation_preflight
 from services.lineage_tracker import LineageTracker
+from scripts.eval.embedding_cache import CachingEmbeddingProvider
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TEST_CASES_PATH = REPO_ROOT / "data" / "eval" / "test_cases.json"
@@ -630,6 +632,11 @@ async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest
     await connect()
     try:
         init_providers()
+        embedding_cache = getattr(args, "embedding_cache", None)
+        if embedding_cache:
+            override_embedding_provider_for_eval(
+                lambda provider: CachingEmbeddingProvider(provider, embedding_cache)
+            )
         generator = get_llm_provider()
         judge = get_judge_llm_provider(generator)
         generator_provider = settings.llm_provider
@@ -722,7 +729,7 @@ async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest
         await disconnect()
 
 
-def main():
+def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="RQ1 統一標準化評測 Harness")
     parser.add_argument("--kg-id", default="236903cf-055a-40a8-8923-b9d06601f3b7")
     parser.add_argument("--doc-ids", default="D0080015_警察人員特別休假辦法,F0040034_員工接受召集請假期間薪資費用加成減除辦法,N0030006_勞工請假規則,N0030018_育嬰留職停薪實施辦法,N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法,N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法")
@@ -739,6 +746,16 @@ def main():
         action="store_true",
         help="僅供 pilot；允許生成器與 judge 共用 provider，正式評測不應使用。",
     )
+    parser.add_argument(
+        "--embedding-cache",
+        default=None,
+        help="選填：評測專用 embedding JSON 快取路徑；不傳則完全不啟用。",
+    )
+    return parser
+
+
+def main():
+    parser = build_arg_parser()
 
     args = parser.parse_args()
     kg_uuid = UUID(args.kg_id)

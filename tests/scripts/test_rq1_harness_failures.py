@@ -1,6 +1,13 @@
 """RQ1 harness 非 timeout 例外的結構化 failure record 測試。"""
 from models.eval_schema import AtomicGoldFact, ScenarioType, TestCase as EvalTestCase, VerificationStatus
-from scripts.eval.run_rq1_comparison import _build_failure_record, _render_pareto_summary
+from uuid import uuid4
+
+from scripts.eval.run_rq1_comparison import (
+    _build_failure_record,
+    _build_kg_chat_request,
+    build_arg_parser,
+    _render_pareto_summary,
+)
 
 
 def test_build_failure_record_preserves_lineage_and_failure_reason():
@@ -36,6 +43,13 @@ def test_build_failure_record_preserves_lineage_and_failure_reason():
     assert record["lineage"]["stage3_generation"]["raw_draft"] == ""
     assert record["deterministic_guard"]["guard_name"] == "HarnessException"
     assert record["atomic_score"]["is_perfect"] is False
+
+
+def test_embedding_cache_cli_is_opt_in():
+    parser = build_arg_parser()
+
+    assert parser.parse_args([]).embedding_cache is None
+    assert parser.parse_args(["--embedding-cache", "cache.json"]).embedding_cache == "cache.json"
 
 
 def test_render_pareto_summary_includes_context_quality_section(tmp_path):
@@ -80,3 +94,37 @@ def test_render_pareto_summary_includes_context_quality_section(tmp_path):
     # 涉及2個source_law、0命中，chain_completeness=0.0，唯一計入樣本 n=1。
     assert "n=1" in content
     assert "0.0%" in content
+
+
+# ── 報告62 T1：K 臂候選設定（--k-top-k）──────────────────────────────────
+
+def _case():
+    return EvalTestCase(
+        id="q1", question="問題", source_article="LAW §1", gold_answer="答案",
+        scenario_type=ScenarioType.TYPE_A,
+        atomic_gold_facts=[AtomicGoldFact(exact_span="原文", source_law="LAW", source_article="第1條")],
+        verification_status=VerificationStatus.VERIFIED,
+    )
+
+
+def test_k_arm_request_default_keeps_frozen_baseline_top_k():
+    """預設（k_top_k=None）必須與凍結基準相同：不傳 top_k，沿用 ChatRequest 預設 20。"""
+    req = _build_kg_chat_request(_case(), "K", uuid4(), [])
+
+    assert req.top_k == 20
+    assert "top_k" not in req.model_fields_set
+    assert req.retrieval_mode == "both"
+    assert req.disable_grounding_regen is False
+
+
+def test_k_arm_request_overrides_top_k_only_when_given():
+    req = _build_kg_chat_request(_case(), "K", uuid4(), [], k_top_k=40)
+
+    assert req.top_k == 40
+    assert req.retrieval_mode == "both"
+
+
+def test_arm_modes_unchanged_by_top_k_option():
+    assert _build_kg_chat_request(_case(), "F", uuid4(), [], 30).retrieval_mode == "fact_only"
+    assert _build_kg_chat_request(_case(), "G", uuid4(), []).retrieval_mode == "bfs_only"
+    assert _build_kg_chat_request(_case(), "K-2b", uuid4(), []).disable_grounding_regen is True

@@ -5,7 +5,11 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.eval.frozen_baseline_stage import ollama_version_matches, remaining_question_ids
+from scripts.eval.frozen_baseline_stage import (
+    build_run_command,
+    ollama_version_matches,
+    remaining_question_ids,
+)
 
 
 class RemainingQuestionTests(unittest.TestCase):
@@ -39,6 +43,26 @@ class OllamaVersionTests(unittest.TestCase):
         self.assertTrue(ollama_version_matches("0.34.2", "0.34.2"))
         self.assertFalse(ollama_version_matches("0.34.2", "0.11.4"))
         self.assertFalse(ollama_version_matches("0.34.2", None))
+
+
+class EmbeddingCacheCommandTests(unittest.TestCase):
+    def test_default_run_command_has_no_embedding_cache_flag(self):
+        command = build_run_command(
+            {"kg_id": "kg", "scope_doc_ids": ["doc"]}, "questions.json", "out"
+        )
+
+        self.assertNotIn("--embedding-cache", command)
+
+    def test_run_command_forwards_optional_embedding_cache(self):
+        command = build_run_command(
+            {"kg_id": "kg", "scope_doc_ids": ["doc"]},
+            "questions.json",
+            "out",
+            embedding_cache="cache.json",
+        )
+
+        index = command.index("--embedding-cache")
+        self.assertEqual(command[index + 1], "cache.json")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,8 @@ model 覆蓋，不呼叫 `init_providers()`（會載入 sentence-transformers �
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from core.providers import factory
@@ -31,6 +33,29 @@ def test_get_judge_llm_provider_returns_dedicated_instance_when_set():
     result = factory.get_judge_llm_provider(fallback)
     assert result is judge
     assert result is not fallback
+
+
+def test_override_embedding_provider_for_eval_requires_initialization():
+    factory._embedding = None
+
+    with pytest.raises(RuntimeError, match="先呼叫 init_providers"):
+        factory.override_embedding_provider_for_eval(lambda provider: provider)
+
+
+def test_override_embedding_provider_for_eval_replaces_global_instance():
+    original = object()
+    wrapped = object()
+    factory._embedding = original
+
+    factory.override_embedding_provider_for_eval(lambda provider: wrapped)
+
+    assert factory.get_embedding_provider() is wrapped
+
+
+def test_production_router_does_not_reference_eval_embedding_override():
+    router_source = Path("routers/agent.py").read_text(encoding="utf-8")
+
+    assert "override_embedding_provider_for_eval" not in router_source
 
 
 def test_make_llm_provider_uses_model_override():
