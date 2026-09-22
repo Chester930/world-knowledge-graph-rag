@@ -1714,7 +1714,7 @@ _NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順�
 動作：{verb}
 受詞：{object}
 
-改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。若動作與受詞開頭字詞剛好重複（例如動作是「得以」、受詞開頭又是「以」），改寫時避免疊字重複，選用通順的講法而非逐字硬接。"""
+改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。主詞／受詞後的括號型別標記只是輔助語意判斷用，不可以把型別名稱本身（如 PERSON、ORGANIZATION）照抄進輸出。若動作與受詞開頭字詞剛好重複（例如動作是「得以」、受詞開頭又是「以」），改寫時避免疊字重複，選用通順的講法而非逐字硬接。"""
 
 
 def _naturalization_dropped_quantity(natural_text: str, subject: str, verb: str, object_: str) -> bool:
@@ -1733,6 +1733,30 @@ def _naturalization_dropped_quantity(natural_text: str, subject: str, verb: str,
     for field in (subject, verb, object_):
         for match in _MEASURE_PATTERN.finditer(field):
             if match.group(0) not in natural_text:
+                return True
+    return False
+
+
+_GENERIC_ENTITY_TYPE_WORDS = frozenset({"概念"})
+
+
+def _naturalization_leaked_type_marker(
+    natural_text: str, subject_type: str, object_type: str
+) -> bool:
+    """核對自然語句是否殘留輸入中的型別名稱。
+
+    型別可由逗號分隔成重複列表（例如 ``PERSON,PERSON``），因此逐一核對
+    每個 token。邊界只排除 ASCII 識別字元，讓型別詞可以緊接中文或括號，
+    同時不把 ``PERSONAL`` 誤判成 ``PERSON``。通用中文型別詞「概念」本身
+    可能是合法語意，不視為洩漏。
+    """
+    for type_value in (subject_type, object_type):
+        for token in re.split(r"[,，]", type_value or ""):
+            token = token.strip()
+            if not token or token in _GENERIC_ENTITY_TYPE_WORDS:
+                continue
+            token_pattern = rf"(?<![A-Za-z0-9_]){re.escape(token)}(?![A-Za-z0-9_])"
+            if re.search(token_pattern, natural_text):
                 return True
     return False
 
@@ -1786,7 +1810,10 @@ async def _naturalize_triple(
     # 報告25 § 4 發現4：改寫輸出過一道 OpenCC 簡→繁（臺灣標準字）正規化，
     # 補救小模型偶爾漏簡體的情況（prompt 已要求繁體，這是保險不是取代）。
     result = _to_traditional(result.strip().strip("「」\"'"))
-    if _naturalization_dropped_quantity(result, subject, verb, object_):
+    if (
+        _naturalization_dropped_quantity(result, subject, verb, object_)
+        or _naturalization_leaked_type_marker(result, subject_type, object_type)
+    ):
         return _verbalize_fact(subject, subject_type, verb, object_, object_type)
     return result
 

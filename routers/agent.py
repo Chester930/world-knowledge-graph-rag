@@ -13,6 +13,7 @@ from fastapi.responses import StreamingResponse
 from neo4j import AsyncDriver
 
 from core.config import settings
+from core.constants import ENTITY_TYPES
 from core.database import get_driver
 from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
 from core.providers.base import EmbeddingProvider, LLMProvider
@@ -538,13 +539,22 @@ def _serialize_sources(
     }
 
 
-# 事實文字裡的型別標記——`（概念）` 或 `（PLACE）`／`（MonetaryAmount）` 這類
-# schema.org 型別 token。報告25 § 4 發現5：`_verbalize_fact()` 新版已不再產生
-# 這種標記、且 `backfill_fact_text_embeddings()` 會重寫既有 `Fact` 節點，但
-# 尚未回填的 KG／殘留資料仍可能帶進 prompt（甚至洩漏到最終答案），這裡做
-# 一道輸出前的防禦性清除。只吃「（純 ASCII 字母型別）」與「（概念）」，不會
-# 誤刪 `（民國一百十年）` 這種正常的中文括號內容。
-_TYPE_MARKER_RE = re.compile(r"\s*（(?:概念|[A-Za-z][A-Za-z0-9_]*)）")
+# 事實文字裡的型別標記——`（概念）` 或受控 ENTITY_TYPES 中的型別 token。
+# 報告25 § 4 發現5：尚未回填的 KG／殘留資料仍可能帶進 prompt（甚至洩漏到
+# 最終答案），這裡做一道輸出前的防禦性清除。只比對受控清單，不用任意大寫
+# 英文字萬用正則，避免誤刪法規正文中的合法英文縮寫。清單型別同時涵蓋
+# `（PERSON,PERSON）` 與裸 `PERSON`；「概念」只保留既有的全形括號格式。
+_CONTROLLED_TYPE_TOKEN_PATTERN = "|".join(
+    re.escape(token) for token in sorted(ENTITY_TYPES, key=len, reverse=True)
+)
+_CONTROLLED_TYPE_LIST_PATTERN = (
+    rf"(?:{_CONTROLLED_TYPE_TOKEN_PATTERN})"
+    rf"(?:\s*[,，]\s*(?:{_CONTROLLED_TYPE_TOKEN_PATTERN}))*"
+)
+_TYPE_MARKER_RE = re.compile(
+    rf"\s*(?:（(?:概念|{_CONTROLLED_TYPE_LIST_PATTERN})）|"
+    rf"{_CONTROLLED_TYPE_LIST_PATTERN})(?![A-Za-z0-9_])"
+)
 
 
 def _strip_type_markers(text: str) -> str:
