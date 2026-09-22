@@ -365,7 +365,42 @@ pytest：動工前 1011 passed → 完成後 1022 passed（0 failed，8 warnings
 （待填）
 
 ### 8.3 TASK-3
-（待填；Phase 1／Phase 2 分別記錄）
+
+任務：TASK-3 Phase 1（P1-a、P1-b、P1-c；Phase 2 未執行）
+分支／worktree：`codex/task3-source-ambiguity-audit`／`.claude/worktrees/codex-task3`
+基底 commit：`26362c3`（`worktree-report-gemini-review` tip）
+最終 commit（清單）：`a2f3882`（新增盤點腳本與離線測試）、`4e063f2`（補全 AGGR18 全域條號配對）；本 docs／結果 commit 回填本節與三份 Phase 1 產出。
+pytest：動工前 1011 passed → 完成後 1025 passed（0 failed，8 warnings）；新增測試 14 passed。`py_compile` 通過。
+新增／修改檔案：`scripts/analysis/source_ambiguity_audit.py`、`tests/scripts/test_source_ambiguity_audit.py`、`data/analysis/source_ambiguity/{kg_wide.json,questions_frozen42.json,summary.md}`、本節 §8.3。
+是否觸碰禁止項（Ollama／Neo4j 寫入／sdd worktree／凍結物件）：否。Neo4j 僅用 READ session；查詢未回傳 `fact_embedding`；未呼叫 LLM／embedding，未讀取 Stage A 半成品、未啟停服務。憑證僅從主 checkout `.env` 讀入程序記憶體，沒有輸出或提交。
+與任務書描述不符的現況：AGGR18 的四筆主配對 Fact 與 §5.4 文字、Jaccard／frame_overlap 預期值（±0.01）吻合，跨法規精確同文為否。題庫所述配對成立，但完整 KG 另有短 Fact「職業災害勞工 經醫療終止後」：舊法 §23 span 也配到同法 §18；新法 §84 span 另配到舊法 §18。AGGR18 主配對仍恰為 §23、§24、§84、§85 四筆；相鄰條號都分別計為額外配對。全域回傳 16,773 rows／distinct Facts，較 manifest 16,826 少 53（0.315%，未超過 1% 停止門檻）。
+範圍外發現（未處理）：Phase 2 等 T2 Stage A 完整結束；未讀取其 records，也未產生 `prompt_level_stageA.json`。未修改題庫或凍結目錄。
+驗收清單逐項結果：42/42 eligible 題載入，無遺漏 ID；未配對 span 明列（35 spans、分布於 23 題）。P1-a：16,180 個相異正規化文字、189 個同文異源文字、439 個涉及碰撞 Fact（2.6173%）；輸出前 20 範例含法規名與條號。P1-b：條號相同列主配對、同法其他條號列額外配對，`n_source_laws` 只依 gold；主配對跨文件 max Jaccard/frame_overlap 為 0.4894/0.8065，含同法額外配對對照為 0.4894/1.0000。P1-c 候選依 frame_overlap 排序為 `57-AGGR18`、`57-AGGR19`、`57-AGGR6`；AGGR18 排第 1。三份輸出只含統計、題庫 gold 配對及前 20 範例，未含大批原始 KG 或憑證。
+未完成／未驗證：Phase 2 待 T2 Stage A 完整結束。為補入完整 AGGR18 條號包含配對並用最終腳本版本重產結果，P1-a 全域唯讀查詢循序執行兩次；每次均為單一 query、每批 200 rows、批次間隔 0.15 秒，兩次列數一致（16,773）。輸出使用第二次結果。markdownlint-cli 對整份任務書仍回報既有錯誤；本節新增內容僅有 MD013 長行告警。新 summary.md 的告警只有既有 MD013／MD060 類型，未引入新規則類型。
+
+### Phase 2（T2 Stage A prompt 來源盤點）
+
+- 任務：TASK-3 Phase 2（凍結 Stage A prompt 行／retrieval trace 對照）
+- 分支／worktree：`codex/task3-source-ambiguity-audit`／`.claude/worktrees/codex-task3`
+- 基底 commit：`6661684`（Phase 1 完成後的分支 HEAD）
+- 最終 commit（Phase 2 程式與測試）：`952cfa9`；Phase 2 JSON 與 summary：`c8366d4`；本節回填另見其後文件提交。
+- pytest：動工前 1028 passed → 完成後 1032 passed（0 failed，8 warnings）；`tests/scripts/test_source_ambiguity_audit.py` 21 passed（其中新增 Phase 2 測試 4 項）；`py_compile`、`git diff --check` 通過。
+
+新增／修改檔案：`scripts/analysis/source_ambiguity_audit.py`、`tests/scripts/test_source_ambiguity_audit.py`、`data/analysis/source_ambiguity/prompt_level_stageA.json`、`data/analysis/source_ambiguity/summary.md`、本節 §8.3。
+
+是否觸碰禁止項（Ollama／Neo4j 寫入／sdd worktree／凍結物件）：否。只讀 `.claude/tmp/task3_phase2_snapshot_20260922/` 副本；未讀取或修改 `sdd-retrieval-comparison` worktree 與 T2 原始輸出、未連 Neo4j、未呼叫 LLM／embedding，未修改 frozen manifest 或題庫。快照目錄被 `.gitignore` 的 `.claude/` 規則忽略，未納入提交。
+
+與任務書描述不符的現況：本分支舊版只提到 `t2_k1_topk40_stage_a/records.json`，遠端更正版 §5.4 與使用者指定本次應納入八個固定資料夾；依八個資料夾的 `records.json` 快照分析。使用者確認 T2 已於 2026-09-21 23:30 結束，故未採用舊版「待 T2 完成」狀態。快照每個檔案的 bytes、SHA-256 與目錄清單均列於 `data/analysis/source_ambiguity/summary.md`，分析載入時逐檔驗證雜湊與大小。
+
+範圍外發現（未處理）：輸出資料本身不能確認或否證 `vector_search_facts` 的 `(subject, rel_type, object)` 去重假設，也不據此推定多來源行的成因；`trace.kind` 實際有 `fact`、`triple`，沒有 `bfs` 的 `in_prompt=true` trace，故照原值列出 `triple`，另列 `bfs=0`。
+
+驗收清單逐項結果：`frozen_manifest.json` 的 42 個 `eligible_ids` 均作為題目範圍；八資料夾共 79 筆紀錄全數保留，超出範圍記錄明列（本次 0 筆）。共 3993 個 prompt 行：唯一歸屬 3981（99.70%）、多來源合併 7（0.18%）、unmatched 5（0.13%）、source unresolved 0；同文件多 trace 重複 65 行，獨立跨來源碰撞行 0。有獨立碰撞的題目為 0/42。多來源合併行前 20 範例目前 1 種正規化文字，包含逐行文字、各 `source_doc_id`、離線可得法規名、出現資料夾與題目分布。依同一執行／子問題組內的唯一歸屬行計算跨文件 frame_overlap：41754 對，分位數 p0/p25/p50/p75/p90/p95/p100 為 0/0/0/0/0.0952/0.1818/1.0000；`fact` 30651 對，`triple` 772 對，`bfs` 0 對。逐題行數與其餘狀態見 summary 表格；各 kind 分母、文件雜湊、unmatched 清單均明列。
+
+`57-AGGR18` 在 `t2_k1_topk40_stage_a2` 有 1 個子問題組、35 條 prompt 行，錨點吻合。對應兩份文件的行是「`- 經認定結果為職業災害者 再以公傷病假處理`」，來源為 `a4c0d396-d8e9-5a83-8655-e5b7c673100d`（勞工職業災害保險及保護法）及 `b90844e9-08c1-5886-8d35-a1fecaff511a`（職業災害勞工保護法）；它不是 gold exact span。JSON 與 summary 逐字列出 AGGR18 prompt 行及每行匹配 trace 欄位。
+
+突變確認：把「至少兩個不同 source_doc_id」改成三個時，來源狀態測試失敗；停用 snapshot SHA／大小檢查時，雜湊測試失敗；略過 unmatched 行時，總 prompt 行數測試失敗；讓 frame_overlap 接納非唯一歸屬行時，唯一歸屬行對數測試失敗。每項突變驗證後均已還原，原測試集 21/21 通過。
+
+可比性：輸入為 `top_k=40`，與凍結基準 `top_k=20` 不同；結果只描述 prompt 行來源歸屬，不用來比較答對率。
 
 ## 9. 使用者待裁示
 
