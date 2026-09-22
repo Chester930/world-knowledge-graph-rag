@@ -213,7 +213,9 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - **建議解法（Wang et al. 2025明確提出，低成本可行）**：**Embedding caching**——問題的query embedding只算一次、之後重複執行/多臂比較都重用同一份，避免每次重新呼叫embedding provider引入變異。這是唯一不需要改動Ollama/bge-m3底層、可以直接在應用層（harness層）實作的緩解措施。
 - **不建議**：修改Ollama/bge-m3推論精度或批次設定追求完全決定性——本專案透過Ollama黑盒呼叫，沒有掌控這層的能力，文獻顯示即使做到（如LayerCast）也需要修改推論引擎內部，成本遠高於應用層的embedding cache。
 
-**下一步建議**：若要繼續驗證獨立judge或任何「固定檢索、只換其他變因」的pilot，優先在harness層加一個query embedding cache（同一次比較的兩個臂共用同一份embedding），或直接沿用報告62 T0的`prompt_context_lines`重放機制（已經是「固定住檢索結果」的等價做法，只是原本設計動機不同，剛好也能排除這裡發現的embedding變因）。**本輪暫不排入實作，待使用者決定要不要繼續投入這條驗證路線。**
+**下一步建議**：若要繼續驗證獨立judge或任何「固定檢索、只換其他變因」的pilot，優先在harness層加一個query embedding cache（同一次比較的兩個臂共用同一份embedding），或直接沿用報告62 T0的`prompt_context_lines`重放機制（已經是「固定住檢索結果」的等價做法，只是原本設計動機不同，剛好也能排除這裡發現的embedding變因）。
+
+**✅ 已落地為任務書，交付Codex**：[報告68：評測harness查詢embedding快取SDD任務書](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)——設計原則是**只動評測harness層，完全不改`routers/agent.py::chat()`或任何production程式碼**：在`core/providers/factory.py`新增一個明確標示eval-only的override hook，讓harness把全域embedding provider單例換成快取包裝版，`chat()`透過既有的`get_embedding_provider()`自動受益，不需要改它任何一行。預設（不傳`--embedding-cache`）零行為變化。T4只驗證快取機制本身有效（同一題連續跑兩次結果一致），**不自動重跑獨立judge pilot**，那是之後另外決定的事。**尚未實作，待Codex執行。**
 
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
@@ -307,7 +309,8 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告62：下一階段任務書（檢索排名與條文擴充驗證）](docs/報告/62_下一階段任務書_檢索排名與條文擴充驗證.md)
 - [報告65：抽取粒度修復設計SDD任務書（F，方向A已核准並落地，定向重抽驗證背景執行中）](docs/報告/65_抽取粒度修復設計SDD任務書.md)
 - [報告66：SVO抽取少樣本領域包參數化SDD任務書（交付Codex，須等報告65驗證完成才開始）](docs/報告/66_SVO抽取少樣本領域包參數化SDD任務書.md)
-- [報告67：事實自然語言化（natural_text）品質問題SDD任務書（T1–T3完成，T4未執行）](docs/報告/67_事實自然語言化品質問題SDD任務書.md)
+- [報告67：事實自然語言化（natural_text）品質問題SDD任務書（T1–T4全部完成）](docs/報告/67_事實自然語言化品質問題SDD任務書.md)
+- [報告68：評測harness查詢embedding快取SDD任務書（交付Codex，尚未實作）](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)
 
 ### 2026-09-22 報告66 T1–T6：SVO 少樣本領域包參數化已實作
 
