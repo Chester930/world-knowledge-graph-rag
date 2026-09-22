@@ -34,7 +34,60 @@
 | `subject='保險人' object='辦理業務使用之醫療藥品與器材'` | `natural_text` 是 `'保險人辦理業務使用之治療救護車輛得以免徵稅捐。'`——講的是**另一筆**（`object='辦理業務使用之治療救護車輛'`）事實的內容，兩筆不同的Fact卻共用同一句 `natural_text` |
 | `subject='雇主' verb='僱用' object='勞工'` | `fact_text`（三元組本身）語意是「雇主僱用勞工」，對應的 `natural_text` 卻是「僱主應依勞動基準法之規定，發給勞工。」——主題不同，疑似跟另一筆citation混淆 |
 
-**尚未查明**這是 `_naturalize_triple()` 本身的LLM生成錯誤，還是 `merge_triples_to_graph()` 累積 citation 時 `natural_text` 覆蓋邏輯（"每次有新citation合併時都重新生成、覆蓋舊值"）有時序或參數傳遞上的bug——這是本任務書 §3 T1 要優先釐清的問題。
+### 1.3 T1 唯讀調查結果（2026-09-22）
+
+依指定環境（`WORKSPACE_DIR=D:/Users/666/Desktop/kg-runtime`、
+`NEO4J_URI=bolt://localhost:17990`、`OLLAMA_BASE_URL=http://127.0.0.1:11434`）
+只對 KG#4（`236903cf-055a-40a8-8923-b9d06601f3b7`）執行 `MATCH ... RETURN` 查詢，
+沒有執行任何 Neo4j 寫入。查詢結果與 `_naturalize_triple()` 重跑紀錄如下。
+
+#### A. 型別標記洩漏：判定為 LLM／prompt 路徑問題
+
+以資料庫查出的 subject／verb／object／type 直接呼叫目前的
+`_naturalize_triple()`，固定 `qwen2.5:7b`、`think:false`，每個案例重跑 4 次：
+
+| 案例 | DB 中的 citation | 4 次輸出是否重現洩漏 |
+|---|---|---|
+| `本辦法`／`所稱`／`定團體`（`概念`／`ORGANIZATION`） | N0090058，c2，第2條 | 4/4：`本辦法所稱定團體是指ORGANIZATION。` |
+| `最高負責人`／`定`／`地方主管機關應依下列各款規定審認之`（`POSITION`／`ORGANIZATION`） | N0030015，c6，第4-2條 | 4/4：`最高負責人 POSITION 確定地方主管機關應依下列各款規定審認之 ORGANIZATION。` |
+| `因離婚或其配偶死亡致婚姻關係消滅後`／`所定`／`依法准予繼續居留者`（空／`PERSON,PERSON,PERSON,PERSON`） | N0050022，c9，第8-2條 | 4/4：括號內重現 `PERSON,PERSON,PERSON,PERSON` |
+
+這些結果與 DB 現存 `natural_text` 逐字一致，且在固定輸入下穩定重現；因此型別洩漏不需要假設跨呼叫 race 才能解釋，直接由目前 prompt 把型別標記送給 LLM、卻沒有禁止複寫造成。T1 對這一類問題的判定是 **LLM／prompt 問題**。
+
+#### B. 疑似內容錯置：目前證據不支持它是 race
+
+兩條被抽查的邊都證實是「一條關係邊累積多筆 citation，但只保存一個
+`natural_text`」：
+
+- `保險人 → 免徵稅捐` 的 `natural_text` 是「…治療救護車輛…」，而
+  `citations_json` 同時有「…醫療藥品與器材」及「…治療救護車輛」兩筆；目前
+  `natural_text` 對應第二筆／最後一筆 citation。報告原表把「醫療藥品與器材」寫成
+  `object`，但 DB 實際是 citation 的 `verb`，邊的 object 是「免徵稅捐」。
+- `雇主 → 勞工` 的 `natural_text` 是「僱主應依勞動基準法之規定，發給勞工。」；
+  `citations_json` 有早期的 `verb=僱用`，但最後一筆是
+  `verb=應依勞動基準法之規定，發給`，所以目前文字對應最後一筆，而非早期
+  `僱用` citation。
+
+再以早期 citation 的三元組直接重跑：
+
+- `保險人`／`辦理業務使用之醫療藥品與器材`／`免徵稅捐`：4/4 都輸出
+  「保險人辦理業務使用之醫療藥品與器材得以免徵稅捐。」。
+- `雇主`／`僱用`／`勞工`：4/4 都輸出「僱主僱用了勞工。」。
+
+因此，這兩個案例目前較符合既有的 edge-level 語意：新 citation 進來時重新生成並
+覆蓋單一 `natural_text`，而 `citations_json` 保留歷史多筆來源；拿較早 citation
+和目前代表最後 citation 的 `natural_text` 比較，會看起來像錯置，但不能據此指向
+LLM 把另一筆輸入混進同一次改寫，也不能據此證明 race。
+
+#### T1 結論與範圍停止
+
+1. **型別標記洩漏：已判定是 `_naturalize_triple()` 的 LLM／prompt 問題，且可穩定重現。**
+2. **兩個疑似內容錯置案例：未觀察到 race 證據；目前觀察到的是最後 citation 覆蓋單一
+   `natural_text` 的既有設計行為。**
+3. `merge_triples_to_graph()` 跨呼叫的 read-modify-write race 仍是靜態程式碼層面的
+   未驗證風險；本次唯讀快照與單次自然語言化重跑無法證明或排除真正的並發覆蓋。若
+   後續要判定它，需要另做並發時序／交易觀測，不在本次 T1 自動展開。
+4. 本次只完成 T1 的查詢與重跑，**沒有執行 T2、T3、T4，也沒有修改 KG 資料**。
 
 ---
 
