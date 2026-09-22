@@ -336,3 +336,14 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - `python -m pytest tests/services/test_svo_service.py tests/core/test_kg_config.py -q -p no:cacheprovider`：292 passed。
 - `python -m pytest tests/services/test_extraction_worker.py -q -p no:cacheprovider`：9 passed。
 - 完整命令 `python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py`：1055 passed，8 warnings，59.02s。
+
+### 2026-09-22 小範圍K-arm驗證（報告65 §9）：抽取修復已生效，被三個下游瓶頸擋住
+
+用新題庫（`23f8c06f…`）對7題（`18-Q5`／`57-AGGR7`／`57-AGGR8`／`57-AGGR19`／`57-CANARY5`／`57-DIST1`／`57-DIST2`）各跑一次K-arm（背景fork執行，pilot性質）。**7題全部`is_perfect=false`，但這不代表今天的抽取端修復沒用**：
+
+1. **修復本身在KG層面已生效**：`57-CANARY5`（本輪人工修正）與`57-DIST1`兩題，修正後的正確內容都**逐字進了prompt**，但生成端沒引用／模糊化掉——卡在已知的生成端問題（報告62 §13同類），不是今天工作造成的新問題。
+2. **`57-AGGR7`（規則10教科書案例）印證了已知取捨**：修好的事實在前65名檢索候選裡完全找不到，疑似verb變長稀釋了embedding辨識度（報告65 §3.1已預先標註這個風險，現在有實測證據）。
+3. **`57-AGGR19`（c85）發現一個全新、獨立的問題**：修正後的事實排名**第0名（分數最高）卻 `in_prompt:false`**，反而是排名第14、用「僱主」異體字的近似重複版本被排進prompt——疑似組裝端有個去重/多樣性機制誤排除了排名最高的正確事實。**這是抽取粒度問題以外的獨立發現**，成本可能比繼續深化規則10更低（純工程問題，不需要跟LLM非決定性搏鬥），值得優先調查。
+4. `57-AGGR8`（c18，已知未修復）符合預期，沒有意外。
+
+**結論**：抽取粒度（方向A）已經不是主要瓶頸，下一步該處理生成端引用率／檢索排名代價／組裝端去重問題，尤其`57-AGGR19`的去重排除機制。詳見報告65 §9。
