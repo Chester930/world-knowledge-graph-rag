@@ -39,26 +39,133 @@
 
 下一步依先前排定的優先序（A/B → F → C → D/E → G/H）進到 **F：抽取粒度修復設計**——針對 §4.21 類別B「抽到但破碎／丟失限定條件」（35個gold span中佔14個、40%，最新人工複核的`57-AGGR19`也是同型案例）設計修復方案，目前尚無對應任務書，需另開。
 
-### 2026-09-22 生成模型能力診斷與 Ollama `think` 參數缺陷（**待交付 Codex 處理**）
+### 2026-09-22 T-B：生成模型與接地核對 judge 解耦設計評估（已完成，僅評估未新增接線）
+
+本節是依使用者要求對 T-B 的設計評估與成本盤點；本輪沒有修改
+`routers/agent.py::chat()`、`services/verification_service.py` 或其他正式行為。
+盤點後發現：T-B 的基本解耦能力其實已在既有提交 `ce84a77`
+（2026-09-08）落地，本次工作不是再做一次接線，而是確認目前接線範圍、預設行為與採用成本。
+
+#### 1. 現況呼叫鏈與目前實際行為
+
+目前的路徑如下：
+
+1. `routers/agent.py::chat()` 先以 `get_llm_provider()` 取得生成端 provider
+   （目前預設 `qwen2.5:7b`），再以
+   `get_judge_llm_provider(llm_provider)` 取得接地核對 provider；目前位置約為
+   `routers/agent.py:1510-1515`。
+2. `chat()` 將兩者分開傳入 `_generate_from_context_lines()`：
+   `llm_provider` 用於初稿串流、分解式生成、限制性重生成與定向修正；
+   `judge_llm_provider` 用於 grounding 核對。helper 的雙 provider 介面約在
+   `routers/agent.py:1256-1263`。
+3. helper 目前有三個 grounding 核對點，均傳入 `judge_llm_provider`：初稿核對約
+   `routers/agent.py:1328-1329`、限制性重生成後複核約
+   `routers/agent.py:1422-1423`、列舉完整性重生成後複核約
+   `routers/agent.py:1436-1437`。
+4. `services/verification_service.py::verify_fact_grounding()` 本身只接受一個
+   provider 參數，並在約 `:148-150` 呼叫該 provider 的 `generate_json()`；它不會
+   再自行取得或建立模型。因此「生成者＝核對者」與否是呼叫端 provider 選擇問題，
+   不是 verification service 內部再拆分的問題。
+
+目前設定與 fallback 語意已存在於 `core/config.py:16-21`、
+`core/providers/factory.py:91-124`：
+
+- `JUDGE_LLM_PROVIDER` 未設定（預設 `None`）時，`_judge_llm=None`，
+  `get_judge_llm_provider()` 回傳生成端 provider；所以現行預設仍是同一顆模型自我核對，
+  完全保留舊行為。
+- 設定 `JUDGE_LLM_PROVIDER` 後，啟動時用同一個 `_make_llm_provider()` 建立獨立的
+  `_judge_llm` 實例；可用 `JUDGE_LLM_MODEL` 覆蓋 judge model。`chat()` 會實際把
+  grounding 核對改送至該獨立實例，生成與重生成仍留在生成端 provider。
+- 因此，T-B 已具備「不同 provider／不同模型」以及「同 provider、同模型但不同
+  Python provider 實例」兩種部署方式；後者只解除物件／路徑共用，不會消除同一模型
+  權重與判斷偏差的相關性。
+
+#### 2. 與離線 harness 的對照
+
+離線 harness 已採相同的角色分離慣例：
+
+- `scripts/eval/run_rq1_comparison.py:648-654` 初始化後分別取得 generator 與 judge，
+  並在 `:659-664` 對正式評測禁止 shared judge（除非明確 `--allow-shared-judge`）。
+- 每題的生成呼叫在約 `:259-263` 傳 `llm_provider=counting`、
+  `judge_llm_provider=judge_counting or counting`；後續 lineage、AtomicScorer 等
+  語意核對也沿用同一 judge。這與 `chat()` 的 provider 角色分工一致。
+- 差異在於 harness 對「正式比較」強制不同 judge；正式 `chat()` 為了向後相容沒有
+  這個強制閘門，未設定時仍允許 shared judge。這是部署策略差異，不是介面能力缺口。
+
+#### 3. 設定方案與建議
+
+不建議再新增 `verification_judge_provider`／`verification_judge_model` 這組重複設定；
+現有 `judge_llm_provider`／`judge_llm_model` 名稱已涵蓋接地核對用途，且已被 factory、
+router、測試與 harness 使用。三種操作模式如下：
+
+| 模式 | 設定 | 可回答的問題 | 代價／限制 |
+|---|---|---|---|
+| 現行相容模式 | 不設 `JUDGE_LLM_PROVIDER` | 保持目前生產行為 | 仍有生成者自我審查的循環性 |
+| 同模型獨立實例 | `JUDGE_LLM_PROVIDER=ollama`，model 同生成端 | 驗證角色與 provider 路徑是否正確分離 | 不是真正的模型多樣性，不能排除同模型偏差；通常沒有第二組權重 |
+| 獨立 judge 模型 | 設定 provider，必要時設 `JUDGE_LLM_MODEL` | 直接測試「生成端與核對端不同模型」是否降低誤判／限制性重生成 | 可能多載入一組模型，增加 VRAM、模型切換與延遲風險 |
+
+T-A 新增的 `OLLAMA_LLM_THINK` 目前是 Ollama 共用設定；若未來要讓生成端與 judge
+各自使用不同 thinking 策略，還需另加角色級設定（例如 judge 專用 think），但這不屬
+本輪 T-B 評估，也不應在沒有配對實驗前自行新增。
+
+#### 4. 成本與測試影響估算
+
+- **程式改動成本**：T-B 基本能力已完成，追加改動為 0 個正式程式檔。若從尚未有
+  解耦能力的版本重做，實際範圍是 `core/config.py`、`core/providers/factory.py`、
+  `routers/agent.py`、`tests/core/test_providers_factory.py`、
+  `tests/routers/test_agent.py` 五個檔案；現有提交已包含這些變更與回歸測試。
+- **呼叫數與延遲**：切換成獨立 judge 不會自動增加 LLM 呼叫數；每次 grounding
+  pass 原本就有一次 `generate_json()`，若觸發重生成，原本也會再複核一次，列舉
+  guard 另有既有複核路徑。變的是 judge 模型的單次速度與判定結果。若 judge 判定
+  差異使重生成率上升，端到端延遲才會額外上升。
+- **記憶體／載入**：同一 Ollama 模型的獨立 Python provider 物件本身成本很小；若
+  judge 是另一模型，Ollama 可能同時保留兩組權重，也可能因 VRAM 不足反覆卸載／重載，
+  造成明顯延遲。這是目前最主要的運行成本，尤其本專案已有 Ollama 記憶體壓力紀錄。
+- **測試影響**：現有 `tests/core/test_providers_factory.py` 已覆蓋 fallback、獨立
+  judge 實例與 model override；`tests/routers/test_agent.py` 已驗證生成走 generator、
+  grounding 走 dedicated judge。若未來改動預設行為，至少要新增 shared／dedicated
+  兩模式的 chat 回歸測試，並重跑完整 pytest；本輪沒有改正式程式，所以不需新增測試。
+- **觀測成本**：factory 已記錄 judge provider/model；harness 也把 generator/judge
+  provider、model、judge calls 寫入 record。正式 chat 若採用獨立 judge，建議後續補記
+  judge identity、grounding pass、regeneration 次數與延遲，否則很難判斷改善來自模型
+  能力還是只來自不同重生成率。
+
+#### 5. T-B 結論與後續決策建議
+
+T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是是否在正式 `chat()` 環境
+設定 dedicated judge，以及要選同模型實例還是不同模型。建議不要把「已能配置」直接當成
+「已證明有效」：若要排除 self-judge 放大因素，應固定生成端 `qwen2.5:7b`、題庫、
+檢索 context、timeout 與 `think:false`，只做 shared judge vs dedicated judge 的配對
+比較，至少記錄 grounding 判定差異、regeneration rate、最終 Atomic Accuracy、拒答／
+模糊拒答率、端到端延遲與 judge model load 次數。
+
+因此，本輪不接線、不更換生產模型，也不執行 T-C；使用者可在確認這份評估後，直接以
+現有 `JUDGE_LLM_PROVIDER`／`JUDGE_LLM_MODEL` 做受控比較，或另行提出角色級 thinking
+設定與更細的 judge 失效分析。
+
+### 2026-09-22 生成模型能力診斷與 Ollama `think` 參數缺陷（T-A 已完成；T-B 見上節）
 
 **背景**：使用者要求確認「是否需要調整生成模型（目前 `qwen2.5:7b`）」。以下判斷依據報告62 §12–14（T2判定＋生成階段診斷＋量測工具稽核）與 `services/verification_service.py` 既有 docstring 記載的歷史 bug，非猜測。
 
 **判斷結論**：
 
-1. **已確認需要修復（與是否換模型無關的獨立程式缺陷）**：`core/providers/llm/ollama.py` 的 `generate()`／`generate_json()`／`stream()` 三個方法都沒有傳 Ollama `/api/generate` 的頂層 `think` 參數（已查證程式碼，完全沒有這個 key）。2026-09-20 的本地生成模型初篩（`rq1_eval_results/local_model_screening_20260921.md`）因此被汙染——思考型模型（`granite4.2`、`qwen3.5`）跑起來极慢或輸出為空，導致「候選多數連第一題都無法穩定完成」，**這個結論不可信**，候選根本沒有在公平條件下跑過。
+1. **已修復（與是否換模型無關的獨立程式缺陷）**：T-A 前曾確認 `core/providers/llm/ollama.py` 的 `generate()`／`generate_json()`／`stream()` 三個方法都沒有傳 Ollama `/api/generate` 的頂層 `think` 參數，污染了 2026-09-20 的本地生成模型初篩（`rq1_eval_results/local_model_screening_20260921.md`）。現已由提交 `2f2415a` 修復：`think=None` 不送 key，`think:false/true` 送至頂層；因此思考型模型初篩的舊結論仍不可信，但基礎設施缺陷已排除。
 2. **尚未確認需要換掉 `qwen2.5:7b`**：現有唯一一次篩選（見上）條件跟凍結基準（K arm、42題、`qwen2.5:7b` generator/judge共用）不可比，又被(1)的bug污染，不能當「換或不換」的證據。同時，報告62 §13 診斷指出的生成端異常（`18-Q4` 限制性重生成變模糊拒答、`canary-P1` 罰鍰區間答錯）主因之一疑似是**接地核對機制用同一顆 7B 模型自我審查**（`services/verification_service.py` docstring 已記錄歷史 bug：qwen2.5:7b 常把問題原樣回貼，被自己的判官誤判成「未接地」觸發重生成）——換模型前應先排除「小模型自我審查放大雜訊」這個設計因素，否則換了模型也未必解決同一種現象。
 3. **報告57 的既有教訓**：換生成模型是獨立於 KG 檢索評測的變因，一旦換了必須固定下來、在所有後續候選比較中維持一致，不可中途替換又互比（報告49/51 曾因此污染過結論）。
 
 **交給 Codex 的任務（建議順序）**：
 
-- **T-A（必做，S，純程式缺陷修復，與是否換模型無關）**：讓 `core/providers/llm/ollama.py` 支援 `think` 參數。
+- **T-A（必做，S，純程式缺陷修復，與是否換模型無關；已完成）**：讓 `core/providers/llm/ollama.py` 支援 `think` 參數。
   - `OllamaLLMProvider.__init__` 新增 `think: bool | None = None` 參數；`generate()`／`generate_json()`／`stream()` 的 request payload 只在 `self._think is not None` 時加入**頂層**（不是 `options` 裡）`"think": self._think`——`None` 時完全不送這個 key，向後相容，不改變任何既有行為。
   - `core/config.py` 仿照 `ollama_llm_num_predict`（約第33行）新增 `ollama_llm_think: bool | None = None`（可用環境變數覆寫）。
   - `core/providers/factory.py::_make_llm_provider()`（約第22-29行，`case "ollama":` 分支）把新設定傳入 `OllamaLLMProvider(...)`。
   - 新測試比照既有 `tests/core/test_ollama_llm_num_predict.py` 的模式，新檔 `tests/core/test_ollama_llm_think.py`：驗證 `think=None`（預設）時 payload 不含 `think` key；`think=False`／`True` 時 payload 含對應值；`generate`／`generate_json`／`stream` 三個方法都要覆蓋。
   - 跑 `python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py` 確認零回歸。
   - **不要**動 `_NUM_CTX`／`_TIMEOUT`／`_SEED` 等既有常數，也不要改變 `think` 未設定時的預設行為。
-- **T-B（S，建議一併評估，但先只做設計評估不接線）**：評估把「生成模型」與「接地核對 judge 模型」的 provider 解耦——目前 `services/verification_service.py::verify_fact_grounding()` 收到的 `llm_provider` 是呼叫端（`routers/agent.py::chat()`）傳入的同一顆生成用 provider。可參考離線 harness 已有的「獨立 judge」慣例（報告57 §1，接線於 `scripts/eval/run_rq1_comparison.py:560-563`）。**在使用者核准前不要接線到正式 `chat()`**。
+- **T-B（S，設計評估已完成；本輪不新增接線）**：現況已由既有 `ce84a77` 提供
+  `judge_llm_provider`／`judge_llm_model` 與 `get_judge_llm_provider()`；未設定時仍與
+  生成端共用，設定後 `chat()` 的三個 grounding 核對點改用獨立 judge。完整現況、離線
+  harness 對照、成本與採用建議見上方「T-B：生成模型與接地核對 judge 解耦設計評估」。
 - **T-C（M，需 T-A 完成後才有意義，非本次必做）**：用 T-A 修好的 `think:false` 重跑一次公平的模型篩選比較，比較對象至少含 `qwen2.5:7b`（現況）、`qwen3.5:4b/9b`、`granite4.2:3b/8b`。**必須對齊凍結基準的 K arm 42題（或已修正的新題庫 `23f8c06f…`）條件，不能沿用舊32題／不同judge／不同timeout**，否則結果一樣不可比。建議 T-A、T-B 完成並經使用者確認後才排入排程。
 
 **明確不要做**：在沒有 T-C 這種公平比較之前，**不要**把生產 `chat()` 或評測 harness 的預設生成模型從 `qwen2.5:7b` 換掉。
