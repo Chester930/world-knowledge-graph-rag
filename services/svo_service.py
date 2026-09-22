@@ -1725,17 +1725,41 @@ def _kg_source_charset(kg_folder: str) -> frozenset[str]:
     return frozenset(chars)
 
 
+#: 報告65 §6/§7 定向重抽驗證發現（2026-09-22）：`_to_traditional_selective()`
+#: 是逐字比對白名單，遇到「單字本身是這個KG來源語料裡合法的繁體字、但用在
+#: 特定詞組裡卻是簡體殘留」時會結構性失效——例如「准」在「核准」／「批准」
+#: 是合法繁體用字，白名單因此保留它，但「准用」本應是「準用」，逐字比對
+#: 抓不出「同一個字在這個詞組裡用錯」。這不是白名單邏輯寫錯，是逐字比對
+#: 這個方法本身的粒度侷限，需要逐詞比對已知易錯詞組來補救。清單只收錄
+#: 真實觀察到、且已核對過另一支語料的案例，不可臆測新增。
+_KNOWN_SIMPLIFIED_COMPOUNDS: dict[str, str] = {
+    # 報告65定向重抽驗證，57-AGGR19（N0050031 c85）真實案例。
+    "准用": "準用",
+    "基准法": "基準法",
+}
+
+
+def _fix_known_simplified_compounds(text: str) -> str:
+    """逐字白名單處理不了的已知簡體殘留詞組，做逐詞取代補救（見上方常數
+    docstring）。在 `_to_traditional_selective()` 之後呼叫，不取代它。"""
+    for bad, good in _KNOWN_SIMPLIFIED_COMPOUNDS.items():
+        text = text.replace(bad, good)
+    return text
+
+
 def traditionalize_triples(
     triples: list[SVOTriple], source_charset: frozenset[str] | None,
 ) -> list[SVOTriple]:
     """對一批三元組的 subject／verb／object 就地套用 `_to_traditional_selective()`
     ——抽取端修正 `qwen2.5:7b` 偶發輸出簡體字的失效（報告25 §4 發現4）。
     在 `extraction_worker._process_one()` merge 前呼叫；`source_charset` 由
-    `_kg_source_charset(kg_folder)` 提供。"""
+    `_kg_source_charset(kg_folder)` 提供。逐字轉換後再補一次
+    `_fix_known_simplified_compounds()`（報告65 §6/§7），涵蓋逐字白名單
+    抓不到的已知易錯詞組。"""
     for t in triples:
-        t.subject = _to_traditional_selective(t.subject, source_charset)
-        t.verb = _to_traditional_selective(t.verb, source_charset)
-        t.object = _to_traditional_selective(t.object, source_charset)
+        t.subject = _fix_known_simplified_compounds(_to_traditional_selective(t.subject, source_charset))
+        t.verb = _fix_known_simplified_compounds(_to_traditional_selective(t.verb, source_charset))
+        t.object = _fix_known_simplified_compounds(_to_traditional_selective(t.object, source_charset))
     return triples
 
 

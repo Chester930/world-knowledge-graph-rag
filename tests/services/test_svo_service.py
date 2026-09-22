@@ -2873,6 +2873,24 @@ def test_traditionalize_triples_none_charset_is_graceful():
     assert (out[0].subject, out[0].verb, out[0].object) == ("職業訓練", "補助", "經費")
 
 
+def test_fix_known_simplified_compounds_replaces_registered_words():
+    """報告65 §6/§7 真實案例（57-AGGR19，N0050031 c85）：「准」在「核准」
+    是合法繁體字，`_to_traditional_selective()` 逐字白名單因此保留它，但
+    「准用」本應是「準用」——逐詞比對已知易錯詞組補救這個逐字比對的盲點。"""
+    assert svc._fix_known_simplified_compounds("准用勞動基准法規定") == "準用勞動基準法規定"
+    # 白名單放行的合法用法（「核准」）不在已知易錯詞組清單裡，維持不變
+    assert svc._fix_known_simplified_compounds("報經主管機關核准") == "報經主管機關核准"
+
+
+def test_traditionalize_triples_also_fixes_known_simplified_compounds():
+    # 「准」本身在白名單裡（來源語料真的有「核准」），逐字轉換不會動它，
+    # 靠新增的逐詞比對步驟修正「准用」這個詞組。
+    charset = frozenset("准許核准雇主受僱者")
+    triples = [SVOTriple(subject="職業災害勞工", verb="終止勞動契約時", object="准用勞動基准法規定預告雇主")]
+    out = svc.traditionalize_triples(triples, charset)
+    assert out[0].object == "準用勞動基準法規定預告雇主"
+
+
 def test_union_citations_dedupes_and_takes_max_confidence():
     a = '[{"source_svo_chunk_index": 1, "verb": "以", "confidence": 1}]'
     b = ('[{"source_svo_chunk_index": 1, "verb": "以", "confidence": 1}, '
