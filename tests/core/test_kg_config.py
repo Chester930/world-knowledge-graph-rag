@@ -66,6 +66,8 @@ def test_kgconfig_defaults_match_live_module_constants():
     assert cfg.domain.system_context == agent._TAIWAN_CONTEXT_INSTRUCTION
     assert cfg.domain.target_language == "zh-Hant"
     assert cfg.domain.name == "taiwan-labor-law"
+    from core.kg_config.model import _DEFAULT_SVO_FEWSHOTS
+    assert cfg.domain.svo_fewshots == _DEFAULT_SVO_FEWSHOTS
 
     # services/svo_chunking.py
     import services.svo_chunking as svo_chunking

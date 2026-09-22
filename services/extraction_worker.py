@@ -22,7 +22,8 @@ from uuid import UUID
 
 from neo4j import AsyncDriver
 
-from core.config import task_queue_db_path
+from core.config import settings, task_queue_db_path
+from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from parser.chunk_writer import document_folder_path
 from repositories.kg_repo import KGRepository
@@ -36,6 +37,26 @@ from services.svo_service import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _load_kg_config(kg_id: str, domain_pack: str | None) -> KGConfig:
+    """載入抽取端的 KG/domain pack 設定，失敗時回到 shipped defaults。
+
+    查詢端 `routers/agent.py::chat()` 已採用同一個 ConfigLoader + FileConfigSource
+    組裝模式。抽取是背景工作，單一 domain pack 設定錯誤不應讓整個 worker
+    無法處理其他 chunk，因此這裡保留既有 graceful fallback。
+    """
+    try:
+        return ConfigLoader([FileConfigSource(settings.kg_config_dir)]).load(
+            kg_id, domain_pack=domain_pack,
+        )
+    except Exception:
+        logger.exception(
+            "[ExtractionWorker] 載入 KG 設定失敗，改用 shipped defaults：kg_id=%s domain_pack=%s",
+            kg_id,
+            domain_pack,
+        )
+        return KGConfig()
 
 
 def _find_chunk(kg_folder: Path, source: str, chunk_index: int) -> dict | None:
@@ -61,6 +82,8 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         if kg is None:
             raise ValueError(f"找不到 KG：{kg_id}")
 
+        cfg = _load_kg_config(kg_id, getattr(kg, "domain_pack", None))
+
         kg_folder = Path(kg.folder_path)
         doc_folder = document_folder_path(source, kg_folder)
         chunk = _find_chunk(kg_folder, source, chunk_index)
@@ -82,7 +105,7 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         # 欄位（build_svo_chunks() 產出），未涵蓋任一舊版本呼叫端行為。
         triples = await extract_svo_triples_with_completeness_check(
             chunk["text"], chunk.get("original_sentences", []), llm_provider, embedding_provider,
-            kg_id=kg_id, calibration_db_path=db_path,
+            cfg=cfg, kg_id=kg_id, calibration_db_path=db_path,
         )
         # 報告25 §4 發現4（2026-09-03）：`qwen2.5:7b` 對繁體輸入偶發輸出簡體
         # subject／verb／object（`育婴留職停薪期间`、`补助经费`），污染 Entity

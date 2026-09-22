@@ -53,11 +53,11 @@ def _raise_runtime_error():
     raise RuntimeError("provider 尚未初始化")
 
 
-def _make_kg(kg_id, folder_path: str) -> KnowledgeGraph:
+def _make_kg(kg_id, folder_path: str, *, domain_pack: str | None = "taiwan-labor-law") -> KnowledgeGraph:
     now = datetime.now(timezone.utc)
     return KnowledgeGraph(
         id=kg_id, name="KG-1", description="", folder_path=folder_path,
-        is_public=True, created_at=now, updated_at=now,
+        is_public=True, created_at=now, updated_at=now, domain_pack=domain_pack,
     )
 
 
@@ -133,6 +133,67 @@ async def test_process_one_success_merges_triples_and_marks_completed(tmp_path, 
     assert updated_record.extraction_status == "completed"
     assert updated_record.chunk_progress == chunk_index
     assert chunk_index in updated_record.completed_chunk_indices
+
+
+@pytest.mark.asyncio
+async def test_process_one_loads_domain_pack_config_for_svo_extraction(tmp_path, monkeypatch):
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+    monkeypatch.setattr(config.settings, "kg_config_dir", str(tmp_path / "config"))
+    pack_dir = tmp_path / "config" / "domain_packs"
+    pack_dir.mkdir(parents=True)
+    (pack_dir / "custom.json").write_text(
+        json.dumps({"schema_version": 1, "domain": {"name": "custom", "svo_fewshots": ["自訂例句"]}}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    kg_id = uuid4()
+    kg_folder, _doc_folder, source, chunk_index = await _seed_pending_chunk(tmp_path, kg_id)
+    _patch_kg_repo(monkeypatch, _make_kg(kg_id, str(kg_folder), domain_pack="custom"))
+    monkeypatch.setattr("services.extraction_worker.get_llm_provider", lambda: FakeLLM("[]"))
+    monkeypatch.setattr("services.extraction_worker.get_embedding_provider", _raise_runtime_error)
+
+    captured_cfg = []
+
+    async def _fake_extract(*args, **kwargs):
+        captured_cfg.append(kwargs["cfg"])
+        return []
+
+    monkeypatch.setattr(
+        "services.extraction_worker.extract_svo_triples_with_completeness_check",
+        _fake_extract,
+    )
+
+    await extraction_worker._process_one(SpyDriver(), str(kg_id), source, chunk_index)
+
+    assert len(captured_cfg) == 1
+    assert captured_cfg[0].domain.name == "custom"
+    assert captured_cfg[0].domain.svo_fewshots == ("自訂例句",)
+
+
+@pytest.mark.asyncio
+async def test_process_one_config_failure_falls_back_to_shipped_defaults(tmp_path, monkeypatch):
+    monkeypatch.setattr(config.settings, "workspace_dir", str(tmp_path))
+    kg_id = uuid4()
+    kg_folder, _doc_folder, source, chunk_index = await _seed_pending_chunk(tmp_path, kg_id)
+    _patch_kg_repo(monkeypatch, _make_kg(kg_id, str(kg_folder), domain_pack="missing-pack"))
+    monkeypatch.setattr("services.extraction_worker.get_llm_provider", lambda: FakeLLM("[]"))
+    monkeypatch.setattr("services.extraction_worker.get_embedding_provider", _raise_runtime_error)
+
+    captured_cfg = []
+
+    async def _fake_extract(*args, **kwargs):
+        captured_cfg.append(kwargs["cfg"])
+        return []
+
+    monkeypatch.setattr(
+        "services.extraction_worker.extract_svo_triples_with_completeness_check",
+        _fake_extract,
+    )
+
+    await extraction_worker._process_one(SpyDriver(), str(kg_id), source, chunk_index)
+
+    assert len(captured_cfg) == 1
+    assert captured_cfg[0].domain.name == "taiwan-labor-law"
 
 
 @pytest.mark.asyncio

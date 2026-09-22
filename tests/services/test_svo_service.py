@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import re
@@ -8,6 +9,7 @@ from neo4j.exceptions import ConstraintError
 
 from core import config
 from core.constants import FACT_SEARCH_CANDIDATE_MULTIPLIER, SVO_REL_TYPES
+from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
@@ -47,6 +49,51 @@ class FakeLLM:
     async def generate_json(self, prompt: str) -> str:
         self.prompts.append(prompt)
         return self.payload
+
+
+def test_svo_prompt_shipped_default_matches_legacy_golden():
+    """The shipped/default prompt remains byte-for-byte identical to 35f95ab."""
+    prompt = svc._svo_prompt("測試")
+    assert hashlib.sha256(prompt.encode()).hexdigest() == (
+        "40a8417833e67e343f9e3164c090b1032512620d68e36340aec986b0d56a7fb3"
+    )
+
+
+def test_taiwan_labor_law_domain_pack_prompt_matches_legacy_golden():
+    cfg = ConfigLoader([FileConfigSource("config")]).load(
+        "golden-kg", domain_pack="taiwan-labor-law"
+    )
+
+    prompt = svc._svo_prompt("測試", fewshots=cfg.domain.svo_fewshots)
+
+    assert hashlib.sha256(prompt.encode()).hexdigest() == (
+        "40a8417833e67e343f9e3164c090b1032512620d68e36340aec986b0d56a7fb3"
+    )
+
+
+def test_svo_prompt_default_fewshots_are_explicitly_equivalent():
+    assert svc._svo_prompt("測試") == svc._svo_prompt(
+        "測試", fewshots=svc._DEFAULT_SVO_FEWSHOTS
+    )
+
+
+def test_svo_prompt_custom_fewshots_are_numbered_from_rule_six():
+    prompt = svc._svo_prompt("測試", fewshots=("領域例句 A", "領域例句 B"))
+
+    assert "6. 領域例句 A" in prompt
+    assert "7. 領域例句 B" in prompt
+    assert "8. 領域例句" not in prompt
+    assert prompt.index("6. 領域例句 A") < prompt.index("7. 領域例句 B")
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_uses_domain_fewshots_from_cfg():
+    llm = FakeLLM('{"triples":[]}')
+    cfg = KGConfig.model_validate({"domain": {"svo_fewshots": ["領域專用例句"]}})
+
+    await svc.extract_svo_triples("任意文本。", llm, cfg=cfg)
+
+    assert "6. 領域專用例句" in llm.prompts[0]
 
 
 class FakeEmbedding:
