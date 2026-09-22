@@ -8,6 +8,24 @@ from models.knowledge_graph import SVOTriple
 from routers import agent
 
 
+def test_strip_type_markers_removes_bare_controlled_type_token():
+    assert agent._strip_type_markers("本辦法所稱定團體是指ORGANIZATION。") == (
+        "本辦法所稱定團體是指。"
+    )
+
+
+def test_strip_type_markers_removes_repeated_controlled_type_list():
+    assert agent._strip_type_markers(
+        "因離婚後依法准予繼續居留者（PERSON,PERSON,PERSON,PERSON）。"
+    ) == "因離婚後依法准予繼續居留者。"
+
+
+def test_strip_type_markers_preserves_uncontrolled_legal_abbreviation():
+    text = "本法引用 NPO 標準與 ABC 機構名稱。"
+
+    assert agent._strip_type_markers(text) == text
+
+
 # ── _merge_fact_lines：BFS 三元組與語意檢索 Fact 合併去重（2026-08-18）──────
 
 def _triple(subject="A", rel_type="CAUSES", object_="B", verb="導致", natural_text=None):

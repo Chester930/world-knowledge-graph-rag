@@ -2991,6 +2991,7 @@ async def test_naturalize_triple_prompt_warns_against_fabrication():
     await svc._naturalize_triple("A", "", "導致", "B", "", llm)
 
     assert "不可以增加原文沒有的具體數字" in llm.prompts[0]
+    assert "型別標記只是輔助語意判斷用" in llm.prompts[0]
 
 
 @pytest.mark.asyncio
@@ -3026,6 +3027,30 @@ def test_naturalization_dropped_quantity_checks_verb_too():
     )
 
 
+def test_naturalization_leaked_type_marker_detects_bare_controlled_type():
+    assert svc._naturalization_leaked_type_marker(
+        "本辦法所稱定團體是指ORGANIZATION。", "概念", "ORGANIZATION"
+    )
+
+
+def test_naturalization_leaked_type_marker_detects_repeated_comma_list():
+    assert svc._naturalization_leaked_type_marker(
+        "依法准予繼續居留者（PERSON,PERSON,PERSON,PERSON）。", "", "PERSON,PERSON,PERSON,PERSON"
+    )
+
+
+def test_naturalization_leaked_type_marker_does_not_match_legal_word_substring():
+    assert not svc._naturalization_leaked_type_marker(
+        "PERSONAL 是文件中的合法英文用語。", "PERSON", ""
+    )
+
+
+def test_naturalization_leaked_type_marker_ignores_generic_concept_word():
+    assert not svc._naturalization_leaked_type_marker(
+        "這個概念描述的是法律上的分類。", "概念", ""
+    )
+
+
 @pytest.mark.asyncio
 async def test_naturalize_triple_falls_back_to_template_when_quantity_dropped():
     """報告26 §4 #6 修法：偵測到遺漏時捨棄 LLM 改寫，退回 `_verbalize_fact()`
@@ -3040,6 +3065,20 @@ async def test_naturalize_triple_falls_back_to_template_when_quantity_dropped():
         "災害發生之當月一日起", "概念", "計算", "前條所定災後六個月期間", "概念",
     )
     assert "一日" in text
+
+
+@pytest.mark.asyncio
+async def test_naturalize_triple_falls_back_to_template_when_type_marker_leaked():
+    llm = FakeLLM("本辦法所稱定團體是指ORGANIZATION。")
+
+    text = await svc._naturalize_triple(
+        "本辦法", "概念", "所稱", "定團體", "ORGANIZATION", llm,
+    )
+
+    assert text == svc._verbalize_fact(
+        "本辦法", "概念", "所稱", "定團體", "ORGANIZATION",
+    )
+    assert "ORGANIZATION" not in text
 
 
 @pytest.mark.asyncio
