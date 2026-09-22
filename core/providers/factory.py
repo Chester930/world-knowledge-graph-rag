@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections.abc import Callable
 import logging
 
 from core.providers.base import EmbeddingProvider, LLMProvider
@@ -128,3 +129,18 @@ def get_embedding_provider() -> EmbeddingProvider:
     if _embedding is None:
         raise RuntimeError("Provider 尚未初始化，請先呼叫 init_providers()")
     return _embedding
+
+
+def override_embedding_provider_for_eval(
+    wrap: Callable[[EmbeddingProvider], EmbeddingProvider],
+) -> None:
+    """僅供離線評測／測試 harness 使用：替換行程層級 embedding 單例。
+
+    呼叫時機必須在 `init_providers()` 之後。不要在 `routers/` 或任何正式
+    請求處理路徑呼叫這個函式；它改的是全域狀態，正式服務不應在請求處理
+    中途替換 provider。
+    """
+    global _embedding
+    if _embedding is None:
+        raise RuntimeError("先呼叫 init_providers()")
+    _embedding = wrap(_embedding)

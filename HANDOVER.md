@@ -389,3 +389,25 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 3. 新增 T2/T3 核對、fallback、prompt 與輸入邊界測試。指定完整測試命令：**1065 passed, 8 warnings, 75.63s**。
 
 目前待使用者決定：是否另行排入 T4 範圍估算，或先針對 T2/T3 進一步審查；T4 未在本次 commit 中執行。
+
+### 2026-09-22 報告68 T1–T4：評測 harness embedding cache 已實作並完成小規模複驗
+
+完成報告68 的 T1–T4；範圍只涉及 `core/providers/factory.py`、`scripts/eval/` 與對應測試／文件，
+沒有修改 `routers/agent.py` 或 production `chat()` 行為，也沒有對 Neo4j 寫入。
+
+1. `scripts/eval/embedding_cache.py` 新增 `CachingEmbeddingProvider`：以 model name 加
+   `SHA-256(text)` 做 JSON 持久化快取，`encode_batch()` 只送唯一的 cache miss 到底層 provider，
+   並保留輸入順序。
+2. `core/providers/factory.py` 新增明確標示 eval/test-only 的
+   `override_embedding_provider_for_eval()`；只有 harness 傳入 `--embedding-cache` 時才包裝既有
+   全域 embedding provider。未傳參數維持零行為變化。
+3. `run_rq1_comparison.py` 與 `frozen_baseline_stage.py` 已佈線選填 `--embedding-cache`，並新增
+   cache、factory 與 CLI 回歸測試。
+4. T4 使用既有 7 題連續執行兩次，共用
+   `.claude/tmp/report68_embedding_cache_20260922/embedding_cache.json`；兩次均 7/7 完成、無
+   harness error／逾時。Stage 1 Context Recall 逐題完全一致：
+   `18-Q5=1.0`、`57-DIST1=1.0`、`57-DIST2=1.0`、`57-CANARY5=1.0`、
+   `57-AGGR7=0.3333`、`57-AGGR8=0.75`、`57-AGGR19=0.25`。
+
+完整測試與 commit 狀態待本輪收尾更新；本結果只驗證 embedding cache 的 Stage 1 可重現性，沒有重跑
+獨立 judge pilot，也不對是否接線或更換模型下結論。

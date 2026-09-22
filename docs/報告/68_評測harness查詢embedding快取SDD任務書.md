@@ -79,6 +79,43 @@ def override_embedding_provider_for_eval(wrap) -> None:
 
 ---
 
+## 7. 2026-09-22 T1–T4 執行結果
+
+### 實作
+
+- T1：新增 `scripts/eval/embedding_cache.py` 的 `CachingEmbeddingProvider`。快取鍵為
+  `model_name + SHA-256(text)`，支援 `encode()`、`encode_batch()`，只把未命中的唯一文字送到底層 provider，並以 JSON 持久化；輸出順序維持呼叫端輸入順序。
+- T2：`core/providers/factory.py` 新增明確標示 eval/test-only 的
+  `override_embedding_provider_for_eval()`。它只能在 `init_providers()` 後包裝全域 embedding
+  provider；未初始化時會 raise。沒有修改 `routers/agent.py`，正式 `chat()` 路徑仍使用既有的
+  `get_embedding_provider()`。
+- T3：`run_rq1_comparison.py` 與 `frozen_baseline_stage.py` 新增選填
+  `--embedding-cache`。未傳參數時不建立 wrapper、不寫快取檔，也不增加新的呼叫路徑；既有命令
+  介面保持相容。新增測試涵蓋 cache hit/miss、batch 去重、跨 instance 持久化、model 隔離、factory
+  override，以及兩個 harness 的 default/optional CLI 行為。
+
+### T4 小規模驗證
+
+使用 7 題 `.claude/tmp/report65_targeted_karm_20260922/questions.json`，以相同的 frozen
+baseline、KG、生成／judge 設定連續執行兩次；兩次都使用同一個快取檔
+`.claude/tmp/report68_embedding_cache_20260922/embedding_cache.json`。本次沒有重跑獨立 judge
+pilot；兩次使用預設共用 judge，`OLLAMA_LLM_THINK=false` 僅避免思考模型設定造成額外變因。
+
+| 題目 | run1 Stage 1 Context Recall | run2 Stage 1 Context Recall | 是否一致 |
+|---|---:|---:|---|
+| 18-Q5 | 1.0 | 1.0 | 是 |
+| 57-DIST1 | 1.0 | 1.0 | 是 |
+| 57-DIST2 | 1.0 | 1.0 | 是 |
+| 57-CANARY5 | 1.0 | 1.0 | 是 |
+| 57-AGGR7 | 0.3333 | 0.3333 | 是 |
+| 57-AGGR8 | 0.75 | 0.75 | 是 |
+| 57-AGGR19 | 0.25 | 0.25 | 是 |
+
+兩次均完成 7/7 records，沒有 harness error 或逾時；逐題 recall exact match。這只證明在此
+7 題與此快取設定下 Stage 1 recall 可重現，不對獨立 judge 是否改善生成端問題下結論。
+
+---
+
 ## 4. 明確不做的事
 
 - **不修改 `routers/agent.py::chat()` 或任何production行為**——這個任務書全程只動 `core/providers/factory.py`（新增一個明確標示eval-only的函式）與 `scripts/eval/` 下的檔案。

@@ -74,21 +74,39 @@ def cmd_remaining(args: argparse.Namespace) -> None:
     print(f"eligible {len(manifest['eligible_ids'])}, remaining {len(selected)}: {ids}")
 
 
+def build_run_command(
+    manifest: dict,
+    questions: str,
+    out: str,
+    embedding_cache: str | None = None,
+) -> list[str]:
+    """組出 frozen stage 的 harness command；快取旗標是 opt-in。"""
+    cmd = [
+        sys.executable, "-u", str(REPO_ROOT / "scripts" / "eval" / "run_rq1_comparison.py"),
+        "--kg-id", manifest["kg_id"],
+        "--doc-ids", ",".join(manifest["scope_doc_ids"]),
+        "--questions", questions,
+        "--arms", "K", "--runs", "1",
+        "--query-timeout-s", "900",
+        "--allow-shared-judge",
+        "--out", out,
+    ]
+    if embedding_cache:
+        cmd += ["--embedding-cache", embedding_cache]
+    return cmd
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     manifest = load_manifest(Path(args.frozen_dir))
     env = dict(os.environ)
     for key, value in DEFAULT_ENV.items():
         env.setdefault(key, value)
-    cmd = [
-        sys.executable, "-u", str(REPO_ROOT / "scripts" / "eval" / "run_rq1_comparison.py"),
-        "--kg-id", manifest["kg_id"],
-        "--doc-ids", ",".join(manifest["scope_doc_ids"]),
-        "--questions", args.questions,
-        "--arms", "K", "--runs", "1",
-        "--query-timeout-s", "900",
-        "--allow-shared-judge",
-        "--out", args.out,
-    ]
+    cmd = build_run_command(
+        manifest,
+        args.questions,
+        args.out,
+        getattr(args, "embedding_cache", None),
+    )
     if getattr(args, "k_top_k", None) is not None:  # 報告62 T1 候選臂；預設不傳＝凍結基準
         cmd += ["--k-top-k", str(args.k_top_k)]
     base_url = env["OLLAMA_BASE_URL"]
@@ -116,6 +134,8 @@ def main() -> None:
     run.add_argument("--out", required=True)
     run.add_argument("--k-top-k", type=int, default=None,
                      help="報告62 T1 候選臂的語意 Fact 筆數；預設不傳＝凍結基準（20）。")
+    run.add_argument("--embedding-cache", default=None,
+                     help="選填：評測專用 embedding JSON 快取路徑；不傳則完全不啟用。")
     args = parser.parse_args()
     if args.command == "remaining":
         cmd_remaining(args)

@@ -5,6 +5,7 @@ from uuid import uuid4
 from scripts.eval.run_rq1_comparison import (
     _build_failure_record,
     _build_kg_chat_request,
+    build_arg_parser,
     _render_pareto_summary,
 )
 
@@ -42,6 +43,13 @@ def test_build_failure_record_preserves_lineage_and_failure_reason():
     assert record["lineage"]["stage3_generation"]["raw_draft"] == ""
     assert record["deterministic_guard"]["guard_name"] == "HarnessException"
     assert record["atomic_score"]["is_perfect"] is False
+
+
+def test_embedding_cache_cli_is_opt_in():
+    parser = build_arg_parser()
+
+    assert parser.parse_args([]).embedding_cache is None
+    assert parser.parse_args(["--embedding-cache", "cache.json"]).embedding_cache == "cache.json"
 
 
 def test_render_pareto_summary_includes_context_quality_section(tmp_path):
