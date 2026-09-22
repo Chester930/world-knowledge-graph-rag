@@ -40,6 +40,46 @@ def test_merge_fact_lines_dedupes_same_triple_from_both_sources():
     assert "生產" in lines[0]  # 保留 BFS 版本的措辭，語意檢索版本被去重掉
 
 
+def test_split_fact_lines_prefer_fact_on_collision_swaps_which_version_survives():
+    """報告65 §9 真實案例（57-AGGR19）：`prefer_fact_on_collision=True` 時，
+    同一 `(subject, rel_type, object)` 碰撞應改為語意 Fact 版本存活，不是
+    BFS 版本；預設（`False`）維持既有行為不變（見上一個測試）。"""
+    triples = [_triple("職業災害勞工", "RELATED_TO", "準用勞動基準法規定預告雇主",
+                        verb="終止勞動契約時",
+                        natural_text="職業災害勞工在終止勞動契約時，準用勞動基準法規定預告僱主。")]
+    fact_results = [{"fact_text": "職業災害勞工 終止勞動契約時 準用勞動基準法規定預告雇主",
+                      "subject": "職業災害勞工", "rel_type": "RELATED_TO",
+                      "object": "準用勞動基準法規定預告雇主", "verb": "終止勞動契約時"}]
+
+    bfs_lines, fact_lines = agent._split_fact_lines(triples, fact_results, prefer_fact_on_collision=True)
+
+    assert bfs_lines == []
+    assert len(fact_lines) == 1
+    assert "雇主" in fact_lines[0] and "僱主" not in fact_lines[0]
+
+    # 預設值不變：同樣輸入、不傳旗標，仍是 BFS 版本存活。
+    bfs_lines_default, fact_lines_default = agent._split_fact_lines(triples, fact_results)
+    assert fact_lines_default == []
+    assert len(bfs_lines_default) == 1
+    assert "僱主" in bfs_lines_default[0]
+
+
+def test_split_fact_lines_prefer_fact_defers_to_bfs_when_fact_verb_empty():
+    """報告65 §10 品質守門：verb 為空的 Fact 渲染成「主詞　　受詞」雙空格、
+    比 BFS 的通順 natural_text 明顯更差，`prefer_fact_on_collision=True` 時
+    這種 Fact 不該佔用碰撞鍵，讓 BFS 版本照舊顯示。"""
+    triples = [_triple("勞動部", "RELATED_TO", "就業保險主管機關",
+                        natural_text="勞動部負責就業保險主管機關相關事項。")]
+    fact_results = [{"fact_text": "勞動部  就業保險主管機關", "subject": "勞動部",
+                      "rel_type": "RELATED_TO", "object": "就業保險主管機關", "verb": ""}]
+
+    bfs_lines, fact_lines = agent._split_fact_lines(triples, fact_results, prefer_fact_on_collision=True)
+
+    assert fact_lines == []
+    assert len(bfs_lines) == 1
+    assert "負責" in bfs_lines[0]  # BFS 的通順版本存活，不是雙空格的 Fact 版本
+
+
 def test_merge_fact_lines_keeps_fact_with_missing_key_fields():
     """Fact 節點缺 subject/rel_type/object（2026-08-18 schema 修正前建立、
     尚未跑過 §b 回填的舊資料）時，無法安全去重，一律原樣保留。"""

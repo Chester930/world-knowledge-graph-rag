@@ -570,7 +570,7 @@ def _is_contentful_line(line: str, subject: str | None) -> bool:
 
 
 def _split_fact_lines(
-    triples: list[SVOTriple], fact_results: list[dict]
+    triples: list[SVOTriple], fact_results: list[dict], *, prefer_fact_on_collision: bool = False,
 ) -> tuple[list[str], list[str]]:
     """把 BFS 圖遍歷三元組與語意檢索 Fact 各自轉成 prompt 文字行，**分開回傳**
     `(bfs_lines, fact_lines)`，供 `_arrange_fact_lines()` 依來源分別處理——
@@ -580,53 +580,81 @@ def _split_fact_lines(
     語意 Fact 被沒有訊號的 BFS 樣板列舉擠掉）。`_merge_fact_lines()` 保留
     為兩者相接的扁平版本，供接地核對等只需要「最終文字清單」的呼叫端。
 
-    去重：優先按 `(subject, rel_type, object)`（三欄皆非空時，BFS 版優先）；
-    object 為空時 `all(key)` 為 False、無法用 key 比對，改以**渲染後的行
-    文字**比對涵蓋這個情況。
+    去重：優先按 `(subject, rel_type, object)`（三欄皆非空時，**預設 BFS 版
+    優先**——純粹是先寫的迴圈先佔位，非經評測驗證的刻意設計）；object 為空
+    時 `all(key)` 為 False、無法用 key 比對，改以**渲染後的行文字**比對涵蓋
+    這個情況。
 
-    ✅ **殘缺過濾改看渲染文字（2026-09-02，報告25 § 4 發現6 追查）**：見
-    `_is_contentful_line()`——只丟空字串或「只有 subject」的行，`X verb (空)`
-    這種 payload 在 verb 的合法事實保留（Q8 三筆答案事實正是這個形狀）。
+    ⚠️ **`prefer_fact_on_collision`（2026-09-22，報告65 §9/§10 pilot，預設
+    `False`＝行為零變化）**：報告65 定向重抽驗證發現，BFS 版用邊上的
+    `natural_text`（LLM 改寫），語意 Fact 版用 `_verbalize_fact()`
+    （規範化實體名稱直接串接）——兩者的 `(subject, rel_type, object)` 結構
+    可能完全一致，但顯示文字可能有用字漂移（例：`natural_text` 把「雇主」
+    意譯成同義異體字「僱主」），甚至偶爾內容錯置（見報告65 §10 全KG掃描，
+    7338 筆碰撞裡找到 `natural_text` 把兩筆不同事實顯示成同一句的真實案例）。
+    目前預設 BFS 版優先，代表即使語意 Fact 排名最高、文字更貼近規範化實體
+    名稱，去重後看到的仍是 BFS 的改寫版本，這個旗標開啟後改成 Fact 優先。
 
-    ✅ **自然語言化（2026-09-01，報告24 §5 階段3）**：BFS 三元組 `natural_text`
-    有值時直接用，沒有時 fallback 回 `subject verb object` 直接串接（報告25
-    § 4 發現5：不再塞 `（型別）`）。`fact_results` 的 `fact_text` 沿用
-    `_verbalize_fact()` 簡單串接，輸出前用 `_strip_type_markers()` 清掉尚未
-    回填 KG 殘留的型別標記。
+    ⚠️ **品質守門（2026-09-22，報告65 §10 全KG掃描發現後補）**：`fact_text`
+    在 `verb` 為空字串時會渲染成「主詞　　受詞」（雙空格、缺動詞連接），
+    比 `natural_text` 的通順句子明顯更差——掃描 7338 筆碰撞裡有 400 筆
+    （5.5%）屬於這個情形。因此 `prefer_fact_on_collision=True` 時，**只有
+    `verb` 非空的 Fact 才會佔用碰撞鍵**；`verb` 為空的 Fact 讓出鍵，改由
+    BFS 的 `natural_text` 版本照舊顯示——不是「Fact 全面優先」，是「較完整
+    的一方優先」。
     """
     seen_keys: set[tuple[str, str, str]] = set()
     seen_texts: set[str] = set()
     bfs_lines: list[str] = []
-    for t in triples:
+    fact_lines: list[str] = []
+
+    def _add_bfs(t: SVOTriple) -> None:
         if not t.subject:
-            continue
+            return
         raw = t.natural_text if t.natural_text else f"{t.subject} {t.verb} {t.object}".rstrip()
         # 尚未跑過發現5 回填的 KG，其邊 `natural_text` 仍帶 `（型別）`——與
         # `fact_results` 側一致，輸出前一律過 `_strip_type_markers()`（順帶讓
         # 「帶標記的 BFS 版」與「乾淨的語意 Fact 版」文字一致、可被去重）。
         line = f"- {_strip_type_markers(raw)}"
         if not _is_contentful_line(line, t.subject) or line in seen_texts:
-            continue
-        if t.subject and t.rel_type and t.object:
-            seen_keys.add((t.subject, t.rel_type, t.object))
+            return
+        key = (t.subject, t.rel_type, t.object)
+        if all(key) and key in seen_keys:
+            return
+        if all(key):
+            seen_keys.add(key)
         seen_texts.add(line)
         bfs_lines.append(line)
 
-    fact_lines: list[str] = []
-    for f in fact_results:
+    def _add_fact(f: dict, *, skip_if_empty_verb: bool = False) -> None:
         subject = f.get("subject")
         if subject is not None and subject.strip() == "":
-            continue
+            return
+        # 報告65 §10 品質守門：verb 為空時 fact_text 是「主詞　　受詞」的
+        # 劣質渲染，不佔碰撞鍵，讓 BFS 的 natural_text 版本有機會照舊顯示。
+        if skip_if_empty_verb and not (f.get("verb") or "").strip():
+            return
         key = (f.get("subject"), f.get("rel_type"), f.get("object"))
         if all(key) and key in seen_keys:
-            continue
+            return
         line = f"- {_strip_type_markers(f['fact_text'])}"
         if not _is_contentful_line(line, subject) or line in seen_texts:
-            continue
+            return
         if all(key):
             seen_keys.add(key)
         seen_texts.add(line)
         fact_lines.append(line)
+
+    if prefer_fact_on_collision:
+        for f in fact_results:
+            _add_fact(f, skip_if_empty_verb=True)
+        for t in triples:
+            _add_bfs(t)
+    else:
+        for t in triples:
+            _add_bfs(t)
+        for f in fact_results:
+            _add_fact(f)
 
     return bfs_lines, fact_lines
 
