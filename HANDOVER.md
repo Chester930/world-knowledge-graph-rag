@@ -1,7 +1,7 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-21
+> **最後更新**：2026-09-22
 
 ## 先讀這裡
 
@@ -32,6 +32,30 @@
 3. **同分支上的其他工作**（提交者同為 `Chester930`，無法分辨 session，**未經我審查**）：本地生成模型初篩（結論：暫不替換 `qwen2.5:7b`；條件與凍結基準不同，不可比較）、Embedding×KG×Chunk 協作架構討論稿（其「`HybridEvidence`／`PathTrace`」第一個工程任務與報告62 T0 方向一致）、補入先前 untracked 的實驗輸出，以及 **`master` 已合進本分支（`b1c620e`）**——因此下方第 6 項 (b) 的「先把 master 合進本分支」已完成，只剩依路徑拆分與使用者確認。
 4. **推送須取得使用者明確同意**；**合併 `master` 前須逐項詳細確認**（使用者明訂）。
 5. **報告62 T0 已完成（本分支未推送）**：opt-in `ChatRequest.include_retrieval_trace` 記錄檢索順位／分數／來源與實際進 prompt 的行，不改行為（1 題實跑與凍結基準逐項相同）。**重要發現**：基準 stage-2／SNR 以「檢索到的全部」計算；prompt 截斷門檻非單調（池 >35 時放寬到 35 行），使 T2（top_k=40）同時會縮減 BFS 名額——詳見報告62 §10。T1（`--k-top-k`）已完成。**T2（K1＝top_k 40）已完成並判定**（報告62 §12）：達標 12→14（淨增 2，p=0.75），穩定通過的 `57-DIST1/2` 退步、Type-E 退步 → **需更多證據，不建議設為預設**；退步題的 gold 皆在 prompt 內（生成階段失敗），新增題也非來自第 21–40 名 Fact。使用者已同意 D3 採用門檻（§11.1，評測前已寫定）。**§13 生成診斷後修正**：`57-DIST1/2` 的退步是評分器對逐字引用 vs 改寫的敏感度（實質答案相同，KG 缺全國性天數）、`57-AGGR18` 的新增是評分器漏抓同一個新舊法寫反的錯——**達標題數 ±2 屬於量測噪音**。**§14 量測工具稽核已完成（2026-09-22，標註者是模型、需使用者抽驗）**：評分器偽陰性下界 ≥11.8%（23/195，主因是改寫／近逐字被判 missing）、偽陽性下界 ≥4.0%（7/174，含新舊法歸屬寫反）；確定性規則 R（高重疊＋數字條號守衛＋否定詞守衛）在樣本內救回 18/23 偽陰性、誤翻 1/18，**T2 的 +2 結論對此穩定**（重判後仍 +2）。**現行評分器未改動**（改了會與凍結基準不可比）；**§14.6–14.9（2026-09-22）**：用 `granite4.2:3b`／`qwen3.5:4b` 盲審交叉比對——只是弱佐證（一致率 52.8%／69.0%）；保守下界改為偽陰性 ≥7.2%（14/195）、偽陽性 ≥3.4%（6/174），另有約 5 題需人工複核（`data/eval/scorer_audit_20260922/contested_for_human_review.json`）。gold span 掃描只發現 `57-DIST1/2` 是真缺陷（法規原文已核對：全國性＝二至五日）。評分器 v2 已離線重判（`data/eval/scorer_v2_20260922/`）：事後情境淨差 +2～+4、p 0.29–0.75，**不翻轉 §12**。待使用者裁示：是否採用 v2 定義當之後候選的比較基準、是否修改 `test_cases.json` 的 DIST1/2、人工複核清單。**跑 Ollama 思考型模型（Granite 4.2、Qwen3/3.5）務必 `think:false`，否則 content 為空且極慢。** 再談 K1b／T3。**§14.10（2026-09-22，使用者已同意）：題庫已修正**——`57-DIST1/2` 各補兩個必要 span（第2條「給予一至三日之特別休假」、第3條「給予二至五日之特別休假」，逐字取自 KG 條文，已核對原文）；兩份鏡像 sha256 同步為 `23f8c06f…`（**與 09-20 凍結雜湊 `404cde9f…` 不同，這是預期變更**）。之後任何用 `frozen_baseline_stage.py` 重跑舊 `20260920_frozen` 流程，`verify_frozen.py` 會如預期回報 bank hash 不一致，**不是環境壞掉**。09-20 的「12/42」歷史數字語意不變（仍是舊題庫下的結果），但**下次要做 T2/T3 或任何新候選評測，一律改用新題庫 `23f8c06f…` 當基準**，不可與舊數字直接相加減。
+
+### 2026-09-22 生成模型能力診斷與 Ollama `think` 參數缺陷（**待交付 Codex 處理**）
+
+**背景**：使用者要求確認「是否需要調整生成模型（目前 `qwen2.5:7b`）」。以下判斷依據報告62 §12–14（T2判定＋生成階段診斷＋量測工具稽核）與 `services/verification_service.py` 既有 docstring 記載的歷史 bug，非猜測。
+
+**判斷結論**：
+
+1. **已確認需要修復（與是否換模型無關的獨立程式缺陷）**：`core/providers/llm/ollama.py` 的 `generate()`／`generate_json()`／`stream()` 三個方法都沒有傳 Ollama `/api/generate` 的頂層 `think` 參數（已查證程式碼，完全沒有這個 key）。2026-09-20 的本地生成模型初篩（`rq1_eval_results/local_model_screening_20260921.md`）因此被汙染——思考型模型（`granite4.2`、`qwen3.5`）跑起來极慢或輸出為空，導致「候選多數連第一題都無法穩定完成」，**這個結論不可信**，候選根本沒有在公平條件下跑過。
+2. **尚未確認需要換掉 `qwen2.5:7b`**：現有唯一一次篩選（見上）條件跟凍結基準（K arm、42題、`qwen2.5:7b` generator/judge共用）不可比，又被(1)的bug污染，不能當「換或不換」的證據。同時，報告62 §13 診斷指出的生成端異常（`18-Q4` 限制性重生成變模糊拒答、`canary-P1` 罰鍰區間答錯）主因之一疑似是**接地核對機制用同一顆 7B 模型自我審查**（`services/verification_service.py` docstring 已記錄歷史 bug：qwen2.5:7b 常把問題原樣回貼，被自己的判官誤判成「未接地」觸發重生成）——換模型前應先排除「小模型自我審查放大雜訊」這個設計因素，否則換了模型也未必解決同一種現象。
+3. **報告57 的既有教訓**：換生成模型是獨立於 KG 檢索評測的變因，一旦換了必須固定下來、在所有後續候選比較中維持一致，不可中途替換又互比（報告49/51 曾因此污染過結論）。
+
+**交給 Codex 的任務（建議順序）**：
+
+- **T-A（必做，S，純程式缺陷修復，與是否換模型無關）**：讓 `core/providers/llm/ollama.py` 支援 `think` 參數。
+  - `OllamaLLMProvider.__init__` 新增 `think: bool | None = None` 參數；`generate()`／`generate_json()`／`stream()` 的 request payload 只在 `self._think is not None` 時加入**頂層**（不是 `options` 裡）`"think": self._think`——`None` 時完全不送這個 key，向後相容，不改變任何既有行為。
+  - `core/config.py` 仿照 `ollama_llm_num_predict`（約第33行）新增 `ollama_llm_think: bool | None = None`（可用環境變數覆寫）。
+  - `core/providers/factory.py::_make_llm_provider()`（約第22-29行，`case "ollama":` 分支）把新設定傳入 `OllamaLLMProvider(...)`。
+  - 新測試比照既有 `tests/core/test_ollama_llm_num_predict.py` 的模式，新檔 `tests/core/test_ollama_llm_think.py`：驗證 `think=None`（預設）時 payload 不含 `think` key；`think=False`／`True` 時 payload 含對應值；`generate`／`generate_json`／`stream` 三個方法都要覆蓋。
+  - 跑 `python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py` 確認零回歸。
+  - **不要**動 `_NUM_CTX`／`_TIMEOUT`／`_SEED` 等既有常數，也不要改變 `think` 未設定時的預設行為。
+- **T-B（S，建議一併評估，但先只做設計評估不接線）**：評估把「生成模型」與「接地核對 judge 模型」的 provider 解耦——目前 `services/verification_service.py::verify_fact_grounding()` 收到的 `llm_provider` 是呼叫端（`routers/agent.py::chat()`）傳入的同一顆生成用 provider。可參考離線 harness 已有的「獨立 judge」慣例（報告57 §1，接線於 `scripts/eval/run_rq1_comparison.py:560-563`）。**在使用者核准前不要接線到正式 `chat()`**。
+- **T-C（M，需 T-A 完成後才有意義，非本次必做）**：用 T-A 修好的 `think:false` 重跑一次公平的模型篩選比較，比較對象至少含 `qwen2.5:7b`（現況）、`qwen3.5:4b/9b`、`granite4.2:3b/8b`。**必須對齊凍結基準的 K arm 42題（或已修正的新題庫 `23f8c06f…`）條件，不能沿用舊32題／不同judge／不同timeout**，否則結果一樣不可比。建議 T-A、T-B 完成並經使用者確認後才排入排程。
+
+**明確不要做**：在沒有 T-C 這種公平比較之前，**不要**把生產 `chat()` 或評測 harness 的預設生成模型從 `qwen2.5:7b` 換掉。
 
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
