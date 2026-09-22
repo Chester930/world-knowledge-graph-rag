@@ -77,6 +77,14 @@
 
 **已知取捨**：verb 文字變長、同一條件在多筆三元組裡重複出現，`fact_text`／embedding 會有一定冗餘；但每筆三元組單獨可解讀，直接對症診斷出的 gold span 缺陷。
 
+**⚠️ 架構定位（2026-09-22 補記，使用者要求釐清）：規則10目前是全域生效，不是per-KG範圍**。查證 `core/kg_config/model.py`／`docs/論文/04_系統實作.md`（報告33 §6「尚未做」清單）確認：`KGConfig` + domain pack 機制（`generic` vs `taiwan-labor-law`）目前**已經**涵蓋生成端 prompt 前綴（`DomainConfig.system_context`）、輸出語言、切塊策略、多項數值門檻，**但 `services/svo_service.py::_svo_prompt()`（含所有規則1-10）仍是單一全域寫死函式，沒有per-KG覆蓋機制**——這是專案自己已記錄在案的已知缺口，非本次新發現：論文明講「抽取少樣本、守衛正則、DEDUP 門檻目前仍寫死」。**因此本次新增的規則10會套用到所有KG，不限於驗證用的KG#4**。
+
+**與未來 `svo_fewshots` 機制的關係（使用者釐清：通用/特定的關係應該是「參數導入」，不是「整套換掉」）**：報告33 §3（`domain_packs/generic/svo_fewshots.json` 為空陣列、`domain_packs/taiwan-labor-law/svo_fewshots.json` 放勞動法規正反例組）本來就是設計成**覆蓋／參數注入模式**，不是「每個domain各自維護一份完整的`_svo_prompt()`」——這跟 `DomainConfig.system_context` 單一欄位覆蓋、`guard_profile` 用 token 清單組出守衛正則，是同一套設計原則（domain pack 覆蓋 generic、查無則 fallback，見論文 3.9.3）。若未來要把規則1-10移進這個機制，正確切法應該是：
+- **留在共用骨架（skeleton）不動**：JSON輸出格式、rel_type合法清單、規則1-5（通則：型別選填、verb保留原文、confidence範圍等）、以及規則6-10**各自的通用原則本身**（例如規則10的「共同條件複述進每筆衍生三元組」這個邏輯本身跟法規領域無關，任何領域的複合句都適用）。
+- **可抽成 `svo_fewshots` 注入參數**：規則6-10目前附帶的具體例句（婚假八日、事假十四日、中高齡者職業訓練補助等，皆為勞動法規詞彙）——這些才是真正domain-specific、應該讓`taiwan-labor-law`與`generic`各自替換的部分。
+- 報告33 §5 R4已經記錄一個已知風險：`generic` pack 的 few-shot 若留空，qwen對「有規則但沒範例」的遵循度可能下降——這代表就算未來做了這個切分，`generic` domain 是否要放一組中性/抽象範例（而非完全空陣列）需要另外驗證，不能假設「拿掉範例只留規則」一定等效。
+- **本階段不執行這個切分**：這是報告33 §6既定但待drain完成的路線圖項目，不在本次F任務範圍內，此處只記錄正確的架構原則供未來接手者參考，避免屆時又走回「每個domain整份複製`_svo_prompt()`」這種重寫式的錯誤設計。
+
 ### 3.2 方向B：Fact 節點補句子層級 provenance，檢索/組裝時撈同句兄弟 Fact
 
 `_create_fact_node()` 新增 `source_sentence_start`／`source_sentence_end` 兩個扁平屬性（沿用 2026-08-24 幫 `article_no` 做過的同一套模式），既有 16826 筆 Fact 需要 backfill（`backfill_fact_nodes()` 已有先例可仿照）。檢索到任一 Fact 時，額外查詢「同一 `source_doc_id`＋`source_svo_chunk_index`＋句子範圍重疊」的其他 Fact 一起帶入 context——比 T3（報告62，整條文擴充）更精準，不會像整條文那樣拉進不相干的其他列舉項目、拉低 SNR。
