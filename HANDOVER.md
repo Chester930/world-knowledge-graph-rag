@@ -197,6 +197,16 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 
 **明確不要做**：在沒有 T-C 這種公平比較之前，**不要**把生產 `chat()` 或評測 harness 的預設生成模型從 `qwen2.5:7b` 換掉。
 
+### 2026-09-22 獨立judge pilot（n=1）：結果被檢索階段非決定性雜訊蓋過，不可信
+
+沿用今天小範圍K-arm的7題（`.claude/tmp/report65_targeted_karm_20260922/questions.json`），設 `JUDGE_LLM_PROVIDER=ollama`／`JUDGE_LLM_MODEL=qwen3.5:4b`／`OLLAMA_LLM_THINK=false` 跑一次對照（`run2_independent_judge`，背景fork執行，唯讀不動KG不改程式碼）。**Judge切換驗證正確**（generator=qwen2.5:7b、judge=qwen3.5:4b、`same_instance=False`）。
+
+**結果好壞參半**：3題改善（`18-Q5`／`57-DIST1`／`57-DIST2`）、3題變差（`57-CANARY5`／`57-AGGR7`／`57-AGGR8`）、1題持平。整體 Atomic Accuracy 50.0%→46.4%（降）、Context Recall 76.2%→57.1%（明顯降）、is_perfect 0/7→2/7（升）。
+
+**關鍵異常，判定「不可信」的理由**：`57-CANARY5` 的 **Stage 1 檢索** recall 從1.0掉到0.5——但 judge 模型理論上完全不會影響檢索階段，同一KG同一問題不該因為換judge就檢索到不同東西。這代表 run1／run2 之間存在**跟judge無關、但幅度大到蓋過待測效果**的雜訊，很可能是檢索/embedding層的非決定性。`57-DIST1`（原本最想驗證的案例）在 run2 仍是 `regenerated=true`、仍缺一個gold span——「限制性重生成→不完整引用」的模式**沒有消失**，數字變好較可能是單次隨機波動。
+
+**判定**：n=1的pilot設計無法把「judge效果」跟「檢索非決定性雜訊」分開，**不建議據此採用或否決獨立judge**。若要繼續驗證，正確做法是用報告62 T0已有的機制（`prompt_context_lines`/固定prompt重放），排除檢索階段變因，只測生成+judge本身。**本輪不建議直接重跑**——先查文獻與參考專案，看業界對這類「檢索/embedding非決定性」問題的診斷與解法（見下段待補查證），再決定下一步實驗設計。
+
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
 1. **KG#4 抽取狀態已修復**：發現 `_process_one()` 內部吞例外、只標 `failed`，重抽腳本回報的「N/N 成功」不可信；KG 曾有 10 failed＋2 pending chunk（N0060041 §8/23/24/25/33/34、N0050031 §69/84/85/86、N0030006 chunk 3/8）。已用新工具重跑，12/12 首次即 `completed`，Fact 由 44 增為 82 筆，佇列現為 3307/3307 `completed`。詳見 [報告57 附錄C](docs/報告/57_附錄C_KG重抽來源清單與失敗chunk盤點.md)。**先前「終止條件比較子題抽取品質差」「請假規則 §3/§8 漏抽」的結論不成立**，已在報告57 §4.6 與論文 3.1.3§b 更正。
