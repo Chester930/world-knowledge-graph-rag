@@ -462,6 +462,53 @@ def test_prompt_analysis_handles_nested_flat_and_empty_prompt_lists():
     assert result["analyzed_prompt_record_count"] == 3
 
 
+def test_prompt_analysis_ignores_matching_trace_when_in_prompt_is_false():
+    records = {
+        "stage_a": [
+            phase2_record(
+                "q1",
+                ["- 只在檢索結果不使用"],
+                [phase2_trace("只在檢索結果不使用", "doc-a", in_prompt=False)],
+            )
+        ]
+    }
+
+    result = analyze_prompt_records(records, {"q1"})
+
+    assert result["prompt_line_status_counts"] == {
+        "uniquely_attributed": 0,
+        "multi_source_merged": 0,
+        "unmatched": 1,
+        "source_unresolved": 0,
+    }
+    assert result["unmatched_prompt_rows"][0]["prompt_line"] == "- 只在檢索結果不使用"
+
+
+def test_prompt_analysis_marks_matching_trace_without_source_doc_id_as_unresolved():
+    records = {
+        "stage_a": [
+            phase2_record(
+                "q1",
+                ["- 缺少來源識別"],
+                [
+                    phase2_trace("缺少來源識別", None),
+                    phase2_trace("缺少來源識別", ""),
+                ],
+            )
+        ]
+    }
+
+    result = analyze_prompt_records(records, {"q1"})
+
+    assert result["prompt_line_status_counts"] == {
+        "uniquely_attributed": 0,
+        "multi_source_merged": 0,
+        "unmatched": 0,
+        "source_unresolved": 1,
+    }
+    assert result["question_distribution"]["q1"]["source_unresolved_line_count"] == 1
+
+
 def test_prompt_analysis_separates_merged_duplicates_unmatched_and_independent_collisions():
     records = {
         "stage_a": [
