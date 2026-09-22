@@ -215,7 +215,36 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 
 **下一步建議**：若要繼續驗證獨立judge或任何「固定檢索、只換其他變因」的pilot，優先在harness層加一個query embedding cache（同一次比較的兩個臂共用同一份embedding），或直接沿用報告62 T0的`prompt_context_lines`重放機制（已經是「固定住檢索結果」的等價做法，只是原本設計動機不同，剛好也能排除這裡發現的embedding變因）。
 
-**✅ 已落地為任務書，交付Codex**：[報告68：評測harness查詢embedding快取SDD任務書](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)——設計原則是**只動評測harness層，完全不改`routers/agent.py::chat()`或任何production程式碼**：在`core/providers/factory.py`新增一個明確標示eval-only的override hook，讓harness把全域embedding provider單例換成快取包裝版，`chat()`透過既有的`get_embedding_provider()`自動受益，不需要改它任何一行。預設（不傳`--embedding-cache`）零行為變化。T4只驗證快取機制本身有效（同一題連續跑兩次結果一致），**不自動重跑獨立judge pilot**，那是之後另外決定的事。**尚未實作，待Codex執行。**
+**✅ 已落地為任務書，交付Codex**：[報告68：評測harness查詢embedding快取SDD任務書](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)——設計原則是**只動評測harness層，完全不改`routers/agent.py::chat()`或任何production程式碼**：在`core/providers/factory.py`新增一個明確標示eval-only的override hook，讓harness把全域embedding provider單例換成快取包裝版，`chat()`透過既有的`get_embedding_provider()`自動受益，不需要改它任何一行。預設（不傳`--embedding-cache`）零行為變化。T4只驗證快取機制本身有效（同一題連續跑兩次結果一致），**不自動重跑獨立judge pilot**，那是之後另外決定的事。**✅ 2026-09-22已由Codex完成並驗證**（commit `92d8492`），T1-T4全數通過，`routers/agent.py`確認未被觸碰，1076 tests全綠。
+
+### 2026-09-22 embedding快取重跑獨立judge pilot：發現Stage 1 Context Recall指標本身內嵌judge模型，非純檢索指標
+
+用報告68落地的`--embedding-cache`，讓共用judge臂（沿用報告68 T4的`run1_cached`，judge=generator=qwen2.5:7b）與新增的獨立judge臂（`JUDGE_LLM_MODEL=qwen3.5:4b`）共用同一份快取檔`.claude/tmp/report68_embedding_cache_20260922/embedding_cache.json`，唯讀背景fork執行，輸出於`.claude/tmp/report69_independent_judge_cached_20260922/run_independent_judge_cached/`。
+
+**embedding快取本身確認有效**：兩次跑的`retrieval_trace`（每個fact的檢索分數與排序）逐位元完全相同，證明「查詢向量→向量搜尋→BFS檢索」這段已是決定性的，報告68的機制做對了。
+
+**但七題中只有3題（`18-Q5`／`57-DIST1`／`57-DIST2`）Stage 1 Context Recall在兩臂間完全一致，另外4題（`57-CANARY5`／`57-AGGR7`／`57-AGGR8`／`57-AGGR19`）不一致**：
+
+| 題目 | 共用judge Recall | 獨立judge Recall | 一致？ | 共用judge Atomic Acc | 獨立judge Atomic Acc |
+|---|---|---|---|---|---|
+| 18-Q5 | 1.0 | 1.0 | ✅ | 0.667 | 1.0 |
+| 57-DIST1 | 1.0 | 1.0 | ✅ | 0.5 | 0.75 |
+| 57-DIST2 | 1.0 | 1.0 | ✅ | 0.75 | 1.0 |
+| 57-CANARY5 | 1.0 | 0.5 | ❌ | 0.5 | 0.0 |
+| 57-AGGR7 | 0.333 | 0.0 | ❌ | 0.333 | 0.0 |
+| 57-AGGR8 | 0.75 | 0.0 | ❌ | 0.25 | 0.0 |
+| 57-AGGR19 | 0.25 | 0.5 | ❌ | 0.5 | 0.5 |
+
+**根因（已讀碼獨立驗證，非fork片面之詞）**：`services/semantic_span_matcher.py::match_spans_with_fallback()`（第56-107行）對每個gold span先做逐字子字串比對，**若比對不到、且傳入了`judge_llm_provider`，會額外呼叫一次judge LLM做語意蘊含核對**（第83行`judge_llm_provider.generate_json()`）。這個函式被`services/lineage_tracker.py::record_retrieval_async()`（第133行）呼叫來計算Stage 1 Context Recall。也就是說，**Stage 1 Context Recall不是純檢索指標，而是「檢索到的fact集合」+「用哪個judge做語意核對」的複合結果**。只要逐字比對沒有100%命中（本例4/7題如此），這個數字就會隨judge換人而變；18-Q5/DIST1/DIST2三題兩邊一致，是因為逐字比對就已100%命中，根本沒觸發語意fallback。
+
+**這個confound不只影響這次pilot**：任何「固定檢索、只換其他變因」的跨judge比較，只要gold span不是逐字命中（naturalization改寫後很常見，也是報告67處理natural_text品質問題的同一類現象），Stage 1 Recall都會被污染。
+
+**判讀**：
+- 只有3/7題是乾淨樣本，可把Atomic Accuracy差異單純歸因於judge——這3題方向一致，獨立judge給分皆較高（0.667→1.0、0.5→0.75、0.75→1.0）。
+- 其餘4題的差異混雜「Stage1語意核對用哪個judge」與「Stage3生成評分用哪個judge」兩層效應，不能單獨歸因。
+- 不代表獨立judge沒有效果，而是**目前的評測方法論還無法把這個效果乾淨量出來**。
+
+**建議修法方向（尚未實作，待使用者決定）**：`match_spans_with_fallback`計算Stage 1 Recall時，語意fallback應固定用同一顆judge（不隨受測的arm變動），judge差異只保留在Stage 3 Atomic Accuracy這一層——把「評測用哪個judge做語意核對」和「待測的judge本身」分開。這是評測harness的設計問題，不是這次執行出錯，也不影響report68已完成的embedding快取本身的正確性。
 
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
