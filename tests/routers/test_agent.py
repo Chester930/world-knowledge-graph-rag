@@ -26,6 +26,15 @@ def test_strip_type_markers_preserves_uncontrolled_legal_abbreviation():
     assert agent._strip_type_markers(text) == text
 
 
+def test_strip_type_markers_does_not_truncate_word_ending_in_controlled_type():
+    """報告67 T3 複驗（2026-09-22）：裸字分支原本缺開頭邊界，會把
+    「XORGANIZATION」這類尾端剛好是受控型別詞的合法詞彙誤砍成「X」。"""
+    assert agent._strip_type_markers("這是XORGANIZATION結尾測試") == (
+        "這是XORGANIZATION結尾測試"
+    )
+    assert agent._strip_type_markers("SUPERPERSON") == "SUPERPERSON"
+
+
 # ── _merge_fact_lines：BFS 三元組與語意檢索 Fact 合併去重（2026-08-18）──────
 
 def _triple(subject="A", rel_type="CAUSES", object_="B", verb="導致", natural_text=None):

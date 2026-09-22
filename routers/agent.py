@@ -551,9 +551,13 @@ _CONTROLLED_TYPE_LIST_PATTERN = (
     rf"(?:{_CONTROLLED_TYPE_TOKEN_PATTERN})"
     rf"(?:\s*[,，]\s*(?:{_CONTROLLED_TYPE_TOKEN_PATTERN}))*"
 )
+# 報告67 T3 複驗（2026-09-22）：裸字分支原本只在結尾擋 `(?![A-Za-z0-9_])`，
+# 沒有對稱的開頭 `(?<![A-Za-z0-9_])`——導致「XORGANIZATION」這類合法詞彙
+# 尾端剛好是受控型別詞時，會被誤砍成「X」（已用真實案例重現並修正）。
+# 括號版不需要這個左邊界，因為全形括號本身就是非 ASCII 字元、天然斷詞。
 _TYPE_MARKER_RE = re.compile(
     rf"\s*(?:（(?:概念|{_CONTROLLED_TYPE_LIST_PATTERN})）|"
-    rf"{_CONTROLLED_TYPE_LIST_PATTERN})(?![A-Za-z0-9_])"
+    rf"(?<![A-Za-z0-9_]){_CONTROLLED_TYPE_LIST_PATTERN})(?![A-Za-z0-9_])"
 )
 
 

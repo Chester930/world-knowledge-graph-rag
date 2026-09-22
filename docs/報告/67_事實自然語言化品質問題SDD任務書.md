@@ -136,6 +136,13 @@ T1 判定為 LLM／prompt 問題後，已完成 T2 與 T3；本輪沒有執行 T
 - 寫一支唯讀腳本，對全KG（或至少報告65 §10已掃描過的KG#4）套用T2的核對邏輯（`_naturalization_leaked_type_marker()`），統計目前有多少筆邊的 `natural_text` 已經受影響。
 - **只回報統計數字與樣本，不要執行任何 backfill 寫入**——backfill 是不可逆的KG資料異動，範圍與必要性需要使用者看過T1-T3的結果與T4的統計後才能決定，不在本任務書自動核准的範圍內。
 
+### T2/T3 完成與複驗（2026-09-22，Codex實作，Claude Code複驗）
+
+Codex 完成 T2、T3（commit `7ed651d`），未執行T4，未對KG寫入。獨立重跑全套pytest確認 **1065 passed**，逐行核對diff：
+
+- **T2 實作扎實**：`_naturalization_leaked_type_marker()`（`services/svo_service.py`）正則同時有開頭 `(?<![A-Za-z0-9_])` 與結尾 `(?![A-Za-z0-9_])` 邊界，測試涵蓋裸字洩漏、逗號列表洩漏、以及「PERSONAL不誤判成PERSON」的邊界案例。
+- **T3 發現一個真實缺陷並已修復（commit待補）**：`_TYPE_MARKER_RE`（`routers/agent.py`）的裸字（無括號）分支**只有結尾邊界、缺開頭邊界**，導致「XORGANIZATION」這類尾端剛好是受控型別詞的合法詞彙被誤砍成「X」（`SUPERPERSON`→`SUPER`）——已用真實案例重現確認，且T3自己的測試（用`NPO`/`ABC`這類完全不在清單裡的縮寫）沒有涵蓋到這個邊界，沒抓到。**已直接修正**：裸字分支補上對稱的 `(?<![A-Za-z0-9_])`，加1項回歸測試，全套pytest **1066 passed**。括號版本不需要這個左邊界（全形括號本身就是天然斷詞）。
+
 ---
 
 ## 4. 明確不做的事
