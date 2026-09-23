@@ -1,7 +1,36 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-22
+> **最後更新**：2026-09-23
+
+## 2026-09-23：報告68/69收尾 + master整合完成（大量跨worktree協調，開新對話前必讀）
+
+**報告68（embedding快取）與報告69（固定metric-judge與受測arm-judge解耦）皆已由Codex完成、Claude Code獨立驗證、使用者核准並push**。詳見上方「2026-09-22 報告68」「2026-09-22 embedding快取重跑獨立judge pilot」「2026-09-23 報告69」三段的完整技術細節，此處只記結論：
+
+- 報告68：評測harness查詢embedding快取，解決檢索embedding生成端非決定性（文獻`docs/參考文獻/38/`）。
+- 報告69：harness新增`--metric-judge-provider`/`--metric-judge-model`，把「受測arm自己的judge」與「Stage1-4評分工具的固定judge」解耦（文獻`docs/參考文獻/39/`，定性為評判者間信度問題非self-preference bias）。T5驗證：7題中5題Stage1 Recall兩臂完全一致（比修法前3/7進步），殘餘2題（`57-CANARY5`／`57-AGGR19`）獨立查證為已知的LLM推論非決定性（`core/providers/llm/ollama.py`固定seed仍無法完全消除，與報告20同源機制），非本次修法缺陷。
+- **待使用者決定、尚未執行**：(a) 殘餘的judge推論非決定性要不要進一步緩解（例如語意fallback核對也跑多次取眾數）；(b) 乾淨樣本5/7是否足以支撐「獨立judge是否有效」的結論，要不要正式重跑判定。
+
+**同日完成一次大規模跨branch/worktree版控整合**（起因：使用者要求整理「待合併與推送項目」，開了另一個Claude Code session在main checkout做盤點）：
+
+1. **盤點結果**：4個worktree/分支——主checkout(`master`)、`.claude/worktrees/kg-reextract`(`reextract-v2`，落後master 227個commit，**維持不動**，不整支merge，只是執行期工具不屬產品主線)、`.claude/worktrees/report-gemini-review`(`worktree-report-gemini-review`，已是master祖先，**無事可做**)、本worktree(`worktree-sdd-retrieval-comparison`，領先master 34/落後48，diffstat 115檔115萬字)。
+2. **從本branch挑出9筆commit**（逐commit核對本文件的日期段落狀態標記，而非只看檔案路徑，才正確識別出哪些production變更已核准接線）分4組cherry-pick進一個中繼分支`codex/integrate-sdd-groups`：
+   - 第1組（評測診斷）：`aedaf93`／`d918174`／`b15c2ec`
+   - 第2組（抽取修復＋設定重構）：`35f95ab`／`860654a`／`8b80eaf`
+   - 第3組（去重旗標）：`5ae0154`
+   - 第4組（型別標記修復）：`7ed651d`→`6bc644e`
+   - 過程中修正2次「整份取代衝突檔案」的錯誤指令——`d918174`/`b15c2ec`混雜了報告文件（該報告的建立commit不在9筆名單內，master上不存在）需要用`git rm`只排除文件、保留code；`8b80eaf`曾誤導成「整份取代`services/svo_service.py`」，會蓋掉master自己獨立演進的cfg門檻接線功能（`074052f`～`a8c7cbb`共10筆，跟這次整合完全無關），被pytest的`test_svo_service_cfg_wiring.py`10個失敗即時攔下，改為精確手動合併（保留master既有的`cfg`參數簽名，只加`_svo_prompt()`重構與一行fewshots轉發）。
+3. **意外事件**：第3組完成時（13:50:17建立中繼commit`3ff6d44`後37秒），`origin/master`被直接push成`3ff6d44`，來源查證未果（Codex與另一個平行session皆否認且有操作紀錄佐證），但內容本身已逐筆審查過、判定安全，使用者決定不深究、直接接受現狀往下走。
+4. **main checkout本地master同步**：另有一個平行session（使用者稱「Cherry-pick進度追蹤」，非本session）同時在處理一個無關的小任務（`.gitignore`加`.pytest-tmp*/`忽略規則），導致main checkout本地master多出一筆獨立commit、跟意外push的`origin/master`分岔。用「`git reset --hard`到內容已完整涵蓋新commit的目標、事前`git stash`保護使用者既有未commit異動、事後`stash pop`還原」的方式安全處理了兩次分岔（`8d13baf`→`f2ccc63`→`7e67f2b`），main checkout原有的3個既有異動（`docs/報告/53_...md`修改＋2份未追蹤v1.0文件）全程無損。
+5. **最終結果**：`origin/master`已fast-forward到`7e67f2b`（=舊master `b629282` + 9筆核准commit + gitignore修正），非force push，已由Claude Code獨立核對ref與內容。`reextract-v2`、`worktree-report-gemini-review`維持不動。
+
+**尚未納入這輪整合**：本worktree（`worktree-sdd-retrieval-comparison`）自己這次工作階段新增的報告68/69內容（embedding快取、metric-judge解耦，commit `92d8492`／`1f353d8`／`b8f0178`／`313b3d5`）**還沒有被cherry-pick進master**——這是下一輪可以考慮的整合批次，屬於「評測基礎設施」類別，風險應該較低（predominantly eval-only，`routers/agent.py`/`services/`皆未觸碰）。
+
+**下一步待決定**（優先順序供參考，非硬性規定）：
+- 要不要把報告68/69這批也cherry-pick進master（比照這次的分組審查流程）。
+- 報告67遺留的96/11,011（0.87%）筆`natural_text`型別洩漏backfill決策，仍未執行。
+- 報告62原始待辦（C/D/E/G/H：新題庫基準重建、K1b、T3條文擴充、chunk-RAG比較），這次工作階段全程被report65-69插隊，仍未動。
+- 報告69殘餘的judge推論非決定性緩解，以及要不要正式重跑獨立judge pilot判定成效。
 
 ## 先讀這裡
 
