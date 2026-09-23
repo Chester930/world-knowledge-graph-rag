@@ -3,6 +3,13 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-23
 
+## 2026-09-23（續）：報告68/69批次整合進master完成 + 3份後續任務書已交付Codex
+
+依HANDOVER「下一步待決定」清單順序，建立4份任務書（[報告70](docs/報告/70_報告68_69批次整合進master任務書.md)～[73](docs/報告/73_報告69殘餘judge非決定性緩解任務書.md)）交付Codex，逐項由使用者在對話中核准後執行：
+
+1. **✅ 報告70已完成並push**：報告68/69 production code（`92d8492`／`1f353d8`）cherry-pick進main checkout master（新SHA`41697bb`／`c8f9184`），另加2筆必要修正——`12d2308`移除3個依賴報告62專屬`_build_kg_chat_request`的測試（該函式不在master，報告62本身尚未合併）、`bc37b61`清理尾端空白行。`routers/agent.py`／`services/`確認未觸碰（`git diff`為空）；`core/providers/factory.py`只新增`override_embedding_provider_for_eval()`／`make_llm_provider_for_eval()`兩個eval-only函式，master原有簽名未變；HANDOVER.md僅新增精簡段落未整份取代。pytest 1107 passed。**已由Claude Code獨立`git fetch`核對`origin/master`確實為`bc37b61`**（範圍`7e67f2b..bc37b61`，非force push）。**待辦**：`12d2308`移除的3個測試屬報告62功能，日後報告62正式合併master時需補回。
+2. **待執行**：報告71（natural_text型別洩漏backfill，T0/T1唯讀掃描先做，T2寫入待另一輪核准）、報告72（報告62殘留待辦：新題庫基準重建／K1b／T3條文擴充／chunk-RAG對照組）、報告73（報告69殘餘judge非決定性緩解）。
+
 ## 2026-09-23：報告68/69收尾 + master整合完成（大量跨worktree協調，開新對話前必讀）
 
 **報告68（embedding快取）與報告69（固定metric-judge與受測arm-judge解耦）皆已由Codex完成、Claude Code獨立驗證、使用者核准並push**。詳見上方「2026-09-22 報告68」「2026-09-22 embedding快取重跑獨立judge pilot」「2026-09-23 報告69」三段的完整技術細節，此處只記結論：
