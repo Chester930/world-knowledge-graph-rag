@@ -77,6 +77,25 @@ def test_make_llm_provider_rejects_unknown_provider():
         factory._make_llm_provider("not-a-provider")
 
 
+def test_make_llm_provider_for_eval_is_independent_and_needs_no_init(monkeypatch):
+    factory._llm = object()
+    factory._judge_llm = object()
+    prov = factory.make_llm_provider_for_eval("ollama", "metric-model")
+    second = factory.make_llm_provider_for_eval("ollama", "other-model")
+
+    assert isinstance(prov, OllamaLLMProvider)
+    assert prov.model == "metric-model"
+    assert second.model == "other-model"
+    assert second is not prov
+    assert factory._llm is not prov
+    assert factory._judge_llm is not prov
+
+
+def test_make_llm_provider_for_eval_rejects_unknown_provider():
+    with pytest.raises(ValueError):
+        factory.make_llm_provider_for_eval("not-a-provider")
+
+
 def test_init_providers_wires_independent_judge_when_configured(monkeypatch):
     """judge_llm_provider 有設 → init_providers 另建一個 _judge_llm，
     且與生成端 _llm 是不同實例；embedding 走假建構避免載入模型。"""
