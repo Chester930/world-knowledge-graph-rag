@@ -52,6 +52,21 @@ def test_embedding_cache_cli_is_opt_in():
     assert parser.parse_args(["--embedding-cache", "cache.json"]).embedding_cache == "cache.json"
 
 
+def test_metric_judge_cli_is_opt_in():
+    parser = build_arg_parser()
+
+    args = parser.parse_args([])
+    assert args.metric_judge_provider is None
+    assert args.metric_judge_model is None
+
+    args = parser.parse_args([
+        "--metric-judge-provider", "ollama",
+        "--metric-judge-model", "qwen2.5:7b",
+    ])
+    assert args.metric_judge_provider == "ollama"
+    assert args.metric_judge_model == "qwen2.5:7b"
+
+
 def test_render_pareto_summary_includes_context_quality_section(tmp_path):
     """報告57 §2.3：Context Quality矩陣（Recall/SNR/Chain Completeness）
     須與既有Atomic Accuracy矩陣並列輸出，不互相取代。"""

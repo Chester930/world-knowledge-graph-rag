@@ -144,3 +144,16 @@ def override_embedding_provider_for_eval(
     if _embedding is None:
         raise RuntimeError("先呼叫 init_providers()")
     _embedding = wrap(_embedding)
+
+
+def make_llm_provider_for_eval(
+    provider_name: str, model_override: str | None = None
+) -> LLMProvider:
+    """僅供離線評測 harness 使用的獨立 LLM provider 建構器。
+
+    直接依明確傳入的 provider/model 建構實例，不讀取或修改全域
+    ``_llm``／``_judge_llm``，也不受 ``JUDGE_LLM_PROVIDER``／
+    ``JUDGE_LLM_MODEL`` 影響。供評測用固定 metric-judge 使用；不要在
+    ``routers/`` 或任何 production request path 呼叫。
+    """
+    return _make_llm_provider(provider_name, model_override)

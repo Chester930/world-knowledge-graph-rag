@@ -79,8 +79,10 @@ def build_run_command(
     questions: str,
     out: str,
     embedding_cache: str | None = None,
+    metric_judge_provider: str | None = None,
+    metric_judge_model: str | None = None,
 ) -> list[str]:
-    """組出 frozen stage 的 harness command；快取旗標是 opt-in。"""
+    """組出 frozen stage 的 harness command；評測覆蓋旗標皆是 opt-in。"""
     cmd = [
         sys.executable, "-u", str(REPO_ROOT / "scripts" / "eval" / "run_rq1_comparison.py"),
         "--kg-id", manifest["kg_id"],
@@ -93,6 +95,10 @@ def build_run_command(
     ]
     if embedding_cache:
         cmd += ["--embedding-cache", embedding_cache]
+    if metric_judge_provider:
+        cmd += ["--metric-judge-provider", metric_judge_provider]
+    if metric_judge_model:
+        cmd += ["--metric-judge-model", metric_judge_model]
     return cmd
 
 
@@ -106,6 +112,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         args.questions,
         args.out,
         getattr(args, "embedding_cache", None),
+        getattr(args, "metric_judge_provider", None),
+        getattr(args, "metric_judge_model", None),
     )
     if getattr(args, "k_top_k", None) is not None:  # 報告62 T1 候選臂；預設不傳＝凍結基準
         cmd += ["--k-top-k", str(args.k_top_k)]
@@ -136,6 +144,10 @@ def main() -> None:
                      help="報告62 T1 候選臂的語意 Fact 筆數；預設不傳＝凍結基準（20）。")
     run.add_argument("--embedding-cache", default=None,
                      help="選填：評測專用 embedding JSON 快取路徑；不傳則完全不啟用。")
+    run.add_argument("--metric-judge-provider", default=None,
+                     help="選填：固定 Stage 1-4 評分工具 judge 的 provider。")
+    run.add_argument("--metric-judge-model", default=None,
+                     help="選填：固定 Stage 1-4 評分工具 judge 的 model。")
     args = parser.parse_args()
     if args.command == "remaining":
         cmd_remaining(args)

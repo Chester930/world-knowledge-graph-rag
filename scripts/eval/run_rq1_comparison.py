@@ -46,6 +46,7 @@ from core.providers.factory import (
     get_judge_llm_provider,
     get_llm_provider,
     init_providers,
+    make_llm_provider_for_eval,
     override_embedding_provider_for_eval,
 )
 from models.document import ChatRequest
@@ -227,10 +228,17 @@ async def _run_single_query(
     reranker,
     baseline_top_k: int,
     k_top_k: int | None = None,
+    metric_counter: _CountingLLM | None = None,
 ) -> dict:
     counting.reset()
     if judge_counting is not None and judge_counting is not counting:
         judge_counting.reset()
+    if (
+        metric_counter is not None
+        and metric_counter is not counting
+        and metric_counter is not judge_counting
+    ):
+        metric_counter.reset()
     t0 = time.perf_counter()
 
     raw_arm = ARM_ALIAS_MAP.get(arm, arm)
@@ -312,7 +320,7 @@ async def _run_single_query(
     await tracker.record_retrieval_async(
         retrieved_texts, gold_spans, latency_ms=latency_s * 1000,
         chunk_ids=chunk_ids, fact_ids=fact_ids,
-        judge_llm_provider=judge_counting or counting, question=tc.question,
+        judge_llm_provider=metric_counter or judge_counting or counting, question=tc.question,
         atomic_gold_facts=tc.atomic_gold_facts,
         retrieval_trace=retrieval_trace,
     )
@@ -320,7 +328,7 @@ async def _run_single_query(
     full_context_str = "\n".join(context_lines)
     await tracker.record_context_assembly_async(
         full_context_str, gold_spans, total_tokens=len(full_context_str) // 4,
-        judge_llm_provider=judge_counting or counting, question=tc.question,
+        judge_llm_provider=metric_counter or judge_counting or counting, question=tc.question,
         prompt_context_lines=trace.get("prompt_lines") or [],
     )
 
@@ -358,7 +366,7 @@ async def _run_single_query(
         answer,
         tc.atomic_gold_facts,
         refusal_expected=refusal_exp,
-        judge_llm_provider=judge_counting or counting,
+        judge_llm_provider=metric_counter or judge_counting or counting,
         question=tc.question,
         deterministic_guard_passed=guard_result.is_valid,
         guard_failures=(
@@ -371,7 +379,9 @@ async def _run_single_query(
     scope_audit = audit_answer_scope(answer, tc)
 
     full_lineage = await tracker.build_full_lineage_async(
-        gold_spans, judge_llm_provider=judge_counting or counting, question=tc.question,
+        gold_spans,
+        judge_llm_provider=metric_counter or judge_counting or counting,
+        question=tc.question,
     )
 
     return {
@@ -689,6 +699,14 @@ async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest
 
         generator_counter = _CountingLLM(generator)
         judge_counter = _CountingLLM(judge)
+        metric_judge_provider_name = getattr(args, "metric_judge_provider", None)
+        metric_counter = None
+        if metric_judge_provider_name:
+            metric_judge = make_llm_provider_for_eval(
+                metric_judge_provider_name,
+                getattr(args, "metric_judge_model", None),
+            )
+            metric_counter = _CountingLLM(metric_judge)
         records: list[dict] = []
         records_path = out_dir / "records.json"
         records_path.write_text("[]", encoding="utf-8")
@@ -710,6 +728,7 @@ async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest
                                 None,
                                 args.baseline_top_k,
                                 args.k_top_k,
+                                metric_counter,
                             ),
                             timeout=args.query_timeout_s,
                         )
@@ -771,6 +790,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--embedding-cache",
         default=None,
         help="選填：評測專用 embedding JSON 快取路徑；不傳則完全不啟用。",
+    )
+    parser.add_argument(
+        "--metric-judge-provider",
+        default=None,
+        help="選填：固定評分工具 judge 的 provider，獨立於受測 arm 的 JUDGE_LLM_PROVIDER，"
+             "用於 Stage 1-4 語意核對/評分；不傳則沿用現況。",
+    )
+    parser.add_argument(
+        "--metric-judge-model",
+        default=None,
+        help="選填：搭配 --metric-judge-provider 指定 metric-judge model；"
+             "不傳則使用該 provider 的 settings 預設 model。",
     )
     return parser
 
@@ -860,6 +891,10 @@ def main():
         "generator_model": generator_model,
         "judge_provider": judge_provider,
         "judge_model": judge_model,
+        "metric_judge_provider": args.metric_judge_provider,
+        "metric_judge_model": (
+            args.metric_judge_model if args.metric_judge_provider else None
+        ),
         "embedding_provider": settings.embedding_provider,
         "embedding_model": _configured_embedding_model(settings.embedding_provider),
         "query_timeout_s": args.query_timeout_s,

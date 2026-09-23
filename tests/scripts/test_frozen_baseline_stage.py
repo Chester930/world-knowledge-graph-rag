@@ -64,6 +64,28 @@ class EmbeddingCacheCommandTests(unittest.TestCase):
         index = command.index("--embedding-cache")
         self.assertEqual(command[index + 1], "cache.json")
 
+    def test_default_run_command_has_no_metric_judge_flags(self):
+        command = build_run_command(
+            {"kg_id": "kg", "scope_doc_ids": ["doc"]}, "questions.json", "out"
+        )
+
+        self.assertNotIn("--metric-judge-provider", command)
+        self.assertNotIn("--metric-judge-model", command)
+
+    def test_run_command_forwards_optional_metric_judge(self):
+        command = build_run_command(
+            {"kg_id": "kg", "scope_doc_ids": ["doc"]},
+            "questions.json",
+            "out",
+            metric_judge_provider="ollama",
+            metric_judge_model="qwen2.5:7b",
+        )
+
+        provider_index = command.index("--metric-judge-provider")
+        model_index = command.index("--metric-judge-model")
+        self.assertEqual(command[provider_index + 1], "ollama")
+        self.assertEqual(command[model_index + 1], "qwen2.5:7b")
+
 
 if __name__ == "__main__":
     unittest.main()
