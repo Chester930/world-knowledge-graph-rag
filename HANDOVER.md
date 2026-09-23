@@ -23,6 +23,10 @@
 - [報告57 §4.13：scope A/B 與 Fact top_k 精準度掃描](docs/報告/57_檢索品質解耦評測與知識圖譜場景化角色SDD任務書.md#413-source-scope-ab-與-fact-top_k-精準度掃描2026-09-18)
 - [報告60 §1.4：接續評估摘要與建議](docs/報告/60_Codex接續確認交接任務書.md#14-2026-09-18-檢索精準度最佳化評估)
 
+### 2026-09-23：報告68／69補入 master
+
+報告68 的評測 embedding 快取與報告69 的固定 metric-judge 解耦 production code 已由來源 commit `92d8492`／`1f353d8` 依序整合進 master；文件與參考文獻另以獨立 `docs:` commit 補入。這批變更限定在評測基礎設施與 `core/providers/factory.py` 的 eval-only 入口，未觸碰 `routers/agent.py` 或 `services/`。
+
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
 1. **KG#4 抽取狀態已修復**：發現 `_process_one()` 內部吞例外、只標 `failed`，重抽腳本回報的「N/N 成功」不可信；KG 曾有 10 failed＋2 pending chunk（N0060041 §8/23/24/25/33/34、N0050031 §69/84/85/86、N0030006 chunk 3/8）。已用新工具重跑，12/12 首次即 `completed`，Fact 由 44 增為 82 筆，佇列現為 3307/3307 `completed`。詳見 [報告57 附錄C](docs/報告/57_附錄C_KG重抽來源清單與失敗chunk盤點.md)。**先前「終止條件比較子題抽取品質差」「請假規則 §3/§8 漏抽」的結論不成立**，已在報告57 §4.6 與論文 3.1.3§b 更正。
