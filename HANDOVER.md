@@ -8,7 +8,8 @@
 依HANDOVER「下一步待決定」清單順序，建立4份任務書（[報告70](docs/報告/70_報告68_69批次整合進master任務書.md)～[73](docs/報告/73_報告69殘餘judge非決定性緩解任務書.md)）交付Codex，逐項由使用者在對話中核准後執行：
 
 1. **✅ 報告70已完成並push**：報告68/69 production code（`92d8492`／`1f353d8`）cherry-pick進main checkout master（新SHA`41697bb`／`c8f9184`），另加2筆必要修正——`12d2308`移除3個依賴報告62專屬`_build_kg_chat_request`的測試（該函式不在master，報告62本身尚未合併）、`bc37b61`清理尾端空白行。`routers/agent.py`／`services/`確認未觸碰（`git diff`為空）；`core/providers/factory.py`只新增`override_embedding_provider_for_eval()`／`make_llm_provider_for_eval()`兩個eval-only函式，master原有簽名未變；HANDOVER.md僅新增精簡段落未整份取代。pytest 1107 passed。**已由Claude Code獨立`git fetch`核對`origin/master`確實為`bc37b61`**（範圍`7e67f2b..bc37b61`，非force push）。**待辦**：`12d2308`移除的3個測試屬報告62功能，日後報告62正式合併master時需補回。
-2. **待執行**：報告71（natural_text型別洩漏backfill，T0/T1唯讀掃描先做，T2寫入待另一輪核准）、報告72（報告62殘留待辦：新題庫基準重建／K1b／T3條文擴充／chunk-RAG對照組）、報告73（報告69殘餘judge非決定性緩解）。
+2. **✅ 報告71 T0-T2已完成，KG#4部分backfill已寫入（main checkout，未push）**：T0查明production KG只有2個（KG#4`236903cf-...`與舊KG`76bc98ff-...`，後者0筆`natural_text`不受影響）；T1唯讀dry-run對KG#4重算96筆受影響邊，49筆重算成功、47筆因欄位缺漏安全跳過（不臆測）；**人工審閱15筆樣本發現機械「無殘留型別標記」核對不足以保證品質**（發現截斷、缺謂語詞堆疊、疑似LLM幻覺如「進行檢測」被改成「無特定數值」），故追加一輪品質分級（數字/單位/CNS-ISO錨點、動詞與主賓詞覆蓋、截斷/缺謂語檢查），49筆分為**27筆安全／17筆需人工複核／5筆建議排除**。**使用者核准只backfill 27筆安全案例**；T2執行完成：27/27寫入成功且讀回核對一致，其餘69筆（17複核+5排除+47跳過）獨立查回確認維持原值未被改動。稽核紀錄commit為main checkout本地`59801a0`（`t2_write_log.json`／`t2_verification.md`／`scripts/kg/backfill_naturalization_safe_edges.py`），**push待使用者核准**。**仍待辦**：17筆需人工複核、5筆建議排除（含1筆疑似LLM幻覺案例）尚未處理，需要另一輪明確決策；dry-run/分級/T2稽核資料已分3筆commit（`83d77ff`／`e175949`／`59801a0`）保存在main checkout，尚未push。
+3. **待執行**：報告72（報告62殘留待辦：新題庫基準重建／K1b／T3條文擴充／chunk-RAG對照組）、報告73（報告69殘餘judge非決定性緩解）。
 
 ## 2026-09-23：報告68/69收尾 + master整合完成（大量跨worktree協調，開新對話前必讀）
 
