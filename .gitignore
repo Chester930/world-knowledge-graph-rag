@@ -49,4 +49,6 @@ Thumbs.db
 
 # 抽取任務佇列（執行期 SQLite，非原始碼）
 task_queue.db
-.pytest-tmp-scopeaudit/
+
+# pytest --basetemp 暫存目錄（任何後綴）
+.pytest-tmp*/
