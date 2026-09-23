@@ -106,5 +106,3 @@ def test_render_pareto_summary_includes_context_quality_section(tmp_path):
     # 涉及2個source_law、0命中，chain_completeness=0.0，唯一計入樣本 n=1。
     assert "n=1" in content
     assert "0.0%" in content
-
-

@@ -83,4 +83,3 @@ class CachingEmbeddingProvider(EmbeddingProvider):
             self._persist()
 
         return [model_cache[key] for key in keys]
-

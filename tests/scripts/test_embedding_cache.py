@@ -81,4 +81,3 @@ async def test_different_model_names_do_not_share_vectors(tmp_path):
 
     assert result == [4.0, 1.0]
     assert second_inner.encode_calls == ["同一文字"]
-
