@@ -1,0 +1,318 @@
+{
+  "operation": "t2_naturalization_safe_allowlist",
+  "dryrun": "data/eval/naturalization_backfill_dryrun_20260923/affected_edges.json",
+  "database": "neo4j",
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "target_count": 27,
+  "approved_edge_ids": [
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165019572",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165023767",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165023772",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025297",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165028952",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165033107",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165035802",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165040978",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165041341",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152936897769664027",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152937997281292486",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152947892885957676",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978699636",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978703559",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978722249",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1157430601792410752",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199251412",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199251414",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199259984",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199263903",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199264614",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199266133",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199266661",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199269094",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199269602",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199271940",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917546619827179615"
+  ],
+  "entries": [
+    {
+      "timestamp_utc": "2026-09-23T08:41:56.503046Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165019572",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "數位服務組 ANTONYM 負責規劃、資訊資源配置及管理 PRODUCT 。",
+      "new_value": "數位服務組負責規劃、資訊資源配置及管理資訊應用環境。",
+      "actual_before_value": "數位服務組 ANTONYM 負責規劃、資訊資源配置及管理 PRODUCT 。",
+      "actual_after_value": "數位服務組負責規劃、資訊資源配置及管理資訊應用環境。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:56.542397Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165023767",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "VH（PRODUCT）於壓縮機額定回轉速度時最終段或最終元氣筒一小時活塞壓縮量值單位為立方公尺。",
+      "new_value": "VH 於壓縮機額定回轉速度時最終段或最終元氣筒一小時活塞壓縮量值 單位：立方公尺",
+      "actual_before_value": "VH（PRODUCT）於壓縮機額定回轉速度時最終段或最終元氣筒一小時活塞壓縮量值單位為立方公尺。",
+      "actual_after_value": "VH 於壓縮機額定回轉速度時最終段或最終元氣筒一小時活塞壓縮量值 單位：立方公尺"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:56.586325Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165023772",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "VL（PRODUCT）於壓縮機額定回轉速度時最終段或最終元之前一小時活塞壓縮量的單位為立方公尺。",
+      "new_value": "VL 於壓縮機額定回轉速度時最終段或最終元之前一氣筒一小時活塞壓縮量值 單位：立方公尺",
+      "actual_before_value": "VL（PRODUCT）於壓縮機額定回轉速度時最終段或最終元之前一小時活塞壓縮量的單位為立方公尺。",
+      "actual_after_value": "VL 於壓縮機額定回轉速度時最終段或最終元之前一氣筒一小時活塞壓縮量值 單位：立方公尺"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:56.754527Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025297",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "出勤紀錄（LOCAL_BUSINESS,ORGANIZATION）包括簽到簿、出勤卡、刷卡機、門禁卡、生物特徵辨識系統、電腦出勤紀錄系統及其他可資核實記載出勤時間的工具。",
+      "new_value": "出勤紀錄包括簽到簿、出勤卡、刷卡機、門禁卡、生物特徵辨識系統、電腦出勤紀錄系統及其他可資核實記載出勤時間的工具。",
+      "actual_before_value": "出勤紀錄（LOCAL_BUSINESS,ORGANIZATION）包括簽到簿、出勤卡、刷卡機、門禁卡、生物特徵辨識系統、電腦出勤紀錄系統及其他可資核實記載出勤時間的工具。",
+      "actual_after_value": "出勤紀錄包括簽到簿、出勤卡、刷卡機、門禁卡、生物特徵辨識系統、電腦出勤紀錄系統及其他可資核實記載出勤時間的工具。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:56.791907Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165028952",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "滯納金（FEE）與因此所承受強制執行標的物之收入、基金運用之收支及雜項收入，得以免納營業稅及所得稅（TAX）。",
+      "new_value": "滯納金與因此所承受強制執行標的物之收入、基金運用之收支及雜項收入，免納營業稅及所得稅。",
+      "actual_before_value": "滯納金（FEE）與因此所承受強制執行標的物之收入、基金運用之收支及雜項收入，得以免納營業稅及所得稅（TAX）。",
+      "actual_after_value": "滯納金與因此所承受強制執行標的物之收入、基金運用之收支及雜項收入，免納營業稅及所得稅。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:56.934172Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165033107",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "因普通傷害者 PERSON 必須住院治療，由其投保單位 ORGANIZATION 申請。",
+      "new_value": "因普通傷害者 必須住院治療 由其投保單位申請",
+      "actual_before_value": "因普通傷害者 PERSON 必須住院治療，由其投保單位 ORGANIZATION 申請。",
+      "actual_after_value": "因普通傷害者 必須住院治療 由其投保單位申請"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.097839Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165035802",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "PLACE應與第七十九條規定之灌氣容器放置場所分設厚度十二公分以上鋼筋混凝土造或具有同等以上強度結構之防護牆。",
+      "new_value": "使用每平方公分一百公斤以上之壓力灌注壓縮氣體於容器之場所 與第七十九條規定之灌氣容器放置場間 應分設厚度在十二公分以上鋼筋混凝土造或具有與此同等以上強度結構之防護牆",
+      "actual_before_value": "PLACE應與第七十九條規定之灌氣容器放置場所分設厚度十二公分以上鋼筋混凝土造或具有同等以上強度結構之防護牆。",
+      "actual_after_value": "使用每平方公分一百公斤以上之壓力灌注壓縮氣體於容器之場所 與第七十九條規定之灌氣容器放置場間 應分設厚度在十二公分以上鋼筋混凝土造或具有與此同等以上強度結構之防護牆"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.129588Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165040978",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "經中央主管機關指定之PRODUCT應對其全長依中央主管機關規定之方法實施TEST。",
+      "new_value": "經中央主管機關指定者應對其全長依中央主管機關規定之方法實施放射線檢查。",
+      "actual_before_value": "經中央主管機關指定之PRODUCT應對其全長依中央主管機關規定之方法實施TEST。",
+      "actual_after_value": "經中央主管機關指定者應對其全長依中央主管機關規定之方法實施放射線檢查。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.283327Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165041341",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "發生災害時之Action為調查及檢討左列高壓氣體製造安全有關事項之災害原因及防災對策。",
+      "new_value": "發生災害時之 災害原因調查及檢討防災對策 左列高壓氣體製造安全有關事項",
+      "actual_before_value": "發生災害時之Action為調查及檢討左列高壓氣體製造安全有關事項之災害原因及防災對策。",
+      "actual_after_value": "發生災害時之 災害原因調查及檢討防災對策 左列高壓氣體製造安全有關事項"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.336111Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152936897769664027",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "PERSON 領取了各種保險給付。",
+      "new_value": "支出殯葬費之人領取各種保險給付。",
+      "actual_before_value": "PERSON 領取了各種保險給付。",
+      "actual_after_value": "支出殯葬費之人領取各種保險給付。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.525186Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152937997281292486",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "ORGANIZATION接受從事本法第四十六條規定工作之外國人委任代其辦理就業服務業務。",
+      "new_value": "接受從事本法第四十六條規定工作之外國人委任 代其辦理居留業務 始得從事就業服務業務",
+      "actual_before_value": "ORGANIZATION接受從事本法第四十六條規定工作之外國人委任代其辦理就業服務業務。",
+      "actual_after_value": "接受從事本法第四十六條規定工作之外國人委任 代其辦理居留業務 始得從事就業服務業務"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.748476Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152947892885957676",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "電力線操作應避免在 PLACE 地區進行。",
+      "new_value": "電力線操作應避免在附近進行。",
+      "actual_before_value": "電力線操作應避免在 PLACE 地區進行。",
+      "actual_after_value": "電力線操作應避免在附近進行。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.798185Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978699636",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "其他經中央主管機關指定之高溫作業屬於 PLACE 一定規模以上之工程範圍。",
+      "new_value": "其他經中央主管機關指定公告者屬於一定規模以上之工程範圍。",
+      "actual_before_value": "其他經中央主管機關指定之高溫作業屬於 PLACE 一定規模以上之工程範圍。",
+      "actual_after_value": "其他經中央主管機關指定公告者屬於一定規模以上之工程範圍。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:57.973966Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978703559",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "全數勞資會議同意後並同申請實施年金保險（Action）。",
+      "new_value": "全數勞資會議同意後併同申請實施年金保險。",
+      "actual_before_value": "全數勞資會議同意後並同申請實施年金保險（Action）。",
+      "actual_after_value": "全數勞資會議同意後併同申請實施年金保險。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.024872Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978722249",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "不適用勞動基準法之勞工（ PERSON ）依前條，或其僱主依第八十四條規定終止勞動契約時，僱主應以不低於勞工退休金條例規定之資遣費計算標準發給離職金（ PRODUCT ）。",
+      "new_value": "不適用勞動基準法之勞工依前條，或其僱主依第八十四條規定終止勞動契約時，僱主應以不低於勞工退休金條例規定之資遣費計算標準發給離職金。",
+      "actual_before_value": "不適用勞動基準法之勞工（ PERSON ）依前條，或其僱主依第八十四條規定終止勞動契約時，僱主應以不低於勞工退休金條例規定之資遣費計算標準發給離職金（ PRODUCT ）。",
+      "actual_after_value": "不適用勞動基準法之勞工依前條，或其僱主依第八十四條規定終止勞動契約時，僱主應以不低於勞工退休金條例規定之資遣費計算標準發給離職金。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.073379Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1157430601792410752",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "場所 PLACE 標示嚴禁煙火及禁止無關人員進入。",
+      "new_value": "場所標示嚴禁煙火及禁止無關人員進入。",
+      "actual_before_value": "場所 PLACE 標示嚴禁煙火及禁止無關人員進入。",
+      "actual_after_value": "場所標示嚴禁煙火及禁止無關人員進入。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.262255Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199251412",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "DISPUTE指勞資雙方當事人基於法令、團體協約、勞動契約之規定所為權利義務之爭議。",
+      "new_value": "權利事項及調整事項之勞資爭議 指 勞資雙方當事人基於法令、團體協約、勞動契約之規定所為權利義務之爭議",
+      "actual_before_value": "DISPUTE指勞資雙方當事人基於法令、團體協約、勞動契約之規定所為權利義務之爭議。",
+      "actual_after_value": "權利事項及調整事項之勞資爭議 指 勞資雙方當事人基於法令、團體協約、勞動契約之規定所為權利義務之爭議"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.324659Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199251414",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "DISPUTE指勞資雙方當事人對於勞動條件主張繼續維持或變更之爭議。",
+      "new_value": "權利事項及調整事項之勞資爭議 指 勞資雙方當事人對於勞動條件主張繼續維持或變更之爭議",
+      "actual_before_value": "DISPUTE指勞資雙方當事人對於勞動條件主張繼續維持或變更之爭議。",
+      "actual_after_value": "權利事項及調整事項之勞資爭議 指 勞資雙方當事人對於勞動條件主張繼續維持或變更之爭議"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.381010Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199259984",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "檢查結果全部內容公告於左列場所之一（PLACE）。",
+      "new_value": "檢查結果全部內容公告於左列場所之一。",
+      "actual_before_value": "檢查結果全部內容公告於左列場所之一（PLACE）。",
+      "actual_after_value": "檢查結果全部內容公告於左列場所之一。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.564725Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199263903",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "專戶於金融機構 PLACE 被開立。",
+      "new_value": "專戶於金融機構開立。",
+      "actual_before_value": "專戶於金融機構 PLACE 被開立。",
+      "actual_after_value": "專戶於金融機構開立。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.743804Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199264614",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "標示於槽壁缺乏識別效果之地下儲槽（PRODUCT）得採設置其他易於識別之方式（METHOD）。",
+      "new_value": "標示於槽壁缺乏識別效果之地下儲槽得採設置其他易於識別之方式。",
+      "actual_before_value": "標示於槽壁缺乏識別效果之地下儲槽（PRODUCT）得採設置其他易於識別之方式（METHOD）。",
+      "actual_after_value": "標示於槽壁缺乏識別效果之地下儲槽得採設置其他易於識別之方式。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.911748Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199266133",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "當事人之一方 PERSON 載明其姓名、性別、年齡、職業及住所或居所 INFO。",
+      "new_value": "當事人之一方姓名、性別、年齡、職業及住所或居所均載明。",
+      "actual_before_value": "當事人之一方 PERSON 載明其姓名、性別、年齡、職業及住所或居所 INFO。",
+      "actual_after_value": "當事人之一方姓名、性別、年齡、職業及住所或居所均載明。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:58.980755Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199266661",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "當事人之一方 PERSON於第三十九條第二項所定期間提起之訴訟視為調解之聲請 LEGAL_ACTION。",
+      "new_value": "當事人之一方於第三十九條第二項所定期間提起之訴訟視為調解之聲請。",
+      "actual_before_value": "當事人之一方 PERSON於第三十九條第二項所定期間提起之訴訟視為調解之聲請 LEGAL_ACTION。",
+      "actual_after_value": "當事人之一方於第三十九條第二項所定期間提起之訴訟視為調解之聲請。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:59.042251Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199269094",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "通知方式提供必要文件（PRODUCT）。",
+      "new_value": "通知方式提供必要文件。",
+      "actual_before_value": "通知方式提供必要文件（PRODUCT）。",
+      "actual_after_value": "通知方式提供必要文件。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:59.146940Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199269602",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "書件包含傷病給付申請書及給付收據（CREATIVE_WORK）。",
+      "new_value": "書件包含傷病給付申請書及給付收據。",
+      "actual_before_value": "書件包含傷病給付申請書及給付收據（CREATIVE_WORK）。",
+      "actual_after_value": "書件包含傷病給付申請書及給付收據。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:59.235870Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199271940",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "被保險人可以依本法第四十三條第一項或第三項規定請領失能一次金給付（PRODUCT）。",
+      "new_value": "被保險人依本法第四十三條第一項或第三項規定請領失能一次金給付。",
+      "actual_before_value": "被保險人可以依本法第四十三條第一項或第三項規定請領失能一次金給付（PRODUCT）。",
+      "actual_after_value": "被保險人依本法第四十三條第一項或第三項規定請領失能一次金給付。"
+    },
+    {
+      "timestamp_utc": "2026-09-23T08:41:59.286379Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917546619827179615",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "勞工保險被保險人或受益人 PERSON 於本法施行前已依勞工保險條例規定請領職業災害給付。",
+      "new_value": "勞工保險被保險人於本法施行前已依勞工保險條例規定請領職業災害給付。",
+      "actual_before_value": "勞工保險被保險人或受益人 PERSON 於本法施行前已依勞工保險條例規定請領職業災害給付。",
+      "actual_after_value": "勞工保險被保險人於本法施行前已依勞工保險條例規定請領職業災害給付。"
+    }
+  ],
+  "started_at_utc": "2026-09-23T08:41:55.732616Z",
+  "apply_requested_at_utc": "2026-09-23T08:41:55.732634Z",
+  "apply_mode": true,
+  "updated_at_utc": "2026-09-23T08:41:59.286401Z",
+  "result_counts": {
+    "written": 27,
+    "skipped": 0,
+    "failed": 0
+  },
+  "completed_at_utc": "2026-09-23T08:41:59.287568Z"
+}
