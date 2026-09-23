@@ -246,6 +246,18 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 
 **建議修法方向（尚未實作，待使用者決定）**：`match_spans_with_fallback`計算Stage 1 Recall時，語意fallback應固定用同一顆judge（不隨受測的arm變動），judge差異只保留在Stage 3 Atomic Accuracy這一層——把「評測用哪個judge做語意核對」和「待測的judge本身」分開。這是評測harness的設計問題，不是這次執行出錯，也不影響report68已完成的embedding快取本身的正確性。
 
+### 2026-09-23 報告69：固定metric-judge與受測arm-judge解耦——✅ 已由Codex完成並驗證，confound部分解決，殘餘部分定性為已知LLM生成非決定性
+
+文獻查證（`docs/參考文獻/39_LLM評判者一致性與固定化評測量尺/README.md`）確認上述confound更準確的定性是**評判者間信度問題，非self-preference bias**（Stage 1核對的文字是KG檢索出的事實，不是judge自己生成的內容；Chen et al. 2024指出事實導向RAG任務self-preference bias本來就不顯著）。統一設計原則：把「受測arm自己的judge」（只用於`chat()`內部重生成決策）與「評分工具的固定metric-judge」（Stage 1-4量測，跨所有arm一致）分開，比照Zheng et al. 2023自己的評測方法論（固定外部judge評分所有受測模型）。
+
+**Codex完成T1-T5**（commit `1f353d8`，未push）：`core/providers/factory.py`新增eval-only的`make_llm_provider_for_eval()`；`run_rq1_comparison.py`新增`--metric-judge-provider`/`--metric-judge-model`選填參數，接線到Stage 1-4這4處（`record_retrieval_async`／`record_context_assembly_async`／`AtomicScorer.evaluate_async`／`build_full_lineage_async`），**B0/B1 arm第264行的judge來源明確未動**；`frozen_baseline_stage.py`比照報告68先例新增透傳。**已獨立複驗**：`routers/agent.py`／`services/`確認未被觸碰；diff逐行核對與任務書規格完全一致；`tests/scripts/test_rq1_metric_judge.py`新增4個測試，精準驗證Stage1-4收到metric_counter、B0 arm生成路徑仍收到judge_counting（不受metric_counter影響）、不傳旗標時harness不建立metric_counter；獨立重跑`python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py`確認**1086 passed**，跟Codex回報一致。
+
+**T5驗證結果**：固定`--metric-judge-provider ollama --metric-judge-model qwen2.5:7b`後，7題中5題（`18-Q5`／`57-DIST1`／`57-DIST2`／`57-AGGR7`／`57-AGGR8`）Stage 1 Recall在共用judge臂與獨立judge臂之間完全一致（`57-AGGR7`／`57-AGGR8`從原本不一致變成一致，證明修法確實消除了「換judge model造成的confound」），僅`57-CANARY5`（1.0→0.5）與`57-AGGR19`（0.25→0.5）仍不一致。
+
+**殘餘不一致的根因診斷（已獨立查證，非Codex片面之詞）**：逐位元比對兩次跑的`retrieval_trace`（sha256 hash完全相同），確認retrieval端100%決定性、跟這2題的差異無關。差異出在**同一個固定metric-judge（qwen2.5:7b）對同一段文字、同一個gold span做語意蘊含核對，兩次呼叫給出不同的true/false判斷**——`core/providers/llm/ollama.py`第35-57行的`OllamaLLMProvider`已設定`temperature=0.0`＋固定`seed`，但程式碼註解本身已誠實聲明「固定seed無法完全解決這個問題，根因是batch size依賴的浮點運算非結合律」，與報告20已引用的Horace He/Thinking Machines Lab機制同源，這次剛好體現在judge做語意fallback核對的呼叫上，屬於**已知、文獻記載、目前應用層無法完全消除**的LLM推論非決定性，不是報告69這次修法的缺陷。`57-AGGR19`的分歧點（「雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。」是否與另一句幾乎同義的gold span算命中）本身也是新舊法規定實質相同、語意判斷本就落在模糊邊界的案例，跟已知的AGGR19特性吻合。
+
+**下一步待使用者決定**：(a) 是否推送`1f353d8`；(b) 殘餘的judge推論非決定性要不要進一步緩解（例如比照`adaptive_repeat.py`的多次執行取眾數精神，讓語意fallback核對也跑3次取多數決，但這會增加judge呼叫成本，且報告20已有先例說明這類緩解措施的取捨）；(c) 是否要重跑正式的獨立judge pilot（用固定metric-judge+embedding快取），現在乾淨樣本已從3/7提升到5/7，是否足以支撐「獨立judge是否有效」的結論。
+
 ### 2026-09-20 最新進度（本段優先於下方 09-19 段落）
 
 1. **KG#4 抽取狀態已修復**：發現 `_process_one()` 內部吞例外、只標 `failed`，重抽腳本回報的「N/N 成功」不可信；KG 曾有 10 failed＋2 pending chunk（N0060041 §8/23/24/25/33/34、N0050031 §69/84/85/86、N0030006 chunk 3/8）。已用新工具重跑，12/12 首次即 `completed`，Fact 由 44 增為 82 筆，佇列現為 3307/3307 `completed`。詳見 [報告57 附錄C](docs/報告/57_附錄C_KG重抽來源清單與失敗chunk盤點.md)。**先前「終止條件比較子題抽取品質差」「請假規則 §3/§8 漏抽」的結論不成立**，已在報告57 §4.6 與論文 3.1.3§b 更正。
