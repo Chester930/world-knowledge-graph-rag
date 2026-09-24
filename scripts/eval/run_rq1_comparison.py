@@ -202,11 +202,14 @@ def _build_kg_chat_request(
     kg_id: UUID,
     scope_uuids: list[UUID],
     k_top_k: int | None = None,
+    article_expand: bool | None = None,
 ) -> ChatRequest:
     """F／G／K／K-2b 臂的 `ChatRequest`。`k_top_k=None`（預設）**不傳 `top_k`**，
     沿用 `ChatRequest` 預設值＝凍結基準的行為；有值才覆寫（報告62 T1 候選臂）。"""
     mode = {"F": "fact_only", "G": "bfs_only", "K": "both", "K-2b": "both"}.get(raw_arm, "both")
     extra = {} if k_top_k is None else {"top_k": k_top_k}
+    if article_expand is not None:
+        extra["article_expand"] = article_expand
     return ChatRequest(
         question=tc.question, kg_id=kg_id, use_svo=True,
         retrieval_mode=mode, disable_grounding_regen=(raw_arm == "K-2b"),
@@ -229,6 +232,7 @@ async def _run_single_query(
     baseline_top_k: int,
     k_top_k: int | None = None,
     metric_counter: _CountingLLM | None = None,
+    article_expand: bool | None = None,
 ) -> dict:
     counting.reset()
     if judge_counting is not None and judge_counting is not counting:
@@ -286,7 +290,12 @@ async def _run_single_query(
             ],
         }
     else:  # F / G / K / K-2b
-        r = await _drain_chat(_build_kg_chat_request(tc, raw_arm, kg_id, scope_uuids, k_top_k))
+        r = await _drain_chat(
+            _build_kg_chat_request(
+                tc, raw_arm, kg_id, scope_uuids, k_top_k,
+                article_expand=article_expand,
+            )
+        )
         # 報告57任務C Stage 1真實資料發現（2026-09-15）：`r["triples"]`／`r["facts"]`
         # 是JSON往返解碼出來的dict，`natural_text`/`source_doc_id`/`fact_text`/
         # `fact_id`這些鍵永遠存在但值可能是JSON null（例如`_serialize_sources()`
@@ -389,6 +398,7 @@ async def _run_single_query(
         "arm": arm,
         "raw_arm": raw_arm,
         "k_top_k": k_top_k,
+        "article_expand": article_expand,
         "scenario_type": tc.scenario_type.value,
         "answer": answer,
         "error": r["error"],
@@ -729,6 +739,7 @@ async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest
                                 args.baseline_top_k,
                                 args.k_top_k,
                                 metric_counter,
+                                article_expand=getattr(args, "article_expand", False),
                             ),
                             timeout=args.query_timeout_s,
                         )
@@ -777,6 +788,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--k-top-k", type=int, default=None,
         help="報告62 T1：F／G／K 臂的語意 Fact 檢索筆數。預設不傳＝ChatRequest 預設（20，凍結基準條件）。",
+    )
+    parser.add_argument(
+        "--article-expand",
+        action="store_true",
+        help="報告62 T3：opt-in 補入同 LawArticle 的兄弟 Fact；預設關閉。",
     )
     parser.add_argument("--query-timeout-s", type=float, default=180.0)
     parser.add_argument("--complexity", default="all")
@@ -899,6 +915,7 @@ def main():
         "embedding_model": _configured_embedding_model(settings.embedding_provider),
         "query_timeout_s": args.query_timeout_s,
         "k_top_k": args.k_top_k,
+        "article_expand": args.article_expand,
         "dataset_sha256": dataset_sha256,
         "preflight": preflight.as_dict(),
         "status": "initialized",

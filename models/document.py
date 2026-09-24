@@ -52,6 +52,10 @@ class ChatRequest(BaseModel):
     # 且連鎖觸發 `_relevant_doc_ids_from_facts()` 把 BFS 結果一併濾掉）。
     # `le` 由 10 放寬到 50，對齊 `SearchRequest.top_k`。
     top_k: int = Field(default=20, ge=1, le=50)
+    # 報告62 T3：檢索到條文任一 Fact 時，選擇性補入同條文兄弟 Fact。
+    # None 表示沿用 per-KG `FactListConfig`；True/False 可由離線 harness 或
+    # 呼叫端明確 opt-in/opt-out，預設不改變既有行為。
+    article_expand: bool | None = None
     max_chars_per_doc: int = Field(default=2000, ge=500, le=12000)
     use_svo: bool = True
     # 報告27 L0（2026-09-04）：預設由 2 改為 1。`bfs_query()` 現把 `svo_hops`

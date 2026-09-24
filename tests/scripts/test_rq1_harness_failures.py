@@ -139,6 +139,15 @@ def test_k_arm_request_overrides_top_k_only_when_given():
     assert req.retrieval_mode == "both"
 
 
+def test_k_arm_request_can_opt_in_to_article_expansion_without_changing_default():
+    baseline = _build_kg_chat_request(_case(), "K", uuid4(), [])
+    expanded = _build_kg_chat_request(_case(), "K", uuid4(), [], article_expand=True)
+
+    assert baseline.article_expand is None
+    assert expanded.article_expand is True
+    assert "article_expand" in expanded.model_fields_set
+
+
 def test_arm_modes_unchanged_by_top_k_option():
     assert _build_kg_chat_request(_case(), "F", uuid4(), [], 30).retrieval_mode == "fact_only"
     assert _build_kg_chat_request(_case(), "G", uuid4(), []).retrieval_mode == "bfs_only"

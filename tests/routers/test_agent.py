@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -121,6 +122,74 @@ def test_merge_fact_lines_keeps_fact_with_missing_key_fields():
 
 def test_merge_fact_lines_empty_when_no_sources():
     assert agent._merge_fact_lines([], []) == []
+
+
+class _ArticleExpansionDriver:
+    def __init__(self, records):
+        self.records = records
+        self.query = None
+        self.parameters = None
+
+    async def execute_query(self, query, **parameters):
+        self.query = query
+        self.parameters = parameters
+        return SimpleNamespace(records=self.records)
+
+
+@pytest.mark.asyncio
+async def test_article_expand_adds_capped_deduped_siblings_per_article():
+    """T3：同一 LawArticle 的兄弟 Fact 要補入，但不重複 seed，且每條文
+    的新增兄弟數受上限約束；同條文的第二個 seed 不應再次灌入相同兄弟。"""
+    doc_id = str(uuid4())
+    kg_id = uuid4()
+    seed = {
+        "fact_text": "第1條第一句",
+        "subject": "法規",
+        "verb": "規定",
+        "rel_type": "HAS_RULE",
+        "object": "第一句",
+        "source_doc_id": doc_id,
+        "source_svo_chunk_index": 4,
+        "score": 0.99,
+    }
+    seed_again = {**seed, "fact_text": "第1條第一句（另一筆檢索結果）"}
+    records = [
+        {"seed_doc_id": doc_id, "seed_chunk_index": 4, "article_no": "第1條",
+         **seed},
+        {"seed_doc_id": doc_id, "seed_chunk_index": 4, "article_no": "第1條",
+         "fact_text": "第1條第二句", "subject": "法規", "verb": "規定",
+         "rel_type": "HAS_RULE", "object": "第二句", "source_doc_id": doc_id,
+         "source_svo_chunk_index": 4, "score": None},
+        {"seed_doc_id": doc_id, "seed_chunk_index": 4, "article_no": "第1條",
+         "fact_text": "第1條第三句", "subject": "法規", "verb": "規定",
+         "rel_type": "HAS_RULE", "object": "第三句", "source_doc_id": doc_id,
+         "source_svo_chunk_index": 4, "score": None},
+        {"seed_doc_id": doc_id, "seed_chunk_index": 4, "article_no": "第1條",
+         "fact_text": "第1條第四句（超過上限）", "subject": "法規", "verb": "規定",
+         "rel_type": "HAS_RULE", "object": "第四句", "source_doc_id": doc_id,
+         "source_svo_chunk_index": 4, "score": None},
+    ]
+    driver = _ArticleExpansionDriver(records)
+
+    expanded = await agent._expand_facts_by_article(
+        driver, kg_id, [seed, seed_again], sibling_limit=2,
+    )
+
+    assert [fact["fact_text"] for fact in expanded] == [
+        "第1條第一句", "第1條第二句", "第1條第三句",
+    ]
+    assert driver.parameters["kg_id"] == str(kg_id)
+    assert driver.parameters["seeds"] == [{"source_doc_id": doc_id, "chunk_index": 4}]
+    assert "SUPPORTED_BY" in driver.query
+    assert "LawArticle" in driver.query
+
+
+def test_article_expand_is_opt_in_and_config_has_conservative_cap():
+    from core.kg_config import KGConfig
+
+    assert ChatRequest(question="問題").article_expand is None
+    assert KGConfig().factlist.article_expand is False
+    assert KGConfig().factlist.article_expand_sibling_limit == 8
 
 
 # ── _merge_fact_lines：殘缺過濾改看渲染文字（報告25 §4 發現6 追查，2026-09-02）─

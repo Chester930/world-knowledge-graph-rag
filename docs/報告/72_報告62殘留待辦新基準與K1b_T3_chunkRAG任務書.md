@@ -123,3 +123,75 @@ SNR 依 `records.json` 的 `lineage.stage1_retrieval.snr` 計算：先對每題�
 **判定：需更多證據，不建議設為預設；不建議採用 K1b。** K1b 通過了「淨增至少 3 題」、配對方向（5 > 2）及 SNR 一半門檻，但違反必要的不退步條件，且 Type-E 由 3/5 降至 2/5；McNemar `p=0.4531`、配對差 CI 橫跨 0，也不支持把 +3 題視為明確改善。因此本階段不把 K1b 接成全域預設，不進行自動合併 master；S2 是否開始，待使用者核對本節後另行決定。
 
 `57-AGGR18` 雖列在 S1 新增通過，但報告62 §14.9 所揭露的角色互換歸屬檢查（`role_mismatch` 規則泛化）仍未完成；目前 `claim_scope_auditor` 的覆蓋有限，故 Atomic Accuracy／達標 status 可能高估。此限制不在 S1 範圍內，不能用本次分數掩蓋。另依報告62 §5，Ollama 記憶體壓力、`--query-timeout-s 900`、共用 generator/judge 僅屬 pilot 等風險仍有效，SNR 與逐題判定不應被解讀為消除這些風險。
+
+---
+
+## 7. S2結果：T3 `article_expand` 三臂逐題配對判定（2026-09-24）
+
+### 7.1 實作範圍與評測資料
+
+S2 依報告62 §3 T3 原始設計實作為 **opt-in**：檢索到某條文的任一 Fact 後，沿 `Fact -[:SUPPORTED_BY]-> LawArticle` 找同一條文的兄弟 Fact；每條文最多新增 8 個兄弟 Fact，並以結構化 `(subject, rel_type, object)`（無法結構化時退回 `fact_text`）去重。`article_expand` 預設為關閉；可由 request 明確開啟或關閉，沒有改變現行全域預設。
+
+確切插入點在 `routers/agent.py`：`chat()` 完成 `_filter_triples_by_source_doc_ids()`／`_filter_facts_by_source_doc_ids()` 後、呼叫 `_generate_from_context_lines()` 前執行 `_expand_facts_by_article()`；後者才會進入 `_arrange_fact_lines()`。因此擴充發生在檢索結果組裝、`_arrange_fact_lines()` 排列前，仍受既有 prompt／BFS／RRF／LITM 限制，不繞過既有上限。新增 Fact 的 `article_no` 也寫入 retrieval trace，供人工核對「有補入檢索池」與「實際進 prompt」的差異。
+
+三臂均使用 S0 同一批 42 題、新題庫雜湊 `23f8c06f…`、同一 KG、`qwen2.5:7b`／`bge-m3`、`--query-timeout-s 900` 與共用 generator/judge pilot 條件；S0 基準為 `data/eval/baseline_runs/20260923_rebased/summary_final.json`。最終摘要如下：
+
+| 臂 | 設定 | 結果摘要 |
+|---|---|---|
+| S0 | 新基準 | **13/42**；SNR **3.7367%** |
+| K1 | `top_k=40`、`article_expand=false`（控制組） | **16/42**；SNR **3.0405%**（S0 的 0.8134 倍） |
+| K2 | 預設 `top_k`、`article_expand=true` | **13/42**；SNR **2.6121%**（S0 的 0.6989 倍） |
+| K3 | `top_k=40`、`article_expand=true` | **14/42**；SNR **1.6167%**（S0 的 0.4327 倍） |
+
+SNR 的計算方式與 §6 相同：從各臂所有 stage 的 `records.json` 讀取 `lineage.stage1_retrieval.snr`，先對每題有效重跑取平均，再對 42 題取平均；錯誤 records 不列入數值平均。三臂最終摘要的 `next_run_ids` 均為空。過程中 K1 有 5 題、K2 有 2 題、K3 有 1 題曾出現 Ollama `/api/embeddings` HTTP 500 的 transient `harness_exception`，均由 adaptive stage C 補跑完成；這些事件仍列為評測風險，不能當作模型品質證據。
+
+### 7.2 逐題配對差異與信賴區間
+
+下列「通過」完全沿用 summary 的 `stable_pass` 或 `single_pass`，未依結果臨時改切法。CI 是 42 題題目層級配對差異的近似 95% CI；另列 discordant pairs 的 exact McNemar 雙尾檢定。
+
+| 臂 | S0 未通過 → 新增通過 | S0 通過 → 退步 | 淨變化 | 配對差 CI（百分點） | McNemar `p` |
+|---|---|---|---:|---:|---:|
+| K1 | `18-Q1`、`18-Q5`、`18-Q6`、`57-AGGR18`、`57-COREF3`（5） | `18-Q4`、`canary-P1`（2） | **+3**（16/42） | **−5.16～+19.45** | **0.4531** |
+| K2 | `18-Q6`、`57-AGGR17`、`57-COREF1`、`57-DIST1`、`canary-P4`（5） | `18-Q3`、`18-Q4`、`26-Q5`、`57-AGGR12`、`57-CANARY2`（5） | **0**（13/42） | **−14.94～+14.94** | **1.0000** |
+| K3 | `18-Q6`、`57-AGGR17`、`57-AGGR19`、`57-COREF1`、`57-DIST1`、`canary-P4`（6） | `18-Q3`、`18-Q4`、`26-Q5`、`57-AGGR12`、`57-CANARY2`（5） | **+1**（14/42） | **−13.27～+18.03** | **1.0000** |
+
+### 7.3 依報告62 §11.1 逐項判定
+
+| 條件 | K1 | K2 | K3 |
+|---|---|---|---|
+| 淨增至少 3 題且新增明顯多於退步 | ✅ +3；5 > 2 | ❌ 0；5 = 5 | ❌ +1；6 > 5 但未達 +3 |
+| S0 穩定通過題不得變成 `stable_fail` | ❌ `18-Q4`、`canary-P1` | ❌ `18-Q3`、`18-Q4`、`26-Q5`、`57-AGGR12`、`57-CANARY2` | ❌ 同 K2 |
+| SNR 不低於 S0 一半（門檻 **1.8683%**） | ✅ 3.0405% | ✅ 2.6121% | ❌ 1.6167% |
+| Type-E 不退步 | ❌ 3/5 → 2/5，`canary-P1` 退步 | ❌ 雖總數仍 3/5，`57-CANARY2` 逐題由通過退步 | ❌ 同樣 `57-CANARY2` 逐題退步 |
+
+**K1 判定：需更多證據，不建議設為預設。** 它達到 +3 且新增多於退步，SNR 也過半，但穩定通過不退步與 Type-E 必要條件失敗；所以這次僅作為 `top_k=40` 對照，不採用。
+
+**K2 判定：需更多證據，不建議設為預設。** 達標題數沒有淨增，新增與退步相抵，並有 5 個 S0 通過題變成 `stable_fail`；即使 SNR 尚未跌破一半，也不能採用。
+
+**K3 判定：需更多證據，不建議設為預設。** 條文擴充與 `top_k=40` 組合只淨增 1 題，且 SNR 跌至 S0 一半以下（1.6167% < 1.8683%），直接觸發 SNR 否決條件；同時仍有穩定退步與 Type-E 逐題退步。
+
+### 7.4 穩定退步逐題原因
+
+- **K1：`18-Q4`。** S0 為穩定通過；K1 的 gold span 仍被檢索並進 prompt，但兩次生成均遺漏「自當年度營利事業所得額減除」，屬 Stage 3 generation smoothing／intrinsic generation failure，不能把它解釋成檢索修復。**`canary-P1`** 為 Type-E，S0 的 single pass 是正確拒答；K1 兩次均回答金額而未拒答，屬 refusal／Stage 1 行為退步。
+- **K2/K3：`18-Q3`、`18-Q4`、`26-Q5`、`57-AGGR12`。** 逐題診斷顯示相關 gold facts 已檢索並進 prompt，但生成分別遺漏「雇主應予同意」、「自當年度營利事業所得額減除」、「自災害發生之當月一日起計算六個月」或退休提撥事實；屬生成階段遺漏／平滑，部分被 guard 記為 atomic 0.5，不能以 article expansion 的 retrieval presence 宣稱已修復。
+- **K2 的 `57-CANARY2`。** gold fact 在有效 records 中仍可見且進 prompt，但預期拒答沒有生成，屬 refusal／generation failure。**K3 的 `57-CANARY2`** 在診斷 record 中甚至未召回該 gold fact，且同樣沒有預期拒答，故為 retrieval 加 refusal 雙重退步。
+
+### 7.5 類別 B「抽到但被拆碎」人工抽查
+
+依報告57 §4.21 與 `data/eval/baseline_runs/20260920_frozen/analysis/retrieval_failure_diagnosis.json` 選取 5 個案例，逐一查看 K2 的 retrieval trace；`article_no` 用來區分同條文兄弟是否真的進入候選池，`in_prompt` 用來確認是否實際補到生成上下文。K2 42 題 trace 共記錄 1,860 個帶 `article_no` 的 expanded Facts；K1 trace 沒有帶 `article_no` 的 expanded Facts，表示 opt-in 機制確實有運作，但不代表每個 gold span 都能穿過後續排序與 prompt cap。
+
+| 題目／條文 | gold span 的人工核對 | K2 結果與判定 |
+|---|---|---|
+| `18-Q5`／D0080015 §4 | `有左列情事之一者，給予三至七日之特別休假` | 候選／trace 出現同條文 `第4條` 的 `左列情事之一者 給予 三至七日之特別休假`，且 `in_prompt=true`；核心條件與日數補入，但「有」仍缺漏，判為**部分修復，非逐字完整**。 |
+| `57-AGGR1`／N0060022 附表一項次一 | `勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。` | 未看到目標附表／項次一的同條文兄弟或完整 gold span；只有不相干的高溫工作時數片段，判為**未補齊**。 |
+| `57-AGGR7`／N0090058 §6 | `雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。` | 未出現 `第6條` 兄弟或「五人／八十小時」目標片段；雖有 `第24條` 的不相干訓練補助 Fact，判為**未補齊**。 |
+| `57-AGGR8`／N0090055 §24 | `雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。` | trace 沒有完整目標 gold span 或目標條文兄弟進 prompt，判為**未補齊**。 |
+| `57-AGGR10`／N0090025 §8 | `第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。` | 未看到 `第8條` 兄弟或 500／1,250 元目標片段進 prompt，只有其他條文內容，判為**未補齊**。 |
+
+因此人工抽查結論是「擴充機制確實把部分同條文 Fact 帶入候選池，但對類別 B 的拆碎 gold span 並非穩定補齊」；K2 的 13/42 也沒有超過 S0，不能用分數波動取代內容證據。另抽查 `57-AGGR19` 可見同條文 `第85條` Fact 進入 retrieval pool 但 gold 的「準用勞動基準法規定預告雇主」未進 prompt，進一步顯示候選池擴充不等於上下文有效擴充。
+
+### 7.6 風險、已知限制與結論
+
+S2 三臂均保留報告62 §5 的風險：Ollama 記憶體壓力、`--query-timeout-s 900` 的必要性、延遲數字不宜過度解讀，以及共用 generator/judge 僅屬 pilot。`57-AGGR18` 的角色互換歸屬檢查（`role_mismatch` 規則泛化）仍不在本範圍內，可能使 Atomic Accuracy／達標 status 高估；本次 K1 的 `57-AGGR18` 新增通過尤其不能脫離此限制解讀。
+
+**S2 總結：K1、K2、K3 均「需更多證據，不建議設為預設」；沒有任何一臂採用。** 本節如實記錄了 SNR、逐題退步、Type-E 與人工內容抽查結果；不自動修改全域預設、不合併 master，S3 chunk-RAG 對照組不在本次執行範圍內，待使用者另行決定。

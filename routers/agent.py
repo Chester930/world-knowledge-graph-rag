@@ -339,6 +339,147 @@ def _filter_facts_by_source_doc_ids(fact_results: list[dict], allowed_doc_ids: s
     return _scope_by_source_doc_ids(fact_results, allowed_doc_ids, _doc_id)
 
 
+async def _expand_facts_by_article(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    fact_results: list[dict],
+    *,
+    sibling_limit: int,
+) -> list[dict]:
+    """報告62 T3：以 ``Fact-SUPPORTED_BY->LawArticle`` 補入同條文兄弟 Facts。
+
+    這個 helper 刻意放在 `_arrange_fact_lines()` 同一段的檢索／組裝邊界附近，
+    但在 `_arrange_fact_lines()` 前由 `chat()` 呼叫：擴充結果會與原始語意 Fact
+    一起進入既有截斷、BFS 保底、RRF 與 LITM 排列，不繞過既有的 prompt 名額。
+    `sibling_limit` 是每條文的新增 Fact 上限；同一個 `(subject, rel_type,
+    object)`（缺欄位時退回 `fact_text`）只保留一次。沒有 `LawArticle` 邊的舊
+    KG 會自然回傳原始結果，不影響一般文件或尚未完成條文連結的資料。
+    """
+    if sibling_limit <= 0 or not fact_results:
+        return list(fact_results)
+
+    def _source_key(fact: dict) -> tuple[str, int] | None:
+        source_doc_id = fact.get("source_doc_id")
+        chunk_index = fact.get("source_svo_chunk_index")
+        if source_doc_id is None or chunk_index is None:
+            return None
+        try:
+            return str(source_doc_id), int(chunk_index)
+        except (TypeError, ValueError):
+            return None
+
+    def _fact_key(fact: dict) -> tuple[str, tuple | str] | None:
+        triple = tuple(fact.get(field) for field in ("subject", "rel_type", "object"))
+        if all(value is not None for value in triple):
+            return "triple", tuple(str(value) for value in triple)
+        text = fact.get("fact_text")
+        return ("text", str(text)) if text else None
+
+    seeds: list[dict] = []
+    seen_seed_keys: set[tuple[str, int]] = set()
+    for fact in fact_results:
+        source_key = _source_key(fact)
+        if source_key is not None and source_key not in seen_seed_keys:
+            seen_seed_keys.add(source_key)
+            seeds.append({"source_doc_id": source_key[0], "chunk_index": source_key[1]})
+    if not seeds:
+        return list(fact_results)
+
+    result = await driver.execute_query(
+        """
+        UNWIND $seeds AS seed
+        MATCH (seed_fact:Fact {kg_id: $kg_id})
+        WHERE toString(seed_fact.source_doc_id) = seed.source_doc_id
+          AND seed_fact.source_svo_chunk_index = seed.chunk_index
+        MATCH (seed_fact)-[:SUPPORTED_BY]->(article:LawArticle {kg_id: $kg_id})
+        MATCH (sibling:Fact {kg_id: $kg_id})-[:SUPPORTED_BY]->(article)
+        RETURN seed.source_doc_id AS seed_doc_id,
+               seed.chunk_index AS seed_chunk_index,
+               article.article_no AS article_no,
+               sibling.fact_text AS fact_text,
+               sibling.verb AS verb,
+               sibling.confidence AS confidence,
+               sibling.subject AS subject,
+               sibling.object AS object,
+               sibling.rel_type AS rel_type,
+               sibling.source_doc_id AS source_doc_id,
+               sibling.source_svo_chunk_index AS source_svo_chunk_index,
+               NULL AS score
+        ORDER BY seed_doc_id, seed_chunk_index, article_no,
+                 sibling.source_svo_chunk_index, sibling.fact_text
+        """,
+        kg_id=str(kg_id),
+        seeds=seeds,
+    )
+
+    def _record_get(record, key: str):
+        if isinstance(record, dict):
+            return record.get(key)
+        try:
+            return record[key]
+        except (KeyError, IndexError, TypeError):
+            return None
+
+    rows_by_seed: dict[tuple[str, int], dict[tuple[str, str], list]] = {}
+    for record in result.records:
+        seed_doc_id = _record_get(record, "seed_doc_id")
+        seed_chunk_index = _record_get(record, "seed_chunk_index")
+        article_no = _record_get(record, "article_no")
+        if seed_doc_id is None or seed_chunk_index is None or article_no is None:
+            continue
+        try:
+            seed_key = (str(seed_doc_id), int(seed_chunk_index))
+        except (TypeError, ValueError):
+            continue
+        article_key = (str(seed_doc_id), str(article_no))
+        rows_by_seed.setdefault(seed_key, {}).setdefault(article_key, []).append(record)
+
+    # `vector_search_facts()` normally already去重；這層仍保留防線，避免擴充
+    # 查詢把相同三元組或不同 seed 產生的同一兄弟重複送入 prompt。
+    expanded: list[dict] = []
+    seen_fact_keys: set[tuple[str, tuple | str]] = set()
+    expanded_articles: set[tuple[str, str]] = set()
+    for original in fact_results:
+        original_key = _fact_key(original)
+        if original_key is not None and original_key in seen_fact_keys:
+            continue
+        expanded.append(original)
+        if original_key is not None:
+            seen_fact_keys.add(original_key)
+
+        source_key = _source_key(original)
+        if source_key is None:
+            continue
+        for article_key, rows in rows_by_seed.get(source_key, {}).items():
+            if article_key in expanded_articles:
+                continue
+            added = 0
+            for record in rows:
+                sibling = {
+                    "fact_text": _record_get(record, "fact_text"),
+                    "verb": _record_get(record, "verb"),
+                    "confidence": _record_get(record, "confidence"),
+                    "subject": _record_get(record, "subject"),
+                    "object": _record_get(record, "object"),
+                    "rel_type": _record_get(record, "rel_type"),
+                    "source_doc_id": _record_get(record, "source_doc_id"),
+                    "source_svo_chunk_index": _record_get(record, "source_svo_chunk_index"),
+                    "score": _record_get(record, "score"),
+                    "article_no": _record_get(record, "article_no"),
+                }
+                sibling_key = _fact_key(sibling)
+                if not sibling.get("fact_text") or sibling_key is None or sibling_key in seen_fact_keys:
+                    continue
+                if added >= sibling_limit:
+                    break
+                expanded.append(sibling)
+                seen_fact_keys.add(sibling_key)
+                added += 1
+            expanded_articles.add(article_key)
+
+    return expanded
+
+
 def _filter_triples_by_relation_type(triples: list[SVOTriple], rel_type: str | None) -> list[SVOTriple]:
     """§ 3.2 §c `QFILTER`（2026-08-18 定案）：對 `bfs_query()` 已回傳的三元組
     做**後篩選**，只保留 `rel_type` 型別——不改變 BFS 走訪路徑本身的語意，
@@ -455,7 +596,7 @@ def _build_retrieval_trace(
             "score": f.get("score"),
             "source_doc_id": str(f["source_doc_id"]) if f.get("source_doc_id") is not None else None,
             "source_svo_chunk_index": int(idx) if idx is not None else None,
-            "article_no": None,
+            "article_no": f.get("article_no"),
             "in_prompt": _in_prompt(f"- {_strip_type_markers(text)}"),
         })
 
@@ -1681,6 +1822,21 @@ async def chat(payload: ChatRequest):
             # `relevant_doc_ids` 為空 → `_filter_*` 的歸零守衛原樣放行（不篩選）。
             triples = _filter_triples_by_source_doc_ids(triples, relevant_doc_ids)
             fact_results = _filter_facts_by_source_doc_ids(fact_results, relevant_doc_ids)
+            # 報告62 T3：條文擴充是檢索後、`_arrange_fact_lines()` 前的 opt-in
+            # 組裝步驟。先完成來源文件範圍後才查兄弟 Fact，避免擴充穿透題目
+            # 的 scope；結果仍交給既有 fact/BFS 名額與截斷邏輯。
+            article_expand = (
+                payload.article_expand
+                if payload.article_expand is not None
+                else cfg.factlist.article_expand
+            )
+            if article_expand:
+                fact_results = await _expand_facts_by_article(
+                    driver,
+                    payload.kg_id,
+                    fact_results,
+                    sibling_limit=cfg.factlist.article_expand_sibling_limit,
+                )
         retrieval_telemetry = _build_retrieval_telemetry(
             triples, fact_results, time.perf_counter() - t_retrieval_start,
         )

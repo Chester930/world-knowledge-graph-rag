@@ -179,6 +179,9 @@ class FactListConfig(BaseModel):
     min_bfs_slots: int = Field(default=4, ge=0)
     # routers/agent.py::_RRF_K（Cormack et al. 2009 文獻值；非未校準常數，收此供覆蓋）
     rrf_k: int = Field(default=60, ge=1)
+    # 報告62 T3：預設關閉的條文層級 Fact 擴充；每條文只補這麼多兄弟 Fact。
+    article_expand: bool = False
+    article_expand_sibling_limit: int = Field(default=8, ge=0, le=64)
 
 
 class DecomposeConfig(BaseModel):

@@ -1,0 +1,386 @@
+{
+ "status_counts": {
+  "stable_pass": 4,
+  "single_pass": 10,
+  "stable_fail": 27,
+  "needs_second_run": 1
+ },
+ "next_run_ids": [
+  "57-AGGR5"
+ ],
+ "audit": {
+  "sampled": 4,
+  "rerun_completed": 4,
+  "passed_again": 4,
+  "reliability": 1.0
+ },
+ "questions": {
+  "17-Q1": {
+   "status": "stable_pass",
+   "needs_run": false,
+   "valid_results": [
+    true,
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "17-Q2": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "17-Q6": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "18-Q1": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "18-Q2": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "18-Q3": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "18-Q4": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "18-Q5": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "18-Q6": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "26-Q1": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "26-Q5": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "canary-P1": {
+   "status": "stable_pass",
+   "needs_run": false,
+   "valid_results": [
+    true,
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "canary-P4": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-COREF1": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-COREF2": {
+   "status": "stable_pass",
+   "needs_run": false,
+   "valid_results": [
+    true,
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-COREF3": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-DIST1": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-DIST2": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-CANARY1": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-CANARY2": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR1": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR2": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-CANARY3": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR3": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR4": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-CANARY4": {
+   "status": "stable_pass",
+   "needs_run": false,
+   "valid_results": [
+    true,
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-CANARY5": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR5": {
+   "status": "needs_second_run",
+   "needs_run": true,
+   "valid_results": [
+    false
+   ],
+   "invalid_runs": 1
+  },
+  "57-AGGR6": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR7": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR8": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR9": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR10": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR11": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR12": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR13": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR14": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR15": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR16": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR17": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR18": {
+   "status": "stable_fail",
+   "needs_run": false,
+   "valid_results": [
+    false,
+    false
+   ],
+   "invalid_runs": 0
+  },
+  "57-AGGR19": {
+   "status": "single_pass",
+   "needs_run": false,
+   "valid_results": [
+    true
+   ],
+   "invalid_runs": 0
+  }
+ }
+}
