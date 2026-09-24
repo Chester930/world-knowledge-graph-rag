@@ -416,7 +416,14 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告67：事實自然語言化（natural_text）品質問題SDD任務書（T1–T4全部完成）](docs/報告/67_事實自然語言化品質問題SDD任務書.md)
 - [報告68：評測harness查詢embedding快取SDD任務書（交付Codex，尚未實作）](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)
 - [報告75：本體論設計資料夾專案整合候選盤點（純盤點，不含決策）](docs/報告/75_本體論設計資料夾專案整合候選盤點.md)
-- [報告76：guard_profile領域可插拔化SDD任務書（交付Codex，尚未實作）](docs/報告/76_guard_profile領域可插拔化SDD任務書.md)
+- [報告76：guard_profile領域可插拔化SDD任務書（✅ Codex已完成並獨立複驗，commit `2da08c0`，未push）](docs/報告/76_guard_profile領域可插拔化SDD任務書.md)
+- [報告77：法律模態關係型per-KG擴充SDD任務書（交付Codex，尚未實作）](docs/報告/77_法律模態關係型per-KG擴充SDD任務書.md)
+
+### 2026-09-25（續）報告76完成獨立複驗 + 報告77交付Codex
+
+**報告76已由Codex完成**（commit `2da08c0`，未push）：`GuardConfig`五欄位切法未調整、正則結構固定/token清單可配置切法正確、`resolve_entity_name`/`_naturalize_triple`/`_naturalization_dropped_quantity`/`merge_triples_to_graph`/`backfill_natural_text`全數補上`cfg`參數、§1.2的14個迴歸案例全部轉成golden test。**Claude Code已獨立複驗**：`git show --stat`確認範圍只在9個允許檔案內、`routers/agent.py`未觸碰、獨立重跑`pytest`得**1111 passed**與Codex回報一致、逐一核對`GuardConfig`/正則重構/14條迴歸測試diff內容與任務書規格相符。額外做了任務書沒要求但合理的加分項：`core/kg_config/stages.py`註冊`dedup.guard` stage。**尚未push，待使用者決定。**
+
+依報告75候選序，下一項原訂GAP-04（條件-效果綁定），但查證發現**已被報告65「規則10」部分解決**（2026-09-22落地，report66已參數化）——對「單一條件→結果」有效，對「多個並列條件→共享結果」明確無效（c84/c85已知邊界，非bug），故改選GAP-03（法律模態關係型）。**查證發現比預期複雜**：`SVO_REL_TYPES`被`docs/論文/02_文獻探討.md`明文定義為「恰好等於ConceptNet 5.5官方35個核心關係，逐一可追溯」，有完整的35→33→35查證訂正史，直接加入4個新型別會破壞此學術主張；且該集合同時被抽取端REJECT、BFS圖遍歷Cypher關係型別過濾、SIM/QSIM embedding比對三處共用。使用者確認採用「新建per-KG可覆蓋的域名關係型擴充集」方案（`DomainConfig.rel_type_extensions`，`SVO_REL_TYPES`本身不動）——**報告77已產出**，含文獻誠實聲明紅線（不可宣稱LKIF-Core已查證）、`_type_description_embeddings()`快取key污染風險的具體修法。**尚未執行，待貼給Codex。**
 
 ### 2026-09-25 報告75/76：外部本體論設計資料夾盤點 + guard_profile任務書交付Codex
 
