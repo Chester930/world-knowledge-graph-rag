@@ -9,8 +9,8 @@
 
 第 1 步只收 scalar 常數；第 3a 步（2026-09-08）加 `domain` 分區的
 `system_context`／`target_language`（generation prompt 前綴、輸出語言）。
-`svo_fewshots` 於第 3b 步併入；`guard_profile` token 清單仍留待第 4 步，
-不屬本次參數化範圍。
+`svo_fewshots` 於第 3b 步併入；第 4 步加入 `guard` 分區，收納 SVO
+守衛正則的 domain token 清單。
 """
 from __future__ import annotations
 
@@ -100,6 +100,49 @@ subject: "適用勞動基準法之外國人於聘僱許可有效期間內，向�
 正確做法（前言本身這筆也要帶數量，不可以比各列舉項目少）：
 {"subject":"左列情事之一者", "verb":"給予", "object":"三至七日之特別休假"}""",
 )
+
+
+# services/svo_service.py 的 CJK 守衛正則只把這些 domain token 清單交給
+# GuardConfig；中文數字、比較句式間隔與序數／分數／小數／附表結構仍固定在
+# svo_service.py。順序刻意保持與原模組正則逐字一致，供 golden test 鎖定。
+_DEFAULT_MEASURE_UNITS: tuple[str, ...] = (
+    "個月", "個年", "個星期", "日", "月", "年", "次", "小時", "分鐘",
+    "百分之", "％", "%", "元", "倍", "等級", "歲", "人", "名", "週", "度",
+    "種", "類", "條", "款", "項", "點",
+)
+_DEFAULT_RANGE_TRAILING_COMPARATORS: tuple[str, ...] = ("以上", "以下", "以內")
+_DEFAULT_RANGE_LEADING_COMPARATORS: tuple[str, ...] = ("未滿", "超過")
+_DEFAULT_SCOPE_MODIFIER_WORDS: tuple[str, ...] = (
+    "增加", "增列", "額外", "追加", "新增", "另計", "加計", "超出",
+)
+_DEFAULT_ENUM_CLOSED_VALUES: tuple[str, ...] = ("顯著", "中度", "低度")
+
+
+class GuardConfig(BaseModel):
+    """實體模糊合併與自然語言化核對的 CJK 守衛 token 清單。
+
+    只收 domain 詞彙清單；中文數字字元類、比較句式間隔長度，以及序數／
+    分數／小數／附表格式等結構性樣式維持在 ``services.svo_service`` 固定。
+    """
+
+    model_config = _FROZEN
+
+    # services/svo_service.py::_MEASURE_PATTERN 單位詞清單
+    measure_units: tuple[str, ...] = Field(default_factory=lambda: _DEFAULT_MEASURE_UNITS)
+    # services/svo_service.py::_RANGE_COMPARATOR_PATTERN 後置比較詞（數字在前）
+    range_trailing_comparators: tuple[str, ...] = Field(
+        default_factory=lambda: _DEFAULT_RANGE_TRAILING_COMPARATORS
+    )
+    # services/svo_service.py::_RANGE_COMPARATOR_PATTERN 前置比較詞（數字在後）
+    range_leading_comparators: tuple[str, ...] = Field(
+        default_factory=lambda: _DEFAULT_RANGE_LEADING_COMPARATORS
+    )
+    # services/svo_service.py::_SCOPE_MODIFIER_PATTERN 修飾詞清單
+    scope_modifier_words: tuple[str, ...] = Field(
+        default_factory=lambda: _DEFAULT_SCOPE_MODIFIER_WORDS
+    )
+    # services/svo_service.py::_ENUM_GUARD_PATTERN 封閉列舉值部分（風險等級）
+    enum_closed_values: tuple[str, ...] = Field(default_factory=lambda: _DEFAULT_ENUM_CLOSED_VALUES)
 
 
 class ChunkingConfig(BaseModel):
@@ -271,5 +314,6 @@ class KGConfig(BaseModel):
     dedup: DedupConfig = Field(default_factory=DedupConfig)
     reltype: RelTypeConfig = Field(default_factory=RelTypeConfig)
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
+    guard: GuardConfig = Field(default_factory=GuardConfig)
     domain: DomainConfig = Field(default_factory=DomainConfig)
     chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)

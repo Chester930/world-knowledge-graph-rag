@@ -9,7 +9,7 @@ from neo4j.exceptions import ConstraintError
 
 from core import config
 from core.constants import FACT_SEARCH_CANDIDATE_MULTIPLIER, SVO_REL_TYPES
-from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
+from core.kg_config import ConfigLoader, FileConfigSource, GuardConfig, KGConfig
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
@@ -1720,6 +1720,166 @@ async def test_resolve_entity_name_scope_modifier_bidirectional_filter():
     assert await svc.resolve_entity_name(
         "額外給付工資", [{"name": "額外給付之工資", "alias_counts_json": "{}"}],
     ) == "額外給付之工資"
+
+
+def test_guard_patterns_shipped_defaults_match_legacy_pattern_strings():
+    """報告76 T2/T6：shipped defaults 的四組 pattern 逐字等於重構前。"""
+    cfg = GuardConfig()
+    expected = {
+        "measure": (
+            r"[〇零一二三四五六七八九十百千萬0-9]+"
+            r"(?:至[〇零一二三四五六七八九十百千萬0-9]+)?"
+            r"(?:個月|個年|個星期|日|月|年|次|小時|分鐘|百分之|％|%|元|倍|等級|歲|人|名|週|度|種|類|條|款|項|點)"
+        ),
+        "range": (
+            r"[〇零一二三四五六七八九十百千萬0-9]+[^，,。；;、（）()]{0,12}?(?:以上|以下|以內)"
+            r"|(?:未滿|超過)[^，,。；;、（）()]{0,12}?[〇零一二三四五六七八九十百千萬0-9]+"
+        ),
+        "enum": (
+            r"第[〇零一二三四五六七八九十百千0-9]+級"
+            r"|[〇零一二三四五六七八九十百千0-9]+分之[〇零一二三四五六七八九十百千0-9]+"
+            r"|[0-9]+\.[0-9]+"
+            r"|附表[〇零一二三四五六七八九十0-9]+"
+            r"|之[〇零一二三四五六七八九十]+$"
+            r"|(?:顯著|中度|低度)風險"
+        ),
+        "scope": r"增加|增列|額外|追加|新增|另計|加計|超出",
+    }
+    actual = {
+        "measure": svc._build_measure_pattern(cfg).pattern,
+        "range": svc._build_range_comparator_pattern(cfg).pattern,
+        "enum": svc._build_enum_guard_pattern(cfg).pattern,
+        "scope": svc._build_scope_modifier_pattern(cfg).pattern,
+    }
+    assert actual == expected
+    assert svc._MEASURE_PATTERN.pattern == expected["measure"]
+    assert svc._RANGE_COMPARATOR_PATTERN.pattern == expected["range"]
+    assert svc._ENUM_GUARD_PATTERN.pattern == expected["enum"]
+    assert svc._SCOPE_MODIFIER_PATTERN.pattern == expected["scope"]
+
+
+def test_guard_patterns_accept_domain_token_overrides_without_changing_structure():
+    cfg = GuardConfig(
+        measure_units=("件",),
+        range_trailing_comparators=("至少",),
+        range_leading_comparators=("少於",),
+        scope_modifier_words=("遞增",),
+        enum_closed_values=("高", "低"),
+    )
+    assert svc._build_measure_pattern(cfg).search("三件")
+    assert not svc._build_measure_pattern(cfg).search("三日")
+    assert svc._build_range_comparator_pattern(cfg).search("三至少")
+    assert svc._build_range_comparator_pattern(cfg).search("少於三")
+    assert svc._build_enum_guard_pattern(cfg).search("高風險")
+    assert not svc._build_enum_guard_pattern(cfg).search("具顯著風險")
+    assert svc._build_scope_modifier_pattern(cfg).search("遞增數量")
+    assert not svc._build_scope_modifier_pattern(cfg).search("增加數量")
+
+
+@pytest.mark.parametrize(
+    "case_id, guard_kind, values",
+    [
+        pytest.param(
+            "report25_measure_quantity_q7", "measure",
+            ("新臺幣四千元", "新臺幣八千元", "五日", "十日", "三十日以上", "未滿三十日"),
+            id="報告25-四千八千五日十日三十日以上未滿",
+        ),
+        pytest.param(
+            "discovery_c_q3_age_tiers", "measure",
+            ("年齡未滿六歲者", "年齡六歲以上未滿十二歲者", "年齡十二歲以上未滿十五歲者"),
+            id="發現C-Q3-年齡三段",
+        ),
+        pytest.param(
+            "report32_e3_period_tiers", "measure",
+            ("三個月為限", "六個月為限"), id="報告32-E3-個月期程",
+        ),
+        pytest.param(
+            "report32_f2_lead", "range",
+            ("血中鉛濃度十μg/dl以上者", "五μg/dl以上未達十μg/dl（第一級）"),
+            id="報告32-F2-鉛濃度",
+        ),
+        pytest.param(
+            "report29_q8_variable_coefficient", "range",
+            ("1以上，未滿10", "100以上，未滿1000"), id="報告29-Q8-變量係數",
+        ),
+        pytest.param(
+            "report32_f2_units", "range",
+            ("二十公尺以上", "五百平方公尺以上"), id="報告32-F2-公尺",
+        ),
+        pytest.param(
+            "report32_f3b_ordinals", "enum",
+            ("第三級管理", "第一級管理"), id="報告32-F3b-序數",
+        ),
+        pytest.param(
+            "report32_f3b_fractions", "enum",
+            ("二分之一", "五分之一"), id="報告32-F3b-分數",
+        ),
+        pytest.param(
+            "report32_f3b_decimals", "enum",
+            ("30.6℃", "32.6℃"), id="報告32-F3b-小數",
+        ),
+        pytest.param(
+            "report32_f3b_appendix", "enum",
+            ("附表一", "附表二"), id="報告32-F3b-附表",
+        ),
+        pytest.param(
+            "report32_f3b_zhi_suffix", "enum",
+            ("精密作業之一", "精密作業之三"), id="報告32-F3b-之N",
+        ),
+        pytest.param(
+            "task_c_risk_enum", "enum",
+            ("具顯著風險者", "具中度風險者", "具低度風險者"), id="任務C-風險列舉",
+        ),
+        pytest.param(
+            "report29_scope_modifier", "scope",
+            ("每一型式", "每增加一種型式"), id="報告29-範圍修飾詞",
+        ),
+        pytest.param(
+            "report26_f4_dropped_day", "dropped_quantity",
+            ("災害發生之當月一日起", "從災害發生之當月起"), id="報告26-F4-一日遺漏",
+        ),
+    ],
+)
+def test_report76_guard_regression_case(case_id, guard_kind, values):
+    """報告76 §1.2：14 條真實迴歸案例逐條執行 shipped-default guard。"""
+    del case_id  # pytest id carries the traceability label
+    if guard_kind == "dropped_quantity":
+        subject, natural_text = values
+        assert svc._naturalization_dropped_quantity(
+            natural_text, subject, "起算日", ""
+        )
+        return
+
+    pattern = {
+        "measure": svc._build_measure_pattern(GuardConfig()),
+        "range": svc._build_range_comparator_pattern(GuardConfig()),
+        "enum": svc._build_enum_guard_pattern(GuardConfig()),
+        "scope": svc._build_scope_modifier_pattern(GuardConfig()),
+    }[guard_kind]
+    if guard_kind == "scope":
+        assert not pattern.search(values[0])
+        assert pattern.search(values[1])
+    else:
+        assert all(pattern.search(value) for value in values)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "name, candidate",
+    [
+        ("六個月為限", "三個月為限"),
+        ("血中鉛濃度在十μg/dl以上者", "血中鉛濃度在五μg/dl以上未達十μg/dl"),
+        ("具低度風險者", "具中度風險者"),
+        ("每一型式", "每增加一種型式"),
+        ("新臺幣四千元", "新臺幣八千元"),
+    ],
+)
+async def test_resolve_entity_name_guard_cfg_none_and_defaults_are_identical(name, candidate):
+    """報告76 T6.4：代表性案例的 cfg=None 與 shipped GuardConfig 行為一致。"""
+    candidates = [{"name": candidate, "alias_counts_json": "{}"}]
+    without_cfg = await svc.resolve_entity_name(name, candidates, cfg=None)
+    with_defaults = await svc.resolve_entity_name(name, candidates, cfg=KGConfig())
+    assert without_cfg == with_defaults == name
 
 
 @pytest.mark.asyncio

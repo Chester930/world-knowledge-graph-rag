@@ -134,7 +134,7 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         if triples:
             await merge_triples_to_graph(
                 driver, UUID(kg_id), triples,
-                embedding_provider=embedding_provider, llm_provider=llm_provider,
+                embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
             )
     except Exception:
         # 單一 chunk 的抽取失敗（LLM 逾時／格式錯誤／KG 或 chunk 遺失等）不應該

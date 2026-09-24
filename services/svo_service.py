@@ -37,7 +37,7 @@ from core.constants import (
     VECTOR_DIM,
 )
 from core.config import task_queue_db_path
-from core.kg_config import KGConfig
+from core.kg_config import GuardConfig, KGConfig
 from core.kg_config.model import _DEFAULT_SVO_FEWSHOTS
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
@@ -541,16 +541,31 @@ _QUANTITY_PATTERN = re.compile(
 # `natural_text` 還被寫錯段。`_QUANTITY_PATTERN` 刻意不動（發現3 的
 # `_quantity_mis_bound_to_clause`／報告20 的 `_contains_ungrounded_quantity`
 # 對「數量忠實性」的語意較窄，混進「歲／人／條」會擴大它們的誤判面）。
-_MEASURE_PATTERN = re.compile(
-    r"[〇零一二三四五六七八九十百千萬0-9]+"
-    r"(?:至[〇零一二三四五六七八九十百千萬0-9]+)?"
-    # `個月／個年／個星期`（報告32 §9.3 E3，2026-09-07）：`X個月` 的「個」卡在數字
-    # 與「月」之間，舊樣式抓不到——導致 `三個月為限`／`六個月為限` 這類期程分段
-    # 主詞在 `resolve_entity_name` 沒被守衛擋（全庫掃描實際命中），且 `六個月`
-    # 期程不受 `_naturalization_dropped_quantity()` 的逐字核對。放在 `_MEASURE_PATTERN`
-    # 而不動 `_QUANTITY_PATTERN`（發現3／報告20 語意較窄，比照發現C）。
-    r"(?:個月|個年|個星期|日|月|年|次|小時|分鐘|百分之|％|%|元|倍|等級|歲|人|名|週|度|種|類|條|款|項|點)"
-)
+_CJK_NUMBER_PATTERN = r"[〇零一二三四五六七八九十百千萬0-9]+"
+_MEASURE_NUMBER_PATTERN = _CJK_NUMBER_PATTERN + r"(?:至" + _CJK_NUMBER_PATTERN + r")?"
+_RANGE_NUMBER_GAP_PATTERN = r"[^，,。；;、（）()]{0,12}?"
+
+
+def _regex_token_alternation(tokens: tuple[str, ...]) -> str:
+    """把 domain token 清單轉成安全的正則 alternation。
+
+    空清單使用永不匹配的分支，避免 domain pack 清空詞彙後意外把守衛變成
+    「匹配所有字串」的空 alternation。
+    """
+    return "|".join(re.escape(token) for token in tokens) or r"(?!)"
+
+
+@lru_cache(maxsize=128)
+def _compile_measure_pattern(units: tuple[str, ...]) -> re.Pattern[str]:
+    return re.compile(
+        _MEASURE_NUMBER_PATTERN
+        + rf"(?:{_regex_token_alternation(units)})"
+    )
+
+
+def _build_measure_pattern(cfg: GuardConfig) -> re.Pattern[str]:
+    """以固定 CJK 數字／範圍結構注入 domain 單位詞。"""
+    return _compile_measure_pattern(cfg.measure_units)
 
 # 數字＋（選配單位）＋「以上／以下／以內／未滿／超過」的比較句式偵測
 # （報告29 §2.4／§4.3，2026-09-05，報告26 §4 #3 Q8 真實根因診斷）。法規門檻／
@@ -570,10 +585,26 @@ _MEASURE_PATTERN = re.compile(
 # 事實從圖中消失（報告32 Q6）。改為在數字與比較詞之間允許至多 12 個非標點字元
 # （非貪婪），涵蓋 `十 μg/dl 以上`、`二十公尺 以上`、`五百平方公尺 以上`；
 # 既有「1 以上，未滿 10」等案例無迴歸（`\s*` 是新字元類的子集）。
-_RANGE_COMPARATOR_PATTERN = re.compile(
-    r"[〇零一二三四五六七八九十百千萬0-9]+[^，,。；;、（）()]{0,12}?(?:以上|以下|以內)"
-    r"|(?:未滿|超過)[^，,。；;、（）()]{0,12}?[〇零一二三四五六七八九十百千萬0-9]+"
-)
+@lru_cache(maxsize=128)
+def _compile_range_comparator_pattern(
+    trailing_comparators: tuple[str, ...], leading_comparators: tuple[str, ...]
+) -> re.Pattern[str]:
+    return re.compile(
+        _CJK_NUMBER_PATTERN
+        + _RANGE_NUMBER_GAP_PATTERN
+        + rf"(?:{_regex_token_alternation(trailing_comparators)})"
+        + "|"
+        + rf"(?:{_regex_token_alternation(leading_comparators)})"
+        + _RANGE_NUMBER_GAP_PATTERN
+        + _CJK_NUMBER_PATTERN
+    )
+
+
+def _build_range_comparator_pattern(cfg: GuardConfig) -> re.Pattern[str]:
+    """以固定至多 12 個非標點字元結構注入比較詞。"""
+    return _compile_range_comparator_pattern(
+        cfg.range_trailing_comparators, cfg.range_leading_comparators
+    )
 
 # 序數／分數／小數／附表列舉守衛（報告32 §9.3 F3b，2026-09-07）——`_MEASURE_PATTERN`
 # （要單位）與 `_RANGE_COMPARATOR_PATTERN`（要比較詞）都抓不到的列舉主詞：
@@ -586,14 +617,21 @@ _RANGE_COMPARATOR_PATTERN = re.compile(
 # 2026-09-18（任務C第9組真實重抽）：`具顯著／中度／低度風險者` 是封閉列舉值，彼此只差一字；
 # 曾把原文正確抽出的「具低度風險者」模糊合併成「具中度風險者」，造成第三類事業的 Fact 錯接。
 # 三種風險值加入同一精確比對守衛，防止列舉成員跨值合併。
-_ENUM_GUARD_PATTERN = re.compile(
-    r"第[〇零一二三四五六七八九十百千0-9]+級"
-    r"|[〇零一二三四五六七八九十百千0-9]+分之[〇零一二三四五六七八九十百千0-9]+"
-    r"|[0-9]+\.[0-9]+"
-    r"|附表[〇零一二三四五六七八九十0-9]+"
-    r"|之[〇零一二三四五六七八九十]+$"
-    r"|(?:顯著|中度|低度)風險"
-)
+@lru_cache(maxsize=128)
+def _compile_enum_guard_pattern(closed_values: tuple[str, ...]) -> re.Pattern[str]:
+    return re.compile(
+        r"第[〇零一二三四五六七八九十百千0-9]+級"
+        r"|[〇零一二三四五六七八九十百千0-9]+分之[〇零一二三四五六七八九十百千0-9]+"
+        r"|[0-9]+\.[0-9]+"
+        r"|附表[〇零一二三四五六七八九十0-9]+"
+        r"|之[〇零一二三四五六七八九十]+$"
+        + rf"|(?:{_regex_token_alternation(closed_values)})風險"
+    )
+
+
+def _build_enum_guard_pattern(cfg: GuardConfig) -> re.Pattern[str]:
+    """以固定序數／分數／小數／附表結構注入封閉列舉值。"""
+    return _compile_enum_guard_pattern(cfg.enum_closed_values)
 
 # 範圍修飾詞守衛（報告29 §4.1／報告32 §9.3，2026-09-07）——「基礎量 vs 遞增量」：
 # `每一型式` vs `每增加一種型式`（`_edit_ratio`＝0.727、不含任何量詞，`_MEASURE_PATTERN`／
@@ -601,11 +639,26 @@ _ENUM_GUARD_PATTERN = re.compile(
 # 「基礎量」改成「遞增量」，語意相反、表面極相似。與 `_MEASURE_PATTERN`／§4.3 的早退不同：
 # 此處做**雙向過濾**——比對迴圈前依「是否含範圍修飾詞」把候選清單與 `name` 分同異兩類、
 # 只保留同類候選再比對（含修飾詞的彼此仍可正常合併，不含的彼此也是）。
-_SCOPE_MODIFIER_PATTERN = re.compile(r"增加|增列|額外|追加|新增|另計|加計|超出")
+@lru_cache(maxsize=128)
+def _compile_scope_modifier_pattern(words: tuple[str, ...]) -> re.Pattern[str]:
+    return re.compile(_regex_token_alternation(words))
 
 
-def _has_scope_modifier(name: str) -> bool:
-    return _SCOPE_MODIFIER_PATTERN.search(name) is not None
+def _build_scope_modifier_pattern(cfg: GuardConfig) -> re.Pattern[str]:
+    return _compile_scope_modifier_pattern(cfg.scope_modifier_words)
+
+
+# 向後相容的 shipped-default aliases：既有測試與少量內部唯讀呼叫仍可直接
+# inspect `.pattern`／`.search()`；正式判定路徑在下方依 cfg 建構對應 pattern。
+_DEFAULT_GUARD_CONFIG = GuardConfig()
+_MEASURE_PATTERN = _build_measure_pattern(_DEFAULT_GUARD_CONFIG)
+_RANGE_COMPARATOR_PATTERN = _build_range_comparator_pattern(_DEFAULT_GUARD_CONFIG)
+_ENUM_GUARD_PATTERN = _build_enum_guard_pattern(_DEFAULT_GUARD_CONFIG)
+_SCOPE_MODIFIER_PATTERN = _build_scope_modifier_pattern(_DEFAULT_GUARD_CONFIG)
+
+
+def _has_scope_modifier(name: str, *, pattern: re.Pattern[str] | None = None) -> bool:
+    return (pattern or _SCOPE_MODIFIER_PATTERN).search(name) is not None
 
 
 def _contains_ungrounded_quantity(text: str, source_text: str) -> bool:
@@ -1156,6 +1209,7 @@ async def resolve_entity_name(
     *,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """DEDUP4＋ESCALATE：決定這次提及該歸屬到哪個既有 Entity 名稱。
 
@@ -1170,8 +1224,14 @@ async def resolve_entity_name(
     不重新呼叫 `embedding_provider.encode()`；只有尚未回填的舊候選才
     fallback 即時編碼——比對邏輯與門檻本身不變，純粹省去重複編碼成本。
     """
+    _cfg = cfg or KGConfig()
     if not candidates:
         return name
+
+    measure_pattern = _build_measure_pattern(_cfg.guard)
+    range_comparator_pattern = _build_range_comparator_pattern(_cfg.guard)
+    enum_guard_pattern = _build_enum_guard_pattern(_cfg.guard)
+    scope_modifier_pattern = _build_scope_modifier_pattern(_cfg.guard)
 
     # 2026-09-03（`docs/報告/25_擴大版新舊KG問答品質比對報告.md` §4 發現3 收尾
     # 真實重抽發現）：數量／金額實體只准精確比對，不做編輯距離／cosine 模糊
@@ -1198,9 +1258,9 @@ async def resolve_entity_name(
     # 2026-09-18（任務C第9組）：事業風險等級（`具顯著／中度／低度風險者`）也是封閉列舉值；
     # 不得把正確抽出的第三類「低度」模糊合併成既有第二類「中度」實體。
     if (
-        _MEASURE_PATTERN.search(name)
-        or _RANGE_COMPARATOR_PATTERN.search(name)
-        or _ENUM_GUARD_PATTERN.search(name)
+        measure_pattern.search(name)
+        or range_comparator_pattern.search(name)
+        or enum_guard_pattern.search(name)
     ):
         return name
 
@@ -1209,9 +1269,10 @@ async def resolve_entity_name(
     # （`_edit_ratio`＝0.727、無量詞、上面的早退守衛都不命中）。與早退不同，這裡只是
     # **縮小候選集**：把 `name` 與各候選依「是否含範圍修飾詞」分同異兩類，下方的模糊
     # 比對（編輯距離／cosine）只在同類候選內進行；exact 相符不受影響（仍先全量檢查）。
-    _name_has_scope_mod = _has_scope_modifier(name)
+    _name_has_scope_mod = _has_scope_modifier(name, pattern=scope_modifier_pattern)
     fuzzy_candidates = [
-        c for c in candidates if _has_scope_modifier(c["name"]) == _name_has_scope_mod
+        c for c in candidates
+        if _has_scope_modifier(c["name"], pattern=scope_modifier_pattern) == _name_has_scope_mod
     ]
 
     # 2026-08-19（真實審查發現並修復）：`_fetch_entity_candidates()` 的 Cypher
@@ -1390,6 +1451,7 @@ async def merge_entity(
     source_svo_chunk_file: str | None = None,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """解析並合併一個實體節點，回傳這次寫入後的最終 Entity.name。
 
@@ -1416,7 +1478,7 @@ async def merge_entity(
     """
     candidates = await _fetch_entity_candidates(driver, kg_id, entity_type, name, embedding_provider=embedding_provider)
     resolved_name = await resolve_entity_name(
-        name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider
+        name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg
     )
 
     if source_doc_id is None or source_svo_chunk_index is None:
@@ -1717,7 +1779,14 @@ _NATURALIZE_PROMPT_TEMPLATE = """把下列結構化事實改寫成一句通順�
 改寫時務必忠實於原意，不可以增加原文沒有的具體數字、期限或條件，也不可以省略主詞或受詞裡的關鍵資訊。主詞／受詞後的括號型別標記只是輔助語意判斷用，不可以把型別名稱本身（如 PERSON、ORGANIZATION）照抄進輸出。若動作與受詞開頭字詞剛好重複（例如動作是「得以」、受詞開頭又是「以」），改寫時避免疊字重複，選用通順的講法而非逐字硬接。"""
 
 
-def _naturalization_dropped_quantity(natural_text: str, subject: str, verb: str, object_: str) -> bool:
+def _naturalization_dropped_quantity(
+    natural_text: str,
+    subject: str,
+    verb: str,
+    object_: str,
+    *,
+    cfg: KGConfig | None = None,
+) -> bool:
     """報告26 §4 #6／報告29-鄰近設計（`docs/參考文獻/25_三元組自然語言化
     遺漏偵測/README.md`）：`_naturalize_triple()` 的 LLM 改寫偶爾遺漏
     subject／verb／object 裡的量詞或日期片語（真實案例：`災害發生之當月
@@ -1730,8 +1799,9 @@ def _naturalization_dropped_quantity(natural_text: str, subject: str, verb: str,
     量詞/日期片語，逐一核對是否逐字留在 `natural_text` 裡；任一片語消失
     即回傳 `True`，由呼叫端決定是否退回樣板拼接（見 `_naturalize_triple()`）。
     """
+    measure_pattern = _build_measure_pattern((cfg or KGConfig()).guard)
     for field in (subject, verb, object_):
-        for match in _MEASURE_PATTERN.finditer(field):
+        for match in measure_pattern.finditer(field):
             if match.group(0) not in natural_text:
                 return True
     return False
@@ -1768,6 +1838,8 @@ async def _naturalize_triple(
     object_: str,
     object_type: str,
     llm_provider: LLMProvider,
+    *,
+    cfg: KGConfig | None = None,
 ) -> str:
     """把三元組改寫成自然語句（見 `docs/報告/24_事實清單自然語言化機制設計
     報告.md` § 4、§5 階段1）——取代 `routers/agent.py::_merge_fact_lines()`
@@ -1811,7 +1883,7 @@ async def _naturalize_triple(
     # 補救小模型偶爾漏簡體的情況（prompt 已要求繁體，這是保險不是取代）。
     result = _to_traditional(result.strip().strip("「」\"'"))
     if (
-        _naturalization_dropped_quantity(result, subject, verb, object_)
+        _naturalization_dropped_quantity(result, subject, verb, object_, cfg=cfg)
         or _naturalization_leaked_type_marker(result, subject_type, object_type)
     ):
         return _verbalize_fact(subject, subject_type, verb, object_, object_type)
@@ -1929,6 +2001,7 @@ async def merge_triples_to_graph(
     *,
     embedding_provider: EmbeddingProvider | None = None,
     llm_provider: LLMProvider | None = None,
+    cfg: KGConfig | None = None,
 ) -> None:
     """將 SVO triples 的主客實體解析對齊後，MERGE 進 Neo4j Entity Graph。
 
@@ -1976,14 +2049,14 @@ async def merge_triples_to_graph(
             source_doc_id=triple.source_doc_id,
             source_svo_chunk_index=triple.source_svo_chunk_index,
             source_svo_chunk_file=triple.source_svo_chunk_file,
-            embedding_provider=embedding_provider, llm_provider=llm_provider,
+            embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
         )
         object_name = await merge_entity(
             driver, kg_id, triple.object, triple.object_type, triple.object,
             source_doc_id=triple.source_doc_id,
             source_svo_chunk_index=triple.source_svo_chunk_index,
             source_svo_chunk_file=triple.source_svo_chunk_file,
-            embedding_provider=embedding_provider, llm_provider=llm_provider,
+            embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
         )
 
         get_or_create = await driver.execute_query(
@@ -2038,7 +2111,7 @@ async def merge_triples_to_graph(
             set_clause += ", r.natural_text = $natural_text"
             set_params["natural_text"] = await _naturalize_triple(
                 subject_name, triple.subject_type, triple.verb, object_name, triple.object_type,
-                llm_provider,
+                llm_provider, cfg=cfg,
             )
 
         await driver.execute_query(
@@ -2615,6 +2688,7 @@ async def backfill_natural_text(
     llm_provider: LLMProvider,
     *,
     batch_size: int = 100,
+    cfg: KGConfig | None = None,
 ) -> int:
     """報告24 § 5 階段2 回填批次任務：掃描該 KG 內所有既有邊，把尚未有
     `r.natural_text` 的邊補上自然語句版本——`_naturalize_triple()` 是本次
@@ -2672,6 +2746,7 @@ async def backfill_natural_text(
                 natural_text = await _naturalize_triple(
                     edge["subject"], edge["subject_type"], verb,
                     edge["object"], edge["object_type"], llm_provider,
+                    cfg=cfg,
                 )
             else:
                 # 防禦性 fallback：沒有 verb，或 subject／object 殘缺，無法

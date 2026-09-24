@@ -18,6 +18,7 @@ from core.kg_config import (
     ConfigSchemaVersionError,
     DictConfigSource,
     FileConfigSource,
+    GuardConfig,
     KGConfig,
     deep_merge,
 )
@@ -69,6 +70,19 @@ def test_kgconfig_defaults_match_live_module_constants():
     from core.kg_config.model import _DEFAULT_SVO_FEWSHOTS
     assert cfg.domain.svo_fewshots == _DEFAULT_SVO_FEWSHOTS
 
+    from core.kg_config.model import (
+        _DEFAULT_ENUM_CLOSED_VALUES,
+        _DEFAULT_MEASURE_UNITS,
+        _DEFAULT_RANGE_LEADING_COMPARATORS,
+        _DEFAULT_RANGE_TRAILING_COMPARATORS,
+        _DEFAULT_SCOPE_MODIFIER_WORDS,
+    )
+    assert cfg.guard.measure_units == _DEFAULT_MEASURE_UNITS
+    assert cfg.guard.range_trailing_comparators == _DEFAULT_RANGE_TRAILING_COMPARATORS
+    assert cfg.guard.range_leading_comparators == _DEFAULT_RANGE_LEADING_COMPARATORS
+    assert cfg.guard.scope_modifier_words == _DEFAULT_SCOPE_MODIFIER_WORDS
+    assert cfg.guard.enum_closed_values == _DEFAULT_ENUM_CLOSED_VALUES
+
     # services/svo_chunking.py
     import services.svo_chunking as svo_chunking
     assert cfg.chunking.max_sentences == svo_chunking.DEFAULT_SVO_CHUNK_MAX_SENTENCES
@@ -105,6 +119,22 @@ def test_kgconfig_validates_ranges():
         KGConfig.model_validate({"dedup": {"cosine_threshold": 1.5}})
     with pytest.raises(Exception):
         KGConfig.model_validate({"bfs": {"seed_max_degree": 0}})
+
+
+def test_guard_config_defaults_are_exact_shipped_token_lists():
+    """報告76 T1/T6：五個 GuardConfig 欄位逐字鎖定現行 guard token。"""
+    assert KGConfig().guard == GuardConfig()
+    assert GuardConfig().model_dump() == {
+        "measure_units": (
+            "個月", "個年", "個星期", "日", "月", "年", "次", "小時", "分鐘",
+            "百分之", "％", "%", "元", "倍", "等級", "歲", "人", "名", "週", "度",
+            "種", "類", "條", "款", "項", "點",
+        ),
+        "range_trailing_comparators": ("以上", "以下", "以內"),
+        "range_leading_comparators": ("未滿", "超過"),
+        "scope_modifier_words": ("增加", "增列", "額外", "追加", "新增", "另計", "加計", "超出"),
+        "enum_closed_values": ("顯著", "中度", "低度"),
+    }
 
 
 # ── 合併語意 test（報告33 §3.9.3 / 論文 05 §5.3.6）────────────────────────

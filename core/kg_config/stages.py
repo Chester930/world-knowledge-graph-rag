@@ -181,6 +181,23 @@ STAGE_REGISTRY: dict[str, Stage] = {
         harness=Harness.MANUAL,
         blocked_by=Blocker.EXTRACTION_SIDE,
     ),
+    "dedup.guard": Stage(
+        id="dedup.guard",
+        description="實體模糊合併與自然語言化核對的 domain guard token（報告76）",
+        config_section="guard",
+        params=(
+            "measure_units", "range_trailing_comparators", "range_leading_comparators",
+            "scope_modifier_words", "enum_closed_values",
+        ),
+        capability_flags=(),
+        metrics=(
+            Metric("mis_merge_count", "lower_is_better", "組", "報告76 §1.2"),
+            Metric("quantity_fidelity", "higher_is_better", "ratio", "報告26／報告76 §1.2"),
+        ),
+        gates=(),
+        harness=Harness.MANUAL,
+        blocked_by=Blocker.EXTRACTION_SIDE,
+    ),
     "reltype.reconcile": Stage(
         id="reltype.reconcile",
         description="關係型別調解門檻（SIM/COMPARE/ESCALATE3 抽取側 + QSIM 查詢側）",

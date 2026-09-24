@@ -72,7 +72,7 @@ def test_manual_harness_stages_are_the_consolidation_backlog():
     新增，尚無自動 harness，故同屬待辦）。"""
     manual_ids = {s.id for s in stages_without_harness()}
     assert manual_ids == {
-        "routing.kg_select", "dedup.entity", "reltype.reconcile", "generation.decompose",
+        "routing.kg_select", "dedup.entity", "dedup.guard", "reltype.reconcile", "generation.decompose",
         "ingestion.chunking",
     }
 
