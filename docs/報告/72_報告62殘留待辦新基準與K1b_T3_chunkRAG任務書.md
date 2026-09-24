@@ -81,3 +81,45 @@
 ## 5. 給 Codex 的指令（可直接貼上）
 
 > 請依序執行 `docs/報告/72_報告62殘留待辦新基準與K1b_T3_chunkRAG任務書.md` 的S0-S3。背景：報告62規劃的T3（條文層級擴充）、K1b（top_k=40且維持BFS名額）、T6（chunk-RAG對照組）自09-21起被報告65-69插隊、全程未執行；同時報告62 §14.10已修正題庫（`57-DIST1/2`補天數span），題庫雜湊由`404cde9f…`變成`23f8c06f…`，T2當初「12→14」的判定是在**舊雜湊**下做的。**S0（先決）**：用`frozen_baseline_stage.py`在現行程式碼（本分支HEAD）與新題庫雜湊下重跑42題K arm，重複次數比照09-20凍結基準的`adaptive_repeat.py`品質門檻規則，產出獨立的新基準（不是修正09-20的舊數字，兩者語意不同），存放並記錄在`data/eval/baseline_runs/20260923_rebased/`與本報告新增章節。**S1**：依報告62 §11.3設計K1b（`--k-top-k 40`＋per-KG設定覆寫`factlist.min_bfs_slots`維持BFS名額），對S0新基準配對比較，套用報告62 §11.1既定採用規則（淨增≥3題、不退步、SNR不低於基準一半、Type-E不退步、附信賴區間），**規則不可臨場更改**。**S2**：依報告62 §3 T3節設計opt-in `article_expand`（檢索到條文任一Fact時帶入同條文兄弟Fact，設上限＋去重），同時評估K1／K2（純條文擴充）／K3（組合）三臂對S0新基準比較，另做至少5個報告57 §4.21類別B gold span的人工抽查確認片段確實被補齊。**S3**：用既有B0／B1／D arm在同一批42題新題庫、同凍結條件下補跑chunk-RAG對照組，產出與K arm（S0或最終建議配置）的並列比較表，這是回答論文核心問題「KG相對chunk-RAG的增益」的關鍵證據，**結果無論好壞都要如實記錄**。**已知缺口**：`57-AGGR18`的角色互換歸屬檢查（`role_mismatch`規則泛化）仍待辦不在本任務書範圍，回報S1/S2/S3結果時必須提醒這個限制可能讓Atomic Accuracy高估。全程遵守報告62 §5列出的已知風險（Ollama記憶體壓力、`--query-timeout-s 900`、評分器盲點、共用generator/judge僅屬pilot）；開工前用ListAgents確認沒有其他Claude session同時在用同一組Neo4j/Ollama；不擴大題庫、不改評分器預設、不重抽KG、不換生成模型、不把新機制設為全域預設、不自動合併master。完成後跑`python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py`確認全綠，回報每個子任務的結果與是否建議採用。
+
+---
+
+## 6. S1結果：K1b逐題配對判定（2026-09-24）
+
+### 6.1 資料與判定口徑
+
+本節依報告62 §11.1 的**既定規則**，將 S1 K1b 與本任務書 S0 新基準逐題配對；未改題庫、未改評分器預設、未重抽 KG、未更換 generator/judge。S0 使用 `data/eval/baseline_runs/20260923_rebased/summary_final.json`，S1 使用 `data/eval/candidate_runs/s1_k1b_topk40_bfs16_adaptive_summary_r2.json`。兩份 summary 都是同一批 42 題；S0 有 75 筆有效 records，S1 有 71 筆有效 records。逐題「通過」定義為 `stable_pass` 或 `single_pass`，完全沿用 summary 的 status。
+
+SNR 依 `records.json` 的 `lineage.stage1_retrieval.snr` 計算：先對每題的有效重跑取平均，再對 42 題取平均；各 stage 的 `summary.md` 四捨五入值與此結果一致。
+
+### 6.2 逐題配對結果
+
+| 配對類別 | 題目 | 題數 |
+|---|---|---:|
+| S0 未通過 → S1 新增通過 | `18-Q1`、`18-Q5`、`18-Q6`、`57-COREF3`、`57-AGGR18` | 5 |
+| S0 通過 → S1 退步 | `18-Q4`、`canary-P1` | 2 |
+| 兩邊都通過 | — | 11 |
+| 兩邊都未通過 | — | 24 |
+
+因此 S0 **13/42** → S1 **16/42**，淨增 **+3 題**；逐題方向為新增 5 題、退步 2 題，新增明顯多於退步。配對差異 `d = S1通過 − S0通過` 的平均為 **+7.14 個百分點**，以 42 題的題目層級差異計算近似 95% CI 為 **−5.16～+19.45 個百分點**；discordant pairs 的 exact McNemar 雙尾 `p = 0.4531`，方向尚不具統計明確性。這些逐題差異與 CI 一併保留，不把淨增 +3 題解讀成已證明的穩定改善。
+
+### 6.3 依 §11.1 逐項驗收
+
+| 條件 | 實際結果 | 判定 |
+|---|---|---|
+| 主指標：淨增 ≥3，且新增多於退步 | 13 → 16，淨增 +3；新增 5、退步 2 | ✅ |
+| 不退步：S0 的 `stable_pass`／`single_pass` 不得變成 S1 `stable_fail` | `18-Q4`、`canary-P1` 發生 | ❌ |
+| SNR ≥ S0 一半 | S0 **3.7367%** → S1 **3.0405%**；比值 **0.8137**，門檻 **1.8684%** | ✅ |
+| Type-E 不退步 | 5 題中 S0 通過 3 題 → S1 通過 2 題；`canary-P1` 退步 | ❌ |
+| 統計／逐題差異 | 已附 5/2 配對清單、McNemar `p` 與 95% CI | ✅ |
+
+### 6.4 不退步題逐題原因
+
+- **`18-Q4`：`stable_pass` → `stable_fail`。** S0 兩次均保留全部 gold span 且通過；S1 兩次的 Context Recall 仍為 1.0，gold Fact 仍在 prompt，但 Stage 3 生成均遺漏／平滑掉「自當年度營利事業所得額減除」這一完整 span，records 的 failure attribution 為 generation failure。這是觀察到的生成階段退步；較長 prompt／內容稀釋可能是候選差異的背景因素，但本資料不足以證明因果。
+- **`canary-P1`：`single_pass` → `stable_fail`，同時是 Type-E 退步。** S0 的單次結果正確拒答；S1 兩次均改答「最高一百五十萬元」，而非拒答，屬 unsupported answer。這不是把 S0 的單次通過升格成穩定證據，而是明確記錄為 Type-E 行為退步。
+
+### 6.5 判定與限制
+
+**判定：需更多證據，不建議設為預設；不建議採用 K1b。** K1b 通過了「淨增至少 3 題」、配對方向（5 > 2）及 SNR 一半門檻，但違反必要的不退步條件，且 Type-E 由 3/5 降至 2/5；McNemar `p=0.4531`、配對差 CI 橫跨 0，也不支持把 +3 題視為明確改善。因此本階段不把 K1b 接成全域預設，不進行自動合併 master；S2 是否開始，待使用者核對本節後另行決定。
+
+`57-AGGR18` 雖列在 S1 新增通過，但報告62 §14.9 所揭露的角色互換歸屬檢查（`role_mismatch` 規則泛化）仍未完成；目前 `claim_scope_auditor` 的覆蓋有限，故 Atomic Accuracy／達標 status 可能高估。此限制不在 S1 範圍內，不能用本次分數掩蓋。另依報告62 §5，Ollama 記憶體壓力、`--query-timeout-s 900`、共用 generator/judge 僅屬 pilot 等風險仍有效，SNR 與逐題判定不應被解讀為消除這些風險。
