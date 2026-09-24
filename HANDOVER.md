@@ -9,9 +9,23 @@
 
 1. **✅ 報告70已完成並push**：報告68/69 production code（`92d8492`／`1f353d8`）cherry-pick進main checkout master（新SHA`41697bb`／`c8f9184`），另加2筆必要修正——`12d2308`移除3個依賴報告62專屬`_build_kg_chat_request`的測試（該函式不在master，報告62本身尚未合併）、`bc37b61`清理尾端空白行。`routers/agent.py`／`services/`確認未觸碰（`git diff`為空）；`core/providers/factory.py`只新增`override_embedding_provider_for_eval()`／`make_llm_provider_for_eval()`兩個eval-only函式，master原有簽名未變；HANDOVER.md僅新增精簡段落未整份取代。pytest 1107 passed。**已由Claude Code獨立`git fetch`核對`origin/master`確實為`bc37b61`**（範圍`7e67f2b..bc37b61`，非force push）。**待辦**：`12d2308`移除的3個測試屬報告62功能，日後報告62正式合併master時需補回。
 2. **✅ 報告71 T0-T2已完成並push，但發現後續需修正的4筆**：T0查明production KG只有2個（KG#4`236903cf-...`與舊KG`76bc98ff-...`，後者0筆`natural_text`不受影響）；T1唯讀dry-run對KG#4重算96筆受影響邊，49筆重算成功、47筆因欄位缺漏安全跳過（不臆測）；人工審閱樣本發現機械「無殘留型別標記」核對不足以保證品質（截斷、缺謂語詞堆疊、疑似LLM幻覺），追加品質分級（數字/單位/CNS-ISO錨點、動詞與主賓詞覆蓋、截斷/缺謂語檢查），49筆分為27筆安全／17筆需人工複核／5筆建議排除。**使用者核准只backfill 27筆安全案例**，T2執行27/27寫入成功且讀回核對一致，其餘69筆確認維持原值未被改動。**已push，`origin/master`最終為`c57f7dd`（Claude Code獨立`git fetch`核對，範圍`bc37b61..c57f7dd`）**。**⚠️ 重要**：Claude Code逐筆核對27筆寫入內容後，發現**機械品質分級仍漏了2類問題**——「關鍵限定詞/受益對象被整段刪除」（例：`...6917546619827179615`刪除「或受益人」、`...1155178801978699636`刪除「高溫作業」主詞）與「插入原文沒有的新子句」（`...1152937997281292486`疑似加料「代其辦理居留業務」），加上1筆語序破碎（`...1152927002165041341`），共**4筆已寫入KG但內容有疑慮**，已記錄在`data/eval/naturalization_backfill_dryrun_20260923/t2_followup_issues.md`（commit `be17cf0`／`c57f7dd`，含目前KG實際值、T1舊值、法規出處），**尚未修正**，需要下一輪人工核對法規原文後另案處理。品質分級規則的這個缺口也已記錄在`quality_grading.md`，供之後（17筆需複核清單、或其他KG的類似backfill）設計檢查規則參考。**仍待辦**：這4筆的實際修正、17筆需人工複核、5筆建議排除，均需要另一輪明確決策。
-3. **⏸️ 報告72（S0/S1已完成，安全暫停checkpoint）**：詳見下方「2026-09-24 報告72暫停checkpoint」。報告73（報告69殘餘judge非決定性緩解）待執行。
+3. **✅ 報告72 S0-S2已完成，S3待決定**：詳見下方「2026-09-24 報告72 S0-S2完成」。報告73（報告69殘餘judge非決定性緩解）待執行。
 
-## 2026-09-24 報告72暫停checkpoint（Codex執行、Claude Code逐項核對＋補寫本段）
+## 2026-09-24 報告72 S0-S2完成——4個候選臂全部「需更多證據，不建議採用」
+
+**接手前先讀本段，再讀[報告72任務書](docs/報告/72_報告62殘留待辦新基準與K1b_T3_chunkRAG任務書.md)§6/§7的完整判定。**
+
+**結論**：新題庫（`23f8c06f…`）基準S0為13/42；K1b／K1（top_k=40）、K2（`article_expand`）、K3（兩者組合）**四個候選臂逐題配對後全部判定「需更多證據，不建議設為預設」**，沒有任何一臂被採用。詳細數字：K1b/K1 16/42（違反不退步＋Type-E不退步規則）、K2 13/42（無淨增，5題新增5題退步）、K3 14/42（SNR 1.6167%跌破S0一半門檻1.8683%，直接否決）。**`article_expand`機制的人工抽查**（報告57 §4.21類別B「拆碎gold span」5案例）顯示：機制確實把同條文兄弟Fact帶入檢索候選池（K2 trace有1,860個帶`article_no`的擴充Fact），但**只有1/5部分修復、4/5仍未補齊**——候選池擴充不等於實際排進prompt的內容擴充，這是誠實記錄的負面結果，不是被分數波動掩蓋。
+
+**production程式碼異動**（commit `be57b4d`，**Claude Code已逐行核對diff並獨立重跑pytest確認1089 passed**）：`routers/agent.py`新增`_expand_facts_by_article()`（純唯讀Cypher，只有`MATCH`/`RETURN`，不寫入Neo4j）、`core/kg_config/model.py`新增`FactListConfig.article_expand`（預設`False`）、`models/document.py`新增`ChatRequest.article_expand`（預設`None`，沿用per-KG設定）——**全部opt-in，預設行為未變**，插入點在scope過濾後、`_arrange_fact_lines()`前，仍受既有prompt/BFS/RRF/LITM限制。`config/kg/236903cf-....json`（S1 K1b用）與S2的per-request `article_expand`是兩種不同的啟用方式，兩者都不影響全域預設。
+
+**版控狀態**：HEAD在main worktree（`worktree-sdd-retrieval-comparison`）本地為`be57b4d`（S0/S1/S2全部commit在案，含逐項核對記錄），**尚未push**。main checkout `master`全程未被本任務觸碰。過程中兩次遇到`.git/worktrees/.../index.lock`權限競爭（Codex與Claude Code同時在同一個worktree操作導致），皆由Claude Code協助完成commit解決，未造成資料遺失。
+
+**已知限制**（S3若執行、或之後任何人要引用S1/S2結果時務必提醒）：`57-AGGR18`角色互換歸屬檢查（`claim_scope_auditor`的`role_mismatch`規則泛化）仍待辦，Atomic Accuracy／達標status可能高估；共用generator/judge（`qwen2.5:7b`）僅屬pilot，非正式評測；`18-Q4`／`26-Q5`等多題的退步歸因是Stage 3生成階段遺漏/平滑，不是檢索問題，換檢索策略解不了這類生成端缺陷。
+
+**S3（chunk-RAG對照組，決策點D1）尚未執行**——這是報告62/72設計中回答論文核心問題「KG相對chunk-RAG的增益」的最後一塊，工作量較大（需在同一批42題、同凍結條件下補跑既有B0/B1/D arm），**待使用者決定是否進行**，不是自動下一步。
+
+## 2026-09-24 報告72 S0/S1暫停checkpoint（歷史記錄，已被S2完成取代，保留供追溯）
 
 **接手前先讀本段，再讀[報告72任務書](docs/報告/72_報告62殘留待辦新基準與K1b_T3_chunkRAG任務書.md)與[中繼執行報告74](docs/報告/74_報告72執行接續報告_20260923.md)。**
 
