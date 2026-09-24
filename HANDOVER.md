@@ -1,7 +1,7 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-23
+> **最後更新**：2026-09-25
 
 ## 2026-09-23（續）：報告68/69批次整合進master完成 + 3份後續任務書已交付Codex
 
@@ -415,6 +415,14 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告66：SVO抽取少樣本領域包參數化SDD任務書（交付Codex，須等報告65驗證完成才開始）](docs/報告/66_SVO抽取少樣本領域包參數化SDD任務書.md)
 - [報告67：事實自然語言化（natural_text）品質問題SDD任務書（T1–T4全部完成）](docs/報告/67_事實自然語言化品質問題SDD任務書.md)
 - [報告68：評測harness查詢embedding快取SDD任務書（交付Codex，尚未實作）](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)
+- [報告75：本體論設計資料夾專案整合候選盤點（純盤點，不含決策）](docs/報告/75_本體論設計資料夾專案整合候選盤點.md)
+- [報告76：guard_profile領域可插拔化SDD任務書（交付Codex，尚未實作）](docs/報告/76_guard_profile領域可插拔化SDD任務書.md)
+
+### 2026-09-25 報告75/76：外部本體論設計資料夾盤點 + guard_profile任務書交付Codex
+
+使用者提供 `D:\Users\666\Desktop\本體論設計` 資料夾（獨立於本 repo 的姊妹研究，含本體工程理論、缺口紀錄表、per-KG設定架構報告書等），要求盤點跟本專案的接入可能性。**報告75**（純盤點，不含決策）分五類整理：已對照程式碼驗證的近期候選（GAP-03/04/06/07、per-KG設定斷點）、需先驗證的中長期方向、不建議近期混入（其他產品線如「台灣中小企業數位人資長」規則引擎、異領域案例）、未查證文獻對照、尚待詳讀清單。過程中發現該資料夾的「知識圖譜分層客製化架構報告書」列的「per-KG設定斷點1（few-shot參數化）」**其實已經在報告66完成**，報告75已更正。
+
+使用者選擇優先把「guard_profile（第4步）」排成長任務交付Codex。查證後發現實際範圍比預期複雜：`services/svo_service.py:544-604` 的4組正則（`_MEASURE_PATTERN`／`_RANGE_COMPARATOR_PATTERN`／`_ENUM_GUARD_PATTERN`／`_SCOPE_MODIFIER_PATTERN`）背後是報告20/26/29/32共14個真實迴歸案例，且 `resolve_entity_name()`／`_naturalize_triple()`／`_naturalization_dropped_quantity()` 目前都不接受 `cfg`，需要新增DI鏈路。使用者確認仍按此方向進行，但要求加強迴歸測試——**報告76**已產出，設計「結構固定（CJK通用格式）＋domain token清單（可配置）」切法，T6迴歸測試套件要求§1.2表格14個案例全部轉成golden test。**尚未執行，待貼給Codex。**
 
 ### 2026-09-22 報告66 T1–T6：SVO 少樣本領域包參數化已實作
 
