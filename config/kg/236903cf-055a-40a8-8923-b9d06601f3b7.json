@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "_note": "Report72 S1 K1b only: preserve the approximately 16 BFS slots observed at top_k=20 while testing top_k=40. This is an opt-in per-KG profile; global defaults remain unchanged.",
+  "factlist": {
+    "min_bfs_slots": 16
+  }
+}
