@@ -1,0 +1,4160 @@
+{
+ "description": "報告79 T1-T4：S3 規則 R 離線敏感度分析；非正式評分結果",
+ "params": {
+  "T": 0.7,
+  "require_qty": false,
+  "cand_fail": [],
+  "eligible_manifest": "baseline_runs\\20260923_rebased\\frozen_manifest.json",
+  "eligible_count": 42
+ },
+ "arms": {
+  "S0": {
+   "eligible_count": 42,
+   "original_pass_count": 13,
+   "rule_r_pass_count": 16,
+   "original_pass_ids": [
+    "17-Q1",
+    "17-Q2",
+    "18-Q2",
+    "18-Q3",
+    "18-Q4",
+    "26-Q1",
+    "26-Q5",
+    "canary-P1",
+    "57-COREF2",
+    "57-CANARY1",
+    "57-CANARY2",
+    "57-CANARY4",
+    "57-AGGR12"
+   ],
+   "rule_r_pass_ids": [
+    "17-Q1",
+    "17-Q2",
+    "18-Q2",
+    "18-Q3",
+    "18-Q4",
+    "18-Q6",
+    "26-Q1",
+    "26-Q5",
+    "canary-P1",
+    "57-COREF2",
+    "57-DIST1",
+    "57-DIST2",
+    "57-CANARY1",
+    "57-CANARY2",
+    "57-CANARY4",
+    "57-AGGR12"
+   ],
+   "flipped_to_pass": [
+    "18-Q6",
+    "57-DIST1",
+    "57-DIST2"
+   ],
+   "pass_to_fail": [],
+   "net_pass_change": 3,
+   "question_votes": {
+    "17-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "17-Q2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "17-Q6": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "18-Q1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "18-Q2": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "18-Q3": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q4": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "18-Q5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "18-Q6": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "26-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "26-Q5": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "canary-P1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "canary-P4": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-COREF1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-COREF2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-COREF3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-DIST1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-DIST2": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-CANARY1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-CANARY2": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-AGGR1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR2": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR4": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY4": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-CANARY5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR6": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR7": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR8": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR9": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR10": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR11": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR12": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-AGGR13": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR14": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR15": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR16": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR17": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR18": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR19": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    }
+   },
+   "arm": "S0",
+   "record_count": 75,
+   "stage_counts": {
+    "stage_s0_r1": 39,
+    "stage_s0_r1_resume1": 3,
+    "stage_s0_r2": 33
+   }
+  },
+  "B0": {
+   "eligible_count": 42,
+   "original_pass_count": 21,
+   "rule_r_pass_count": 23,
+   "original_pass_ids": [
+    "17-Q1",
+    "17-Q2",
+    "17-Q6",
+    "18-Q1",
+    "18-Q2",
+    "18-Q3",
+    "18-Q4",
+    "18-Q5",
+    "18-Q6",
+    "26-Q1",
+    "26-Q5",
+    "canary-P1",
+    "canary-P4",
+    "57-COREF1",
+    "57-COREF2",
+    "57-COREF3",
+    "57-CANARY2",
+    "57-CANARY4",
+    "57-AGGR14",
+    "57-AGGR18",
+    "57-AGGR19"
+   ],
+   "rule_r_pass_ids": [
+    "17-Q1",
+    "17-Q2",
+    "17-Q6",
+    "18-Q1",
+    "18-Q2",
+    "18-Q3",
+    "18-Q4",
+    "18-Q5",
+    "18-Q6",
+    "26-Q1",
+    "26-Q5",
+    "canary-P1",
+    "canary-P4",
+    "57-COREF1",
+    "57-COREF2",
+    "57-COREF3",
+    "57-DIST2",
+    "57-CANARY2",
+    "57-CANARY4",
+    "57-AGGR7",
+    "57-AGGR14",
+    "57-AGGR18",
+    "57-AGGR19"
+   ],
+   "flipped_to_pass": [
+    "57-DIST2",
+    "57-AGGR7"
+   ],
+   "pass_to_fail": [],
+   "net_pass_change": 2,
+   "question_votes": {
+    "17-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "17-Q2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "17-Q6": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q2": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "18-Q3": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q4": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "18-Q5": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q6": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "26-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "26-Q5": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "canary-P1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "canary-P4": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-COREF1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-COREF2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-COREF3": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-DIST1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-DIST2": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-CANARY1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY2": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-AGGR1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR2": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR4": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY4": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-CANARY5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR6": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR7": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-AGGR8": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR9": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR10": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR11": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR12": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR13": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR14": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-AGGR15": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR16": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR17": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR18": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-AGGR19": {
+     "valid_records": 3,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      false,
+      true,
+      true
+     ]
+    }
+   },
+   "arm": "B0",
+   "record_count": 69,
+   "stage_counts": {
+    "s3_chunk_rag_b0_stage_a": 42,
+    "s3_chunk_rag_b0_stage_b": 26,
+    "s3_chunk_rag_b0_stage_c": 1
+   }
+  },
+  "B1": {
+   "eligible_count": 42,
+   "original_pass_count": 21,
+   "rule_r_pass_count": 22,
+   "original_pass_ids": [
+    "17-Q1",
+    "17-Q2",
+    "17-Q6",
+    "18-Q1",
+    "18-Q2",
+    "18-Q3",
+    "18-Q4",
+    "18-Q6",
+    "26-Q1",
+    "26-Q5",
+    "canary-P1",
+    "canary-P4",
+    "57-COREF2",
+    "57-COREF3",
+    "57-DIST2",
+    "57-CANARY1",
+    "57-CANARY2",
+    "57-CANARY4",
+    "57-AGGR6",
+    "57-AGGR14",
+    "57-AGGR19"
+   ],
+   "rule_r_pass_ids": [
+    "17-Q1",
+    "17-Q2",
+    "17-Q6",
+    "18-Q1",
+    "18-Q2",
+    "18-Q3",
+    "18-Q4",
+    "18-Q6",
+    "26-Q1",
+    "26-Q5",
+    "canary-P1",
+    "canary-P4",
+    "57-COREF2",
+    "57-COREF3",
+    "57-DIST2",
+    "57-CANARY1",
+    "57-CANARY2",
+    "57-CANARY4",
+    "57-AGGR6",
+    "57-AGGR14",
+    "57-AGGR18",
+    "57-AGGR19"
+   ],
+   "flipped_to_pass": [
+    "57-AGGR18"
+   ],
+   "pass_to_fail": [],
+   "net_pass_change": 1,
+   "question_votes": {
+    "17-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "17-Q2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "17-Q6": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q2": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "18-Q3": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "18-Q4": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "18-Q5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "18-Q6": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "26-Q1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "26-Q5": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "canary-P1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "canary-P4": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-COREF1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-COREF2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-COREF3": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-DIST1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-DIST2": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-CANARY1": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-CANARY2": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-AGGR1": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR2": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR3": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR4": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-CANARY4": {
+     "valid_records": 2,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true,
+      true
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-CANARY5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR5": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR6": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-AGGR7": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR8": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR9": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR10": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR11": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR12": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR13": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR14": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    },
+    "57-AGGR15": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR16": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR17": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": false,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      false,
+      false
+     ]
+    },
+    "57-AGGR18": {
+     "valid_records": 2,
+     "original": false,
+     "rule_r": true,
+     "original_votes": [
+      false,
+      false
+     ],
+     "rule_r_votes": [
+      true,
+      true
+     ]
+    },
+    "57-AGGR19": {
+     "valid_records": 1,
+     "original": true,
+     "rule_r": true,
+     "original_votes": [
+      true
+     ],
+     "rule_r_votes": [
+      true
+     ]
+    }
+   },
+   "arm": "B1",
+   "record_count": 67,
+   "stage_counts": {
+    "s3_chunk_rag_b1_stage_a": 42,
+    "s3_chunk_rag_b1_stage_b": 25
+   }
+  }
+ },
+ "comparisons": {
+  "S0_vs_B0": {
+   "candidate": "B0",
+   "base": "S0",
+   "original": {
+    "base_pass_count": 13,
+    "candidate_pass_count": 21,
+    "candidate_gains": [
+     "17-Q6",
+     "18-Q1",
+     "18-Q5",
+     "18-Q6",
+     "canary-P4",
+     "57-COREF1",
+     "57-COREF3",
+     "57-AGGR14",
+     "57-AGGR18",
+     "57-AGGR19"
+    ],
+    "base_advantages": [
+     "57-CANARY1",
+     "57-AGGR12"
+    ],
+    "candidate_minus_base_net": 8,
+    "kg_minus_candidate_gap": -8,
+    "exact_mcnemar_p": 0.03857421875
+   },
+   "rule_r": {
+    "base_pass_count": 16,
+    "candidate_pass_count": 23,
+    "candidate_gains": [
+     "17-Q6",
+     "18-Q1",
+     "18-Q5",
+     "canary-P4",
+     "57-COREF1",
+     "57-COREF3",
+     "57-AGGR7",
+     "57-AGGR14",
+     "57-AGGR18",
+     "57-AGGR19"
+    ],
+    "base_advantages": [
+     "57-DIST1",
+     "57-CANARY1",
+     "57-AGGR12"
+    ],
+    "candidate_minus_base_net": 7,
+    "kg_minus_candidate_gap": -7,
+    "exact_mcnemar_p": 0.09228515625
+   }
+  },
+  "S0_vs_B1": {
+   "candidate": "B1",
+   "base": "S0",
+   "original": {
+    "base_pass_count": 13,
+    "candidate_pass_count": 21,
+    "candidate_gains": [
+     "17-Q6",
+     "18-Q1",
+     "18-Q6",
+     "canary-P4",
+     "57-COREF3",
+     "57-DIST2",
+     "57-AGGR6",
+     "57-AGGR14",
+     "57-AGGR19"
+    ],
+    "base_advantages": [
+     "57-AGGR12"
+    ],
+    "candidate_minus_base_net": 8,
+    "kg_minus_candidate_gap": -8,
+    "exact_mcnemar_p": 0.021484375
+   },
+   "rule_r": {
+    "base_pass_count": 16,
+    "candidate_pass_count": 22,
+    "candidate_gains": [
+     "17-Q6",
+     "18-Q1",
+     "canary-P4",
+     "57-COREF3",
+     "57-AGGR6",
+     "57-AGGR14",
+     "57-AGGR18",
+     "57-AGGR19"
+    ],
+    "base_advantages": [
+     "57-DIST1",
+     "57-AGGR12"
+    ],
+    "candidate_minus_base_net": 6,
+    "kg_minus_candidate_gap": -6,
+    "exact_mcnemar_p": 0.109375
+   }
+  }
+ },
+ "record_results": [
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "17-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "17-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "17-Q6",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q3",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q6",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "26-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "26-Q5",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "canary-P1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "canary-P4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-COREF1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-COREF2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-COREF3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-DIST1",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-DIST2",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-CANARY1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-CANARY2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR2",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-CANARY3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-CANARY4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-CANARY5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR6",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR7",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR8",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR9",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR10",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR11",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR12",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR13",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR14",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR15",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1",
+   "question_id": "57-AGGR16",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1_resume1",
+   "question_id": "57-AGGR17",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1_resume1",
+   "question_id": "57-AGGR18",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r1_resume1",
+   "question_id": "57-AGGR19",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "17-Q6",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "18-Q1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "18-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "18-Q4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "18-Q5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "18-Q6",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "canary-P4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-COREF1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-COREF3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-DIST1",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-DIST2",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-CANARY2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR2",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-CANARY3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-CANARY4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-CANARY5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR6",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR7",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR8",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR9",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR10",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR11",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR13",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR14",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR15",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR16",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR17",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR18",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "S0",
+   "stage": "stage_s0_r2",
+   "question_id": "57-AGGR19",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "17-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "17-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "17-Q6",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q3",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q5",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q6",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "26-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "26-Q5",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "canary-P1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "canary-P4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-COREF1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-COREF2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-COREF3",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-DIST1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-DIST2",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-CANARY1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-CANARY2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR2",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-CANARY3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-CANARY4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-CANARY5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR6",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR7",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR8",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR9",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR10",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR11",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR12",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR13",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR14",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR15",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR16",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR17",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR18",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-AGGR19",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "18-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "18-Q4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-DIST1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-DIST2",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-CANARY1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-CANARY2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR2",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-CANARY3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-CANARY4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-CANARY5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR6",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR7",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR8",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR9",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR10",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR11",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR12",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR13",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR15",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR16",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR17",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-AGGR19",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B0",
+   "stage": "s3_chunk_rag_b0_stage_c",
+   "question_id": "57-AGGR19",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "17-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "17-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "17-Q6",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q3",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q6",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "26-Q1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "26-Q5",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "canary-P1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "canary-P4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-COREF1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-COREF2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-COREF3",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-DIST1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-DIST2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-CANARY1",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-CANARY2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR2",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-CANARY3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-CANARY4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-CANARY5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR6",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR7",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR8",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR9",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR10",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR11",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR12",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR13",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR14",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR15",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR16",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR17",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR18",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-AGGR19",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "18-Q2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "18-Q4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "18-Q5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-COREF1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-DIST1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-CANARY2",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR1",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR2",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-CANARY3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR3",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR4",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-CANARY4",
+   "orig_meets": true,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-CANARY5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR5",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR7",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR8",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR9",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR10",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR11",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR12",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR13",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR15",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": true,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR16",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR17",
+   "orig_meets": false,
+   "rule_r_core": false,
+   "rule_r_meets": false,
+   "scope_ok": false,
+   "changed": false
+  },
+  {
+   "arm": "B1",
+   "stage": "s3_chunk_rag_b1_stage_b",
+   "question_id": "57-AGGR18",
+   "orig_meets": false,
+   "rule_r_core": true,
+   "rule_r_meets": true,
+   "scope_ok": true,
+   "changed": true
+  }
+ ],
+ "special_cases": [
+  {
+   "stage": "stage_s0_r1",
+   "question_id": "18-Q6",
+   "answer": "1. 勞工因有事故必須親自處理，可以請事假嗎？\n根據提供的事實清單，勞工因有事故必須親自處理，可以請事假。以下是詳細說明：\n\n1. **勞工因親自照顧家庭成員，得依前項規定請事假**：這條事實表明勞工因親自照顧家庭成員可以請事假，而事故處理可以視為一種親自照顧家庭成員的情況。\n\n2. **事假期間不給工資**：請事假期間，勞工不會獲得工資。\n\n3. **事假可以選擇以小時為請假單位**：勞工可以根據實際需要，以小時為單位請事假。\n\n4. **一年內事假不得累計超過十四日**：勞工在一年內請事假的總天數不得超過十四日。\n\n5. **勞工 因親自照顧家庭成員，依第七條規定請事假 雇主不得視為缺勤而為其他不利之處分**：這條事實表明勞工因親自照顧家庭成員請事假時，雇主不得因此而對勞工進行不利處分。\n\n綜合以上事實，勞工因有事故必須親自處理，可以請事假，但請假天數需符合一年內事假不得累計超過十四日的規定。請假期間不給工資，但雇主不得因此而對勞工進行不利處分。\n\n2. 一年內最多可以請幾天？\n根據提供的事實清單，我們可以分析出以下幾點：\n\n1. **事假**：一年內事假不得累計超過十四日。\n2. **普通傷病假**：一年內未超過三十日部分，工資折半發給；超過三十日部分，雇主為相關人事考核時，仍應以其工作能力、工作態度及實際績效等綜合考量。\n3. **婚假**：未記載具體天數，但明確指出婚假照給工資。\n4. **留職停薪**：以一年為限。\n5. **其他假別**：未記載具體天數，但有提到未住院者在二年內合計不得超過一年。\n\n根據上述事實，一年內最多可以請的天數如下：\n\n- 事假：一年內最多可以請14天。\n- 普通傷病假：一年內最多可以請30天（未超過30天的部分工資折半發給，超過30天的部分需考慮其他因素）。\n- 婚假：未記載具體天數，但明確指出婚假照給工資。\n- 留職停薪：以一年為限，但未記載具體天數。\n\n因此，一年內最多可以請的天數為30天（普通傷病假），加上14天（事假），總計44天。但需要注意的是，這44天需要根據實際情況分開請假，不能全部集中使用。\n\n3. 請事假期間有沒有工資？\n根據提供的事實清單，請事假期間沒有工資。\n\n相關事實如下：\n- 事假期間不給工資。\n- 一年內事假不得累計超過十四日。\n- 勞工 一年內請普通傷病假日數未超過 十日（這條事實與請事假無直接關係，但有助於了解請假規則）。\n\n以上事實明確指出，請事假期間不給工資。",
+   "missing_spans": [
+    "一年內合計不得超過十四日"
+   ],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [
+    {
+     "gold_span": "一年內合計不得超過十四日",
+     "overlap": 1.0,
+     "threshold": 0.7,
+     "overlap_ge_threshold": true,
+     "number_tokens": [
+      "一",
+      "十四"
+     ],
+     "all_number_tokens_present": true,
+     "negation_tokens": [],
+     "no_negation": true,
+     "flip": true
+    }
+   ],
+   "arm": "S0"
+  },
+  {
+   "stage": "stage_s0_r1",
+   "question_id": "57-DIST2",
+   "answer": "1. 警察當選「全國性」好人好事代表，可以獲得幾天特別休假？\n警察當選「全國性」好人好事代表，可以獲得二至五日之特別休假。此資訊來源於事實清單中的「當選全國性好人好事代表者 因 給予二至五日之特別休假」。\n\n2. 跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？\n根據提供的事實清單，當選「直轄市／縣市級模範警察」或「直轄市／縣市級好人好事代表」可獲得一至三日的特別休假，而當選「直轄市／縣市級好人好事代表」可獲得二至五日的特別休假。\n\n因此，跟當選「直轄市／縣市級」好人好事代表的天數不一樣。當選「直轄市／縣市級」好人好事代表可獲得二至五日的特別休假，而「直轄市／縣市級模範警察」則可獲得一至三日的特別休假。",
+   "missing_spans": [
+    "給予一至三日之特別休假"
+   ],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [
+    {
+     "gold_span": "給予一至三日之特別休假",
+     "overlap": 0.9,
+     "threshold": 0.7,
+     "overlap_ge_threshold": true,
+     "number_tokens": [
+      "一",
+      "三"
+     ],
+     "all_number_tokens_present": true,
+     "negation_tokens": [],
+     "no_negation": true,
+     "flip": true
+    }
+   ],
+   "arm": "S0"
+  },
+  {
+   "stage": "stage_s0_r2",
+   "question_id": "18-Q6",
+   "answer": "1. 勞工因有事故必須親自處理，可以請事假嗎？\n根據提供的事實清單，勞工因有事故必須親自處理，可以請事假。以下是詳細說明：\n\n1. **勞工因親自照顧家庭成員，得依前項規定請事假**：這條事實表明勞工因親自照顧家庭成員可以請事假，而事故處理可以視為一種親自照顧家庭成員的情況。\n\n2. **事假期間不給工資**：請事假期間，勞工不會獲得工資。\n\n3. **事假可以選擇以小時為請假單位**：勞工可以根據實際需要，以小時為單位請事假。\n\n4. **一年內事假不得累計超過十四日**：勞工在一年內請事假的總天數不得超過十四日。\n\n5. **勞工 因親自照顧家庭成員，依第七條規定請事假 雇主不得視為缺勤而為其他不利之處分**：這條事實表明勞工因親自照顧家庭成員請事假時，雇主不得因此而對勞工進行不利處分。\n\n綜合以上事實，勞工因有事故必須親自處理，可以請事假，但請假天數需符合一年內事假不得累計超過十四日的規定。請假期間不給工資，但雇主不得因此而對勞工進行不利處分。\n\n2. 一年內最多可以請幾天？\n根據提供的事實清單，我們可以分析出以下幾點：\n\n1. **事假**：一年內事假不得累計超過十四日。\n2. **普通傷病假**：一年內未超過三十日部分，工資折半發給；超過三十日部分，雇主為相關人事考核時，仍應以其工作能力、工作態度及實際績效等綜合考量。\n3. **婚假**：未記載具體天數，但明確指出婚假照給工資。\n4. **留職停薪**：以一年為限。\n5. **其他假別**：未記載具體天數，但有提到未住院者在二年內合計不得超過一年。\n\n根據上述事實，一年內最多可以請的天數如下：\n\n- 事假：一年內最多可以請14天。\n- 普通傷病假：一年內最多可以請30天（未超過30天的部分工資折半發給，超過30天的部分需考慮其他因素）。\n- 婚假：未記載具體天數，但明確指出婚假照給工資。\n- 留職停薪：以一年為限，但未記載具體天數。\n\n因此，一年內最多可以請的天數為30天（普通傷病假），加上14天（事假），總計44天。但需要注意的是，這44天需要根據實際情況分開請假，不能全部集中使用。\n\n3. 請事假期間有沒有工資？\n根據提供的事實清單，請事假期間沒有工資。\n\n相關事實如下：\n- 事假期間不給工資。\n- 一年內事假不得累計超過十四日。\n- 勞工 一年內請普通傷病假日數未超過 十日（這條事實與請事假無直接關係，但有助於了解請假規則）。\n\n以上事實明確指出，請事假期間不給工資。",
+   "missing_spans": [
+    "一年內合計不得超過十四日"
+   ],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [
+    {
+     "gold_span": "一年內合計不得超過十四日",
+     "overlap": 1.0,
+     "threshold": 0.7,
+     "overlap_ge_threshold": true,
+     "number_tokens": [
+      "一",
+      "十四"
+     ],
+     "all_number_tokens_present": true,
+     "negation_tokens": [],
+     "no_negation": true,
+     "flip": true
+    }
+   ],
+   "arm": "S0"
+  },
+  {
+   "stage": "stage_s0_r2",
+   "question_id": "57-DIST2",
+   "answer": "1. 警察當選「全國性」好人好事代表，可以獲得幾天特別休假？\n警察當選「全國性」好人好事代表，可以獲得二至五日之特別休假。此資訊來源於事實清單中的「當選全國性好人好事代表者 因 給予二至五日之特別休假」。\n\n2. 跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？\n根據提供的事實清單，當選「直轄市／縣市級模範警察」或「直轄市／縣市級好人好事代表」可獲得一至三日的特別休假，而當選「直轄市／縣市級好人好事代表」可獲得二至五日的特別休假。\n\n因此，跟當選「直轄市／縣市級」好人好事代表的天數不一樣。當選「直轄市／縣市級」好人好事代表可獲得二至五日的特別休假，而「直轄市／縣市級模範警察」則可獲得一至三日的特別休假。",
+   "missing_spans": [
+    "給予一至三日之特別休假"
+   ],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [
+    {
+     "gold_span": "給予一至三日之特別休假",
+     "overlap": 0.9,
+     "threshold": 0.7,
+     "overlap_ge_threshold": true,
+     "number_tokens": [
+      "一",
+      "三"
+     ],
+     "all_number_tokens_present": true,
+     "negation_tokens": [],
+     "no_negation": true,
+     "flip": true
+    }
+   ],
+   "arm": "S0"
+  },
+  {
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "18-Q6",
+   "answer": "根據提供的事實清單，勞工因有事故必須親自處理，可以請事假。根據勞工請假規則第7條，勞工一年內合計請事假的天數最多為14日。請事假期間不給工資。\n\n以下是詳細說明：\n\n1. 根據勞工請假規則第7條：勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工因有事故必須親自處理，可以請事假，一年內最多可以請14天。請事假期間不給工資。",
+   "missing_spans": [],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [],
+   "arm": "B0"
+  },
+  {
+   "stage": "s3_chunk_rag_b0_stage_a",
+   "question_id": "57-DIST2",
+   "answer": "根據提供的事實清單，警察當選「全國性」好人好事代表可以獲得二至五日之特別休假，而當選「直轄市／縣市級」好人好事代表則可以獲得一至三日之特別休假。因此，「全國性」好人好事代表獲得的特別休假天數並不是與「直轄市／縣市級」的好人好事代表相同。\n\n相關事實如下：\n\n【來源：D0080015_警察人員特別休假辦法，第2段】\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n【來源：D0080015_警察人員特別休假辦法，第2段】\n一、處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n二、奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n三、搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n四、搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n五、當選直轄市、縣（市）級模範警察或好人好事代表者。\n六、對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者。",
+   "missing_spans": [
+    "給予一至三日之特別休假"
+   ],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [
+    {
+     "gold_span": "給予一至三日之特別休假",
+     "overlap": 0.9,
+     "threshold": 0.7,
+     "overlap_ge_threshold": true,
+     "number_tokens": [
+      "一",
+      "三"
+     ],
+     "all_number_tokens_present": true,
+     "negation_tokens": [],
+     "no_negation": true,
+     "flip": true
+    }
+   ],
+   "arm": "B0"
+  },
+  {
+   "stage": "s3_chunk_rag_b0_stage_b",
+   "question_id": "57-DIST2",
+   "answer": "根據提供的事實清單，警察當選「全國性」好人好事代表可以獲得二至五日之特別休假，而當選「直轄市／縣市級」好人好事代表則可以獲得一至三日之特別休假。因此，「全國性」好人好事代表獲得的特別休假天數並不是與「直轄市／縣市級」的好人好事代表相同。\n\n相關事實如下：\n\n【來源：D0080015_警察人員特別休假辦法，第2段】\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n【來源：D0080015_警察人員特別休假辦法，第2段】\n一、處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n二、奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n三、搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n四、搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n五、當選直轄市、縣（市）級模範警察或好人好事代表者。\n六、對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者。",
+   "missing_spans": [
+    "給予一至三日之特別休假"
+   ],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [
+    {
+     "gold_span": "給予一至三日之特別休假",
+     "overlap": 0.9,
+     "threshold": 0.7,
+     "overlap_ge_threshold": true,
+     "number_tokens": [
+      "一",
+      "三"
+     ],
+     "all_number_tokens_present": true,
+     "negation_tokens": [],
+     "no_negation": true,
+     "flip": true
+    }
+   ],
+   "arm": "B0"
+  },
+  {
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "18-Q6",
+   "answer": "根據上述事實清單，勞工因有事故必須親自處理，可以請事假。根據第7條規定，勞工一年內合計請事假的天數不得超過14日。請事假期間不給工資。\n\n以下是詳細說明：\n1. 根據第7條，勞工因有事故必須親自處理，得請事假。\n2. 根據第7條，勞工一年內合計請事假的天數不得超過14日。\n3. 根據第7條，事假期間不給工資。\n\n因此，勞工因有事故必須親自處理，可以請事假，一年內最多可以請14天，請事假期間不給工資。",
+   "missing_spans": [],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [],
+   "arm": "B1"
+  },
+  {
+   "stage": "s3_chunk_rag_b1_stage_a",
+   "question_id": "57-DIST2",
+   "answer": "根據提供的事實清單，警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。這與當選「直轄市／縣市級」好人好事代表的天數不同。\n\n相關事實如下：\n- 第 2 條：有左列情事之一者，給予二至五日之特別休假：\n  一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n  二、當選全國性模範警察者。\n  三、當選全國性好人好事代表者。\n\n- 第 3 條：有左列情事之一者，給予一至三日之特別休假：\n  一、處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n  二、奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n  三、搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n  四、搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n  五、當選直轄市、縣（市）級模範警察或好人好事代表者。\n  六、對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者。\n\n因此，當選「全國性」好人好事代表的特別休假天數為二至五日，而當選「直轄市／縣市級」好人好事代表的特別休假天數為一至三日，兩者不同。",
+   "missing_spans": [],
+   "scope_ok": true,
+   "deterministic_guard_passed": true,
+   "conditions": [],
+   "arm": "B1"
+  }
+ ]
+}
