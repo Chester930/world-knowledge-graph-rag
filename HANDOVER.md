@@ -416,8 +416,14 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告67：事實自然語言化（natural_text）品質問題SDD任務書（T1–T4全部完成）](docs/報告/67_事實自然語言化品質問題SDD任務書.md)
 - [報告68：評測harness查詢embedding快取SDD任務書（交付Codex，尚未實作）](docs/報告/68_評測harness查詢embedding快取SDD任務書.md)
 - [報告75：本體論設計資料夾專案整合候選盤點（純盤點，不含決策）](docs/報告/75_本體論設計資料夾專案整合候選盤點.md)
-- [報告76：guard_profile領域可插拔化SDD任務書（✅ Codex已完成並獨立複驗，commit `2da08c0`，未push）](docs/報告/76_guard_profile領域可插拔化SDD任務書.md)
-- [報告77：法律模態關係型per-KG擴充SDD任務書（交付Codex，尚未實作）](docs/報告/77_法律模態關係型per-KG擴充SDD任務書.md)
+- [報告76：guard_profile領域可插拔化SDD任務書（✅ 完成+獨立複驗+已push，commit `2da08c0`）](docs/報告/76_guard_profile領域可插拔化SDD任務書.md)
+- [報告77：法律模態關係型per-KG擴充SDD任務書（✅ 完成+獨立複驗+已push，commit `b598f34`）](docs/報告/77_法律模態關係型per-KG擴充SDD任務書.md)
+
+### 2026-09-25（續2）報告77完成獨立複驗 + 4個commit已push
+
+**報告77已由Codex完成**（commit `b598f34`）：`RelTypeExtension`+`DomainConfig.rel_type_extensions`四筆內容逐字符合任務書；`core/constants.py`/`docs/論文/`兩條紅線皆未觸碰（`git diff --stat`確認）；`_TYPE_DESCRIPTION_EMBEDDING_CACHE`快取key正確改為`(model_name, 排序後描述項目tuple)`；**額外修正了任務書未明講的細節**——`resolve_query_relation_type()`內原本用`SVO_REL_TYPE_DESCRIPTIONS[best_type]`組LLM仲裁prompt，查詢解析到`OBLIGATES`時會KeyError崩潰，Codex正確改用有效描述字典。**Claude Code已獨立複驗**：獨立重跑pytest得**1118 passed**與回報一致，逐一核對diff內容，`config/domain_packs/generic.json`正確覆寫`rel_type_extensions: []`，T8迴歸測試全數到位且用「預設cfg vs核心-only cfg」雙向對照證明機制真的生效。commit message含完整文獻誠實聲明。
+
+**使用者已同意push，4個累積commit（`34058d5`／`2da08c0`／`d43cc05`／`b598f34`）已於2026-09-25推送**，`origin/worktree-sdd-retrieval-comparison`現與本地一致（`b598f34`）。
 
 ### 2026-09-25（續）報告76完成獨立複驗 + 報告77交付Codex
 
