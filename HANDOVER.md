@@ -538,3 +538,12 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 
 完整測試與 commit 狀態待本輪收尾更新；本結果只驗證 embedding cache 的 Stage 1 可重現性，沒有重跑
 獨立 judge pilot，也不對是否接線或更換模型下結論。
+
+### 2026-09-25 報告72 S3：chunk-RAG對照組已完成
+
+依使用者授權只執行報告72 §2 的 S3，沒有重跑 S0/S1/S2。沿用新題庫雜湊 `23f8c06f`、KG `236903cf-055a-40a8-8923-b9d06601f3b7`、23個scope documents、`qwen2.5:7b`、`bge-m3`、timeout 900 秒與共用 generator/judge pilot；沒有重抽 KG、沒有 Neo4j 寫入。
+
+- S0 K：13/42；D direct-LM：2/42；B0 naive chunk-RAG：20/42（另 `57-AGGR19` 為三次 `[False, True, True]` 的 unstable）；B1 hybrid chunk-RAG：21/42。
+- 對 S0 的逐題配對：B0 對照新增9、KG優勢2、淨差 KG -7；B1 對照新增9、KG優勢1、淨差 KG -8。結論是目前沒有 KG 優於做得夠好的 chunk-RAG 的整體證據；完整表格與 CI/McNemar 見報告72 §9。
+- `57-AGGR18` 的 `role_mismatch` 泛化仍未完成，可能讓 Atomic Accuracy／達標 status 高估，且影響 S3 解讀；共用 generator/judge 仍只是 pilot。
+- 完整 pytest：`1118 passed, 8 warnings`。S3 records／summaries 位於 `data/eval/candidate_runs/s3_chunk_rag_*`；本輪不 push，且保留既有未追蹤檔案不 stage。

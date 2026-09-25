@@ -206,4 +206,56 @@ S0 新題庫基準為 **13/42**。S1 的 K1b，以及 S2 的 K1（`top_k=40`）�
 
 結果解讀仍受兩項限制約束：`57-AGGR18` 的角色互換歸屬檢查（`role_mismatch` 規則泛化）尚未完成，可能使 Atomic Accuracy／達標 status 高估；共用 generator/judge 僅屬 pilot，非正式評測證據。
 
-**S3 chunk-RAG 對照組尚未執行**，是否依報告62／72 的設計進行，待使用者另行決定；本次不自動開始 S3。
+S3 chunk-RAG 對照組已完成，結果與逐題配對明細見下方 §9；本次仍未把任何對照臂設為全域預設，也未自動合併 master。
+
+---
+
+## 9. S3結果：chunk-RAG對照組與S0 K arm並列比較（2026-09-25）
+
+### 9.1 凍結條件、執行範圍與資料完整性
+
+本節只執行 S3，沒有重跑 S0、S1 或 S2。比較基準是 S0 新題庫 K arm 本身，不是任何 S1/S2候選配置：
+
+- 題庫仍為同一批 42 題，manifest／題庫雜湊為 `23f8c06fa7f4459e2bc64531ef80c62f6e00a25b779a0abb7eb4e81933b3aa84`（短雜湊 `23f8c06f`）。
+- KG 為 `236903cf-055a-40a8-8923-b9d06601f3b7`，沿用既有 frozen manifest 的 23 個 scope documents；沒有重抽 KG，也沒有改動 Neo4j 資料。
+- generator/judge 維持 `qwen2.5:7b`，embedding 維持 `bge-m3`；`--query-timeout-s 900`、chunk size `500`、baseline top-k `5`、共用 generator/judge pilot 與 S0 相同。
+- `B0` 在 harness 中以 `M1` alias 執行（naive chunk-RAG），`B1` 以 `M2` alias 執行（hybrid chunk-RAG）；`D` 是既有無檢索 direct-LM control，不把它冒充成 chunk-RAG。
+- 每題先執行一筆，再依既有 `adaptive_repeat.py` 規則補跑不穩定題及固定四題 audit；成功評測 records 均無 harness error。輸出位於 `data/eval/candidate_runs/s3_chunk_rag_{d,b0,b1}_*`，最終 adaptive 摘要分別為 `s3_chunk_rag_d_adaptive_summary_r2.json`、`s3_chunk_rag_b0_adaptive_summary_r3.json`、`s3_chunk_rag_b1_adaptive_summary_r2.json`。
+
+下表的「確定通過」完全沿用 §6/§7 的口徑，只計 `single_pass` 或 `stable_pass`；`unstable` 不擅自當成通過。Context Recall、Atomic Accuracy、SNR 則依各臂所有有效 records，先按題目平均重跑結果，再按 42 題平均；錯誤 records 不列入數值平均。
+
+### 9.2 K arm與chunk-RAG對照組並列表
+
+| 臂 | 方法／設定 | 確定通過 | Atomic Accuracy | Context Recall | SNR | 有效 records | 備註 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| S0 K | KG新基準 | **13/42** | 52.98% | 66.86% | **3.7367%** | 75 | `stable_pass=4`、`single_pass=9` |
+| D | 無檢索 direct-LM control | **2/42** | 13.59% | 0.00% | 0.0000% | 82 | 不是 chunk-RAG；用來確認無檢索下限 |
+| B0 | naive chunk-RAG（M1） | **20/42** | 72.22% | 84.33% | 3.0952% | 69 | `single_pass=16`、`stable_pass=4`、`stable_fail=21`、`unstable=1` |
+| B1 | hybrid chunk-RAG（M2） | **21/42** | 73.71% | 85.71% | 3.1605% | 67 | `single_pass=17`、`stable_pass=4`、`stable_fail=21` |
+
+B0 的唯一 `unstable` 是 `57-AGGR19`，三次結果為 `[False, True, True]`；若以多數決觀察會是 21/42，但本表和逐題主判定仍保守列為 20/42。B1 是本次較強的 chunk-RAG 對照：比 S0 多 **8** 個確定通過題，Context Recall 高 **18.85 個百分點**，SNR 為 S0 的 **0.8458 倍**（仍高於 §11.1 的一半門檻）。B0 則比 S0 多 **7** 題，SNR 為 S0 的 **0.8283 倍**。因此，SNR 沒有跌破一半不能解釋成 KG 已取得整體優勢；在本題庫上，chunk-RAG 的達標與召回表現反而較高。
+
+### 9.3 逐題配對差異與信賴區間
+
+下表的方向是「對照臂通過 − S0 K 通過」；「對照新增」代表 S0 未通過而 chunk/direct control 通過，「KG優勢」代表 S0 通過而對照臂未通過。CI 是 42 題題目層級差異的近似 95% CI，另列 discordant pairs 的 exact McNemar 雙尾檢定。
+
+| 臂 | 對照新增（S0未通過 → 對照通過） | KG優勢（S0通過 → 對照未通過） | 淨差 | 配對差 CI（百分點） | McNemar `p` |
+| --- | --- | --- | ---: | ---: | ---: |
+| D | `57-AGGR17`（1） | `17-Q1`、`17-Q2`、`18-Q2`、`18-Q3`、`18-Q4`、`26-Q1`、`26-Q5`、`canary-P1`、`57-CANARY1`、`57-CANARY2`、`57-CANARY4`、`57-AGGR12`（12） | **−11**（2/42） | **−41.22～−11.17** | **0.0034** |
+| B0 | `17-Q6`、`18-Q1`、`18-Q5`、`18-Q6`、`canary-P4`、`57-COREF1`、`57-COREF3`、`57-AGGR14`、`57-AGGR18`（9） | `57-CANARY1`、`57-AGGR12`（2） | **−7**（20/42） | **+1.86～+31.48** | **0.0654** |
+| B1 | `17-Q6`、`18-Q1`、`18-Q6`、`canary-P4`、`57-COREF3`、`57-DIST2`、`57-AGGR6`、`57-AGGR14`、`57-AGGR19`（9） | `57-AGGR12`（1） | **−8**（21/42） | **+5.30～+32.80** | **0.0215** |
+
+以較強的 B1 為例，S0 K 的可辨識優勢只在 `57-AGGR12`；相反地，B1 從 S0 未通過中新增 9 題，包含新題庫修正相關的 `57-DIST2`。B0 也只有兩題是 S0 通過而 B0 未通過，且沒有 S0 `stable_pass` → 對照 `stable_fail` 的退步；B1 同樣沒有這種 stable regression。Type-E 則是 S0 **3/5**、B0 **3/5**、B1 **4/5**、D **0/5**；B1 的 Type-E 並未因 chunk-RAG 而退步。
+
+### 9.4 「KG相對於做得夠好的chunk-RAG」的回答
+
+本次資料對論文定位問題的答案是：**目前沒有顯示 KG 相對於做得夠好的 chunk-RAG 有整體增益。** B1 這個較強的 chunk-RAG 對照組為 21/42，而 S0 K 為 13/42；逐題是 chunk-RAG 新增 9 題、KG 保有 1 題，淨差為 KG **−8 題**，McNemar `p=0.0215`，配對差 CI 亦未跨 0。B0 的方向相同（chunk 新增 9 題、KG 優勢 2 題，淨差 KG **−7 題**），只是 `p=0.0654` 尚未達同樣的統計明確性。
+
+KG 相對無檢索 D control 仍有明顯增益（13/42 對 2/42），所以結果不是「檢索沒有價值」；較精確的結論是，**在這批題目、這個既有 KG 與目前 generator/judge 條件下，KG 沒有勝過已做得足夠好的 chunk-RAG，反而低於 B0/B1**。這個結果不選擇性隱去，亦不把 B0/B1 設成系統預設；S3 是對照證據，不是架構切換裁示。
+
+### 9.5 風險、已知限制與交付狀態
+
+- `57-AGGR18` 的角色互換歸屬檢查（`role_mismatch` 規則泛化）仍未完成；它可能讓 Atomic Accuracy／達標 status 高估，且這項限制同樣影響 S3，不只是 S1/S2。B0 的新增清單包含 `57-AGGR18`，因此不能把該題當成無條件的 KG 或 chunk-RAG 增益證據。
+- generator/judge 共用 `qwen2.5:7b` 仍是 pilot，不是獨立正式 judge；延遲也不作為本節結論。B0 的 `57-AGGR19` 仍不穩定，已保留為 `unstable` 而非擅自升格。
+- 本次未擴大題庫、未修改 `AtomicScorer` 預設、未重抽 KG、未更換生成模型、未修改全域預設、未處理 `services/expand_worker.py`，也沒有執行 Neo4j 資料寫入。
+- S3 評測資料與 summaries 已保留在 `data/eval/candidate_runs/s3_chunk_rag_*`；完成後依任務書要求執行完整 pytest，結果記於交付回報。S3 不自動合併 master，push 亦不在本次範圍內。

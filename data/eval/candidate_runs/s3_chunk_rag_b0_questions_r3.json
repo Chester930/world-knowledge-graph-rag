@@ -1,0 +1,59 @@
+{
+  "questions": [
+    {
+      "id": "57-AGGR19",
+      "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）分別規定在哪些條文？兩者的實質內容有沒有不同？",
+      "pcode": "N0050031",
+      "source_article": "N0060041 §26；N0050031 §84第2項、§85第2項",
+      "gold_answer": "實質內容相同，只是條文位置不同，這不是新法新增的規定。舊法集中規定在第26條：雇主依第23條規定預告終止時，準用勞動基準法規定預告勞工（第1項）；職業災害勞工依第24條第1款規定終止時，準用勞動基準法規定預告雇主（第2項）。新法則分別併入各自的條文：雇主預告終止的規定在第84條第2項；職業災害勞工終止的規定在第85條第2項（同樣僅限依第1款，即醫院認定不堪勝任工作的情形）。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第26條第1項",
+          "is_essential": true,
+          "note": "舊法雇主預告規定，2026-09-20逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "source_law": "N0060041_職業災害勞工保護法",
+          "source_article": "第26條第2項",
+          "is_essential": true,
+          "note": "舊法勞工預告規定，2026-09-20逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第84條第2項",
+          "is_essential": true,
+          "note": "新法雇主預告規定（併入第84條），2026-09-20逐字核對original.md與Neo4j"
+        },
+        {
+          "exact_span": "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "source_law": "N0050031_勞工職業災害保險及保護法",
+          "source_article": "第85條第2項",
+          "is_essential": true,
+          "note": "新法勞工預告規定（併入第85條），2026-09-20逐字核對original.md與Neo4j"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "新舊法對照的錯誤前提陷阱（預告規定新舊法實質相同、僅條文位置不同；系統若誤稱新法新增或舊法沒有即為錯誤）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務C第4組候選「終止條件比較」子題重啟（2026-09-20，12個failed chunk重抽後）",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "cross_doc_multihop",
+        "multi_fact_assembly"
+      ],
+      "answer_scope": "只回答預告規定在新舊法的所在條文，以及實質內容是否相同；不延伸回答資遣費、退休金（舊法第25條、新法第86條）或終止事由。",
+      "required_claims": [
+        "舊法的預告規定在第26條",
+        "新法的預告規定在第84條第2項與第85條第2項",
+        "新舊法實質內容相同，不是新法新增"
+      ]
+    }
+  ]
+}

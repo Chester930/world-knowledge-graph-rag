@@ -1,0 +1,4156 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單，勞工結婚可以請8日婚假，工資照給。\n\n相關事實如下：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。",
+    "error": null,
+    "latency_s": 14.83,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 645,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M2",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 14830.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_9"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2197,
+        "snr": 0.0073,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 626,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 14830.0,
+        "raw_draft": "根據上述事實清單，勞工結婚可以請8日婚假，工資照給。\n\n相關事實如下：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，勞工結婚可以請8日婚假，工資照給。\n\n相關事實如下：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單，勞工請事假一年內合計不得超過十四日，且事假期間不給工資。\n\n相關事實如下：\n【來源：N0030006_勞工請假規則，第7條】\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。",
+    "error": null,
+    "latency_s": 11.59,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 662,
+    "atomic_score": {
+      "supported_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "M2",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 11590.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2177,
+        "snr": 0.0096,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 622,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 11590.0,
+        "raw_draft": "根據上述事實清單，勞工請事假一年內合計不得超過十四日，且事假期間不給工資。\n\n相關事實如下：\n【來源：N0030006_勞工請假規則，第7條】\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，勞工請事假一年內合計不得超過十四日，且事假期間不給工資。\n\n相關事實如下：\n【來源：N0030006_勞工請假規則，第7條】\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "17-Q6",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察因搶救重大災害表現優異，可以獲得的特別休假天數如下：\n\n根據【來源：D0080015_警察人員特別休假辦法，第2條】，警察人員有下列情形之一者，可以獲得一至三日之特別休假：\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n\n因此，警察因搶救重大災害表現優異，可以獲得一至三日的特別休假。",
+    "error": null,
+    "latency_s": 17.68,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 610,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q6",
+      "arm": "M2",
+      "question": "警察因搶救重大災害表現優異，可以獲得幾天特別休假？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 17680.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1963,
+        "snr": 0.0245,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 570,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 17680.0,
+        "raw_draft": "根據提供的事實清單，警察因搶救重大災害表現優異，可以獲得的特別休假天數如下：\n\n根據【來源：D0080015_警察人員特別休假辦法，第2條】，警察人員有下列情形之一者，可以獲得一至三日之特別休假：\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n\n因此，警察因搶救重大災害表現優異，可以獲得一至三日的特別休假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察因搶救重大災害表現優異，可以獲得的特別休假天數如下：\n\n根據【來源：D0080015_警察人員特別休假辦法，第2條】，警察人員有下列情形之一者，可以獲得一至三日之特別休假：\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n\n因此，警察因搶救重大災害表現優異，可以獲得一至三日的特別休假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，回答如下：\n\n1. 普通傷病假未住院者，一年內合計不得超過三十日。\n2. 普通傷病假住院者，二年內合計不得超過一年。\n3. 普通傷病假未住院部分，一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n\n以上資訊均來自事實清單中的第4條。未住院者一年內合計不得超過三十日，住院者二年內合計不得超過一年，未住院傷病假與住院傷病假二年內合計不得超過一年。普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+    "error": null,
+    "latency_s": 22.15,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 663,
+    "atomic_score": {
+      "supported_spans": [
+        "未住院者，一年內合計不得超過三十日",
+        "住院者，二年內合計不得超過一年",
+        "未超過三十日部分，工資折半發給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q1",
+      "arm": "M2",
+      "question": "勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？住院者二年內合計上限是多少？工資怎麼給付？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 22150.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_2",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2055,
+        "snr": 0.0229,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 599,
+        "retained_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 22150.0,
+        "raw_draft": "根據提供的事實清單，回答如下：\n\n1. 普通傷病假未住院者，一年內合計不得超過三十日。\n2. 普通傷病假住院者，二年內合計不得超過一年。\n3. 普通傷病假未住院部分，一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n\n以上資訊均來自事實清單中的第4條。未住院者一年內合計不得超過三十日，住院者二年內合計不得超過一年，未住院傷病假與住院傷病假二年內合計不得超過一年。普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，回答如下：\n\n1. 普通傷病假未住院者，一年內合計不得超過三十日。\n2. 普通傷病假住院者，二年內合計不得超過一年。\n3. 普通傷病假未住院部分，一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n\n以上資訊均來自事實清單中的第4條。未住院者一年內合計不得超過三十日，住院者二年內合計不得超過一年，未住院傷病假與住院傷病假二年內合計不得超過一年。普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單，受僱者申請育嬰留職停薪，原則上每次不少於六個月。如果只需要30日以上未達六個月，最多可以申請兩次。\n\n相關事實如下：\n\n第 2 條：育嬰留職停薪期間，每次以不少於六個月為原則。但受僱者有少於六個月之需求者，每次申請育嬰留職停薪之期間及次數如下：\n\n一、三十日以上未達六個月：以二次為限。\n\n二、未滿三十日：每次申請，得以日為單位。但合併以三十日為限。",
+    "error": null,
+    "latency_s": 21.37,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 646,
+    "atomic_score": {
+      "supported_spans": [
+        "每次以不少於六個月為原則",
+        "三十日以上未達六個月：以二次為限"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q2",
+      "arm": "M2",
+      "question": "受僱者申請育嬰留職停薪，原則上每次不少於幾個月？如果只需要 30 日以上未達六個月，最多可以申請幾次？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 21370.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030001_勞動基準法_21",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0090025_就業促進津貼實施辦法_6"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2027,
+        "snr": 0.0138,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 600,
+        "retained_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 21370.0,
+        "raw_draft": "根據上述事實清單，受僱者申請育嬰留職停薪，原則上每次不少於六個月。如果只需要30日以上未達六個月，最多可以申請兩次。\n\n相關事實如下：\n\n第 2 條：育嬰留職停薪期間，每次以不少於六個月為原則。但受僱者有少於六個月之需求者，每次申請育嬰留職停薪之期間及次數如下：\n\n一、三十日以上未達六個月：以二次為限。\n\n二、未滿三十日：每次申請，得以日為單位。但合併以三十日為限。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，受僱者申請育嬰留職停薪，原則上每次不少於六個月。如果只需要30日以上未達六個月，最多可以申請兩次。\n\n相關事實如下：\n\n第 2 條：育嬰留職停薪期間，每次以不少於六個月為原則。但受僱者有少於六個月之需求者，每次申請育嬰留職停薪之期間及次數如下：\n\n一、三十日以上未達六個月：以二次為限。\n\n二、未滿三十日：每次申請，得以日為單位。但合併以三十日為限。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單，回答問題如下：\n\n1. 外國人若要用特別休假返國，返國期日是由誰排定？\n   - 根據第3條，受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向雇主請求以特別休假返國，並自行排定請假返國期日，雇主應予同意。\n\n2. 雇主可以片面更改嗎？\n   - 根據第3條，雇主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。雇主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n\n因此，外國人可以自行排定特別休假返國的期日，但雇主在特定情況下可以與外國人協商調整返國期日，若協商不成，則應依外國人原排定之返國期日同意其返國。",
+    "error": null,
+    "latency_s": 65.5,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 633,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日",
+        "雇主應予同意"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "M2",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 65500.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "N0090001_就業服務法_17",
+          "N0030001_勞動基準法_18"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1893,
+        "snr": 0.0085,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 550,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 65500.0,
+        "raw_draft": "根據上述事實清單，回答問題如下：\n\n1. 外國人若要用特別休假返國，返國期日是由誰排定？\n   - 根據第3條，受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向雇主請求以特別休假返國，並自行排定請假返國期日，雇主應予同意。\n\n2. 雇主可以片面更改嗎？\n   - 根據第3條，雇主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。雇主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n\n因此，外國人可以自行排定特別休假返國的期日，但雇主在特定情況下可以與外國人協商調整返國期日，若協商不成，則應依外國人原排定之返國期日同意其返國。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，回答問題如下：\n\n1. 外國人若要用特別休假返國，返國期日是由誰排定？\n   - 根據第3條，受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向雇主請求以特別休假返國，並自行排定請假返國期日，雇主應予同意。\n\n2. 雇主可以片面更改嗎？\n   - 根據第3條，雇主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。雇主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n\n因此，外國人可以自行排定特別休假返國的期日，但雇主在特定情況下可以與外國人協商調整返國期日，若協商不成，則應依外國人原排定之返國期日同意其返國。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十，於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按百分之一百五十的比例從當年度所得額中減除。",
+    "error": null,
+    "latency_s": 33.05,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 630,
+    "atomic_score": {
+      "supported_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "M2",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 33050.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1929,
+        "snr": 0.0161,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 563,
+        "retained_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 33050.0,
+        "raw_draft": "根據上述事實清單，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十，於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按百分之一百五十的比例從當年度所得額中減除。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十，於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按百分之一百五十的比例從當年度所得額中減除。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察人員特別休假辦法中所稱的「特別休假」，其核發依據如下：\n\n1. 根據第2條，特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n   - 當選直轄市、縣（市）級模範警察或好人好事代表者。\n   - 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者。\n\n2. 根據第3條，特別休假的核發依據還包括：\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n   - 當選全國性模範警察者。\n   - 當選全國性好人好事代表者。\n\n3. 根據第4條，特別休假的核發依據還包括：\n   - 主動破獲叛亂組織，人證俱獲者。\n   - 因特別貢獻或特殊功績受頒勳章者。\n   - 因特殊功績榮獲晉階者。\n\n特別休假與服務年資無直接關係，因為特別休假是基於勞動人員的特殊功績或貢獻而發放的，而非根據服務年資。\n\n特別休假的最長天數根據第4條規定，因特別貢獻或特殊功績受頒勳章者或因特殊功績榮獲晉階者，可以獲得三至七日的特別休假。因此，特別休假的最高可以給七天。",
+    "error": null,
+    "latency_s": 70.57,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 730,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 70570.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1991,
+        "snr": 0.0301,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 583,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 70570.0,
+        "raw_draft": "根據提供的事實清單，警察人員特別休假辦法中所稱的「特別休假」，其核發依據如下：\n\n1. 根據第2條，特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n   - 當選直轄市、縣（市）級模範警察或好人好事代表者。\n   - 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者。\n\n2. 根據第3條，特別休假的核發依據還包括：\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n   - 當選全國性模範警察者。\n   - 當選全國性好人好事代表者。\n\n3. 根據第4條，特別休假的核發依據還包括：\n   - 主動破獲叛亂組織，人證俱獲者。\n   - 因特別貢獻或特殊功績受頒勳章者。\n   - 因特殊功績榮獲晉階者。\n\n特別休假與服務年資無直接關係，因為特別休假是基於勞動人員的特殊功績或貢獻而發放的，而非根據服務年資。\n\n特別休假的最長天數根據第4條規定，因特別貢獻或特殊功績受頒勳章者或因特殊功績榮獲晉階者，可以獲得三至七日的特別休假。因此，特別休假的最高可以給七天。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察人員特別休假辦法中所稱的「特別休假」，其核發依據如下：\n\n1. 根據第2條，特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n   - 當選直轄市、縣（市）級模範警察或好人好事代表者。\n   - 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者。\n\n2. 根據第3條，特別休假的核發依據還包括：\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n   - 當選全國性模範警察者。\n   - 當選全國性好人好事代表者。\n\n3. 根據第4條，特別休假的核發依據還包括：\n   - 主動破獲叛亂組織，人證俱獲者。\n   - 因特別貢獻或特殊功績受頒勳章者。\n   - 因特殊功績榮獲晉階者。\n\n特別休假與服務年資無直接關係，因為特別休假是基於勞動人員的特殊功績或貢獻而發放的，而非根據服務年資。\n\n特別休假的最長天數根據第4條規定，因特別貢獻或特殊功績受頒勳章者或因特殊功績榮獲晉階者，可以獲得三至七日的特別休假。因此，特別休假的最高可以給七天。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q6",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單，勞工因有事故必須親自處理，可以請事假。根據第7條規定，勞工一年內合計請事假的天數不得超過14日。請事假期間不給工資。\n\n以下是詳細說明：\n1. 根據第7條，勞工因有事故必須親自處理，得請事假。\n2. 根據第7條，勞工一年內合計請事假的天數不得超過14日。\n3. 根據第7條，事假期間不給工資。\n\n因此，勞工因有事故必須親自處理，可以請事假，一年內最多可以請14天，請事假期間不給工資。",
+    "error": null,
+    "latency_s": 28.87,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 628,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工因有事故必須親自處理，得請事假",
+        "一年內合計不得超過十四日",
+        "事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q6",
+      "arm": "M2",
+      "question": "勞工因有事故必須親自處理，可以請事假嗎？一年內最多可以請幾天？請事假期間有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 28870.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_2",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_18"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工因有事故必須親自處理，得請事假",
+          "一年內合計不得超過十四日",
+          "事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2011,
+        "snr": 0.0184,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 578,
+        "retained_exact_spans": [
+          "勞工因有事故必須親自處理，得請事假",
+          "一年內合計不得超過十四日",
+          "事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 28870.0,
+        "raw_draft": "根據上述事實清單，勞工因有事故必須親自處理，可以請事假。根據第7條規定，勞工一年內合計請事假的天數不得超過14日。請事假期間不給工資。\n\n以下是詳細說明：\n1. 根據第7條，勞工因有事故必須親自處理，得請事假。\n2. 根據第7條，勞工一年內合計請事假的天數不得超過14日。\n3. 根據第7條，事假期間不給工資。\n\n因此，勞工因有事故必須親自處理，可以請事假，一年內最多可以請14天，請事假期間不給工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，勞工因有事故必須親自處理，可以請事假。根據第7條規定，勞工一年內合計請事假的天數不得超過14日。請事假期間不給工資。\n\n以下是詳細說明：\n1. 根據第7條，勞工因有事故必須親自處理，得請事假。\n2. 根據第7條，勞工一年內合計請事假的天數不得超過14日。\n3. 根據第7條，事假期間不給工資。\n\n因此，勞工因有事故必須親自處理，可以請事假，一年內最多可以請14天，請事假期間不給工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "26-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間依作業高度分三段規定如下：\n\n1. 高度在二公尺以上未滿五公尺者，至少有二十分鐘休息。\n2. 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n3. 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n以上休息時間規定詳見第4條。",
+    "error": null,
+    "latency_s": 65.09,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 549,
+    "atomic_score": {
+      "supported_spans": [
+        "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+        "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+        "高度在二十公尺以上者，至少有三十五分鐘休息"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q1",
+      "arm": "M2",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 65090.0,
+        "retrieved_chunk_ids": [
+          "N0060029_高架作業勞工保護措施標準_0",
+          "N0060029_高架作業勞工保護措施標準_1",
+          "N0060001_職業安全衛生法_10",
+          "N0060012_精密作業勞工視機能保護設施標準_2",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1742,
+        "snr": 0.0408,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 510,
+        "retained_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 65090.0,
+        "raw_draft": "根據高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間依作業高度分三段規定如下：\n\n1. 高度在二公尺以上未滿五公尺者，至少有二十分鐘休息。\n2. 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n3. 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n以上休息時間規定詳見第4條。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間依作業高度分三段規定如下：\n\n1. 高度在二公尺以上未滿五公尺者，至少有二十分鐘休息。\n2. 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n3. 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n以上休息時間規定詳見第4條。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，災區受災勞工在災後六個月期間內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。\n\n相關事實如下：\n\n第 2 條：災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應。\n\n第 3 條：前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，災區受災勞工在災後六個月期間內，個人應負擔的保險費由中央政府支應，這個期間從災害發生之當月一日起算。",
+    "error": null,
+    "latency_s": 28.15,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 703,
+    "atomic_score": {
+      "supported_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M2",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 28150.0,
+        "retrieved_chunk_ids": [
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_0",
+          "N0050031_勞工職業災害保險及保護法_7",
+          "N0050031_勞工職業災害保險及保護法_4",
+          "N0050031_勞工職業災害保險及保護法_5",
+          "N0050031_勞工職業災害保險及保護法_3"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2228,
+        "snr": 0.0193,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 641,
+        "retained_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 28150.0,
+        "raw_draft": "根據提供的事實清單，災區受災勞工在災後六個月期間內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。\n\n相關事實如下：\n\n第 2 條：災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應。\n\n第 3 條：前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，災區受災勞工在災後六個月期間內，個人應負擔的保險費由中央政府支應，這個期間從災害發生之當月一日起算。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，災區受災勞工在災後六個月期間內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。\n\n相關事實如下：\n\n第 2 條：災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應。\n\n第 3 條：前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，災區受災勞工在災後六個月期間內，個人應負擔的保險費由中央政府支應，這個期間從災害發生之當月一日起算。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。清單中未記載罰鍰超過七十五萬元的規定，因此無法確認是否有更高額的罰鍰。",
+    "error": null,
+    "latency_s": 84.22,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 652,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "M2",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 84220.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_27",
+          "N0030001_勞動基準法_31",
+          "N0030020_勞工退休金條例_18",
+          "N0090001_就業服務法_25",
+          "N0060001_職業安全衛生法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 2278,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 634,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 84220.0,
+        "raw_draft": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。清單中未記載罰鍰超過七十五萬元的規定，因此無法確認是否有更高額的罰鍰。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。清單中未記載罰鍰超過七十五萬元的規定，因此無法確認是否有更高額的罰鍰。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "canary-P4",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次。根據提供的事實清單，勞基法主要規定了工作時間、休息休假、終止勞動契約、資遣費、職業災害補償等內容，並未涉及關於火星旅遊補助的規定。",
+    "error": null,
+    "latency_s": 113.76,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 652,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P4",
+      "arm": "M2",
+      "question": "請問勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 113760.0,
+        "retrieved_chunk_ids": [
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_7",
+          "N0030001_勞動基準法_24",
+          "N0090001_就業服務法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未記載相關規定"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2179,
+        "snr": 0.0032,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 625,
+        "retained_exact_spans": [
+          "未記載相關規定"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 113760.0,
+        "raw_draft": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次。根據提供的事實清單，勞基法主要規定了工作時間、休息休假、終止勞動契約、資遣費、職業災害補償等內容，並未涉及關於火星旅遊補助的規定。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次。根據提供的事實清單，勞基法主要規定了工作時間、休息休假、終止勞動契約、資遣費、職業災害補償等內容，並未涉及關於火星旅遊補助的規定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單，受僱者申請育嬰留職停薪未滿30日，原則上要提前5天提出申請。這是根據育嬰留職停薪實施辦法第2條第2款的規定。\n\n如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，受僱者可以委託他人代辦申請手續。這是根據育嬰留職停薪實施辦法第2條第2款但書的規定。\n\n因此，受僱者申請育嬰留職停薪未滿30日，原則上要提前5天提出；若因突發狀況來不及提前一天申請，可以委託他人代辦申請手續。",
+    "error": null,
+    "latency_s": 50.56,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 643,
+    "atomic_score": {
+      "supported_spans": [
+        "未滿三十日：於五日前提出",
+        "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+      ],
+      "missing_spans": [
+        "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF1",
+      "arm": "M2",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 50560.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030006_勞工請假規則_1",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2044,
+        "snr": 0.0342,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 593,
+        "retained_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 50560.0,
+        "raw_draft": "根據上述事實清單，受僱者申請育嬰留職停薪未滿30日，原則上要提前5天提出申請。這是根據育嬰留職停薪實施辦法第2條第2款的規定。\n\n如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，受僱者可以委託他人代辦申請手續。這是根據育嬰留職停薪實施辦法第2條第2款但書的規定。\n\n因此，受僱者申請育嬰留職停薪未滿30日，原則上要提前5天提出；若因突發狀況來不及提前一天申請，可以委託他人代辦申請手續。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，受僱者申請育嬰留職停薪未滿30日，原則上要提前5天提出申請。這是根據育嬰留職停薪實施辦法第2條第2款的規定。\n\n如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，受僱者可以委託他人代辦申請手續。這是根據育嬰留職停薪實施辦法第2條第2款但書的規定。\n\n因此，受僱者申請育嬰留職停薪未滿30日，原則上要提前5天提出；若因突發狀況來不及提前一天申請，可以委託他人代辦申請手續。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的資訊，勞工如果因為請普通傷病假而遭受不利處分，雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n相關事實如下：\n【來源：N0030006_勞工請假規則，第2段】\n勞工因請普通傷病假而受有不利處分者，雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，根據勞工請假規則第2段的規定，雇主需要負擔舉證責任來證明不利處分與勞工請普通傷病假無關。",
+    "error": null,
+    "latency_s": 18.11,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 639,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF2",
+      "arm": "M2",
+      "question": "勞工如果因為請普通傷病假而遭受不利處分，要由誰負責證明這個處分跟請假無關？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 18110.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_2",
+          "N0030006_勞工請假規則_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_0",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0146,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 18110.0,
+        "raw_draft": "根據上述事實清單中的資訊，勞工如果因為請普通傷病假而遭受不利處分，雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n相關事實如下：\n【來源：N0030006_勞工請假規則，第2段】\n勞工因請普通傷病假而受有不利處分者，雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，根據勞工請假規則第2段的規定，雇主需要負擔舉證責任來證明不利處分與勞工請普通傷病假無關。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的資訊，勞工如果因為請普通傷病假而遭受不利處分，雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n相關事實如下：\n【來源：N0030006_勞工請假規則，第2段】\n勞工因請普通傷病假而受有不利處分者，雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，根據勞工請假規則第2段的規定，雇主需要負擔舉證責任來證明不利處分與勞工請普通傷病假無關。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，勞工為了親自照顧家庭成員而請事假的天數限制、工資規定，與一般事假有所不同。\n\n### 事假天數限制\n根據第7條，勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。\n\n### 工資規定\n根據第9條，勞工請前項第二款以外之普通傷病假，其全勤獎金之扣發，應按請普通傷病假日數依比例計算。但勞雇雙方另有優於法令之約定者，從其約定。\n\n### 以小時計算\n根據第7條，勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。\n\n因此，勞工為了親自照顧家庭成員而請事假的天數限制為一年內合計不得超過十四日，且可以以小時為單位請假。工資方面，未請普通傷病假的情況下，請事假期間不給工資，但請普通傷病假的情況下，工資扣發需按比例計算。",
+    "error": null,
+    "latency_s": 47.68,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 715,
+    "atomic_score": {
+      "supported_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資",
+        "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF3",
+      "arm": "M2",
+      "question": "勞工為了親自照顧家庭成員而請事假，天數限制、工資規定，跟一般事假一樣嗎？可以用小時計算嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 47680.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2156,
+        "snr": 0.0325,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 614,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 47680.0,
+        "raw_draft": "根據提供的事實清單，勞工為了親自照顧家庭成員而請事假的天數限制、工資規定，與一般事假有所不同。\n\n### 事假天數限制\n根據第7條，勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。\n\n### 工資規定\n根據第9條，勞工請前項第二款以外之普通傷病假，其全勤獎金之扣發，應按請普通傷病假日數依比例計算。但勞雇雙方另有優於法令之約定者，從其約定。\n\n### 以小時計算\n根據第7條，勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。\n\n因此，勞工為了親自照顧家庭成員而請事假的天數限制為一年內合計不得超過十四日，且可以以小時為單位請假。工資方面，未請普通傷病假的情況下，請事假期間不給工資，但請普通傷病假的情況下，工資扣發需按比例計算。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，勞工為了親自照顧家庭成員而請事假的天數限制、工資規定，與一般事假有所不同。\n\n### 事假天數限制\n根據第7條，勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。\n\n### 工資規定\n根據第9條，勞工請前項第二款以外之普通傷病假，其全勤獎金之扣發，應按請普通傷病假日數依比例計算。但勞雇雙方另有優於法令之約定者，從其約定。\n\n### 以小時計算\n根據第7條，勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。\n\n因此，勞工為了親自照顧家庭成員而請事假的天數限制為一年內合計不得超過十四日，且可以以小時為單位請假。工資方面，未請普通傷病假的情況下，請事假期間不給工資，但請普通傷病假的情況下，工資扣發需按比例計算。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得2至5日的特別休假。這條信息來自《警察人員特別休假辦法》第2條第5項。\n\n至於當選「全國性」模範警察的特別休假天數，根據同一份《警察人員特別休假辦法》第3條第2項，當選「全國性」模範警察可以獲得2至5日的特別休假。\n\n因此，當選「直轄市」模範警察和當選「全國性」模範警察獲得的特別休假天數是一樣的，都是2至5日。",
+    "error": null,
+    "latency_s": 16.61,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 615,
+    "atomic_score": {
+      "supported_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "當選全國性模範警察者"
+      ],
+      "missing_spans": [
+        "給予一至三日之特別休假",
+        "給予二至五日之特別休假"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 2/4 facts (semantic fallback). Missed essential: ['給予一至三日之特別休假', '給予二至五日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST1",
+      "arm": "M2",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 16610.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1963,
+        "snr": 0.028,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 570,
+        "retained_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 16610.0,
+        "raw_draft": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得2至5日的特別休假。這條信息來自《警察人員特別休假辦法》第2條第5項。\n\n至於當選「全國性」模範警察的特別休假天數，根據同一份《警察人員特別休假辦法》第3條第2項，當選「全國性」模範警察可以獲得2至5日的特別休假。\n\n因此，當選「直轄市」模範警察和當選「全國性」模範警察獲得的特別休假天數是一樣的，都是2至5日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得2至5日的特別休假。這條信息來自《警察人員特別休假辦法》第2條第5項。\n\n至於當選「全國性」模範警察的特別休假天數，根據同一份《警察人員特別休假辦法》第3條第2項，當選「全國性」模範警察可以獲得2至5日的特別休假。\n\n因此，當選「直轄市」模範警察和當選「全國性」模範警察獲得的特別休假天數是一樣的，都是2至5日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['給予一至三日之特別休假', '給予二至五日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['給予一至三日之特別休假', '給予二至五日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。這與當選「直轄市／縣市級」好人好事代表的天數不同。\n\n相關事實如下：\n- 第 2 條：有左列情事之一者，給予二至五日之特別休假：\n  一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n  二、當選全國性模範警察者。\n  三、當選全國性好人好事代表者。\n\n- 第 3 條：有左列情事之一者，給予一至三日之特別休假：\n  一、處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n  二、奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n  三、搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n  四、搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n  五、當選直轄市、縣（市）級模範警察或好人好事代表者。\n  六、對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者。\n\n因此，當選「全國性」好人好事代表的特別休假天數為二至五日，而當選「直轄市／縣市級」好人好事代表的特別休假天數為一至三日，兩者不同。",
+    "error": null,
+    "latency_s": 37.29,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 695,
+    "atomic_score": {
+      "supported_spans": [
+        "當選全國性好人好事代表者",
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "給予一至三日之特別休假",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 4/4 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST2",
+      "arm": "M2",
+      "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 37290.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_19",
+          "N0060027_職業安全衛生管理辦法_6"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1956,
+        "snr": 0.0291,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 574,
+        "retained_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 37290.0,
+        "raw_draft": "根據提供的事實清單，警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。這與當選「直轄市／縣市級」好人好事代表的天數不同。\n\n相關事實如下：\n- 第 2 條：有左列情事之一者，給予二至五日之特別休假：\n  一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n  二、當選全國性模範警察者。\n  三、當選全國性好人好事代表者。\n\n- 第 3 條：有左列情事之一者，給予一至三日之特別休假：\n  一、處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n  二、奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n  三、搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n  四、搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n  五、當選直轄市、縣（市）級模範警察或好人好事代表者。\n  六、對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者。\n\n因此，當選「全國性」好人好事代表的特別休假天數為二至五日，而當選「直轄市／縣市級」好人好事代表的特別休假天數為一至三日，兩者不同。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。這與當選「直轄市／縣市級」好人好事代表的天數不同。\n\n相關事實如下：\n- 第 2 條：有左列情事之一者，給予二至五日之特別休假：\n  一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n  二、當選全國性模範警察者。\n  三、當選全國性好人好事代表者。\n\n- 第 3 條：有左列情事之一者，給予一至三日之特別休假：\n  一、處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者。\n  二、奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者。\n  三、搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者。\n  四、搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者。\n  五、當選直轄市、縣（市）級模範警察或好人好事代表者。\n  六、對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者。\n\n因此，當選「全國性」好人好事代表的特別休假天數為二至五日，而當選「直轄市／縣市級」好人好事代表的特別休假天數為一至三日，兩者不同。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n事實清單中並未明確記載勞工在留職停薪屆滿一年後是否可以申請延長留職停薪，以及最多可以延長多久。因此，根據規則2，資料未明確記載，無法確認。",
+    "error": null,
+    "latency_s": 39.88,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 620,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 39880.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_2",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0053,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 39880.0,
+        "raw_draft": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n事實清單中並未明確記載勞工在留職停薪屆滿一年後是否可以申請延長留職停薪，以及最多可以延長多久。因此，根據規則2，資料未明確記載，無法確認。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n事實清單中並未明確記載勞工在留職停薪屆滿一年後是否可以申請延長留職停薪，以及最多可以延長多久。因此，根據規則2，資料未明確記載，無法確認。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，根據規則2，答案為「資料未明確記載，無法確認」。",
+    "error": null,
+    "latency_s": 20.27,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 601,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY2",
+      "arm": "M2",
+      "question": "警察特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是多少？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 20270.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_18",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_17",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2007,
+        "snr": 0.0164,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 583,
+        "retained_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 20270.0,
+        "raw_draft": "根據提供的事實清單，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，根據規則2，答案為「資料未明確記載，無法確認」。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，根據規則2，答案為「資料未明確記載，無法確認」。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據上述事實清單，高溫作業的勞工特殊健康檢查的頻率如下：\n\n第 19 條指出，雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，高溫作業的勞工應每年實施一次特殊健康檢查。",
+    "error": null,
+    "latency_s": 12.57,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 657,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR1",
+      "arm": "M2",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 12570.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_9",
+          "N0060022_勞工健康保護規則_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2197,
+        "snr": 0.0228,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 629,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 12570.0,
+        "raw_draft": "根據上述事實清單，高溫作業的勞工特殊健康檢查的頻率如下：\n\n第 19 條指出，雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，高溫作業的勞工應每年實施一次特殊健康檢查。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，高溫作業的勞工特殊健康檢查的頻率如下：\n\n第 19 條指出，雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，高溫作業的勞工應每年實施一次特殊健康檢查。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。\n\n高溫作業的勞工，根據勞工健康保護規則第19條，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n特定化學物質作業的勞工，根據職業安全衛生管理辦法第49條，並未明確規定特殊健康檢查的頻率，僅規定雇主對特定化學設備或其附屬設備於開始使用、改造、修理時，應依規定實施重點檢查一次。\n\n因此，資料未明確記載特定化學物質作業的勞工特殊健康檢查的頻率。",
+    "error": null,
+    "latency_s": 47.4,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 687,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR2",
+      "arm": "M2",
+      "question": "高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 47400.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_9",
+          "N0060027_職業安全衛生管理辦法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2194,
+        "snr": 0.0228,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 632,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 47400.0,
+        "raw_draft": "根據提供的事實清單，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。\n\n高溫作業的勞工，根據勞工健康保護規則第19條，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n特定化學物質作業的勞工，根據職業安全衛生管理辦法第49條，並未明確規定特殊健康檢查的頻率，僅規定雇主對特定化學設備或其附屬設備於開始使用、改造、修理時，應依規定實施重點檢查一次。\n\n因此，資料未明確記載特定化學物質作業的勞工特殊健康檢查的頻率。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。\n\n高溫作業的勞工，根據勞工健康保護規則第19條，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n特定化學物質作業的勞工，根據職業安全衛生管理辦法第49條，並未明確規定特殊健康檢查的頻率，僅規定雇主對特定化學設備或其附屬設備於開始使用、改造、修理時，應依規定實施重點檢查一次。\n\n因此，資料未明確記載特定化學物質作業的勞工特殊健康檢查的頻率。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，對於精密作業的勞工，需要進行特殊健康檢查。以下是詳細回答：\n\n1. **特殊健康檢查的必要性**：\n   - 根據【來源：N0060012_精密作業勞工視機能保護設施標準，第3條】，本標準適用於從事精密作業之有關事業，且本標準所稱精密作業，係指雇主使勞工從事下列凝視作業，且每日凝視作業時間合計在二小時以上者。因此，從事精密作業的勞工需要進行特殊健康檢查。\n\n2. **特殊健康檢查的頻率**：\n   - 事實清單中並未直接明確指出精密作業勞工特殊健康檢查的頻率。根據【來源：N0060022_勞工健康保護規則，第19條】，雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。然而，這條規則適用於所有特別危害健康作業，並未特別指出精密作業的檢查頻率。\n   \n   - 由於事實清單中並未提供精密作業勞工特殊健康檢查的特定頻率，因此無法直接從提供的事實清單中得出結論。根據現行法規，精密作業勞工的特殊健康檢查頻率可能與其他特別危害健康作業相同，即每年或於變更其作業時進行檢查。\n\n綜上所述，從事精密作業的勞工需要進行特殊健康檢查，但其檢查頻率未在提供的事實清單中明確指出，可能與其他特別危害健康作業相同，即每年或於變更其作業時進行檢查。",
+    "error": null,
+    "latency_s": 21.37,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 771,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "M2",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 21370.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_9",
+          "N0060012_精密作業勞工視機能保護設施標準_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2193,
+        "snr": 0.0114,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 633,
+        "retained_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 21370.0,
+        "raw_draft": "根據提供的事實清單，對於精密作業的勞工，需要進行特殊健康檢查。以下是詳細回答：\n\n1. **特殊健康檢查的必要性**：\n   - 根據【來源：N0060012_精密作業勞工視機能保護設施標準，第3條】，本標準適用於從事精密作業之有關事業，且本標準所稱精密作業，係指雇主使勞工從事下列凝視作業，且每日凝視作業時間合計在二小時以上者。因此，從事精密作業的勞工需要進行特殊健康檢查。\n\n2. **特殊健康檢查的頻率**：\n   - 事實清單中並未直接明確指出精密作業勞工特殊健康檢查的頻率。根據【來源：N0060022_勞工健康保護規則，第19條】，雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。然而，這條規則適用於所有特別危害健康作業，並未特別指出精密作業的檢查頻率。\n   \n   - 由於事實清單中並未提供精密作業勞工特殊健康檢查的特定頻率，因此無法直接從提供的事實清單中得出結論。根據現行法規，精密作業勞工的特殊健康檢查頻率可能與其他特別危害健康作業相同，即每年或於變更其作業時進行檢查。\n\n綜上所述，從事精密作業的勞工需要進行特殊健康檢查，但其檢查頻率未在提供的事實清單中明確指出，可能與其他特別危害健康作業相同，即每年或於變更其作業時進行檢查。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，對於精密作業的勞工，需要進行特殊健康檢查。以下是詳細回答：\n\n1. **特殊健康檢查的必要性**：\n   - 根據【來源：N0060012_精密作業勞工視機能保護設施標準，第3條】，本標準適用於從事精密作業之有關事業，且本標準所稱精密作業，係指雇主使勞工從事下列凝視作業，且每日凝視作業時間合計在二小時以上者。因此，從事精密作業的勞工需要進行特殊健康檢查。\n\n2. **特殊健康檢查的頻率**：\n   - 事實清單中並未直接明確指出精密作業勞工特殊健康檢查的頻率。根據【來源：N0060022_勞工健康保護規則，第19條】，雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。然而，這條規則適用於所有特別危害健康作業，並未特別指出精密作業的檢查頻率。\n   \n   - 由於事實清單中並未提供精密作業勞工特殊健康檢查的特定頻率，因此無法直接從提供的事實清單中得出結論。根據現行法規，精密作業勞工的特殊健康檢查頻率可能與其他特別危害健康作業相同，即每年或於變更其作業時進行檢查。\n\n綜上所述，從事精密作業的勞工需要進行特殊健康檢查，但其檢查頻率未在提供的事實清單中明確指出，可能與其他特別危害健康作業相同，即每年或於變更其作業時進行檢查。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單，關於婚假、普通傷病假、產假這三種假別，請假期間的工資給付方式如下：\n\n1. **婚假**：\n   - 資料未明確記載，無法確認婚假期間的工資給付方式。\n\n2. **普通傷病假**：\n   - 未住院者，一年內合計不得超過三十日，工資折半發給，勞工領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n   - 住院者，二年內合計不得超過一年，其治療或休養期間，併入住院傷病假計算。\n   - 未住院傷病假與住院傷病假二年內合計不得超過一年。\n\n3. **產假**：\n   - 資料未明確記載，無法確認產假期間的工資給付方式。\n\n因此，根據提供的事實清單，只有普通傷病假的工資給付方式有明確規定，而婚假和產假的工資給付方式未記載。",
+    "error": null,
+    "latency_s": 72.32,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 679,
+    "atomic_score": {
+      "supported_spans": [
+        "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。"
+      ],
+      "missing_spans": [
+        "勞工結婚者給予婚假八日，工資照給。",
+        "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['勞工結婚者給予婚假八日，工資照給。', '前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR3",
+      "arm": "M2",
+      "question": "婚假、普通傷病假、產假這三種假別，請假期間的工資怎麼給？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 72320.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_2",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給。",
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。"
+        ],
+        "missed_exact_spans": [
+          "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2079,
+        "snr": 0.0332,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 598,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給。",
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。"
+        ],
+        "dropped_exact_spans": [
+          "前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 72320.0,
+        "raw_draft": "根據提供的事實清單，關於婚假、普通傷病假、產假這三種假別，請假期間的工資給付方式如下：\n\n1. **婚假**：\n   - 資料未明確記載，無法確認婚假期間的工資給付方式。\n\n2. **普通傷病假**：\n   - 未住院者，一年內合計不得超過三十日，工資折半發給，勞工領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n   - 住院者，二年內合計不得超過一年，其治療或休養期間，併入住院傷病假計算。\n   - 未住院傷病假與住院傷病假二年內合計不得超過一年。\n\n3. **產假**：\n   - 資料未明確記載，無法確認產假期間的工資給付方式。\n\n因此，根據提供的事實清單，只有普通傷病假的工資給付方式有明確規定，而婚假和產假的工資給付方式未記載。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，關於婚假、普通傷病假、產假這三種假別，請假期間的工資給付方式如下：\n\n1. **婚假**：\n   - 資料未明確記載，無法確認婚假期間的工資給付方式。\n\n2. **普通傷病假**：\n   - 未住院者，一年內合計不得超過三十日，工資折半發給，勞工領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。\n   - 住院者，二年內合計不得超過一年，其治療或休養期間，併入住院傷病假計算。\n   - 未住院傷病假與住院傷病假二年內合計不得超過一年。\n\n3. **產假**：\n   - 資料未明確記載，無法確認產假期間的工資給付方式。\n\n因此，根據提供的事實清單，只有普通傷病假的工資給付方式有明確規定，而婚假和產假的工資給付方式未記載。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['前項女工受僱工作在六個月以上者，停止工作期間工資照給；未滿六個月者減半發給。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR4",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，勞工遭遇職業災害，在正式認定為職災之前，請假期間工資的處理方式如下：\n\n1. 職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假。普通傷病假期滿，雇主應予留職停薪。此部分明確記載了請假期間的處理方式，但未提及工資如何計算。\n\n2. 職業災害認定為職業災害後，勞工可依公傷病假處理，但請假期間工資的計算方式未在事實清單中明確記載。\n\n因此，根據上述事實清單，資料未明確記載，無法確認請假期間工資的計算方式。",
+    "error": null,
+    "latency_s": 92.28,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 698,
+    "atomic_score": {
+      "supported_spans": [
+        "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。"
+      ],
+      "missing_spans": [
+        "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+        "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR4",
+      "arm": "M2",
+      "question": "勞工遭遇職業災害，在正式認定為職災之前，請假期間工資怎麼算？認定之後呢？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 92280.0,
+        "retrieved_chunk_ids": [
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0050031_勞工職業災害保險及保護法_40",
+          "N0060041_職業災害勞工保護法_1",
+          "N0050031_勞工職業災害保險及保護法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。"
+        ],
+        "missed_exact_spans": [
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2289,
+        "snr": 0.0306,
+        "chain_completeness": 0.3333
+      },
+      "stage2_context": {
+        "total_context_tokens": 644,
+        "retained_exact_spans": [
+          "職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假，普通傷病假期滿，雇主應予留職停薪，如認定結果為職業災害，再以公傷病假處理。"
+        ],
+        "dropped_exact_spans": [
+          "普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。",
+          "勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 92280.0,
+        "raw_draft": "根據提供的事實清單，勞工遭遇職業災害，在正式認定為職災之前，請假期間工資的處理方式如下：\n\n1. 職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假。普通傷病假期滿，雇主應予留職停薪。此部分明確記載了請假期間的處理方式，但未提及工資如何計算。\n\n2. 職業災害認定為職業災害後，勞工可依公傷病假處理，但請假期間工資的計算方式未在事實清單中明確記載。\n\n因此，根據上述事實清單，資料未明確記載，無法確認請假期間工資的計算方式。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工遭遇職業災害，在正式認定為職災之前，請假期間工資的處理方式如下：\n\n1. 職業災害未認定前，勞工得依勞工請假規則第四條規定，先請普通傷病假。普通傷病假期滿，雇主應予留職停薪。此部分明確記載了請假期間的處理方式，但未提及工資如何計算。\n\n2. 職業災害認定為職業災害後，勞工可依公傷病假處理，但請假期間工資的計算方式未在事實清單中明確記載。\n\n因此，根據上述事實清單，資料未明確記載，無法確認請假期間工資的計算方式。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由雇主補足之。', '勞工在醫療中不能工作時，雇主應按其原領工資數額予以補償。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY4",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單，勞工請事假期間的工資計算方式如下：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工請事假期間的工資計算為零，即事假期間不發給工資。",
+    "error": null,
+    "latency_s": 13.73,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "事假期間不給工資。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY4",
+      "arm": "M2",
+      "question": "勞工請事假，期間工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 13730.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_19",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "事假期間不給工資。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2192,
+        "snr": 0.0041,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 630,
+        "retained_exact_spans": [
+          "事假期間不給工資。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 13730.0,
+        "raw_draft": "根據上述事實清單，勞工請事假期間的工資計算方式如下：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工請事假期間的工資計算為零，即事假期間不發給工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，勞工請事假期間的工資計算方式如下：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工請事假期間的工資計算為零，即事假期間不發給工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，自《勞工職業災害保險及保護法》施行之日起，《職業災害勞工保護法》不再適用。因此，《職業災害勞工保護法》現在不適用。",
+    "error": null,
+    "latency_s": 30.12,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 573,
+    "atomic_score": {
+      "supported_spans": [
+        "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。"
+      ],
+      "missing_spans": [
+        "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY5",
+      "arm": "M2",
+      "question": "《職業災害勞工保護法》現在還適用嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 30120.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_46",
+          "N0050031_勞工職業災害保險及保護法_45",
+          "N0050031_勞工職業災害保險及保護法_44",
+          "N0060041_職業災害勞工保護法_0",
+          "N0050031_勞工職業災害保險及保護法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。"
+        ],
+        "missed_exact_spans": [
+          "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 1909,
+        "snr": 0.0168,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 557,
+        "retained_exact_spans": [
+          "除本法另有規定外，自本法施行之日起，職業災害勞工保護法不再適用。"
+        ],
+        "dropped_exact_spans": [
+          "本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 30120.0,
+        "raw_draft": "根據提供的事實清單，自《勞工職業災害保險及保護法》施行之日起，《職業災害勞工保護法》不再適用。因此，《職業災害勞工保護法》現在不適用。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，自《勞工職業災害保險及保護法》施行之日起，《職業災害勞工保護法》不再適用。因此，《職業災害勞工保護法》現在不適用。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['本法施行前依法應為所屬勞工辦理參加勞工保險而未辦理之雇主，其勞工發生職業災害事故致死亡或失能，經依本法施行前職業災害勞工保護法第六條規定發給補助者，處以補助金額相同額度之罰鍰。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據《勞工職業災害保險及保護法》第六十九條第二項授權訂定的。\n\n關於輔助設施補助金額上限，根據事實清單中的第4條和第5條，補助總金額上限為新臺幣二十萬元。因此，該辦法對輔助設施補助金額有上限，上限為新臺幣二十萬元。",
+    "error": null,
+    "latency_s": 16.91,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 670,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+        "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+      ],
+      "missing_spans": [
+        "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR5",
+      "arm": "M2",
+      "question": "《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據哪一部法律的哪一條文授權訂定的？該辦法對輔助設施補助金額有沒有上限？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 16910.0,
+        "retrieved_chunk_ids": [
+          "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法_0",
+          "N0050031_勞工職業災害保險及保護法_32",
+          "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法_1",
+          "N0050031_勞工職業災害保險及保護法_31",
+          "N0060041_職業災害勞工保護法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2146,
+        "snr": 0.0606,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 634,
+        "retained_exact_spans": [
+          "本辦法依勞工職業災害保險及保護法（以下簡稱本法）第六十九條第二項規定訂定之。",
+          "前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。",
+          "本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 16910.0,
+        "raw_draft": "根據提供的事實清單，《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據《勞工職業災害保險及保護法》第六十九條第二項授權訂定的。\n\n關於輔助設施補助金額上限，根據事實清單中的第4條和第5條，補助總金額上限為新臺幣二十萬元。因此，該辦法對輔助設施補助金額有上限，上限為新臺幣二十萬元。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法》是依據《勞工職業災害保險及保護法》第六十九條第二項授權訂定的。\n\n關於輔助設施補助金額上限，根據事實清單中的第4條和第5條，補助總金額上限為新臺幣二十萬元。因此，該辦法對輔助設施補助金額有上限，上限為新臺幣二十萬元。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['前二條及前項補助或津貼之條件、基準、申請與核發程序及其他應遵行事項之辦法，由中央主管機關定之。', '本辦法所定輔助設施補助，以每一職業災害勞工同一職業災害事故，補助總金額新臺幣二十萬元為限。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR6",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對職業災害勞工終止勞動契約時的資遣費／退休金規定有所不同。以下是詳細分析：\n\n### 1. 資遣費\n- **舊法（職業災害勞工保護法）**：\n  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。\n  - 第 26 條規定，雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 28 條規定，事業單位改組或轉讓後所留用之勞工，因職業災害致身心障礙、喪失部分或全部工作能力者，其依法令或勞動契約原有之權益，對新雇主繼續存在。\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 86 條規定，雇主依第八十四條第一項第一款、第三款，或勞工依第八十五條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n\n### 2. 退休金\n- **舊法（職業災害勞工保護法）**：\n  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 26 條規定，雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 28 條規定，事業單位改組或轉讓後所留用之勞工，因職業災害致身心障礙、喪失部分或全部工作能力者，其依法令或勞動契約原有之權益，對新雇主繼續存在。\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 86 條規定，雇主依第八十四條第一項第一款、第三款，或勞工依第八十五條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n\n### 總結\n新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）在資遣費和退休金的規定上，主要區別在於：\n- 新法明確指出，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。若勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n- 舊法則未明確指出勞工退休金的發給標準，僅規定雇主應依勞動基準法之規定發給勞工退休金。\n\n因此，新法對資遣費和退休金的發給標準更加明確，而舊法則較為模糊。",
+    "error": null,
+    "latency_s": 37.21,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 857,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+        "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+        "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+        "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 4/4 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR6",
+      "arm": "M2",
+      "question": "職業災害勞工終止勞動契約時，新法（勞工職業災害保險及保護法）跟舊法（職業災害勞工保護法）對資遣費／退休金的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 37210.0,
+        "retrieved_chunk_ids": [
+          "N0060041_職業災害勞工保護法_7",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0030020_勞工退休金條例_5",
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0050031_勞工職業災害保險及保護法_46"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1970,
+        "snr": 0.1284,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 561,
+        "retained_exact_spans": [
+          "雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。",
+          "雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。",
+          "雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。",
+          "但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 37210.0,
+        "raw_draft": "根據提供的事實清單，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對職業災害勞工終止勞動契約時的資遣費／退休金規定有所不同。以下是詳細分析：\n\n### 1. 資遣費\n- **舊法（職業災害勞工保護法）**：\n  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。\n  - 第 26 條規定，雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 28 條規定，事業單位改組或轉讓後所留用之勞工，因職業災害致身心障礙、喪失部分或全部工作能力者，其依法令或勞動契約原有之權益，對新雇主繼續存在。\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 86 條規定，雇主依第八十四條第一項第一款、第三款，或勞工依第八十五條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n\n### 2. 退休金\n- **舊法（職業災害勞工保護法）**：\n  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 26 條規定，雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 28 條規定，事業單位改組或轉讓後所留用之勞工，因職業災害致身心障礙、喪失部分或全部工作能力者，其依法令或勞動契約原有之權益，對新雇主繼續存在。\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 86 條規定，雇主依第八十四條第一項第一款、第三款，或勞工依第八十五條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n\n### 總結\n新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）在資遣費和退休金的規定上，主要區別在於：\n- 新法明確指出，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。若勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n- 舊法則未明確指出勞工退休金的發給標準，僅規定雇主應依勞動基準法之規定發給勞工退休金。\n\n因此，新法對資遣費和退休金的發給標準更加明確，而舊法則較為模糊。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對職業災害勞工終止勞動契約時的資遣費／退休金規定有所不同。以下是詳細分析：\n\n### 1. 資遣費\n- **舊法（職業災害勞工保護法）**：\n  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工資遣費。\n  - 第 26 條規定，雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 28 條規定，事業單位改組或轉讓後所留用之勞工，因職業災害致身心障礙、喪失部分或全部工作能力者，其依法令或勞動契約原有之權益，對新雇主繼續存在。\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 86 條規定，雇主依第八十四條第一項第一款、第三款，或勞工依第八十五條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n\n### 2. 退休金\n- **舊法（職業災害勞工保護法）**：\n  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 26 條規定，雇主依第二十三條第二款，或勞工依第二十四條第一款規定終止勞動契約者，雇主應依勞動基準法之規定，發給勞工退休金。\n  - 第 28 條規定，事業單位改組或轉讓後所留用之勞工，因職業災害致身心障礙、喪失部分或全部工作能力者，其依法令或勞動契約原有之權益，對新雇主繼續存在。\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 86 條規定，雇主依第八十四條第一項第一款、第三款，或勞工依第八十五條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n\n### 總結\n新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）在資遣費和退休金的規定上，主要區別在於：\n- 新法明確指出，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。若勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。\n- 舊法則未明確指出勞工退休金的發給標準，僅規定雇主應依勞動基準法之規定發給勞工退休金。\n\n因此，新法對資遣費和退休金的發給標準更加明確，而舊法則較為模糊。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR7",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，雇主幫員工申請中高齡者職業訓練費用補助，具體門檻如下：\n\n1. 最低開班人數應達五人，且訓練時數不得低於八十小時（第 6 條）。\n2. 雇主應檢附申請書、招募計畫書、訓練計畫書、依法設立登記之證明文件影本及其他經中央主管機關規定之文件、資料（第 7 條）。\n3. 雇主應依招募計畫書之勞動條件全部僱用結訓中高齡者；未僱用者，其全部或一部之訓練費用不予補助（第 8 條）。\n\n此門檻的訂定，法源依據是母法第 24 條授權，雇主依僱用人力需求，得自行或委託辦理失業之中高齡者及高齡者職業訓練，雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助（第 24 條）。",
+    "error": null,
+    "latency_s": 84.41,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 711,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。"
+      ],
+      "missing_spans": [
+        "本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。",
+        "雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。', '雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR7",
+      "arm": "M2",
+      "question": "雇主要幫員工申請中高齡者職業訓練費用補助，具體門檻是什麼？這個門檻的訂定，法源依據是母法哪一條授權的？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 84410.0,
+        "retrieved_chunk_ids": [
+          "N0090058_失業中高齡者及高齡者就業促進辦法_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_0",
+          "N0090055_中高齡者及高齡者就業促進法_5",
+          "N0090055_中高齡者及高齡者就業促進法_4",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+          "本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。",
+          "雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2162,
+        "snr": 0.056,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 639,
+        "retained_exact_spans": [
+          "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+          "本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。",
+          "雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 84410.0,
+        "raw_draft": "根據提供的事實清單，雇主幫員工申請中高齡者職業訓練費用補助，具體門檻如下：\n\n1. 最低開班人數應達五人，且訓練時數不得低於八十小時（第 6 條）。\n2. 雇主應檢附申請書、招募計畫書、訓練計畫書、依法設立登記之證明文件影本及其他經中央主管機關規定之文件、資料（第 7 條）。\n3. 雇主應依招募計畫書之勞動條件全部僱用結訓中高齡者；未僱用者，其全部或一部之訓練費用不予補助（第 8 條）。\n\n此門檻的訂定，法源依據是母法第 24 條授權，雇主依僱用人力需求，得自行或委託辦理失業之中高齡者及高齡者職業訓練，雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助（第 24 條）。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，雇主幫員工申請中高齡者職業訓練費用補助，具體門檻如下：\n\n1. 最低開班人數應達五人，且訓練時數不得低於八十小時（第 6 條）。\n2. 雇主應檢附申請書、招募計畫書、訓練計畫書、依法設立登記之證明文件影本及其他經中央主管機關規定之文件、資料（第 7 條）。\n3. 雇主應依招募計畫書之勞動條件全部僱用結訓中高齡者；未僱用者，其全部或一部之訓練費用不予補助（第 8 條）。\n\n此門檻的訂定，法源依據是母法第 24 條授權，雇主依僱用人力需求，得自行或委託辦理失業之中高齡者及高齡者職業訓練，雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助（第 24 條）。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。', '雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['本辦法依中高齡者及高齡者就業促進法（以下簡稱本法）第二十七條規定訂定之。', '雇主依本法第二十四條第二項規定辦理訓練，並申請訓練費用補助者，最低開班人數應達五人，且訓練時數不得低於八十小時。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR8",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《中高齡者及高齡者就業促進法》第27條所稱「前三條所定補助、利息補貼、津貼或獎助」，具體是指以下協助措施：\n\n1. 職業訓練補助。\n2. 創業貸款利息補貼。\n3. 跨域就業補助。\n4. 臨時工作津貼。\n5. 職場學習及再適應津貼。\n6. 雇用獎助。\n\n以上資訊來自《失業中高齡者及高齡者就業促進辦法》第3條。",
+    "error": null,
+    "latency_s": 42.62,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 670,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。"
+      ],
+      "missing_spans": [
+        "主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。",
+        "主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。",
+        "前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.25,
+      "atomic_recall": 0.25,
+      "is_perfect": false,
+      "details": "Hit 1/4 facts (semantic fallback). Missed essential: ['主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。', '主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。', '前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR8",
+      "arm": "M2",
+      "question": "《中高齡者及高齡者就業促進法》第27條所稱「前三條所定補助、利息補貼、津貼或獎助」，具體是指哪些協助措施？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 42620.0,
+        "retrieved_chunk_ids": [
+          "N0090055_中高齡者及高齡者就業促進法_6",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_0",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0090055_中高齡者及高齡者就業促進法_5",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+          "主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。",
+          "主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。",
+          "前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2119,
+        "snr": 0.0934,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 631,
+        "retained_exact_spans": [
+          "雇主依前項規定辦理職業訓練，中央主管機關得予訓練費用補助。",
+          "主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。",
+          "主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。",
+          "前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 42620.0,
+        "raw_draft": "根據《中高齡者及高齡者就業促進法》第27條所稱「前三條所定補助、利息補貼、津貼或獎助」，具體是指以下協助措施：\n\n1. 職業訓練補助。\n2. 創業貸款利息補貼。\n3. 跨域就業補助。\n4. 臨時工作津貼。\n5. 職場學習及再適應津貼。\n6. 雇用獎助。\n\n以上資訊來自《失業中高齡者及高齡者就業促進辦法》第3條。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《中高齡者及高齡者就業促進法》第27條所稱「前三條所定補助、利息補貼、津貼或獎助」，具體是指以下協助措施：\n\n1. 職業訓練補助。\n2. 創業貸款利息補貼。\n3. 跨域就業補助。\n4. 臨時工作津貼。\n5. 職場學習及再適應津貼。\n6. 雇用獎助。\n\n以上資訊來自《失業中高齡者及高齡者就業促進辦法》第3條。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。', '主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。', '前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['主管機關為協助中高齡者及高齡者創業或與青年共同創業，得提供創業諮詢輔導、創業研習課程及創業貸款利息補貼等措施。', '主管機關對於失業之中高齡者及高齡者，應協助其就業，提供相關就業協助措施，並得發給相關津貼、補助或獎助。', '前三條所定補助、利息補貼、津貼或獎助之申請資格條件、項目、方式、期間、廢止、經費來源及其他相關事項之辦法，由中央主管機關定之。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR9",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《就業促進津貼實施辦法》的法源依據是《就業服務法》第二十三條第二項及第二十四條第四項規定。\n\n相關事實如下：\n\n【來源：N0090025_就業促進津貼實施辦法，第1段】\n第 1 條\n本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+    "error": null,
+    "latency_s": 14.32,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 617,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。"
+      ],
+      "missing_spans": [
+        "前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。",
+        "第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。', '第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR9",
+      "arm": "M2",
+      "question": "《就業促進津貼實施辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 14320.0,
+        "retrieved_chunk_ids": [
+          "N0090058_失業中高齡者及高齡者就業促進辦法_9",
+          "N0090025_就業促進津貼實施辦法_0",
+          "N0090025_就業促進津貼實施辦法_8",
+          "N0090001_就業服務法_5",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+          "前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。",
+          "第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1943,
+        "snr": 0.0721,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 582,
+        "retained_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+          "前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。",
+          "第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 14320.0,
+        "raw_draft": "根據提供的事實清單，《就業促進津貼實施辦法》的法源依據是《就業服務法》第二十三條第二項及第二十四條第四項規定。\n\n相關事實如下：\n\n【來源：N0090025_就業促進津貼實施辦法，第1段】\n第 1 條\n本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《就業促進津貼實施辦法》的法源依據是《就業服務法》第二十三條第二項及第二十四條第四項規定。\n\n相關事實如下：\n\n【來源：N0090025_就業促進津貼實施辦法，第1段】\n第 1 條\n本辦法依就業服務法（以下簡稱本法）第二十三條第二項及第二十四條第四項規定訂定之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。', '第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['前項利息補貼、津貼與補助金之申請資格條件、項目、方式、期間、經費來源及其他應遵行事項之辦法，由中央主管機關定之。', '第一項津貼或補助金之申請資格、金額、期間、經費來源及其他相關事項之辦法，由主管機關定之。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR10",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《就業促進津貼實施辦法》相關規定，求職交通補助金、臨時工作津貼、職業訓練生活津貼的發給金額或基準如下：\n\n1. 求職交通補助金：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. 臨時工作津貼：\n   - 按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n   - 用人單位申請津貼應備文件、資料，準用就業促進津貼實施辦法第十一條規定。\n\n3. 職業訓練生活津貼：\n   - 職業訓練生活津貼發給標準，應符合下列條件：\n     - 訓練期間一個月以上。\n     - 每星期訓練四日以上。\n     - 每日訓練日間四小時以上。\n     - 每月總訓練時數一百小時以上。\n   - 本項津貼發給業務，得委任、委託公立就業服務機構或職業訓練單位辦理。\n\n上述信息均來自提供的事實清單，未作任何補充。",
+    "error": null,
+    "latency_s": 17.88,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 703,
+    "atomic_score": {
+      "supported_spans": [
+        "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+        "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+      ],
+      "missing_spans": [
+        "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR10",
+      "arm": "M2",
+      "question": "《就業促進津貼實施辦法》規定的求職交通補助金、臨時工作津貼、職業訓練生活津貼，三者的發給金額或基準各是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 17880.0,
+        "retrieved_chunk_ids": [
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_5",
+          "N0090025_就業促進津貼實施辦法_2",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0090025_就業促進津貼實施辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "missed_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2005,
+        "snr": 0.0509,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 600,
+        "retained_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "dropped_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 17880.0,
+        "raw_draft": "根據《就業促進津貼實施辦法》相關規定，求職交通補助金、臨時工作津貼、職業訓練生活津貼的發給金額或基準如下：\n\n1. 求職交通補助金：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. 臨時工作津貼：\n   - 按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n   - 用人單位申請津貼應備文件、資料，準用就業促進津貼實施辦法第十一條規定。\n\n3. 職業訓練生活津貼：\n   - 職業訓練生活津貼發給標準，應符合下列條件：\n     - 訓練期間一個月以上。\n     - 每星期訓練四日以上。\n     - 每日訓練日間四小時以上。\n     - 每月總訓練時數一百小時以上。\n   - 本項津貼發給業務，得委任、委託公立就業服務機構或職業訓練單位辦理。\n\n上述信息均來自提供的事實清單，未作任何補充。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據《就業促進津貼實施辦法》相關規定，求職交通補助金、臨時工作津貼、職業訓練生活津貼的發給金額或基準如下：\n\n1. 求職交通補助金：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. 臨時工作津貼：\n   - 按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n   - 用人單位申請津貼應備文件、資料，準用就業促進津貼實施辦法第十一條規定。\n\n3. 職業訓練生活津貼：\n   - 職業訓練生活津貼發給標準，應符合下列條件：\n     - 訓練期間一個月以上。\n     - 每星期訓練四日以上。\n     - 每日訓練日間四小時以上。\n     - 每月總訓練時數一百小時以上。\n   - 本項津貼發給業務，得委任、委託公立就業服務機構或職業訓練單位辦理。\n\n上述信息均來自提供的事實清單，未作任何補充。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR11",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《勞工退休金條例年金保險實施辦法》的法源依據是《勞工退休金條例》第三十五條第三項及第三十七條。具體來說：\n\n1. 第 1 條明確指出本辦法是依《勞工退休金條例》第三十五條第三項及第三十七條規定訂定之。\n\n因此，法源依據為《勞工退休金條例》第三十五條第三項及第三十七條。",
+    "error": null,
+    "latency_s": 13.99,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 677,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。"
+      ],
+      "missing_spans": [
+        "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+        "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['事業單位採行前項規定之年金保險者，應報請中央主管機關核准。', '年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR11",
+      "arm": "M2",
+      "question": "《勞工退休金條例年金保險實施辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 13990.0,
+        "retrieved_chunk_ids": [
+          "N0030022_勞工退休金條例年金保險實施辦法_0",
+          "N0030022_勞工退休金條例年金保險實施辦法_11",
+          "N0030020_勞工退休金條例_14",
+          "N0030020_勞工退休金條例_13",
+          "N0030020_勞工退休金條例_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。"
+        ],
+        "missed_exact_spans": [
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2237,
+        "snr": 0.0308,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 641,
+        "retained_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。"
+        ],
+        "dropped_exact_spans": [
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 13990.0,
+        "raw_draft": "根據提供的事實清單，《勞工退休金條例年金保險實施辦法》的法源依據是《勞工退休金條例》第三十五條第三項及第三十七條。具體來說：\n\n1. 第 1 條明確指出本辦法是依《勞工退休金條例》第三十五條第三項及第三十七條規定訂定之。\n\n因此，法源依據為《勞工退休金條例》第三十五條第三項及第三十七條。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《勞工退休金條例年金保險實施辦法》的法源依據是《勞工退休金條例》第三十五條第三項及第三十七條。具體來說：\n\n1. 第 1 條明確指出本辦法是依《勞工退休金條例》第三十五條第三項及第三十七條規定訂定之。\n\n因此，法源依據為《勞工退休金條例》第三十五條第三項及第三十七條。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR12",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單，可以回答雇主為勞工提繳退休金時，個人退休金專戶制度（第14條）與年金保險制度（第36條）的最低提繳比例。\n\n1. **個人退休金專戶制度（第14條）**：\n   - 根據事實清單中的第14條，雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n   - 因此，個人退休金專戶制度的最低提繳比例為勞工每月工資的6%。\n\n2. **年金保險制度（第36條）**：\n   - 根據事實清單中的第36條，雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n   - 因此，年金保險制度的最低提繳比例為勞工每月工資的6%。\n\n綜上所述，根據提供的事實清單，雇主為勞工提繳退休金時，無論是個人退休金專戶制度還是年金保險制度，最低提繳比例皆為勞工每月工資的6%。",
+    "error": null,
+    "latency_s": 28.45,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 729,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+        "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": false,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: [] Guard failures: ['法定起算日遺漏：未精確記載法規原文起算日「次月一日」。']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR12",
+      "arm": "M2",
+      "question": "雇主為勞工提繳退休金，個人退休金專戶制度（第14條）跟年金保險制度（第36條）的最低提繳比例各是多少？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 28450.0,
+        "retrieved_chunk_ids": [
+          "N0030020_勞工退休金條例_16",
+          "N0030020_勞工退休金條例_6",
+          "N0030020_勞工退休金條例_14",
+          "N0030022_勞工退休金條例年金保險實施辦法_11",
+          "N0030022_勞工退休金條例年金保險實施辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2276,
+        "snr": 0.0294,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 642,
+        "retained_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 28450.0,
+        "raw_draft": "根據提供的事實清單，可以回答雇主為勞工提繳退休金時，個人退休金專戶制度（第14條）與年金保險制度（第36條）的最低提繳比例。\n\n1. **個人退休金專戶制度（第14條）**：\n   - 根據事實清單中的第14條，雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n   - 因此，個人退休金專戶制度的最低提繳比例為勞工每月工資的6%。\n\n2. **年金保險制度（第36條）**：\n   - 根據事實清單中的第36條，雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n   - 因此，年金保險制度的最低提繳比例為勞工每月工資的6%。\n\n綜上所述，根據提供的事實清單，雇主為勞工提繳退休金時，無論是個人退休金專戶制度還是年金保險制度，最低提繳比例皆為勞工每月工資的6%。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": true,
+        "guard_reasons": [
+          "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+        ],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，可以回答雇主為勞工提繳退休金時，個人退休金專戶制度（第14條）與年金保險制度（第36條）的最低提繳比例。\n\n1. **個人退休金專戶制度（第14條）**：\n   - 根據事實清單中的第14條，雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n   - 因此，個人退休金專戶制度的最低提繳比例為勞工每月工資的6%。\n\n2. **年金保險制度（第36條）**：\n   - 根據事實清單中的第36條，雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n   - 因此，年金保險制度的最低提繳比例為勞工每月工資的6%。\n\n綜上所述，根據提供的事實清單，雇主為勞工提繳退休金時，無論是個人退休金專戶制度還是年金保險制度，最低提繳比例皆為勞工每月工資的6%。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "InceptionAnchorGuard",
+      "failure_reason": "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。",
+      "extra_constrained_note": "【法定起算日硬約束】法規原文明確規定期間起算時點為「次月一日」！嚴禁擅自平滑化或改寫為「當日」或「發生當日」，必須精確按照「次月一日」作答。"
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR13",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，可以得知《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。具體來說，相關條文如下：\n\n1. 第34條提到私立就業服務機構及其分支機構應向主管機關申請設立許可，並應定期更新許可證。\n2. 第35條規定私立就業服務機構得經營職業介紹或人力仲介業務等。\n3. 第36條要求私立就業服務機構應置符合規定資格及數額之就業服務專業人員。\n4. 第37條列舉了就業服務專業人員不得有的行為。\n5. 第38條規定未辦理相關事項者，由主管機關廢止其設立許可。\n6. 第28條要求私立就業服務機構應將許可證、收費項目及金額明細表、就業服務專業人員證書，揭示於營業場所內之明顯位置。\n7. 第29條規定私立就業服務機構應告知所推介工作之勞動條件。\n8. 第30條要求私立就業服務機構每季終了十日內填報求職、求才狀況表。\n9. 第10條規定私立就業服務機構除經許可外，不得以其他形式設立分支機構，從事就業服務業務。\n10. 第10-1條規定私立就業服務機構及其分支機構申請許可，及就業服務專業人員申請證書，主管機關得公告採網路傳輸方式申請項目。\n11. 第20條規定私立就業服務機構為雇主辦理聘僱外國人或香港或澳門居民、大陸地區人民在臺灣地區工作之申請許可、招募、引進、接續聘僱或管理事項前，應與雇主簽訂書面契約。\n12. 第21條規定私立就業服務機構為從事本法第四十六條第一項第八款至第十一款規定工作之外國人，辦理其在中華民國境內工作之就業服務事項，應與外國人簽訂書面契約。\n\n這些條文共同構成了《私立就業服務機構許可及管理辦法》的法源依據，並基於《就業服務法》相關條文制定。",
+    "error": null,
+    "latency_s": 56.42,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 801,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+        "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。",
+        "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR13",
+      "arm": "M2",
+      "question": "《私立就業服務機構許可及管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 56420.0,
+        "retrieved_chunk_ids": [
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_18",
+          "N0090002_私立就業服務機構許可及管理辦法_4",
+          "N0090002_私立就業服務機構許可及管理辦法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "missed_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2155,
+        "snr": 0.0274,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 628,
+        "retained_exact_spans": [
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "dropped_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 56420.0,
+        "raw_draft": "根據提供的事實清單，可以得知《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。具體來說，相關條文如下：\n\n1. 第34條提到私立就業服務機構及其分支機構應向主管機關申請設立許可，並應定期更新許可證。\n2. 第35條規定私立就業服務機構得經營職業介紹或人力仲介業務等。\n3. 第36條要求私立就業服務機構應置符合規定資格及數額之就業服務專業人員。\n4. 第37條列舉了就業服務專業人員不得有的行為。\n5. 第38條規定未辦理相關事項者，由主管機關廢止其設立許可。\n6. 第28條要求私立就業服務機構應將許可證、收費項目及金額明細表、就業服務專業人員證書，揭示於營業場所內之明顯位置。\n7. 第29條規定私立就業服務機構應告知所推介工作之勞動條件。\n8. 第30條要求私立就業服務機構每季終了十日內填報求職、求才狀況表。\n9. 第10條規定私立就業服務機構除經許可外，不得以其他形式設立分支機構，從事就業服務業務。\n10. 第10-1條規定私立就業服務機構及其分支機構申請許可，及就業服務專業人員申請證書，主管機關得公告採網路傳輸方式申請項目。\n11. 第20條規定私立就業服務機構為雇主辦理聘僱外國人或香港或澳門居民、大陸地區人民在臺灣地區工作之申請許可、招募、引進、接續聘僱或管理事項前，應與雇主簽訂書面契約。\n12. 第21條規定私立就業服務機構為從事本法第四十六條第一項第八款至第十一款規定工作之外國人，辦理其在中華民國境內工作之就業服務事項，應與外國人簽訂書面契約。\n\n這些條文共同構成了《私立就業服務機構許可及管理辦法》的法源依據，並基於《就業服務法》相關條文制定。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，可以得知《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。具體來說，相關條文如下：\n\n1. 第34條提到私立就業服務機構及其分支機構應向主管機關申請設立許可，並應定期更新許可證。\n2. 第35條規定私立就業服務機構得經營職業介紹或人力仲介業務等。\n3. 第36條要求私立就業服務機構應置符合規定資格及數額之就業服務專業人員。\n4. 第37條列舉了就業服務專業人員不得有的行為。\n5. 第38條規定未辦理相關事項者，由主管機關廢止其設立許可。\n6. 第28條要求私立就業服務機構應將許可證、收費項目及金額明細表、就業服務專業人員證書，揭示於營業場所內之明顯位置。\n7. 第29條規定私立就業服務機構應告知所推介工作之勞動條件。\n8. 第30條要求私立就業服務機構每季終了十日內填報求職、求才狀況表。\n9. 第10條規定私立就業服務機構除經許可外，不得以其他形式設立分支機構，從事就業服務業務。\n10. 第10-1條規定私立就業服務機構及其分支機構申請許可，及就業服務專業人員申請證書，主管機關得公告採網路傳輸方式申請項目。\n11. 第20條規定私立就業服務機構為雇主辦理聘僱外國人或香港或澳門居民、大陸地區人民在臺灣地區工作之申請許可、招募、引進、接續聘僱或管理事項前，應與雇主簽訂書面契約。\n12. 第21條規定私立就業服務機構為從事本法第四十六條第一項第八款至第十一款規定工作之外國人，辦理其在中華民國境內工作之就業服務事項，應與外國人簽訂書面契約。\n\n這些條文共同構成了《私立就業服務機構許可及管理辦法》的法源依據，並基於《就業服務法》相關條文制定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR14",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據上述事實清單，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定，具體如下：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構應根據其從業人員人數來配置相應數量的就業服務專業人員。",
+    "error": null,
+    "latency_s": 17.97,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 679,
+    "atomic_score": {
+      "supported_spans": [
+        "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+        "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+        "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR14",
+      "arm": "M2",
+      "question": "私立就業服務機構依從業人員人數多寡，應配置多少名就業服務專業人員？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 17970.0,
+        "retrieved_chunk_ids": [
+          "N0090002_私立就業服務機構許可及管理辦法_2",
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_1",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2157,
+        "snr": 0.0524,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 626,
+        "retained_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 17970.0,
+        "raw_draft": "根據上述事實清單，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定，具體如下：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構應根據其從業人員人數來配置相應數量的就業服務專業人員。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定，具體如下：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構應根據其從業人員人數來配置相應數量的就業服務專業人員。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR15",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第0段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+    "error": null,
+    "latency_s": 18.44,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+      ],
+      "missing_spans": [
+        "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 2,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR15",
+      "arm": "M2",
+      "question": "《職業安全衛生管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 18440.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060022_勞工健康保護規則_0",
+          "N0060027_職業安全衛生管理辦法_5",
+          "N0060027_職業安全衛生管理辦法_8",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2159,
+        "snr": 0.0153,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 621,
+        "retained_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 18440.0,
+        "raw_draft": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第0段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第0段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR16",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《職業安全衛生管理辦法》的規定，第一類事業與第二類事業的風險等級與應設置管理單位的人數門檻如下：\n\n1. **第一類事業**：\n   - **風險等級**：具顯著風險者。\n   - **應設置管理單位的人數門檻**：\n     - 労工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。\n\n2. **第二類事業**：\n   - **風險等級**：具中度風險者。\n   - **應設置管理單位的人數門檻**：\n     - 労工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。\n     - 労工人數在五百人以上者，應設直接隸屬雇主之一級管理單位。\n\n上述答案基於提供的事實清單內容。",
+    "error": null,
+    "latency_s": 22.35,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 710,
+    "atomic_score": {
+      "supported_spans": [
+        "第一類事業：具顯著風險者。",
+        "第二類事業：具中度風險者。",
+        "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+        "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 4/4 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 5,
+      "issue_count": 2,
+      "issues": [
+        {
+          "rule_id": "aggr16-head-office-500-condition",
+          "kind": "conditional",
+          "description": "第6條500人規則須明示事業設有總機構的適用前提。",
+          "missing_conditions": [
+            "事業設有總機構"
+          ]
+        },
+        {
+          "rule_id": "aggr16-second-category-500-role",
+          "kind": "role_mismatch",
+          "description": "第二類500人總機構規則是設一級管理單位，不是專責一級。",
+          "missing_conditions": []
+        }
+      ],
+      "passed": false
+    },
+    "lineage": {
+      "query_id": "57-AGGR16",
+      "arm": "M2",
+      "question": "《職業安全衛生管理辦法》規定的第一類事業與第二類事業，風險等級與應設置管理單位的人數門檻各是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 22350.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_3",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2247,
+        "snr": 0.0441,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 636,
+        "retained_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 22350.0,
+        "raw_draft": "根據《職業安全衛生管理辦法》的規定，第一類事業與第二類事業的風險等級與應設置管理單位的人數門檻如下：\n\n1. **第一類事業**：\n   - **風險等級**：具顯著風險者。\n   - **應設置管理單位的人數門檻**：\n     - 労工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。\n\n2. **第二類事業**：\n   - **風險等級**：具中度風險者。\n   - **應設置管理單位的人數門檻**：\n     - 労工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。\n     - 労工人數在五百人以上者，應設直接隸屬雇主之一級管理單位。\n\n上述答案基於提供的事實清單內容。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據《職業安全衛生管理辦法》的規定，第一類事業與第二類事業的風險等級與應設置管理單位的人數門檻如下：\n\n1. **第一類事業**：\n   - **風險等級**：具顯著風險者。\n   - **應設置管理單位的人數門檻**：\n     - 労工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。\n\n2. **第二類事業**：\n   - **風險等級**：具中度風險者。\n   - **應設置管理單位的人數門檻**：\n     - 労工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。\n     - 労工人數在五百人以上者，應設直接隸屬雇主之一級管理單位。\n\n上述答案基於提供的事實清單內容。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR17",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《職業安全衛生管理辦法》的相關規定，第一類、第二類及第三類事業各自歸為不同的風險等級：\n\n1. 第一類事業：\n   - 歸為具顯著風險者。\n   - 事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。\n\n2. 第二類事業：\n   - 歸為具中度風險者。\n   - 事業單位勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。\n   - 事業單位勞工人數在五百人以上者，應設直接隸屬雇主之一級管理單位。\n\n3. 第三類事業：\n   - 歸為具低度風險者。\n   - 事業單位勞工人數在三千人以上者，應設管理單位。\n\n上述答案直接根據《職業安全衛生管理辦法》第2條的規定得出，該條明確區分了三類事業的風險等級及其應設置的管理單位。",
+    "error": null,
+    "latency_s": 31.77,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 699,
+    "atomic_score": {
+      "supported_spans": [
+        "一、第一類事業：具顯著風險者。",
+        "二、第二類事業：具中度風險者。",
+        "三、第三類事業：具低度風險者。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 1,
+      "issues": [
+        {
+          "rule_id": "aggr17-management-threshold-out-of-scope",
+          "kind": "out_of_scope",
+          "description": "風險分類題不應延伸回答管理組織或人數門檻。",
+          "missing_conditions": []
+        }
+      ],
+      "passed": false
+    },
+    "lineage": {
+      "query_id": "57-AGGR17",
+      "arm": "M2",
+      "question": "《職業安全衛生管理辦法》將第一類、第二類及第三類事業各自歸為何種風險等級？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 31770.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060022_勞工健康保護規則_0",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2158,
+        "snr": 0.0209,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 618,
+        "retained_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 31770.0,
+        "raw_draft": "根據《職業安全衛生管理辦法》的相關規定，第一類、第二類及第三類事業各自歸為不同的風險等級：\n\n1. 第一類事業：\n   - 歸為具顯著風險者。\n   - 事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。\n\n2. 第二類事業：\n   - 歸為具中度風險者。\n   - 事業單位勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。\n   - 事業單位勞工人數在五百人以上者，應設直接隸屬雇主之一級管理單位。\n\n3. 第三類事業：\n   - 歸為具低度風險者。\n   - 事業單位勞工人數在三千人以上者，應設管理單位。\n\n上述答案直接根據《職業安全衛生管理辦法》第2條的規定得出，該條明確區分了三類事業的風險等級及其應設置的管理單位。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據《職業安全衛生管理辦法》的相關規定，第一類、第二類及第三類事業各自歸為不同的風險等級：\n\n1. 第一類事業：\n   - 歸為具顯著風險者。\n   - 事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。\n\n2. 第二類事業：\n   - 歸為具中度風險者。\n   - 事業單位勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。\n   - 事業單位勞工人數在五百人以上者，應設直接隸屬雇主之一級管理單位。\n\n3. 第三類事業：\n   - 歸為具低度風險者。\n   - 事業單位勞工人數在三千人以上者，應設管理單位。\n\n上述答案直接根據《職業安全衛生管理辦法》第2條的規定得出，該條明確區分了三類事業的風險等級及其應設置的管理單位。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR18",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n2. 舊法（職業災害勞工保護法）第24條規定，經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，新法與舊法對於認定「身心障礙不堪勝任工作」的機構規定不同，新法要求由中央衛生福利主管機關醫院評鑑合格醫院認定，而舊法則要求由公立醫療機構認定。",
+    "error": null,
+    "latency_s": 36.88,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 667,
+    "atomic_score": {
+      "supported_spans": [
+        "經公立醫療機構認定身心障礙不堪勝任工作。",
+        "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+        "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+      ],
+      "missing_spans": [
+        "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR18",
+      "arm": "M2",
+      "question": "職業災害勞工經醫療終止後，若要認定其「身心障礙不堪勝任工作」，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於由哪種機構認定的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 36880.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0060041_職業災害勞工保護法_6",
+          "N0050031_勞工職業災害保險及保護法_37",
+          "N0050031_勞工職業災害保險及保護法_45",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2101,
+        "snr": 0.0619,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 606,
+        "retained_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 36880.0,
+        "raw_draft": "根據提供的事實清單，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n2. 舊法（職業災害勞工保護法）第24條規定，經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，新法與舊法對於認定「身心障礙不堪勝任工作」的機構規定不同，新法要求由中央衛生福利主管機關醫院評鑑合格醫院認定，而舊法則要求由公立醫療機構認定。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n2. 舊法（職業災害勞工保護法）第24條規定，經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，新法與舊法對於認定「身心障礙不堪勝任工作」的機構規定不同，新法要求由中央衛生福利主管機關醫院評鑑合格醫院認定，而舊法則要求由公立醫療機構認定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR19",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，相關條文如下：\n\n1. **新法（勞工職業災害保險及保護法）**：\n   - 第 85 條：「有下列情形之一者，職業災害勞工得終止勞動契約：一、經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。二、事業單位改組或轉讓，致事業單位消滅。三、雇主未依第六十七條第一項規定協助勞工恢復原工作或安置適當之工作。四、對雇主依第六十七條第一項規定安置之工作未能達成協議。職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。」\n   - 第 86 條：「雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。」\n\n2. **舊法（職業災害勞工保護法）**：\n   - 第 23 條：「非有下列情形之一者，雇主不得預告終止與職業災害勞工之勞動契約：一、歇業或重大虧損，報經主管機關核定。二、職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。三、因天災、事變或其他不可抗力因素，致事業不能繼續經營，報經主管機關核定。」\n   - 第 26 條：「雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。」\n\n### 兩者的實質內容是否有不同？\n\n根據上述條文，兩者的實質內容基本一致，都涉及了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。具體來說：\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 85 條和第 86 條明確了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。\n  \n- **舊法（職業災害勞工保護法）**：\n  - 第 23 條和第 26 條也明確了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。\n\n因此，兩者的實質內容在這方面是相同的，都要求在終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。",
+    "error": null,
+    "latency_s": 72.19,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 867,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+        "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+        "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+        "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 4/4 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR19",
+      "arm": "M2",
+      "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）分別規定在哪些條文？兩者的實質內容有沒有不同？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 72190.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0060041_職業災害勞工保護法_7",
+          "N0060041_職業災害勞工保護法_6",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2193,
+        "snr": 0.0675,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 627,
+        "retained_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 72190.0,
+        "raw_draft": "根據提供的事實清單，相關條文如下：\n\n1. **新法（勞工職業災害保險及保護法）**：\n   - 第 85 條：「有下列情形之一者，職業災害勞工得終止勞動契約：一、經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。二、事業單位改組或轉讓，致事業單位消滅。三、雇主未依第六十七條第一項規定協助勞工恢復原工作或安置適當之工作。四、對雇主依第六十七條第一項規定安置之工作未能達成協議。職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。」\n   - 第 86 條：「雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。」\n\n2. **舊法（職業災害勞工保護法）**：\n   - 第 23 條：「非有下列情形之一者，雇主不得預告終止與職業災害勞工之勞動契約：一、歇業或重大虧損，報經主管機關核定。二、職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。三、因天災、事變或其他不可抗力因素，致事業不能繼續經營，報經主管機關核定。」\n   - 第 26 條：「雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。」\n\n### 兩者的實質內容是否有不同？\n\n根據上述條文，兩者的實質內容基本一致，都涉及了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。具體來說：\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 85 條和第 86 條明確了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。\n  \n- **舊法（職業災害勞工保護法）**：\n  - 第 23 條和第 26 條也明確了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。\n\n因此，兩者的實質內容在這方面是相同的，都要求在終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，相關條文如下：\n\n1. **新法（勞工職業災害保險及保護法）**：\n   - 第 85 條：「有下列情形之一者，職業災害勞工得終止勞動契約：一、經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。二、事業單位改組或轉讓，致事業單位消滅。三、雇主未依第六十七條第一項規定協助勞工恢復原工作或安置適當之工作。四、對雇主依第六十七條第一項規定安置之工作未能達成協議。職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。」\n   - 第 86 條：「雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，雇主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，雇主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金。」\n\n2. **舊法（職業災害勞工保護法）**：\n   - 第 23 條：「非有下列情形之一者，雇主不得預告終止與職業災害勞工之勞動契約：一、歇業或重大虧損，報經主管機關核定。二、職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。三、因天災、事變或其他不可抗力因素，致事業不能繼續經營，報經主管機關核定。」\n   - 第 26 條：「雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。」\n\n### 兩者的實質內容是否有不同？\n\n根據上述條文，兩者的實質內容基本一致，都涉及了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。具體來說：\n\n- **新法（勞工職業災害保險及保護法）**：\n  - 第 85 條和第 86 條明確了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。\n  \n- **舊法（職業災害勞工保護法）**：\n  - 第 23 條和第 26 條也明確了職業災害勞工在特定情況下終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。\n\n因此，兩者的實質內容在這方面是相同的，都要求在終止勞動契約時，雇主需預告勞工，並適用勞動基準法的相關規定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "run": 1
+  }
+]
