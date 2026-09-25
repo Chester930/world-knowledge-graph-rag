@@ -425,6 +425,8 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 
 **使用者已同意push，4個累積commit（`34058d5`／`2da08c0`／`d43cc05`／`b598f34`）已於2026-09-25推送**，`origin/worktree-sdd-retrieval-comparison`現與本地一致（`b598f34`）。
 
+**使用者決定：先做完報告62/72的既有殘留待辦（S3），再回頭做本體論設計資料夾的新候選（GAP-04殘留邊界／GAP-06／GAP-07）。** [報告72](docs/報告/72_報告62殘留待辦新基準與K1b_T3_chunkRAG任務書.md) §8已記錄：S0新基準13/42，S1（K1b）＋S2（K1/K2/K3 article_expand）四個候選臂全數「需更多證據，不建議採用」，**S3（chunk-RAG對照組，決策點D1）尚未執行**。2026-09-25已用ListAgents確認無其他session同時使用Neo4j/Ollama，**授權交付Codex執行S3**（依報告72 §2 S3節既定設計，不重跑S0-S2）。
+
 ### 2026-09-25（續）報告76完成獨立複驗 + 報告77交付Codex
 
 **報告76已由Codex完成**（commit `2da08c0`，未push）：`GuardConfig`五欄位切法未調整、正則結構固定/token清單可配置切法正確、`resolve_entity_name`/`_naturalize_triple`/`_naturalization_dropped_quantity`/`merge_triples_to_graph`/`backfill_natural_text`全數補上`cfg`參數、§1.2的14個迴歸案例全部轉成golden test。**Claude Code已獨立複驗**：`git show --stat`確認範圍只在9個允許檔案內、`routers/agent.py`未觸碰、獨立重跑`pytest`得**1111 passed**與Codex回報一致、逐一核對`GuardConfig`/正則重構/14條迴歸測試diff內容與任務書規格相符。額外做了任務書沒要求但合理的加分項：`core/kg_config/stages.py`註冊`dedup.guard` stage。**尚未push，待使用者決定。**
