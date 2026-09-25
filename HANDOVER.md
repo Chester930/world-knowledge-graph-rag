@@ -418,6 +418,13 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告75：本體論設計資料夾專案整合候選盤點（純盤點，不含決策）](docs/報告/75_本體論設計資料夾專案整合候選盤點.md)
 - [報告76：guard_profile領域可插拔化SDD任務書（✅ 完成+獨立複驗+已push，commit `2da08c0`）](docs/報告/76_guard_profile領域可插拔化SDD任務書.md)
 - [報告77：法律模態關係型per-KG擴充SDD任務書（✅ 完成+獨立複驗+已push，commit `b598f34`）](docs/報告/77_法律模態關係型per-KG擴充SDD任務書.md)
+- [報告78：S3落差題逐題根因診斷SDD任務書（交付Codex，純分析不改程式碼，尚未執行）](docs/報告/78_S3落差題逐題根因診斷SDD任務書.md)
+
+### 2026-09-25（續3）報告72 S3完成獨立複驗 + 報告78交付Codex（診斷優先於Track A）
+
+**報告72 S3已由Codex完成**（commit `4c7cb69`）：S0 K基準13/42、D(無檢索)2/42、B0(naive chunk-RAG)20/42、B1(hybrid chunk-RAG)21/42。**Claude Code已獨立複驗**：`git diff --stat`確認services/models/core/routers/scripts/kg全零異動；直接讀取三個arm的adaptive_summary原始JSON逐一加總status_counts，與報告數字逐字吻合；McNemar p值（B0=0.0654／B1=0.0215／D=0.0034）自行用exact binomial公式重算，與回報精確吻合到小數點後四位；獨立重跑pytest得1118 passed（與報告77後一致，因無程式碼變動）。**結論：B1淨勝KG 8題，p=0.0215達統計顯著，目前沒有證據顯示這個KG相對做得夠好的chunk-RAG有整體增益**（KG相對無檢索control仍有明顯增益，不是「檢索沒用」）。**commit `4c7cb69`尚未push，使用者尚未回覆是否推送**，之後接手者需先確認這點再push，不要假設已推送。
+
+依討論順序（先診斷再決定要不要修），**沒有直接排GAP-04/06/07進任務書**，而是先深入查了B1贏過S0的9題（`17-Q6`／`18-Q1`／`18-Q6`／`canary-P4`／`57-COREF3`／`57-DIST2`／`57-AGGR6`／`57-AGGR14`／`57-AGGR19`）。**初步讀取S0 K arm每筆record既有的`lineage.failure_attribution`欄位發現重要訊號**：5題是Stage3生成端失敗（事實在prompt裡，LLM遺漏/抹平）、3題是Stage1檢索端失敗、1題是Type-E拒答校準失敗——**跟GAP-04/06/07（皆屬抽取端/圖結構候選）明顯無關的至少有6題**。抽查`57-AGGR19`發現疑似是評分器逐字比對脆弱性（gold要求「準用勞動基準法規定預告勞工」，排名第1、已in_prompt的候選文字缺「準用」兩字），不是抽取缺陷。**報告78已產出**，要求Codex逐題重新核實（不可只複製種子發現）、逐一判定GAP-04/06/07是否對得上因，並明確要求「對不上因就誠實記錄，不可牽強附會」。純離線JSON分析，不寫程式碼、不需Neo4j/Ollama。**尚未執行，待貼給Codex。**
 
 ### 2026-09-25（續2）報告77完成獨立複驗 + 4個commit已push
 
