@@ -145,6 +145,38 @@ class GuardConfig(BaseModel):
     enum_closed_values: tuple[str, ...] = Field(default_factory=lambda: _DEFAULT_ENUM_CLOSED_VALUES)
 
 
+class RelTypeExtension(BaseModel):
+    """Domain-specific relation type appended to the core SVO vocabulary."""
+
+    model_config = _FROZEN
+
+    name: str = Field(pattern=r"^[A-Z][A-Z0-9_]*$")
+    description: str
+
+
+# The user-provided research folder mentions LKIF-Core as naming inspiration, but
+# this repository has not verified that literature live; these names are an
+# original project design and are not presented as literature-derived types.
+_DEFAULT_REL_TYPE_EXTENSIONS: tuple[RelTypeExtension, ...] = (
+    RelTypeExtension(
+        name="OBLIGATES",
+        description="A 依法規定 B 為強制義務，法條用語通常是「應」，例如雇主應為勞工投保勞工保險",
+    ),
+    RelTypeExtension(
+        name="PERMITS",
+        description="A 依法規定得裁量選擇是否進行 B，法條用語通常是「得」，例如勞工得於休假期間出國旅遊",
+    ),
+    RelTypeExtension(
+        name="PROHIBITS",
+        description="A 依法規定禁止進行 B，法條用語通常是「不得」，例如雇主不得使童工從事危險性工作",
+    ),
+    RelTypeExtension(
+        name="DEEMS",
+        description="A 依法規定視為 B（法定事實擬制，不論實際情況為何皆依法認定），法條用語通常是「視為」，例如逾期未為反對之意思表示者視為同意",
+    ),
+)
+
+
 class ChunkingConfig(BaseModel):
     """SVO 切塊與主旨前綴錨定（`services/svo_chunking.py`）。"""
 
@@ -286,7 +318,7 @@ _TAIWAN_CONTEXT_INSTRUCTION_DEFAULT = (
 
 
 class DomainConfig(BaseModel):
-    """領域包層——generation prompt 前綴、輸出語言與 SVO 少樣本規則。"""
+    """領域包層——generation prompt、輸出語言、SVO 少樣本與關係型別擴充。"""
 
     model_config = _FROZEN
 
@@ -296,6 +328,10 @@ class DomainConfig(BaseModel):
     target_language: str = Field(default="zh-Hant")
     # services/svo_service.py::_svo_prompt() 規則 6–10；domain pack 可覆蓋。
     svo_fewshots: tuple[str, ...] = Field(default_factory=lambda: _DEFAULT_SVO_FEWSHOTS)
+    # services/svo_service.py 的 domain-specific relation vocabulary；domain pack 可覆蓋。
+    rel_type_extensions: tuple[RelTypeExtension, ...] = Field(
+        default_factory=lambda: _DEFAULT_REL_TYPE_EXTENSIONS
+    )
 
 
 class KGConfig(BaseModel):

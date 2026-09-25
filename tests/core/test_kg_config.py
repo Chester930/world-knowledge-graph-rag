@@ -20,6 +20,7 @@ from core.kg_config import (
     FileConfigSource,
     GuardConfig,
     KGConfig,
+    RelTypeExtension,
     deep_merge,
 )
 
@@ -69,6 +70,8 @@ def test_kgconfig_defaults_match_live_module_constants():
     assert cfg.domain.name == "taiwan-labor-law"
     from core.kg_config.model import _DEFAULT_SVO_FEWSHOTS
     assert cfg.domain.svo_fewshots == _DEFAULT_SVO_FEWSHOTS
+    from core.kg_config.model import _DEFAULT_REL_TYPE_EXTENSIONS
+    assert cfg.domain.rel_type_extensions == _DEFAULT_REL_TYPE_EXTENSIONS
 
     from core.kg_config.model import (
         _DEFAULT_ENUM_CLOSED_VALUES,
@@ -135,6 +138,46 @@ def test_guard_config_defaults_are_exact_shipped_token_lists():
         "scope_modifier_words": ("增加", "增列", "額外", "追加", "新增", "另計", "加計", "超出"),
         "enum_closed_values": ("顯著", "中度", "低度"),
     }
+
+
+def test_rel_type_extensions_defaults_are_exact_and_disjoint_from_core_types():
+    """報告77 T1/T8.1/T8.2：四個法律模態型別的名稱與描述固定，且不污染
+    ConceptNet 核心關係型別清單。"""
+    import services.svo_service as svo
+    from core.kg_config.model import _DEFAULT_REL_TYPE_EXTENSIONS
+
+    expected = (
+        RelTypeExtension(
+            name="OBLIGATES",
+            description="A 依法規定 B 為強制義務，法條用語通常是「應」，例如雇主應為勞工投保勞工保險",
+        ),
+        RelTypeExtension(
+            name="PERMITS",
+            description="A 依法規定得裁量選擇是否進行 B，法條用語通常是「得」，例如勞工得於休假期間出國旅遊",
+        ),
+        RelTypeExtension(
+            name="PROHIBITS",
+            description="A 依法規定禁止進行 B，法條用語通常是「不得」，例如雇主不得使童工從事危險性工作",
+        ),
+        RelTypeExtension(
+            name="DEEMS",
+            description="A 依法規定視為 B（法定事實擬制，不論實際情況為何皆依法認定），法條用語通常是「視為」，例如逾期未為反對之意思表示者視為同意",
+        ),
+    )
+
+    assert _DEFAULT_REL_TYPE_EXTENSIONS == expected
+    assert KGConfig().domain.rel_type_extensions == expected
+    names = {extension.name for extension in expected}
+    assert names.isdisjoint(svo.SVO_REL_TYPES)
+    assert all(svo._SAFE_REL_TYPE_PATTERN.fullmatch(name) for name in names)
+
+
+def test_generic_domain_pack_can_disable_rel_type_extensions():
+    cfg = ConfigLoader([FileConfigSource("config")]).load(
+        "generic-kg", domain_pack="generic"
+    )
+
+    assert cfg.domain.rel_type_extensions == ()
 
 
 # ── 合併語意 test（報告33 §3.9.3 / 論文 05 §5.3.6）────────────────────────

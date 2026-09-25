@@ -30,6 +30,7 @@ from core.kg_config.model import (
     FactListConfig,
     GuardConfig,
     KGConfig,
+    RelTypeExtension,
     RelTypeConfig,
     RoutingConfig,
 )
@@ -53,6 +54,7 @@ __all__ = [
     "BfsConfig",
     "FactListConfig",
     "GuardConfig",
+    "RelTypeExtension",
     "DecomposeConfig",
     "DedupConfig",
     "RelTypeConfig",

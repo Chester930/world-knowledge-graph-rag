@@ -86,6 +86,20 @@ def test_svo_prompt_custom_fewshots_are_numbered_from_rule_six():
     assert prompt.index("6. 領域例句 A") < prompt.index("7. 領域例句 B")
 
 
+def test_svo_prompt_includes_optional_rel_type_extensions_only_when_passed():
+    cfg = KGConfig()
+
+    default_prompt = svc._svo_prompt(
+        "測試", rel_type_extensions=cfg.domain.rel_type_extensions
+    )
+    for name in ("OBLIGATES", "PERMITS", "PROHIBITS", "DEEMS"):
+        assert name in default_prompt
+
+    core_only_prompt = svc._svo_prompt("測試", rel_type_extensions=())
+    for name in ("OBLIGATES", "PERMITS", "PROHIBITS", "DEEMS"):
+        assert name not in core_only_prompt
+
+
 @pytest.mark.asyncio
 async def test_extract_svo_triples_uses_domain_fewshots_from_cfg():
     llm = FakeLLM('{"triples":[]}')
@@ -94,6 +108,26 @@ async def test_extract_svo_triples_uses_domain_fewshots_from_cfg():
     await svc.extract_svo_triples("任意文本。", llm, cfg=cfg)
 
     assert "6. 領域專用例句" in llm.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_extract_svo_triples_reject_uses_cfg_rel_type_extensions():
+    llm = FakeLLM(
+        '{"triples":[{"subject":"雇主","rel_type":"OBLIGATES",'
+        '"verb":"應投保","object":"勞工保險","confidence":4}]}'
+    )
+
+    triples = await svc.extract_svo_triples("雇主應為勞工投保。", llm)
+
+    assert triples[0].rel_type == "OBLIGATES"
+
+    core_only_cfg = KGConfig.model_validate({"domain": {"rel_type_extensions": []}})
+    core_only_llm = FakeLLM(llm.payload)
+    core_only_triples = await svc.extract_svo_triples(
+        "雇主應為勞工投保。", core_only_llm, cfg=core_only_cfg
+    )
+
+    assert core_only_triples[0].rel_type == "RELATED_TO"
 
 
 class FakeEmbedding:
@@ -420,6 +454,22 @@ async def test_classify_relation_by_embedding_returns_top_cosine_match():
 
 
 @pytest.mark.asyncio
+async def test_type_description_embedding_cache_isolated_by_description_content():
+    svc._TYPE_DESCRIPTION_EMBEDDING_CACHE.clear()
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"描述一": [1.0, 0.0, 0.0], "描述二": [0.0, 1.0, 0.0]},
+        default=[0.0, 0.0, 1.0],
+    )
+
+    first = await svc._type_description_embeddings(embedding, {"REL_A": "描述一"})
+    second = await svc._type_description_embeddings(embedding, {"REL_B": "描述二"})
+
+    assert first == {"REL_A": [1.0, 0.0, 0.0]}
+    assert second == {"REL_B": [0.0, 1.0, 0.0]}
+    assert len(svc._TYPE_DESCRIPTION_EMBEDDING_CACHE) == 2
+
+
+@pytest.mark.asyncio
 async def test_extract_svo_triples_compare_agrees_skips_escalation():
     """COMPARE 一致（embedding 最相似型別＝LLM 自報值，且分數 ≥ 門檻）時，
     直接採用 LLM 自報值，不觸發 ESCALATE3 第二次呼叫。"""
@@ -675,6 +725,29 @@ async def test_resolve_query_relation_type_cfg_raises_escalate_low_threshold():
 
     assert result is None
     assert llm.prompts == []
+
+
+@pytest.mark.asyncio
+async def test_resolve_query_relation_type_uses_cfg_rel_type_descriptions():
+    cfg = KGConfig()
+    extension = next(
+        extension for extension in cfg.domain.rel_type_extensions
+        if extension.name == "OBLIGATES"
+    )
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={
+            "應投保": [1.0, 0.0, 0.0],
+            extension.description: [1.0, 0.0, 0.0],
+        },
+        default=[0.0, 1.0, 0.0],
+    )
+
+    assert await svc.resolve_query_relation_type("應投保", embedding, cfg=cfg) == "OBLIGATES"
+
+    core_only_cfg = KGConfig.model_validate({"domain": {"rel_type_extensions": []}})
+    assert await svc.resolve_query_relation_type(
+        "應投保", embedding, cfg=core_only_cfg
+    ) != "OBLIGATES"
 
 
 # ── _relationship_type（Cypher 注入防護，見 P2-1 docstring）─────────────────
@@ -2633,6 +2706,18 @@ async def test_bfs_query_l2_falls_back_to_blind_expansion_without_all_params():
     )
     assert "*2..2]" in driver.calls[1][0]
     assert {t.object for t in triples} == {"X", "P1", "P2"}
+
+
+@pytest.mark.asyncio
+async def test_bfs_query_uses_cfg_rel_type_extensions():
+    driver = FakeDriver(records=[])
+    await svc.bfs_query(driver, uuid4(), ["A"], cfg=KGConfig())
+    assert "OBLIGATES" in driver.calls[0][0]
+
+    core_only_driver = FakeDriver(records=[])
+    core_only_cfg = KGConfig.model_validate({"domain": {"rel_type_extensions": []}})
+    await svc.bfs_query(core_only_driver, uuid4(), ["A"], cfg=core_only_cfg)
+    assert "OBLIGATES" not in core_only_driver.calls[0][0]
 
 
 # ── trigger_extraction（原 routers/staging.py::_trigger_extraction，遷移自
@@ -4703,7 +4788,11 @@ async def test_completeness_check_skips_second_call_when_no_original_sentences()
     """未提供 original_sentences 時無法做涵蓋比對，優雅降級為只呼叫一次
     LLM，行為等同直接呼叫 extract_svo_triples()。"""
     llm = FakeLLM('{"triples":[{"subject":"A","verb":"導致","object":"B","rel_type":"CAUSES"}]}')
-    embedding = FakeEmbedding()
+    causes_desc = svc.SVO_REL_TYPE_DESCRIPTIONS["CAUSES"]
+    embedding = TypeDescriptionFakeEmbedding(
+        vectors={"導致": [1.0, 0.0, 0.0], causes_desc: [1.0, 0.0, 0.0]},
+        default=[0.0, 1.0, 0.0],
+    )
 
     triples = await svc.extract_svo_triples_with_completeness_check("A 導致 B。", [], llm, embedding)
 

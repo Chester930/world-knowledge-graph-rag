@@ -37,7 +37,7 @@ from core.constants import (
     VECTOR_DIM,
 )
 from core.config import task_queue_db_path
-from core.kg_config import GuardConfig, KGConfig
+from core.kg_config import GuardConfig, KGConfig, RelTypeExtension
 from core.kg_config.model import _DEFAULT_SVO_FEWSHOTS
 from core.providers.base import EmbeddingProvider, LLMProvider
 from core.providers.factory import get_embedding_provider, get_llm_provider
@@ -209,8 +209,31 @@ def resolve_entity_type(raw_type: str) -> str:
     return ",".join(resolved_tokens)
 
 
-def _svo_prompt(text: str, *, fewshots: Sequence[str] | None = None) -> str:
-    rel_types = ", ".join(sorted(SVO_REL_TYPES))
+def _effective_rel_types(cfg: KGConfig) -> frozenset[str]:
+    return frozenset(SVO_REL_TYPES) | {
+        extension.name for extension in cfg.domain.rel_type_extensions
+    }
+
+
+def _effective_rel_type_descriptions(cfg: KGConfig) -> dict[str, str]:
+    descriptions = dict(SVO_REL_TYPE_DESCRIPTIONS)
+    descriptions.update({
+        extension.name: extension.description
+        for extension in cfg.domain.rel_type_extensions
+    })
+    return descriptions
+
+
+def _svo_prompt(
+    text: str,
+    *,
+    fewshots: Sequence[str] | None = None,
+    rel_type_extensions: Sequence[RelTypeExtension] | None = None,
+) -> str:
+    rel_types = set(SVO_REL_TYPES)
+    if rel_type_extensions is not None:
+        rel_types.update(extension.name for extension in rel_type_extensions)
+    rel_types_text = ", ".join(sorted(rel_types))
     selected_fewshots = _DEFAULT_SVO_FEWSHOTS if fewshots is None else fewshots
     fewshot_items = [
         f"{6 + index}. {example}" for index, example in enumerate(selected_fewshots)
@@ -229,7 +252,7 @@ def _svo_prompt(text: str, *, fewshots: Sequence[str] | None = None) -> str:
 請只輸出 JSON，不要輸出解釋。從文本抽取符合受控關係詞彙的三元組。
 
 合法 rel_type：
-{rel_types}
+{rel_types_text}
 
 實體型別參考清單（非強制，僅供判斷參考）：
 {_ENTITY_TYPE_GUIDE}
@@ -250,29 +273,37 @@ def _svo_prompt(text: str, *, fewshots: Sequence[str] | None = None) -> str:
 """
 
 
-# SIM 節點的型別描述句 embedding 快取——依 embedding_provider.model_name 為 key，
-# 35 個型別的描述句 embedding 在同一個 provider/model 底下固定不變，避免每次
-# extract_svo_triples() 呼叫都重新對全部 35 筆描述句呼叫一次 embedding provider。
-_TYPE_DESCRIPTION_EMBEDDING_CACHE: dict[str, dict[str, list[float]]] = {}
+# SIM 節點的型別描述句 embedding 快取——model 與完整描述集合共同組成 key，
+# 避免不同 domain pack 的 KG 在同一個 provider/model 下互相汙染結果。
+_TYPE_DESCRIPTION_EMBEDDING_CACHE: dict[
+    tuple[str, tuple[tuple[str, str], ...]], dict[str, list[float]]
+] = {}
 
 
-async def _type_description_embeddings(embedding_provider: EmbeddingProvider) -> dict[str, list[float]]:
-    cache = _TYPE_DESCRIPTION_EMBEDDING_CACHE.get(embedding_provider.model_name)
+async def _type_description_embeddings(
+    embedding_provider: EmbeddingProvider,
+    descriptions: dict[str, str] | None = None,
+) -> dict[str, list[float]]:
+    description_map = SVO_REL_TYPE_DESCRIPTIONS if descriptions is None else descriptions
+    description_items = tuple(sorted(description_map.items()))
+    cache_key = (embedding_provider.model_name, description_items)
+    cache = _TYPE_DESCRIPTION_EMBEDDING_CACHE.get(cache_key)
     if cache is None:
-        rel_types = sorted(SVO_REL_TYPE_DESCRIPTIONS)
-        vectors = await embedding_provider.encode_batch([SVO_REL_TYPE_DESCRIPTIONS[t] for t in rel_types])
-        cache = dict(zip(rel_types, vectors))
-        _TYPE_DESCRIPTION_EMBEDDING_CACHE[embedding_provider.model_name] = cache
+        vectors = await embedding_provider.encode_batch([description for _, description in description_items])
+        cache = dict(zip((name for name, _ in description_items), vectors))
+        _TYPE_DESCRIPTION_EMBEDDING_CACHE[cache_key] = cache
     return cache
 
 
 async def classify_relation_by_embedding(
-    verb: str, embedding_provider: EmbeddingProvider
+    verb: str,
+    embedding_provider: EmbeddingProvider,
+    descriptions: dict[str, str] | None = None,
 ) -> tuple[str, float]:
     """SIM：`verb` embedding 與 35 個關係型別**描述句**（非識別碼字串本身，見
     `SVO_REL_TYPE_DESCRIPTIONS` docstring）embedding 算 cosine 相似度，取最相似者。
     回傳 (最相似的型別, 該型別的相似度分數)。"""
-    type_vectors = await _type_description_embeddings(embedding_provider)
+    type_vectors = await _type_description_embeddings(embedding_provider, descriptions)
     verb_vec = await embedding_provider.encode(verb)
     best_type = ""
     best_score = -1.0
@@ -314,7 +345,10 @@ async def resolve_query_relation_type(
     `QSIM_ESCALATE_LOW_THRESHOLD`，行為零變化（報告33 §6 第 4 步查詢端半）。
     """
     _cfg = cfg or KGConfig()
-    best_type, best_score = await classify_relation_by_embedding(verb_phrase, embedding_provider)
+    descriptions = _effective_rel_type_descriptions(_cfg)
+    best_type, best_score = await classify_relation_by_embedding(
+        verb_phrase, embedding_provider, descriptions=descriptions
+    )
 
     if best_score >= _cfg.reltype.qsim_assign_threshold:
         return best_type
@@ -324,7 +358,7 @@ async def resolve_query_relation_type(
 
     prompt = (
         f"使用者查詢中的措辭「{verb_phrase}」，是否對應關係類型「{best_type}」"
-        f"（{SVO_REL_TYPE_DESCRIPTIONS[best_type]}）？只回答「是」或「否」，不要有其他文字。"
+        f"（{descriptions[best_type]}）？只回答「是」或「否」，不要有其他文字。"
     )
     answer = (await llm_provider.generate(prompt)).strip()
     return best_type if answer.startswith("是") else None
@@ -338,6 +372,7 @@ async def _reconcile_rel_type(
     llm_provider: LLMProvider | None,
     kg_id: str | None = None,
     calibration_db_path: Path | None = None,
+    cfg: KGConfig | None = None,
 ) -> str:
     """COMPARE＋ESCALATE3：`SIM` 判斷是否與 LLM 自報的 rel_type 一致，見
     docs/論文/03_系統設計與方法論.md § 3.1.3 主圖。
@@ -364,7 +399,12 @@ async def _reconcile_rel_type(
     if embedding_provider is None:
         return llm_rel_type
 
-    best_type, best_score = await classify_relation_by_embedding(verb, embedding_provider)
+    _cfg = cfg or KGConfig()
+    best_type, best_score = await classify_relation_by_embedding(
+        verb,
+        embedding_provider,
+        descriptions=_effective_rel_type_descriptions(_cfg),
+    )
     if best_type == llm_rel_type and best_score >= COMPARE_COSINE_THRESHOLD:
         return llm_rel_type
 
@@ -422,14 +462,18 @@ async def extract_svo_triples(
 
     _cfg = cfg or KGConfig()
     raw = await llm_provider.generate_json(
-        _svo_prompt(text, fewshots=_cfg.domain.svo_fewshots)
+        _svo_prompt(
+            text,
+            fewshots=_cfg.domain.svo_fewshots,
+            rel_type_extensions=_cfg.domain.rel_type_extensions,
+        )
     )
     triples: list[SVOTriple] = []
     for item in _parse_triples_payload(raw):
         rel_type = str(item.get("rel_type", "RELATED_TO")).strip()
         # 3.1.3 REJECT：不在受控詞彙表內的 rel_type 退回 RELATED_TO 兜底，
         # 三元組本身保留（不可靜默丟棄整條事實），原始語意仍留在 verb 欄位。
-        rel_type = rel_type if rel_type in SVO_REL_TYPES else "RELATED_TO"
+        rel_type = rel_type if rel_type in _effective_rel_types(_cfg) else "RELATED_TO"
         verb = str(item.get("verb", "")).strip()
         if verb and embedding_provider is not None:
             rel_type = await _reconcile_rel_type(
@@ -439,6 +483,7 @@ async def extract_svo_triples(
                 llm_provider=llm_provider,
                 kg_id=kg_id,
                 calibration_db_path=calibration_db_path,
+                cfg=_cfg,
             )
         item["rel_type"] = rel_type
         # 3.1.3 §a-1 BACKFILL：僅 RELATED_TO 兜底的三元組才需要保留 verb embedding，
@@ -3769,7 +3814,7 @@ async def bfs_query(
     # 解析成沒有 .name 屬性的 Chunk／Fact 節點，導致 SVOTriple(subject=None)
     # 驗證失敗直接拋例外。走訪型別清單一律只含 SVO_REL_TYPES；報告27 的
     # 文件範圍約束用獨立的 EXISTS {} 子查詢、不進走訪路徑。
-    rel_types = "|".join(sorted(SVO_REL_TYPES))
+    rel_types = "|".join(sorted(_effective_rel_types(_cfg)))
     scoped = bool(scope_doc_ids)
     scope_ids = [str(d) for d in scope_doc_ids] if scoped else None
     want_limit = per_seed_limit is not None
