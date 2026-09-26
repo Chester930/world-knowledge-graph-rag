@@ -425,7 +425,13 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告82：GAP-S3-01上下文組裝離線消融原型SDD任務書（✅ 完成+獨立複驗+已push，commit `db68e83`）](docs/報告/82_GAP_S3_01上下文組裝離線消融原型SDD任務書.md)
 - [報告83：GAP-S3-01/02試驗結果回灌未來工作章節SDD任務書（✅ 完成+獨立複驗+已push，commit `2f6168a`）](docs/報告/83_GAP_S3_0102試驗結果回灌未來工作SDD任務書.md)
 - [報告84：role_mismatch風險題庫全面掃描SDD任務書（✅ 完成+獨立複驗+已push，commit `e1e24fb`；結果見同名`...結果.md`）](docs/報告/84_role_mismatch風險題庫全面掃描SDD任務書.md)
-- [報告85：57-AGGR6與57-AGGR19歸屬錯置精確pilot規則SDD任務書（交付Codex，尚未執行）](docs/報告/85_AGGR6與AGGR19歸屬錯置精確pilot規則SDD任務書.md)
+- [報告85：57-AGGR6與57-AGGR19歸屬錯置精確pilot規則SDD任務書（✅ 完成+獨立複驗，commit `2f8ddab`，未push）](docs/報告/85_AGGR6與AGGR19歸屬錯置精確pilot規則SDD任務書.md)
+
+### 2026-09-26（續8）報告85完成獨立複驗——role_mismatch追蹤線完整收尾
+
+**報告85已由Codex完成**（commit `2f8ddab`）。**Claude Code已獨立複驗**：`git diff --stat`確認只動`test_cases.json`與`test_claim_scope_auditor.py`；兩條新規則（`aggr6-branch-category-swapped`／`aggr19-version-label-swapped`）的`trigger_patterns`皆為真實記錄逐字擷取；獨立重跑完整pytest得**1122 passed**，`test_claim_scope_auditor.py`單獨9 passed含4個新測試全過；**獨立對`test_cases.json`重新算SHA-256得`77c293ed...`，與commit message宣稱的新雜湊逐字吻合**。
+
+**role_mismatch這條追蹤線至此完整收尾**：先發現機制其實已存在且已接線（推翻「S3準確率被系統性高估」的原假設）→ 全題庫掃描（報告84）找到2個真實未覆蓋案例（`57-AGGR6`／`57-AGGR19`）→ 補上精確pilot規則並驗證（報告85）。累積1個未推送commit，待使用者決定push與否及後續方向。
 
 ### 2026-09-26（續7）報告84完成獨立複驗+已push——找到2個真實未覆蓋案例 + 報告85交付Codex
 
