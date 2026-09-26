@@ -429,7 +429,15 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告86：RQ4a/4b追溯表同步報告76/77進度SDD任務書（✅ 完成+獨立複驗+已push，commit `664b3ef`；含1輪修正循環）](docs/報告/86_RQ4a4b追溯表同步報告76_77SDD任務書.md)
 - [報告87：本體論設計資料夾尚待詳讀清單掃描SDD任務書（✅ 完成+獨立複驗+已push，commit `23a9ef8`）](docs/報告/87_本體論設計資料夾尚待詳讀清單掃描SDD任務書.md)
 - [報告88：18-Q6與57-DIST2人工法規語意判定資料包（Claude Code直接彙整，非交付Codex；待使用者本人判定）](docs/報告/88_18Q6與57DIST2人工法規語意判定資料包.md)
-- [報告89：worktree分支合併master前差異摘要SDD任務書（交付Codex，純分析不執行合併，尚未執行）](docs/報告/89_worktree分支合併master前差異摘要SDD任務書.md)
+- [報告89：worktree分支合併master前差異摘要SDD任務書 + 結果（✅ 完成+獨立複驗，commit `08ccc06`，未push）](docs/報告/89_worktree分支合併master前差異摘要SDD任務書.md)
+
+### 2026-09-27 報告89完成獨立複驗——合併master不是單純fast-forward，8個高風險檔案待人工核對
+
+**報告89已由Codex完成**（結果檔`docs/報告/89_worktree分支合併master前差異摘要結果.md`；因Codex執行環境`.git`索引無寫入權限未能自行commit，由Claude Code代為commit `08ccc06`，內容未修改）。**Claude Code已獨立複驗**：獨立重算merge-base（`b1c620e...`）、ahead/behind（98/54，與報告一致）、雙方改檔交集（39個，逐檔比對清單完全吻合）；抽查「內容相同21個」組（`atomic_scorer.py`等，確認`git diff`為空）與「內容不同18個」組（`svo_service.py`/`routers/agent.py`/`core/kg_config/model.py`，確認substantial diff）皆precise符合。無任何git分支操作、無merge/rebase/push發生，`master`checkout未被觸碰。
+
+**核心結論：這不是單純fast-forward**——master領先本分支54個commit（含抽取端cfg接線、來源歧義audit、naturalization backfill等本分支不知情的獨立進度），雙方改檔交集39個中**18個最終內容仍不同**，其中8個列為「高」風險（`HANDOVER.md`、`routers/agent.py`、`services/svo_service.py`、`scripts/eval/run_rq1_comparison.py`、`core/kg_config/model.py`、`tests/core/test_kg_config.py`、`tests/routers/test_agent.py`、`tests/services/test_svo_service.py`）——同一批production抽取/生成路徑與評測harness API，master與本分支各自獨立演進，需要逐段人工核對，不能整檔互相覆蓋或依賴自動三方合併。
+
+**待使用者決定**：是否依報告89 §4.2建議的分層順序（先純新增內容→內容相同組確認→設定schema成對檔案→production/harness核心檔案→長期累積文件）逐步處理合併；或採用其他策略。此決定尚未執行，`master`與本worktree分支現況皆未變動。
 
 ### 2026-09-26（續14）三個小型待辦處理：刪除gemini報告、report67 backfill維持擱置、report89交付Codex
 
