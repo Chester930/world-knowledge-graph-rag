@@ -429,6 +429,13 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告86：RQ4a/4b追溯表同步報告76/77進度SDD任務書（✅ 完成+獨立複驗+已push，commit `664b3ef`；含1輪修正循環）](docs/報告/86_RQ4a4b追溯表同步報告76_77SDD任務書.md)
 - [報告87：本體論設計資料夾尚待詳讀清單掃描SDD任務書（✅ 完成+獨立複驗+已push，commit `23a9ef8`）](docs/報告/87_本體論設計資料夾尚待詳讀清單掃描SDD任務書.md)
 - [報告88：18-Q6與57-DIST2人工法規語意判定資料包（Claude Code直接彙整，非交付Codex；待使用者本人判定）](docs/報告/88_18Q6與57DIST2人工法規語意判定資料包.md)
+- [報告89：worktree分支合併master前差異摘要SDD任務書（交付Codex，純分析不執行合併，尚未執行）](docs/報告/89_worktree分支合併master前差異摘要SDD任務書.md)
+
+### 2026-09-26（續14）三個小型待辦處理：刪除gemini報告、report67 backfill維持擱置、report89交付Codex
+
+**小雜務三選一處理**：①`docs/報告/gemini 整理報告.md`（未追蹤檔案）已直接刪除，無需commit。②report67 natural_text backfill（96/11,011筆，0.87%）使用者確認是誤會，維持「優先度低、先不處理」，不建立任務書。③worktree分支合併master：使用者要求「Codex做摘要報告，Claude檢查，同意才合併」——**不是直接交付Codex執行合併**。
+
+查證發現重要事實：**這不是單純fast-forward情境**——本分支領先`origin/master` 97個commit（報告64-88全部），但`origin/master`也領先本分支**54個commit**（master有本分支不知情的獨立進度）。merge-base=`b1c620eac23dadce4b70d079cc83993c25de78ee`。`data/eval/`有158個變更檔案（多為評測產出，不宜逐檔列舉）。**報告89已產出**：純分析任務，絕對禁止Codex執行任何`git merge`/`git rebase`/push到master；要求交叉比對雙方改過的檔案清單找出衝突風險（特別注意`HANDOVER.md`、`00_研究追溯對映表.md`這類長期累積檔案）；明確要求報告只給客觀資訊供人判斷，不可自行下「建議合併」之類逾越授權的結論。**尚未執行，待貼給Codex。**
 
 ### 2026-09-26（續13）報告88：整理18-Q6/57-DIST2人工判定資料包，待使用者裁決
 
