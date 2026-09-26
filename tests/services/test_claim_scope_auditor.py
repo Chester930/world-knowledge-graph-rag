@@ -113,3 +113,65 @@ def test_aggr18_gold_answer_and_correct_paraphrase_pass():
 
     assert audit_answer_scope(case.gold_answer, case)["passed"] is True
     assert audit_answer_scope(correct_paraphrase, case)["passed"] is True
+
+
+def test_aggr6_observed_branch_category_swap_is_flagged_even_when_atomic_facts_present():
+    # Exact excerpt from data/eval/candidate_runs/s3_chunk_rag_b1_stage_a/records.json:
+    # the old-law severance branch is repeated under the retirement heading.
+    observed_wrong = (
+        "### 2. 退休金\n"
+        "- **舊法（職業災害勞工保護法）**：\n"
+        "  - 第 25 條規定，雇主依第二十三條第一款、第三款，或勞工依第二十四條第二款至第四款規定終止勞動契約者，"
+        "雇主應依勞動基準法之規定，發給勞工退休金。\n"
+    )
+    case = _bank_case("57-AGGR6")
+
+    result = audit_answer_scope(observed_wrong, case)
+
+    assert result["passed"] is False
+    assert result["issues"][0]["rule_id"] == "aggr6-branch-category-swapped"
+
+
+def test_aggr6_gold_answer_and_correct_paraphrase_pass():
+    case = _bank_case("57-AGGR6")
+    correct_paraphrase = (
+        "舊法第25條包含兩個分支：雇主依第23條第1、3款或勞工依第24條第2至4款終止時給付資遣費；"
+        "雇主依第23條第2款或勞工依第24條第1款終止時給付退休金。"
+        "新法第86條基本架構相同，但符合勞動基準法第53條時，依第55條及第84條之2給付退休金。"
+    )
+
+    assert audit_answer_scope(case.gold_answer, case)["passed"] is True
+    assert audit_answer_scope(correct_paraphrase, case)["passed"] is True
+
+
+def test_aggr19_observed_version_label_swap_is_flagged_even_when_atomic_facts_present():
+    # Exact excerpts from data/eval/candidate_runs/s3_chunk_rag_b0_stage_a/records.json:
+    # old-law content is placed under the new-law heading and new-law content under old-law.
+    observed_wrong = (
+        "### 新法（勞工職業災害保險及保護法）\n"
+        "根據第26條規定：\n"
+        "- 雇主依第23條第一款、第三款，或勞工依第24條第二款至第四款規定終止勞動契約者，"
+        "雇主應依勞動基準法之規定，發給勞工資遣費。\n"
+        "### 舊法（職業災害勞工保護法）\n"
+        "根據第85條規定：\n"
+        "- 有下列情形之一者，職業災害勞工得終止勞動契約：\n"
+        "根據第86條規定：\n"
+        "- 雇主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者。\n"
+    )
+    case = _bank_case("57-AGGR19")
+
+    result = audit_answer_scope(observed_wrong, case)
+
+    assert result["passed"] is False
+    assert result["issues"][0]["rule_id"] == "aggr19-version-label-swapped"
+
+
+def test_aggr19_gold_answer_and_correct_paraphrase_pass():
+    case = _bank_case("57-AGGR19")
+    correct_paraphrase = (
+        "舊法的預告規定集中在第26條；新法則分列在第84條第2項與第85條第2項。"
+        "兩者實質內容相同，只有條文位置不同，不能說是新法新增。"
+    )
+
+    assert audit_answer_scope(case.gold_answer, case)["passed"] is True
+    assert audit_answer_scope(correct_paraphrase, case)["passed"] is True
