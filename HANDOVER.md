@@ -424,7 +424,14 @@ T-B **技術上可行且基本接線已完成**；目前真正尚未決定的是
 - [報告81：S3落差題獨立模型盲審交叉驗證SDD任務書（✅ 完成+獨立複驗+已push，commit `ebc265e`）](docs/報告/81_S3落差題獨立模型盲審交叉驗證SDD任務書.md)
 - [報告82：GAP-S3-01上下文組裝離線消融原型SDD任務書（✅ 完成+獨立複驗+已push，commit `db68e83`）](docs/報告/82_GAP_S3_01上下文組裝離線消融原型SDD任務書.md)
 - [報告83：GAP-S3-01/02試驗結果回灌未來工作章節SDD任務書（✅ 完成+獨立複驗+已push，commit `2f6168a`）](docs/報告/83_GAP_S3_0102試驗結果回灌未來工作SDD任務書.md)
-- [報告84：role_mismatch風險題庫全面掃描SDD任務書（交付Codex，純分析不改程式碼，尚未執行）](docs/報告/84_role_mismatch風險題庫全面掃描SDD任務書.md)
+- [報告84：role_mismatch風險題庫全面掃描SDD任務書（✅ 完成+獨立複驗+已push，commit `e1e24fb`；結果見同名`...結果.md`）](docs/報告/84_role_mismatch風險題庫全面掃描SDD任務書.md)
+- [報告85：57-AGGR6與57-AGGR19歸屬錯置精確pilot規則SDD任務書（交付Codex，尚未執行）](docs/報告/85_AGGR6與AGGR19歸屬錯置精確pilot規則SDD任務書.md)
+
+### 2026-09-26（續7）報告84完成獨立複驗+已push——找到2個真實未覆蓋案例 + 報告85交付Codex
+
+**報告84已由Codex完成**（commit `e1e24fb`，已push）。**Claude Code已獨立複驗**：`git show --stat`確認只新增結果文件；獨立讀取`s3_chunk_rag_b1_stage_a`的`57-AGGR6`完整答案原文，確認Codex描述屬實——答案在「資遣費」標題下正確列出第25/26條，卻又在「退休金」標題下把第25條重新列一次、動詞從「發給勞工資遣費」改寫成「發給勞工退休金」，形成自相矛盾的類別歸屬，但4個gold span逐字版本仍完整出現，`AtomicScorer`判4/4完美通過（`atomic_accuracy=1.0`），完全沒抓到。**這次掃描（19題結構初篩→5題符合role_mismatch結構→2題`57-AGGR6`/`57-AGGR19`查到真實未覆蓋案例）是真實、有具體證據的新發現**，Codex沒有為了湊產出而灌水（`57-DIST1/2/3`誠實保留為「結構有風險但無乾淨對調證據」，未升格）。
+
+使用者同意補這2條精確pilot規則。**報告85已產出**：比照`57-AGGR18`既有的`aggr18-institution-swapped`寫法，要求Codex重新讀取完整答案原文自行設計`trigger_patterns`（不可只憑報告84摘錄）、比照既有`test_claim_scope_auditor.py`的配對測試寫法（真實錯誤答案被抓到+正確答案通過各一組），並明確警告**這會改變`test_cases.json`的`bank_sha256`**——比照報告62 §14.10先例，是預期中的題庫修正，非意外。**尚未執行，待貼給Codex。**
 
 ### 2026-09-26（續6）報告83收尾 + 報告84交付Codex（role_mismatch題庫全面掃描）
 
