@@ -1,9 +1,13 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-27（續5）
+> **最後更新**：2026-09-27（續6）
 
-## 2026-09-27（續5）：報告91已由Codex完成執行、Claude Code獨立複驗通過並套用到本分支——**⚠️main checkout本地master目前領先origin一個未push的commit`a020f58`**
+## 2026-09-27（續6）：main checkout本地master孤立commit`a020f58`已清理完畢
+
+延續下方（續5）記錄的落差，已由使用者在main checkout親自執行（Claude Code因worktree沙盒隔離技術上無法對main checkout下git指令，全程口頭指導）：(1) `git stash push -u -m "master-a020f58-cleanup-20260927"`保護既有3筆未commit異動（`docs/報告/53_...md`修改稿＋2份v1.0未追蹤文件），取得SHA`aa707ec02cc9d1e059c51d1bf9797057c7c0dbd6`；(2) `git reset --hard 534cb71`丟掉多餘的`a020f58`（其內容已完整涵蓋在本worktree分支的`8eaabe7`並push）；(3) `git stash apply aa707ec...`（非pop）＋核對SHA後`git stash drop "stash@{0}"`精準還原並清除暫存（PowerShell對`stash@{0}`需加引號才能正確解析）。**main checkout本地master現在與`origin/master`完全同步於`534cb71`，3筆既有異動與其餘4筆歷史暫存皆完好無損**。此節取代（續5）的警告。
+
+## 2026-09-27（續5，歷史記錄，已解決見上方）：報告91已由Codex完成執行、Claude Code獨立複驗通過並套用到本分支——~~⚠️main checkout本地master目前領先origin一個未push的commit`a020f58`~~
 
 Codex依報告91 T1-T4在**main checkout本地`master`**上完成§7.4方案二/四/七/八四段展開，commit `a020f58`（parent `534cb71`，**尚未push**）。Claude Code獨立複驗：(1) `git diff 534cb71 a020f58`確認diff乾淨，只換掉4個bullet、其餘§7.4段落完全未動；(2) 逐項核對內容——LayoutLM引用（*LayoutLM: Pre-training of Text and Layout for Document Image Understanding*, Xu et al., KDD 2020）全名/作者正確；獨立`Grep`確認`services/`／`repositories/`確實查無Louvain/`community_service`機制（`repositories/kg_repo.py`裡的"Community"命中是Neo4j Community Edition的無關誤報，已排除）；確認`docs/報告/技術導入評估.md`存在但無方案八專節。**驗證全數通過，內容誠實、無溢美用詞、未觸碰production程式碼**。
 
