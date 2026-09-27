@@ -1,7 +1,56 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-25
+> **最後更新**：2026-09-27
+
+## 2026-09-27：報告75-89批次收尾 + worktree分支合併master並反向fast-forward——四處版控狀態已統一於同一commit
+
+**接手前必讀**：本分支（`worktree-sdd-retrieval-comparison`）、`origin/worktree-sdd-retrieval-comparison`、`origin/master`、主 checkout（`D:\Users\666\Desktop\world knowledge graph rag`）本地 `master` **四處現在完全同步，都指向 commit `32387b9`**（`git rev-list --left-right --count origin/master...HEAD` = `0 0`）。本節整理報告75-89的收尾狀態與這次合併的技術細節。
+
+### 報告75-89 摘要（皆已個別commit並push，詳細內容見各報告檔案）
+
+- **報告75**：本體論設計資料夾（`D:\Users\666\Desktop\本體論設計`）專案整合候選盤點，後續由報告87延伸（§7）。
+- **報告76**：guard_profile（CJK正則守衛token）per-KG可插拔化，commit `2da08c0`，pytest 1111 passed。
+- **報告77**：法律模態關係型（`RelTypeExtension`）per-KG擴充，commit `b598f34`，pytest 1118 passed。
+- **報告78**：S3落差題（B1優於S0-K的9題）逐題根因診斷，commit `ddbc4ac`。
+- **報告79**：S3評分器規則R（確定性敏感度分析規則）套用結果，commit `db39d8e`：S0 13→16/42、B1 21→22/42、KG缺口 -8→-6、p值0.021484→0.109375。**規則R只是診斷工具，非正式評分器**。
+- **報告80**：S3結果回灌論文RQ1章節（`docs/論文/00,05,06,07`），commit `4812e07`。
+- **報告81**：S3落差題獨立模型（granite4.2:3b／qwen3.5:4b）盲審交叉驗證，commit `ebc265e`：模型間一致率僅5/11，弱佐證。
+- **報告82**：GAP-S3-01上下文組裝離線消融原型，commit `db68e83`：3/10 is_perfect，證據不充分。
+- **報告83**：GAP-S3-01/02試驗結果回灌論文未來工作章節（§7.4），commit `2f6168a`。
+- **報告84**：`role_mismatch`（歸屬錯置）風險全題庫（65題）掃描，commit `e1e24fb`：發現`57-AGGR6`／`57-AGGR19`兩個真實未覆蓋案例。
+- **報告85**：AGGR6/AGGR19精確pilot規則落地`test_cases.json`，commit `2f8ddab`：`bank_sha256` `23f8c06f…`→`77c293ed…`（預期變更），pytest 1122 passed。
+- **報告86**：RQ4a/4b追溯表同步報告76/77，首次執行commit `a1691a2`有資訊遺失瑕疵（誤刪「每一型式 vs 每增加一種型式」具體案例，換成空泛自我指涉句），Claude Code發現後要求修正，commit `664b3ef`已補回。
+- **報告87**：本體論設計資料夾尚待詳讀清單掃描，commit `23a9ef8`：未發現新GAP候選（誠實的空結果）。
+- **報告88**：`18-Q6`與`57-DIST2`人工法規語意判定資料包，commit `9ddf598`。**⚠️ 使用者尚未裁決，明確表示「晚一點確認」——下次接手第一件事應詢問是否已有結論**。內容含兩題完整未截斷答案文字、既有自動判定表，以及Claude Code發現的`57-DIST2` S0-K答案內部自相矛盾（先說「一至三日」後說「二至五日」）。
+- **報告89**：worktree分支合併master前差異摘要（純分析，不執行合併），任務書commit `74872a4`、結果commit`08ccc06`。確認merge-base `b1c620e`、ahead=98/behind=54、交集39檔、8個高風險檔案清單。這次合併就是報告89分析的後續執行。
+
+### 2026-09-27 本次合併執行細節（Claude Code親自執行，非委派Codex）
+
+依報告89的分析與使用者核准，**Claude Code本人**（非Codex）執行`git merge origin/master --no-commit --no-ff`並逐檔手動解決12個衝突：
+
+- `scripts/eval/embedding_cache.py`／`tests/scripts/test_embedding_cache.py`：add/add衝突，內容byte-identical，直接採用。
+- `config/domain_packs/generic.json`：保留HEAD（含guard/rel_type_extensions的完整`_note`）。
+- `core/kg_config/model.py`：4處衝突全保留HEAD（`GuardConfig`／`RelTypeExtension`類別master完全沒有）；已確認master的`RelTypeConfig`/`reltype`欄位在同檔案未受衝突影響、原樣保留（git自動合併），兩邊功能共存。
+- `scripts/eval/run_rq1_comparison.py`、`scripts/eval/frozen_baseline_stage.py`：保留HEAD的`--k-top-k`/`--article-expand`（報告62 T1/T3）CLI參數，與master的`--embedding-cache`/`--metric-judge-*`（報告68/69）並存，兩者互不衝突。
+- **`services/svo_service.py`（9處衝突，風險最高）**：多數保留HEAD的superset功能；**其中`_reconcile_rel_type()`一處必須真正合併雙方**——HEAD的`rel_type_extensions`描述（`_effective_rel_type_descriptions()`）與master新增的per-KG`_cfg.reltype.compare_cosine_threshold`（取代寫死的`COMPARE_COSINE_THRESHOLD`常數）缺一不可，已手動合併兩者。
+- `routers/agent.py`：1處衝突，HEAD的`article_no: f.get("article_no")`（報告62 T3含article_expand的retrieval trace）取代master的靜態`None`，純附加telemetry欄位、`.get()`安全取值，不影響`chat()`核心邏輯。
+- `tests/core/test_kg_config.py`、`tests/scripts/test_rq1_harness_failures.py`、`tests/services/test_svo_service.py`：皆保留HEAD新增的測試（對應上述per-KG功能，master沒有）。
+- `HANDOVER.md`：保留HEAD完整敘事版本，master側的短摘要段落內容已被HEAD自己頂部的報告70段落涵蓋，補一句交叉引用避免遺漏。
+
+**⚠️ 發現並修正2處git靜默合併錯誤（非標記衝突，`ast.parse()`測不出來，需完整`compile()`或跑測試才會發現）**：`services/svo_service.py`的`extract_svo_triples()`與`extract_svo_triples_with_completeness_check()`兩個函式各自被git自動合併成**重複宣告`cfg`參數**（HEAD與master各自在不同行位置插入同名參數，未觸發衝突標記但語法非法）。已手動移除重複宣告。同步修正`tests/services/test_svo_service_cfg_wiring.py`中一個因新增`descriptions=`參數而過時的mock函式簽章。
+
+**驗證**：全套`python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py`跑出**1156 passed，零失敗**。
+
+**版控狀態**：merge commit `32387b9`（parents: `d1a22b5`本分支＋`c57f7dd` origin/master）→ push到`origin/worktree-sdd-retrieval-comparison`（fast-forward）→ 使用者確認後push到`origin/master`（`c57f7dd..32387b9`，fast-forward非force）→ 主checkout本地`git pull --ff-only`一度因`core/kg_config/stages.py`／`tests/core/test_kg_config_stages.py`兩個檔案「本地異動」被擋，經`diff --strip-trailing-cr`核對確認**純換行符（CRLF/LF）差異、內容逐字相同、無實質工作內容**，執行`git checkout --`還原後fast-forward成功。**四處版控狀態現在完全一致**。
+
+### 下一步待決定（優先順序供參考）
+
+1. **報告88（`18-Q6`／`57-DIST2`）人工裁決**——使用者已明確表示會晚點確認，下次接手應先詢問是否已有結論，尚未確認前不要假設已解決。
+2. **報告69殘餘**：judge推論非決定性是否要進一步緩解（例如語意fallback核對跑3次取眾數）；是否要用固定metric-judge+embedding快取正式重跑獨立judge pilot（乾淨樣本已從3/7提升到5/7）。
+3. **報告67**：96/11,011（0.87%）筆`natural_text`型別洩漏backfill——使用者已明確確認優先度低、暫不處理，勿主動提起執行。
+4. 長期、未經深入討論不應啟動的方向：GAP-06（Relator）、GAP-07（bi-temporal）、RQ2-RQ6新研究方向。
+5. S3（KG vs chunk-RAG）已完整跑完並回灌論文（報告78-83），GAP-S3-01/02皆已誠實記錄「證據不足，不建議投入」；若要重啟這條線，需要使用者提出新的具體切入點，不是自動下一步。
 
 ## 2026-09-23（續）：報告68/69批次整合進master完成 + 3份後續任務書已交付Codex
 
