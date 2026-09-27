@@ -146,6 +146,43 @@ def test_evidence_deduped_by_source_and_chunk_index():
     assert result.context_char_len == sum(len(l) for l in result.context_lines)
 
 
+def test_complex_budget_fairness_no_subquestion_starved():
+    """報告93修正：舊版單一遞減計數器會讓前面子問題把預算用光，後面子問題
+    分不到任何檢索機會（實測案例18-Q5：3個子問題rounds=[5,3,0]）。這裡用
+    同樣的形狀（3子問題、max_rounds=5、retrieval_budget=8、reflect永遠
+    回報不足）重現舊bug條件，驗證新版「保底+動態分配」下沒有任何子問題
+    是0輪，且總消耗仍等於retrieval_budget（8=2+2+2*3底+2共用池全部用完）。"""
+    def retrieve(q, *, top_k):
+        return [_hit("N01", 0)]
+
+    def reflect(sq, ev):
+        return ReflectVerdict(sufficient=False, missing="更多")  # 永遠不足
+
+    result = svc.gather_evidence_agentic(
+        "問一？問二？問三？", retrieve, reflect, max_rounds=5, retrieval_budget=8
+    )
+    assert len(result.rounds_per_subquestion) == 3
+    assert min(result.rounds_per_subquestion) >= 1  # 沒有子問題被餓死
+    assert result.rounds_per_subquestion == [4, 2, 2]
+    assert result.retrieval_calls == 8
+
+
+def test_complex_budget_smaller_than_subquestion_count_still_guarantees_floor():
+    """retrieval_budget < 子問題數時，保底優先於嚴格封頂：每子問題至少1
+    輪，總消耗可能超過retrieval_budget（刻意取捨，docstring已註明）。"""
+    def retrieve(q, *, top_k):
+        return [_hit("N01", 0)]
+
+    def reflect(sq, ev):
+        return ReflectVerdict(sufficient=True)  # 一輪就夠，只驗證保底門檻本身
+
+    result = svc.gather_evidence_agentic(
+        "問一？問二？問三？問四？", retrieve, reflect, max_rounds=5, retrieval_budget=2
+    )
+    assert len(result.rounds_per_subquestion) == 4
+    assert min(result.rounds_per_subquestion) >= 1
+
+
 # ── gather_evidence_agentic_async：與同步版一一對應 ────────────────
 # harness 實際呼叫的是這個版本（retrieve/reflect 需要 await，例如內部要
 # 對每個精煉後的 query 重新 embed）。邏輯與同步版共用，這裡只驗證 await
@@ -245,3 +282,20 @@ async def test_async_evidence_deduped_by_source_and_chunk_index():
     result = await svc.gather_evidence_agentic_async("問一？問二？", retrieve, reflect)
     assert len(result.evidence) == 2
     assert result.context_char_len == sum(len(l) for l in result.context_lines)
+
+
+@pytest.mark.asyncio
+async def test_async_complex_budget_fairness_no_subquestion_starved():
+    """報告93修正的async版本，比照同步版test_complex_budget_fairness_no_subquestion_starved。"""
+    async def retrieve(q, *, top_k):
+        return [_hit("N01", 0)]
+
+    async def reflect(sq, ev):
+        return ReflectVerdict(sufficient=False, missing="更多")
+
+    result = await svc.gather_evidence_agentic_async(
+        "問一？問二？問三？", retrieve, reflect, max_rounds=5, retrieval_budget=8
+    )
+    assert min(result.rounds_per_subquestion) >= 1
+    assert result.rounds_per_subquestion == [4, 2, 2]
+    assert result.retrieval_calls == 8

@@ -145,7 +145,21 @@ def gather_evidence_agentic(
                呼叫端包一次 LLM 呼叫。
     entity_count : 問句抽出的實體數（供 `route_complexity`）；None 時該判準略過。
     max_rounds : 每個子問題的檢索輪數上限（Fan 2026＝5）。
-    retrieval_budget : 整題（跨所有子問題）的總檢索次數上限。
+    retrieval_budget : 整題（跨所有子問題）的總檢索次數「軟」上限——見下方
+        「預算分配」說明，不是每個子問題各自硬性均分後就不能再要。
+
+    預算分配（報告93修正，原設計缺陷）
+    ----
+    舊版用單一遞減計數器 `retrieval_calls < retrieval_budget` 跨子問題共用，
+    前面子問題可以把預算全部用完，導致排在後面的子問題完全分不到檢索機會
+    （報告93實測案例`18-Q5`：3個子問題`rounds_per_subquestion=[5,3,0]`）。
+    現在改成「每子問題保底＋剩餘額度動態分配」：`floor_per_sq =
+    max(1, retrieval_budget // 子問題數)` 是每個子問題的保底輪數（至少 1
+    輪，即使 `retrieval_budget` 小於子問題數也一樣，此時總消耗會超過
+    `retrieval_budget`，這是刻意的取捨——保底優先於嚴格封頂）；除法無法
+    整除的餘數、以及前面子問題沒用完的保底額度，會累積成一個共用池
+    `shared_pool`，動態分給後面用得到的子問題。子問題仍受 `max_rounds`
+    封頂。
 
     回傳 `AgenticResult`：綜合證據 `context_lines` ＋ trace。
     """
@@ -170,15 +184,20 @@ def gather_evidence_agentic(
             rounds_per_subquestion=[1],
         )
 
-    # 複雜題 → 分解 → 逐子問題多輪
+    # 複雜題 → 分解 → 逐子問題多輪（每子問題保底 + 剩餘額度動態分配）
     sub_questions = split_into_subquestions(question)
+    floor_per_sq = max(1, retrieval_budget // len(sub_questions))
+    shared_pool = max(0, retrieval_budget - floor_per_sq * len(sub_questions))
     rounds_per_sq: list[int] = []
     for sub_q in sub_questions:
+        sq_limit = floor_per_sq + shared_pool
         query = sub_q
         rounds = 0
-        while rounds < max_rounds and retrieval_calls < retrieval_budget:
+        calls_this_sq = 0
+        while rounds < max_rounds and calls_this_sq < sq_limit:
             hits = retrieve(query, top_k=per_round_top_k)
             retrieval_calls += 1
+            calls_this_sq += 1
             rounds += 1
             _merge_evidence(pool, seen, hits)
 
@@ -189,6 +208,7 @@ def gather_evidence_agentic(
             # FLARE 觸發：依缺口精煉下一輪查詢
             missing = (verdict.missing or "").strip()
             query = f"{sub_q} {missing}".strip() if missing else sub_q
+        shared_pool = shared_pool + floor_per_sq - calls_this_sq
         rounds_per_sq.append(rounds)
 
     return AgenticResult(
@@ -228,7 +248,9 @@ async def gather_evidence_agentic_async(
     ----
     retrieve : `async (query: str, *, top_k: int) -> list[dict]`。
     reflect  : `async (subquestion: str, evidence_texts: list[str]) -> ReflectVerdict`。
-    其餘參數與回傳值語意與同步版完全相同。
+    其餘參數與回傳值語意、預算分配規則（每子問題保底＋剩餘額度動態分配，
+    見同步版 `gather_evidence_agentic()` docstring「預算分配」段）與同步版
+    完全相同。
     """
     complexity = route_complexity(question, entity_count=entity_count)
     pool: list[dict] = []
@@ -251,13 +273,18 @@ async def gather_evidence_agentic_async(
         )
 
     sub_questions = split_into_subquestions(question)
+    floor_per_sq = max(1, retrieval_budget // len(sub_questions))
+    shared_pool = max(0, retrieval_budget - floor_per_sq * len(sub_questions))
     rounds_per_sq: list[int] = []
     for sub_q in sub_questions:
+        sq_limit = floor_per_sq + shared_pool
         query = sub_q
         rounds = 0
-        while rounds < max_rounds and retrieval_calls < retrieval_budget:
+        calls_this_sq = 0
+        while rounds < max_rounds and calls_this_sq < sq_limit:
             hits = await retrieve(query, top_k=per_round_top_k)
             retrieval_calls += 1
+            calls_this_sq += 1
             rounds += 1
             _merge_evidence(pool, seen, hits)
 
@@ -267,6 +294,7 @@ async def gather_evidence_agentic_async(
                 break
             missing = (verdict.missing or "").strip()
             query = f"{sub_q} {missing}".strip() if missing else sub_q
+        shared_pool = shared_pool + floor_per_sq - calls_this_sq
         rounds_per_sq.append(rounds)
 
     return AgenticResult(
