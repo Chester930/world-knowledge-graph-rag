@@ -7,7 +7,9 @@
 
 Claude Code用官方全國法規資料庫（law.moj.gov.tw）逐條核對報告71標記的4筆有疑慮的natural_text，結論跟報告71的機械判斷不一致：**2筆其實是誤判**（`6917546619827179615`受益人案、`1155178801978699636`高溫作業案——現況已經是對的，法條原文本來就沒有那些字，不用修）；**2筆確認需要修正**（`1152927002165041341`第226條語序破碎案、`1152937997281292486`第3條——但問題點跟報告71原判斷不同：「代其辦理居留業務」其實是對的，真正查無出處的是尾段「始得從事就業服務業務」）。詳細查證過程與官方條文引用見[報告90](docs/報告/90_報告71殘留4筆natural_text法規原文複核與修正SDD任務書.md)。
 
-**已交付Codex執行**（T1-T4：文件記錄複核結論、新增獨立腳本`scripts/kg/fix_report90_verified_naturalization_facts.py`、preflight確認、`--apply`寫入2筆、驗證＋pytest）。**尚未執行**，下次接手若Codex已完成，應先核對`data/eval/naturalization_backfill_dryrun_20260923/report90_manual_fix_write_log.json`與`t2_followup_issues.md`的最終狀態。
+**Codex已完成T1-T4，commit `c6cbe65`（落在main checkout本地`master`，非本worktree分支，尚未push）**。Claude Code已獨立複驗：(1)`git show --stat`確認只動3個檔案（新腳本、`t2_followup_issues.md`、新審計log），未觸碰production程式碼；(2)逐行核對新腳本`scripts/kg/fix_report90_verified_naturalization_facts.py`，compare-and-set guard完整（kg_id/rel_type/natural_text/subject/subject_type/object/object_type皆須吻合才SET，只寫`natural_text`）；(3)`t2_followup_issues.md`新增章節內容忠實、第4筆重新核對後仍誠實標註「查無出處屬排除法、查證強度有限」；(4)**獨立唯讀查詢Neo4j**確認兩筆`natural_text`現況分別為「發生災害時之災害原因調查及檢討防災對策。」與「接受從事本法第四十六條規定工作之外國人委任，代其辦理居留業務。」，跟審計log與task目標值一致；(5)**獨立重跑`python -m pytest tests -q ...`於main checkout，結果同樣1156 passed**。**驗證全數通過，無需修正**。
+
+**後續待辦**：main checkout本地`master`目前領先`origin/master`一個commit（`c6cbe65`），是否push由使用者決定（不在本worktree範圍內，Claude Code未曾在main checkout操作git）。報告71殘留的17筆需人工複核、5筆建議排除案例仍未處理，非本任務範圍。
 
 ## 2026-09-27（續）：報告88人工裁決已完成——`18-Q6`算對／`57-DIST2`算錯，落差校正為−7題
 
