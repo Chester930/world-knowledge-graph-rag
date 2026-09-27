@@ -1,7 +1,15 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-27（續4）
+> **最後更新**：2026-09-27（續5）
+
+## 2026-09-27（續5）：報告91已由Codex完成執行、Claude Code獨立複驗通過並套用到本分支——**⚠️main checkout本地master目前領先origin一個未push的commit`a020f58`**
+
+Codex依報告91 T1-T4在**main checkout本地`master`**上完成§7.4方案二/四/七/八四段展開，commit `a020f58`（parent `534cb71`，**尚未push**）。Claude Code獨立複驗：(1) `git diff 534cb71 a020f58`確認diff乾淨，只換掉4個bullet、其餘§7.4段落完全未動；(2) 逐項核對內容——LayoutLM引用（*LayoutLM: Pre-training of Text and Layout for Document Image Understanding*, Xu et al., KDD 2020）全名/作者正確；獨立`Grep`確認`services/`／`repositories/`確實查無Louvain/`community_service`機制（`repositories/kg_repo.py`裡的"Community"命中是Neo4j Community Edition的無關誤報，已排除）；確認`docs/報告/技術導入評估.md`存在但無方案八專節。**驗證全數通過，內容誠實、無溢美用詞、未觸碰production程式碼**。
+
+**⚠️ 重要落差需下次接手注意**：Codex是在main checkout本地`master`（版本落後於本worktree分支，缺本次session稍早完成的§7.2/§7.3更新，見續3/續4段落）上作業的，**不能直接把`a020f58`push上去**——那會讓origin/master的§7.4修好、但§7.2/§7.3又是舊版（TODO未填、RQ2限制條目缺漏）。Claude Code已改為手動把同一段文字**逐字套用**到本worktree分支對應的檔案（commit `8eaabe7`，pytest 1156 passed），本分支現在同時具備§7.2/§7.3/§7.4的完整版本。**main checkout本地`master`上的`a020f58`目前是孤立、未push、內容已被本分支`8eaabe7`涵蓋的多餘commit**——下次接手若要合併本分支進master（比照報告89/續段的既有流程），需注意這一點，避免重複套用或選錯合併方向；若使用者確認`a020f58`已無用途，可以考慮之後在main checkout上用`git reset`處理（**不要自行執行，需使用者同意**，且需先確認main checkout沒有其他未commit異動）。
+
+已push `8eaabe7`到`origin/worktree-sdd-retrieval-comparison`。
 
 ## 2026-09-27（續4）：報告91任務書已建立，交付Codex處理§7.4「方案二/四/七/八」補完缺口
 
