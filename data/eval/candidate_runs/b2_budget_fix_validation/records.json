@@ -1,0 +1,116 @@
+[
+  {
+    "question_id": "18-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的「警察人員特別休假辦法」相關事實，特別休假的核發依據如下：\n\n1. 根據第2條至第4條：\n   - 有左列情形之一者，給予一至三日之特別休假（處理重大突發治安事件、奮勇緝兇等）。\n   - 有左列情事之一者，給予二至五日之特別休假（主動破獲重大擾亂財政金融或私造武器彈藥案件等）。\n   - 有左列情事之一者，給予三至七日之特別休假（因特別貢獻或特殊功績受頒勳章者、因特殊功績榮獲晉階者等）。\n\n2. 特別休假與服務年資無直接關係。特別休假的天數是根據勞動人員所具有的特定功績或貢獻來決定，而非基於服務年資。\n\n3. 最高可以給七日特別休假（第4條）。\n\n因此，特別休假的核發依據主要是勞動人員在工作中的特殊功績或貢獻，最高可以給七日特別休假。",
+    "error": null,
+    "latency_s": 171.88,
+    "llm_calls": 9,
+    "generation_llm_calls": 9,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1025,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "B2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 171880.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030006_勞工請假規則_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030006_勞工請假規則_2",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 3160,
+        "snr": 0.019,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 944,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 171880.0,
+        "raw_draft": "根據提供的「警察人員特別休假辦法」相關事實，特別休假的核發依據如下：\n\n1. 根據第2條至第4條：\n   - 有左列情形之一者，給予一至三日之特別休假（處理重大突發治安事件、奮勇緝兇等）。\n   - 有左列情事之一者，給予二至五日之特別休假（主動破獲重大擾亂財政金融或私造武器彈藥案件等）。\n   - 有左列情事之一者，給予三至七日之特別休假（因特別貢獻或特殊功績受頒勳章者、因特殊功績榮獲晉階者等）。\n\n2. 特別休假與服務年資無直接關係。特別休假的天數是根據勞動人員所具有的特定功績或貢獻來決定，而非基於服務年資。\n\n3. 最高可以給七日特別休假（第4條）。\n\n因此，特別休假的核發依據主要是勞動人員在工作中的特殊功績或貢獻，最高可以給七日特別休假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的「警察人員特別休假辦法」相關事實，特別休假的核發依據如下：\n\n1. 根據第2條至第4條：\n   - 有左列情形之一者，給予一至三日之特別休假（處理重大突發治安事件、奮勇緝兇等）。\n   - 有左列情事之一者，給予二至五日之特別休假（主動破獲重大擾亂財政金融或私造武器彈藥案件等）。\n   - 有左列情事之一者，給予三至七日之特別休假（因特別貢獻或特殊功績受頒勳章者、因特殊功績榮獲晉階者等）。\n\n2. 特別休假與服務年資無直接關係。特別休假的天數是根據勞動人員所具有的特定功績或貢獻來決定，而非基於服務年資。\n\n3. 最高可以給七日特別休假（第4條）。\n\n因此，特別休假的核發依據主要是勞動人員在工作中的特殊功績或貢獻，最高可以給七日特別休假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        2,
+        2
+      ]
+    },
+    "run": 1
+  }
+]

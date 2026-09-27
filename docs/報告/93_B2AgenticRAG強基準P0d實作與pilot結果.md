@@ -119,9 +119,41 @@ P0d的程式碼實作（真實LLM反思、harness B2臂接線、成本profile）
 
 ---
 
+## 4.1 追加：`retrieval_budget`分配缺陷已修正並驗證（2026-09-27，使用者裁示「先修retrieval_budget分配規則」）
+
+### 修正內容
+
+`services/agentic_baseline_service.py`的`gather_evidence_agentic()`／`gather_evidence_agentic_async()`原本用單一遞減計數器`retrieval_calls < retrieval_budget`跨子問題共用，前面子問題可以把預算全部用完（§3.3的18-Q5案例）。改為「每子問題保底＋剩餘額度動態分配」：
+
+- `floor_per_sq = max(1, retrieval_budget // 子問題數)`：每個子問題的保底輪數，即使`retrieval_budget`小於子問題數也至少保底1輪（此時總消耗可能超過`retrieval_budget`，這是刻意取捨——保底優先於嚴格封頂，已在docstring註明）。
+- 除法無法整除的餘數、以及前面子問題沒用完的保底額度，累積成共用池`shared_pool`動態分給後面子問題；仍受`max_rounds`封頂。
+
+同步／async兩版本同步修正。新增3個單元測試（含1個直接重現18-Q5的`[5,3,0]`退化形狀、驗證修正後沒有子問題是0輪），既有19個測試斷言**全數不變通過**（因為這些測試只斷言`retrieval_calls`總數或`max_rounds`封頂情境，不受內部分配方式改變影響）。全套`pytest`1170→**1173 passed**。Commit `cb3be26`。
+
+### 真實重跑18-Q5驗證（非mock）
+
+用同一題（`18-Q5`）、同一份KG、同樣的B2臂設定（`max_rounds=5, retrieval_budget=8`）重新跑一次：
+
+| 指標 | 修正前（§3.3記錄） | 修正後 |
+|---|---|---|
+| `rounds_per_subquestion` | `[5, 3, 0]`（第三子問題完全沒檢索） | `[4, 2, 2]`（三個子問題都有檢索，與手算預期完全吻合） |
+| `atomic_accuracy` | 0.33 | **1.0** |
+| `is_perfect` | 否 | **是** |
+| 答案內容 | 明顯退步 | 正確涵蓋三個級距（1-3日／2-5日／3-7日），與gold facts逐一對應 |
+| latency_s | 192.2 | 171.9 |
+| retrieval_calls | 8 | 8（總消耗相同，只是分配方式改變） |
+
+**修正確認有效**：本次pilot發現的confounder已經解決，18-Q5從「B2明顯退步的唯一反例」變成「B2正確作答」。輸出：`data/eval/candidate_runs/b2_budget_fix_validation/`。
+
+**仍待使用者決定**：是否要用修正後的程式碼重新擴大跑測規模（例如補完先前因記憶體壓力中止的42題全量比較），或現階段先以「budget分配缺陷已修正並經單題驗證」的狀態收斂，本報告不自動決定。
+
+---
+
 ## 5. 版控狀態
 
-- Commit `c791cbf`（P0d實作：async孿生函式、`_b2_reflect()`、harness B2臂接線、cost_analyzer profile，14個新測試，pytest 1170 passed）——**已commit，未push**。
-- preflight SUPPORTED_ARMS修正＋本報告：**尚未commit**（見下方交付狀態，將在本報告寫完後一併commit）。
-- pilot輸出：`data/eval/candidate_runs/b2_pilot_smoke/`（2題smoke test）、`data/eval/candidate_runs/b2_pilot_full/`（9題部分完成，被記憶體壓力中止前的真實records）、`data/eval/candidate_runs/b2_pilot_full_stdout.log`（背景執行log）。
+- Commit `c791cbf`（P0d實作：async孿生函式、`_b2_reflect()`、harness B2臂接線、cost_analyzer profile，14個新測試，pytest 1170 passed）。
+- Commit `eabcfc0`（preflight SUPPORTED_ARMS修正＋本報告8題pilot結果）。
+- Commit `0981014`（HANDOVER記錄）。**以上3筆commit已於2026-09-27由使用者確認並push**（`origin/worktree-sdd-retrieval-comparison`）。
+- Commit `cb3be26`（§4.1：`retrieval_budget`每子問題保底＋動態分配修正，3個新測試，pytest 1173 passed）——依使用者裁示「先修retrieval_budget分配規則」執行，**已commit，push待使用者確認**。
+- pilot輸出：`data/eval/candidate_runs/b2_pilot_smoke/`（2題smoke test）、`data/eval/candidate_runs/b2_pilot_full/`（9題部分完成，被記憶體壓力中止前的真實records）、`data/eval/candidate_runs/b2_pilot_full_stdout.log`（背景執行log）、`data/eval/candidate_runs/b2_budget_fix_validation/`（§4.1修正後18-Q5單題重跑驗證）。
 - **push留待使用者與主session確認**，本報告不自行push。
