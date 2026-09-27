@@ -84,3 +84,18 @@ Claude Code先從`data/eval/naturalization_backfill_dryrun_20260923/affected_edg
 5. 案例11、13的法規出處仍有兩個候選未能確認，若backfill時可考慮同時修正`citations_json`標明兩個候選皆可能，或維持現狀（本報告不建議在缺乏更多資訊時武斷選一個）。
 
 若使用者核准，下一步是仿照報告90新增一支獨立一次性腳本（`scripts/kg/fix_report71_residual_22_facts.py`），對這20筆（或使用者選定的子集）執行preflight／`--apply`／compare-and-set寫入guard／獨立read-only覆核／pytest全綠，並更新`quality_grading.md`與`t2_followup_issues.md`記錄最終結論。
+
+---
+
+## 4. 執行結果（2026-09-27，使用者已核准「全部20筆都實作」）
+
+已依§3建議新增`scripts/kg/fix_report71_residual_20_facts.py`（比照`fix_report90_verified_naturalization_facts.py`的preflight/`--apply`/compare-and-set寫入guard模式），對§2.1（5筆）+§2.2（10筆）+§2.4（5筆）共20筆執行：
+
+1. **Preflight**：20筆全數`READY`（現況與09-23時記錄的`expected_old`/`subject`/`object`等欄位完全吻合，無漂移）。
+2. **`--apply`**：20筆全數`written_verified`。
+3. **獨立覆核**：另用一次獨立的唯讀查詢（不透過寫入腳本自身的回讀邏輯）重新確認20筆`natural_text`皆等於§2記錄的目標值，全數吻合。
+4. **測試**：`python -m pytest tests -q -p no:cacheprovider --ignore=tests/core/test_embedding_migration.py` 1156 passed。
+5. 審計log：`data/eval/naturalization_backfill_dryrun_20260923/report92_residual_20_fix_write_log.json`。
+6. §2.3的2筆（`1152927002165017400`、`1152927002165023783`）**維持現狀未寫入**，如§3.3所述，問題根源在結構化欄位本身，留待未來另案處理。
+
+至此，報告71對KG#4的96筆`natural_text`型別洩漏backfill全數處理完畢：27（09-23初次）+2（報告90）+20（本報告）= 49筆已backfill，2筆（本報告§2.3）待未來另案處理，其餘47筆為`skipped_missing_fields`（欄位缺漏，安全跳過，未受影響，非本輪範圍）。

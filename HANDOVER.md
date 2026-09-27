@@ -1,7 +1,13 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-27（session總結）
+> **最後更新**：2026-09-27（報告92）
+
+## 2026-09-27（報告92）：報告71殘留22筆natural_text全數處理完畢
+
+**現況（接手前先確認）**：Claude Code派3組agent逐筆用官方「全國法規資料庫」（law.moj.gov.tw）核對報告71殘留的22筆`natural_text`（17需複核+5建議排除），發現09-23的機械品質分級判斷力有限——22筆沒有一筆是「原分級完全正確」的。使用者核准後，已用`scripts/kg/fix_report71_residual_20_facts.py`（preflight/`--apply`/compare-and-set guard模式，比照報告90）對其中20筆backfill驗證後的`natural_text`，全數`written_verified`並經獨立唯讀查詢覆核吻合，pytest 1156 passed。剩餘2筆（`1152927002165017400`、`1152927002165023783`）因結構化欄位本身有問題（段落錯置／公式符號D/d混淆），維持現狀待未來另案處理。詳見[報告92](docs/報告/92_報告71殘留22筆natural_text法規原文複核報告.md)。**至此報告71對KG#4的96筆型別洩漏backfill全數處理完畢**（27+2+20=49筆已backfill，2筆待未來處理，47筆為欄位缺漏安全跳過）。尚未commit（下一步）。
+
+**下次接手建議**：報告71系列已無殘留待辦。若要進一步深化RQ1論證，B2（Agentic RAG強基準）仍是目前唯一還沒做的正式對照組（已有部分證據蒐集端程式碼`services/agentic_baseline_service.py`，缺生成端接線與harness併入，報告36 §8）。
 
 ## 2026-09-27（session總結）：第六七章空白段落補齊 + 報告90/91執行複驗 + 全版控同步於`c48268f`
 

@@ -73,3 +73,16 @@
 ## 已知品質缺口（T2 後續發現）
 
 現行機械檢查（數字/單位/CNS-ISO錨點、動詞覆蓋、截斷/缺謂語）未涵蓋「關鍵限定詞/受益對象刪除」與「插入原文沒有的新子句」。
+
+## 2026-09-27 殘留22筆（17需複核+5建議排除）法規原文複核與寫入結論
+
+詳見[報告92](../../../docs/報告/92_報告71殘留22筆natural_text法規原文複核報告.md)。Claude Code派3組agent逐筆用官方「全國法規資料庫」（law.moj.gov.tw）WebFetch核對，發現本輪機械分級的判斷力有限——22筆沒有一筆是「原分級完全正確、不需要更多資訊」的：
+
+- **5筆（原「需複核」）**：查證後確認忠實對應法條，安全backfill現有`new_text`。
+- **10筆（原「需複核」）**：查證後發現漏詞/單位錯/重複贅字等實質問題，改用法條逐字為據的驗證後文字backfill。
+- **5筆（原「建議排除」）**：排除理由全數確認成立（截斷、幻覺、錨點錯置），但查到官方條文後都能寫出忠實版本，改用驗證後文字backfill（而非維持含型別標記或截斷的舊值）。
+- **2筆（原「需複核」，`1152927002165017400`與`1152927002165023783`）**：查證後判定結構化欄位（`subject`/`object`）本身抓錯法條款次（段落錯置）或混淆公式符號（D/d混淆+單位錯），非`natural_text`字串層級能單獨修正，**維持現狀，留待未來另案處理抽取層級問題**。
+
+已用`scripts/kg/fix_report71_residual_20_facts.py`（比照`backfill_naturalization_safe_edges.py`／`fix_report90_verified_naturalization_facts.py`的preflight/`--apply`/compare-and-set寫入guard模式）對前3類共20筆執行寫入，preflight全數`READY`、`--apply`全數`written_verified`，並用獨立唯讀查詢覆核20筆`natural_text`皆等於預期值。審計log：`report92_residual_20_fix_write_log.json`。
+
+至此，報告71對KG#4的96筆`natural_text`型別洩漏backfill全數處理完畢：27（初次）+2（報告90）+20（報告92）= 49筆已backfill，2筆（報告92 §2.3，結構化欄位問題）待未來另案處理，其餘47筆為`skipped_missing_fields`（欄位缺漏，安全跳過，未受影響）。

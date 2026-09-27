@@ -1,0 +1,238 @@
+{
+  "operation": "report92_residual_20_naturalization_fix",
+  "database": "neo4j",
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "target_count": 20,
+  "target_edge_ids": [
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165016788",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165023788",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025320",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025328",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025941",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165029730",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165037197",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165040151",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152945693862695968",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152951191420832698",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978703584",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978703736",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978722385",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978723107",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155179901490326826",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1161934201419755035",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199257486",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199270989",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199273547",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917558714455078035"
+  ],
+  "entries": [
+    {
+      "timestamp_utc": "2026-09-27T08:00:20.172194Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165016788",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "最高負責人 POSITION 確定地方主管機關應依下列各款規定審認之 ORGANIZATION。",
+      "new_value": "地方主管機關應依下列各款規定，審認本法所定之最高負責人。",
+      "actual_before_value": "最高負責人 POSITION 確定地方主管機關應依下列各款規定審認之 ORGANIZATION。",
+      "actual_after_value": "地方主管機關應依下列各款規定，審認本法所定之最高負責人。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:21.680774Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165023788",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "C（PRODUCT）依冷媒氣體決定之中央主管機關之指定值進行檢測。",
+      "new_value": "C為依冷媒氣體決定之中央主管機關之指定值。",
+      "actual_before_value": "C（PRODUCT）依冷媒氣體決定之中央主管機關之指定值進行檢測。",
+      "actual_after_value": "C為依冷媒氣體決定之中央主管機關之指定值。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:22.173698Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025320",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "PERSON有提出資料變更申請書。",
+      "new_value": "出生年月日有變更或錯誤時，雇主應即填具資料變更申請書。",
+      "actual_before_value": "PERSON有提出資料變更申請書。",
+      "actual_after_value": "出生年月日有變更或錯誤時，雇主應即填具資料變更申請書。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:22.215629Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025328",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "居留證統一證號 PERSON 有變更或錯誤時，需提出資料變更申請書。",
+      "new_value": "居留證統一證號有變更或錯誤時，雇主應即填具資料變更申請書。",
+      "actual_before_value": "居留證統一證號 PERSON 有變更或錯誤時，需提出資料變更申請書。",
+      "actual_after_value": "居留證統一證號有變更或錯誤時，雇主應即填具資料變更申請書。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:22.675361Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165025941",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "PERSON 具有 教師及職員資格。",
+      "new_value": "現任或曾任公私立學校教師及職員，具有擔任監場人員之資格。",
+      "actual_before_value": "PERSON 具有 教師及職員資格。",
+      "actual_after_value": "現任或曾任公私立學校教師及職員，具有擔任監場人員之資格。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:22.709567Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165029730",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "地下儲槽（PRODUCT）標示於槽壁缺乏識別效果者得設置標示牌（DEVICE）。",
+      "new_value": "標示於槽壁缺乏識別效果之地下儲槽 得採設置 標示牌",
+      "actual_before_value": "地下儲槽（PRODUCT）標示於槽壁缺乏識別效果者得設置標示牌（DEVICE）。",
+      "actual_after_value": "標示於槽壁缺乏識別效果之地下儲槽 得採設置 標示牌"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:22.740608Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165037197",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "Service為FUND來源。",
+      "new_value": "受託業務及提供服務之收入為經費來源之一。",
+      "actual_before_value": "Service為FUND來源。",
+      "actual_after_value": "受託業務及提供服務之收入為經費來源之一。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:22.923136Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165040151",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "國家標準CNS 16368、CNS 16653系列及CNS 18893與國際標準ISO 16368、ISO 16653系列及ISO 18893不一致時，以STANDARD為準。",
+      "new_value": "國家標準CNS 16368、CNS 16653系列及CNS 18893與國際標準ISO16368、ISO16653系列及ISO18893不一致時，以國際標準為準。",
+      "actual_before_value": "國家標準CNS 16368、CNS 16653系列及CNS 18893與國際標準ISO 16368、ISO 16653系列及ISO 18893不一致時，以STANDARD為準。",
+      "actual_after_value": "國家標準CNS 16368、CNS 16653系列及CNS 18893與國際標準ISO16368、ISO16653系列及ISO18893不一致時，以國際標準為準。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.047566Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152945693862695968",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "t（PRODUCT）的回轉活塞之氣體壓縮部分之厚度值單位為立方公尺。",
+      "new_value": "t 為回轉活塞之氣體壓縮部分之厚度值，單位為公尺。",
+      "actual_before_value": "t（PRODUCT）的回轉活塞之氣體壓縮部分之厚度值單位為立方公尺。",
+      "actual_after_value": "t 為回轉活塞之氣體壓縮部分之厚度值，單位為公尺。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.158010Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152951191420832698",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "被申訴人 PERSON 的最高負責人為最高負責人。",
+      "new_value": "被申訴人為最高負責人。",
+      "actual_before_value": "被申訴人 PERSON 的最高負責人為最高負責人。",
+      "actual_after_value": "被申訴人為最高負責人。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.179351Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978703584",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "Service屬於前條所定勞工健康服務事項。",
+      "new_value": "定期向雇主報告及勞工健康服務之建議 屬於 前條所定勞工健康服務事項",
+      "actual_before_value": "Service屬於前條所定勞工健康服務事項。",
+      "actual_after_value": "定期向雇主報告及勞工健康服務之建議 屬於 前條所定勞工健康服務事項"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.511010Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978703736",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "CREATIVE_WORK通知ORGANIZATION有關推介就業情形回覆卡事宜。",
+      "new_value": "推介就業情形回覆卡 通知 公立就業服務機構",
+      "actual_before_value": "CREATIVE_WORK通知ORGANIZATION有關推介就業情形回覆卡事宜。",
+      "actual_after_value": "推介就業情形回覆卡 通知 公立就業服務機構"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.669663Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978722385",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "閥之相關裝置 PRODUCT 應當加鎖、鉛封或採取其他同等有效的措施 CREATIVE_WORK。",
+      "new_value": "操作對製造設備安全有重大影響且不常使用之閥之相關裝置，應予加鎖、鉛封或採取其他同等有效之措施。",
+      "actual_before_value": "閥之相關裝置 PRODUCT 應當加鎖、鉛封或採取其他同等有效的措施 CREATIVE_WORK。",
+      "actual_after_value": "操作對製造設備安全有重大影響且不常使用之閥之相關裝置，應予加鎖、鉛封或採取其他同等有效之措施。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.696157Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155178801978723107",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "從事前項規定作業之勞工 PERSON 必須供給穿著不浸透性防護衣、防護手套、防護長鞋及呼吸用防護具等個人防護具十一種。",
+      "new_value": "從事該作業之勞工，雇主應供給其穿著不浸透性防護衣、防護手套、防護長鞋、呼吸用防護具等個人防護具。",
+      "actual_before_value": "從事前項規定作業之勞工 PERSON 必須供給穿著不浸透性防護衣、防護手套、防護長鞋及呼吸用防護具等個人防護具十一種。",
+      "actual_after_value": "從事該作業之勞工，雇主應供給其穿著不浸透性防護衣、防護手套、防護長鞋、呼吸用防護具等個人防護具。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.722808Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1155179901490326826",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "本辦法所稱定團體是指ORGANIZATION。",
+      "new_value": "本辦法所稱之團體，指依人民團體法或其他法令設立者。",
+      "actual_before_value": "本辦法所稱定團體是指ORGANIZATION。",
+      "actual_after_value": "本辦法所稱之團體，指依人民團體法或其他法令設立者。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.751136Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1161934201419755035",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "PERSON以郵寄方式向保險人請領insurance給付。",
+      "new_value": "支出殯葬費之人以郵寄方式向保險人請領保險給付。",
+      "actual_before_value": "PERSON以郵寄方式向保險人請領insurance給付。",
+      "actual_after_value": "支出殯葬費之人以郵寄方式向保險人請領保險給付。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.879191Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199257486",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "持有ORGANIZATION民用航空醫務中心所發出的航空人員體格檢查合格證明，為合格證明CREATIVE_WORK。",
+      "new_value": "持有民用航空醫務中心航空人員體格檢查合格證明。",
+      "actual_before_value": "持有ORGANIZATION民用航空醫務中心所發出的航空人員體格檢查合格證明，為合格證明CREATIVE_WORK。",
+      "actual_after_value": "持有民用航空醫務中心航空人員體格檢查合格證明。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:23.907294Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199270989",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "安置對象 CREATIVE_WORK 屬於安置 DEFINED_AS。",
+      "new_value": "安置對象、期間及程序，由中央主管機關所定。",
+      "actual_before_value": "安置對象 CREATIVE_WORK 屬於安置 DEFINED_AS。",
+      "actual_after_value": "安置對象、期間及程序，由中央主管機關所定。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:24.021967Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917534525199273547",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "除第五十六條及第五十七條另有規定者外，請領各項保險給付之診斷書及證明書應由醫院出具（LOCAL_BUSINESS）。",
+      "new_value": "請領各項保險給付之診斷書及證明書，除第五十六條及第五十七條另有規定者外，應由醫院、診所或領有執業執照之醫師出具。",
+      "actual_before_value": "除第五十六條及第五十七條另有規定者外，請領各項保險給付之診斷書及證明書應由醫院出具（LOCAL_BUSINESS）。",
+      "actual_after_value": "請領各項保險給付之診斷書及證明書，除第五十六條及第五十七條另有規定者外，應由醫院、診所或領有執業執照之醫師出具。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T08:00:24.167505Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:6917558714455078035",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "PERSON為安全負責人。",
+      "new_value": "清艙作業或解體作業之實際負責人 為 安全負責人",
+      "actual_before_value": "PERSON為安全負責人。",
+      "actual_after_value": "清艙作業或解體作業之實際負責人 為 安全負責人"
+    }
+  ],
+  "started_at_utc": "2026-09-27T08:00:19.938335Z",
+  "apply_requested_at_utc": "2026-09-27T08:00:19.938347Z",
+  "apply_mode": true,
+  "updated_at_utc": "2026-09-27T08:00:24.167522Z",
+  "result_counts": {
+    "written_verified": 20
+  },
+  "completed_at_utc": "2026-09-27T08:00:24.168212Z"
+}
