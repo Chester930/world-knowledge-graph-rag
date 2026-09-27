@@ -1,9 +1,13 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-27（續6）
+> **最後更新**：2026-09-27（續7）
 
-## 2026-09-27（續6）：main checkout本地master孤立commit`a020f58`已清理完畢
+## 2026-09-27（續7）：四處版控已統一於`3090821`——本worktree分支+報告90修正已合併進master並push
+
+發現master與本worktree分支已分岔（master領先1個commit`534cb71`＝報告90 T1-T4修正，只新增3個檔案、無衝突；本分支領先11個commit＝第六七章補完＋報告91任務書＋本次一系列HANDOVER記錄）。處理方式：(1) `git merge --no-commit --no-ff master`試合併確認零衝突（純新增，未觸碰本次工作內容）；(2) 正式合併commit`3090821`；(3) `pytest`1156 passed全綠；(4) push `origin/worktree-sdd-retrieval-comparison`（`643dc11..3090821`）；(5) `git push origin HEAD:master` fast-forward `origin/master`（`534cb71..3090821`）；(6) 使用者在main checkout執行`git pull --ff-only`同步本地master。**四處（本worktree分支／origin本分支／origin master／main checkout本地master）現在完全同步於`3090821`**，取代（續6）以前的分岔記錄。
+
+## 2026-09-27（續6，歷史記錄）：main checkout本地master孤立commit`a020f58`已清理完畢
 
 延續下方（續5）記錄的落差，已由使用者在main checkout親自執行（Claude Code因worktree沙盒隔離技術上無法對main checkout下git指令，全程口頭指導）：(1) `git stash push -u -m "master-a020f58-cleanup-20260927"`保護既有3筆未commit異動（`docs/報告/53_...md`修改稿＋2份v1.0未追蹤文件），取得SHA`aa707ec02cc9d1e059c51d1bf9797057c7c0dbd6`；(2) `git reset --hard 534cb71`丟掉多餘的`a020f58`（其內容已完整涵蓋在本worktree分支的`8eaabe7`並push）；(3) `git stash apply aa707ec...`（非pop）＋核對SHA後`git stash drop "stash@{0}"`精準還原並清除暫存（PowerShell對`stash@{0}`需加引號才能正確解析）。**main checkout本地master現在與`origin/master`完全同步於`534cb71`，3筆既有異動與其餘4筆歷史暫存皆完好無損**。此節取代（續5）的警告。
 
