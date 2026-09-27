@@ -1,7 +1,15 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-27（報告92）
+> **最後更新**：2026-09-27（報告93）
+
+## 2026-09-27（報告93）：B2 Agentic RAG強基準P0d實作+真實pilot（8題，非正式結論）
+
+**現況（接手前先確認）**：使用者核准後，Claude Code（背景fork）完成報告36 §8最後一項待辦（P0d：生成端＋真實reflect LLM prompt＋harness併入）。`services/agentic_baseline_service.py`新增`gather_evidence_agentic_async()`（既有同步版不動）；`scripts/eval/run_rq1_comparison.py`新增`_b2_reflect()`真實LLM反思與`raw_arm=="B2"`分支（沿用B1檢索前端，生成端與B0/B1逐位元共用`_generate_from_context_lines()`——查證發現這條共用生成堆疊其實早就存在，不需要report 36預期的額外重構）；`services/evaluation_preflight.py`／`services/cost_analyzer.py`同步補B2。14個新測試，pytest 1170 passed。commit `c791cbf`／`eabcfc0`，**未push**。
+
+真實pilot（非mock）原訂42題`--arms M1,M2,B2`，執行36分鐘後因系統記憶體壓力被背景保護機制自動終止（非程式錯誤，未重新啟動），**只完整跑完8題**三臂配對：B0 mean atomic_accuracy 0.938、B1 0.812、B2 0.917，但B2平均llm_calls 5.88次/題（B0/B1約1.1次）、延遲高28%、context長度約2倍。B2在1題（18-Q3）救回B0/B1都只答對一半的案例，但在另1題（18-Q5）明顯退步——**發現新confounder**：`retrieval_budget`在多子問題間扁平共用，前面子問題會把後面子問題的檢索額度耗光（`rounds_per_subquestion=[5,3,0]`），report 36原設計沒考慮到。詳見[報告93](docs/報告/93_B2AgenticRAG強基準P0d實作與pilot結果.md)。
+
+**誠實結論（報告93 §4）**：n=8太小，不足以判斷B2值不值得投入更大規模正式RQ1對照，維持report 36「B2為optional」定位不變。**下次接手建議**：(a) 先修`retrieval_budget`分配規則（例如每子問題保底額度）再考慮擴大跑測規模；或(b) 使用者可直接依現有8題證據收斂判斷（例如記錄進論文限制/未來工作章節、不投入正式RQ1對照組）。兩條路都待使用者裁示，不是自動下一步。**push（commit `c791cbf`／`eabcfc0`）也待使用者確認**。
 
 ## 2026-09-27（報告92）：報告71殘留22筆natural_text全數處理完畢
 
