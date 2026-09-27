@@ -1,0 +1,1269 @@
+{
+  "aggr18_multi_source_gold_checks": [
+    {
+      "matches_gold_exact_span": false,
+      "prompt_line": "- 經認定結果為職業災害者 再以公傷病假處理",
+      "record_index": 13,
+      "source_folder": "t2_k1_topk40_stage_a2"
+    }
+  ],
+  "aggr18_prompt_attempts": [
+    {
+      "question_id": "57-AGGR18",
+      "record_index": 13,
+      "source_folder": "t2_k1_topk40_stage_a2",
+      "subquestions": [
+        {
+          "prompt_lines": [
+            {
+              "line_index": 0,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 1,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工 經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作",
+              "status": "unique"
+            },
+            {
+              "line_index": 1,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 2,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "職業災害勞工 經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作",
+              "status": "unique"
+            },
+            {
+              "line_index": 2,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 3,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工 經醫療終止後 疑似有身心障礙"
+                },
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "triple",
+                  "rank": 7,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工經醫療終止後，疑似有身心障礙。"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 經醫療終止後 疑似有身心障礙",
+              "status": "unique"
+            },
+            {
+              "line_index": 3,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 4,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "勞工保險被保險人或受益人 於本法施行前發生職業災害傷病、失能或死亡保險事故，符合下列情形之一申請補助者 不得依本法施行前職業災害勞工保護法申請補助"
+                }
+              ],
+              "prompt_line": "- 勞工保險被保險人或受益人 於本法施行前發生職業災害傷病、失能或死亡保險事故，符合下列情形之一申請補助者 不得依本法施行前職業災害勞工保護法申請補助",
+              "status": "unique"
+            },
+            {
+              "line_index": 4,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 5,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "經認定結果為職業災害者 再以公傷病假處理"
+                },
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 20,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "經認定結果為職業災害者 再以公傷病假處理"
+                }
+              ],
+              "prompt_line": "- 經認定結果為職業災害者 再以公傷病假處理",
+              "status": "multi_source"
+            },
+            {
+              "line_index": 5,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 7,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災難醫療期間終止勞動合同並退出醫療保險人員的行為  得以特定主體作為被保人身份延續強傷病患常規理賠資格直到達到退休金申請標准的日子。不遵循《中華人民共和國社會保障法》第6條的規定。（此句拆分後補充完整信息得出的關系和對象）。"
+                }
+              ],
+              "prompt_line": "- 職業災難醫療期間終止勞動合同並退出醫療保險人員的行為  得以特定主體作為被保人身份延續強傷病患常規理賠資格直到達到退休金申請標准的日子。不遵循《中華人民共和國社會保障法》第6條的規定。（此句拆分後補充完整信息得出的關系和對象）。",
+              "status": "unique"
+            },
+            {
+              "line_index": 6,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 11,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "本法施行前，仍參加勞工保險職業災害保險或就業保險之被保險人 有未繳清勞工保險職業災害保險之保險費或滯納金者 准用前二項規定"
+                }
+              ],
+              "prompt_line": "- 本法施行前，仍參加勞工保險職業災害保險或就業保險之被保險人 有未繳清勞工保險職業災害保險之保險費或滯納金者 准用前二項規定",
+              "status": "unique"
+            },
+            {
+              "line_index": 7,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 13,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "直轄市、縣（市）主管機關 發現 職業災害勞工疑似有身心障礙"
+                }
+              ],
+              "prompt_line": "- 直轄市、縣（市）主管機關 發現 職業災害勞工疑似有身心障礙",
+              "status": "unique"
+            },
+            {
+              "line_index": 8,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 16,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "主管機關 於本法施行後 不得依本法施行前職業災害勞工保護法申請補助"
+                }
+              ],
+              "prompt_line": "- 主管機關 於本法施行後 不得依本法施行前職業災害勞工保護法申請補助",
+              "status": "unique"
+            },
+            {
+              "line_index": 9,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 18,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工 得終止勞動契約"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 得終止勞動契約",
+              "status": "unique"
+            },
+            {
+              "line_index": 10,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 21,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "勞工因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者 處以 第六條補助金額之相同額度之罰鍰"
+                }
+              ],
+              "prompt_line": "- 勞工因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者 處以 第六條補助金額之相同額度之罰鍰",
+              "status": "unique"
+            },
+            {
+              "line_index": 11,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 23,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "勞工 發生職業災害事故致死亡或失能"
+                }
+              ],
+              "prompt_line": "- 勞工 發生職業災害事故致死亡或失能",
+              "status": "unique"
+            },
+            {
+              "line_index": 12,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 25,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工 經醫療終止後"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 經醫療終止後",
+              "status": "unique"
+            },
+            {
+              "line_index": 13,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 27,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "勞工 因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者"
+                }
+              ],
+              "prompt_line": "- 勞工 因職業災害致死亡或遺存障害符合勞工保險失能給付標準表第一等級至第十等級規定之項目者",
+              "status": "unique"
+            },
+            {
+              "line_index": 14,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 29,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "雇主 處以補助金額相同額度之罰鍰 勞工發生職業災害事故致死亡或失能經依本法施行前職業災害勞工保護法第六條規定發給補助者"
+                }
+              ],
+              "prompt_line": "- 雇主 處以補助金額相同額度之罰鍰 勞工發生職業災害事故致死亡或失能經依本法施行前職業災害勞工保護法第六條規定發給補助者",
+              "status": "unique"
+            },
+            {
+              "line_index": 15,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 31,
+                  "source_doc_id": "de1995ed-8bbd-551b-b91a-39bf12eeb05e",
+                  "text": "其他違反本法或本辦法之規定  不予發給僱用職業災害勞工補助"
+                }
+              ],
+              "prompt_line": "- 其他違反本法或本辦法之規定  不予發給僱用職業災害勞工補助",
+              "status": "unique"
+            },
+            {
+              "line_index": 16,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 34,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "因職業災害致喪失全部或部分生活自理能力 確需他人照顧 且未依其他法令規定領取有關補助"
+                }
+              ],
+              "prompt_line": "- 因職業災害致喪失全部或部分生活自理能力 確需他人照顧 且未依其他法令規定領取有關補助",
+              "status": "unique"
+            },
+            {
+              "line_index": 17,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 37,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "經醫師診斷罹患職業疾病 喪失部分或全部工作能力 經請領勞工保險各項職業災害給付後"
+                }
+              ],
+              "prompt_line": "- 經醫師診斷罹患職業疾病 喪失部分或全部工作能力 經請領勞工保險各項職業災害給付後",
+              "status": "unique"
+            },
+            {
+              "line_index": 18,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 35,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "前項保險費率 於本法施行時 依中央主管機關公告之最近一次勞工保險職業災害保險適用行業別及費率表辦理"
+                }
+              ],
+              "prompt_line": "- 前項保險費率 於本法施行時 依中央主管機關公告之最近一次勞工保險職業災害保險適用行業別及費率表辦理",
+              "status": "unique"
+            },
+            {
+              "line_index": 19,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 33,
+                  "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+                  "text": "雇主 一次給付四十個月之平均工資後，免除此項工資補償責任 勞工經治療終止後，經指定之醫院診斷，審定為喪失原有工作能力，且不合第三款之失能給付標準者"
+                }
+              ],
+              "prompt_line": "- 雇主 一次給付四十個月之平均工資後，免除此項工資補償責任 勞工經治療終止後，經指定之醫院診斷，審定為喪失原有工作能力，且不合第三款之失能給付標準者",
+              "status": "unique"
+            },
+            {
+              "line_index": 20,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 30,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "因職業災害致遺存障害 喪失部分或全部工作能力 符合勞工保險失能給付標準表第一等級至第七等級規定之項目"
+                }
+              ],
+              "prompt_line": "- 因職業災害致遺存障害 喪失部分或全部工作能力 符合勞工保險失能給付標準表第一等級至第七等級規定之項目",
+              "status": "unique"
+            },
+            {
+              "line_index": 21,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 28,
+                  "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+                  "text": "前項勞工 於保護期間因工作條件、作業程序變更、當事人健康異常或有不適反應 經醫師評估確認不適原有工作者，雇主應依前項規定重新辦理之"
+                }
+              ],
+              "prompt_line": "- 前項勞工 於保護期間因工作條件、作業程序變更、當事人健康異常或有不適反應 經醫師評估確認不適原有工作者，雇主應依前項規定重新辦理之",
+              "status": "unique"
+            },
+            {
+              "line_index": 22,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 26,
+                  "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+                  "text": "身心障礙不堪勝任工作者  情形之一"
+                }
+              ],
+              "prompt_line": "- 身心障礙不堪勝任工作者  情形之一",
+              "status": "unique"
+            },
+            {
+              "line_index": 23,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 24,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "已依職業災害勞工保護法第十一條或第十三條等規定受理職業疾病認定或鑑定 其處理程序未終結"
+                }
+              ],
+              "prompt_line": "- 已依職業災害勞工保護法第十一條或第十三條等規定受理職業疾病認定或鑑定 其處理程序未終結",
+              "status": "unique"
+            },
+            {
+              "line_index": 24,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 22,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 雇主"
+                }
+              ],
+              "prompt_line": "- 事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 雇主",
+              "status": "unique"
+            },
+            {
+              "line_index": 25,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 19,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "勞工保險被保險人或受益人 於本法施行前 已依勞工保險條例規定請領職業災害給付"
+                }
+              ],
+              "prompt_line": "- 勞工保險被保險人或受益人 於本法施行前 已依勞工保險條例規定請領職業災害給付",
+              "status": "unique"
+            },
+            {
+              "line_index": 26,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 17,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "勞工保險條例 有關 職業災害保險規定"
+                }
+              ],
+              "prompt_line": "- 勞工保險條例 有關 職業災害保險規定",
+              "status": "unique"
+            },
+            {
+              "line_index": 27,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 14,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "主管機關 發現 職業災害勞工疑似有身心障礙情形"
+                }
+              ],
+              "prompt_line": "- 主管機關 發現 職業災害勞工疑似有身心障礙情形",
+              "status": "unique"
+            },
+            {
+              "line_index": 28,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 12,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "勞工保險被保險人或受益人 不得依本法施行前職業災害勞工保護法 申請補助"
+                }
+              ],
+              "prompt_line": "- 勞工保險被保險人或受益人 不得依本法施行前職業災害勞工保護法 申請補助",
+              "status": "unique"
+            },
+            {
+              "line_index": 29,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 8,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "自本法施行之日起 職業災害勞工保護法不再適用"
+                }
+              ],
+              "prompt_line": "- 自本法施行之日起 職業災害勞工保護法不再適用",
+              "status": "unique"
+            },
+            {
+              "line_index": 30,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 6,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 新雇主"
+                }
+              ],
+              "prompt_line": "- 事業單位改組或轉讓後所留用之勞工 因職業災害致身心障礙、喪失部分或全部工作能力者 新雇主",
+              "status": "unique"
+            },
+            {
+              "line_index": 31,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "triple",
+                  "rank": 2,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工依第二十四條第一款規定勞動契約終止。"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工依第二十四條第一款規定勞動契約終止。",
+              "status": "unique"
+            },
+            {
+              "line_index": 32,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 32,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議"
+                },
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "triple",
+                  "rank": 1,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 對雇主依第六十七條第一項規定安置之工作未能達成協議",
+              "status": "unique"
+            },
+            {
+              "line_index": 33,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 15,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "職業災害勞工 經醫療終止後，雇主應依前條第一項所定復工計畫，並協助其恢復原工作 原工作"
+                },
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "triple",
+                  "rank": 14,
+                  "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+                  "text": "職業災害勞工 經醫療終止後，雇主應依前條第一項所定復工計畫，並協助其恢復原工作 原工作"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工 經醫療終止後，雇主應依前條第一項所定復工計畫，並協助其恢復原工作 原工作",
+              "status": "unique"
+            },
+            {
+              "line_index": 34,
+              "matched_traces": [
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "fact",
+                  "rank": 3,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工 經醫療終止後 疑似有身心障礙"
+                },
+                {
+                  "article_no": null,
+                  "in_prompt": true,
+                  "kind": "triple",
+                  "rank": 7,
+                  "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+                  "text": "職業災害勞工經醫療終止後，疑似有身心障礙。"
+                }
+              ],
+              "prompt_line": "- 職業災害勞工經醫療終止後，疑似有身心障礙。",
+              "status": "unique"
+            }
+          ],
+          "subquestion_index": 0
+        }
+      ]
+    }
+  ],
+  "analyzed_prompt_record_count": 79,
+  "by_trace_kind": {
+    "bfs": {
+      "cross_document_frame_overlap_pair_count": 0,
+      "cross_document_frame_overlap_quantiles": {
+        "p0": null,
+        "p100": null,
+        "p25": null,
+        "p50": null,
+        "p75": null,
+        "p90": null,
+        "p95": null
+      },
+      "independent_cross_source_collision_group_count": 0,
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 0,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 0,
+      "unmatched_line_count": 0
+    },
+    "fact": {
+      "cross_document_frame_overlap_pair_count": 30651,
+      "cross_document_frame_overlap_quantiles": {
+        "p0": 0.0,
+        "p100": 1.0,
+        "p25": 0.0,
+        "p50": 0.0,
+        "p75": 0.0,
+        "p90": 0.08695652173913043,
+        "p95": 0.16
+      },
+      "independent_cross_source_collision_group_count": 0,
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 7,
+      "prompt_line_count": 3418,
+      "same_document_duplicate_line_count": 20,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 3411,
+      "unmatched_line_count": 0
+    },
+    "triple": {
+      "cross_document_frame_overlap_pair_count": 772,
+      "cross_document_frame_overlap_quantiles": {
+        "p0": 0.0,
+        "p100": 1.0,
+        "p25": 0.0,
+        "p50": 0.0,
+        "p75": 0.17780748663101603,
+        "p90": 0.2857142857142857,
+        "p95": 0.35714285714285715
+      },
+      "independent_cross_source_collision_group_count": 0,
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 615,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 615,
+      "unmatched_line_count": 0
+    }
+  },
+  "cross_document_frame_overlap_pair_count": 41754,
+  "cross_document_frame_overlap_quantiles": {
+    "p0": 0.0,
+    "p100": 1.0,
+    "p25": 0.0,
+    "p50": 0.0,
+    "p75": 0.0,
+    "p90": 0.09523809523809523,
+    "p95": 0.18181818181818182
+  },
+  "eligible_question_count": 42,
+  "folder_record_counts": {
+    "t2_k1_topk40_stage_a": 28,
+    "t2_k1_topk40_stage_a2": 14,
+    "t2_k1_topk40_stage_a3": 1,
+    "t2_k1_topk40_stage_b": 12,
+    "t2_k1_topk40_stage_b2a": 8,
+    "t2_k1_topk40_stage_b2b": 7,
+    "t2_k1_topk40_stage_b2c": 7,
+    "t2_k1_topk40_stage_c": 2
+  },
+  "generated_at_utc": "2026-09-21T17:05:20+00:00",
+  "git_commit": "952cfa9db50939512bff3480e9d9b186a60056b1",
+  "independent_cross_source_collision_group_count": 0,
+  "independent_cross_source_collision_line_count": 0,
+  "independent_cross_source_collision_line_ratio": 0.0,
+  "matching_rule": "strip one leading '- '; normalize_text equality with in_prompt=true retrieval_trace.text",
+  "missing_prompt_context_records": [],
+  "multi_source_merged_examples_top20": [
+    {
+      "documents": [
+        {
+          "law_name": "勞工職業災害保險及保護法",
+          "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d"
+        },
+        {
+          "law_name": "職業災害勞工保護法",
+          "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a"
+        }
+      ],
+      "normalized_text": "經認定結果為職業災害者再以公傷病假處理",
+      "occurrence_count": 7,
+      "prompt_line": "- 經認定結果為職業災害者 再以公傷病假處理",
+      "question_ids": [
+        "57-AGGR18",
+        "57-AGGR6",
+        "57-CANARY5",
+        "57-COREF2"
+      ],
+      "source_folders": [
+        "t2_k1_topk40_stage_a",
+        "t2_k1_topk40_stage_a2",
+        "t2_k1_topk40_stage_b2b",
+        "t2_k1_topk40_stage_c"
+      ]
+    }
+  ],
+  "multi_source_merged_question_distribution": {
+    "17-Q1": 0,
+    "17-Q2": 0,
+    "17-Q6": 0,
+    "18-Q1": 0,
+    "18-Q2": 0,
+    "18-Q3": 0,
+    "18-Q4": 0,
+    "18-Q5": 0,
+    "18-Q6": 0,
+    "26-Q1": 0,
+    "26-Q5": 0,
+    "57-AGGR1": 0,
+    "57-AGGR10": 0,
+    "57-AGGR11": 0,
+    "57-AGGR12": 0,
+    "57-AGGR13": 0,
+    "57-AGGR14": 0,
+    "57-AGGR15": 0,
+    "57-AGGR16": 0,
+    "57-AGGR17": 0,
+    "57-AGGR18": 1,
+    "57-AGGR19": 0,
+    "57-AGGR2": 0,
+    "57-AGGR3": 0,
+    "57-AGGR4": 0,
+    "57-AGGR5": 0,
+    "57-AGGR6": 3,
+    "57-AGGR7": 0,
+    "57-AGGR8": 0,
+    "57-AGGR9": 0,
+    "57-CANARY1": 0,
+    "57-CANARY2": 0,
+    "57-CANARY3": 0,
+    "57-CANARY4": 0,
+    "57-CANARY5": 2,
+    "57-COREF1": 0,
+    "57-COREF2": 1,
+    "57-COREF3": 0,
+    "57-DIST1": 0,
+    "57-DIST2": 0,
+    "canary-P1": 0,
+    "canary-P4": 0
+  },
+  "observed_trace_kinds": [
+    "fact",
+    "triple"
+  ],
+  "out_of_scope_records": [],
+  "prompt_line_count": 3993,
+  "prompt_line_status_counts": {
+    "multi_source_merged": 7,
+    "source_unresolved": 0,
+    "uniquely_attributed": 3981,
+    "unmatched": 5
+  },
+  "prompt_line_status_ratios_of_all_prompt_lines": {
+    "multi_source_merged": 0.001753067868770348,
+    "source_unresolved": 0.0,
+    "uniquely_attributed": 0.9969947407963937,
+    "unmatched": 0.001252191334835963
+  },
+  "question_distribution": {
+    "17-Q1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "17-Q2": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "17-Q6": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "18-Q1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 210,
+      "same_document_duplicate_line_count": 10,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 210,
+      "unmatched_line_count": 0
+    },
+    "18-Q2": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "18-Q3": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "18-Q4": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "18-Q5": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 210,
+      "same_document_duplicate_line_count": 6,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 210,
+      "unmatched_line_count": 0
+    },
+    "18-Q6": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 210,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 210,
+      "unmatched_line_count": 0
+    },
+    "26-Q1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 35,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 35,
+      "unmatched_line_count": 0
+    },
+    "26-Q5": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 69,
+      "unmatched_line_count": 1
+    },
+    "57-AGGR1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR10": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR11": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR12": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 35,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 35,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR13": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR14": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR15": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 36,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 36,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR16": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 4,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR17": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR18": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 1,
+      "prompt_line_count": 35,
+      "same_document_duplicate_line_count": 4,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 34,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR19": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 210,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 210,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR2": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR3": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR4": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 4,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 138,
+      "unmatched_line_count": 2
+    },
+    "57-AGGR5": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 4,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR6": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 3,
+      "prompt_line_count": 105,
+      "same_document_duplicate_line_count": 3,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 102,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR7": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 6,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR8": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 4,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-AGGR9": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-CANARY1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "57-CANARY2": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-CANARY3": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "57-CANARY4": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    },
+    "57-CANARY5": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 2,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 68,
+      "unmatched_line_count": 0
+    },
+    "57-COREF1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "57-COREF2": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 1,
+      "prompt_line_count": 35,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 34,
+      "unmatched_line_count": 0
+    },
+    "57-COREF3": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 72,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 72,
+      "unmatched_line_count": 0
+    },
+    "57-DIST1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "57-DIST2": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 140,
+      "same_document_duplicate_line_count": 2,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 140,
+      "unmatched_line_count": 0
+    },
+    "canary-P1": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 68,
+      "unmatched_line_count": 2
+    },
+    "canary-P4": {
+      "independent_cross_source_collision_line_count": 0,
+      "multi_source_merged_line_count": 0,
+      "prompt_line_count": 70,
+      "same_document_duplicate_line_count": 0,
+      "source_unresolved_line_count": 0,
+      "uniquely_attributed_line_count": 70,
+      "unmatched_line_count": 0
+    }
+  },
+  "questions_with_independent_cross_source_collision": [],
+  "questions_with_independent_cross_source_collision_count": 0,
+  "questions_with_independent_cross_source_collision_ratio_of_eligible": 0.0,
+  "same_document_duplicate_line_count": 65,
+  "scope_rule": "question_id in frozen_manifest.eligible_ids; preserve all runs and folders",
+  "snapshot_root": "D:\\Users\\666\\Desktop\\world knowledge graph rag\\.claude\\worktrees\\codex-task3\\.claude\\tmp\\task3_phase2_snapshot_20260922",
+  "source_snapshot": {
+    "included_directories": [
+      "t2_k1_topk40_stage_a",
+      "t2_k1_topk40_stage_a2",
+      "t2_k1_topk40_stage_a3",
+      "t2_k1_topk40_stage_b",
+      "t2_k1_topk40_stage_b2a",
+      "t2_k1_topk40_stage_b2b",
+      "t2_k1_topk40_stage_b2c",
+      "t2_k1_topk40_stage_c"
+    ],
+    "verified_files": [
+      {
+        "bytes": 1250087,
+        "directory": "t2_k1_topk40_stage_a",
+        "record_count": 28,
+        "sha256": "eeb95903996e9072513cff85725a178897c9a3d0a229f168a05e58f16bc4c28b",
+        "snapshot": "t2_k1_topk40_stage_a/records.json"
+      },
+      {
+        "bytes": 676315,
+        "directory": "t2_k1_topk40_stage_a2",
+        "record_count": 14,
+        "sha256": "34426098406586572006431459f803f29549199c40d256f6d06f512fb5112530",
+        "snapshot": "t2_k1_topk40_stage_a2/records.json"
+      },
+      {
+        "bytes": 57565,
+        "directory": "t2_k1_topk40_stage_a3",
+        "record_count": 1,
+        "sha256": "fe748b86ecba2aa068892188356f0ecc3cbe826e9bbaff3cfe45c357915492cc",
+        "snapshot": "t2_k1_topk40_stage_a3/records.json"
+      },
+      {
+        "bytes": 441388,
+        "directory": "t2_k1_topk40_stage_b",
+        "record_count": 12,
+        "sha256": "57c4b6d8706c18091fd0b1e7792ecb6ddb1c402fab9f801020114543cc3adecd",
+        "snapshot": "t2_k1_topk40_stage_b/records.json"
+      },
+      {
+        "bytes": 545248,
+        "directory": "t2_k1_topk40_stage_b2a",
+        "record_count": 8,
+        "sha256": "5b1c9e33095ffc36451bfe76bc705ccdd7232260f536d2df2d078a5c333f4a36",
+        "snapshot": "t2_k1_topk40_stage_b2a/records.json"
+      },
+      {
+        "bytes": 406983,
+        "directory": "t2_k1_topk40_stage_b2b",
+        "record_count": 7,
+        "sha256": "ce3a11adb3b61191fa8a5371fdbf792ab876511d48a8fca4561016d49a13e028",
+        "snapshot": "t2_k1_topk40_stage_b2b/records.json"
+      },
+      {
+        "bytes": 291735,
+        "directory": "t2_k1_topk40_stage_b2c",
+        "record_count": 7,
+        "sha256": "c21423ae936e746fbe76ed5b6530991c3b9202ddde9fb7e876baf5d61255a8fb",
+        "snapshot": "t2_k1_topk40_stage_b2c/records.json"
+      },
+      {
+        "bytes": 189006,
+        "directory": "t2_k1_topk40_stage_c",
+        "record_count": 2,
+        "sha256": "20bc71435872420e6af548a6a0bb3159e5cefda7b3d6592b7195c4fe18c4b1b1",
+        "snapshot": "t2_k1_topk40_stage_c/records.json"
+      }
+    ]
+  },
+  "unmatched_prompt_rows": [
+    {
+      "line_index": 33,
+      "prompt_line": "- 期間適用於就業促進津貼實施辦法第三條、第十八條至第二十一條及第二十六條規定",
+      "question_id": "26-Q5",
+      "record_index": 10,
+      "source_folder": "t2_k1_topk40_stage_a",
+      "subquestion_index": 1
+    },
+    {
+      "line_index": 31,
+      "prompt_line": "- 公司法有關公司重整之債務免責規定屬於規定。",
+      "question_id": "canary-P1",
+      "record_index": 11,
+      "source_folder": "t2_k1_topk40_stage_a",
+      "subquestion_index": 0
+    },
+    {
+      "line_index": 31,
+      "prompt_line": "- 期間適用於就業促進津貼實施辦法第三條、第十八條至第二十一條及第二十六條規定",
+      "question_id": "57-AGGR4",
+      "record_index": 24,
+      "source_folder": "t2_k1_topk40_stage_a",
+      "subquestion_index": 1
+    },
+    {
+      "line_index": 31,
+      "prompt_line": "- 公司法有關公司重整之債務免責規定屬於規定。",
+      "question_id": "canary-P1",
+      "record_index": 6,
+      "source_folder": "t2_k1_topk40_stage_b",
+      "subquestion_index": 0
+    },
+    {
+      "line_index": 31,
+      "prompt_line": "- 期間適用於就業促進津貼實施辦法第三條、第十八條至第二十一條及第二十六條規定",
+      "question_id": "57-AGGR4",
+      "record_index": 6,
+      "source_folder": "t2_k1_topk40_stage_b2a",
+      "subquestion_index": 1
+    }
+  ]
+}

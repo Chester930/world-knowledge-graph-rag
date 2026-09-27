@@ -1,0 +1,88 @@
+{
+  "generated_at_utc": "2026-09-23T08:00:10.437855+00:00",
+  "databases": [
+    {
+      "name": "kg54f8cdfa",
+      "currentStatus": "online",
+      "type": "standard"
+    },
+    {
+      "name": "neo4j",
+      "currentStatus": "online",
+      "type": "standard"
+    },
+    {
+      "name": "system",
+      "currentStatus": "online",
+      "type": "system"
+    }
+  ],
+  "database_inventory": [
+    {
+      "database": "kg54f8cdfa",
+      "entity_count": 1810,
+      "relation_count": 2964,
+      "natural_text_edge_count": 0,
+      "knowledge_graph_node_count": 0,
+      "scope_decision": "not_registered_as_application_kg; retained_in_inventory_only"
+    },
+    {
+      "database": "neo4j",
+      "entity_count": 18843,
+      "relation_count": 137873,
+      "natural_text_edge_count": 11011,
+      "knowledge_graph_node_count": 2,
+      "scope_decision": "registered_kg_database_scope"
+    }
+  ],
+  "registered_knowledge_graphs": [
+    {
+      "id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "name": "勞動部法規遵循示範集（64筆，2026-09-07 reextract-v2 乾淨重跑版）",
+      "description": "對舊KG 76bc98ff-2cbd-447e-a087-7f2df6898655 的同一批64份勞動部法規遵循示範集文件，套用2026-08-31管線稽核修正（報告21）＋規則7擴充＋抽取完整性自我核對（報告19）＋數值忠實性核對（報告20）後的乾淨重跑版本。",
+      "db_name": "",
+      "doc_count": 0,
+      "entity_count": 0,
+      "relation_count": 0,
+      "created_at": "2026-09-07T09:00:27.279767+00:00",
+      "updated_at": "2026-09-07T09:00:27.279767+00:00"
+    },
+    {
+      "id": "76bc98ff-2cbd-447e-a087-7f2df6898655",
+      "name": "勞動部法規遵循示範集（64筆）",
+      "description": "從 20260821_leave_and_scheduling_normalized.jsonl 篩選出的 469 筆請假與排班法規匯入，以 Document/LawArticle 節點保留 JSON 結構化中繼資料。",
+      "db_name": "",
+      "doc_count": 0,
+      "entity_count": 0,
+      "relation_count": 0,
+      "created_at": "2026-08-25T16:01:27.886161+00:00",
+      "updated_at": "2026-08-25T16:01:27.886161+00:00"
+    }
+  ],
+  "kg_summaries": [
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "kg_name": "勞動部法規遵循示範集（64筆，2026-09-07 reextract-v2 乾淨重跑版）",
+      "database": "neo4j",
+      "relation_count": 14021,
+      "natural_text_edge_count": 11011,
+      "affected_count": 96,
+      "affected_ratio_percent": 0.8718554173099629,
+      "recomputed_count": 49,
+      "skipped_count": 47,
+      "residual_count": 0
+    },
+    {
+      "kg_id": "76bc98ff-2cbd-447e-a087-7f2df6898655",
+      "kg_name": "勞動部法規遵循示範集（64筆）",
+      "database": "neo4j",
+      "relation_count": 6776,
+      "natural_text_edge_count": 0,
+      "affected_count": 0,
+      "affected_ratio_percent": 0.0,
+      "recomputed_count": 0,
+      "skipped_count": 0,
+      "residual_count": 0
+    }
+  ]
+}

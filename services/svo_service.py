@@ -25,9 +25,6 @@ from neo4j.exceptions import ConstraintError
 from core.constants import (
     COMPARE_COSINE_THRESHOLD,
     ENTITY_CANDIDATE_CANOPY_K,
-    ENTITY_DEDUP_COSINE_THRESHOLD,
-    ENTITY_DEDUP_EDIT_RATIO_THRESHOLD,
-    ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD,
     ENTITY_TYPES,
     FACT_SEARCH_CANDIDATE_MULTIPLIER,
     QSIM_ASSIGN_THRESHOLD,
@@ -396,16 +393,16 @@ async def _reconcile_rel_type(
     沒有「最終仲裁結果」可比對，不需要記錄。任一參數缺席時完全跳過記錄，
     行為與先前版本一致（向後相容）。
     """
+    _cfg = cfg or KGConfig()
     if embedding_provider is None:
         return llm_rel_type
 
-    _cfg = cfg or KGConfig()
     best_type, best_score = await classify_relation_by_embedding(
         verb,
         embedding_provider,
         descriptions=_effective_rel_type_descriptions(_cfg),
     )
-    if best_type == llm_rel_type and best_score >= COMPARE_COSINE_THRESHOLD:
+    if best_type == llm_rel_type and best_score >= _cfg.reltype.compare_cosine_threshold:
         return llm_rel_type
 
     if llm_provider is None:
@@ -528,7 +525,8 @@ async def _find_uncovered_sentences(
     triples: list[SVOTriple],
     embedding_provider: EmbeddingProvider,
     *,
-    threshold: float = UNCOVERED_SENTENCE_THRESHOLD,
+    threshold: float | None = None,
+    cfg: KGConfig | None = None,
 ) -> list[str]:
     """比照 ProMem《Beyond Static Summarization》(arXiv:2601.04463) §Memory
     Completion 的語意涵蓋比對：對每一句原文，計算它與「已抽出三元組」的最高
@@ -543,7 +541,12 @@ async def _find_uncovered_sentences(
 
     `triples` 為空（第一階段完全沒抽到任何三元組）時，全部句子視為未涵蓋；
     `original_sentences` 為空時直接回傳空清單，不做無意義的比對。
+
+    門檻依序採用明確的 `threshold`、`cfg.extraction.uncovered_sentence_threshold`，
+    最後才是 `KGConfig()` 的預設值（與既有常數相同）。
     """
+    _cfg = cfg or KGConfig()
+    threshold = threshold if threshold is not None else _cfg.extraction.uncovered_sentence_threshold
     if not original_sentences:
         return []
     if not triples:
@@ -1056,7 +1059,9 @@ async def extract_svo_triples_with_completeness_check(
     if not original_sentences or embedding_provider is None:
         return _filter_ungrounded_quantity_triples(triples, text, original_sentences or None)
 
-    uncovered = await _find_uncovered_sentences(original_sentences, triples, embedding_provider)
+    uncovered = await _find_uncovered_sentences(
+        original_sentences, triples, embedding_provider, cfg=cfg,
+    )
     if not uncovered:
         return _filter_ungrounded_quantity_triples(triples, text, original_sentences)
 
@@ -1337,7 +1342,7 @@ async def resolve_entity_name(
     best_edit_ratio = 0.0
     for c in fuzzy_candidates:
         ratio = _edit_ratio(name, c["name"])
-        if ratio >= ENTITY_DEDUP_EDIT_RATIO_THRESHOLD and ratio > best_edit_ratio:
+        if ratio >= _cfg.dedup.edit_ratio_threshold and ratio > best_edit_ratio:
             best_edit_ratio = ratio
             best_edit_name = c["name"]
     if best_edit_name is not None:
@@ -1358,10 +1363,10 @@ async def resolve_entity_name(
 
     if best_name is None:
         return name
-    if best_score >= ENTITY_DEDUP_COSINE_THRESHOLD:
+    if best_score >= _cfg.dedup.cosine_threshold:
         return best_name
 
-    if llm_provider is not None and best_score >= ENTITY_DEDUP_ESCALATE_LOW_THRESHOLD:
+    if llm_provider is not None and best_score >= _cfg.dedup.escalate_low_threshold:
         prompt = (
             f"「{name}」與「{best_name}」是否為同一個真實世界的實體/對象？"
             "只回答「是」或「否」，不要有其他文字。"
@@ -1523,7 +1528,7 @@ async def merge_entity(
     """
     candidates = await _fetch_entity_candidates(driver, kg_id, entity_type, name, embedding_provider=embedding_provider)
     resolved_name = await resolve_entity_name(
-        name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg
+        name, candidates, embedding_provider=embedding_provider, llm_provider=llm_provider, cfg=cfg,
     )
 
     if source_doc_id is None or source_svo_chunk_index is None:
@@ -3238,6 +3243,7 @@ async def backfill_related_to_edges(
     *,
     llm_provider: LLMProvider | None = None,
     top_k: int = 100,
+    cfg: KGConfig | None = None,
 ) -> int:
     """3.1.3 §a-1 BACKFILL：`EXPAND` 核准新型別後，對該 KG 既有的 `RELATED_TO`
     邊做一次向量索引查詢，把 `verb_embedding` 與新型別描述句夠相似
@@ -3264,6 +3270,7 @@ async def backfill_related_to_edges(
     不改寫任何邊（回傳 0）**，不會退回「純 cosine 分數即可改寫」的舊行為——
     這是刻意的保守預設，不是遺漏。
     """
+    _cfg = cfg or KGConfig()
     query_vector = await embedding_provider.encode(new_type_description)
     result = await driver.execute_query(
         """
@@ -3277,7 +3284,7 @@ async def backfill_related_to_edges(
         kg_id=str(kg_id),
         top_k=top_k,
         query_vector=query_vector,
-        threshold=COMPARE_COSINE_THRESHOLD,
+        threshold=_cfg.reltype.compare_cosine_threshold,
     )
 
     if llm_provider is None:

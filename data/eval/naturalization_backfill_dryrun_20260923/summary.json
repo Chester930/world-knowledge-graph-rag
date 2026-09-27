@@ -1,0 +1,104 @@
+{
+  "run_date": "20260923",
+  "generated_at_utc": "2026-09-23T08:00:10.437855+00:00",
+  "completed_at_utc": "2026-09-23T08:02:37.124441+00:00",
+  "neo4j_queries_are_read_only": true,
+  "scanned_databases": [
+    "neo4j"
+  ],
+  "online_standard_databases": [
+    "kg54f8cdfa",
+    "neo4j"
+  ],
+  "llm_provider": "ollama",
+  "llm_model": "qwen2.5:7b",
+  "kg_summaries": [
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "kg_name": "勞動部法規遵循示範集（64筆，2026-09-07 reextract-v2 乾淨重跑版）",
+      "database": "neo4j",
+      "relation_count": 14021,
+      "natural_text_edge_count": 11011,
+      "affected_count": 96,
+      "affected_ratio_percent": 0.8718554173099629,
+      "recomputed_count": 49,
+      "skipped_count": 47,
+      "residual_count": 0
+    },
+    {
+      "kg_id": "76bc98ff-2cbd-447e-a087-7f2df6898655",
+      "kg_name": "勞動部法規遵循示範集（64筆）",
+      "database": "neo4j",
+      "relation_count": 6776,
+      "natural_text_edge_count": 0,
+      "affected_count": 0,
+      "affected_ratio_percent": 0.0,
+      "recomputed_count": 0,
+      "skipped_count": 0,
+      "residual_count": 0
+    }
+  ],
+  "total_affected_count": 96,
+  "total_recomputed_count": 49,
+  "total_skipped_count": 47,
+  "total_residual_count": 0,
+  "severe_examples": [
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165035802",
+      "rel_type": "RELATED_TO",
+      "old_text": "PLACE應與第七十九條規定之灌氣容器放置場所分設厚度十二公分以上鋼筋混凝土造或具有同等以上強度結構之防護牆。",
+      "new_text": "使用每平方公分一百公斤以上之壓力灌注壓縮氣體於容器之場所 與第七十九條規定之灌氣容器放置場間 應分設厚度在十二公分以上鋼筋混凝土造或具有與此同等以上強度結構之防護牆",
+      "status": "recomputed",
+      "skip_reason": null,
+      "severity_score": 10
+    },
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165037197",
+      "rel_type": "RELATED_TO",
+      "old_text": "Service為FUND來源。",
+      "new_text": "服務收入為經費來源。",
+      "status": "recomputed",
+      "skip_reason": null,
+      "severity_score": 10
+    },
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165040978",
+      "rel_type": "RELATED_TO",
+      "old_text": "經中央主管機關指定之PRODUCT應對其全長依中央主管機關規定之方法實施TEST。",
+      "new_text": "經中央主管機關指定者應對其全長依中央主管機關規定之方法實施放射線檢查。",
+      "status": "recomputed",
+      "skip_reason": null,
+      "severity_score": 10
+    },
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165022256",
+      "rel_type": "RELATED_TO",
+      "old_text": "根據國家標準CNS15030分類，屬於致癌物質第一級、生殖細胞致突變性物質第一級或生殖毒性物質第一級的化學品（PRODUCT）應優先管理。",
+      "new_text": null,
+      "status": "skipped_missing_verb",
+      "skip_reason": "latest_citation_verb_missing",
+      "severity_score": 10
+    },
+    {
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165040460",
+      "rel_type": "RELATED_TO",
+      "old_text": "PLACE 由金屬構材組成之室外升降機升降路塔或導軌支持塔所使用的鋼構為第一項所定之 PRODUCT 。",
+      "new_text": null,
+      "status": "skipped_missing_verb",
+      "skip_reason": "latest_citation_verb_missing",
+      "severity_score": 10
+    }
+  ],
+  "t2_executed": false,
+  "report_reconciliation": {
+    "affected_edges_file_count": 96,
+    "recomputed_file_count": 49,
+    "skipped_file_count": 47,
+    "residual_file_count": 0
+  }
+}

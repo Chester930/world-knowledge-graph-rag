@@ -1,0 +1,818 @@
+{
+  "contains_raw_fact_dump": false,
+  "document_identity_rule": "Document.source_doc_id；缺值時退回正規化 Document.title",
+  "generated_at_utc": "2026-09-21T10:05:17+00:00",
+  "git_commit": "4e063f23187a32f698fa01ce64fb689cc46c7d4c",
+  "global_stats": {
+    "actual_fact_count": 16773,
+    "collision_examples_top20": [
+      {
+        "document_count": 8,
+        "documents": [
+          {
+            "article_nos": [
+              "第 43 條"
+            ],
+            "source_doc_id": "33b1b158-307a-5c5d-a42b-5881cc433bb9",
+            "title": "就業保險法"
+          },
+          {
+            "article_nos": [
+              "第 39 條"
+            ],
+            "source_doc_id": "4ca167cb-b62b-5657-bd87-2ea21142c2c6",
+            "title": "性別平等工作法"
+          },
+          {
+            "article_nos": [
+              "第 54 條"
+            ],
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "title": "職業安全衛生法"
+          },
+          {
+            "article_nos": [
+              "第 48 條"
+            ],
+            "source_doc_id": "7be8416e-733d-5e08-862c-dadb634a5ce3",
+            "title": "工會法"
+          },
+          {
+            "article_nos": [
+              "第 108 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 40 條"
+            ],
+            "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+            "title": "職業災害勞工保護法"
+          },
+          {
+            "article_nos": [
+              "第 82 條"
+            ],
+            "source_doc_id": "c442573a-1465-5d8d-a264-26abf9769229",
+            "title": "就業服務法"
+          },
+          {
+            "article_nos": [
+              "第 44 條"
+            ],
+            "source_doc_id": "fe73f47a-4191-544b-b1d1-b4c6d934c22c",
+            "title": "中高齡者及高齡者就業促進法"
+          }
+        ],
+        "fact_count": 8,
+        "fact_text_examples": [
+          "本法施行細則 由 中央主管機關定之"
+        ],
+        "normalized_fact_text": "本法施行細則由中央主管機關定之"
+      },
+      {
+        "document_count": 7,
+        "documents": [
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "08b337cc-04b8-56a1-a91e-ff5f0e666a4e",
+            "title": "勞工退休金條例"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "title": "勞動基準法"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "18d05f16-8057-5529-9408-49b61d29970d",
+            "title": "勞資爭議處理法"
+          },
+          {
+            "article_nos": [
+              "第 5 條"
+            ],
+            "source_doc_id": "2ba4c95b-a716-5ad0-af82-f3a4b9504174",
+            "title": "團體協約法"
+          },
+          {
+            "article_nos": [
+              "第 3 條"
+            ],
+            "source_doc_id": "7be8416e-733d-5e08-862c-dadb634a5ce3",
+            "title": "工會法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "fe73f47a-4191-544b-b1d1-b4c6d934c22c",
+            "title": "中高齡者及高齡者就業促進法"
+          }
+        ],
+        "fact_count": 7,
+        "fact_text_examples": [
+          "主管機關 在中央為 勞動部"
+        ],
+        "normalized_fact_text": "主管機關在中央為勞動部"
+      },
+      {
+        "document_count": 7,
+        "documents": [
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "08b337cc-04b8-56a1-a91e-ff5f0e666a4e",
+            "title": "勞工退休金條例"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "title": "勞動基準法"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "18d05f16-8057-5529-9408-49b61d29970d",
+            "title": "勞資爭議處理法"
+          },
+          {
+            "article_nos": [
+              "第 5 條"
+            ],
+            "source_doc_id": "2ba4c95b-a716-5ad0-af82-f3a4b9504174",
+            "title": "團體協約法"
+          },
+          {
+            "article_nos": [
+              "第 3 條"
+            ],
+            "source_doc_id": "7be8416e-733d-5e08-862c-dadb634a5ce3",
+            "title": "工會法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "fe73f47a-4191-544b-b1d1-b4c6d934c22c",
+            "title": "中高齡者及高齡者就業促進法"
+          }
+        ],
+        "fact_count": 7,
+        "fact_text_examples": [
+          "主管機關 在直轄市為 直轄市政府"
+        ],
+        "normalized_fact_text": "主管機關在直轄市為直轄市政府"
+      },
+      {
+        "document_count": 7,
+        "documents": [
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "08b337cc-04b8-56a1-a91e-ff5f0e666a4e",
+            "title": "勞工退休金條例"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "title": "勞動基準法"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "18d05f16-8057-5529-9408-49b61d29970d",
+            "title": "勞資爭議處理法"
+          },
+          {
+            "article_nos": [
+              "第 5 條"
+            ],
+            "source_doc_id": "2ba4c95b-a716-5ad0-af82-f3a4b9504174",
+            "title": "團體協約法"
+          },
+          {
+            "article_nos": [
+              "第 3 條"
+            ],
+            "source_doc_id": "7be8416e-733d-5e08-862c-dadb634a5ce3",
+            "title": "工會法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "fe73f47a-4191-544b-b1d1-b4c6d934c22c",
+            "title": "中高齡者及高齡者就業促進法"
+          }
+        ],
+        "fact_count": 7,
+        "fact_text_examples": [
+          "主管機關 在縣（市）為 縣（市）政府"
+        ],
+        "normalized_fact_text": "主管機關在縣市為縣市政府"
+      },
+      {
+        "document_count": 5,
+        "documents": [
+          {
+            "article_nos": [
+              "第 39 條"
+            ],
+            "source_doc_id": "08b50e26-d094-503c-b9aa-a5a3cade136f",
+            "title": "失業中高齡者及高齡者就業促進辦法"
+          },
+          {
+            "article_nos": [
+              "第 16 條"
+            ],
+            "source_doc_id": "229df0c2-7a26-577e-9e0b-c3b4e79ec452",
+            "title": "勞工健康保護規則"
+          },
+          {
+            "article_nos": [
+              "第 7 條"
+            ],
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "title": "高架作業勞工保護措施標準"
+          },
+          {
+            "article_nos": [
+              "第 63 條",
+              "第 70 條",
+              "第 71 條"
+            ],
+            "source_doc_id": "60094acf-b5e9-562d-8c1f-49733b1800ad",
+            "title": "營造安全衛生設施標準"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "e4111dd9-4ebf-59c1-ba7d-fbd3b519d5e8",
+            "title": "重體力勞動作業勞工保護措施標準"
+          }
+        ],
+        "fact_count": 7,
+        "fact_text_examples": [
+          "雇主 僱用 勞工"
+        ],
+        "normalized_fact_text": "雇主僱用勞工"
+      },
+      {
+        "document_count": 6,
+        "documents": [
+          {
+            "article_nos": [
+              "第 66 條"
+            ],
+            "source_doc_id": "18d05f16-8057-5529-9408-49b61d29970d",
+            "title": "勞資爭議處理法"
+          },
+          {
+            "article_nos": [
+              "第 34 條"
+            ],
+            "source_doc_id": "2ba4c95b-a716-5ad0-af82-f3a4b9504174",
+            "title": "團體協約法"
+          },
+          {
+            "article_nos": [
+              "第 55 條"
+            ],
+            "source_doc_id": "70d78361-3548-5045-a05b-024aa4b5ba33",
+            "title": "職業安全衛生法"
+          },
+          {
+            "article_nos": [
+              "第 49 條"
+            ],
+            "source_doc_id": "7be8416e-733d-5e08-862c-dadb634a5ce3",
+            "title": "工會法"
+          },
+          {
+            "article_nos": [
+              "第 109 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 45 條"
+            ],
+            "source_doc_id": "fe73f47a-4191-544b-b1d1-b4c6d934c22c",
+            "title": "中高齡者及高齡者就業促進法"
+          }
+        ],
+        "fact_count": 6,
+        "fact_text_examples": [
+          "本法 施行日期由 行政院定之"
+        ],
+        "normalized_fact_text": "本法施行日期由行政院定之"
+      },
+      {
+        "document_count": 5,
+        "documents": [
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "title": "勞動基準法"
+          },
+          {
+            "article_nos": [
+              "第 4 條"
+            ],
+            "source_doc_id": "18d05f16-8057-5529-9408-49b61d29970d",
+            "title": "勞資爭議處理法"
+          },
+          {
+            "article_nos": [
+              "第 5 條"
+            ],
+            "source_doc_id": "2ba4c95b-a716-5ad0-af82-f3a4b9504174",
+            "title": "團體協約法"
+          },
+          {
+            "article_nos": [
+              "第 3 條"
+            ],
+            "source_doc_id": "7be8416e-733d-5e08-862c-dadb634a5ce3",
+            "title": "工會法"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "fe73f47a-4191-544b-b1d1-b4c6d934c22c",
+            "title": "中高齡者及高齡者就業促進法"
+          }
+        ],
+        "fact_count": 5,
+        "fact_text_examples": [
+          "本法 所稱 主管機關"
+        ],
+        "normalized_fact_text": "本法所稱主管機關"
+      },
+      {
+        "document_count": 4,
+        "documents": [
+          {
+            "article_nos": [
+              "第 46 條"
+            ],
+            "source_doc_id": "08b337cc-04b8-56a1-a91e-ff5f0e666a4e",
+            "title": "勞工退休金條例"
+          },
+          {
+            "article_nos": [
+              "第 80-1 條"
+            ],
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "title": "勞動基準法"
+          },
+          {
+            "article_nos": [
+              "第 38 條"
+            ],
+            "source_doc_id": "4ca167cb-b62b-5657-bd87-2ea21142c2c6",
+            "title": "性別平等工作法"
+          },
+          {
+            "article_nos": [
+              "第 95 條",
+              "第 96 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          }
+        ],
+        "fact_count": 5,
+        "fact_text_examples": [
+          "屆期未改善者 應按次處罰"
+        ],
+        "normalized_fact_text": "屆期未改善者應按次處罰"
+      },
+      {
+        "document_count": 4,
+        "documents": [
+          {
+            "article_nos": [
+              "第 9 條"
+            ],
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "title": "高架作業勞工保護措施標準"
+          },
+          {
+            "article_nos": [
+              "第 10 條"
+            ],
+            "source_doc_id": "76598956-d7c5-5433-8f3d-ca23f6cc7b88",
+            "title": "高溫作業勞工作息時間標準"
+          },
+          {
+            "article_nos": [
+              "第 12 條"
+            ],
+            "source_doc_id": "8dd077f6-4584-542b-877c-ef14f32c6e32",
+            "title": "精密作業勞工視機能保護設施標準"
+          },
+          {
+            "article_nos": [
+              "第 8 條"
+            ],
+            "source_doc_id": "e4111dd9-4ebf-59c1-ba7d-fbd3b519d5e8",
+            "title": "重體力勞動作業勞工保護措施標準"
+          }
+        ],
+        "fact_count": 4,
+        "fact_text_examples": [
+          "本標準 自發布日施行"
+        ],
+        "normalized_fact_text": "本標準自發布日施行"
+      },
+      {
+        "document_count": 2,
+        "documents": [
+          {
+            "article_nos": [
+              "第 45 條"
+            ],
+            "source_doc_id": "07300c68-d781-58b6-8114-1ac03a8d8d88",
+            "title": "就業保險促進就業實施辦法"
+          },
+          {
+            "article_nos": [
+              "第 17 條"
+            ],
+            "source_doc_id": "96926e77-c360-5d0a-8590-273c69b26f82",
+            "title": "就業促進津貼實施辦法"
+          }
+        ],
+        "fact_count": 4,
+        "fact_text_examples": [
+          "從事臨時工作之人員 辦理參加 勞工職業災害保險"
+        ],
+        "normalized_fact_text": "從事臨時工作之人員辦理參加勞工職業災害保險"
+      },
+      {
+        "document_count": 2,
+        "documents": [
+          {
+            "article_nos": [
+              "第 45 條"
+            ],
+            "source_doc_id": "07300c68-d781-58b6-8114-1ac03a8d8d88",
+            "title": "就業保險促進就業實施辦法"
+          },
+          {
+            "article_nos": [
+              "第 17 條"
+            ],
+            "source_doc_id": "96926e77-c360-5d0a-8590-273c69b26f82",
+            "title": "就業促進津貼實施辦法"
+          }
+        ],
+        "fact_count": 4,
+        "fact_text_examples": [
+          "用人單位 應為 從事臨時工作之人員辦理參加"
+        ],
+        "normalized_fact_text": "用人單位應為從事臨時工作之人員辦理參加"
+      },
+      {
+        "document_count": 2,
+        "documents": [
+          {
+            "article_nos": [
+              "第 84 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 23 條"
+            ],
+            "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+            "title": "職業災害勞工保護法"
+          }
+        ],
+        "fact_count": 4,
+        "fact_text_examples": [
+          "雇主 不得預告終止 與職業災害勞工之勞動契約"
+        ],
+        "normalized_fact_text": "雇主不得預告終止與職業災害勞工之勞動契約"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 76 條"
+            ],
+            "source_doc_id": "50f997b4-a495-5453-aea1-5331f6f9751e",
+            "title": "勞工職業災害保險及保護法施行細則"
+          },
+          {
+            "article_nos": [
+              "第 48 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          },
+          {
+            "article_nos": [
+              "第 81 條"
+            ],
+            "source_doc_id": "b1dabea1-e2ff-57ce-9fc0-7ef5cea699cd",
+            "title": "勞工保險條例施行細則"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "保險人 逕予 退保",
+          "保險人 逕予退保"
+        ],
+        "normalized_fact_text": "保險人逕予退保"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 24 條"
+            ],
+            "source_doc_id": "33b1b158-307a-5c5d-a42b-5881cc433bb9",
+            "title": "就業保險法"
+          },
+          {
+            "article_nos": [
+              "第 30 條"
+            ],
+            "source_doc_id": "9c347a09-187e-598a-ba72-a10dbc5febe1",
+            "title": "勞工保險條例"
+          },
+          {
+            "article_nos": [
+              "第 37 條"
+            ],
+            "source_doc_id": "a4c0d396-d8e9-5a83-8655-e5b7c673100d",
+            "title": "勞工職業災害保險及保護法"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "保險給付之請求權 自得請領之日起不行使 消滅"
+        ],
+        "normalized_fact_text": "保險給付之請求權自得請領之日起不行使消滅"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 23 條"
+            ],
+            "source_doc_id": "50f997b4-a495-5453-aea1-5331f6f9751e",
+            "title": "勞工職業災害保險及保護法施行細則"
+          },
+          {
+            "article_nos": [
+              "第 10 條"
+            ],
+            "source_doc_id": "7f2bcb07-4b83-5e10-bf66-a05ef22feb02",
+            "title": "就業保險法施行細則"
+          },
+          {
+            "article_nos": [
+              "第 24 條"
+            ],
+            "source_doc_id": "b1dabea1-e2ff-57ce-9fc0-7ef5cea699cd",
+            "title": "勞工保險條例施行細則"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "投保單位 應即填具 被保險人變更事項申請書",
+          "投保單位 應即填具被保險人變更事項申請書"
+        ],
+        "normalized_fact_text": "投保單位應即填具被保險人變更事項申請書"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 72 條"
+            ],
+            "source_doc_id": "10502171-5d34-57d6-89e1-9683d0efdd1f",
+            "title": "雇主聘僱外國人許可及管理辦法"
+          },
+          {
+            "article_nos": [
+              "第 71 條"
+            ],
+            "source_doc_id": "c61f975a-2967-5e12-b378-849bdfdbd6ed",
+            "title": "外國技術人力工作資格及許可管理辦法"
+          },
+          {
+            "article_nos": [
+              "第 43 條"
+            ],
+            "source_doc_id": "e201c43a-d088-5798-b788-e8cc63ce9567",
+            "title": "私立就業服務機構許可及管理辦法"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "書表格式 由 中央主管機關定之",
+          "書表格式 由中央主管機關定之"
+        ],
+        "normalized_fact_text": "書表格式由中央主管機關定之"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 9 條"
+            ],
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "title": "高架作業勞工保護措施標準"
+          },
+          {
+            "article_nos": [
+              "第 10 條"
+            ],
+            "source_doc_id": "76598956-d7c5-5433-8f3d-ca23f6cc7b88",
+            "title": "高溫作業勞工作息時間標準"
+          },
+          {
+            "article_nos": [
+              "第 8 條"
+            ],
+            "source_doc_id": "e4111dd9-4ebf-59c1-ba7d-fbd3b519d5e8",
+            "title": "重體力勞動作業勞工保護措施標準"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "本標準修正條文 自中華民國一百零三年七月三日施行"
+        ],
+        "normalized_fact_text": "本標準修正條文自中華民國一百零三年七月三日施行"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "title": "高架作業勞工保護措施標準"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "60094acf-b5e9-562d-8c1f-49733b1800ad",
+            "title": "營造安全衛生設施標準"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "8dd077f6-4584-542b-877c-ef14f32c6e32",
+            "title": "精密作業勞工視機能保護設施標準"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "本標準 適用於 從事精密作業之有關事業"
+        ],
+        "normalized_fact_text": "本標準適用於從事精密作業之有關事業"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 1 條"
+            ],
+            "source_doc_id": "33b1b158-307a-5c5d-a42b-5881cc433bb9",
+            "title": "就業保險法"
+          },
+          {
+            "article_nos": [
+              "第 1 條"
+            ],
+            "source_doc_id": "b90844e9-08c1-5886-8d35-a1fecaff511a",
+            "title": "職業災害勞工保護法"
+          },
+          {
+            "article_nos": [
+              "第 1 條"
+            ],
+            "source_doc_id": "c442573a-1465-5d8d-a264-26abf9769229",
+            "title": "就業服務法"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "本辦法 未規定者適用 其他法律之規定"
+        ],
+        "normalized_fact_text": "本辦法未規定者適用其他法律之規定"
+      },
+      {
+        "document_count": 3,
+        "documents": [
+          {
+            "article_nos": [
+              "第 7 條"
+            ],
+            "source_doc_id": "50f997b4-a495-5453-aea1-5331f6f9751e",
+            "title": "勞工職業災害保險及保護法施行細則"
+          },
+          {
+            "article_nos": [
+              "第 11 條"
+            ],
+            "source_doc_id": "b1dabea1-e2ff-57ce-9fc0-7ef5cea699cd",
+            "title": "勞工保險條例施行細則"
+          },
+          {
+            "article_nos": [
+              "第 2 條"
+            ],
+            "source_doc_id": "d81b0c7e-6e21-5395-91ff-89beb9c3f1d7",
+            "title": "職業安全衛生法施行細則"
+          }
+        ],
+        "fact_count": 3,
+        "fact_text_examples": [
+          "自營作業者 指獨立從事勞動或技藝工作，獲致報酬，且未僱用有酬人員幫同工作者"
+        ],
+        "normalized_fact_text": "自營作業者指獨立從事勞動或技藝工作獲致報酬且未僱用有酬人員幫同工作者"
+      }
+    ],
+    "distinct_normalized_text_count": 16180,
+    "empty_normalized_fact_count": 2,
+    "same_text_cross_document_distinct_text_count": 189,
+    "same_text_cross_document_fact_count": 439,
+    "same_text_cross_document_fact_ratio_by_facts": 0.026173016156918857,
+    "same_text_cross_document_text_ratio_by_distinct_texts": 0.011681087762669963,
+    "same_text_cross_document_text_ratio_by_facts": 0.01126810946163477
+  },
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "manifest_kg_fact_total": 16826,
+  "query_stats": {
+    "batch_pause_seconds": 0.15,
+    "batch_size": 200,
+    "distinct_fact_count": 16773,
+    "distinct_fact_count_difference_ratio": 0.003149887079519791,
+    "elapsed_seconds": 16.285182600000553,
+    "fact_count_difference_ratio": 0.003149887079519791,
+    "manifest_fact_count": 16826,
+    "returned_row_count": 16773,
+    "returned_row_count_difference_ratio": 0.003149887079519791
+  }
+}

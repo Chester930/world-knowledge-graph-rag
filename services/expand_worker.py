@@ -27,6 +27,7 @@ from uuid import UUID
 from neo4j import AsyncDriver
 
 from core.config import task_queue_db_path
+from core.kg_config import KGConfig
 from core.constants import (
     EXPAND_GATE_THRESHOLD,
     EXPAND_GATE_WINDOW,
@@ -95,6 +96,7 @@ async def commit_and_backfill(
     description: str,
     member_verbs: list[str],
     reused_from_registry: bool,
+    cfg: KGConfig | None = None,
 ) -> int:
     """`COMMIT`＋`BACKFILL`：核准新型別後把候選標記為 `committed`、（若非沿用
     既有登記）寫入跨 KG 登記表，並在同一輪流程內接著觸發回溯重分類（見
@@ -115,7 +117,7 @@ async def commit_and_backfill(
     expand_governance_service.mark_committed(db_path, kg_id_str, member_verbs)
 
     return await backfill_related_to_edges(
-        driver, kg_id, type_name, description, embedding_provider, llm_provider=llm_provider,
+        driver, kg_id, type_name, description, embedding_provider, llm_provider=llm_provider, cfg=cfg,
     )
 
 
