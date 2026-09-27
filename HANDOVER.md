@@ -9,7 +9,7 @@ Claude Code用官方全國法規資料庫（law.moj.gov.tw）逐條核對報告7
 
 **Codex已完成T1-T4，commit `c6cbe65`（落在main checkout本地`master`，非本worktree分支，尚未push）**。Claude Code已獨立複驗：(1)`git show --stat`確認只動3個檔案（新腳本、`t2_followup_issues.md`、新審計log），未觸碰production程式碼；(2)逐行核對新腳本`scripts/kg/fix_report90_verified_naturalization_facts.py`，compare-and-set guard完整（kg_id/rel_type/natural_text/subject/subject_type/object/object_type皆須吻合才SET，只寫`natural_text`）；(3)`t2_followup_issues.md`新增章節內容忠實、第4筆重新核對後仍誠實標註「查無出處屬排除法、查證強度有限」；(4)**獨立唯讀查詢Neo4j**確認兩筆`natural_text`現況分別為「發生災害時之災害原因調查及檢討防災對策。」與「接受從事本法第四十六條規定工作之外國人委任，代其辦理居留業務。」，跟審計log與task目標值一致；(5)**獨立重跑`python -m pytest tests -q ...`於main checkout，結果同樣1156 passed**。**驗證全數通過，無需修正**。
 
-**後續待辦**：main checkout本地`master`目前領先`origin/master`一個commit（`c6cbe65`），是否push由使用者決定（不在本worktree範圍內，Claude Code未曾在main checkout操作git）。報告71殘留的17筆需人工複核、5筆建議排除案例仍未處理，非本任務範圍。
+**已push（2026-09-27）**：main checkout本地`master`原本因與`origin/master`分岔（origin多了`99b004c`）被拒絕push；使用者在main checkout自行執行、Claude Code全程指導（因本worktree session技術上無法對main checkout下git指令，`cd`/`git -C`皆被沙盒擋下）：(1)`git stash push -u -m "report90-rebase-temp-20260927"`暫存既有3筆未commit異動（`53_...`修改稿+2份v1.0 untracked文件）；(2)`git pull --rebase origin master`成功接上`99b004c`；(3)`git push origin master`成功（`99b004c..534cb71`）；(4)`git stash apply <sha>`（非pop）＋核對SHA後`git stash drop 'stash@{0}'`精準還原並清除暫存,3筆既有異動完好無損、其餘4個歷史stash未受影響。**main checkout本地master與origin/master現在都在`534cb71`**。報告71殘留的17筆需人工複核、5筆建議排除案例仍未處理，非本任務範圍。
 
 ## 2026-09-27（續）：報告88人工裁決已完成——`18-Q6`算對／`57-DIST2`算錯，落差校正為−7題
 
