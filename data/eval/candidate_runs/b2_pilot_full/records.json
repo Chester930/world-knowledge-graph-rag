@@ -1,0 +1,2639 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的資料：\n\n勞工結婚可以請8日的婚假，工資照給。\n\n這項資訊來自事實清單中的第2條：「勞工結婚者給予婚假八日，工資照給。」\n\n因此，對於問題「勞工結婚可以請幾天婚假？工資怎麼算？」的答案如下：\n\n勞工結婚可以請8天的婚假，並且這段期間內的工資會照常發放。",
+    "error": null,
+    "latency_s": 64.12,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 679,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M1",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 64120.00000000001,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030001_勞動基準法_17",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2247,
+        "snr": 0.0071,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 645,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 64120.00000000001,
+        "raw_draft": "根據上述事實清單中的資料：\n\n勞工結婚可以請8日的婚假，工資照給。\n\n這項資訊來自事實清單中的第2條：「勞工結婚者給予婚假八日，工資照給。」\n\n因此，對於問題「勞工結婚可以請幾天婚假？工資怎麼算？」的答案如下：\n\n勞工結婚可以請8天的婚假，並且這段期間內的工資會照常發放。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的資料：\n\n勞工結婚可以請8日的婚假，工資照給。\n\n這項資訊來自事實清單中的第2條：「勞工結婚者給予婚假八日，工資照給。」\n\n因此，對於問題「勞工結婚可以請幾天婚假？工資怎麼算？」的答案如下：\n\n勞工結婚可以請8天的婚假，並且這段期間內的工資會照常發放。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "17-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的資料：\n\n勞工結婚可以請8日的婚假，並且工資照給。\n\n相關法規來源為：\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。",
+    "error": null,
+    "latency_s": 35.55,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 648,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M2",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 35550.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_9"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2197,
+        "snr": 0.0073,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 626,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 35550.0,
+        "raw_draft": "根據上述事實清單中的資料：\n\n勞工結婚可以請8日的婚假，並且工資照給。\n\n相關法規來源為：\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的資料：\n\n勞工結婚可以請8日的婚假，並且工資照給。\n\n相關法規來源為：\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "17-Q1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假，並且工資會照常發放。",
+    "error": null,
+    "latency_s": 59.59,
+    "llm_calls": 3,
+    "generation_llm_calls": 3,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1234,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "B2",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 59590.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_2",
+          "N0030001_勞動基準法_18",
+          "N0090001_就業服務法_21",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_9",
+          "N0030001_勞動基準法_0",
+          "N0030001_勞動基準法_11",
+          "N0030022_勞工退休金條例年金保險實施辦法_5"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4261,
+        "snr": 0.0038,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1213,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 59590.0,
+        "raw_draft": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假，並且工資會照常發放。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的資料：\n\n【來源：N0030006_勞工請假規則，第2條】\n勞工結婚者給予婚假八日，工資照給。\n\n因此，勞工結婚可以請8天的婚假，並且工資會照常發放。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 2,
+      "reflect_calls": 2,
+      "rounds_per_subquestion": [
+        1,
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的第7條，勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且在事假期間不會獲得工資。",
+    "error": null,
+    "latency_s": 32.72,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 659,
+    "atomic_score": {
+      "supported_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "M1",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 32720.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_17",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2231,
+        "snr": 0.0094,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 637,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 32720.0,
+        "raw_draft": "根據上述事實清單中的第7條，勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且在事假期間不會獲得工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第7條，勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且在事假期間不會獲得工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且事假期間不給工資。",
+    "error": null,
+    "latency_s": 34.71,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 642,
+    "atomic_score": {
+      "supported_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "M2",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 34710.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2177,
+        "snr": 0.0096,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 622,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 34710.0,
+        "raw_draft": "根據上述事實清單：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且事假期間不給工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且事假期間不給工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "17-Q2",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的第7條：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且事假期間不給工資。",
+    "error": null,
+    "latency_s": 106.62,
+    "llm_calls": 9,
+    "generation_llm_calls": 9,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1833,
+    "atomic_score": {
+      "supported_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q2",
+      "arm": "B2",
+      "question": "勞工事假一年最多可以請幾天？有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 106620.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_19",
+          "N0030006_勞工請假規則_2",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_9",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_11",
+          "N0030001_勞動基準法_0",
+          "N0030001_勞動基準法_12",
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030020_勞工退休金條例_8",
+          "N0030001_勞動基準法_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 6337,
+        "snr": 0.0033,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1812,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 106620.0,
+        "raw_draft": "根據上述事實清單中的第7條：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且事假期間不給工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第7條：\n\n勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。\n\n因此，勞工事假一年最多可以請14天，並且事假期間不給工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        5,
+        3
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "17-Q6",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得特別休假的天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數為一至三日。",
+    "error": null,
+    "latency_s": 53.17,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 613,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q6",
+      "arm": "M1",
+      "question": "警察因搶救重大災害表現優異，可以獲得幾天特別休假？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 53170.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030006_勞工請假規則_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_18"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1971,
+        "snr": 0.0244,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 572,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 53170.0,
+        "raw_draft": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得特別休假的天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數為一至三日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得特別休假的天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數為一至三日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "17-Q6",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   警察人員在「搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者」的情況下，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得一至三日的特別休假。",
+    "error": null,
+    "latency_s": 63.51,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 613,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q6",
+      "arm": "M2",
+      "question": "警察因搶救重大災害表現優異，可以獲得幾天特別休假？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 63510.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1963,
+        "snr": 0.0245,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 570,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 63510.0,
+        "raw_draft": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   警察人員在「搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者」的情況下，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得一至三日的特別休假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   警察人員在「搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者」的情況下，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得一至三日的特別休假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "17-Q6",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   警察人員在「搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者」的情況下，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得一至三日的特別休假。",
+    "error": null,
+    "latency_s": 64.01,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 613,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q6",
+      "arm": "B2",
+      "question": "警察因搶救重大災害表現優異，可以獲得幾天特別休假？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 64010.00000000001,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1963,
+        "snr": 0.0245,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 570,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 64010.00000000001,
+        "raw_draft": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   警察人員在「搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者」的情況下，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得一至三日的特別休假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察因搶救重大災害表現優異可以獲得的特別休假天數如下：\n\n1. 根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n   警察人員在「搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者」的情況下，可以獲得一至三日的特別休假。\n\n因此，根據上述事實清單，警察因搶救重大災害表現優異可以獲得一至三日的特別休假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（來源：N0030006_勞工請假規則 第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（來源：N0030006_勞工請假規則 第4條）。\n\n3. 工資給付方式：\n   - 未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（來源：N0030006_勞工請假規則 第4條）。\n\n因此，回答如下：\n\n1. 普通傷病假未住院者一年內合計不得超過三十日。\n2. 普通傷病假住院者二年內合計上限為一年。\n3. 工資給付方式為：未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之。",
+    "error": null,
+    "latency_s": 39.52,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 725,
+    "atomic_score": {
+      "supported_spans": [
+        "未住院者，一年內合計不得超過三十日",
+        "住院者，二年內合計不得超過一年",
+        "未超過三十日部分，工資折半發給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q1",
+      "arm": "M1",
+      "question": "勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？住院者二年內合計上限是多少？工資怎麼給付？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 39520.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0030006_勞工請假規則_0",
+          "N0050031_勞工職業災害保險及保護法_17",
+          "N0050031_勞工職業災害保險及保護法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2191,
+        "snr": 0.0215,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 637,
+        "retained_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 39520.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（來源：N0030006_勞工請假規則 第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（來源：N0030006_勞工請假規則 第4條）。\n\n3. 工資給付方式：\n   - 未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（來源：N0030006_勞工請假規則 第4條）。\n\n因此，回答如下：\n\n1. 普通傷病假未住院者一年內合計不得超過三十日。\n2. 普通傷病假住院者二年內合計上限為一年。\n3. 工資給付方式為：未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（來源：N0030006_勞工請假規則 第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（來源：N0030006_勞工請假規則 第4條）。\n\n3. 工資給付方式：\n   - 未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（來源：N0030006_勞工請假規則 第4條）。\n\n因此，回答如下：\n\n1. 普通傷病假未住院者一年內合計不得超過三十日。\n2. 普通傷病假住院者二年內合計上限為一年。\n3. 工資給付方式為：未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（來源：N0030006_勞工請假規則，第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（來源：N003006_勞工請假規則，第4條）。\n\n3. 工資給付方式：\n   - 未住院者普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（來源：N0030006_勞工請假規則，第4條）。\n\n綜上所述：\n- 普通傷病假未住院者一年內合計不得超過三十日。\n- 普通傷病假住院者二年內合計不得超過一年。\n- 工資折半發放，不足部分由僱主補足。",
+    "error": null,
+    "latency_s": 36.19,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 673,
+    "atomic_score": {
+      "supported_spans": [
+        "未住院者，一年內合計不得超過三十日",
+        "住院者，二年內合計不得超過一年",
+        "未超過三十日部分，工資折半發給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q1",
+      "arm": "M2",
+      "question": "勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？住院者二年內合計上限是多少？工資怎麼給付？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 36190.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_2",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2055,
+        "snr": 0.0229,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 599,
+        "retained_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 36190.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（來源：N0030006_勞工請假規則，第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（來源：N003006_勞工請假規則，第4條）。\n\n3. 工資給付方式：\n   - 未住院者普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（來源：N0030006_勞工請假規則，第4條）。\n\n綜上所述：\n- 普通傷病假未住院者一年內合計不得超過三十日。\n- 普通傷病假住院者二年內合計不得超過一年。\n- 工資折半發放，不足部分由僱主補足。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（來源：N0030006_勞工請假規則，第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（來源：N003006_勞工請假規則，第4條）。\n\n3. 工資給付方式：\n   - 未住院者普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（來源：N0030006_勞工請假規則，第4條）。\n\n綜上所述：\n- 普通傷病假未住院者一年內合計不得超過三十日。\n- 普通傷病假住院者二年內合計不得超過一年。\n- 工資折半發放，不足部分由僱主補足。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（第4條）。\n\n3. 工資給付方式：\n   - 未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（第4條）。\n\n因此，回答如下：\n\n1. 普通傷病假未住院者，一年內合計不得超過三十日。\n2. 普通傷病假住院者，二年內合計不得超過一年。\n3. 工資給付方式為：未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之。",
+    "error": null,
+    "latency_s": 86.73,
+    "llm_calls": 9,
+    "generation_llm_calls": 9,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1819,
+    "atomic_score": {
+      "supported_spans": [
+        "未住院者，一年內合計不得超過三十日",
+        "住院者，二年內合計不得超過一年",
+        "未超過三十日部分，工資折半發給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q1",
+      "arm": "B2",
+      "question": "勞工請「普通傷病假」，未住院者一年內合計不得超過幾天？住院者二年內合計上限是多少？工資怎麼給付？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 86730.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_2",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0090025_就業促進津貼實施辦法_7",
+          "N0050031_勞工職業災害保險及保護法_15",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_10",
+          "N0030001_勞動基準法_25",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_9",
+          "N0030001_勞動基準法_11",
+          "N0030001_勞動基準法_7",
+          "N0030001_勞動基準法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 6075,
+        "snr": 0.0077,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1745,
+        "retained_exact_spans": [
+          "未住院者，一年內合計不得超過三十日",
+          "住院者，二年內合計不得超過一年",
+          "未超過三十日部分，工資折半發給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 86730.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（第4條）。\n\n3. 工資給付方式：\n   - 未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（第4條）。\n\n因此，回答如下：\n\n1. 普通傷病假未住院者，一年內合計不得超過三十日。\n2. 普通傷病假住院者，二年內合計不得超過一年。\n3. 工資給付方式為：未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 普通傷病假未住院者：\n   - 一年內合計不得超過三十日（第4條）。\n\n2. 普通傷病假住院者：\n   - 二年內合計不得超過一年（第4條）。\n\n3. 工資給付方式：\n   - 未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之（第4條）。\n\n因此，回答如下：\n\n1. 普通傷病假未住院者，一年內合計不得超過三十日。\n2. 普通傷病假住院者，二年內合計不得超過一年。\n3. 工資給付方式為：未住院者，普通傷病假一年內未超過三十日部分，工資折半發給，其領有勞工保險普通傷病給付未達工資半數者，由僱主補足之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        1,
+        5,
+        2
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q2",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月（第2條）。\n\n2. 如果只需要30日以上未達六個月，最多可以申請二次（第2條）。\n\n因此，回答問題如下：\n- 原則上每次不少於六個月。\n- 如果只需要30日以上未達六個月，最多可以申請二次。",
+    "error": null,
+    "latency_s": 44.65,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 641,
+    "atomic_score": {
+      "supported_spans": [
+        "每次以不少於六個月為原則",
+        "三十日以上未達六個月：以二次為限"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q2",
+      "arm": "M1",
+      "question": "受僱者申請育嬰留職停薪，原則上每次不少於幾個月？如果只需要 30 日以上未達六個月，最多可以申請幾次？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 44650.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030001_勞動基準法_21",
+          "N0030006_勞工請假規則_1",
+          "N0090001_就業服務法_17"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2095,
+        "snr": 0.0134,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 607,
+        "retained_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 44650.0,
+        "raw_draft": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月（第2條）。\n\n2. 如果只需要30日以上未達六個月，最多可以申請二次（第2條）。\n\n因此，回答問題如下：\n- 原則上每次不少於六個月。\n- 如果只需要30日以上未達六個月，最多可以申請二次。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月（第2條）。\n\n2. 如果只需要30日以上未達六個月，最多可以申請二次（第2條）。\n\n因此，回答問題如下：\n- 原則上每次不少於六個月。\n- 如果只需要30日以上未達六個月，最多可以申請二次。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月。這是根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】中提到的「育嬰留職停薪期間，每次以不少於六個月為原則」。\n\n2. 如果只需要 30 日以上未達六個月，最多可以申請兩次。這是根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】中提到的「三十日以上未達六個月：以二次為限」。\n\n綜上所述：\n- 原則上每次不少於六個月。\n- 如果只需要 30 日以上未達六個月，最多可以申請兩次。",
+    "error": null,
+    "latency_s": 44.9,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 660,
+    "atomic_score": {
+      "supported_spans": [
+        "每次以不少於六個月為原則",
+        "三十日以上未達六個月：以二次為限"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q2",
+      "arm": "M2",
+      "question": "受僱者申請育嬰留職停薪，原則上每次不少於幾個月？如果只需要 30 日以上未達六個月，最多可以申請幾次？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 44900.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030001_勞動基準法_21",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0090025_就業促進津貼實施辦法_6"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2027,
+        "snr": 0.0138,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 600,
+        "retained_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 44900.0,
+        "raw_draft": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月。這是根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】中提到的「育嬰留職停薪期間，每次以不少於六個月為原則」。\n\n2. 如果只需要 30 日以上未達六個月，最多可以申請兩次。這是根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】中提到的「三十日以上未達六個月：以二次為限」。\n\n綜上所述：\n- 原則上每次不少於六個月。\n- 如果只需要 30 日以上未達六個月，最多可以申請兩次。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月。這是根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】中提到的「育嬰留職停薪期間，每次以不少於六個月為原則」。\n\n2. 如果只需要 30 日以上未達六個月，最多可以申請兩次。這是根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】中提到的「三十日以上未達六個月：以二次為限」。\n\n綜上所述：\n- 原則上每次不少於六個月。\n- 如果只需要 30 日以上未達六個月，最多可以申請兩次。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q2",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n2. 如果只需要30日以上未達六個月，最多可以申請二次。\n\n因此，回答問題如下：\n\n受僱者申請育嬰留職停薪，原則上每次不少於六個月。如果只需要30日以上未達六個月，最多可以申請二次。",
+    "error": null,
+    "latency_s": 64.81,
+    "llm_calls": 7,
+    "generation_llm_calls": 7,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1505,
+    "atomic_score": {
+      "supported_spans": [
+        "每次以不少於六個月為原則",
+        "三十日以上未達六個月：以二次為限"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q2",
+      "arm": "B2",
+      "question": "受僱者申請育嬰留職停薪，原則上每次不少於幾個月？如果只需要 30 日以上未達六個月，最多可以申請幾次？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 64810.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030001_勞動基準法_21",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030006_勞工請假規則_1",
+          "N0090025_就業促進津貼實施辦法_6",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_10",
+          "N0090001_就業服務法_16",
+          "N0090001_就業服務法_17",
+          "N0090002_私立就業服務機構許可及管理辦法_13",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_9",
+          "N0090025_就業促進津貼實施辦法_3"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 5031,
+        "snr": 0.0056,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1472,
+        "retained_exact_spans": [
+          "每次以不少於六個月為原則",
+          "三十日以上未達六個月：以二次為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 64810.0,
+        "raw_draft": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n2. 如果只需要30日以上未達六個月，最多可以申請二次。\n\n因此，回答問題如下：\n\n受僱者申請育嬰留職停薪，原則上每次不少於六個月。如果只需要30日以上未達六個月，最多可以申請二次。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪，原則上每次不少於六個月。\n2. 如果只需要30日以上未達六個月，最多可以申請二次。\n\n因此，回答問題如下：\n\n受僱者申請育嬰留職停薪，原則上每次不少於六個月。如果只需要30日以上未達六個月，最多可以申請二次。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 6,
+      "reflect_calls": 6,
+      "rounds_per_subquestion": [
+        1,
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的相關規定，回答問題如下：\n\n1. **特別休假返國期日的排定**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，適用勞動基準法的外國人在聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。因此，特別休假返國期日是由外國人自己排定的。\n\n2. **僱主是否可以片面更改**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。若僱主與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n   - 因此，僱主不可以片面更改外國人的請假返國期日，除非能夠與外國人達成協議。\n\n以上回答基於提供的事實清單內容。",
+    "error": null,
+    "latency_s": 72.88,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日"
+      ],
+      "missing_spans": [
+        "雇主應予同意"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['雇主應予同意']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "M1",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 72880.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "N0090001_就業服務法_17",
+          "N0030001_勞動基準法_18"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1893,
+        "snr": 0.0085,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 550,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 72880.0,
+        "raw_draft": "根據上述事實清單中的相關規定，回答問題如下：\n\n1. **特別休假返國期日的排定**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，適用勞動基準法的外國人在聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。因此，特別休假返國期日是由外國人自己排定的。\n\n2. **僱主是否可以片面更改**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。若僱主與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n   - 因此，僱主不可以片面更改外國人的請假返國期日，除非能夠與外國人達成協議。\n\n以上回答基於提供的事實清單內容。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的相關規定，回答問題如下：\n\n1. **特別休假返國期日的排定**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，適用勞動基準法的外國人在聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。因此，特別休假返國期日是由外國人自己排定的。\n\n2. **僱主是否可以片面更改**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。若僱主與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n   - 因此，僱主不可以片面更改外國人的請假返國期日，除非能夠與外國人達成協議。\n\n以上回答基於提供的事實清單內容。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['雇主應予同意']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['雇主應予同意'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的相關規定，回答問題如下：\n\n1. **特別休假返國期日的排定**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，適用勞動基準法的外國人在聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。因此，特別休假返國期日是由外國人自己排定的。\n\n2. **僱主是否可以片面更改**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。若僱主與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n   - 因此，僱主不可以片面更改外國人的請假返國期日，除非能夠與外國人達成協議。\n\n以上回答基於提供的事實清單內容。",
+    "error": null,
+    "latency_s": 63.78,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日"
+      ],
+      "missing_spans": [
+        "雇主應予同意"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['雇主應予同意']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "M2",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 63780.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "N0090001_就業服務法_17",
+          "N0030001_勞動基準法_18"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1893,
+        "snr": 0.0085,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 550,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 63780.0,
+        "raw_draft": "根據上述事實清單中的相關規定，回答問題如下：\n\n1. **特別休假返國期日的排定**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，適用勞動基準法的外國人在聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。因此，特別休假返國期日是由外國人自己排定的。\n\n2. **僱主是否可以片面更改**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。若僱主與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n   - 因此，僱主不可以片面更改外國人的請假返國期日，除非能夠與外國人達成協議。\n\n以上回答基於提供的事實清單內容。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的相關規定，回答問題如下：\n\n1. **特別休假返國期日的排定**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，適用勞動基準法的外國人在聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。因此，特別休假返國期日是由外國人自己排定的。\n\n2. **僱主是否可以片面更改**：\n   - 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3條】，僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。若僱主與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n   - 因此，僱主不可以片面更改外國人的請假返國期日，除非能夠與外國人達成協議。\n\n以上回答基於提供的事實清單內容。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['雇主應予同意']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['雇主應予同意'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單：\n\n1. 根據第 3 條：「前條所定之外國人應於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日，僱主應予同意。」\n\n2. 根據第 3 條：「但僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。僱主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。」\n\n由以上兩條可以得知：\n\n- 外國人有權自行排定特別休假返國的請假返國期日。\n- 僱主在特定情況下（如企業經營或被照顧者急迫需求）可以與外國人協商調整返國期日，但如果協商不成，僱主仍需依外國人原排定之返國期日同意其返國。\n\n因此，特別休假返國的請假返國期日是由外國人自行排定的。但若僱主有合理理由（如企業經營或被照顧者急迫需求）且與外國人協商不成時，可以調整返國期日，不過這種情況下仍需尊重外國人的原排定日期。",
+    "error": null,
+    "latency_s": 160.82,
+    "llm_calls": 7,
+    "generation_llm_calls": 7,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1534,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日",
+        "雇主應予同意"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "B2",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 160820.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "N0090001_就業服務法_17",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_18",
+          "N0090001_就業服務法_23",
+          "N0090001_就業服務法_28",
+          "N0030001_勞動基準法_5",
+          "N0030001_勞動基準法_4",
+          "N0090001_就業服務法_18",
+          "N0030001_勞動基準法_2",
+          "N0030001_勞動基準法_3"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4920,
+        "snr": 0.0033,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1435,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 160820.0,
+        "raw_draft": "根據上述事實清單：\n\n1. 根據第 3 條：「前條所定之外國人應於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日，僱主應予同意。」\n\n2. 根據第 3 條：「但僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。僱主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。」\n\n由以上兩條可以得知：\n\n- 外國人有權自行排定特別休假返國的請假返國期日。\n- 僱主在特定情況下（如企業經營或被照顧者急迫需求）可以與外國人協商調整返國期日，但如果協商不成，僱主仍需依外國人原排定之返國期日同意其返國。\n\n因此，特別休假返國的請假返國期日是由外國人自行排定的。但若僱主有合理理由（如企業經營或被照顧者急迫需求）且與外國人協商不成時，可以調整返國期日，不過這種情況下仍需尊重外國人的原排定日期。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單：\n\n1. 根據第 3 條：「前條所定之外國人應於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日，僱主應予同意。」\n\n2. 根據第 3 條：「但僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。僱主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。」\n\n由以上兩條可以得知：\n\n- 外國人有權自行排定特別休假返國的請假返國期日。\n- 僱主在特定情況下（如企業經營或被照顧者急迫需求）可以與外國人協商調整返國期日，但如果協商不成，僱主仍需依外國人原排定之返國期日同意其返國。\n\n因此，特別休假返國的請假返國期日是由外國人自行排定的。但若僱主有合理理由（如企業經營或被照顧者急迫需求）且與外國人協商不成時，可以調整返國期日，不過這種情況下仍需尊重外國人的原排定日期。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 6,
+      "reflect_calls": 6,
+      "rounds_per_subquestion": [
+        1,
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+    "error": null,
+    "latency_s": 57.6,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 634,
+    "atomic_score": {
+      "supported_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "M1",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 57600.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14",
+          "N0030006_勞工請假規則_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1929,
+        "snr": 0.0161,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 563,
+        "retained_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 57600.0,
+        "raw_draft": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+    "error": null,
+    "latency_s": 55.74,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 634,
+    "atomic_score": {
+      "supported_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "M2",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 55740.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1929,
+        "snr": 0.0161,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 563,
+        "retained_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 55740.0,
+        "raw_draft": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q4",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+    "error": null,
+    "latency_s": 55.01,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 634,
+    "atomic_score": {
+      "supported_spans": [
+        "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q4",
+      "arm": "B2",
+      "question": "各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按多少比例從當年度所得額中減除？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 55010.0,
+        "retrieved_chunk_ids": [
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2",
+          "N0030006_勞工請假規則_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1929,
+        "snr": 0.0161,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 563,
+        "retained_exact_spans": [
+          "得就其給付薪資金額之百分之一百五十，自當年度營利事業所得額減除"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 55010.0,
+        "raw_draft": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第3條和第4條，各機關團體給付員工接受後備軍人召集請假期間的薪資金額，可以按以下比例從當年度所得額中減除：\n\n1. 屬應辦理營利事業所得稅結算、決算或清算申報者，得就其給付薪資金額之百分之一百五十（150%），自當年度營利事業所得額減除。\n2. 屬應辦理綜合所得稅結算申報之執行業務者、私人辦理補習班、幼兒園及養護、療養院（所），得就其給付薪資金額之百分之一百五十（150%），於核實計算申報當年度執行業務所得或其他所得中減除。\n\n因此，根據上述事實清單，各機關團體可以將員工接受後備軍人召集請假期間的薪資金額按150%的比例從當年度所得額中減除。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假與服務年資無直接關係。\n\n最高可以給的天數如下：\n- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者：1至3日\n- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者：1至3日\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者：2至5日\n- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者：2至5日\n- 當選直轄市、縣（市）級模範警察或好人好事代表者：1至3日\n- 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者：1至3日\n- 主動破獲叛亂組織，人證俱獲者：3至7日\n- 因特別貢獻或特殊功績受頒勳章者：3至7日\n- 因特殊功績榮獲晉階者：3至7日\n\n因此，特別休假的最高天數為7日。",
+    "error": null,
+    "latency_s": 254.42,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M1",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 254420.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2019,
+        "snr": 0.0297,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 586,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 254420.0,
+        "raw_draft": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假與服務年資無直接關係。\n\n最高可以給的天數如下：\n- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者：1至3日\n- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者：1至3日\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者：2至5日\n- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者：2至5日\n- 當選直轄市、縣（市）級模範警察或好人好事代表者：1至3日\n- 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者：1至3日\n- 主動破獲叛亂組織，人證俱獲者：3至7日\n- 因特別貢獻或特殊功績受頒勳章者：3至7日\n- 因特殊功績榮獲晉階者：3至7日\n\n因此，特別休假的最高天數為7日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假與服務年資無直接關係。\n\n最高可以給的天數如下：\n- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者：1至3日\n- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者：1至3日\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者：2至5日\n- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者：2至5日\n- 當選直轄市、縣（市）級模範警察或好人好事代表者：1至3日\n- 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者：1至3日\n- 主動破獲叛亂組織，人證俱獲者：3至7日\n- 因特別貢獻或特殊功績受頒勳章者：3至7日\n- 因特殊功績榮獲晉階者：3至7日\n\n因此，特別休假的最高天數為7日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）\n   - 選直轄市、縣（市）級模範警察或好人好事代表者（第2條）\n   - 對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者（第2條）\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者（第3條）\n   - 選全國性模範警察者（第3條）\n   - 選全國性好人好事代表者（第3條）\n   - 主動破獲叛亂組織，人證俱獲者（第4條）\n   - 因特別貢獻或特殊功績受頒勳章者（第4條）\n   - 因特殊功績榮獲晉階者（第4條）\n\n2. 特別休假與服務年資無直接關係，其天數根據勞工所具有的特定功績而定。\n\n3. 最高可以給的特別休假日數為七日，這是因「主動破獲叛亂組織，人證俱獲」的情況下可獲得三至七日之特別休假（第4條）。",
+    "error": null,
+    "latency_s": 273.87,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 714,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 273870.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1991,
+        "snr": 0.0301,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 583,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 273870.0,
+        "raw_draft": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）\n   - 選直轄市、縣（市）級模範警察或好人好事代表者（第2條）\n   - 對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者（第2條）\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者（第3條）\n   - 選全國性模範警察者（第3條）\n   - 選全國性好人好事代表者（第3條）\n   - 主動破獲叛亂組織，人證俱獲者（第4條）\n   - 因特別貢獻或特殊功績受頒勳章者（第4條）\n   - 因特殊功績榮獲晉階者（第4條）\n\n2. 特別休假與服務年資無直接關係，其天數根據勞工所具有的特定功績而定。\n\n3. 最高可以給的特別休假日數為七日，這是因「主動破獲叛亂組織，人證俱獲」的情況下可獲得三至七日之特別休假（第4條）。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）\n   - 選直轄市、縣（市）級模範警察或好人好事代表者（第2條）\n   - 對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者（第2條）\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者（第3條）\n   - 選全國性模範警察者（第3條）\n   - 選全國性好人好事代表者（第3條）\n   - 主動破獲叛亂組織，人證俱獲者（第4條）\n   - 因特別貢獻或特殊功績受頒勳章者（第4條）\n   - 因特殊功績榮獲晉階者（第4條）\n\n2. 特別休假與服務年資無直接關係，其天數根據勞工所具有的特定功績而定。\n\n3. 最高可以給的特別休假日數為七日，這是因「主動破獲叛亂組織，人證俱獲」的情況下可獲得三至七日之特別休假（第4條）。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "警察人員特別休假辦法中所稱的「特別休假」，其核發依據如下：\n\n1. 根據第2條至第4條，特別休假的天數依勞功績而定。具體來說：\n   - 第2條規定，處理重大突發治安事件、奮勇緝兇、搶救重大災害等情形可獲1至3日之特別休假。\n   - 第3條規定，主動破獲重大案件或當選模範警察等情形可獲2至5日之特別休假。\n   - 第4條規定，因特別貢獻或特殊功績受頒勳章者、因特殊功績榮獲晉階者可獲3至7日之特別休假。\n\n特別休假與服務年資無直接關係。最高可以給的特別休假日數為7天（第4條）。\n\n資料未明確記載，無法確認特別休假是否與服務年資有關。",
+    "error": null,
+    "latency_s": 192.21,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1259,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假"
+      ],
+      "missing_spans": [
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "B2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 192210.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030020_勞工退休金條例_4",
+          "N0030001_勞動基準法_33",
+          "N0030001_勞動基準法_6",
+          "N0030022_勞工退休金條例年金保險實施辦法_12",
+          "N0030020_勞工退休金條例_10"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4132,
+        "snr": 0.0145,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1192,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 192210.0,
+        "raw_draft": "警察人員特別休假辦法中所稱的「特別休假」，其核發依據如下：\n\n1. 根據第2條至第4條，特別休假的天數依勞功績而定。具體來說：\n   - 第2條規定，處理重大突發治安事件、奮勇緝兇、搶救重大災害等情形可獲1至3日之特別休假。\n   - 第3條規定，主動破獲重大案件或當選模範警察等情形可獲2至5日之特別休假。\n   - 第4條規定，因特別貢獻或特殊功績受頒勳章者、因特殊功績榮獲晉階者可獲3至7日之特別休假。\n\n特別休假與服務年資無直接關係。最高可以給的特別休假日數為7天（第4條）。\n\n資料未明確記載，無法確認特別休假是否與服務年資有關。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "警察人員特別休假辦法中所稱的「特別休假」，其核發依據如下：\n\n1. 根據第2條至第4條，特別休假的天數依勞功績而定。具體來說：\n   - 第2條規定，處理重大突發治安事件、奮勇緝兇、搶救重大災害等情形可獲1至3日之特別休假。\n   - 第3條規定，主動破獲重大案件或當選模範警察等情形可獲2至5日之特別休假。\n   - 第4條規定，因特別貢獻或特殊功績受頒勳章者、因特殊功績榮獲晉階者可獲3至7日之特別休假。\n\n特別休假與服務年資無直接關係。最高可以給的特別休假日數為7天（第4條）。\n\n資料未明確記載，無法確認特別休假是否與服務年資有關。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        5,
+        3,
+        0
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q6",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單：\n\n勞工因有事故必須親自處理，可以請事假（第 7 條）。一年內合計不得超過十四日（第 7 條）。\n\n請事假期間不給工資（第 7 條）。\n\n因此，答案如下：\n1. 貓勞工因有事故必須親自處理，可以請事假。\n2. 一年內最多可以請 14 天事假。\n3. 請事假期間沒有工資。",
+    "error": null,
+    "latency_s": 33.44,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 635,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工因有事故必須親自處理，得請事假",
+        "一年內合計不得超過十四日",
+        "事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q6",
+      "arm": "M1",
+      "question": "勞工因有事故必須親自處理，可以請事假嗎？一年內最多可以請幾天？請事假期間有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 33440.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_2",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0030001_勞動基準法_17"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工因有事故必須親自處理，得請事假",
+          "一年內合計不得超過十四日",
+          "事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2053,
+        "snr": 0.018,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 599,
+        "retained_exact_spans": [
+          "勞工因有事故必須親自處理，得請事假",
+          "一年內合計不得超過十四日",
+          "事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 33440.0,
+        "raw_draft": "根據上述事實清單：\n\n勞工因有事故必須親自處理，可以請事假（第 7 條）。一年內合計不得超過十四日（第 7 條）。\n\n請事假期間不給工資（第 7 條）。\n\n因此，答案如下：\n1. 貓勞工因有事故必須親自處理，可以請事假。\n2. 一年內最多可以請 14 天事假。\n3. 請事假期間沒有工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單：\n\n勞工因有事故必須親自處理，可以請事假（第 7 條）。一年內合計不得超過十四日（第 7 條）。\n\n請事假期間不給工資（第 7 條）。\n\n因此，答案如下：\n1. 貓勞工因有事故必須親自處理，可以請事假。\n2. 一年內最多可以請 14 天事假。\n3. 請事假期間沒有工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q6",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單：\n\n勞工因有事故必須親自處理，可以請事假（第7條）。一年內合計不得超過十四日（第7條）。\n\n請事假期間不給工資（第7條）。\n\n因此，答案如下：\n1. 潛在請事假的條件：勞工因有事故必須親自處理。\n2. 一年內最多可以請的事假天數：十四日。\n3. 請事假期間是否有工資：沒有工資。",
+    "error": null,
+    "latency_s": 73.0,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 615,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工因有事故必須親自處理，得請事假",
+        "一年內合計不得超過十四日",
+        "事假期間不給工資"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q6",
+      "arm": "M2",
+      "question": "勞工因有事故必須親自處理，可以請事假嗎？一年內最多可以請幾天？請事假期間有沒有工資？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 73000.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030006_勞工請假規則_2",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_18"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "勞工因有事故必須親自處理，得請事假",
+          "一年內合計不得超過十四日",
+          "事假期間不給工資"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2011,
+        "snr": 0.0184,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 578,
+        "retained_exact_spans": [
+          "勞工因有事故必須親自處理，得請事假",
+          "一年內合計不得超過十四日",
+          "事假期間不給工資"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 73000.0,
+        "raw_draft": "根據上述事實清單：\n\n勞工因有事故必須親自處理，可以請事假（第7條）。一年內合計不得超過十四日（第7條）。\n\n請事假期間不給工資（第7條）。\n\n因此，答案如下：\n1. 潛在請事假的條件：勞工因有事故必須親自處理。\n2. 一年內最多可以請的事假天數：十四日。\n3. 請事假期間是否有工資：沒有工資。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單：\n\n勞工因有事故必須親自處理，可以請事假（第7條）。一年內合計不得超過十四日（第7條）。\n\n請事假期間不給工資（第7條）。\n\n因此，答案如下：\n1. 潛在請事假的條件：勞工因有事故必須親自處理。\n2. 一年內最多可以請的事假天數：十四日。\n3. 請事假期間是否有工資：沒有工資。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  }
+]

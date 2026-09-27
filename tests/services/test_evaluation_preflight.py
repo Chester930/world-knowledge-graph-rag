@@ -97,6 +97,13 @@ def test_preflight_allows_type_e_synthetic_source():
     assert result.passed is True
 
 
+def test_preflight_accepts_b2_arm():
+    # 報告36/93：B2（Agentic RAG強基準）不是M1-M4別名，是獨立的SUPPORTED_ARMS成員。
+    result = run_evaluation_preflight(**_kwargs(arms=["B2"]))
+
+    assert result.passed is True
+
+
 def test_preflight_rejects_invalid_dataset_hash_arm_and_timeout():
     result = run_evaluation_preflight(
         **_kwargs(arms=["UNKNOWN"], dataset_sha256="short", query_timeout_s=0)

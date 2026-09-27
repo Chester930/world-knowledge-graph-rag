@@ -9,7 +9,7 @@ from models.eval_schema import ScenarioType, TestCase
 from services.evaluation_eligibility import assess_test_case
 
 
-SUPPORTED_ARMS = frozenset({"M1", "M2", "M3", "M4", "D", "G", "K", "K-2b"})
+SUPPORTED_ARMS = frozenset({"M1", "M2", "M3", "M4", "D", "G", "K", "K-2b", "B2"})
 _SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
