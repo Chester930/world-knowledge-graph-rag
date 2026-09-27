@@ -1,53 +1,24 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-27（續7）
+> **最後更新**：2026-09-27（session總結）
 
-## 2026-09-27（續7）：四處版控已統一於`3090821`——本worktree分支+報告90修正已合併進master並push
+## 2026-09-27（session總結）：第六七章空白段落補齊 + 報告90/91執行複驗 + 全版控同步於`c48268f`
 
-發現master與本worktree分支已分岔（master領先1個commit`534cb71`＝報告90 T1-T4修正，只新增3個檔案、無衝突；本分支領先11個commit＝第六七章補完＋報告91任務書＋本次一系列HANDOVER記錄）。處理方式：(1) `git merge --no-commit --no-ff master`試合併確認零衝突（純新增，未觸碰本次工作內容）；(2) 正式合併commit`3090821`；(3) `pytest`1156 passed全綠；(4) push `origin/worktree-sdd-retrieval-comparison`（`643dc11..3090821`）；(5) `git push origin HEAD:master` fast-forward `origin/master`（`534cb71..3090821`）；(6) 使用者在main checkout執行`git pull --ff-only`同步本地master。**四處（本worktree分支／origin本分支／origin master／main checkout本地master）現在完全同步於`3090821`**，取代（續6）以前的分岔記錄。
+**現況（接手前先確認）**：四處版控完全同步於 commit `c48268f`——本worktree分支（`worktree-sdd-retrieval-comparison`）、`origin/worktree-sdd-retrieval-comparison`、`origin/master`、main checkout本地`master`。
 
-## 2026-09-27（續6，歷史記錄）：main checkout本地master孤立commit`a020f58`已清理完畢
+本次session依序完成：
 
-延續下方（續5）記錄的落差，已由使用者在main checkout親自執行（Claude Code因worktree沙盒隔離技術上無法對main checkout下git指令，全程口頭指導）：(1) `git stash push -u -m "master-a020f58-cleanup-20260927"`保護既有3筆未commit異動（`docs/報告/53_...md`修改稿＋2份v1.0未追蹤文件），取得SHA`aa707ec02cc9d1e059c51d1bf9797057c7c0dbd6`；(2) `git reset --hard 534cb71`丟掉多餘的`a020f58`（其內容已完整涵蓋在本worktree分支的`8eaabe7`並push）；(3) `git stash apply aa707ec...`（非pop）＋核對SHA後`git stash drop "stash@{0}"`精準還原並清除暫存（PowerShell對`stash@{0}`需加引號才能正確解析）。**main checkout本地master現在與`origin/master`完全同步於`534cb71`，3筆既有異動與其餘4筆歷史暫存皆完好無損**。此節取代（續5）的警告。
+1. **論文第六、七章空白段落補齊**（純文件）：依`00_研究追溯對映表.md`現況，§6.1 TODO量化表、§6.2.2–6.2.6（RQ2-RQ6原本空白的標題）改寫為誠實的機制現況＋缺口說明；§7.2（原TODO：呼應1.3）依三層貢獻框架重申實際完成範圍——**RQ1是本論文唯一完成完整比較實驗閉環的正式研究問題**；補上§7.3缺漏的RQ2限制條目。
+2. **報告88人工裁決回灌**（延續前次session的裁決結論）：`18-Q6`算對／`57-DIST2`算錯，KG相對B1落差校正為**−7題**，已寫入第六章§6.2.1/§6.4與第七章GAP-S3-02。
+3. **報告90（報告71殘留4筆natural_text的法規原文複核與修正）**：Claude Code用law.moj.gov.tw逐條查證，2筆是誤判（現況已對、不用修）、2筆確認需修正（且問題點跟報告71原判斷不同）；Codex執行T1-T4，Claude Code獨立複驗（腳本compare-and-set guard、獨立唯讀Neo4j查詢核對、pytest 1156）全數通過。詳見[報告90](docs/報告/90_報告71殘留4筆natural_text法規原文複核與修正SDD任務書.md)。報告71殘留的17筆需人工複核、5筆建議排除案例**仍未處理**。
+4. **報告91（第七章§7.4「方案二/四/七/八」未來工作補完）**：Claude Code直接讀取v1對標文件（`D:\Users\666\Desktop\智慧知識庫\docs\報告\04_對標NotebookLM_不足分析與完全超越方案.md`）原文，建立任務書，發現方案四（社群自動導讀）在v2查無對應Louvain機制的落差；Codex執行T1-T4，Claude Code獨立複驗（LayoutLM引用全名/作者核對、Grep確認`services/`／`repositories/`確實無社群偵測機制、確認`技術導入評估.md`無方案八專節）全數通過。詳見[報告91](docs/報告/91_第七章未來工作方案二四七八補完SDD任務書.md)。
+5. **跨checkout/分支整併收尾**：過程中main checkout本地master一度因Codex在落後版本上作業而產生孤立commit`a020f58`，已用`git stash`保護既有異動＋`git reset --hard`清理；master與本worktree分支最終還分岔1個commit（報告90的T1-T4修正）對多個commit（本session全部工作），已`git merge`（零衝突、純新增）+pytest全綠後push，四處統一於`c48268f`。技術細節（stash SHA、逐步指令）若需要可查git reflog，不再展開於本文件。
 
-## 2026-09-27（續5，歷史記錄，已解決見上方）：報告91已由Codex完成執行、Claude Code獨立複驗通過並套用到本分支——~~⚠️main checkout本地master目前領先origin一個未push的commit`a020f58`~~
-
-Codex依報告91 T1-T4在**main checkout本地`master`**上完成§7.4方案二/四/七/八四段展開，commit `a020f58`（parent `534cb71`，**尚未push**）。Claude Code獨立複驗：(1) `git diff 534cb71 a020f58`確認diff乾淨，只換掉4個bullet、其餘§7.4段落完全未動；(2) 逐項核對內容——LayoutLM引用（*LayoutLM: Pre-training of Text and Layout for Document Image Understanding*, Xu et al., KDD 2020）全名/作者正確；獨立`Grep`確認`services/`／`repositories/`確實查無Louvain/`community_service`機制（`repositories/kg_repo.py`裡的"Community"命中是Neo4j Community Edition的無關誤報，已排除）；確認`docs/報告/技術導入評估.md`存在但無方案八專節。**驗證全數通過，內容誠實、無溢美用詞、未觸碰production程式碼**。
-
-**⚠️ 重要落差需下次接手注意**：Codex是在main checkout本地`master`（版本落後於本worktree分支，缺本次session稍早完成的§7.2/§7.3更新，見續3/續4段落）上作業的，**不能直接把`a020f58`push上去**——那會讓origin/master的§7.4修好、但§7.2/§7.3又是舊版（TODO未填、RQ2限制條目缺漏）。Claude Code已改為手動把同一段文字**逐字套用**到本worktree分支對應的檔案（commit `8eaabe7`，pytest 1156 passed），本分支現在同時具備§7.2/§7.3/§7.4的完整版本。**main checkout本地`master`上的`a020f58`目前是孤立、未push、內容已被本分支`8eaabe7`涵蓋的多餘commit**——下次接手若要合併本分支進master（比照報告89/續段的既有流程），需注意這一點，避免重複套用或選錯合併方向；若使用者確認`a020f58`已無用途，可以考慮之後在main checkout上用`git reset`處理（**不要自行執行，需使用者同意**，且需先確認main checkout沒有其他未commit異動）。
-
-已push `8eaabe7`到`origin/worktree-sdd-retrieval-comparison`。
-
-## 2026-09-27（續4）：報告91任務書已建立，交付Codex處理§7.4「方案二/四/七/八」補完缺口
-
-延續下方（續3）記錄的缺口——第七章§7.4開頭TODO列出的v1對標文件（`D:\Users\666\Desktop\智慧知識庫\docs\報告\04_對標NotebookLM_不足分析與完全超越方案.md`，另一個獨立專案，不在本repo）「方案二／四／七／八」四項只有名稱、沒有展開說明。Claude Code已直接讀取v1原文全文，確認內容並發現一個重要落差：**方案四（社群自動導讀）在v1裡依賴的`services/community_service.py`（Louvain社群偵測）是v1專案的既有服務，本論文（v2）查無對應機制**，不是「v1已有、v2尚未搬」這麼簡單。另外方案八（RLHF邊權重學習）本論文`01_緒論.md`§1.4.1第5項已有既有查證結論（「缺乏對應學術文獻支撐」），任務書要求Codex沿用不得翻案；方案二/七在§1.4.1也各有一句既有排除說明可交叉引用。
-
-已建立[報告91](docs/報告/91_第七章未來工作方案二四七八補完SDD任務書.md)，內含v1原文四個方案的完整摘錄、逐項查證要求、用詞紅線（禁止把v1行銷語氣或未查證引用數字帶進論文正文）與可直接貼給Codex的指令。**尚未交付執行**，下次接手若使用者確認要推進，直接把報告91 §7的指令貼給Codex即可；本次工作純屬任務書撰寫，未修改任何論文正文或程式碼。
-
-## 2026-09-27（續3）：論文第六、七章空白段落已補齊（純文件，commit `28c2834`，已push）
-
-依 `00_研究追溯對映表.md` 現況（RQ2–RQ6 機制已實作但正式消融實驗未完成），把第六章原本的 §6.1 TODO 量化表與 §6.2.2–6.2.6（RQ2/RQ3/RQ4a-4b/RQ5/RQ6）空白標題，改寫為誠實的機制現況＋缺口說明；第七章 §7.2（TODO：呼應1.3）已依三層貢獻框架（學術研究／系統實作／產品工程）重申實際完成範圍——**RQ1 是本論文唯一完成完整比較實驗閉環的正式研究問題**，其餘五個 RQ 依 §1.3／§1.4.3 事先聲明的條件式範圍，均未完成正式消融，改列入 §7.3／§7.4；同步補上 §7.3 原本缺漏的 RQ2 限制條目。**全部內容基於既有實驗數據（S3、報告72/78/88）與追溯表現況整理，未新增任何實驗、未修改 production 程式碼**。已 push 到 `origin/worktree-sdd-retrieval-comparison`（`bd7ab8f..28c2834`）。**尚未合併進 master**——下次若要合併，比照過去慣例先詳細確認差異範圍。
-
-第六、七章目前仍剩的缺口（非本次範圍，供下次接手參考）：§7.4 開頭「TODO：v1 `04_對標NotebookLM...` 中未納入本論文正式驗證範圍的方案」下列的「方案二／四／七／八」四個項目目前只有名稱、沒有展開說明（v1 文件不在本 worktree，位置見記憶 `reference_zhihuizhishiku.md`），若要補完需先取得 v1 文件內容核實後才能誠實展開，不應憑空杜撰。
-
-## 2026-09-27（續2）：報告90已交付Codex——報告71殘留4筆natural_text的法規原文複核與修正
-
-Claude Code用官方全國法規資料庫（law.moj.gov.tw）逐條核對報告71標記的4筆有疑慮的natural_text，結論跟報告71的機械判斷不一致：**2筆其實是誤判**（`6917546619827179615`受益人案、`1155178801978699636`高溫作業案——現況已經是對的，法條原文本來就沒有那些字，不用修）；**2筆確認需要修正**（`1152927002165041341`第226條語序破碎案、`1152937997281292486`第3條——但問題點跟報告71原判斷不同：「代其辦理居留業務」其實是對的，真正查無出處的是尾段「始得從事就業服務業務」）。詳細查證過程與官方條文引用見[報告90](docs/報告/90_報告71殘留4筆natural_text法規原文複核與修正SDD任務書.md)。
-
-**Codex已完成T1-T4，commit `c6cbe65`（落在main checkout本地`master`，非本worktree分支，尚未push）**。Claude Code已獨立複驗：(1)`git show --stat`確認只動3個檔案（新腳本、`t2_followup_issues.md`、新審計log），未觸碰production程式碼；(2)逐行核對新腳本`scripts/kg/fix_report90_verified_naturalization_facts.py`，compare-and-set guard完整（kg_id/rel_type/natural_text/subject/subject_type/object/object_type皆須吻合才SET，只寫`natural_text`）；(3)`t2_followup_issues.md`新增章節內容忠實、第4筆重新核對後仍誠實標註「查無出處屬排除法、查證強度有限」；(4)**獨立唯讀查詢Neo4j**確認兩筆`natural_text`現況分別為「發生災害時之災害原因調查及檢討防災對策。」與「接受從事本法第四十六條規定工作之外國人委任，代其辦理居留業務。」，跟審計log與task目標值一致；(5)**獨立重跑`python -m pytest tests -q ...`於main checkout，結果同樣1156 passed**。**驗證全數通過，無需修正**。
-
-**已push（2026-09-27）**：main checkout本地`master`原本因與`origin/master`分岔（origin多了`99b004c`）被拒絕push；使用者在main checkout自行執行、Claude Code全程指導（因本worktree session技術上無法對main checkout下git指令，`cd`/`git -C`皆被沙盒擋下）：(1)`git stash push -u -m "report90-rebase-temp-20260927"`暫存既有3筆未commit異動（`53_...`修改稿+2份v1.0 untracked文件）；(2)`git pull --rebase origin master`成功接上`99b004c`；(3)`git push origin master`成功（`99b004c..534cb71`）；(4)`git stash apply <sha>`（非pop）＋核對SHA後`git stash drop 'stash@{0}'`精準還原並清除暫存,3筆既有異動完好無損、其餘4個歷史stash未受影響。**main checkout本地master與origin/master現在都在`534cb71`**。報告71殘留的17筆需人工複核、5筆建議排除案例仍未處理，非本任務範圍。
-
-## 2026-09-27（續）：報告88人工裁決已完成——`18-Q6`算對／`57-DIST2`算錯，落差校正為−7題
-
-使用者已對報告88的兩題給出最終判定（詳見報告88 §3）：`18-Q6`**算對**（評分器假陰性，語意等同gold）；`57-DIST2`**算錯**（答案內部自相矛盾，把地方級好人好事代表天數誤講成全國級，是規則R的表面判準沒能偵測到的實質內容錯誤）。已回頭更新：
-
-- 第六章 `docs/論文/06_結果與討論.md` §6.2.1（新增人工判定段落，落差校正為 **−7題**，介於原始−8與規則R的−6之間）與 §6.4（限制討論補充規則R的盲點證據）。
-- 第七章 `docs/論文/07_結論與未來工作.md` GAP-S3-02（標註已對兩題完成人工判定，其餘7題落差仍是未來工作）。
-- 報告88本身 §3 填入判定表與理由。
-
-**尚未commit/push**，只動了這三份文件，無production程式碼異動。下次接手：若使用者同意，commit這三個檔案；HANDOVER開頭「下一步待決定」第1項（報告88裁決）已解決，可移除。
+**下次接手建議**：
+- 第六、七章目前**已無已知的空白/TODO段落**。若要進一步深化RQ1論證，B2（Agentic RAG強基準）是目前唯一還沒做的正式對照組。
+- 報告71殘留的17筆需人工複核、5筆建議排除案例，優先度未定，待使用者提出。
+- 其餘長期未決事項見下方（續）以前的歷史段落與檔案末尾附錄。
 
 ## 2026-09-27：報告75-89批次收尾 + worktree分支合併master並反向fast-forward——四處版控狀態已統一於同一commit
 
