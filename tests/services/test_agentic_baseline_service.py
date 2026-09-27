@@ -2,6 +2,8 @@
 
 用假的 retrieve／reflect 注入函式，不碰 LLM／索引。
 """
+import pytest
+
 from services import agentic_baseline_service as svc
 from services.agentic_baseline_service import ReflectVerdict
 
@@ -141,4 +143,105 @@ def test_evidence_deduped_by_source_and_chunk_index():
 
     result = svc.gather_evidence_agentic("問一？問二？", retrieve, reflect)
     assert len(result.evidence) == 2  # 兩子問題各回傳相同兩塊 → 去重成 2
+    assert result.context_char_len == sum(len(l) for l in result.context_lines)
+
+
+# ── gather_evidence_agentic_async：與同步版一一對應 ────────────────
+# harness 實際呼叫的是這個版本（retrieve/reflect 需要 await，例如內部要
+# 對每個精煉後的 query 重新 embed）。邏輯與同步版共用，這裡只驗證 await
+# 路徑本身沒有壞掉，不重複窮舉同步版已覆蓋過的所有規則式判準組合。
+
+@pytest.mark.asyncio
+async def test_async_simple_path_single_retrieval_no_reflect():
+    calls = []
+
+    async def retrieve(q, *, top_k):
+        calls.append((q, top_k))
+        return [_hit("N01", 0)]
+
+    async def reflect(sq, ev):  # 不該被呼叫
+        raise AssertionError("simple 路徑不應反思")
+
+    result = await svc.gather_evidence_agentic_async("婚假幾天？", retrieve, reflect)
+    assert result.complexity == "simple"
+    assert result.retrieval_calls == 1
+    assert result.reflect_calls == 0
+    assert result.context_lines == ["【來源：N01，第0段】\n內容"]
+
+
+@pytest.mark.asyncio
+async def test_async_complex_sufficient_first_round_one_retrieve_per_subq():
+    async def retrieve(q, *, top_k):
+        return [_hit("N01", 0)]
+
+    async def reflect(sq, ev):
+        return ReflectVerdict(sufficient=True)
+
+    result = await svc.gather_evidence_agentic_async("要滿幾個月？發幾個月？", retrieve, reflect)
+    assert result.complexity == "complex"
+    assert result.sub_questions == ["要滿幾個月？", "發幾個月？"]
+    assert result.retrieval_calls == 2
+    assert result.reflect_calls == 2
+    assert result.rounds_per_subquestion == [1, 1]
+
+
+@pytest.mark.asyncio
+async def test_async_insufficient_refines_query_with_missing_then_retries():
+    seen_queries = []
+
+    async def retrieve(q, *, top_k):
+        seen_queries.append(q)
+        return [_hit("N01", len(seen_queries))]
+
+    n = {"calls": 0}
+
+    async def reflect(sq, ev):
+        n["calls"] += 1
+        return ReflectVerdict(sufficient=n["calls"] % 2 == 0, missing="核銷期限")
+
+    result = await svc.gather_evidence_agentic_async("補助多少？期限多久？", retrieve, reflect)
+    assert result.complexity == "complex"
+    assert any("核銷期限" in q for q in seen_queries)
+    assert result.rounds_per_subquestion == [2, 2]
+
+
+@pytest.mark.asyncio
+async def test_async_respects_max_rounds():
+    async def retrieve(q, *, top_k):
+        return [_hit("N01", 0)]
+
+    async def reflect(sq, ev):
+        return ReflectVerdict(sufficient=False, missing="更多")
+
+    result = await svc.gather_evidence_agentic_async(
+        "問一？問二？", retrieve, reflect, max_rounds=3, retrieval_budget=99
+    )
+    assert result.rounds_per_subquestion == [3, 3]
+    assert result.retrieval_calls == 6
+
+
+@pytest.mark.asyncio
+async def test_async_respects_retrieval_budget():
+    async def retrieve(q, *, top_k):
+        return [_hit("N01", 0)]
+
+    async def reflect(sq, ev):
+        return ReflectVerdict(sufficient=False, missing="更多")
+
+    result = await svc.gather_evidence_agentic_async(
+        "問一？問二？問三？", retrieve, reflect, max_rounds=5, retrieval_budget=4
+    )
+    assert result.retrieval_calls == 4
+
+
+@pytest.mark.asyncio
+async def test_async_evidence_deduped_by_source_and_chunk_index():
+    async def retrieve(q, *, top_k):
+        return [_hit("N01", 0, "同一塊"), _hit("N02", 1, "另一塊")]
+
+    async def reflect(sq, ev):
+        return ReflectVerdict(sufficient=True)
+
+    result = await svc.gather_evidence_agentic_async("問一？問二？", retrieve, reflect)
+    assert len(result.evidence) == 2
     assert result.context_char_len == sum(len(l) for l in result.context_lines)

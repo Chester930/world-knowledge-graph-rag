@@ -200,3 +200,81 @@ def gather_evidence_agentic(
         reflect_calls=reflect_calls,
         rounds_per_subquestion=rounds_per_sq,
     )
+
+
+# ── 主入口（async 孿生版）──────────────────────────────────────────
+#
+# `gather_evidence_agentic()` 是同步的：現有 13 個單元測試用同步假函式
+# 注入，維持原樣不動。但實際 harness 呼叫端（`run_rq1_comparison.py`）
+# 每個子問題／每輪都要對「不同的 query」重新 embed（`emb.encode()` 是
+# async），而 embed 動作必須發生在 `retrieve()` 內部才能對每個精煉後的
+# query 各自算一次向量。同步函式內不能 `await`，因此另立這個 async
+# 孿生版本，供 `retrieve`/`reflect` 是 async callable 的呼叫端使用；
+# 邏輯與同步版逐行對應，僅把兩個呼叫點改成 `await`。
+
+async def gather_evidence_agentic_async(
+    question: str,
+    retrieve,
+    reflect,
+    *,
+    entity_count: int | None = None,
+    max_rounds: int = _MAX_ROUNDS_DEFAULT,
+    per_round_top_k: int = _PER_ROUND_TOP_K_DEFAULT,
+    retrieval_budget: int = _RETRIEVAL_BUDGET_DEFAULT,
+) -> AgenticResult:
+    """`gather_evidence_agentic()` 的 async 版本。
+
+    參數
+    ----
+    retrieve : `async (query: str, *, top_k: int) -> list[dict]`。
+    reflect  : `async (subquestion: str, evidence_texts: list[str]) -> ReflectVerdict`。
+    其餘參數與回傳值語意與同步版完全相同。
+    """
+    complexity = route_complexity(question, entity_count=entity_count)
+    pool: list[dict] = []
+    seen: set = set()
+    retrieval_calls = 0
+    reflect_calls = 0
+
+    if complexity == "simple":
+        hits = await retrieve(question, top_k=per_round_top_k)
+        retrieval_calls += 1
+        _merge_evidence(pool, seen, hits)
+        return AgenticResult(
+            context_lines=build_context_lines(pool),
+            complexity=complexity,
+            sub_questions=[question],
+            evidence=pool,
+            retrieval_calls=retrieval_calls,
+            reflect_calls=reflect_calls,
+            rounds_per_subquestion=[1],
+        )
+
+    sub_questions = split_into_subquestions(question)
+    rounds_per_sq: list[int] = []
+    for sub_q in sub_questions:
+        query = sub_q
+        rounds = 0
+        while rounds < max_rounds and retrieval_calls < retrieval_budget:
+            hits = await retrieve(query, top_k=per_round_top_k)
+            retrieval_calls += 1
+            rounds += 1
+            _merge_evidence(pool, seen, hits)
+
+            verdict = await reflect(sub_q, [h["chunk_text"] for h in pool])
+            reflect_calls += 1
+            if verdict.sufficient:
+                break
+            missing = (verdict.missing or "").strip()
+            query = f"{sub_q} {missing}".strip() if missing else sub_q
+        rounds_per_sq.append(rounds)
+
+    return AgenticResult(
+        context_lines=build_context_lines(pool),
+        complexity=complexity,
+        sub_questions=sub_questions,
+        evidence=pool,
+        retrieval_calls=retrieval_calls,
+        reflect_calls=reflect_calls,
+        rounds_per_subquestion=rounds_per_sq,
+    )

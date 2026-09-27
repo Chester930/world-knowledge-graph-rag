@@ -26,6 +26,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import re
 import statistics
 import subprocess
 import sys
@@ -53,7 +54,7 @@ from models.document import ChatRequest
 from models.eval_schema import AtomicGoldFact, EvaluationDataset, RetrievedEvidence, TestCase
 from repositories.kg_repo import KGRepository
 from routers import agent
-from services import baseline_rag_service, document_record_service
+from services import agentic_baseline_service, baseline_rag_service, document_record_service
 from services.atomic_scorer import AtomicScorer
 from services.claim_scope_auditor import audit_answer_scope
 from services.cost_analyzer import CostAnalyzer
@@ -219,6 +220,61 @@ def _build_kg_chat_request(
     )
 
 
+_B2_REFLECT_EVIDENCE_CHAR_LIMIT = 4000  # 避免多輪反思的prompt無限累積長度
+
+
+def _b2_strip_json_fence(raw: str) -> str:
+    cleaned = raw.strip()
+    fence = re.match(r"^```(?:json)?\s*(.*?)\s*```$", cleaned, re.DOTALL | re.IGNORECASE)
+    return fence.group(1).strip() if fence else cleaned
+
+
+def _b2_reflect_prompt(sub_question: str, evidence_texts: list[str]) -> str:
+    evidence_block = "\n---\n".join(evidence_texts) if evidence_texts else "（目前沒有任何檢索到的證據）"
+    if len(evidence_block) > _B2_REFLECT_EVIDENCE_CHAR_LIMIT:
+        evidence_block = evidence_block[:_B2_REFLECT_EVIDENCE_CHAR_LIMIT] + "…（已截斷）"
+    return (
+        "你是一個檢索是否足夠的判斷器。請判斷下列「目前已檢索到的證據」是否足以完整回答"
+        "「子問題」；若不足，請指出還缺什麼關鍵資訊，用於下一輪檢索查詢精煉。\n\n"
+        f"子問題：{sub_question}\n\n"
+        f"目前已檢索到的證據：\n{evidence_block}\n\n"
+        '請只輸出 JSON，格式：{"sufficient": true 或 false, '
+        '"missing": "若不足，用一句話描述還缺什麼；若足夠則空字串"}'
+    )
+
+
+async def _b2_reflect(
+    llm_provider, sub_question: str, evidence_texts: list[str]
+) -> agentic_baseline_service.ReflectVerdict:
+    """B2（報告36 §7）Self-RAG 式反思：判斷目前證據是否足以回答子問題。
+
+    這是 `gather_evidence_agentic_async()` 的 `reflect` 依賴注入的真實 LLM
+    實作；用「generator 固定」那顆模型（呼叫端傳入的 `llm_provider`，即
+    `_CountingLLM` 包裝的 counting provider），確保 B2 每題的 LLM 呼叫數
+    能被既有的 `_CountingLLM` 正確累計（報告36 §5 線上效率欄）。
+
+    LLM 輸出解析失敗（JSON parse 失敗、缺欄位、非 dict）時，安全預設為
+    `sufficient=True` 直接結束該子問題的檢索迴圈——報告36 §3 的終止條件是
+    `max_rounds` 或 `sufficient=True` 或總檢索次數達上限三者任一即停止；
+    反思本身失敗屬不可信號，保守選擇「停止繼續檢索」而非「假裝還要繼續」，
+    避免無限耗用 `retrieval_budget`。沒有任何證據（第一輪檢索前）時視為
+    「明確不足」，用子問題本身當缺口精煉下一輪查詢。
+    """
+    if not evidence_texts:
+        return agentic_baseline_service.ReflectVerdict(sufficient=False, missing=sub_question)
+    try:
+        raw = await llm_provider.generate_json(_b2_reflect_prompt(sub_question, evidence_texts))
+        payload = json.loads(_b2_strip_json_fence(raw))
+        if not isinstance(payload, dict):
+            raise ValueError("B2 reflect 輸出必須是 JSON object")
+        sufficient = bool(payload.get("sufficient", True))
+        missing = str(payload.get("missing", "") or "").strip()
+        return agentic_baseline_service.ReflectVerdict(sufficient=sufficient, missing=missing)
+    except (json.JSONDecodeError, ValueError, TypeError, AttributeError) as exc:
+        print(f"[B2] reflect 解析失敗，安全預設 sufficient=True 結束本子問題：{exc}", file=sys.stderr)
+        return agentic_baseline_service.ReflectVerdict(sufficient=True, missing="")
+
+
 async def _run_single_query(
     tc: TestCase,
     arm: str,
@@ -253,6 +309,7 @@ async def _run_single_query(
     retrieved_texts = []
     chunk_ids = []
     fact_ids = []
+    agentic_trace: dict | None = None
 
     if raw_arm == "D":
         r = await _drain_chat(ChatRequest(question=tc.question, kg_id=kg_id, use_svo=False))
@@ -268,6 +325,58 @@ async def _run_single_query(
         context_lines = baseline_rag_service.build_context_lines(hits)
         retrieved_texts = [h.get("chunk_text", "") for h in hits]
         chunk_ids = [f"{h.get('source')}_{h.get('chunk_index')}" for h in hits]
+
+        gen = None
+        async for item in agent._generate_from_context_lines(
+            tc.question, history=None, cfg=cfg,
+            llm_provider=counting,
+            judge_llm_provider=judge_counting or counting,
+            kg_id=kg_id, use_svo=True, context_lines=context_lines,
+        ):
+            if isinstance(item, agent._GenerationResult):
+                gen = item
+        r = {
+            "answer": gen.final_answer if gen else "",
+            "error": None,
+            "regenerated": gen.regenerated if gen else None,
+            "triples": [],
+            "facts": [],
+            "grounding": [
+                {"statement": c.statement, "is_claim": c.is_claim, "supported": c.supported}
+                for c in (gen.grounding if gen else [])
+            ],
+        }
+    elif raw_arm == "B2":
+        # B2＝Agentic RAG強基準（報告36）：在B1檢索前端上包一層single-agent
+        # 多輪迴圈（複雜度路由→分解→逐子問題〔檢索→反思→依缺口精煉再檢索〕）。
+        # 最終context_lines餵進跟B0/B1完全相同的_generate_from_context_lines()
+        # ——生成端逐位元相同是§3.8單一變因控制的硬需求，B2只換檢索前端。
+        vectors, meta = baseline_index
+        emb = get_embedding_provider()
+
+        async def _b2_retrieve(query: str, *, top_k: int) -> list[dict]:
+            q_vec = await emb.encode(query)
+            return baseline_rag_service.search_baseline(
+                query, q_vec, vectors, meta,
+                top_k=top_k, hybrid=True, reranker=reranker,
+            )
+
+        async def _b2_reflect_bound(sub_q: str, evidence_texts: list[str]):
+            return await _b2_reflect(counting, sub_q, evidence_texts)
+
+        agentic_result = await agentic_baseline_service.gather_evidence_agentic_async(
+            tc.question, _b2_retrieve, _b2_reflect_bound,
+        )
+        context_lines = agentic_result.context_lines
+        retrieved_texts = [h.get("chunk_text", "") for h in agentic_result.evidence]
+        chunk_ids = [f"{h.get('source')}_{h.get('chunk_index')}" for h in agentic_result.evidence]
+        agentic_trace = {
+            "complexity": agentic_result.complexity,
+            "sub_question_count": len(agentic_result.sub_questions),
+            "retrieval_calls": agentic_result.retrieval_calls,
+            "reflect_calls": agentic_result.reflect_calls,
+            "rounds_per_subquestion": agentic_result.rounds_per_subquestion,
+        }
 
         gen = None
         async for item in agent._generate_from_context_lines(
@@ -419,6 +528,7 @@ async def _run_single_query(
         "lineage": full_lineage.model_dump(),
         "failure_attribution": full_lineage.failure_attribution,
         "deterministic_guard": guard_result.model_dump(),
+        "agentic_trace": agentic_trace,
     }
 
 
@@ -702,7 +812,7 @@ async def _run_harness(args, out_dir: Path, test_cases: list[TestCase], manifest
 
         raw_arms = {ARM_ALIAS_MAP.get(arm, arm) for arm in args.arms}
         baseline_index = None
-        if raw_arms.intersection({"B0", "B1"}):
+        if raw_arms.intersection({"B0", "B1", "B2"}):
             baseline_index = _load_scoped_baseline_index(
                 UUID(args.kg_id), args.chunk_size, sources,
             )

@@ -167,6 +167,29 @@ class CostAnalyzer:
                 avg_tokens_per_query=650.0,  # Fact Context 壓縮比 Chunk 短
                 estimated_cost_per_1k_queries_usd=0.182,
             )
+        elif arm == "B2":
+            # B2＝Agentic RAG強基準（報告36）：離線建構成本比照B1，重用同一份
+            # chunk索引，只多包一層prompt-based agentic迴圈，增量≈0（無新的
+            # 離線建庫步驟）。serving latency/avg_tokens估高一些反映每題可能
+            # 多輪檢索＋反思呼叫；**這些serving數字跟B0/B1/M4區段一樣是工程
+            # 估計值，不是實測**——正式數字務必用`run_rq1_comparison.py --arms
+            # B2`的真實跑測結果覆蓋（見報告93 pilot），不可直接引用本函式。
+            build = BuildCost(
+                total_ingestion_time_hours=0.08,  # 同B1，重用同一份chunk索引
+                storage_footprint_mb=3.8,
+                raw_text_mb=raw_size_mb,
+                storage_multiplier=2.33,
+                total_build_tokens=500_000,
+            )
+            maint = MaintenanceCost(delta_update_latency_sec=0.4, graph_update_ops=0)
+            serving = ServingCost(
+                arm=arm,
+                query_count=0,
+                latency_p50_ms=900.0,   # 多輪檢索+反思估計，非實測
+                latency_p95_ms=2600.0,
+                avg_tokens_per_query=2200.0,  # 多輪累積context，非實測
+                estimated_cost_per_1k_queries_usd=0.560,
+            )
         else:  # M4, K, Full KG
             # Full KG with BFS and Lineage
             build = BuildCost(
