@@ -1,0 +1,40 @@
+{
+  "operation": "report90_manual_naturalization_fix",
+  "database": "neo4j",
+  "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+  "target_count": 2,
+  "target_edge_ids": [
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165041341",
+    "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152937997281292486"
+  ],
+  "entries": [
+    {
+      "timestamp_utc": "2026-09-27T04:35:01.752525Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152927002165041341",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "發生災害時之 災害原因調查及檢討防災對策 左列高壓氣體製造安全有關事項",
+      "new_value": "發生災害時之災害原因調查及檢討防災對策。",
+      "actual_before_value": "發生災害時之 災害原因調查及檢討防災對策 左列高壓氣體製造安全有關事項",
+      "actual_after_value": "發生災害時之災害原因調查及檢討防災對策。"
+    },
+    {
+      "timestamp_utc": "2026-09-27T04:35:02.354573Z",
+      "edge_id": "5:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:1152937997281292486",
+      "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+      "status": "written_verified",
+      "old_value": "接受從事本法第四十六條規定工作之外國人委任 代其辦理居留業務 始得從事就業服務業務",
+      "new_value": "接受從事本法第四十六條規定工作之外國人委任，代其辦理居留業務。",
+      "actual_before_value": "接受從事本法第四十六條規定工作之外國人委任 代其辦理居留業務 始得從事就業服務業務",
+      "actual_after_value": "接受從事本法第四十六條規定工作之外國人委任，代其辦理居留業務。"
+    }
+  ],
+  "started_at_utc": "2026-09-27T04:34:59.440275Z",
+  "apply_requested_at_utc": "2026-09-27T04:34:59.440288Z",
+  "apply_mode": true,
+  "updated_at_utc": "2026-09-27T04:35:02.354587Z",
+  "result_counts": {
+    "written_verified": 2
+  },
+  "completed_at_utc": "2026-09-27T04:35:02.355056Z"
+}
