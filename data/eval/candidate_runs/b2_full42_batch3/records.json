@@ -1,0 +1,2362 @@
+[
+  {
+    "question_id": "57-COREF3",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單內容：\n\n1. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的天數限制是否與一般事假相同。事實清單中只提到勞工為親自照顧家庭成員可請事假，但並未詳細說明其天數限制。\n\n2. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的工資規定是否與一般事假相同。事實清單中提到勞工因親自照顧家庭成員依第七條規定請事假，但並未說明其工資給付方式。\n\n3. 資料明確記載，勞工為親自照顧家庭成員可請事假，且可以選擇以小時為單位請假。事實清單中第7條提到：「勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。」\n\n因此，根據提供的事實清單內容，勞工為了親自照顧家庭成員而請事假可以選擇以小時為單位請假。至於天數限制及工資給付方式是否與一般事假相同，則未有明確記載。",
+    "error": null,
+    "latency_s": 118.64,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 717,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+      ],
+      "missing_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['一年內合計不得超過十四日。事假期間不給工資']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF3",
+      "arm": "M1",
+      "question": "勞工為了親自照顧家庭成員而請事假，天數限制、工資規定，跟一般事假一樣嗎？可以用小時計算嗎？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 118640.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_19",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2175,
+        "snr": 0.0322,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 625,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 118640.0,
+        "raw_draft": "根據提供的事實清單內容：\n\n1. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的天數限制是否與一般事假相同。事實清單中只提到勞工為親自照顧家庭成員可請事假，但並未詳細說明其天數限制。\n\n2. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的工資規定是否與一般事假相同。事實清單中提到勞工因親自照顧家庭成員依第七條規定請事假，但並未說明其工資給付方式。\n\n3. 資料明確記載，勞工為親自照顧家庭成員可請事假，且可以選擇以小時為單位請假。事實清單中第7條提到：「勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。」\n\n因此，根據提供的事實清單內容，勞工為了親自照顧家庭成員而請事假可以選擇以小時為單位請假。至於天數限制及工資給付方式是否與一般事假相同，則未有明確記載。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容：\n\n1. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的天數限制是否與一般事假相同。事實清單中只提到勞工為親自照顧家庭成員可請事假，但並未詳細說明其天數限制。\n\n2. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的工資規定是否與一般事假相同。事實清單中提到勞工因親自照顧家庭成員依第七條規定請事假，但並未說明其工資給付方式。\n\n3. 資料明確記載，勞工為親自照顧家庭成員可請事假，且可以選擇以小時為單位請假。事實清單中第7條提到：「勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。」\n\n因此，根據提供的事實清單內容，勞工為了親自照顧家庭成員而請事假可以選擇以小時為單位請假。至於天數限制及工資給付方式是否與一般事假相同，則未有明確記載。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['一年內合計不得超過十四日。事假期間不給工資']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['一年內合計不得超過十四日。事假期間不給工資'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單內容：\n\n1. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的天數限制是否與一般事假相同。事實清單中提到勞工為親自照顧家庭成員可以請事假，但並未詳細說明其天數限制。\n\n2. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的工資規定是否與一般事假相同。事實清單中提到事假期間不給工資，但對於特定情況如親自照顧家庭成員的情況下是否有不同規定並未說明。\n\n3. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假是否可以用小時計算。事實清單中提到事假期間不給工資，但對於請假單位的細節並未提及。\n\n因此，根據提供的資訊，無法確定勞工為了親自照顧家庭成員而請事假的天數限制、工資規定以及請假單位是否與一般事假相同。",
+    "error": null,
+    "latency_s": 111.89,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 695,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+      ],
+      "missing_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['一年內合計不得超過十四日。事假期間不給工資']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF3",
+      "arm": "M2",
+      "question": "勞工為了親自照顧家庭成員而請事假，天數限制、工資規定，跟一般事假一樣嗎？可以用小時計算嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 111890.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2156,
+        "snr": 0.0325,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 614,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 111890.0,
+        "raw_draft": "根據提供的事實清單內容：\n\n1. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的天數限制是否與一般事假相同。事實清單中提到勞工為親自照顧家庭成員可以請事假，但並未詳細說明其天數限制。\n\n2. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的工資規定是否與一般事假相同。事實清單中提到事假期間不給工資，但對於特定情況如親自照顧家庭成員的情況下是否有不同規定並未說明。\n\n3. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假是否可以用小時計算。事實清單中提到事假期間不給工資，但對於請假單位的細節並未提及。\n\n因此，根據提供的資訊，無法確定勞工為了親自照顧家庭成員而請事假的天數限制、工資規定以及請假單位是否與一般事假相同。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容：\n\n1. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的天數限制是否與一般事假相同。事實清單中提到勞工為親自照顧家庭成員可以請事假，但並未詳細說明其天數限制。\n\n2. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假的工資規定是否與一般事假相同。事實清單中提到事假期間不給工資，但對於特定情況如親自照顧家庭成員的情況下是否有不同規定並未說明。\n\n3. 資料未明確記載，無法確認勞工為了親自照顧家庭成員而請事假是否可以用小時計算。事實清單中提到事假期間不給工資，但對於請假單位的細節並未提及。\n\n因此，根據提供的資訊，無法確定勞工為了親自照顧家庭成員而請事假的天數限制、工資規定以及請假單位是否與一般事假相同。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['一年內合計不得超過十四日。事假期間不給工資']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['一年內合計不得超過十四日。事假期間不給工資'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF3",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，勞工為了親自照顧家庭成員而請事假的天數限制、工資規定以及是否可以用小時計算如下：\n\n1. **天數限制**：\n   - 根據勞動基準法第7條，勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，一年內合計不得超過十四日。因此，勞工為了親自照顧家庭成員而請的事假天數限制與一般事假相同，即一年內合計不得超過十四日。\n\n2. **工資規定**：\n   - 根據勞動基準法第7條，事假期間不給工資。因此，勞工在請事假期間的工資不會因為照顧家庭成員而有所調整或補發。\n\n3. **是否可以用小時計算**：\n   - 根據勞動基準法第7條，勞工為親自照顧家庭成員請的事假可以選擇以小時為單位。因此，勞工在請事假期間可以按照小時來申請請假。\n\n綜上所述，勞工為了親自照顧家庭成員而請的事假天數限制、工資規定以及是否可以用小時計算與一般事假相同，但需要注意的是，事假期間不給工資，且可以選擇以小時為單位請假。",
+    "error": null,
+    "latency_s": 71.58,
+    "llm_calls": 9,
+    "generation_llm_calls": 9,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1348,
+    "atomic_score": {
+      "supported_spans": [
+        "一年內合計不得超過十四日。事假期間不給工資",
+        "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF3",
+      "arm": "B2",
+      "question": "勞工為了親自照顧家庭成員而請事假，天數限制、工資規定，跟一般事假一樣嗎？可以用小時計算嗎？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 71580.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_21",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_15",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030001_勞動基準法_14",
+          "N0090025_就業促進津貼實施辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4359,
+        "snr": 0.0161,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1244,
+        "retained_exact_spans": [
+          "一年內合計不得超過十四日。事假期間不給工資",
+          "勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 71580.0,
+        "raw_draft": "根據提供的事實清單，勞工為了親自照顧家庭成員而請事假的天數限制、工資規定以及是否可以用小時計算如下：\n\n1. **天數限制**：\n   - 根據勞動基準法第7條，勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，一年內合計不得超過十四日。因此，勞工為了親自照顧家庭成員而請的事假天數限制與一般事假相同，即一年內合計不得超過十四日。\n\n2. **工資規定**：\n   - 根據勞動基準法第7條，事假期間不給工資。因此，勞工在請事假期間的工資不會因為照顧家庭成員而有所調整或補發。\n\n3. **是否可以用小時計算**：\n   - 根據勞動基準法第7條，勞工為親自照顧家庭成員請的事假可以選擇以小時為單位。因此，勞工在請事假期間可以按照小時來申請請假。\n\n綜上所述，勞工為了親自照顧家庭成員而請的事假天數限制、工資規定以及是否可以用小時計算與一般事假相同，但需要注意的是，事假期間不給工資，且可以選擇以小時為單位請假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，勞工為了親自照顧家庭成員而請事假的天數限制、工資規定以及是否可以用小時計算如下：\n\n1. **天數限制**：\n   - 根據勞動基準法第7條，勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，一年內合計不得超過十四日。因此，勞工為了親自照顧家庭成員而請的事假天數限制與一般事假相同，即一年內合計不得超過十四日。\n\n2. **工資規定**：\n   - 根據勞動基準法第7條，事假期間不給工資。因此，勞工在請事假期間的工資不會因為照顧家庭成員而有所調整或補發。\n\n3. **是否可以用小時計算**：\n   - 根據勞動基準法第7條，勞工為親自照顧家庭成員請的事假可以選擇以小時為單位。因此，勞工在請事假期間可以按照小時來申請請假。\n\n綜上所述，勞工為了親自照顧家庭成員而請的事假天數限制、工資規定以及是否可以用小時計算與一般事假相同，但需要注意的是，事假期間不給工資，且可以選擇以小時為單位請假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n第 2 條 警察人員特別休假辦法中規定：\n一、當選直轄市、縣（市）級模範警察或好人好事代表者，給予一至三日之特別休假。\n\n第 3 條 警察人員特別休假辦法中規定：\n二、當選全國性模範警察者，給予二至五日之特別休假。\n三、當選全國性好人好事代表者，給予二至五日之特別休假。\n\n根據上述事實清單，可以得知：\n\n1. 警察當選「直轄市」模範警察，可以獲得一至三日的特別休假。\n2. 警察當選「全國性」模範警察，可以獲得二至五日的特別休假。\n\n因此，當選「直轄市」模範警察與當選「全國性」模範警察所獲得的特別休假天數不同。前者為一至三日，後者為二至五日。",
+    "error": null,
+    "latency_s": 67.59,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 647,
+    "atomic_score": {
+      "supported_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "當選全國性模範警察者",
+        "給予一至三日之特別休假",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 4/4 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST1",
+      "arm": "M1",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 67590.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1981,
+        "snr": 0.0278,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 576,
+        "retained_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 67590.0,
+        "raw_draft": "根據提供的事實清單：\n\n第 2 條 警察人員特別休假辦法中規定：\n一、當選直轄市、縣（市）級模範警察或好人好事代表者，給予一至三日之特別休假。\n\n第 3 條 警察人員特別休假辦法中規定：\n二、當選全國性模範警察者，給予二至五日之特別休假。\n三、當選全國性好人好事代表者，給予二至五日之特別休假。\n\n根據上述事實清單，可以得知：\n\n1. 警察當選「直轄市」模範警察，可以獲得一至三日的特別休假。\n2. 警察當選「全國性」模範警察，可以獲得二至五日的特別休假。\n\n因此，當選「直轄市」模範警察與當選「全國性」模範警察所獲得的特別休假天數不同。前者為一至三日，後者為二至五日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n第 2 條 警察人員特別休假辦法中規定：\n一、當選直轄市、縣（市）級模範警察或好人好事代表者，給予一至三日之特別休假。\n\n第 3 條 警察人員特別休假辦法中規定：\n二、當選全國性模範警察者，給予二至五日之特別休假。\n三、當選全國性好人好事代表者，給予二至五日之特別休假。\n\n根據上述事實清單，可以得知：\n\n1. 警察當選「直轄市」模範警察，可以獲得一至三日的特別休假。\n2. 警察當選「全國性」模範警察，可以獲得二至五日的特別休假。\n\n因此，當選「直轄市」模範警察與當選「全國性」模範警察所獲得的特別休假天數不同。前者為一至三日，後者為二至五日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得2至5日的特別休假。\n\n這項資訊來源於《警察人員特別休假辦法》第2條第5款：\n\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n\n根據此規定，當選「直轄市」模範警察可以獲得2至5日的特別休假。這與當選「全國性」模範警察所獲特別休假天數不同，因為當選「全國性」模範警察可獲得較多的特別休假天數（見《警察人員特別休假辦法》第3條）。\n\n因此，答案是：\n- 警察當選「直轄市」模範警察可以獲得2至5日特別休假。\n- 這與當選「全國性」模範警察所獲特別休假天數不同。",
+    "error": null,
+    "latency_s": 58.63,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 634,
+    "atomic_score": {
+      "supported_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [
+        "當選全國性模範警察者",
+        "給予一至三日之特別休假"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 2/4 facts (semantic fallback). Missed essential: ['當選全國性模範警察者', '給予一至三日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST1",
+      "arm": "M2",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 58630.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1963,
+        "snr": 0.028,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 570,
+        "retained_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 58630.0,
+        "raw_draft": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得2至5日的特別休假。\n\n這項資訊來源於《警察人員特別休假辦法》第2條第5款：\n\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n\n根據此規定，當選「直轄市」模範警察可以獲得2至5日的特別休假。這與當選「全國性」模範警察所獲特別休假天數不同，因為當選「全國性」模範警察可獲得較多的特別休假天數（見《警察人員特別休假辦法》第3條）。\n\n因此，答案是：\n- 警察當選「直轄市」模範警察可以獲得2至5日特別休假。\n- 這與當選「全國性」模範警察所獲特別休假天數不同。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得2至5日的特別休假。\n\n這項資訊來源於《警察人員特別休假辦法》第2條第5款：\n\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n\n根據此規定，當選「直轄市」模範警察可以獲得2至5日的特別休假。這與當選「全國性」模範警察所獲特別休假天數不同，因為當選「全國性」模範警察可獲得較多的特別休假天數（見《警察人員特別休假辦法》第3條）。\n\n因此，答案是：\n- 警察當選「直轄市」模範警察可以獲得2至5日特別休假。\n- 這與當選「全國性」模範警察所獲特別休假天數不同。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選全國性模範警察者', '給予一至三日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選全國性模範警察者', '給予一至三日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得二至五日的特別休假。\n\n根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n三、當選全國性模範警察者。\n\n因此，當選「直轄市」模範警察可以獲得的特別休假天數為二至五日。這與當選「全國性」模範警察所獲特別休假天數不同，根據【來源：D0080015_警察人員特別休假辦法，第3條】：\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n三、當選全國性模範警察者。\n\n因此，當選「直轄市」模範警察與當選「全國性」模範警察獲得的特別休假天數不同。",
+    "error": null,
+    "latency_s": 118.68,
+    "llm_calls": 7,
+    "generation_llm_calls": 7,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1051,
+    "atomic_score": {
+      "supported_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "當選全國性模範警察者",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [
+        "給予一至三日之特別休假"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['給予一至三日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST1",
+      "arm": "B2",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 118680.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_19",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0090025_就業促進津貼實施辦法_4",
+          "N0090025_就業促進津貼實施辦法_6"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 3251,
+        "snr": 0.0169,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 950,
+        "retained_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 118680.0,
+        "raw_draft": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得二至五日的特別休假。\n\n根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n三、當選全國性模範警察者。\n\n因此，當選「直轄市」模範警察可以獲得的特別休假天數為二至五日。這與當選「全國性」模範警察所獲特別休假天數不同，根據【來源：D0080015_警察人員特別休假辦法，第3條】：\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n三、當選全國性模範警察者。\n\n因此，當選「直轄市」模範警察與當選「全國性」模範警察獲得的特別休假天數不同。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，警察當選「直轄市」模範警察可以獲得二至五日的特別休假。\n\n根據【來源：D0080015_警察人員特別休假辦法，第2條】：\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n三、當選全國性模範警察者。\n\n因此，當選「直轄市」模範警察可以獲得的特別休假天數為二至五日。這與當選「全國性」模範警察所獲特別休假天數不同，根據【來源：D0080015_警察人員特別休假辦法，第3條】：\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選直轄市、縣（市）級模範警察或好人好事代表者。\n三、當選全國性模範警察者。\n\n因此，當選「直轄市」模範警察與當選「全國性」模範警察獲得的特別休假天數不同。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['給予一至三日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['給予一至三日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 6,
+      "reflect_calls": 6,
+      "rounds_per_subquestion": [
+        1,
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST2",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n第 2 條\n\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n第 3 條\n\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n根據上述事實，警察當選「全國性」好人好事代表可以獲得二至五日的特別休假。而根據第 2 條和第 3 條，當選「直轄市／縣市級」好人好事代表則會獲得一至三日的特別休假。\n\n因此，當選「全國性」好人好事代表與當選「直轄市／縣市級」好人好事代表的天數不一樣。前者可獲得二至五日的特別休假，後者則為一至三日。",
+    "error": null,
+    "latency_s": 77.14,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 677,
+    "atomic_score": {
+      "supported_spans": [
+        "當選全國性好人好事代表者",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "給予一至三日之特別休假"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 2/4 facts (semantic fallback). Missed essential: ['當選直轄市、縣（市）級模範警察或好人好事代表者', '給予一至三日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST2",
+      "arm": "M1",
+      "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 77140.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0090025_就業促進津貼實施辦法_4",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1993,
+        "snr": 0.0286,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 587,
+        "retained_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 77140.0,
+        "raw_draft": "根據提供的事實清單：\n\n第 2 條\n\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n第 3 條\n\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n根據上述事實，警察當選「全國性」好人好事代表可以獲得二至五日的特別休假。而根據第 2 條和第 3 條，當選「直轄市／縣市級」好人好事代表則會獲得一至三日的特別休假。\n\n因此，當選「全國性」好人好事代表與當選「直轄市／縣市級」好人好事代表的天數不一樣。前者可獲得二至五日的特別休假，後者則為一至三日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n第 2 條\n\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n第 3 條\n\n有左列情事之一者，給予二至五日之特別休假：\n一、主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者。\n二、當選全國性模範警察者。\n三、當選全國性好人好事代表者。\n\n根據上述事實，警察當選「全國性」好人好事代表可以獲得二至五日的特別休假。而根據第 2 條和第 3 條，當選「直轄市／縣市級」好人好事代表則會獲得一至三日的特別休假。\n\n因此，當選「全國性」好人好事代表與當選「直轄市／縣市級」好人好事代表的天數不一樣。前者可獲得二至五日的特別休假，後者則為一至三日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選直轄市、縣（市）級模範警察或好人好事代表者', '給予一至三日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選直轄市、縣（市）級模範警察或好人好事代表者', '給予一至三日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。\n\n這段資訊來自【來源：D0080015_警察人員特別休假辦法，第2條】中的一項規定。\n\n而當選「直轄市／縣市級」好人好事代表則根據同一條規範中的第一項獲得一至三日的特別休假。\n\n因此，全國性的好人好事代表與直轄市/縣市級的好人好事代表所獲得的特別休假天數不同。全國性的可以獲得二至五日特別休假，而直轄市/縣市級的好人好事代表則獲得一至三日特別休假。",
+    "error": null,
+    "latency_s": 28.3,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 628,
+    "atomic_score": {
+      "supported_spans": [
+        "當選全國性好人好事代表者",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "給予一至三日之特別休假"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 2/4 facts (semantic fallback). Missed essential: ['當選直轄市、縣（市）級模範警察或好人好事代表者', '給予一至三日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST2",
+      "arm": "M2",
+      "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 28300.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_19",
+          "N0060027_職業安全衛生管理辦法_6"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1956,
+        "snr": 0.0291,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 574,
+        "retained_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 28300.0,
+        "raw_draft": "根據提供的事實清單：\n\n警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。\n\n這段資訊來自【來源：D0080015_警察人員特別休假辦法，第2條】中的一項規定。\n\n而當選「直轄市／縣市級」好人好事代表則根據同一條規範中的第一項獲得一至三日的特別休假。\n\n因此，全國性的好人好事代表與直轄市/縣市級的好人好事代表所獲得的特別休假天數不同。全國性的可以獲得二至五日特別休假，而直轄市/縣市級的好人好事代表則獲得一至三日特別休假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n警察當選「全國性」好人好事代表，可以獲得二至五日的特別休假。\n\n這段資訊來自【來源：D0080015_警察人員特別休假辦法，第2條】中的一項規定。\n\n而當選「直轄市／縣市級」好人好事代表則根據同一條規範中的第一項獲得一至三日的特別休假。\n\n因此，全國性的好人好事代表與直轄市/縣市級的好人好事代表所獲得的特別休假天數不同。全國性的可以獲得二至五日特別休假，而直轄市/縣市級的好人好事代表則獲得一至三日特別休假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選直轄市、縣（市）級模範警察或好人好事代表者', '給予一至三日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選直轄市、縣（市）級模範警察或好人好事代表者', '給予一至三日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST2",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單：\n\n1. 警察當選「全國性」好人好事代表，可以獲得二至五日之特別休假（來源：D0080015_警察人員特別休假辦法，第2條）。\n2. 警察當選「直轄市／縣市級」好人好事代表，可以獲得一至三日之特別休假（來源：D0080015_警察人員特別休假辦法，第2條）。\n\n因此，當選「全國性」好人好事代表的特別休假天數與當選「直轄市／縣市級」的好人好事代表不同。前者可獲得二至五日之特別休假，後者則為一至三日之特別休假。",
+    "error": null,
+    "latency_s": 79.29,
+    "llm_calls": 9,
+    "generation_llm_calls": 9,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1370,
+    "atomic_score": {
+      "supported_spans": [
+        "當選全國性好人好事代表者",
+        "當選直轄市、縣（市）級模範警察或好人好事代表者",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [
+        "給予一至三日之特別休假"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['給予一至三日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST2",
+      "arm": "B2",
+      "question": "警察當選「全國性」好人好事代表，可以獲得幾天特別休假？跟當選「直轄市／縣市級」好人好事代表的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 79290.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_0",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_19",
+          "N0030001_勞動基準法_18",
+          "N0060041_職業災害勞工保護法_4",
+          "N0090025_就業促進津貼實施辦法_4",
+          "N0090002_私立就業服務機構許可及管理辦法_10",
+          "N0090001_就業服務法_6",
+          "N0090001_就業服務法_2",
+          "N0090001_就業服務法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4560,
+        "snr": 0.0125,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1317,
+        "retained_exact_spans": [
+          "當選全國性好人好事代表者",
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 79290.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 警察當選「全國性」好人好事代表，可以獲得二至五日之特別休假（來源：D0080015_警察人員特別休假辦法，第2條）。\n2. 警察當選「直轄市／縣市級」好人好事代表，可以獲得一至三日之特別休假（來源：D0080015_警察人員特別休假辦法，第2條）。\n\n因此，當選「全國性」好人好事代表的特別休假天數與當選「直轄市／縣市級」的好人好事代表不同。前者可獲得二至五日之特別休假，後者則為一至三日之特別休假。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 警察當選「全國性」好人好事代表，可以獲得二至五日之特別休假（來源：D0080015_警察人員特別休假辦法，第2條）。\n2. 警察當選「直轄市／縣市級」好人好事代表，可以獲得一至三日之特別休假（來源：D0080015_警察人員特別休假辦法，第2條）。\n\n因此，當選「全國性」好人好事代表的特別休假天數與當選「直轄市／縣市級」的好人好事代表不同。前者可獲得二至五日之特別休假，後者則為一至三日之特別休假。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['給予一至三日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['給予一至三日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+    "error": null,
+    "latency_s": 94.55,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M1",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 94550.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2241,
+        "snr": 0.0049,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 647,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 94550.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+    "error": null,
+    "latency_s": 82.25,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 620,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 82250.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_2",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0053,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 82250.0,
+        "raw_draft": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+    "error": null,
+    "latency_s": 220.92,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1487,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "B2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 220920.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0030006_勞工請假規則_2",
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_15",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_16",
+          "N0030018_育嬰留職停薪實施辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 5072,
+        "snr": 0.0022,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1443,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 220920.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY2",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。\n\n事實清單中第6條提到：\n\n「休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金。」\n\n但對於獎金的具體金額或計算方式並無進一步說明。",
+    "error": null,
+    "latency_s": 97.56,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 627,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY2",
+      "arm": "M1",
+      "question": "警察特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是多少？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 97560.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2028,
+        "snr": 0.0163,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 591,
+        "retained_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 97560.0,
+        "raw_draft": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。\n\n事實清單中第6條提到：\n\n「休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金。」\n\n但對於獎金的具體金額或計算方式並無進一步說明。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。\n\n事實清單中第6條提到：\n\n「休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金。」\n\n但對於獎金的具體金額或計算方式並無進一步說明。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。",
+    "error": null,
+    "latency_s": 48.59,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 600,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY2",
+      "arm": "M2",
+      "question": "警察特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是多少？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 48590.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_18",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_17",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2007,
+        "snr": 0.0164,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 583,
+        "retained_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 48590.0,
+        "raw_draft": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY2",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。",
+    "error": null,
+    "latency_s": 63.72,
+    "llm_calls": 7,
+    "generation_llm_calls": 7,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 600,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY2",
+      "arm": "B2",
+      "question": "警察特別休假被機關要求銷假之後，法規規定的不休假獎金金額或計算方式是多少？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 63720.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030001_勞動基準法_18",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_17",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2007,
+        "snr": 0.0164,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 583,
+        "retained_exact_spans": [
+          "休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 63720.0,
+        "raw_draft": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，警察特別休假被機關要求銷假之後，法規並未明確規定不休假獎金的金額或計算方式。因此，答案為「資料未明確記載，無法確認」。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['休假期間遇有緊急事故，得隨時令其銷假，並保留其假期或酌發不休假獎金'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 1,
+      "retrieval_calls": 5,
+      "reflect_calls": 5,
+      "rounds_per_subquestion": [
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，對於從事高溫作業的勞工，特殊健康檢查的頻率如下：\n\n1. 未滿四十歲者：每三年一次。\n2. 四十歲以上未滿六十歲者：每年一次或於變更其作業時進行。\n\n因此，根據上述事實清單，從事高溫作業的勞工在不同年齡段的特殊健康檢查頻率有所不同。",
+    "error": null,
+    "latency_s": 30.0,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 664,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR1",
+      "arm": "M1",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 30000.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_9",
+          "N0060027_職業安全衛生管理辦法_20"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2182,
+        "snr": 0.0229,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 633,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 30000.0,
+        "raw_draft": "根據提供的事實清單，對於從事高溫作業的勞工，特殊健康檢查的頻率如下：\n\n1. 未滿四十歲者：每三年一次。\n2. 四十歲以上未滿六十歲者：每年一次或於變更其作業時進行。\n\n因此，根據上述事實清單，從事高溫作業的勞工在不同年齡段的特殊健康檢查頻率有所不同。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，對於從事高溫作業的勞工，特殊健康檢查的頻率如下：\n\n1. 未滿四十歲者：每三年一次。\n2. 四十歲以上未滿六十歲者：每年一次或於變更其作業時進行。\n\n因此，根據上述事實清單，從事高溫作業的勞工在不同年齡段的特殊健康檢查頻率有所不同。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單內容，高溫作業的勞工特殊健康檢查之頻率並未明確記載。因此，答案為：資料未明確記載，無法確認。\n\n事實清單中提到第19條規定了對於高溫度、異常氣壓、高架、精密或重體力勞動作業應每年或於變更其作業時實施特殊健康檢查，但並未明確指出高溫作業的具體檢查頻率。",
+    "error": null,
+    "latency_s": 91.14,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 662,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR1",
+      "arm": "M2",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 91140.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_9",
+          "N0060022_勞工健康保護規則_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2197,
+        "snr": 0.0228,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 629,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 91140.0,
+        "raw_draft": "根據提供的事實清單內容，高溫作業的勞工特殊健康檢查之頻率並未明確記載。因此，答案為：資料未明確記載，無法確認。\n\n事實清單中提到第19條規定了對於高溫度、異常氣壓、高架、精密或重體力勞動作業應每年或於變更其作業時實施特殊健康檢查，但並未明確指出高溫作業的具體檢查頻率。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，高溫作業的勞工特殊健康檢查之頻率並未明確記載。因此，答案為：資料未明確記載，無法確認。\n\n事實清單中提到第19條規定了對於高溫度、異常氣壓、高架、精密或重體力勞動作業應每年或於變更其作業時實施特殊健康檢查，但並未明確指出高溫作業的具體檢查頻率。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單內容，高溫作業的勞工特殊健康檢查之頻率並未明確記載。因此，答案為：資料未明確記載，無法確認。\n\n事實清單中提到第19條規定了對於高溫度、異常氣壓、高架、精密或重體力勞動作業應每年或於變更其作業時實施特殊健康檢查，但並未明確指出高溫作業的具體檢查頻率。",
+    "error": null,
+    "latency_s": 81.36,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 662,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/2 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR1",
+      "arm": "B2",
+      "question": "高溫作業的勞工多久要做一次特殊健康檢查？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 81360.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_9",
+          "N0060022_勞工健康保護規則_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2197,
+        "snr": 0.0228,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 629,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 81360.0,
+        "raw_draft": "根據提供的事實清單內容，高溫作業的勞工特殊健康檢查之頻率並未明確記載。因此，答案為：資料未明確記載，無法確認。\n\n事實清單中提到第19條規定了對於高溫度、異常氣壓、高架、精密或重體力勞動作業應每年或於變更其作業時實施特殊健康檢查，但並未明確指出高溫作業的具體檢查頻率。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，高溫作業的勞工特殊健康檢查之頻率並未明確記載。因此，答案為：資料未明確記載，無法確認。\n\n事實清單中提到第19條規定了對於高溫度、異常氣壓、高架、精密或重體力勞動作業應每年或於變更其作業時實施特殊健康檢查，但並未明確指出高溫作業的具體檢查頻率。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR2",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是不同的。\n\n高溫作業方面：\n- 第 19 條提到從事高溫度工作的勞工應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。（【來源：N0060027_職業安全衛生管理辦法，第19段】）\n\n特定化學物質作業方面：\n- 第 21 條提到從事特別危害健康作業之勞工應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。（【來源：N0060027_職業安全衛生管理辦法，第21段】）\n\n因此，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是一樣的，都是每年或於變更其作業時。",
+    "error": null,
+    "latency_s": 145.68,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 705,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR2",
+      "arm": "M1",
+      "question": "高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 145680.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_9",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_8",
+          "N0060027_職業安全衛生管理辦法_20"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2182,
+        "snr": 0.0229,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 633,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 145680.0,
+        "raw_draft": "根據提供的事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是不同的。\n\n高溫作業方面：\n- 第 19 條提到從事高溫度工作的勞工應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。（【來源：N0060027_職業安全衛生管理辦法，第19段】）\n\n特定化學物質作業方面：\n- 第 21 條提到從事特別危害健康作業之勞工應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。（【來源：N0060027_職業安全衛生管理辦法，第21段】）\n\n因此，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是一樣的，都是每年或於變更其作業時。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是不同的。\n\n高溫作業方面：\n- 第 19 條提到從事高溫度工作的勞工應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。（【來源：N0060027_職業安全衛生管理辦法，第19段】）\n\n特定化學物質作業方面：\n- 第 21 條提到從事特別危害健康作業之勞工應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。（【來源：N0060027_職業安全衛生管理辦法，第21段】）\n\n因此，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率是一樣的，都是每年或於變更其作業時。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單內容：\n\n1. 高溫作業勞工的特殊健康檢查頻率：第 25 條提到僱主應參採從事勞工健康服務醫師綜合評估勞工之體格或健康檢查結果之建議，適當配置勞工之工作及休息時間。但並未明確指出高溫作業勞工特殊的健康檢查頻率。\n\n2. 特定化學物質作業勞工的特殊健康檢查頻率：第 19 條提到僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，根據上述事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。特定化學物質作業勞工需要每年或於變更其作業時進行特殊健康檢查，而高溫作業勞工的特殊健康檢查頻率未明確記載。",
+    "error": null,
+    "latency_s": 187.1,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 706,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR2",
+      "arm": "M2",
+      "question": "高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 187100.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_9",
+          "N0060027_職業安全衛生管理辦法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2194,
+        "snr": 0.0228,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 632,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 187100.0,
+        "raw_draft": "根據提供的事實清單內容：\n\n1. 高溫作業勞工的特殊健康檢查頻率：第 25 條提到僱主應參採從事勞工健康服務醫師綜合評估勞工之體格或健康檢查結果之建議，適當配置勞工之工作及休息時間。但並未明確指出高溫作業勞工特殊的健康檢查頻率。\n\n2. 特定化學物質作業勞工的特殊健康檢查頻率：第 19 條提到僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，根據上述事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。特定化學物質作業勞工需要每年或於變更其作業時進行特殊健康檢查，而高溫作業勞工的特殊健康檢查頻率未明確記載。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容：\n\n1. 高溫作業勞工的特殊健康檢查頻率：第 25 條提到僱主應參採從事勞工健康服務醫師綜合評估勞工之體格或健康檢查結果之建議，適當配置勞工之工作及休息時間。但並未明確指出高溫作業勞工特殊的健康檢查頻率。\n\n2. 特定化學物質作業勞工的特殊健康檢查頻率：第 19 條提到僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，根據上述事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。特定化學物質作業勞工需要每年或於變更其作業時進行特殊健康檢查，而高溫作業勞工的特殊健康檢查頻率未明確記載。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR2",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單內容：\n\n1. 高溫作業勞工的特殊健康檢查頻率：第 25 條提到僱主應參採從事勞工健康服務醫師綜合評估勞工之體格或健康檢查結果之建議，適當配置勞工之工作及休息時間。但並未明確指出高溫作業勞工特殊的健康檢查頻率。\n\n2. 特定化學物質作業勞工的特殊健康檢查頻率：第 19 條提到僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，根據上述事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。特定化學物質作業勞工需要每年或於變更其作業時進行特殊健康檢查，而高溫作業勞工的特殊健康檢查頻率未明確記載。",
+    "error": null,
+    "latency_s": 178.32,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 706,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+        "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業",
+        "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業', '雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR2",
+      "arm": "B2",
+      "question": "高溫作業和特定化學物質作業的勞工，做特殊健康檢查的頻率一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 178320.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_9",
+          "N0060027_職業安全衛生管理辦法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "missed_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2194,
+        "snr": 0.0228,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 632,
+        "retained_exact_spans": [
+          "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。"
+        ],
+        "dropped_exact_spans": [
+          "勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。",
+          "附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 178320.0,
+        "raw_draft": "根據提供的事實清單內容：\n\n1. 高溫作業勞工的特殊健康檢查頻率：第 25 條提到僱主應參採從事勞工健康服務醫師綜合評估勞工之體格或健康檢查結果之建議，適當配置勞工之工作及休息時間。但並未明確指出高溫作業勞工特殊的健康檢查頻率。\n\n2. 特定化學物質作業勞工的特殊健康檢查頻率：第 19 條提到僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，根據上述事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。特定化學物質作業勞工需要每年或於變更其作業時進行特殊健康檢查，而高溫作業勞工的特殊健康檢查頻率未明確記載。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容：\n\n1. 高溫作業勞工的特殊健康檢查頻率：第 25 條提到僱主應參採從事勞工健康服務醫師綜合評估勞工之體格或健康檢查結果之建議，適當配置勞工之工作及休息時間。但並未明確指出高溫作業勞工特殊的健康檢查頻率。\n\n2. 特定化學物質作業勞工的特殊健康檢查頻率：第 19 條提到僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n因此，根據上述事實清單內容，高溫作業和特定化學物質作業的勞工做特殊健康檢查的頻率並不同。特定化學物質作業勞工需要每年或於變更其作業時進行特殊健康檢查，而高溫作業勞工的特殊健康檢查頻率未明確記載。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['勞工健康保護規則附表一（特別危害健康作業）之項次一為高溫作業勞工作息時間標準所稱之高溫作業。', '附表一之項次九為製造、處置或使用特定化學物質或其重量比（苯為體積比）超過百分之一之混合物之作業'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY3",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，精密作業勞工需要接受特殊健康檢查。\n\n### 精密作業勞工的特殊健康檢查\n\n1. **檢查頻率**：\n   - 根據【來源：N0060022_勞工健康保護規則，第19條】，僱主使勞工從事特別危害健康作業（包括精密作業），應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n### 結論\n\n根據上述事實清單，精密作業的勞工需要接受特殊健康檢查，且每年至少進行一次。",
+    "error": null,
+    "latency_s": 49.65,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 621,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "M1",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 49650.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060012_精密作業勞工視機能保護設施標準_0",
+          "N0060012_精密作業勞工視機能保護設施標準_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 1968,
+        "snr": 0.0127,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 571,
+        "retained_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 49650.0,
+        "raw_draft": "根據提供的事實清單，精密作業勞工需要接受特殊健康檢查。\n\n### 精密作業勞工的特殊健康檢查\n\n1. **檢查頻率**：\n   - 根據【來源：N0060022_勞工健康保護規則，第19條】，僱主使勞工從事特別危害健康作業（包括精密作業），應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n### 結論\n\n根據上述事實清單，精密作業的勞工需要接受特殊健康檢查，且每年至少進行一次。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，精密作業勞工需要接受特殊健康檢查。\n\n### 精密作業勞工的特殊健康檢查\n\n1. **檢查頻率**：\n   - 根據【來源：N0060022_勞工健康保護規則，第19條】，僱主使勞工從事特別危害健康作業（包括精密作業），應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n### 結論\n\n根據上述事實清單，精密作業的勞工需要接受特殊健康檢查，且每年至少進行一次。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，精密作業勞工需要接受特殊健康檢查。檢查的頻率為每年一次或在變更其作業時進行。\n\n相關條文如下：\n- 第 19 條：僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+    "error": null,
+    "latency_s": 146.91,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 662,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "M2",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 146910.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_8",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_9",
+          "N0060012_精密作業勞工視機能保護設施標準_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2193,
+        "snr": 0.0114,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 633,
+        "retained_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 146910.0,
+        "raw_draft": "根據提供的事實清單內容，精密作業勞工需要接受特殊健康檢查。檢查的頻率為每年一次或在變更其作業時進行。\n\n相關條文如下：\n- 第 19 條：僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，精密作業勞工需要接受特殊健康檢查。檢查的頻率為每年一次或在變更其作業時進行。\n\n相關條文如下：\n- 第 19 條：僱主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  }
+]

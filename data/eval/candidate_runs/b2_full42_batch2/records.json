@@ -1,0 +1,1805 @@
+[
+  {
+    "question_id": "26-Q1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據高架作業勞工保護措施標準第4條規定，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n一、高度在二公尺以上未滿五公尺者，至少有二十分鐘休息。\n\n二、高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n\n三、高度在二十公尺以上者，至少有三十五分鐘休息。",
+    "error": null,
+    "latency_s": 159.92,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 548,
+    "atomic_score": {
+      "supported_spans": [
+        "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+        "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+        "高度在二十公尺以上者，至少有三十五分鐘休息"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q1",
+      "arm": "M1",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 159920.0,
+        "retrieved_chunk_ids": [
+          "N0060029_高架作業勞工保護措施標準_0",
+          "N0060029_高架作業勞工保護措施標準_1",
+          "N0060001_職業安全衛生法_10",
+          "N0060012_精密作業勞工視機能保護設施標準_2",
+          "N0030001_勞動基準法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1755,
+        "snr": 0.0405,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 514,
+        "retained_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 159920.0,
+        "raw_draft": "根據高架作業勞工保護措施標準第4條規定，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n一、高度在二公尺以上未滿五公尺者，至少有二十分鐘休息。\n\n二、高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n\n三、高度在二十公尺以上者，至少有三十五分鐘休息。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據高架作業勞工保護措施標準第4條規定，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n一、高度在二公尺以上未滿五公尺者，至少有二十分鐘休息。\n\n二、高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n\n三、高度在二十公尺以上者，至少有三十五分鐘休息。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "26-Q1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據高架作業勞工保護措施標準第4條，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。\n\n這三段休息時間是根據作業高度的不同而有所區分的。因此，勞工從事高架作業每連續作業二小時應給予的休息時間依作業高度分為三段規定如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。",
+    "error": null,
+    "latency_s": 65.01,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 581,
+    "atomic_score": {
+      "supported_spans": [
+        "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+        "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+        "高度在二十公尺以上者，至少有三十五分鐘休息"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q1",
+      "arm": "M2",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 65010.00000000001,
+        "retrieved_chunk_ids": [
+          "N0060029_高架作業勞工保護措施標準_0",
+          "N0060029_高架作業勞工保護措施標準_1",
+          "N0060001_職業安全衛生法_10",
+          "N0060012_精密作業勞工視機能保護設施標準_2",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1742,
+        "snr": 0.0408,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 510,
+        "retained_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 65010.00000000001,
+        "raw_draft": "根據高架作業勞工保護措施標準第4條，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。\n\n這三段休息時間是根據作業高度的不同而有所區分的。因此，勞工從事高架作業每連續作業二小時應給予的休息時間依作業高度分為三段規定如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據高架作業勞工保護措施標準第4條，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。\n\n這三段休息時間是根據作業高度的不同而有所區分的。因此，勞工從事高架作業每連續作業二小時應給予的休息時間依作業高度分為三段規定如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "26-Q1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據高架作業勞工保護措施標準第4條，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。\n\n這三段休息時間是根據作業高度的不同而有所區分的。因此，勞工從事高架作業每連續作業二小時應給予的休息時間依作業高度分為三段規定如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。",
+    "error": null,
+    "latency_s": 44.7,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 581,
+    "atomic_score": {
+      "supported_spans": [
+        "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+        "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+        "高度在二十公尺以上者，至少有三十五分鐘休息"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q1",
+      "arm": "B2",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 44700.0,
+        "retrieved_chunk_ids": [
+          "N0060029_高架作業勞工保護措施標準_0",
+          "N0060029_高架作業勞工保護措施標準_1",
+          "N0060001_職業安全衛生法_10",
+          "N0060012_精密作業勞工視機能保護設施標準_2",
+          "N0030001_勞動基準法_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1742,
+        "snr": 0.0408,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 510,
+        "retained_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 44700.0,
+        "raw_draft": "根據高架作業勞工保護措施標準第4條，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。\n\n這三段休息時間是根據作業高度的不同而有所區分的。因此，勞工從事高架作業每連續作業二小時應給予的休息時間依作業高度分為三段規定如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據高架作業勞工保護措施標準第4條，僱主使勞工從事高架作業時，每連續作業二小時應給予休息時間如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。\n\n這三段休息時間是根據作業高度的不同而有所區分的。因此，勞工從事高架作業每連續作業二小時應給予的休息時間依作業高度分為三段規定如下：\n\n1. 高度在2公尺以上未滿5公尺者，至少有20分鐘休息。\n2. 高度在5公尺以上未滿20公尺者，至少有25分鐘休息。\n3. 高度在20公尺以上者，至少有35分鐘休息。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據上述事實清單中的第2條和第3條：\n\n1. 災區受災勞工在災後六個月期間內個人應負擔的保險費由中央政府支應。\n2. 災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，符合規定者在災後六個月（即從災害發生之當月起計六個月）內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+    "error": null,
+    "latency_s": 38.04,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 588,
+    "atomic_score": {
+      "supported_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M1",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 38040.0,
+        "retrieved_chunk_ids": [
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_0",
+          "N0050031_勞工職業災害保險及保護法_5",
+          "N0060041_職業災害勞工保護法_10",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_2",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1802,
+        "snr": 0.0239,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 550,
+        "retained_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 38040.0,
+        "raw_draft": "根據上述事實清單中的第2條和第3條：\n\n1. 災區受災勞工在災後六個月期間內個人應負擔的保險費由中央政府支應。\n2. 災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，符合規定者在災後六個月（即從災害發生之當月起計六個月）內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第2條和第3條：\n\n1. 災區受災勞工在災後六個月期間內個人應負擔的保險費由中央政府支應。\n2. 災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，符合規定者在災後六個月（即從災害發生之當月起計六個月）內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，災區受災勞工在符合特定條件的情況下，在災後六個月期間內個人應負擔的保險費由中央政府支應。\n\n相關事實如下：\n\n第 2 條：災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應：\n\n- 一、死亡或失蹤，符合政府核發死亡或失蹤救助金標準。\n- 二、領取政府核發重傷救助金。\n- 三、符合領取政府核發安遷救助金、淹水救助金或住屋受災救助金標準之人口。\n- 四、領取政府核發農田、漁塭、漁船（筏）或舢舨受災救助金。\n\n第 3 條：前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，符合規定的災區受災勞工在災後六個月內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+    "error": null,
+    "latency_s": 117.61,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 731,
+    "atomic_score": {
+      "supported_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M2",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 117610.0,
+        "retrieved_chunk_ids": [
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_0",
+          "N0050031_勞工職業災害保險及保護法_7",
+          "N0050031_勞工職業災害保險及保護法_4",
+          "N0050031_勞工職業災害保險及保護法_5",
+          "N0050031_勞工職業災害保險及保護法_3"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2228,
+        "snr": 0.0193,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 641,
+        "retained_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 117610.0,
+        "raw_draft": "根據提供的事實清單，災區受災勞工在符合特定條件的情況下，在災後六個月期間內個人應負擔的保險費由中央政府支應。\n\n相關事實如下：\n\n第 2 條：災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應：\n\n- 一、死亡或失蹤，符合政府核發死亡或失蹤救助金標準。\n- 二、領取政府核發重傷救助金。\n- 三、符合領取政府核發安遷救助金、淹水救助金或住屋受災救助金標準之人口。\n- 四、領取政府核發農田、漁塭、漁船（筏）或舢舨受災救助金。\n\n第 3 條：前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，符合規定的災區受災勞工在災後六個月內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，災區受災勞工在符合特定條件的情況下，在災後六個月期間內個人應負擔的保險費由中央政府支應。\n\n相關事實如下：\n\n第 2 條：災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應：\n\n- 一、死亡或失蹤，符合政府核發死亡或失蹤救助金標準。\n- 二、領取政府核發重傷救助金。\n- 三、符合領取政府核發安遷救助金、淹水救助金或住屋受災救助金標準之人口。\n- 四、領取政府核發農田、漁塭、漁船（筏）或舢舨受災救助金。\n\n第 3 條：前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，符合規定的災區受災勞工在災後六個月內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據上述事實清單中的信息：\n\n【來源：N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法，第2條】\n災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應：\n\n1. 此段落明確指出，受災被保險人在災後六個月期間內應負擔的保險費由中央政府支應。\n2. 【來源：N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法，第3條】\n   前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，根據上述事實清單中的信息：\n\n災區受災勞工在災後六個月的期間內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+    "error": null,
+    "latency_s": 138.67,
+    "llm_calls": 7,
+    "generation_llm_calls": 7,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1528,
+    "atomic_score": {
+      "supported_spans": [
+        "自災害發生之當月一日起計算六個月",
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "B2",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 138670.0,
+        "retrieved_chunk_ids": [
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_0",
+          "N0050031_勞工職業災害保險及保護法_7",
+          "N0060041_職業災害勞工保護法_1",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_2",
+          "N0060041_職業災害勞工保護法_9",
+          "N0050031_勞工職業災害保險及保護法_3",
+          "N0050031_勞工職業災害保險及保護法_4",
+          "N0050031_勞工職業災害保險及保護法_5",
+          "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法_7",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030001_勞動基準法_34",
+          "N0030001_勞動基準法_13"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4951,
+        "snr": 0.0087,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1439,
+        "retained_exact_spans": [
+          "自災害發生之當月一日起計算六個月",
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 138670.0,
+        "raw_draft": "根據上述事實清單中的信息：\n\n【來源：N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法，第2條】\n災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應：\n\n1. 此段落明確指出，受災被保險人在災後六個月期間內應負擔的保險費由中央政府支應。\n2. 【來源：N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法，第3條】\n   前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，根據上述事實清單中的信息：\n\n災區受災勞工在災後六個月的期間內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的信息：\n\n【來源：N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法，第2條】\n災區受災勞工保險與勞工職業災害保險及就業保險之被保險人（以下簡稱受災被保險人）有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應：\n\n1. 此段落明確指出，受災被保險人在災後六個月期間內應負擔的保險費由中央政府支應。\n2. 【來源：N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法，第3條】\n   前條所定災後六個月期間之計算，自災害發生之當月一日起計算六個月。\n\n因此，根據上述事實清單中的信息：\n\n災區受災勞工在災後六個月的期間內，個人應負擔的保險費由中央政府支應。這個期間從災害發生之當月一日起算。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 6,
+      "reflect_calls": 6,
+      "rounds_per_subquestion": [
+        1,
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。這基於第45條和第78條中所列明的罰鍰上限。\n\n第 45 條指出，有下列情形之一者，處新臺幣三萬元以上七十五萬元以下罰鍰。\n第 78 條指出，未依規定給付者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，但此上限未被其他條文超越。\n\n因此，根據上述事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。",
+    "error": null,
+    "latency_s": 102.5,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 689,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "M1",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 102500.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_27",
+          "N0030001_勞動基準法_31",
+          "N0060001_職業安全衛生法_24",
+          "N0090001_就業服務法_25",
+          "N0030001_勞動基準法_30"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 2297,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 641,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 102500.0,
+        "raw_draft": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。這基於第45條和第78條中所列明的罰鍰上限。\n\n第 45 條指出，有下列情形之一者，處新臺幣三萬元以上七十五萬元以下罰鍰。\n第 78 條指出，未依規定給付者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，但此上限未被其他條文超越。\n\n因此，根據上述事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。這基於第45條和第78條中所列明的罰鍰上限。\n\n第 45 條指出，有下列情形之一者，處新臺幣三萬元以上七十五萬元以下罰鍰。\n第 78 條指出，未依規定給付者，處新臺幣三十萬元以上一百五十萬元以下罰鍰，但此上限未被其他條文超越。\n\n因此，根據上述事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。此為第45條所列明的罰鍰上限。\n\n事實清單中並未提到超過七十五萬元的罰鍰，因此無法確認是否有更高額度的罰鍰。",
+    "error": null,
+    "latency_s": 133.28,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 657,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "M2",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 133280.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_27",
+          "N0030001_勞動基準法_31",
+          "N0030020_勞工退休金條例_18",
+          "N0090001_就業服務法_25",
+          "N0060001_職業安全衛生法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 2278,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 634,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 133280.0,
+        "raw_draft": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。此為第45條所列明的罰鍰上限。\n\n事實清單中並未提到超過七十五萬元的罰鍰，因此無法確認是否有更高額度的罰鍰。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。此為第45條所列明的罰鍰上限。\n\n事實清單中並未提到超過七十五萬元的罰鍰，因此無法確認是否有更高額度的罰鍰。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。此為第45條所列明的罰鍰上限。\n\n事實清單中並未提到超過七十五萬元的罰鍰，因此無法確認是否有更高額度的罰鍰。",
+    "error": null,
+    "latency_s": 133.24,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 657,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "B2",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 133240.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_27",
+          "N0030001_勞動基準法_31",
+          "N0030020_勞工退休金條例_18",
+          "N0090001_就業服務法_25",
+          "N0060001_職業安全衛生法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 2278,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 634,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 133240.0,
+        "raw_draft": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。此為第45條所列明的罰鍰上限。\n\n事實清單中並未提到超過七十五萬元的罰鍰，因此無法確認是否有更高額度的罰鍰。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，公司若違反勞動法令，依規定最高可處新臺幣七十五萬元的罰鍰。此為第45條所列明的罰鍰上限。\n\n事實清單中並未提到超過七十五萬元的罰鍰，因此無法確認是否有更高額度的罰鍰。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "canary-P4",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。上述事實清單中並無相關內容提及此種情形。",
+    "error": null,
+    "latency_s": 40.87,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 665,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P4",
+      "arm": "M1",
+      "question": "請問勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 40870.0,
+        "retrieved_chunk_ids": [
+          "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法_6",
+          "N0060022_勞工健康保護規則_8",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14",
+          "N0030001_勞動基準法_14",
+          "N0060001_職業安全衛生法_20"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未記載相關規定"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2285,
+        "snr": 0.0031,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 650,
+        "retained_exact_spans": [
+          "未記載相關規定"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 40870.0,
+        "raw_draft": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。上述事實清單中並無相關內容提及此種情形。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。上述事實清單中並無相關內容提及此種情形。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "canary-P4",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。根據提供的事實清單內容，勞動基準法並無相關規定關於火星旅遊補助的內容。",
+    "error": null,
+    "latency_s": 50.45,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 644,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P4",
+      "arm": "M2",
+      "question": "請問勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 50450.0,
+        "retrieved_chunk_ids": [
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_7",
+          "N0030001_勞動基準法_24",
+          "N0090001_就業服務法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未記載相關規定"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2179,
+        "snr": 0.0032,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 625,
+        "retained_exact_spans": [
+          "未記載相關規定"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 50450.0,
+        "raw_draft": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。根據提供的事實清單內容，勞動基準法並無相關規定關於火星旅遊補助的內容。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。根據提供的事實清單內容，勞動基準法並無相關規定關於火星旅遊補助的內容。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "canary-P4",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。根據提供的事實清單內容，勞動基準法並無相關規定關於火星旅遊補助的內容。",
+    "error": null,
+    "latency_s": 49.38,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 644,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P4",
+      "arm": "B2",
+      "question": "請問勞基法規定勞工每工作滿五年，雇主應強制補助至火星旅遊考察幾次？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 49380.0,
+        "retrieved_chunk_ids": [
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_17",
+          "N0030001_勞動基準法_7",
+          "N0030001_勞動基準法_24",
+          "N0090001_就業服務法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未記載相關規定"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2179,
+        "snr": 0.0032,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 625,
+        "retained_exact_spans": [
+          "未記載相關規定"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 49380.0,
+        "raw_draft": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。根據提供的事實清單內容，勞動基準法並無相關規定關於火星旅遊補助的內容。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "資料未明確記載，無法確認勞基法規定勞工每工作滿五年，僱主應強制補助至火星旅遊考察幾次。根據提供的事實清單內容，勞動基準法並無相關規定關於火星旅遊補助的內容。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的信息：\n\n1. 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出申請（來源：N0030018_育嬰留職停薪實施辦法，第2條第2款）。\n\n2. 如果是因為子女生病、停託或停課等突發狀況，受僱者不及於一日前提出申請時，可以委託他人代辦申請手續（來源：N0030018_育嬰留職停薪實施辦法，第2條第2款但書）。\n\n因此，根據上述事實清單：\n\n- 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n- 如果因突發狀況如子女生病、停託或停課等無法及時提出申請，受僱者可以委託他人代辦申請手續。",
+    "error": null,
+    "latency_s": 57.16,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 662,
+    "atomic_score": {
+      "supported_spans": [
+        "未滿三十日：於五日前提出",
+        "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+      ],
+      "missing_spans": [
+        "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF1",
+      "arm": "M1",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 57160.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030006_勞工請假規則_1",
+          "N0030001_勞動基準法_21",
+          "N0090001_就業服務法_21"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2045,
+        "snr": 0.0342,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 597,
+        "retained_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 57160.0,
+        "raw_draft": "根據上述事實清單中的信息：\n\n1. 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出申請（來源：N0030018_育嬰留職停薪實施辦法，第2條第2款）。\n\n2. 如果是因為子女生病、停託或停課等突發狀況，受僱者不及於一日前提出申請時，可以委託他人代辦申請手續（來源：N0030018_育嬰留職停薪實施辦法，第2條第2款但書）。\n\n因此，根據上述事實清單：\n\n- 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n- 如果因突發狀況如子女生病、停託或停課等無法及時提出申請，受僱者可以委託他人代辦申請手續。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的信息：\n\n1. 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出申請（來源：N0030018_育嬰留職停薪實施辦法，第2條第2款）。\n\n2. 如果是因為子女生病、停託或停課等突發狀況，受僱者不及於一日前提出申請時，可以委託他人代辦申請手續（來源：N0030018_育嬰留職停薪實施辦法，第2條第2款但書）。\n\n因此，根據上述事實清單：\n\n- 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n- 如果因突發狀況如子女生病、停託或停課等無法及時提出申請，受僱者可以委託他人代辦申請手續。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出申請。\n2. 如果是因為子女生病、停託或停課等突發狀況，受僱者可以在一日前提出申請。但若無法在一日前提出，可以委託他人代辦申請手續。\n\n因此，根據上述事實清單：\n\n- 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n- 若因突發狀況如子女生病、停託或停課等無法在一日前提出申請，受僱者可以委託他人代辦申請手續。",
+    "error": null,
+    "latency_s": 36.65,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 644,
+    "atomic_score": {
+      "supported_spans": [
+        "未滿三十日：於五日前提出",
+        "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+      ],
+      "missing_spans": [
+        "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF1",
+      "arm": "M2",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 36650.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030006_勞工請假規則_1",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2044,
+        "snr": 0.0342,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 593,
+        "retained_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 36650.0,
+        "raw_draft": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出申請。\n2. 如果是因為子女生病、停託或停課等突發狀況，受僱者可以在一日前提出申請。但若無法在一日前提出，可以委託他人代辦申請手續。\n\n因此，根據上述事實清單：\n\n- 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n- 若因突發狀況如子女生病、停託或停課等無法在一日前提出申請，受僱者可以委託他人代辦申請手續。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的規定：\n\n1. 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出申請。\n2. 如果是因為子女生病、停託或停課等突發狀況，受僱者可以在一日前提出申請。但若無法在一日前提出，可以委託他人代辦申請手續。\n\n因此，根據上述事實清單：\n\n- 受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n- 若因突發狀況如子女生病、停託或停課等無法在一日前提出申請，受僱者可以委託他人代辦申請手續。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，回答如下：\n\n1. 受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？\n\n根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】：\n受僱者向僱主申請育嬰留職停薪之程序如下：\n二、育嬰留職停薪期間未滿三十日：於五日前提出。\n\n因此，原則上應提前5天提出申請。\n\n2. 如果是因為子女生病、停託或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？\n\n根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】：\n前項第二款但書規定，受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續。\n\n因此，如果因為子女生病、停託或停課等突發狀況來不及提前一天申請，可以委託他人代辦申請手續。",
+    "error": null,
+    "latency_s": 82.4,
+    "llm_calls": 4,
+    "generation_llm_calls": 4,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1419,
+    "atomic_score": {
+      "supported_spans": [
+        "未滿三十日：於五日前提出",
+        "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+      ],
+      "missing_spans": [
+        "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF1",
+      "arm": "B2",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 82400.0,
+        "retrieved_chunk_ids": [
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "N0030006_勞工請假規則_1",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030006_勞工請假規則_0",
+          "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法_7",
+          "N0090002_私立就業服務機構許可及管理辦法_22",
+          "N0050031_勞工職業災害保險及保護法_25",
+          "N0060079_直轄市及縣市政府辦理協助職業災害勞工重返職場補助辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0090001_就業服務法_28"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 4566,
+        "snr": 0.0153,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1342,
+        "retained_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 82400.0,
+        "raw_draft": "根據提供的事實清單，回答如下：\n\n1. 受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？\n\n根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】：\n受僱者向僱主申請育嬰留職停薪之程序如下：\n二、育嬰留職停薪期間未滿三十日：於五日前提出。\n\n因此，原則上應提前5天提出申請。\n\n2. 如果是因為子女生病、停託或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？\n\n根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】：\n前項第二款但書規定，受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續。\n\n因此，如果因為子女生病、停託或停課等突發狀況來不及提前一天申請，可以委託他人代辦申請手續。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，回答如下：\n\n1. 受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？\n\n根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】：\n受僱者向僱主申請育嬰留職停薪之程序如下：\n二、育嬰留職停薪期間未滿三十日：於五日前提出。\n\n因此，原則上應提前5天提出申請。\n\n2. 如果是因為子女生病、停託或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？\n\n根據【來源：N0030018_育嬰留職停薪實施辦法，第2條】：\n前項第二款但書規定，受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續。\n\n因此，如果因為子女生病、停託或停課等突發狀況來不及提前一天申請，可以委託他人代辦申請手續。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 3,
+      "reflect_calls": 3,
+      "rounds_per_subquestion": [
+        1,
+        2
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF2",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n這條規定明確指出，當勞工因為請普通傷病假而遭受不利處分時，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。因此，答案是：僱主需要負責證明這個處分跟請假無關。",
+    "error": null,
+    "latency_s": 49.33,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 628,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF2",
+      "arm": "M1",
+      "question": "勞工如果因為請普通傷病假而遭受不利處分，要由誰負責證明這個處分跟請假無關？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 49330.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_2",
+          "N0030006_勞工請假規則_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_40",
+          "N0030001_勞動基準法_26"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2062,
+        "snr": 0.0145,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 586,
+        "retained_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 49330.0,
+        "raw_draft": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n這條規定明確指出，當勞工因為請普通傷病假而遭受不利處分時，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。因此，答案是：僱主需要負責證明這個處分跟請假無關。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n這條規定明確指出，當勞工因為請普通傷病假而遭受不利處分時，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。因此，答案是：僱主需要負責證明這個處分跟請假無關。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF2",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】指出：\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，如果勞工因為請普通傷病假而遭受不利處分，根據上述法規，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。",
+    "error": null,
+    "latency_s": 45.82,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 627,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF2",
+      "arm": "M2",
+      "question": "勞工如果因為請普通傷病假而遭受不利處分，要由誰負責證明這個處分跟請假無關？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 45820.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_2",
+          "N0030006_勞工請假規則_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_0",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0146,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 45820.0,
+        "raw_draft": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】指出：\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，如果勞工因為請普通傷病假而遭受不利處分，根據上述法規，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】指出：\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，如果勞工因為請普通傷病假而遭受不利處分，根據上述法規，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF2",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】指出：\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，如果勞工因為請普通傷病假而遭受不利處分，根據上述法規，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。",
+    "error": null,
+    "latency_s": 44.06,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 627,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF2",
+      "arm": "B2",
+      "question": "勞工如果因為請普通傷病假而遭受不利處分，要由誰負責證明這個處分跟請假無關？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 44060.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_2",
+          "N0030006_勞工請假規則_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_0",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0146,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "雇主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 44060.0,
+        "raw_draft": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】指出：\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，如果勞工因為請普通傷病假而遭受不利處分，根據上述法規，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的信息：\n\n【來源：N003006_勞工請假規則，第2段】指出：\n勞工因請普通傷病假而受有不利處分者，僱主對於該不利處分與其請普通傷病假行為無關之事實，負舉證責任。\n\n因此，如果勞工因為請普通傷病假而遭受不利處分，根據上述法規，僱主需要負擔舉證責任來證明這個處分與勞工請假行為無關。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  }
+]
