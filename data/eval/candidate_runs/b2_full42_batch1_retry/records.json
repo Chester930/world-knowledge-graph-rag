@@ -1,0 +1,620 @@
+[
+  {
+    "question_id": "18-Q3",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的相關規定：\n\n1. 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3段】：\n   - 外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。\n   \n2. 同段落還提到：\n   - 僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。僱主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n\n根據上述規定，特別休假返國的請假返國期日是由外國人自行排定的，除非僱主和外國人之間能夠就返國期日進行協商並達成一致。如果雙方無法協商成功，則應依照外國人原排定之返國期日。\n\n因此，答案是：\n- 外國人可以自行排定請假返國期日。\n- 僱主在特定情況下（如企業經營或被照顧者急迫需求）可以與外國人協商調整返國期日。若協商不成，則應依外國人原排定之返國期日同意其返國。\n\n這段回答基於提供的事實清單內容，沒有涉及其他補充知識。",
+    "error": null,
+    "latency_s": 101.65,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 568,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日",
+        "雇主應予同意"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "M1",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 101650.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "D0080015_警察人員特別休假辦法_1",
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1481,
+        "snr": 0.0108,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 454,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 101650.0,
+        "raw_draft": "根據上述事實清單中的相關規定：\n\n1. 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3段】：\n   - 外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。\n   \n2. 同段落還提到：\n   - 僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。僱主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n\n根據上述規定，特別休假返國的請假返國期日是由外國人自行排定的，除非僱主和外國人之間能夠就返國期日進行協商並達成一致。如果雙方無法協商成功，則應依照外國人原排定之返國期日。\n\n因此，答案是：\n- 外國人可以自行排定請假返國期日。\n- 僱主在特定情況下（如企業經營或被照顧者急迫需求）可以與外國人協商調整返國期日。若協商不成，則應依外國人原排定之返國期日同意其返國。\n\n這段回答基於提供的事實清單內容，沒有涉及其他補充知識。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的相關規定：\n\n1. 根據【來源：N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法，第3段】：\n   - 外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。\n   \n2. 同段落還提到：\n   - 僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。僱主依前項但書規定與外國人協商調整不成立時，應依外國人原排定之返國期日同意其返國。\n\n根據上述規定，特別休假返國的請假返國期日是由外國人自行排定的，除非僱主和外國人之間能夠就返國期日進行協商並達成一致。如果雙方無法協商成功，則應依照外國人原排定之返國期日。\n\n因此，答案是：\n- 外國人可以自行排定請假返國期日。\n- 僱主在特定情況下（如企業經營或被照顧者急迫需求）可以與外國人協商調整返國期日。若協商不成，則應依外國人原排定之返國期日同意其返國。\n\n這段回答基於提供的事實清單內容，沒有涉及其他補充知識。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的第3條，受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。但若僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。\n\n因此，外國人的特別休假返國期日是由外國人自行排定的，但在某些情況下，僱主可以與外國人協商調整返國期日。如果雙方協商不成，則應依外國人原排定之返國期日同意其返國。",
+    "error": null,
+    "latency_s": 133.29,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 510,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日",
+        "雇主應予同意"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "M2",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 133290.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030006_勞工請假規則_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1466,
+        "snr": 0.0109,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 454,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 133290.0,
+        "raw_draft": "根據上述事實清單中的第3條，受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。但若僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。\n\n因此，外國人的特別休假返國期日是由外國人自行排定的，但在某些情況下，僱主可以與外國人協商調整返國期日。如果雙方協商不成，則應依外國人原排定之返國期日同意其返國。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據上述事實清單中的第3條，受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人於聘僱許可有效期間內，合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國，並自行排定請假返國期日。但若僱主基於企業經營或被照顧者之急迫需求，得與外國人協商調整返國期日。\n\n因此，外國人的特別休假返國期日是由外國人自行排定的，但在某些情況下，僱主可以與外國人協商調整返國期日。如果雙方協商不成，則應依外國人原排定之返國期日同意其返國。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q3",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "根據上述事實清單中的第3條，特別休假返國期日是由外國人自行排定的。僱主在基於企業經營或被照顧者之急迫需求的情況下，可以與外國人協商調整返國期日，但若協商不成，則應依外國人原排定之返國期日同意其返國。\n\n因此，返國期日是由外國人自行排定的，僱主在特定情況下可以片面更改，但前提是必須先與外國人進行協商。如果協商不成，僱主仍需依外國人原排定之返國期日同意其返國。",
+    "error": null,
+    "latency_s": 203.45,
+    "llm_calls": 8,
+    "generation_llm_calls": 8,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 982,
+    "atomic_score": {
+      "supported_spans": [
+        "自行排定請假返國期日",
+        "雇主應予同意"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q3",
+      "arm": "B2",
+      "question": "外國人若要用特別休假返國，返國期日是由誰排定？雇主可以片面更改嗎？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 203450.0,
+        "retrieved_chunk_ids": [
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_1",
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030006_勞工請假規則_2",
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030006_勞工請假規則_1",
+          "N0030018_育嬰留職停薪實施辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 3118,
+        "snr": 0.0051,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 938,
+        "retained_exact_spans": [
+          "自行排定請假返國期日",
+          "雇主應予同意"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 203450.0,
+        "raw_draft": "根據上述事實清單中的第3條，特別休假返國期日是由外國人自行排定的。僱主在基於企業經營或被照顧者之急迫需求的情況下，可以與外國人協商調整返國期日，但若協商不成，則應依外國人原排定之返國期日同意其返國。\n\n因此，返國期日是由外國人自行排定的，僱主在特定情況下可以片面更改，但前提是必須先與外國人進行協商。如果協商不成，僱主仍需依外國人原排定之返國期日同意其返國。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據上述事實清單中的第3條，特別休假返國期日是由外國人自行排定的。僱主在基於企業經營或被照顧者之急迫需求的情況下，可以與外國人協商調整返國期日，但若協商不成，則應依外國人原排定之返國期日同意其返國。\n\n因此，返國期日是由外國人自行排定的，僱主在特定情況下可以片面更改，但前提是必須先與外國人進行協商。如果協商不成，僱主仍需依外國人原排定之返國期日同意其返國。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 6,
+      "reflect_calls": 6,
+      "rounds_per_subquestion": [
+        1,
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "警察人員特別休假辦法中所稱的「特別休假」，核發依據如下：\n\n1. 核發特別休假的情況包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）。\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）。\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）。\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）。\n   - 當選直轄市、縣（市）級模範警察或好人好事代表者（第2條）。\n   - 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者（第2條）。\n\n2. 核發特別休假的天數區間為：\n   - 一至三日（第2條）。\n   - 二至五日（第3條）。\n   - 三至七日（第4條）。\n\n特別休假與服務年資無直接關係，其核發主要依賴於勞動者在工作中的特殊功績或貢獻。最高可以給的天數為七日。",
+    "error": null,
+    "latency_s": 183.3,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 688,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M1",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 183300.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1994,
+        "snr": 0.0301,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 587,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 183300.0,
+        "raw_draft": "警察人員特別休假辦法中所稱的「特別休假」，核發依據如下：\n\n1. 核發特別休假的情況包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）。\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）。\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）。\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）。\n   - 當選直轄市、縣（市）級模範警察或好人好事代表者（第2條）。\n   - 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者（第2條）。\n\n2. 核發特別休假的天數區間為：\n   - 一至三日（第2條）。\n   - 二至五日（第3條）。\n   - 三至七日（第4條）。\n\n特別休假與服務年資無直接關係，其核發主要依賴於勞動者在工作中的特殊功績或貢獻。最高可以給的天數為七日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "警察人員特別休假辦法中所稱的「特別休假」，核發依據如下：\n\n1. 核發特別休假的情況包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）。\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）。\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）。\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）。\n   - 當選直轄市、縣（市）級模範警察或好人好事代表者（第2條）。\n   - 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者（第2條）。\n\n2. 核發特別休假的天數區間為：\n   - 一至三日（第2條）。\n   - 二至五日（第3條）。\n   - 三至七日（第4條）。\n\n特別休假與服務年資無直接關係，其核發主要依賴於勞動者在工作中的特殊功績或貢獻。最高可以給的天數為七日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假並未與服務年資有關。\n\n根據第2條至第4條，特別休假天數如下：\n1. 滿足特定條件者可獲得一至三日之特別休假。\n2. 滿足特定條件者可獲得二至五日之特別休假。\n3. 滿足特定條件者可獲得三至七日之特別休假。\n\n因此，特別休假的最高可以給七天。",
+    "error": null,
+    "latency_s": 182.53,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 639,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "missing_spans": [
+        "有左列情事之一者，給予二至五日之特別休假"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['有左列情事之一者，給予二至五日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 182530.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030006_勞工請假規則_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2014,
+        "snr": 0.0298,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 599,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 182530.0,
+        "raw_draft": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假並未與服務年資有關。\n\n根據第2條至第4條，特別休假天數如下：\n1. 滿足特定條件者可獲得一至三日之特別休假。\n2. 滿足特定條件者可獲得二至五日之特別休假。\n3. 滿足特定條件者可獲得三至七日之特別休假。\n\n因此，特別休假的最高可以給七天。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假並未與服務年資有關。\n\n根據第2條至第4條，特別休假天數如下：\n1. 滿足特定條件者可獲得一至三日之特別休假。\n2. 滿足特定條件者可獲得二至五日之特別休假。\n3. 滿足特定條件者可獲得三至七日之特別休假。\n\n因此，特別休假的最高可以給七天。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功人員因特別貢獻或特殊功績而獲得之獎勵。特別休假與服務年資無關。\n\n最高可以給幾天的部分，根據第4條規定，有下列情事之一者，給予三至七日之特別休假：\n一、主動破獲叛亂組織，人證俱獲者。\n二、因特別貢獻或特殊功績受頒勳章者。\n三、因特殊功績榮獲晉階者。",
+    "error": null,
+    "latency_s": 201.86,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 898,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "B2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 201860.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030006_勞工請假規則_0",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0",
+          "N0030006_勞工請假規則_1",
+          "N0030018_育嬰留職停薪實施辦法_1",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2873,
+        "snr": 0.0209,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 860,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 201860.0,
+        "raw_draft": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功人員因特別貢獻或特殊功績而獲得之獎勵。特別休假與服務年資無關。\n\n最高可以給幾天的部分，根據第4條規定，有下列情事之一者，給予三至七日之特別休假：\n一、主動破獲叛亂組織，人證俱獲者。\n二、因特別貢獻或特殊功績受頒勳章者。\n三、因特殊功績榮獲晉階者。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功人員因特別貢獻或特殊功績而獲得之獎勵。特別休假與服務年資無關。\n\n最高可以給幾天的部分，根據第4條規定，有下列情事之一者，給予三至七日之特別休假：\n一、主動破獲叛亂組織，人證俱獲者。\n二、因特別貢獻或特殊功績受頒勳章者。\n三、因特殊功績榮獲晉階者。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        2,
+        2
+      ]
+    },
+    "run": 1
+  }
+]
