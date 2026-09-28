@@ -1,0 +1,120 @@
+[
+  {
+    "question_id": "57-CANARY3",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，精密作業勞工需要接受特殊健康檢查。\n\n### 確定是否需要特殊健康檢查：\n- 根據【來源：N0060022_勞工健康保護規則，第19條】，僱主使勞工從事特別危害健康作業時，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n### 確定特殊健康檢查的頻率：\n- 根據【來源：N0060022_勞工健康保護規則，第17條】和【來源：N0060022_勞工健康保護規則，第18條】，一般健康檢查的頻率如下：\n  - 年滿六十歲者，每年檢查一次。\n  - 四十歲以上未滿六十歲者，每二年檢查一次。\n  - 未滿四十歲者，每三年檢查一次。\n\n- 然而，對於從事特別危害健康作業的勞工，特殊健康檢查的頻率並未直接提及。根據【來源：N0060022_勞工健康保護規則，第19條】，特殊健康檢查應每年或於變更其作業時進行。\n\n因此，精密作業勞工需要接受特殊健康檢查，且檢查的頻率為每年一次（除非在作業內容有變更）。\n\n### 結論：\n根據上述事實清單，精密作業勞工需要接受特殊健康檢查，並且檢查的頻率為每年一次。",
+    "error": null,
+    "latency_s": 148.8,
+    "llm_calls": 9,
+    "generation_llm_calls": 9,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 2154,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY3",
+      "arm": "B2",
+      "question": "精密作業的勞工需要做特殊健康檢查嗎？多久一次？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 148800.0,
+        "retrieved_chunk_ids": [
+          "N0060001_職業安全衛生法_10",
+          "N0060022_勞工健康保護規則_12",
+          "N0060022_勞工健康保護規則_8",
+          "N0060012_精密作業勞工視機能保護設施標準_1",
+          "N0060012_精密作業勞工視機能保護設施標準_0",
+          "N0060022_勞工健康保護規則_9",
+          "N0030020_勞工退休金條例_10",
+          "N0060027_職業安全衛生管理辦法_16",
+          "N0050031_勞工職業災害保險及保護法_23",
+          "N0060027_職業安全衛生管理辦法_17",
+          "N0060027_職業安全衛生管理辦法_20",
+          "N0030001_勞動基準法_16",
+          "N0030001_勞動基準法_15",
+          "N0060029_高架作業勞工保護措施標準_0",
+          "N0030001_勞動基準法_21",
+          "N0030001_勞動基準法_12"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 7041,
+        "snr": 0.0036,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 2037,
+        "retained_exact_spans": [
+          "本標準依職業安全衛生法第六條及第十九條規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 148800.0,
+        "raw_draft": "根據提供的事實清單，精密作業勞工需要接受特殊健康檢查。\n\n### 確定是否需要特殊健康檢查：\n- 根據【來源：N0060022_勞工健康保護規則，第19條】，僱主使勞工從事特別危害健康作業時，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n### 確定特殊健康檢查的頻率：\n- 根據【來源：N0060022_勞工健康保護規則，第17條】和【來源：N0060022_勞工健康保護規則，第18條】，一般健康檢查的頻率如下：\n  - 年滿六十歲者，每年檢查一次。\n  - 四十歲以上未滿六十歲者，每二年檢查一次。\n  - 未滿四十歲者，每三年檢查一次。\n\n- 然而，對於從事特別危害健康作業的勞工，特殊健康檢查的頻率並未直接提及。根據【來源：N0060022_勞工健康保護規則，第19條】，特殊健康檢查應每年或於變更其作業時進行。\n\n因此，精密作業勞工需要接受特殊健康檢查，且檢查的頻率為每年一次（除非在作業內容有變更）。\n\n### 結論：\n根據上述事實清單，精密作業勞工需要接受特殊健康檢查，並且檢查的頻率為每年一次。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，精密作業勞工需要接受特殊健康檢查。\n\n### 確定是否需要特殊健康檢查：\n- 根據【來源：N0060022_勞工健康保護規則，第19條】，僱主使勞工從事特別危害健康作業時，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。\n\n### 確定特殊健康檢查的頻率：\n- 根據【來源：N0060022_勞工健康保護規則，第17條】和【來源：N0060022_勞工健康保護規則，第18條】，一般健康檢查的頻率如下：\n  - 年滿六十歲者，每年檢查一次。\n  - 四十歲以上未滿六十歲者，每二年檢查一次。\n  - 未滿四十歲者，每三年檢查一次。\n\n- 然而，對於從事特別危害健康作業的勞工，特殊健康檢查的頻率並未直接提及。根據【來源：N0060022_勞工健康保護規則，第19條】，特殊健康檢查應每年或於變更其作業時進行。\n\n因此，精密作業勞工需要接受特殊健康檢查，且檢查的頻率為每年一次（除非在作業內容有變更）。\n\n### 結論：\n根據上述事實清單，精密作業勞工需要接受特殊健康檢查，並且檢查的頻率為每年一次。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['特別危害健康作業：指符合附表一之物理性及化學性危害之作業。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 1
+  }
+]

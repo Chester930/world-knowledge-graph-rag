@@ -1,0 +1,292 @@
+[
+  {
+    "question_id": "57-AGGR19",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+        "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+        "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+        "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/4 facts. Missed essential: ['雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": null,
+      "issues": [],
+      "passed": null,
+      "status": "not_evaluated"
+    },
+    "lineage": {
+      "query_id": "57-AGGR19",
+      "arm": "M1",
+      "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）分別規定在哪些條文？兩者的實質內容有沒有不同？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "57-AGGR19",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單內容：\n\n1. **新法（勞工職業災害保險及保護法）**：\n   - 第 85 條規定：「有下列情形之一者，職業災害勞工得終止勞動契約」中提到「僱主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工」。\n   - 第 23 條規定：「非有下列情形之一者，僱主不得預告終止與職業災害勞工之勞動契約」中提到「僱主依第八十四條第一項第二款，或勞工依前條第一項第一款規定終止勞動契約者，僱主應按勞工工作年資，適用勞動基準法規定發給勞工退休金及適用勞動基準法規定發給勞工資遣費」。\n\n2. **舊法（職業災害勞工保護法）**：\n   - 第 84 條規定：「僱主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，僱主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，僱主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金」。\n   - 第 26 條規定：「僱主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工」。\n\n**實質內容比較**：\n- 新舊兩法在這兩個條文中都提到準用勞動基準法的規定。新法中更明確地指出僱主應按勞工工作年資發給退休金及資遣費，而舊法則是適用勞動基準法或勞工退休金條例規定。\n- 新法第 85 條提到的是終止勞動契約的情況，而舊法第 84 條則包括了預告終止勞動契約和終止勞動契約兩種情況。\n\n因此，新舊兩法在實質內容上有所區別，但都涉及準用勞動基準法的規定。",
+    "error": null,
+    "latency_s": 259.24,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 793,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+        "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。"
+      ],
+      "missing_spans": [
+        "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+        "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 2/4 facts (semantic fallback). Missed essential: ['職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR19",
+      "arm": "M2",
+      "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）分別規定在哪些條文？兩者的實質內容有沒有不同？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 259240.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0060041_職業災害勞工保護法_7",
+          "N0060041_職業災害勞工保護法_6",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2193,
+        "snr": 0.0675,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 627,
+        "retained_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 259240.0,
+        "raw_draft": "根據提供的事實清單內容：\n\n1. **新法（勞工職業災害保險及保護法）**：\n   - 第 85 條規定：「有下列情形之一者，職業災害勞工得終止勞動契約」中提到「僱主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工」。\n   - 第 23 條規定：「非有下列情形之一者，僱主不得預告終止與職業災害勞工之勞動契約」中提到「僱主依第八十四條第一項第二款，或勞工依前條第一項第一款規定終止勞動契約者，僱主應按勞工工作年資，適用勞動基準法規定發給勞工退休金及適用勞動基準法規定發給勞工資遣費」。\n\n2. **舊法（職業災害勞工保護法）**：\n   - 第 84 條規定：「僱主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，僱主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，僱主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金」。\n   - 第 26 條規定：「僱主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工」。\n\n**實質內容比較**：\n- 新舊兩法在這兩個條文中都提到準用勞動基準法的規定。新法中更明確地指出僱主應按勞工工作年資發給退休金及資遣費，而舊法則是適用勞動基準法或勞工退休金條例規定。\n- 新法第 85 條提到的是終止勞動契約的情況，而舊法第 84 條則包括了預告終止勞動契約和終止勞動契約兩種情況。\n\n因此，新舊兩法在實質內容上有所區別，但都涉及準用勞動基準法的規定。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容：\n\n1. **新法（勞工職業災害保險及保護法）**：\n   - 第 85 條規定：「有下列情形之一者，職業災害勞工得終止勞動契約」中提到「僱主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工」。\n   - 第 23 條規定：「非有下列情形之一者，僱主不得預告終止與職業災害勞工之勞動契約」中提到「僱主依第八十四條第一項第二款，或勞工依前條第一項第一款規定終止勞動契約者，僱主應按勞工工作年資，適用勞動基準法規定發給勞工退休金及適用勞動基準法規定發給勞工資遣費」。\n\n2. **舊法（職業災害勞工保護法）**：\n   - 第 84 條規定：「僱主依第八十四條第一項第一款、第三款，或勞工依前條第一項第二款至第四款規定終止勞動契約者，僱主應按勞工工作年資，適用勞動基準法或勞工退休金條例規定，發給勞工資遣費。但勞工同時符合勞動基準法第五十三條規定時，僱主應依勞動基準法第五十五條及第八十四條之二規定發給勞工退休金」。\n   - 第 26 條規定：「僱主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工」。\n\n**實質內容比較**：\n- 新舊兩法在這兩個條文中都提到準用勞動基準法的規定。新法中更明確地指出僱主應按勞工工作年資發給退休金及資遣費，而舊法則是適用勞動基準法或勞工退休金條例規定。\n- 新法第 85 條提到的是終止勞動契約的情況，而舊法第 84 條則包括了預告終止勞動契約和終止勞動契約兩種情況。\n\n因此，新舊兩法在實質內容上有所區別，但都涉及準用勞動基準法的規定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR19",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "run": 1,
+    "scenario_type": "Type-C",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+        "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+        "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+        "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/4 facts. Missed essential: ['雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": null,
+      "issues": [],
+      "passed": null,
+      "status": "not_evaluated"
+    },
+    "lineage": {
+      "query_id": "57-AGGR19",
+      "arm": "B2",
+      "question": "雇主預告終止職業災害勞工的勞動契約、或職業災害勞工終止勞動契約時，準用勞動基準法預告的規定，在新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）分別規定在哪些條文？兩者的實質內容有沒有不同？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": 0.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。",
+          "雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。",
+          "職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 4/4 gold facts missed (['雇主依第二十三條規定預告終止與職業災害勞工之勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依第二十四條第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。', '雇主依前項規定預告終止勞動契約時，準用勞動基準法規定預告勞工。', '職業災害勞工依前項第一款規定終止勞動契約時，準用勞動基準法規定預告雇主。'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  }
+]

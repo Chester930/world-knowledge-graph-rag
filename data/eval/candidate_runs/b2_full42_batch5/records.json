@@ -1,0 +1,2865 @@
+[
+  {
+    "question_id": "57-AGGR10",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《就業促進津貼實施辦法》：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 規定的金額基準是按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n   - 每人每次得發給的金額上限為每月最低工資。\n\n3. **職業訓練生活津貼**：\n   - 資料未明確記載，無法確認其具體發給金額或基準。",
+    "error": null,
+    "latency_s": 197.24,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 673,
+    "atomic_score": {
+      "supported_spans": [
+        "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+        "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+      ],
+      "missing_spans": [
+        "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR10",
+      "arm": "M1",
+      "question": "《就業促進津貼實施辦法》規定的求職交通補助金、臨時工作津貼、職業訓練生活津貼，三者的發給金額或基準各是什麼？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 197240.0,
+        "retrieved_chunk_ids": [
+          "N0090025_就業促進津貼實施辦法_2",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_5",
+          "N0090025_就業促進津貼實施辦法_7",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "missed_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2058,
+        "snr": 0.0496,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 613,
+        "retained_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "dropped_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 197240.0,
+        "raw_draft": "根據《就業促進津貼實施辦法》：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 規定的金額基準是按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n   - 每人每次得發給的金額上限為每月最低工資。\n\n3. **職業訓練生活津貼**：\n   - 資料未明確記載，無法確認其具體發給金額或基準。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《就業促進津貼實施辦法》：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 規定的金額基準是按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n   - 每人每次得發給的金額上限為每月最低工資。\n\n3. **職業訓練生活津貼**：\n   - 資料未明確記載，無法確認其具體發給金額或基準。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR10",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《就業促進津貼實施辦法》：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 津貼發給標準按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n\n3. **職業訓練生活津貼**：\n   - 事實清單中未明確記載其發給金額或基準。",
+    "error": null,
+    "latency_s": 184.46,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 652,
+    "atomic_score": {
+      "supported_spans": [
+        "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+        "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+      ],
+      "missing_spans": [
+        "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR10",
+      "arm": "M2",
+      "question": "《就業促進津貼實施辦法》規定的求職交通補助金、臨時工作津貼、職業訓練生活津貼，三者的發給金額或基準各是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 184460.0,
+        "retrieved_chunk_ids": [
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_5",
+          "N0090025_就業促進津貼實施辦法_2",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0090025_就業促進津貼實施辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "missed_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2005,
+        "snr": 0.0509,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 600,
+        "retained_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "dropped_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 184460.0,
+        "raw_draft": "根據《就業促進津貼實施辦法》：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 津貼發給標準按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n\n3. **職業訓練生活津貼**：\n   - 事實清單中未明確記載其發給金額或基準。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《就業促進津貼實施辦法》：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 津貼發給標準按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n\n3. **職業訓練生活津貼**：\n   - 事實清單中未明確記載其發給金額或基準。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR10",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《就業促進津貼實施辦法》相關規定：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 津貼發給標準按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n\n3. **職業訓練生活津貼**：\n   - 未明確記載具體金額或基準。根據《就業促進津貼實施辦法》第18條規定，全日制職業訓練的條件包括訓練期間一個月以上、每星期訓練四日以上、每日訓練日間四小時以上及每月總訓練時數一百小時以上等，但未明確提及具體發給金額。\n\n因此，求職交通補助金和臨時工作津貼的發給金額或基準已明確記載，而職業訓練生活津貼則未明確記載具體金額。",
+    "error": null,
+    "latency_s": 282.28,
+    "llm_calls": 7,
+    "generation_llm_calls": 7,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 814,
+    "atomic_score": {
+      "supported_spans": [
+        "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+        "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+      ],
+      "missing_spans": [
+        "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR10",
+      "arm": "B2",
+      "question": "《就業促進津貼實施辦法》規定的求職交通補助金、臨時工作津貼、職業訓練生活津貼，三者的發給金額或基準各是什麼？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 282280.0,
+        "retrieved_chunk_ids": [
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_5",
+          "N0090025_就業促進津貼實施辦法_2",
+          "N0090025_就業促進津貼實施辦法_5",
+          "N0090025_就業促進津貼實施辦法_0",
+          "N0090025_就業促進津貼實施辦法_7"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "missed_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2428,
+        "snr": 0.042,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 726,
+        "retained_exact_spans": [
+          "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+          "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。"
+        ],
+        "dropped_exact_spans": [
+          "第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 282280.0,
+        "raw_draft": "根據《就業促進津貼實施辦法》相關規定：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 津貼發給標準按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n\n3. **職業訓練生活津貼**：\n   - 未明確記載具體金額或基準。根據《就業促進津貼實施辦法》第18條規定，全日制職業訓練的條件包括訓練期間一個月以上、每星期訓練四日以上、每日訓練日間四小時以上及每月總訓練時數一百小時以上等，但未明確提及具體發給金額。\n\n因此，求職交通補助金和臨時工作津貼的發給金額或基準已明確記載，而職業訓練生活津貼則未明確記載具體金額。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《就業促進津貼實施辦法》相關規定：\n\n1. **求職交通補助金**：\n   - 每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。\n   - 每人每年度以發給四次為限。\n\n2. **臨時工作津貼**：\n   - 津貼發給標準按中央主管機關公告之每小時最低工資核給，且不超過每月最低工資，最長六個月。\n\n3. **職業訓練生活津貼**：\n   - 未明確記載具體金額或基準。根據《就業促進津貼實施辦法》第18條規定，全日制職業訓練的條件包括訓練期間一個月以上、每星期訓練四日以上、每日訓練日間四小時以上及每月總訓練時數一百小時以上等，但未明確提及具體發給金額。\n\n因此，求職交通補助金和臨時工作津貼的發給金額或基準已明確記載，而職業訓練生活津貼則未明確記載具體金額。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['第十八條津貼每月按最低工資百分之六十發給，最長以六個月為限。申請人為身心障礙者，最長發給一年。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 1,
+      "retrieval_calls": 5,
+      "reflect_calls": 5,
+      "rounds_per_subquestion": [
+        5
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR11",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《勞工退休金條例年金保險實施辦法》的法源依據如下：\n\n1. 根據【來源：N0030022_勞工退休金條例年金保險實施辦法，第1段】：\n   - 本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。\n\n因此，《勞工退休金條例年金保險實施辦法》的法源依據是《勞工退休金條例》中的第三十五條第三項及第三十七條。",
+    "error": null,
+    "latency_s": 49.59,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 689,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。"
+      ],
+      "missing_spans": [
+        "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+        "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['事業單位採行前項規定之年金保險者，應報請中央主管機關核准。', '年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR11",
+      "arm": "M1",
+      "question": "《勞工退休金條例年金保險實施辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 49590.0,
+        "retrieved_chunk_ids": [
+          "N0030022_勞工退休金條例年金保險實施辦法_0",
+          "N0030020_勞工退休金條例_0",
+          "N0030022_勞工退休金條例年金保險實施辦法_1",
+          "N0050031_勞工職業災害保險及保護法_27",
+          "N0030022_勞工退休金條例年金保險實施辦法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2206,
+        "snr": 0.0181,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 645,
+        "retained_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 49590.0,
+        "raw_draft": "根據提供的事實清單，《勞工退休金條例年金保險實施辦法》的法源依據如下：\n\n1. 根據【來源：N0030022_勞工退休金條例年金保險實施辦法，第1段】：\n   - 本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。\n\n因此，《勞工退休金條例年金保險實施辦法》的法源依據是《勞工退休金條例》中的第三十五條第三項及第三十七條。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《勞工退休金條例年金保險實施辦法》的法源依據如下：\n\n1. 根據【來源：N0030022_勞工退休金條例年金保險實施辦法，第1段】：\n   - 本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。\n\n因此，《勞工退休金條例年金保險實施辦法》的法源依據是《勞工退休金條例》中的第三十五條第三項及第三十七條。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['事業單位採行前項規定之年金保險者，應報請中央主管機關核准。', '年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['事業單位採行前項規定之年金保險者，應報請中央主管機關核准。', '年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR11",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "《勞工退休金條例年金保險實施辦法》的法源依據是勞動基準法第三十五條第三項及第三十七條。",
+    "error": null,
+    "latency_s": 50.14,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 651,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。"
+      ],
+      "missing_spans": [
+        "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+        "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['事業單位採行前項規定之年金保險者，應報請中央主管機關核准。', '年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR11",
+      "arm": "M2",
+      "question": "《勞工退休金條例年金保險實施辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 50140.0,
+        "retrieved_chunk_ids": [
+          "N0030022_勞工退休金條例年金保險實施辦法_0",
+          "N0030022_勞工退休金條例年金保險實施辦法_11",
+          "N0030020_勞工退休金條例_14",
+          "N0030020_勞工退休金條例_0",
+          "N0030020_勞工退休金條例_13"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。"
+        ],
+        "missed_exact_spans": [
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2237,
+        "snr": 0.0308,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 641,
+        "retained_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。"
+        ],
+        "dropped_exact_spans": [
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 50140.0,
+        "raw_draft": "《勞工退休金條例年金保險實施辦法》的法源依據是勞動基準法第三十五條第三項及第三十七條。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "《勞工退休金條例年金保險實施辦法》的法源依據是勞動基準法第三十五條第三項及第三十七條。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR11",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "《勞工退休金條例年金保險實施辦法》的法源依據是勞動基準法第三十五條第三項及第三十七條。",
+    "error": null,
+    "latency_s": 62.64,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 5,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 651,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。"
+      ],
+      "missing_spans": [
+        "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。",
+        "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['事業單位採行前項規定之年金保險者，應報請中央主管機關核准。', '年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR11",
+      "arm": "B2",
+      "question": "《勞工退休金條例年金保險實施辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 62640.0,
+        "retrieved_chunk_ids": [
+          "N0030022_勞工退休金條例年金保險實施辦法_0",
+          "N0030022_勞工退休金條例年金保險實施辦法_11",
+          "N0030020_勞工退休金條例_14",
+          "N0030020_勞工退休金條例_0",
+          "N0030020_勞工退休金條例_13"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。"
+        ],
+        "missed_exact_spans": [
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2237,
+        "snr": 0.0308,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 641,
+        "retained_exact_spans": [
+          "本辦法依勞工退休金條例（以下簡稱本條例）第三十五條第三項及第三十七條規定訂定之。",
+          "事業單位採行前項規定之年金保險者，應報請中央主管機關核准。"
+        ],
+        "dropped_exact_spans": [
+          "年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 62640.0,
+        "raw_draft": "《勞工退休金條例年金保險實施辦法》的法源依據是勞動基準法第三十五條第三項及第三十七條。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "《勞工退休金條例年金保險實施辦法》的法源依據是勞動基準法第三十五條第三項及第三十七條。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['年金保險之契約應由雇主擔任要保人，勞工為被保險人及受益人。事業單位以向一保險人投保為限。保險人之資格，由中央主管機關會同該保險業務之主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR12",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單：\n\n1. 根據勞工退休金條例第14條：\n   - 僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n\n2. 根據勞工退休金條例年金保險實施辦法第36條：\n   - 僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n因此，個人退休金專戶制度的最低提繳比例為勞工每月工資的6%，而年金保險制度的最低提繳比例也是勞工每月工資的6%。",
+    "error": null,
+    "latency_s": 57.68,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 672,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+        "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": false,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: [] Guard failures: ['法定起算日遺漏：未精確記載法規原文起算日「次月一日」。']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR12",
+      "arm": "M1",
+      "question": "雇主為勞工提繳退休金，個人退休金專戶制度（第14條）跟年金保險制度（第36條）的最低提繳比例各是多少？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 57680.0,
+        "retrieved_chunk_ids": [
+          "N0030020_勞工退休金條例_6",
+          "N0030022_勞工退休金條例年金保險實施辦法_5",
+          "N0030020_勞工退休金條例_14",
+          "N0030020_勞工退休金條例_8",
+          "N0030020_勞工退休金條例_16"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2209,
+        "snr": 0.0303,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 624,
+        "retained_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 57680.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 根據勞工退休金條例第14條：\n   - 僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n\n2. 根據勞工退休金條例年金保險實施辦法第36條：\n   - 僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n因此，個人退休金專戶制度的最低提繳比例為勞工每月工資的6%，而年金保險制度的最低提繳比例也是勞工每月工資的6%。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": true,
+        "guard_reasons": [
+          "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+        ],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 根據勞工退休金條例第14條：\n   - 僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n\n2. 根據勞工退休金條例年金保險實施辦法第36條：\n   - 僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n因此，個人退休金專戶制度的最低提繳比例為勞工每月工資的6%，而年金保險制度的最低提繳比例也是勞工每月工資的6%。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "InceptionAnchorGuard",
+      "failure_reason": "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。",
+      "extra_constrained_note": "【法定起算日硬約束】法規原文明確規定期間起算時點為「次月一日」！嚴禁擅自平滑化或改寫為「當日」或「發生當日」，必須精確按照「次月一日」作答。"
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR12",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單：\n\n1. 第 14 條：僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n2. 第 36 條：僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n根據上述兩條事實：\n\n- 個人退休金專戶制度的最低提繳比例為勞工每月工資百分之六。\n- 年金保險制度的最低提繳比例亦為勞工每月工資百分之六。",
+    "error": null,
+    "latency_s": 59.35,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 685,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+        "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": false,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: [] Guard failures: ['法定起算日遺漏：未精確記載法規原文起算日「次月一日」。']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR12",
+      "arm": "M2",
+      "question": "雇主為勞工提繳退休金，個人退休金專戶制度（第14條）跟年金保險制度（第36條）的最低提繳比例各是多少？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 59350.0,
+        "retrieved_chunk_ids": [
+          "N0030020_勞工退休金條例_16",
+          "N0030020_勞工退休金條例_6",
+          "N0030020_勞工退休金條例_14",
+          "N0030022_勞工退休金條例年金保險實施辦法_11",
+          "N0030022_勞工退休金條例年金保險實施辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2276,
+        "snr": 0.0294,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 642,
+        "retained_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 59350.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 第 14 條：僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n2. 第 36 條：僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n根據上述兩條事實：\n\n- 個人退休金專戶制度的最低提繳比例為勞工每月工資百分之六。\n- 年金保險制度的最低提繳比例亦為勞工每月工資百分之六。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": true,
+        "guard_reasons": [
+          "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+        ],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 第 14 條：僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n2. 第 36 條：僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n根據上述兩條事實：\n\n- 個人退休金專戶制度的最低提繳比例為勞工每月工資百分之六。\n- 年金保險制度的最低提繳比例亦為勞工每月工資百分之六。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "InceptionAnchorGuard",
+      "failure_reason": "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。",
+      "extra_constrained_note": "【法定起算日硬約束】法規原文明確規定期間起算時點為「次月一日」！嚴禁擅自平滑化或改寫為「當日」或「發生當日」，必須精確按照「次月一日」作答。"
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR12",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據提供的事實清單：\n\n1. 第 14 條：僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n2. 第 36 條：僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n根據上述兩條事實：\n\n- 個人退休金專戶制度的最低提繳比例為勞工每月工資百分之六。\n- 年金保險制度的最低提繳比例亦為勞工每月工資百分之六。",
+    "error": null,
+    "latency_s": 60.63,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 685,
+    "atomic_score": {
+      "supported_spans": [
+        "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+        "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": false,
+      "details": "Hit 2/2 facts (semantic fallback). Missed essential: [] Guard failures: ['法定起算日遺漏：未精確記載法規原文起算日「次月一日」。']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR12",
+      "arm": "B2",
+      "question": "雇主為勞工提繳退休金，個人退休金專戶制度（第14條）跟年金保險制度（第36條）的最低提繳比例各是多少？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 60630.0,
+        "retrieved_chunk_ids": [
+          "N0030020_勞工退休金條例_16",
+          "N0030020_勞工退休金條例_6",
+          "N0030020_勞工退休金條例_14",
+          "N0030022_勞工退休金條例年金保險實施辦法_11",
+          "N0030022_勞工退休金條例年金保險實施辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2276,
+        "snr": 0.0294,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 642,
+        "retained_exact_spans": [
+          "雇主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。",
+          "雇主每月負擔之年金保險費，不得低於勞工每月工資百分之六。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 60630.0,
+        "raw_draft": "根據提供的事實清單：\n\n1. 第 14 條：僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n2. 第 36 條：僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n根據上述兩條事實：\n\n- 個人退休金專戶制度的最低提繳比例為勞工每月工資百分之六。\n- 年金保險制度的最低提繳比例亦為勞工每月工資百分之六。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": true,
+        "guard_reasons": [
+          "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。"
+        ],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單：\n\n1. 第 14 條：僱主應為第七條第一項規定之勞工負擔提繳之退休金，不得低於勞工每月工資百分之六。\n2. 第 36 條：僱主每月負擔之年金保險費，不得低於勞工每月工資百分之六。\n\n根據上述兩條事實：\n\n- 個人退休金專戶制度的最低提繳比例為勞工每月工資百分之六。\n- 年金保險制度的最低提繳比例亦為勞工每月工資百分之六。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "InceptionAnchorGuard",
+      "failure_reason": "法定起算日遺漏：未精確記載法規原文起算日「次月一日」。",
+      "extra_constrained_note": "【法定起算日硬約束】法規原文明確規定期間起算時點為「次月一日」！嚴禁擅自平滑化或改寫為「當日」或「發生當日」，必須精確按照「次月一日」作答。"
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR13",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》第三十四條第三項及第四十條第二項。\n\n相關事實如下：\n【來源：N0090002_私立就業服務機構許可及管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+    "error": null,
+    "latency_s": 29.1,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 682,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。"
+      ],
+      "missing_spans": [
+        "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。",
+        "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR13",
+      "arm": "M1",
+      "question": "《私立就業服務機構許可及管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 29100.0,
+        "retrieved_chunk_ids": [
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_0",
+          "N0090002_私立就業服務機構許可及管理辦法_18",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_22"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "missed_exact_spans": [
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 2194,
+        "snr": 0.0447,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 643,
+        "retained_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "dropped_exact_spans": [
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 29100.0,
+        "raw_draft": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》第三十四條第三項及第四十條第二項。\n\n相關事實如下：\n【來源：N0090002_私立就業服務機構許可及管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》第三十四條第三項及第四十條第二項。\n\n相關事實如下：\n【來源：N0090002_私立就業服務機構許可及管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR13",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。\n\n這可以從以下事實推導得出：\n- 第34條提到「私立就業服務機構及其分支機構，應向主管機關申請設立許可」，並指出「其許可證並應定期更新之」。\n- 第10條提到「除經許可外，不得以其他形式設立分支機構，從事就業服務業務」。\n\n這些規定均出自《就業服務法》，因此可以確認，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。",
+    "error": null,
+    "latency_s": 31.72,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 679,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。"
+      ],
+      "missing_spans": [
+        "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。",
+        "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR13",
+      "arm": "M2",
+      "question": "《私立就業服務機構許可及管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 31720.0,
+        "retrieved_chunk_ids": [
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_18",
+          "N0090002_私立就業服務機構許可及管理辦法_4",
+          "N0090002_私立就業服務機構許可及管理辦法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "missed_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2155,
+        "snr": 0.0274,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 628,
+        "retained_exact_spans": [
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "dropped_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 31720.0,
+        "raw_draft": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。\n\n這可以從以下事實推導得出：\n- 第34條提到「私立就業服務機構及其分支機構，應向主管機關申請設立許可」，並指出「其許可證並應定期更新之」。\n- 第10條提到「除經許可外，不得以其他形式設立分支機構，從事就業服務業務」。\n\n這些規定均出自《就業服務法》，因此可以確認，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。\n\n這可以從以下事實推導得出：\n- 第34條提到「私立就業服務機構及其分支機構，應向主管機關申請設立許可」，並指出「其許可證並應定期更新之」。\n- 第10條提到「除經許可外，不得以其他形式設立分支機構，從事就業服務業務」。\n\n這些規定均出自《就業服務法》，因此可以確認，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR13",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。\n\n這可以從以下事實推導得出：\n- 第34條提到「私立就業服務機構及其分支機構，應向主管機關申請設立許可」，並指出「其許可證並應定期更新之」。\n- 第10條提到「除經許可外，不得以其他形式設立分支機構，從事就業服務業務」。\n\n這些規定均出自《就業服務法》，因此可以確認，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。",
+    "error": null,
+    "latency_s": 37.18,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 679,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。"
+      ],
+      "missing_spans": [
+        "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。",
+        "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR13",
+      "arm": "B2",
+      "question": "《私立就業服務機構許可及管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 37180.0,
+        "retrieved_chunk_ids": [
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_18",
+          "N0090002_私立就業服務機構許可及管理辦法_4",
+          "N0090002_私立就業服務機構許可及管理辦法_15"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "missed_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.3333,
+        "retrieved_char_count": 2155,
+        "snr": 0.0274,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 628,
+        "retained_exact_spans": [
+          "第一項私立就業服務機構及其分支機構之設立許可條件、期間、廢止許可、許可證更新及其他管理事項之辦法，由中央主管機關定之。"
+        ],
+        "dropped_exact_spans": [
+          "本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。",
+          "前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 37180.0,
+        "raw_draft": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。\n\n這可以從以下事實推導得出：\n- 第34條提到「私立就業服務機構及其分支機構，應向主管機關申請設立許可」，並指出「其許可證並應定期更新之」。\n- 第10條提到「除經許可外，不得以其他形式設立分支機構，從事就業服務業務」。\n\n這些規定均出自《就業服務法》，因此可以確認，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。\n\n這可以從以下事實推導得出：\n- 第34條提到「私立就業服務機構及其分支機構，應向主管機關申請設立許可」，並指出「其許可證並應定期更新之」。\n- 第10條提到「除經許可外，不得以其他形式設立分支機構，從事就業服務業務」。\n\n這些規定均出自《就業服務法》，因此可以確認，《私立就業服務機構許可及管理辦法》的法源依據是《就業服務法》。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 2/3 gold facts missed (['本辦法依就業服務法（以下簡稱本法）第三十四條第三項及第四十條第二項規定訂定之。', '前項第十七款之人數、比率及查核方式等事項，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR14",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置至少1名就業服務專業人員。\n- 若從業人員人數為6至10人之間（含），則需配置至少2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名就業服務專業人員。",
+    "error": null,
+    "latency_s": 107.34,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 711,
+    "atomic_score": {
+      "supported_spans": [
+        "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+        "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+        "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR14",
+      "arm": "M1",
+      "question": "私立就業服務機構依從業人員人數多寡，應配置多少名就業服務專業人員？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 107340.0,
+        "retrieved_chunk_ids": [
+          "N0090002_私立就業服務機構許可及管理辦法_2",
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_4",
+          "N0090002_私立就業服務機構許可及管理辦法_1",
+          "N0090001_就業服務法_9"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2172,
+        "snr": 0.052,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 627,
+        "retained_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 107340.0,
+        "raw_draft": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置至少1名就業服務專業人員。\n- 若從業人員人數為6至10人之間（含），則需配置至少2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名就業服務專業人員。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置至少1名就業服務專業人員。\n- 若從業人員人數為6至10人之間（含），則需配置至少2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名就業服務專業人員。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR14",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置1名就業服務專業人員。\n- 若從業人員人數為6至10人之間，則需配置2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名。\n\n事實清單中未提供具體的分段對照表來套用特定數值，因此無法根據問題給出的具體從業人員人數進行更詳細的分段推論。",
+    "error": null,
+    "latency_s": 96.28,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 721,
+    "atomic_score": {
+      "supported_spans": [
+        "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+        "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+        "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR14",
+      "arm": "M2",
+      "question": "私立就業服務機構依從業人員人數多寡，應配置多少名就業服務專業人員？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 96280.0,
+        "retrieved_chunk_ids": [
+          "N0090002_私立就業服務機構許可及管理辦法_2",
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_1",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2157,
+        "snr": 0.0524,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 626,
+        "retained_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 96280.0,
+        "raw_draft": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置1名就業服務專業人員。\n- 若從業人員人數為6至10人之間，則需配置2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名。\n\n事實清單中未提供具體的分段對照表來套用特定數值，因此無法根據問題給出的具體從業人員人數進行更詳細的分段推論。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置1名就業服務專業人員。\n- 若從業人員人數為6至10人之間，則需配置2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名。\n\n事實清單中未提供具體的分段對照表來套用特定數值，因此無法根據問題給出的具體從業人員人數進行更詳細的分段推論。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR14",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置1名就業服務專業人員。\n- 若從業人員人數為6至10人之間，則需配置2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名。\n\n事實清單中未提供具體的分段對照表來套用特定數值，因此無法根據問題給出的具體從業人員人數進行更詳細的分段推論。",
+    "error": null,
+    "latency_s": 108.91,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 1,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 721,
+    "atomic_score": {
+      "supported_spans": [
+        "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+        "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+        "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR14",
+      "arm": "B2",
+      "question": "私立就業服務機構依從業人員人數多寡，應配置多少名就業服務專業人員？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 108910.0,
+        "retrieved_chunk_ids": [
+          "N0090002_私立就業服務機構許可及管理辦法_2",
+          "N0090001_就業服務法_8",
+          "N0090002_私立就業服務機構許可及管理辦法_1",
+          "N0090002_私立就業服務機構許可及管理辦法_21",
+          "N0090002_私立就業服務機構許可及管理辦法_4"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2157,
+        "snr": 0.0524,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 626,
+        "retained_exact_spans": [
+          "從業人員人數在五人以下者，應置就業服務專業人員至少一人。",
+          "從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。",
+          "從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 108910.0,
+        "raw_draft": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置1名就業服務專業人員。\n- 若從業人員人數為6至10人之間，則需配置2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名。\n\n事實清單中未提供具體的分段對照表來套用特定數值，因此無法根據問題給出的具體從業人員人數進行更詳細的分段推論。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據上述事實清單中的第6條，私立就業服務機構應配置的就業服務專業人員數量依從業人員人數而定：\n\n1. 從業人員人數在五人以下者，應置就業服務專業人員至少一人。\n2. 從業人員人數在六人以上十人以下者，應置就業服務專業人員至少二人。\n3. 從業人員人數逾十人者，應置就業服務專業人員至少三人，並自第十一人起，每逾十人應另增置就業服務專業人員一人。\n\n因此，私立就業服務機構依從業人員人數多寡，應配置的就業服務專業人員如下：\n\n- 若從業人員人數為5人以下，則需配置1名就業服務專業人員。\n- 若從業人員人數為6至10人之間，則需配置2名就業服務專業人員。\n- 若從業人員人數超過10人，則需配置至少3名就業服務專業人員，並且每增加10人需再增設1名。\n\n事實清單中未提供具體的分段對照表來套用特定數值，因此無法根據問題給出的具體從業人員人數進行更詳細的分段推論。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR15",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是《職業安全衛生法》第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+    "error": null,
+    "latency_s": 33.18,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+      ],
+      "missing_spans": [
+        "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 2,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR15",
+      "arm": "M1",
+      "question": "《職業安全衛生管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 33180.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060001_職業安全衛生法_1",
+          "N0060022_勞工健康保護規則_0",
+          "N0060041_職業災害勞工保護法_0",
+          "N0060001_職業安全衛生法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2128,
+        "snr": 0.0155,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 620,
+        "retained_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 33180.0,
+        "raw_draft": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是《職業安全衛生法》第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是《職業安全衛生法》第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR15",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+    "error": null,
+    "latency_s": 29.04,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+      ],
+      "missing_spans": [
+        "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 2,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR15",
+      "arm": "M2",
+      "question": "《職業安全衛生管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 29040.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060022_勞工健康保護規則_0",
+          "N0060027_職業安全衛生管理辦法_5",
+          "N0060027_職業安全衛生管理辦法_8",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2159,
+        "snr": 0.0153,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 621,
+        "retained_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 29040.0,
+        "raw_draft": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR15",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+    "error": null,
+    "latency_s": 31.03,
+    "llm_calls": 1,
+    "generation_llm_calls": 1,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 654,
+    "atomic_score": {
+      "supported_spans": [
+        "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+      ],
+      "missing_spans": [
+        "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 2,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR15",
+      "arm": "B2",
+      "question": "《職業安全衛生管理辦法》的法源依據是什麼？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 31030.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060022_勞工健康保護規則_0",
+          "N0060027_職業安全衛生管理辦法_5",
+          "N0060027_職業安全衛生管理辦法_8",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "missed_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "recall_rate": 0.5,
+        "retrieved_char_count": 2159,
+        "snr": 0.0153,
+        "chain_completeness": 0.5
+      },
+      "stage2_context": {
+        "total_context_tokens": 621,
+        "retained_exact_spans": [
+          "本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。"
+        ],
+        "dropped_exact_spans": [
+          "前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 31030.0,
+        "raw_draft": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "根據提供的事實清單，《職業安全衛生管理辦法》的法源依據是職業安全衛生法第二十三條第五項。\n\n相關事實如下：\n\n【來源：N0060027_職業安全衛生管理辦法，第1段】\n第 一 章 總則\n\n第 1 條\n\n本辦法依職業安全衛生法（以下簡稱本法）第二十三條第五項規定訂定之。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/2 gold facts missed (['前四項之事業單位規模、性質、安全衛生組織、人員、職責、管理、自動檢查、職業安全衛生管理系統建置及其他相關事項之辦法，由中央主管機關定之。'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR16",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（第2條）。\n   - 労工人數在一百人以上者應設置直接隸屬僱主之專責一級管理單位（第2-1條）。\n\n2. 第二類事業：\n   - 具中度風險者（第2條）。\n   - 労工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（第2-1條）；勞工人數在五百人以上者亦應設置一級管理單位（第3條）。\n\n因此，第一類事業與第二類事業的風險等級及應設置管理單位的人數門檻如下：\n\n- 第一類事業：具顯著風險，勞工人數在一百人以上需設置專責一級管理單位。\n- 第二類事業：具中度風險，勞工人數在三百人以上需設置一級管理單位；勞工人數在五百人以上亦需設置一級管理單位。",
+    "error": null,
+    "latency_s": 228.97,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 714,
+    "atomic_score": {
+      "supported_spans": [
+        "第一類事業：具顯著風險者。",
+        "第二類事業：具中度風險者。",
+        "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+        "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 4/4 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 5,
+      "issue_count": 2,
+      "issues": [
+        {
+          "rule_id": "aggr16-head-office-500-condition",
+          "kind": "conditional",
+          "description": "第6條500人規則須明示事業設有總機構的適用前提。",
+          "missing_conditions": [
+            "事業設有總機構"
+          ]
+        },
+        {
+          "rule_id": "aggr16-second-category-500-role",
+          "kind": "role_mismatch",
+          "description": "第二類500人總機構規則是設一級管理單位，不是專責一級。",
+          "missing_conditions": []
+        }
+      ],
+      "passed": false
+    },
+    "lineage": {
+      "query_id": "57-AGGR16",
+      "arm": "M1",
+      "question": "《職業安全衛生管理辦法》規定的第一類事業與第二類事業，風險等級與應設置管理單位的人數門檻各是什麼？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 228970.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060027_職業安全衛生管理辦法_2",
+          "N0060027_職業安全衛生管理辦法_3"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2247,
+        "snr": 0.0441,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 636,
+        "retained_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 228970.0,
+        "raw_draft": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（第2條）。\n   - 労工人數在一百人以上者應設置直接隸屬僱主之專責一級管理單位（第2-1條）。\n\n2. 第二類事業：\n   - 具中度風險者（第2條）。\n   - 労工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（第2-1條）；勞工人數在五百人以上者亦應設置一級管理單位（第3條）。\n\n因此，第一類事業與第二類事業的風險等級及應設置管理單位的人數門檻如下：\n\n- 第一類事業：具顯著風險，勞工人數在一百人以上需設置專責一級管理單位。\n- 第二類事業：具中度風險，勞工人數在三百人以上需設置一級管理單位；勞工人數在五百人以上亦需設置一級管理單位。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（第2條）。\n   - 労工人數在一百人以上者應設置直接隸屬僱主之專責一級管理單位（第2-1條）。\n\n2. 第二類事業：\n   - 具中度風險者（第2條）。\n   - 労工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（第2-1條）；勞工人數在五百人以上者亦應設置一級管理單位（第3條）。\n\n因此，第一類事業與第二類事業的風險等級及應設置管理單位的人數門檻如下：\n\n- 第一類事業：具顯著風險，勞工人數在一百人以上需設置專責一級管理單位。\n- 第二類事業：具中度風險，勞工人數在三百人以上需設置一級管理單位；勞工人數在五百人以上亦需設置一級管理單位。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR16",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（未明確指出具體人數門檻）。\n\n2. 第二類事業：\n   - 具中度風險者，勞工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（未明確指出具體人數門檻）。\n\n事實清單中並未明確指出第一類與第二類事業的具體風險等級分界線及應設置管理單位的人數門檻，因此無法確認。",
+    "error": null,
+    "latency_s": 163.84,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "第一類事業：具顯著風險者。",
+        "第二類事業：具中度風險者。",
+        "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+      ],
+      "missing_spans": [
+        "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 5,
+      "issue_count": 1,
+      "issues": [
+        {
+          "rule_id": "aggr16-refusal-with-gold",
+          "kind": "out_of_scope",
+          "description": "已提供必要 Fact 時，不應宣稱無法確認風險等級或門檻。",
+          "missing_conditions": []
+        }
+      ],
+      "passed": false
+    },
+    "lineage": {
+      "query_id": "57-AGGR16",
+      "arm": "M2",
+      "question": "《職業安全衛生管理辦法》規定的第一類事業與第二類事業，風險等級與應設置管理單位的人數門檻各是什麼？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 163840.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_3",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2247,
+        "snr": 0.0441,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 636,
+        "retained_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 163840.0,
+        "raw_draft": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（未明確指出具體人數門檻）。\n\n2. 第二類事業：\n   - 具中度風險者，勞工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（未明確指出具體人數門檻）。\n\n事實清單中並未明確指出第一類與第二類事業的具體風險等級分界線及應設置管理單位的人數門檻，因此無法確認。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（未明確指出具體人數門檻）。\n\n2. 第二類事業：\n   - 具中度風險者，勞工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（未明確指出具體人數門檻）。\n\n事實清單中並未明確指出第一類與第二類事業的具體風險等級分界線及應設置管理單位的人數門檻，因此無法確認。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR16",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（未明確指出具體人數門檻）。\n\n2. 第二類事業：\n   - 具中度風險者，勞工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（未明確指出具體人數門檻）。\n\n事實清單中並未明確指出第一類與第二類事業的具體風險等級分界線及應設置管理單位的人數門檻，因此無法確認。",
+    "error": null,
+    "latency_s": 174.4,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "第一類事業：具顯著風險者。",
+        "第二類事業：具中度風險者。",
+        "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+      ],
+      "missing_spans": [
+        "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 5,
+      "issue_count": 1,
+      "issues": [
+        {
+          "rule_id": "aggr16-refusal-with-gold",
+          "kind": "out_of_scope",
+          "description": "已提供必要 Fact 時，不應宣稱無法確認風險等級或門檻。",
+          "missing_conditions": []
+        }
+      ],
+      "passed": false
+    },
+    "lineage": {
+      "query_id": "57-AGGR16",
+      "arm": "B2",
+      "question": "《職業安全衛生管理辦法》規定的第一類事業與第二類事業，風險等級與應設置管理單位的人數門檻各是什麼？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 174400.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_3",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2247,
+        "snr": 0.0441,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 636,
+        "retained_exact_spans": [
+          "第一類事業：具顯著風險者。",
+          "第二類事業：具中度風險者。",
+          "第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。",
+          "第二類事業勞工人數在三百人以上者，應設直接隸屬雇主之一級管理單位。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 174400.0,
+        "raw_draft": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（未明確指出具體人數門檻）。\n\n2. 第二類事業：\n   - 具中度風險者，勞工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（未明確指出具體人數門檻）。\n\n事實清單中並未明確指出第一類與第二類事業的具體風險等級分界線及應設置管理單位的人數門檻，因此無法確認。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據《職業安全衛生管理辦法》：\n\n1. 第一類事業：\n   - 具顯著風險者（未明確指出具體人數門檻）。\n\n2. 第二類事業：\n   - 具中度風險者，勞工人數在三百人以上者應設置直接隸屬僱主之一級管理單位（未明確指出具體人數門檻）。\n\n事實清單中並未明確指出第一類與第二類事業的具體風險等級分界線及應設置管理單位的人數門檻，因此無法確認。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['第一類事業之事業單位勞工人數在一百人以上者，應設直接隸屬雇主之專責一級管理單位。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR17",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "《職業安全衛生管理辦法》將事業歸為三種風險等級，分別是第一類、第二類及第三類事業。其中：\n\n- 第一類事業：具顯著風險者。\n- 第二類事業：具中度風險者。\n- 第三類事業：具低度風險者。\n\n資料未明確記載，無法確認各類事業的具體人數區間或對應的風險等級細分。",
+    "error": null,
+    "latency_s": 96.13,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 668,
+    "atomic_score": {
+      "supported_spans": [
+        "一、第一類事業：具顯著風險者。"
+      ],
+      "missing_spans": [
+        "二、第二類事業：具中度風險者。",
+        "三、第三類事業：具低度風險者。"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['二、第二類事業：具中度風險者。', '三、第三類事業：具低度風險者。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 1,
+      "issues": [
+        {
+          "rule_id": "aggr17-management-threshold-out-of-scope",
+          "kind": "out_of_scope",
+          "description": "風險分類題不應延伸回答管理組織或人數門檻。",
+          "missing_conditions": []
+        }
+      ],
+      "passed": false
+    },
+    "lineage": {
+      "query_id": "57-AGGR17",
+      "arm": "M1",
+      "question": "《職業安全衛生管理辦法》將第一類、第二類及第三類事業各自歸為何種風險等級？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 96130.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060027_職業安全衛生管理辦法_8",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2229,
+        "snr": 0.0202,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 636,
+        "retained_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 96130.0,
+        "raw_draft": "《職業安全衛生管理辦法》將事業歸為三種風險等級，分別是第一類、第二類及第三類事業。其中：\n\n- 第一類事業：具顯著風險者。\n- 第二類事業：具中度風險者。\n- 第三類事業：具低度風險者。\n\n資料未明確記載，無法確認各類事業的具體人數區間或對應的風險等級細分。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "《職業安全衛生管理辦法》將事業歸為三種風險等級，分別是第一類、第二類及第三類事業。其中：\n\n- 第一類事業：具顯著風險者。\n- 第二類事業：具中度風險者。\n- 第三類事業：具低度風險者。\n\n資料未明確記載，無法確認各類事業的具體人數區間或對應的風險等級細分。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['二、第二類事業：具中度風險者。', '三、第三類事業：具低度風險者。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['二、第二類事業：具中度風險者。', '三、第三類事業：具低度風險者。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR17",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "《職業安全衛生管理辦法》將事業區分為三種風險等級，分別是：\n\n一、第一類事業：具顯著風險者。\n\n二、第二類事業：具中度風險者。\n\n三、第三類事業：具低度風險者。",
+    "error": null,
+    "latency_s": 118.72,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 638,
+    "atomic_score": {
+      "supported_spans": [
+        "一、第一類事業：具顯著風險者。",
+        "二、第二類事業：具中度風險者。",
+        "三、第三類事業：具低度風險者。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR17",
+      "arm": "M2",
+      "question": "《職業安全衛生管理辦法》將第一類、第二類及第三類事業各自歸為何種風險等級？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 118720.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060022_勞工健康保護規則_0",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2158,
+        "snr": 0.0209,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 618,
+        "retained_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 118720.0,
+        "raw_draft": "《職業安全衛生管理辦法》將事業區分為三種風險等級，分別是：\n\n一、第一類事業：具顯著風險者。\n\n二、第二類事業：具中度風險者。\n\n三、第三類事業：具低度風險者。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "《職業安全衛生管理辦法》將事業區分為三種風險等級，分別是：\n\n一、第一類事業：具顯著風險者。\n\n二、第二類事業：具中度風險者。\n\n三、第三類事業：具低度風險者。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR17",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-D",
+    "answer": "《職業安全衛生管理辦法》將事業區分為三種風險等級，分別是：\n\n一、第一類事業：具顯著風險者。\n\n二、第二類事業：具中度風險者。\n\n三、第三類事業：具低度風險者。",
+    "error": null,
+    "latency_s": 109.74,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 638,
+    "atomic_score": {
+      "supported_spans": [
+        "一、第一類事業：具顯著風險者。",
+        "二、第二類事業：具中度風險者。",
+        "三、第三類事業：具低度風險者。"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR17",
+      "arm": "B2",
+      "question": "《職業安全衛生管理辦法》將第一類、第二類及第三類事業各自歸為何種風險等級？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 109740.0,
+        "retrieved_chunk_ids": [
+          "N0060027_職業安全衛生管理辦法_0",
+          "N0060027_職業安全衛生管理辦法_4",
+          "N0060027_職業安全衛生管理辦法_1",
+          "N0060022_勞工健康保護規則_0",
+          "N0060027_職業安全衛生管理辦法_2"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2158,
+        "snr": 0.0209,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 618,
+        "retained_exact_spans": [
+          "一、第一類事業：具顯著風險者。",
+          "二、第二類事業：具中度風險者。",
+          "三、第三類事業：具低度風險者。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 109740.0,
+        "raw_draft": "《職業安全衛生管理辦法》將事業區分為三種風險等級，分別是：\n\n一、第一類事業：具顯著風險者。\n\n二、第二類事業：具中度風險者。\n\n三、第三類事業：具低度風險者。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "《職業安全衛生管理辦法》將事業區分為三種風險等級，分別是：\n\n一、第一類事業：具顯著風險者。\n\n二、第二類事業：具中度風險者。\n\n三、第三類事業：具低度風險者。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR18",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條和第24條明確指出，應由中央衛生福利主管機關醫院評鑑合格醫院進行認定。\n2. 舊法（職業災害勞工保護法）未在提供的事實清單中提及具體的認定機構。\n\n因此，根據上述內容，新法規定由中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作，而舊法未有相關規定。",
+    "error": null,
+    "latency_s": 152.81,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 600,
+    "atomic_score": {
+      "supported_spans": [
+        "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+        "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+      ],
+      "missing_spans": [
+        "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+        "經公立醫療機構認定身心障礙不堪勝任工作。"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 2/4 facts (semantic fallback). Missed essential: ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。', '經公立醫療機構認定身心障礙不堪勝任工作。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR18",
+      "arm": "M1",
+      "question": "職業災害勞工經醫療終止後，若要認定其「身心障礙不堪勝任工作」，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於由哪種機構認定的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 152810.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0060041_職業災害勞工保護法_6",
+          "N0050031_勞工職業災害保險及保護法_37",
+          "N0050031_勞工職業災害保險及保護法_46",
+          "N0050031_勞工職業災害保險及保護法_45"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1863,
+        "snr": 0.0698,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 545,
+        "retained_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 152810.0,
+        "raw_draft": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條和第24條明確指出，應由中央衛生福利主管機關醫院評鑑合格醫院進行認定。\n2. 舊法（職業災害勞工保護法）未在提供的事實清單中提及具體的認定機構。\n\n因此，根據上述內容，新法規定由中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作，而舊法未有相關規定。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條和第24條明確指出，應由中央衛生福利主管機關醫院評鑑合格醫院進行認定。\n2. 舊法（職業災害勞工保護法）未在提供的事實清單中提及具體的認定機構。\n\n因此，根據上述內容，新法規定由中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作，而舊法未有相關規定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。', '經公立醫療機構認定身心障礙不堪勝任工作。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。', '經公立醫療機構認定身心障礙不堪勝任工作。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR18",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條、第24條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n\n2. 舊法（職業災害勞工保護法）第84條亦有類似規定，同樣指出經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，兩者對於由哪種機構認定的規定是相同的，都是由公立或中央衛生福利主管機關醫院評鑑合格醫院進行認定。資料未明確記載，無法確認有其他不同之處。",
+    "error": null,
+    "latency_s": 148.76,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 670,
+    "atomic_score": {
+      "supported_spans": [
+        "經公立醫療機構認定身心障礙不堪勝任工作。",
+        "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+        "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+      ],
+      "missing_spans": [
+        "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR18",
+      "arm": "M2",
+      "question": "職業災害勞工經醫療終止後，若要認定其「身心障礙不堪勝任工作」，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於由哪種機構認定的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 148760.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0060041_職業災害勞工保護法_6",
+          "N0050031_勞工職業災害保險及保護法_37",
+          "N0050031_勞工職業災害保險及保護法_45",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2101,
+        "snr": 0.0619,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 606,
+        "retained_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 148760.0,
+        "raw_draft": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條、第24條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n\n2. 舊法（職業災害勞工保護法）第84條亦有類似規定，同樣指出經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，兩者對於由哪種機構認定的規定是相同的，都是由公立或中央衛生福利主管機關醫院評鑑合格醫院進行認定。資料未明確記載，無法確認有其他不同之處。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條、第24條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n\n2. 舊法（職業災害勞工保護法）第84條亦有類似規定，同樣指出經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，兩者對於由哪種機構認定的規定是相同的，都是由公立或中央衛生福利主管機關醫院評鑑合格醫院進行認定。資料未明確記載，無法確認有其他不同之處。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-AGGR18",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條、第24條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n\n2. 舊法（職業災害勞工保護法）第84條亦有類似規定，同樣指出經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，兩者對於由哪種機構認定的規定是相同的，都是由公立或中央衛生福利主管機關醫院評鑑合格醫院進行認定。資料未明確記載，無法確認有其他不同之處。",
+    "error": null,
+    "latency_s": 123.29,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 670,
+    "atomic_score": {
+      "supported_spans": [
+        "經公立醫療機構認定身心障礙不堪勝任工作。",
+        "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+        "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+      ],
+      "missing_spans": [
+        "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 1,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-AGGR18",
+      "arm": "B2",
+      "question": "職業災害勞工經醫療終止後，若要認定其「身心障礙不堪勝任工作」，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於由哪種機構認定的規定有什麼不同？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 123290.0,
+        "retrieved_chunk_ids": [
+          "N0050031_勞工職業災害保險及保護法_38",
+          "N0060041_職業災害勞工保護法_6",
+          "N0050031_勞工職業災害保險及保護法_37",
+          "N0050031_勞工職業災害保險及保護法_45",
+          "N0060041_職業災害勞工保護法_8"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2101,
+        "snr": 0.0619,
+        "chain_completeness": 1.0
+      },
+      "stage2_context": {
+        "total_context_tokens": 606,
+        "retained_exact_spans": [
+          "職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。",
+          "經公立醫療機構認定身心障礙不堪勝任工作。",
+          "職業災害勞工經醫療終止後，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。",
+          "經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 123290.0,
+        "raw_draft": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條、第24條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n\n2. 舊法（職業災害勞工保護法）第84條亦有類似規定，同樣指出經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，兩者對於由哪種機構認定的規定是相同的，都是由公立或中央衛生福利主管機關醫院評鑑合格醫院進行認定。資料未明確記載，無法確認有其他不同之處。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，新法（勞工職業災害保險及保護法）與舊法（職業災害勞工保護法）對於認定「身心障礙不堪勝任工作」的機構規定如下：\n\n1. 新法（勞工職業災害保險及保護法）第85條、第24條規定，經中央衛生福利主管機關醫院評鑑合格醫院認定身心障礙不堪勝任工作。\n\n2. 舊法（職業災害勞工保護法）第84條亦有類似規定，同樣指出經公立醫療機構認定身心障礙不堪勝任工作。\n\n因此，兩者對於由哪種機構認定的規定是相同的，都是由公立或中央衛生福利主管機關醫院評鑑合格醫院進行認定。資料未明確記載，無法確認有其他不同之處。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['職業災害勞工經醫療終止後，經公立醫療機構認定身心障礙不堪勝任工作。'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "simple",
+      "sub_question_count": 1,
+      "retrieval_calls": 1,
+      "reflect_calls": 0,
+      "rounds_per_subquestion": [
+        1
+      ]
+    },
+    "run": 1
+  }
+]

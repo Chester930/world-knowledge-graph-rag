@@ -1,0 +1,1822 @@
+[
+  {
+    "question_id": "18-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "run": 1,
+    "scenario_type": "Type-B",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": null,
+      "issues": [],
+      "passed": null,
+      "status": "not_evaluated"
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M1",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "run": 2,
+    "scenario_type": "Type-B",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": null,
+      "issues": [],
+      "passed": null,
+      "status": "not_evaluated"
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M1",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假與服務年資無直接關係。\n\n最高可以給的天數如下：\n- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者：1至3日\n- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者：1至3日\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者：2至5日\n- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者：2至5日\n- 當選直轄市、縣（市）級模範警察或好人好事代表者：1至3日\n- 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者：1至3日\n- 主動破獲叛亂組織，人證俱獲者：3至7日\n- 因特別貢獻或特殊功績受頒勳章者：3至7日\n- 因特殊功績榮獲晉階者：3至7日\n\n因此，特別休假的最高天數為7日。",
+    "error": null,
+    "latency_s": 272.15,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M1",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 272150.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "F0040034_員工接受召集請假期間薪資費用加成減除辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2019,
+        "snr": 0.0297,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 586,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 272150.0,
+        "raw_draft": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假與服務年資無直接關係。\n\n最高可以給的天數如下：\n- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者：1至3日\n- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者：1至3日\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者：2至5日\n- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者：2至5日\n- 當選直轄市、縣（市）級模範警察或好人好事代表者：1至3日\n- 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者：1至3日\n- 主動破獲叛亂組織，人證俱獲者：3至7日\n- 因特別貢獻或特殊功績受頒勳章者：3至7日\n- 因特殊功績榮獲晉階者：3至7日\n\n因此，特別休假的最高天數為7日。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是勞功績、特殊貢獻等條件。特別休假與服務年資無直接關係。\n\n最高可以給的天數如下：\n- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者：1至3日\n- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者：1至3日\n- 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者：2至5日\n- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者：2至5日\n- 當選直轄市、縣（市）級模範警察或好人好事代表者：1至3日\n- 對主辦業務有重大革新，提出具體方案，經採用確具成效，獲記大功以上之獎勵者：1至3日\n- 主動破獲叛亂組織，人證俱獲者：3至7日\n- 因特別貢獻或特殊功績受頒勳章者：3至7日\n- 因特殊功績榮獲晉階者：3至7日\n\n因此，特別休假的最高天數為7日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 3
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "run": 1,
+    "scenario_type": "Type-B",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": null,
+      "issues": [],
+      "passed": null,
+      "status": "not_evaluated"
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "run": 2,
+    "scenario_type": "Type-B",
+    "answer": "",
+    "error": "harness_timeout_after_300.0s",
+    "latency_s": 300.0,
+    "llm_calls": null,
+    "generation_llm_calls": null,
+    "judge_llm_calls": null,
+    "estimated_tokens": 0,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts. Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'] Guard failures: ['HarnessTimeout: Harness Timeout after 300.0s']",
+      "deterministic_guard_passed": false,
+      "guard_failures": [
+        "HarnessTimeout: Harness Timeout after 300.0s"
+      ]
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": null,
+      "issues": [],
+      "passed": null,
+      "status": "not_evaluated"
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 300000.0,
+        "retrieved_chunk_ids": [],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 0,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 0,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 300000.0,
+        "raw_draft": "",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 3/3 gold facts missed (['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'])"
+    },
+    "failure_attribution": "Harness Timeout after 300.0s",
+    "deterministic_guard": {
+      "is_valid": false,
+      "guard_name": "HarnessTimeout",
+      "failure_reason": "Harness Timeout after 300.0s",
+      "extra_constrained_note": null
+    }
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）\n   - 選直轄市、縣（市）級模範警察或好人好事代表者（第2條）\n   - 對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者（第2條）\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者（第3條）\n   - 選全國性模範警察者（第3條）\n   - 選全國性好人好事代表者（第3條）\n   - 主動破獲叛亂組織，人證俱獲者（第4條）\n   - 因特別貢獻或特殊功績受頒勳章者（第4條）\n   - 因特殊功績榮獲晉階者（第4條）\n\n2. 特別休假與服務年資無直接關係，其天數根據勞工所具有的特定功績而定。\n\n3. 最高可以給的特別休假日數為七日，這是因「主動破獲叛亂組織，人證俱獲」的情況下可獲得三至七日之特別休假（第4條）。",
+    "error": null,
+    "latency_s": 286.52,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 714,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "有左列情形之一者，給予一至三日之特別休假",
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Hit 0/3 facts (semantic fallback). Missed essential: ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "M2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 286520.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 1991,
+        "snr": 0.0301,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 583,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 286520.0,
+        "raw_draft": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）\n   - 選直轄市、縣（市）級模範警察或好人好事代表者（第2條）\n   - 對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者（第2條）\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者（第3條）\n   - 選全國性模範警察者（第3條）\n   - 選全國性好人好事代表者（第3條）\n   - 主動破獲叛亂組織，人證俱獲者（第4條）\n   - 因特別貢獻或特殊功績受頒勳章者（第4條）\n   - 因特殊功績榮獲晉階者（第4條）\n\n2. 特別休假與服務年資無直接關係，其天數根據勞工所具有的特定功績而定。\n\n3. 最高可以給的特別休假日數為七日，這是因「主動破獲叛亂組織，人證俱獲」的情況下可獲得三至七日之特別休假（第4條）。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括：\n   - 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者（第2條）\n   - 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者（第2條）\n   - 搶救重大災害，冒險犯難，達三日以上，獲記大功以上之獎勵者（第2條）\n   - 搜救空難、山難、海難達三日以上，並達成任務，獲記大功以上之獎勵者（第2條）\n   - 選直轄市、縣（市）級模範警察或好人好事代表者（第2條）\n   - 對主辦業務有重大革新，提出具體方案，經採行確具成效，獲記大功以上之獎勵者（第2條）\n   - 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者（第3條）\n   - 選全國性模範警察者（第3條）\n   - 選全國性好人好事代表者（第3條）\n   - 主動破獲叛亂組織，人證俱獲者（第4條）\n   - 因特別貢獻或特殊功績受頒勳章者（第4條）\n   - 因特殊功績榮獲晉階者（第4條）\n\n2. 特別休假與服務年資無直接關係，其天數根據勞工所具有的特定功績而定。\n\n3. 最高可以給的特別休假日數為七日，這是因「主動破獲叛亂組織，人證俱獲」的情況下可獲得三至七日之特別休假（第4條）。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情形之一者，給予一至三日之特別休假', '有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 3
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+    "error": null,
+    "latency_s": 257.34,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1961,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假"
+      ],
+      "missing_spans": [
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "B2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 257339.99999999997,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030020_勞工退休金條例_4",
+          "N0030001_勞動基準法_33",
+          "N0030001_勞動基準法_6",
+          "N0030022_勞工退休金條例年金保險實施辦法_12",
+          "N0030020_勞工退休金條例_10",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030001_勞動基準法_22",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0030001_勞動基準法_10",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 6658,
+        "snr": 0.009,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1915,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 257339.99999999997,
+        "raw_draft": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        2,
+        2
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+    "error": null,
+    "latency_s": 250.71,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1961,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假"
+      ],
+      "missing_spans": [
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "B2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 250710.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030020_勞工退休金條例_4",
+          "N0030001_勞動基準法_33",
+          "N0030001_勞動基準法_6",
+          "N0030022_勞工退休金條例年金保險實施辦法_12",
+          "N0030020_勞工退休金條例_10",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030001_勞動基準法_22",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0030001_勞動基準法_10",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 6658,
+        "snr": 0.009,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1915,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 250710.0,
+        "raw_draft": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        2,
+        2
+      ]
+    },
+    "run": 2
+  },
+  {
+    "question_id": "18-Q5",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+    "error": null,
+    "latency_s": 268.64,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1961,
+    "atomic_score": {
+      "supported_spans": [
+        "有左列情形之一者，給予一至三日之特別休假"
+      ],
+      "missing_spans": [
+        "有左列情事之一者，給予二至五日之特別休假",
+        "有左列情事之一者，給予三至七日之特別休假"
+      ],
+      "atomic_accuracy": 0.3333,
+      "atomic_recall": 0.3333,
+      "is_perfect": false,
+      "details": "Hit 1/3 facts (semantic fallback). Missed essential: ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "18-Q5",
+      "arm": "B2",
+      "question": "警察人員特別休假辦法中所稱的「特別休假」，核發依據是什麼？是否與服務年資有關？最高可以給幾天？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 268640.0,
+        "retrieved_chunk_ids": [
+          "D0080015_警察人員特別休假辦法_1",
+          "D0080015_警察人員特別休假辦法_0",
+          "N0030001_勞動基準法_18",
+          "N0030001_勞動基準法_17",
+          "N0090051_受聘僱從事就業服務法第四十六條第一項第八款至第十款規定工作之外國人請假返國辦法_0",
+          "N0030020_勞工退休金條例_4",
+          "N0030001_勞動基準法_33",
+          "N0030001_勞動基準法_6",
+          "N0030022_勞工退休金條例年金保險實施辦法_12",
+          "N0030020_勞工退休金條例_10",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_13",
+          "N0030001_勞動基準法_22",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_8",
+          "N0030001_勞動基準法_10",
+          "N0090058_失業中高齡者及高齡者就業促進辦法_14",
+          "N0030001_勞動基準法_19"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 6658,
+        "snr": 0.009,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1915,
+        "retained_exact_spans": [
+          "有左列情形之一者，給予一至三日之特別休假",
+          "有左列情事之一者，給予二至五日之特別休假",
+          "有左列情事之一者，給予三至七日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 268640.0,
+        "raw_draft": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據警察人員特別休假辦法：\n\n1. 特別休假的核發依據包括處理重大突發治安事件、奮勇緝兇等六種情形可獲一至三日之特別休假；主動破獲重大案件或因特別貢獻或特殊功績受頒勳章者等四種情形可獲二至五日之特別休假；因特別貢獻或特殊功績榮獲晉階者可獲三至七日之特別休假。\n\n2. 特別休假與服務年資無直接關係，其核發主要基於個人表現及功績。\n\n3. 最高可以給的特別休假日數為七天。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['有左列情事之一者，給予二至五日之特別休假', '有左列情事之一者，給予三至七日之特別休假'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 3,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        2,
+        2
+      ]
+    },
+    "run": 3
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+    "error": null,
+    "latency_s": 98.31,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M1",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 98310.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2241,
+        "snr": 0.0049,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 647,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 98310.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+    "error": null,
+    "latency_s": 89.43,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M1",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 89430.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2241,
+        "snr": 0.0049,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 647,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 89430.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 2
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M1",
+    "raw_arm": "B0",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+    "error": null,
+    "latency_s": 88.79,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 678,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M1",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M1",
+        "retrieval_latency_ms": 88790.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法_1",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_11"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2241,
+        "snr": 0.0049,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 647,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 88790.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並無提及留職停薪期滿後是否可再延長及最多可延長多久的相關規定。因此根據提供的資訊，無法進一步回答此問題。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 3
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+    "error": null,
+    "latency_s": 83.99,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 620,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 83990.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_2",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0053,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 83990.0,
+        "raw_draft": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+    "error": null,
+    "latency_s": 83.14,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 620,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 83140.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_2",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0053,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 83140.0,
+        "raw_draft": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 2
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "M2",
+    "raw_arm": "B1",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+    "error": null,
+    "latency_s": 77.86,
+    "llm_calls": 2,
+    "generation_llm_calls": 2,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 620,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "M2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "M2",
+        "retrieval_latency_ms": 77860.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0030006_勞工請假規則_2",
+          "N0050031_勞工職業災害保險及保護法_39"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 2060,
+        "snr": 0.0053,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 590,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 77860.0,
+        "raw_draft": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？\n\n資料未明確記載，無法確認。\n\n事實清單中並未提及留職停薪期間屆滿後是否可以申請延長以及最多可以延長多久。因此根據現行法規，無法提供具體答案。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['留職停薪期間以一年為限'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 3
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+    "error": null,
+    "latency_s": 228.89,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1487,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "B2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 228890.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0030006_勞工請假規則_2",
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_15",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_16",
+          "N0030018_育嬰留職停薪實施辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 5072,
+        "snr": 0.0022,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1443,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 228890.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 1
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+    "error": null,
+    "latency_s": 231.68,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1487,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "B2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 231680.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0030006_勞工請假規則_2",
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_15",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_16",
+          "N0030018_育嬰留職停薪實施辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 5072,
+        "snr": 0.0022,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1443,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 231680.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 2
+  },
+  {
+    "question_id": "57-CANARY1",
+    "arm": "B2",
+    "raw_arm": "B2",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+    "error": null,
+    "latency_s": 263.02,
+    "llm_calls": 10,
+    "generation_llm_calls": 10,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 1487,
+    "atomic_score": {
+      "supported_spans": [],
+      "missing_spans": [
+        "REFUSAL_EXPECTED"
+      ],
+      "atomic_accuracy": 0.0,
+      "atomic_recall": 0.0,
+      "is_perfect": false,
+      "details": "Failed to Refuse on Type-E Canary",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-CANARY1",
+      "arm": "B2",
+      "question": "勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪嗎？最多可以延長多久？",
+      "stage1_retrieval": {
+        "arm": "B2",
+        "retrieval_latency_ms": 263020.0,
+        "retrieved_chunk_ids": [
+          "N0030006_勞工請假規則_1",
+          "N0030006_勞工請假規則_0",
+          "N0060041_職業災害勞工保護法_8",
+          "N0050031_勞工職業災害保險及保護法_39",
+          "N0030006_勞工請假規則_2",
+          "N0030018_育嬰留職停薪實施辦法_0",
+          "N0030001_勞動基準法_14",
+          "N0030001_勞動基準法_15",
+          "N0030001_勞動基準法_10",
+          "N0030001_勞動基準法_13",
+          "N0030001_勞動基準法_16",
+          "N0030018_育嬰留職停薪實施辦法_1"
+        ],
+        "retrieved_fact_ids": [],
+        "retrieval_trace": [],
+        "hit_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 5072,
+        "snr": 0.0022,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 1443,
+        "retained_exact_spans": [
+          "留職停薪期間以一年為限"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": []
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 263020.0,
+        "raw_draft": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單內容，勞工普通傷病假留職停薪屆滿一年還沒痊癒，可以申請延長留職停薪。但留職停薪期間以一年為限。\n\n事實清單中第5條明確規定：「勞工普通傷病假超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者，得予留職停薪。但留職停薪期間以一年為限。」\n\n因此，勞工在留職停薪一年期滿尚未痊癒時，可以申請延長留職停薪，但延長的期間仍以一年為限。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": {
+      "complexity": "complex",
+      "sub_question_count": 2,
+      "retrieval_calls": 8,
+      "reflect_calls": 8,
+      "rounds_per_subquestion": [
+        4,
+        4
+      ]
+    },
+    "run": 3
+  }
+]
