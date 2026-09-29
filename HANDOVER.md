@@ -5,7 +5,7 @@
 
 ## 2026-09-29（報告123）：M2 P1 第二批（SM-2 佇列詞彙統一）任務書，兩段式，交 Codex 執行
 
-使用者同意進第二批並要求「先出替換對照表、Claude 審過才准實作」。[報告123](docs/報告/123_M2_P1第二批_SM2佇列詞彙統一SDD任務書.md)：**設計發現**——SM-2 的狀態語意寫在**原子 SQL** 裡（`claim_next_pending` 的 `UPDATE…RETURNING` 是多 Worker 併發安全的關鍵），**不可**改成 Python 端讀後寫的 `transition()`；Python 端狀態寫入只有 `extraction_worker.py` 的 4 個 `update_status()` 呼叫。故第二批僅做「詞彙統一」：4 個呼叫改用 `state.task_sm.TaskStatus`（`StrEnum`，值不變）、`update_status` 型別標註放寬；**SQL 文字零變動**，並以「SQL 執行軌跡逐字比對」驗證；同時是 `state/` 的第一個 production import（驗接線無循環）。**SM-1 的單一 `transition()` 入口（JSON 記錄、無併發原子性問題）才是 P1 實質內容，留第三批。** 兩段：第一段出報告124（替換對照表＋SQL 軌跡基準腳本，只讀）→**停下等 Claude 核准**→第二段實作（報告125）。**狀態：等待 Codex 第一段→Claude 審核對照表→核准後 Codex 第二段→Claude 依§4驗收（含「故意破壞 worker 一個成員」驗證）→通過才 push。**
+使用者同意進第二批並要求「先出替換對照表、Claude 審過才准實作」。[報告123](docs/報告/123_M2_P1第二批_SM2佇列詞彙統一SDD任務書.md)：**設計發現**——SM-2 的狀態語意寫在**原子 SQL** 裡（`claim_next_pending` 的 `UPDATE…RETURNING` 是多 Worker 併發安全的關鍵），**不可**改成 Python 端讀後寫的 `transition()`；Python 端狀態寫入只有 `extraction_worker.py` 的 4 個 `update_status()` 呼叫。故第二批僅做「詞彙統一」：4 個呼叫改用 `state.task_sm.TaskStatus`（`StrEnum`，值不變）、`update_status` 型別標註放寬；**SQL 文字零變動**，並以「SQL 執行軌跡逐字比對」驗證；同時是 `state/` 的第一個 production import（驗接線無循環）。**SM-1 的單一 `transition()` 入口（JSON 記錄、無併發原子性問題）才是 P1 實質內容，留第三批。** 兩段：第一段出報告124（替換對照表＋SQL 軌跡基準腳本，只讀）→**停下等 Claude 核准**→第二段實作（報告125）。**狀態：第一段已審核通過並 push（`b5497a5`，報告124：15 個寫入點盤點、5 項替換、7 項明確不替換；基準 1286 passed；SQL baseline 14 操作／90 條軌跡）。Claude 獨立重跑軌跡腳本，`operations` 與 `trace` 兩欄與 Codex 基準完全相同＝確定性成立（注意 JSON 含 `repo`／`script` 路徑欄位，不可直接比整檔雜湊，只比這兩欄）。已核准第二段，附加條件：after 比對腳本必須改傳 `TaskStatus.X` 成員（baseline 傳字串，若 after 也傳字串則必然相同、失去意義），且 after 須輸出到不同檔名不得覆寫 baseline。等待 Codex 第二段→Claude 依§4驗收（含「故意破壞 worker 一個成員」驗證）→通過才 push。**
 
 ## 2026-09-29（報告121）：M2 P1 第一批（選項C）任務書，已完成並 push
 
