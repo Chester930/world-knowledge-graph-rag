@@ -12,7 +12,7 @@ A8 完成後的殘留項合併成一份只讀追查：[報告115](docs/報告/11
 - 風險4：`_kg_source_charset()` 只讀 `kg_folder/*/original.md`，虛擬 KG 回空集合＝全轉簡繁（削弱報告25 發現4 的選擇性保護）；`routers/agent.py:1631` 傳的是 `workspace/<kg_id>`。
 - 中：eval／readiness／baseline／sweep 工具的 scope resolver 在虛擬 KG 上同樣看不到成員。
 - **OK**：`classify_service` 的 manifest／prototype／count 已正確納入虛擬成員。
-- **Q8 無法確認**：KG#4 是實體或虛擬，worktree 內無 `workspace/` 可查。（Claude 推論但未驗證：KG#4 的抽取多在 2026-09-07 前完成、早於 SDD-51 虛擬歸屬（09-15），且由匯入腳本建立，較可能是實體目錄；需在有 workspace 的機器上 `ls`＋看 `_members.json` 確認。）
+- **Q8 ✅ 已確認（2026-09-29，Claude 唯讀 `ls` 驗證）：KG#4 是純實體目錄，不受上列盲點影響。** 實際位置＝`D:/Users/666/Desktop/kg-runtime/236903cf-055a-40a8-8923-b9d06601f3b7`（由 `.claude/worktrees/kg-reextract/.env` 的 `WORKSPACE_DIR` 指定；主 checkout 的 `workspace/` 與本 worktree 都沒有 KG#4）。65 個文件子目錄，**每一個都同時有 `_record.json`、`original.md`、`svo_index.json`**（65/65/65），根目錄**沒有 `_members.json`**。因此對 KG#4：`build_graph()`（含 `force_rebuild`）、`rebuild_from_records()`、`_kg_source_charset()` 都看得到全部成員，風險1–4 **目前對現有生產資料不成立**。盲點只在「今後透過網頁上傳／分類（虛擬歸屬預設）建立的新 KG」上暴露。另：以 Glob 遞迴搜尋 `**/_members.json`，`D:/Users/666/Desktop/kg-runtime` 與主 checkout `workspace/`（含另 4 個 KG 資料夾 `0bd40837…`、`238753a1…`、`2ae9d28b…`、`deb24e7c…`）**皆找不到任何 `_members.json`**＝**目前本機沒有任何含虛擬成員的 KG**，盲點屬「潛在」而非「已發生」。修正緊迫度因此降為：在有人透過網頁上傳／分類建立新 KG 之前修好即可；在那之前不會有資料損失。
 - 修正方向 5 項見報告116 §5，**待使用者裁示，尚未實作**。
 
 ## 2026-09-29（報告110＋111）：A8 修正與 05 §5.7.1 更新任務書，交 Codex 執行
