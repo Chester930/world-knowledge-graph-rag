@@ -228,7 +228,7 @@ def test_record_chunk_completed_does_not_falsely_complete_when_a_lower_index_is_
     """迴歸測試（2026-08-19）：chunk 3 從未成功完成（例如失敗、由
     mark_extraction_failed() 標記），但編號更大的 chunk 5 之後成功——舊版用
     chunk_progress（看過的最大 index）判斷完成，會誤判整份文件已完成，並把
-    failed 狀態靜默覆寫掉。修復後必須維持 processing，且 completed_chunk_indices
+    failed 狀態靜默覆寫掉。修復後必須維持 failed，且 completed_chunk_indices
     不應包含從未回報過的 3。"""
     svc.init_record(tmp_path, source="report.pdf", total_chunks=5)
     svc.set_svo_chunk_total(tmp_path, 5)
@@ -239,7 +239,7 @@ def test_record_chunk_completed_does_not_falsely_complete_when_a_lower_index_is_
     svc.record_chunk_completed(tmp_path, 4)
     record = svc.record_chunk_completed(tmp_path, 5)
 
-    assert record.extraction_status == "processing"
+    assert record.extraction_status == "failed"
     assert sorted(record.completed_chunk_indices) == [1, 2, 4, 5]
     assert 3 not in record.completed_chunk_indices
     # chunk_progress 仍保留單調遞增行為（相容用途），但不再是完成判斷依據

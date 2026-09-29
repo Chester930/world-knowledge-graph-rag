@@ -1,8 +1,9 @@
 """STATUS: characterization only, not wired (P1 batch 1).
 
-This module records the current behavior described by reports 120 and 121;
-it is not an idealized state machine and is not imported by production code.
-In particular, X1 (``failed -> processing``) is existing behavior.
+This module records the document state behavior described by reports 120 and
+121; it is not an idealized state machine and is not imported by production
+code.  X1 was repaired in report 133: ``failed`` remains sticky until the
+completion event is FULL.
 """
 from __future__ import annotations
 
@@ -43,8 +44,8 @@ DOCUMENT_TRANSITIONS: dict[tuple[ExtractionStatus, DocumentEvent], ExtractionSta
     (ExtractionStatus.COMPLETED, DocumentEvent.MARK_FAILED): ExtractionStatus.FAILED,
     (ExtractionStatus.FAILED, DocumentEvent.RESET): ExtractionStatus.PENDING,
     (ExtractionStatus.FAILED, DocumentEvent.REASSIGN): ExtractionStatus.PENDING,
-    # 既有行為（報告120 X1）：failed → processing，另案再修。
-    (ExtractionStatus.FAILED, DocumentEvent.CHUNK_COMPLETED_PARTIAL): ExtractionStatus.PROCESSING,
+    # 報告133 X1-A：failed 對部分完成保持黏性，只有 FULL 才能完成。
+    (ExtractionStatus.FAILED, DocumentEvent.CHUNK_COMPLETED_PARTIAL): ExtractionStatus.FAILED,
     # 同一低階函式也允許 failed → completed，依現況保留。
     (ExtractionStatus.FAILED, DocumentEvent.CHUNK_COMPLETED_FULL): ExtractionStatus.COMPLETED,
     (ExtractionStatus.FAILED, DocumentEvent.MARK_FAILED): ExtractionStatus.FAILED,

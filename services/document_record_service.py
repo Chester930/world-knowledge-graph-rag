@@ -247,11 +247,12 @@ def record_chunk_completed(folder: Path, chunk_index: int) -> DocumentRecord | N
     2026-08-19（真實審查發現並修復）：完成判斷改依 `completed_chunk_indices`
     這個實際完成集合的大小是否涵蓋總數，不再用 `chunk_progress` 的 max 值——
     後者若中間任一 chunk 失敗、但編號更大的 chunk 之後成功，會誤判整份文件
-    已完成，且會把 `mark_extraction_failed()` 寫入的 `failed` 狀態靜默覆寫掉，
-    中間失敗的 chunk 永遠不會被 `task_queue_service.rebuild_from_records()`
-    重新排入佇列。集合天然去重（同一 chunk_index 因重試被回報多次不會膨脹
-    計數），也不要求完成順序。`chunk_progress` 仍同步更新（單調遞增，供既有
-    程式碼／顯示用途相容），但不再是完成判斷的依據。
+    已完成。報告133 X1-A 另使 `mark_extraction_failed()` 寫入的 `failed` 狀態
+    在部分完成時保持黏性，只有完成集合涵蓋總數的 FULL 事件才會轉為 completed；
+    中間失敗的 chunk 仍可由 `task_queue_service.rebuild_from_records()` 重新排入
+    佇列。集合天然去重（同一 chunk_index 因重試被回報多次不會膨脹計數），也不
+    要求完成順序。`chunk_progress` 仍同步更新（單調遞增，供既有程式碼／顯示
+    用途相容），但不再是完成判斷的依據。
     """
     record = read_record(folder)
     if record is None:

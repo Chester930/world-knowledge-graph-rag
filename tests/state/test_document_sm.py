@@ -76,15 +76,15 @@ def test_document_sm_parity_with_real_functions(tmp_path, current, event):
     assert observed == document_next_status(current, event)
 
 
-def test_x1_failed_then_partial_completion_is_processing(tmp_path):
-    """既有行為（報告120 X1），另案修復後此測試應同步更新。"""
+def test_failed_stays_failed_on_partial_completion(tmp_path):
+    """報告130 X1 已於報告133 修復：部分完成不再洗回 processing。"""
     folder = _record_with_extraction_status(tmp_path, ExtractionStatus.FAILED, "x1")
     svc.set_svo_chunk_total(folder, 3)
     svc.mark_extraction_failed(folder)
     svc.record_chunk_completed(folder, 1)
 
     observed = ExtractionStatus(svc.read_record(folder).extraction_status)
-    assert observed is ExtractionStatus.PROCESSING
+    assert observed is ExtractionStatus.FAILED
     assert observed is document_next_status(
         ExtractionStatus.FAILED, DocumentEvent.CHUNK_COMPLETED_PARTIAL
     )
