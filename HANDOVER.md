@@ -1,7 +1,16 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-29（報告105 已完成並push——論文對齊系列告一段落）
+> **最後更新**：2026-09-29（報告106＋107 任務書已建立，交 Codex 執行；成果報告預定為 108／109）
+
+## 2026-09-29（報告106＋107）：M2 前置兩份只讀任務書，交 Codex 執行
+
+論文對齊系列（報告98–105）查核通過後，依使用者同意的順序進入 M2 前置：
+- [報告106](docs/報告/106_M2前置_P0回歸基準SDD任務書.md)：完整 pytest 跑兩次建立測試基準＋新增 `scripts/analysis/import_graph_snapshot.py` 產生模組相依快照（fan-in/out、循環）；成果寫入 `docs/報告/108_M2_P0回歸基準結果.md` 與 `data/analysis/import_graph_20260929.json`。**不含**固定5題K臂評測快照（需Neo4j+Ollama、有WSL記憶體風險，待使用者裁示）。
+- [報告107](docs/報告/107_A8虛擬歸屬後抽取路徑追查SDD任務書.md)：只讀追查「虛擬歸屬後 `trigger_extraction()` 以 `doc_folder.parent` 當KG資料夾，但worker到 `kg.folder_path` 找 `svo_index.json`」是否真的對不上（假設待驗證），暫存目錄重現、不碰Neo4j；成果寫入 `docs/報告/109_A8虛擬歸屬路徑追查結果.md`。KG#4由匯入腳本建立、不走此路徑。
+兩份皆**不得修改既有檔案、測試失敗只記錄不修復**。**狀態：等待 Codex 執行→Claude 依各自§驗收審核→通過才 push**。
+
+## 2026-09-29（報告105 已完成並push——論文對齊系列告一段落）
 
 ## 2026-09-29（報告105）：04新增「4.12 評測Harness實作」章節，已完成並push
 
