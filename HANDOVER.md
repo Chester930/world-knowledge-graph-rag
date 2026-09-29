@@ -8,7 +8,7 @@
 使用者同意 A8 採報告109 §5 方向 1（＋方向4），順序：先 A8 再文件。
 - [報告110](docs/報告/110_A8虛擬歸屬抽取路徑修正SDD任務書.md)：程式修正（僅 `classify_service`／`svo_service`／`extraction_worker`／`routers/staging`＋新測試）。契約：輸入在文件實際資料夾、SVO 輸出寫 `kg.folder_path/<doc>`、記錄檔回寫原文件資料夾（新增 `resolve_document_folder`）。**另發現隱性 bug B3**：worker 的 `record_chunk_completed`/`mark_extraction_failed` 在虛擬模式下對不存在的記錄靜默回 None。先寫失敗測試→修→完整回歸須 1178 passed。`build_graph()` 看不到虛擬成員（109 Q6）**不在本任務範圍**，另案。成果報告編號 112。
 - [報告111](docs/報告/111_論文05_5.7.1時程表現況更新SDD任務書.md)：純文件，只改 05 §5.7.1 表四處過時敘述（P0d／P0c／P3／P5），須先核實再改。與 110 無檔案重疊。
-**狀態（審核結果）**：Codex 已完成兩份（`34d29d1` 報告110／112、`38568ca` 報告111）。111 審核通過。110 程式與規格逐處一致、範圍正確，但 **Claude 獨立重現發現 B3 在真實流程仍未修好**：`resolve_document_folder()` 先判斷 `kg_folder/<doc>` 是否為目錄，而 SVO 輸出寫出後該目錄就存在 → 記錄回寫仍落空（缺陷出自 110 §S3(a) 規格，Codex 已在 112 §4 誠實記錄）。已開 [報告113](docs/報告/113_A8補修_resolver判斷順序SDD任務書.md)（改以 `_record.json` 存在判定；先測後修；成果報告 114；回歸須 1180 passed）。**補修驗收通過前，A8 不算完成、110/111 commit 暫不 push。**
+**狀態（審核結果）**：Codex 已完成兩份（`34d29d1` 報告110／112、`38568ca` 報告111）。111 審核通過。110 程式與規格逐處一致、範圍正確，但 **Claude 獨立重現發現 B3 在真實流程仍未修好**：`resolve_document_folder()` 先判斷 `kg_folder/<doc>` 是否為目錄，而 SVO 輸出寫出後該目錄就存在 → 記錄回寫仍落空（缺陷出自 110 §S3(a) 規格，Codex 已在 112 §4 誠實記錄）。已開 [報告113](docs/報告/113_A8補修_resolver判斷順序SDD任務書.md)（改以 `_record.json` 存在判定；先測後修；成果報告 114；回歸須 1180 passed）。**✅ 補修已驗收通過（`ac17900`，報告113／114）並與 110／111 一併 push**：resolver 改以 `_record.json` 存在判定；Claude 重現腳本確認輸出目錄建立後解析到原文件資料夾；獨立回歸 **1180 passed**（新基準，取代報告108 的 1173）。**A8 完成。** 仍未處理（另案）：`build_graph()` 看不到虛擬成員（報告109 Q6）、`_kg_source_charset(str(kg_folder))` 在虛擬模式下可能讀不到來源、`scripts/import_*` 在虛擬模式下重跑需另案驗證 dest 路徑。
 
 ## 2026-09-29（報告106＋107）：M2 前置兩份只讀任務書，已完成並 push
 
