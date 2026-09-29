@@ -132,11 +132,11 @@
 
 ## 4. 回填區（Codex 填寫）
 
-- Commit 1 SHA：
-- Commit 2 SHA：
-- 自我檢查結果：
-- 新增測試數：
-- 意外狀況：
+- Commit 1 SHA：`cce9947`（完整 SHA：`cce99479f0913347040daa558903ad0a8aa3f9cd`）
+- Commit 2 SHA：`b400614`（完整 SHA：`b40061433af7e9792f25b0a553800b4d5b4afc49`）
+- 自我檢查結果：S1 基準與 Commit 1 完整回歸均為 1298 passed；Commit 1 SQL operations／trace 逐字相同（15／96，含不存在列操作）；S4 25 格矩陣恰一格差異；記錄快照 scenarios／time_normalization 相同且唯一差異為 X1 的 extraction_status processing→failed；targeted 198 passed；最終完整回歸 1304 passed、8 warnings；依賴快照 151 modules／420 edges／0 cycles；A8 三項故意破壞均按預期失敗並已還原。未使用 --deselect，未修改報告95，未 push。
+- 新增測試數：6（`tests/state/test_x1a_retry_paths.py`）
+- 意外狀況：報告127快照腳本的 X1 assertion 原本鎖定修復前 `processing`；在系統暫存腳本副本僅將該 assertion 更新為修復後 `failed` 後重跑，其他腳本內容與 7 個情境均未改動。未發生 UMAP 卡住或預期外快照／矩陣差異。
 
 ## 5. 禁止事項
 
