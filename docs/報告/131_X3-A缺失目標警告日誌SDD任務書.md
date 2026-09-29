@@ -109,10 +109,10 @@ X3＝「目標不存在就靜默 no-op」，使 A8 的 B3 長時間無人察覺�
 
 ## 4. 回填區（Codex 填寫）
 
-- commit SHA：
-- 自我檢查結果：
-- 新增測試數：
-- 意外狀況：
+- commit SHA：`ed7c2c5`（`feat(observability): 缺失記錄／佇列列的寫入略過改為輸出 WARNING，行為零變動（報告131 X3-A）`；未 push）
+- 自我檢查結果：基準 HEAD `1cb9985`、起始 worktree 乾淨；S2 RED 為 `6 failed, 3 passed`，實作後新增測試 `9 passed`；指定既有測試 `183 passed`；完整回歸 `1298 passed, 8 warnings`，沒有 UMAP 卡住，未使用 `--deselect`。SQL `operations`／`trace` 皆逐字相同；記錄快照 `scenarios`／`time_normalization` 皆逐字相同；相依快照 before/after 均 `151 modules, 420 edges, cycles=0`。兩個 service diff 均為 additions-only，既有測試未改，`set_document_vector` 未加日誌；repo 內 after import snapshot 已刪除。
+- 新增測試數：9 個 pytest 實例（參數化 5 個 + 其他 4 個）。
+- 意外狀況：基準 `data/analysis/import_graph_20260929.json` 是較早 checkout 的 148/415，不能直接作本次基準；已從本次 HEAD `1cb9985` 建立系統暫存 Git archive 取得正確 before `151/420`，並與 after 比對。執行 Git stage/commit 時 sandbox 需要核准的 worktree index 權限；未修改報告 95、未 push。
 
 ## 5. 禁止事項
 
