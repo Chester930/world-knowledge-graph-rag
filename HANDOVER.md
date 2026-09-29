@@ -3,7 +3,14 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
-## 2026-09-29（報告106＋107）：M2 前置兩份只讀任務書，交 Codex 執行
+## 2026-09-29（報告110＋111）：A8 修正與 05 §5.7.1 更新任務書，交 Codex 執行
+
+使用者同意 A8 採報告109 §5 方向 1（＋方向4），順序：先 A8 再文件。
+- [報告110](docs/報告/110_A8虛擬歸屬抽取路徑修正SDD任務書.md)：程式修正（僅 `classify_service`／`svo_service`／`extraction_worker`／`routers/staging`＋新測試）。契約：輸入在文件實際資料夾、SVO 輸出寫 `kg.folder_path/<doc>`、記錄檔回寫原文件資料夾（新增 `resolve_document_folder`）。**另發現隱性 bug B3**：worker 的 `record_chunk_completed`/`mark_extraction_failed` 在虛擬模式下對不存在的記錄靜默回 None。先寫失敗測試→修→完整回歸須 1178 passed。`build_graph()` 看不到虛擬成員（109 Q6）**不在本任務範圍**，另案。成果報告編號 112。
+- [報告111](docs/報告/111_論文05_5.7.1時程表現況更新SDD任務書.md)：純文件，只改 05 §5.7.1 表四處過時敘述（P0d／P0c／P3／P5），須先核實再改。與 110 無檔案重疊。
+**狀態：等待 Codex 執行→Claude 依各自§驗收審核→通過才 push**。
+
+## 2026-09-29（報告106＋107）：M2 前置兩份只讀任務書，已完成並 push
 
 論文對齊系列（報告98–105）查核通過後，依使用者同意的順序進入 M2 前置：
 - [報告106](docs/報告/106_M2前置_P0回歸基準SDD任務書.md)：完整 pytest 跑兩次建立測試基準＋新增 `scripts/analysis/import_graph_snapshot.py` 產生模組相依快照（fan-in/out、循環）；成果寫入 `docs/報告/108_M2_P0回歸基準結果.md` 與 `data/analysis/import_graph_20260929.json`。**不含**固定5題K臂評測快照（需Neo4j+Ollama、有WSL記憶體風險，待使用者裁示）。
