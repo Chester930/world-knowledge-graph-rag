@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-29（報告115）：虛擬成員盲點追查任務書，交 Codex 執行
+
+A8 完成後的殘留項合併成一份只讀追查：[報告115](docs/報告/115_虛擬成員盲點追查SDD任務書.md)。盤點所有「以 KG 資料夾內容推論成員」的位置（`build_graph()`、`task_queue_service` 重建、`classify_service`、`_kg_source_charset`、匯入腳本），重點確認 **`build_graph(force_rebuild=True)` 先清空 Neo4j 卻不重抽虛擬成員的資料損失路徑**，並確認 KG#4 屬實體還是虛擬。成果報告編號 116。純只讀、不修復。**狀態：等待 Codex 執行→Claude 依§4驗收→通過才 push。**
+
 ## 2026-09-29（報告110＋111）：A8 修正與 05 §5.7.1 更新任務書，交 Codex 執行
 
 使用者同意 A8 採報告109 §5 方向 1（＋方向4），順序：先 A8 再文件。
