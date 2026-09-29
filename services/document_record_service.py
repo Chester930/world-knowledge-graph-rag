@@ -27,6 +27,14 @@ from uuid import uuid5
 
 from core.constants import DOCUMENT_ID_NAMESPACE
 from models.knowledge_graph import AssignmentHistoryEntry, DocumentRecord
+from state.document_sm import (
+    DocumentEvent,
+    ExtractionStatus,
+    NormalizationEvent,
+    NormalizationStatus,
+    document_next_status,
+    normalization_next_status,
+)
 
 _RECORD_FILENAME = "_record.json"
 
@@ -79,6 +87,30 @@ def read_record(folder: Path) -> DocumentRecord | None:
     return DocumentRecord(**json.loads(path.read_text(encoding="utf-8")))
 
 
+def _transition_extraction(record: DocumentRecord, event: DocumentEvent) -> None:
+    record.extraction_status = document_next_status(
+        ExtractionStatus(record.extraction_status), event
+    ).value
+
+
+def _transition_normalization(
+    record: DocumentRecord,
+    event: NormalizationEvent,
+    target: str | None = None,
+) -> None:
+    valid_targets = {item.value for item in NormalizationStatus}
+    if event is NormalizationEvent.SET_STATUS and target not in valid_targets:
+        # Compatibility branch: preserve the historical raw write for runtime
+        # callers that pass a status outside the Literal annotation.
+        record.normalization_status = target
+        return
+    record.normalization_status = normalization_next_status(
+        NormalizationStatus(record.normalization_status),
+        event,
+        NormalizationStatus(target) if target is not None else None,
+    ).value
+
+
 def init_record(folder: Path, source: str, total_chunks: int = 0) -> DocumentRecord:
     """初始化文件資料夾的記錄檔。
 
@@ -94,7 +126,9 @@ def init_record(folder: Path, source: str, total_chunks: int = 0) -> DocumentRec
             # 代表目前內容，必須一併清空，否則分類分數會用到過期向量而不自知。
             existing.document_vector = None
             existing.document_vector_signature = None
-            existing.normalization_status = "not_started"
+            _transition_normalization(
+                existing, NormalizationEvent.REPARSE_CHUNK_COUNT_CHANGED
+            )
             existing.normalization_progress = 0
             existing.normalization_total_sentences = 0
             existing.svo_total_chunks = 0
@@ -154,7 +188,7 @@ def update_normalization_progress(
     if record.normalization_total_sentences and progress > record.normalization_total_sentences:
         raise ValueError("progress 不可大於 normalization_total_sentences")
 
-    record.normalization_status = status
+    _transition_normalization(record, NormalizationEvent.SET_STATUS, target=status)
     record.normalization_progress = progress
     _write_record(folder, record)
     return record
@@ -182,7 +216,7 @@ def reset_extraction_progress(folder: Path) -> DocumentRecord | None:
     record = read_record(folder)
     if record is None:
         return None
-    record.extraction_status = "pending"
+    _transition_extraction(record, DocumentEvent.RESET)
     record.chunk_progress = 0
     record.completed_chunk_indices = []
     _write_record(folder, record)
@@ -208,8 +242,13 @@ def record_chunk_completed(folder: Path, chunk_index: int) -> DocumentRecord | N
     if chunk_index not in record.completed_chunk_indices:
         record.completed_chunk_indices.append(chunk_index)
     total = record.svo_total_chunks or record.total_chunks
-    record.extraction_status = (
-        "completed" if total and len(record.completed_chunk_indices) >= total else "processing"
+    _transition_extraction(
+        record,
+        (
+            DocumentEvent.CHUNK_COMPLETED_FULL
+            if total and len(record.completed_chunk_indices) >= total
+            else DocumentEvent.CHUNK_COMPLETED_PARTIAL
+        ),
     )
     _write_record(folder, record)
     return record
@@ -220,7 +259,7 @@ def mark_extraction_failed(folder: Path) -> DocumentRecord | None:
     record = read_record(folder)
     if record is None:
         return None
-    record.extraction_status = "failed"
+    _transition_extraction(record, DocumentEvent.MARK_FAILED)
     _write_record(folder, record)
     return record
 
@@ -247,7 +286,7 @@ def append_assignment(
         method=method,
         assigned_at=datetime.now(timezone.utc),
     ))
-    record.extraction_status = "pending"
+    _transition_extraction(record, DocumentEvent.REASSIGN)
     record.chunk_progress = 0
     record.completed_chunk_indices = []
 
