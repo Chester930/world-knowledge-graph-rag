@@ -24,6 +24,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Literal
 
+from state.task_sm import TaskStatus as StateTaskStatus
 from services import document_record_service
 from services.svo_chunking import read_svo_index
 
@@ -89,7 +90,11 @@ def enqueue(db_path: Path, kg_id: str, source: str, chunk_indices: list[int]) ->
 
 
 def update_status(
-    db_path: Path, kg_id: str, source: str, chunk_index: int, status: TaskStatus
+    db_path: Path,
+    kg_id: str,
+    source: str,
+    chunk_index: int,
+    status: TaskStatus | StateTaskStatus,
 ) -> None:
     """更新單一 Chunk 的狀態——三態轉換的實際時機分屬 3.1.3（`processing`）
     ／3.1.3 抽取結果（`pending_upload`／`failed`）／3.1.4 寫入結果

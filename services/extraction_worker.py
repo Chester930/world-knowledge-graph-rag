@@ -27,6 +27,7 @@ from core.kg_config import ConfigLoader, FileConfigSource, KGConfig
 from core.providers.factory import get_embedding_provider, get_llm_provider
 from parser.chunk_writer import document_folder_path
 from repositories.kg_repo import KGRepository
+from state.task_sm import TaskStatus as StateTaskStatus
 from services import document_record_service, task_queue_service
 from services.classify_service import resolve_document_folder
 from services.svo_chunking import read_svo_index
@@ -75,7 +76,9 @@ def _find_chunk(kg_folder: Path, source: str, chunk_index: int) -> dict | None:
 
 async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index: int) -> None:
     db_path = task_queue_db_path()
-    task_queue_service.update_status(db_path, kg_id, source, chunk_index, "processing")
+    task_queue_service.update_status(
+        db_path, kg_id, source, chunk_index, StateTaskStatus.PROCESSING
+    )
 
     doc_folder: Path | None = None
     try:
@@ -143,7 +146,9 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         logger.exception(
             "[ExtractionWorker] 抽取失敗 kg_id=%s source=%s chunk_index=%s", kg_id, source, chunk_index,
         )
-        task_queue_service.update_status(db_path, kg_id, source, chunk_index, "failed")
+        task_queue_service.update_status(
+            db_path, kg_id, source, chunk_index, StateTaskStatus.FAILED
+        )
         if doc_folder is not None:
             document_record_service.mark_extraction_failed(doc_folder)
         return
@@ -158,9 +163,13 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
     # （它明確以記錄檔為準），這個 chunk 會被誤判為未完成而重新排入佇列，
     # 重新處理後又會產生 Fact 節點重複（見 revoke_chunk_facts() 相關修正）。
     # 改為先寫真實狀態來源，才寫效能索引，符合既有設計原則。
-    task_queue_service.update_status(db_path, kg_id, source, chunk_index, "pending_upload")
+    task_queue_service.update_status(
+        db_path, kg_id, source, chunk_index, StateTaskStatus.PENDING_UPLOAD
+    )
     document_record_service.record_chunk_completed(doc_folder, chunk_index)
-    task_queue_service.update_status(db_path, kg_id, source, chunk_index, "completed")
+    task_queue_service.update_status(
+        db_path, kg_id, source, chunk_index, StateTaskStatus.COMPLETED
+    )
 
 
 async def run_extraction_worker(driver: AsyncDriver, poll_interval_idle: float = 2.0) -> None:

@@ -109,9 +109,9 @@
 ## 5. 回填區（Codex 填寫）
 
 - 第一段 commit SHA：本段報告124提交完成後的 SHA 於交付回報列出；基準 SHA 為 `95ddeba38823c8188fd835785928c1bd51c4a954`。
-- 第二段 commit SHA：尚未執行，等待 Claude 對報告124的明確核准。
-- 自我檢查結果：S1 已讀完本任務書與報告120 §3.3，確認 worktree clean 並完成全專案 `git grep`；完整回歸 `1286 passed、0 failed`。S2 在全新系統暫存根目錄建立 `set_trace_callback` trace 腳本，先於任何程式碼變更產生 `baseline_sql_trace.json`（14 個操作、90 條 trace），並將腳本全文附於報告124；未啟動 Neo4j／Ollama／server，未執行匯入／重抽。S3 已完成 4 個 worker 呼叫、`update_status` 型別標註及所有 §0 以外 Python writer 的替換對照表；未修改 production、既有測試或 SQL。
-- 意外狀況：起始 git status 為 clean；回歸使用全新暫存 `--basetemp` 以避開既有暫存權限殘留，UMAP 三測試未卡住、未排除；執行時僅出現既有 `RequestsDependencyWarning` 與 pytest／套件 warnings。第一段已完成，依任務書停下等待核准，未 push。
+- 第二段 commit SHA：本段提交完成後的 SHA 於交付回報列出。
+- 自我檢查結果：S4 僅修改核准的 `services/extraction_worker.py` 四個 `update_status` 呼叫與 `services/task_queue_service.py` 的型別標註／import；保留 service 端 `TaskStatus` Literal，沒有修改 SQL、既有測試、X1 或 X3。S5 targeted 回歸為 `141 passed、0 failed`；after 腳本複製 baseline、改傳 `TaskStatus.X` 並輸出獨立的 `after_sql_trace.json`，只比較 `operations` 與 `trace` 且均逐字相同；完整回歸為 `1286 passed、0 failed`。相依快照為 151 modules、419 edges、`cycles=0`、`state.task_sm` fan-in=2、fan-out=0，state 無 services/models/repositories/core 依賴；production grep 無字串狀態參數。S6 已產出報告125，待本段提交。
+- 意外狀況：起始 worktree clean；先前存在的 `pytest-of-666`／`.pytest_cache` 權限警告未直接使用，所有本批 pytest 與 trace／快照均改用全新 `C:\Users\666\AppData\Local\Temp\codex_report125_sqltrace_20260929_01\`。UMAP 三測試未卡住、未排除；執行時僅出現既有 requests／pytest／UMAP／jieba warnings。未啟動 Neo4j／Ollama／server，未執行匯入／重抽，未 push。
 
 ## 6. 禁止事項
 
