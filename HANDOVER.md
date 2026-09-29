@@ -5,7 +5,7 @@
 
 ## 2026-09-29（報告117）：build_graph 清空前虛擬成員防護任務書，交 Codex 執行
 
-使用者同意「先做 a（風險1防護性最小修補）再 c（M2 重構第一步）」。[報告117](docs/報告/117_build_graph虛擬成員清空前防護SDD任務書.md)：`build_graph(force_rebuild=True, doc_ids=None)` 在清空 Neo4j **之前**偵測 manifest 成員缺 `_record.json`，有就拋 `VirtualMembersNotRebuildableError`（router→409）、不清空；非 force 時僅 WARNING。先寫失敗測試→修→回歸須 1183 passed。**只擋住，不支援虛擬成員**（留 M2）。成果報告編號 118。**狀態：等待 Codex 執行→Claude 依§3驗收→通過才 push。** 完成後下一步＝(c) M2 重構第一步（以報告108 相依快照挑拆分目標）。
+使用者同意「先做 a（風險1防護性最小修補）再 c（M2 重構第一步）」。[報告117](docs/報告/117_build_graph虛擬成員清空前防護SDD任務書.md)：`build_graph(force_rebuild=True, doc_ids=None)` 在清空 Neo4j **之前**偵測 manifest 成員缺 `_record.json`，有就拋 `VirtualMembersNotRebuildableError`（router→409）、不清空；非 force 時僅 WARNING。先寫失敗測試→修→回歸須 1183 passed。**只擋住，不支援虛擬成員**（留 M2）。成果報告編號 118。**狀態：✅ 已驗收通過（`8803184`，報告118）並 push。** Claude 離線腳本三情境驗證：虛擬 KG＋force＝拋 `VirtualMembersNotRebuildableError`、0 次 `DETACH DELETE`、0 次抽取；虛擬 KG 非 force＝無錯、不清空；實體 KG＋force＝行為不變（1 次清空、1 次抽取）。回歸基準更新為 **1183 passed**（取代 1180）。**風險1 已堵住（僅防護，非支援）**；`doc_ids` 局部重建仍靜默略過虛擬成員（僅 WARNING）、`ArticleStructureLossError` 在 router 仍回 500、風險2–4／匯入腳本／評測工具的虛擬成員支援留 M2。**下一步＝(c) M2 重構第一步**（以報告108 相依快照挑拆分目標）。
 
 ## 2026-09-29（報告115）：虛擬成員盲點追查任務書，已完成並 push
 
