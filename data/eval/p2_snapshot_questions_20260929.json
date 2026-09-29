@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "snapshot_note": "P2 凍結快照子集，取自 test_cases.json，題庫雜湊另計",
+    "source_dataset": "data/eval/test_cases.json",
+    "source_dataset_sha256": "77c293ed4b75cfd44ac4fe36d9b529566ce669d4dc7c960cbac5a3e5161ee48a",
+    "subset_sha256": "2a572105ccabdaedaa6a2302821bd4c3860648613a6d128796823d3328ffc49c",
+    "subset_sha256_scope": "canonical UTF-8 JSON with meta.subset_sha256 set to null"
+  },
+  "questions": [
+    {
+      "id": "17-Q1",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "pcode": "N0030006",
+      "source_article": "N0030006 勞工請假規則 §2",
+      "gold_answer": "8 日，工資照給",
+      "scenario_type": "Type-A",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "勞工結婚者給予婚假八日，工資照給",
+          "source_law": "N0030006_勞工請假規則",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": null
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "單事實",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": "報告 17 §1（單一 KG）",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "single_fact"
+      ]
+    },
+    {
+      "id": "26-Q1",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "pcode": "N0060029",
+      "source_article": "N0060029 高架作業勞工保護措施標準 §4",
+      "gold_answer": "2–5 m → 20 分鐘；5–20 m → 25 分鐘；20 m 以上 → 35 分鐘",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "source_law": "N0060029_高架作業勞工保護措施標準",
+          "source_article": "第4條第1款",
+          "is_essential": true,
+          "note": "第1段：2-5公尺"
+        },
+        {
+          "exact_span": "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "source_law": "N0060029_高架作業勞工保護措施標準",
+          "source_article": "第4條第2款",
+          "is_essential": true,
+          "note": "第2段：5-20公尺"
+        },
+        {
+          "exact_span": "高度在二十公尺以上者，至少有三十五分鐘休息",
+          "source_law": "N0060029_高架作業勞工保護措施標準",
+          "source_article": "第4條第3款",
+          "is_essential": true,
+          "note": "第3段：20公尺以上"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（列舉分段完整性）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告 26 §2 題1／報告 38 T1 條件A；2026-09-15依報告57任務B補驗證",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "segmented_enumeration"
+      ]
+    },
+    {
+      "id": "26-Q5",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "pcode": "N0050030",
+      "source_article": "N0050030 災區受災勞工保險費補助辦法 §2／§3",
+      "gold_answer": "災後六個月期間內被保險人應負擔之保險費，由中央政府支應；其期間之計算，自災害發生之當月一日起計算六個月。",
+      "scenario_type": "Type-C",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "自災害發生之當月一日起計算六個月",
+          "source_law": "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法",
+          "source_article": "第3條",
+          "is_essential": true,
+          "note": "法律起算日關鍵約束，嚴禁模型平滑化改寫為當日"
+        },
+        {
+          "exact_span": "災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+          "source_law": "N0050030_災區受災勞工保險與勞工職業災害保險及就業保險被保險人保險費支應及傷病給付辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "補助主體與期間"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝＋多跳（跨文件不混淆）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告 26 §2 題5／報告 38 T1 條件A（＝報告 37／38 Q5）",
+      "dup_map": [],
+      "pilot": true,
+      "mechanism_tags": [
+        "cross_doc_multihop"
+      ]
+    },
+    {
+      "id": "57-DIST1",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "pcode": "D0080015",
+      "source_article": "D0080015 §2／§3",
+      "gold_answer": "當選直轄市/縣市級模範警察 → 1-3日；當選全國性模範警察 → 2-5日，兩者天數不同，不可混淆",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條第5款",
+          "is_essential": true,
+          "note": "地方級：1-3日（第2條開頭）"
+        },
+        {
+          "exact_span": "當選全國性模範警察者",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條第2款",
+          "is_essential": true,
+          "note": "全國級：2-5日（第3條開頭），與地方級用詞極相似但天數不同，測鄰接陷阱"
+        },
+        {
+          "exact_span": "給予一至三日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第2條",
+          "is_essential": true,
+          "note": "報告62 §14.7：地方級天數（第2條開頭）。gold 原本只有事由 span、缺天數，答案光靠既有 span 就能過關而不需正確答出天數；本題核心是『地方 vs 全國天數不同，不可混淆』（鄰接陷阱），兩個天數都應是必要事實，補此 span 修正"
+        },
+        {
+          "exact_span": "給予二至五日之特別休假",
+          "source_law": "D0080015_警察人員特別休假辦法",
+          "source_article": "第3條",
+          "is_essential": true,
+          "note": "報告62 §14.7：全國級天數（第3條開頭），同上，另見已核實的偽陰性案例（57-DIST1/2）"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（鄰接陷阱）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "distractor_adjacent"
+      ]
+    },
+    {
+      "id": "57-COREF1",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "pcode": "N0030018",
+      "source_article": "N0030018 育嬰留職停薪實施辦法 §2",
+      "gold_answer": "原則於5日前提出；因子女生病、停托、停課須親自照顧者，得於1日前提出；若連1日前都來不及，得委託他人代辦申請手續",
+      "scenario_type": "Type-B",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "未滿三十日：於五日前提出",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第4項第2款",
+          "is_essential": true,
+          "note": "一般情形5日前提出"
+        },
+        {
+          "exact_span": "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第4項第2款但書",
+          "is_essential": true,
+          "note": "但書例外，1日前提出"
+        },
+        {
+          "exact_span": "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續",
+          "source_law": "N0030018_育嬰留職停薪實施辦法",
+          "source_article": "第2條第5項",
+          "is_essential": true,
+          "note": "此句「前項第二款但書規定」需回頭消解才知道指的是上面的1日前但書，測代名詞/前指消解"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "多事實組裝（代名詞消解）",
+      "complexity_bucket": "multi",
+      "wording_status": "verbatim",
+      "source_report": "報告57任務B §3.3，2026-09-15新出題",
+      "dup_map": [],
+      "pilot": false,
+      "mechanism_tags": [
+        "coreference_resolution",
+        "multi_fact_assembly"
+      ]
+    },
+    {
+      "id": "canary-P1",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "pcode": null,
+      "source_article": "非收錄法令/超出法定額度",
+      "gold_answer": "依據目前收錄之勞動法規資料庫，未記載此項超額罰鍰規定。",
+      "scenario_type": "Type-E",
+      "atomic_gold_facts": [
+        {
+          "exact_span": "未記載相關規定",
+          "source_law": "None",
+          "source_article": "None",
+          "is_essential": true,
+          "note": "必須觸發拒答"
+        }
+      ],
+      "verification_status": "verified",
+      "complexity_label": "拒答金絲雀",
+      "complexity_bucket": "single",
+      "wording_status": "verbatim",
+      "source_report": null,
+      "dup_map": [],
+      "pilot": true,
+      "mechanism_tags": [
+        "canary_refusal"
+      ],
+      "trap_claim_spans": []
+    }
+  ]
+}

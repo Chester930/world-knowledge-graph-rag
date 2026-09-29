@@ -1,0 +1,1708 @@
+[
+  {
+    "question_id": "17-Q1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-A",
+    "answer": "1. 勞工結婚可以請幾天婚假？\n根據提供的事實清單，勞工結婚可以請八日的婚假。\n\n相關事實如下：\n- 婚假天數為八日。\n- 結婚者可以獲得婚假。\n- 勞工 請婚假、喪假、公傷病假及公假 僱主不得視為缺勤而為其他不利之處分\n- 婚假照給工資。\n\n以上事實清楚地表明勞工結婚後可請八日的婚假，且此期間內僱主不得視為缺勤而對勞工進行不利處分。\n\n2. 工資怎麼算？\n根據提供的事實清單，我們可以詳細說明工資計算方式：\n\n1. **婚假**：勞工結婚可獲得八日的婚假，此期間工資照給。\n\n2. **公傷病假**：\n   - 一年內請普通傷病假日數未超過十日的部分，工資折半發給。\n   - 請普通傷病假超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n\n3. **公假**：依法令規定應給予勞工的公假，此期間工資照給。\n\n4. **事假**：\n   - 一年內合計不得超過十四日。\n   - 事假期間不給工資。\n\n5. **普通傷病假**：\n   - 請普通傷病假日數未超過三十日的部分，工資折半發給。\n   - 請普通傷病假超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n\n根據上述事實清單，我們可以得出以下結論：\n\n- 婚假、公假期間的工資照給。\n- 普通傷病假未超過三十日的部分，工資折半發給；超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n- 事假期間不給工資。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。因此，對於具體的工資計算方式，需根據勞工實際請假類型及天數來判斷適用哪種情況。",
+    "error": null,
+    "latency_s": 146.63,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 239,
+    "atomic_score": {
+      "supported_spans": [
+        "勞工結婚者給予婚假八日，工資照給"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 1/1 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "17-Q1",
+      "arm": "M4",
+      "question": "勞工結婚可以請幾天婚假？工資怎麼算？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 146630.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "婚假 照給 工資",
+            "score": 0.9118552207946777,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 1,
+            "text": "勞工 結婚者給予 婚假",
+            "score": 0.8983597755432129,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 2,
+            "text": "婚假 天數為 八日",
+            "score": 0.8674263954162598,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 3,
+            "text": "勞工 一年內請普通傷病假日數未超過 十日",
+            "score": 0.8335003852844238,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 10,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 4,
+            "text": "勞工 給予 公傷病假",
+            "score": 0.8121085166931152,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 6,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 5,
+            "text": "勞工 請婚假、喪假、公傷病假及公假 雇主不得視為缺勤而為其他不利之處分",
+            "score": 0.8006205558776855,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 9,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 6,
+            "text": "勞工 應於事前親自以口頭或書面敘明 請假理由及日數",
+            "score": 0.7986631393432617,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 11,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 7,
+            "text": "事假 期間 不給工資",
+            "score": 0.7983541488647461,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 7,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 8,
+            "text": "事假 一年內合計不得超過 十四日",
+            "score": 0.7954607009887695,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 7,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 9,
+            "text": "公假 依法令規定應給予 勞工",
+            "score": 0.7913217544555664,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 10,
+            "text": "普通傷病假一年內未超過三十日部分 工資折半發給",
+            "score": 0.7912044525146484,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 11,
+            "text": "公假 工資照給",
+            "score": 0.7859220504760742,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 12,
+            "text": "勞工 請普通傷病假超過第一項規定日數者 雇主不得僅以請普通傷病假日數作為考量因素",
+            "score": 0.7848172187805176,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 10,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "婚假天數為八日。",
+            "score": null,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 1,
+            "text": "婚假照給工資。",
+            "score": null,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 2,
+            "text": "結婚者可以獲得婚假。",
+            "score": null,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          }
+        ],
+        "hit_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 229,
+        "snr": 0.0699,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 67,
+        "retained_exact_spans": [
+          "勞工結婚者給予婚假八日，工資照給"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 勞工 一年內請普通傷病假日數未超過 十日",
+            "- 婚假天數為八日。",
+            "- 勞工 給予 公傷病假",
+            "- 結婚者可以獲得婚假。",
+            "- 勞工 請婚假、喪假、公傷病假及公假 雇主不得視為缺勤而為其他不利之處分",
+            "- 婚假照給工資。",
+            "- 勞工 應於事前親自以口頭或書面敘明 請假理由及日數",
+            "- 事假 期間 不給工資",
+            "- 事假 一年內合計不得超過 十四日",
+            "- 公假 依法令規定應給予 勞工",
+            "- 普通傷病假一年內未超過三十日部分 工資折半發給",
+            "- 公假 工資照給",
+            "- 勞工 請普通傷病假超過第一項規定日數者 雇主不得僅以請普通傷病假日數作為考量因素"
+          ],
+          [
+            "- 勞工 一年內請普通傷病假日數未超過 十日",
+            "- 婚假照給工資。",
+            "- 勞工 給予 公傷病假",
+            "- 婚假天數為八日。",
+            "- 勞工 請婚假、喪假、公傷病假及公假 雇主不得視為缺勤而為其他不利之處分",
+            "- 結婚者可以獲得婚假。",
+            "- 勞工 應於事前親自以口頭或書面敘明 請假理由及日數",
+            "- 事假 期間 不給工資",
+            "- 事假 一年內合計不得超過 十四日",
+            "- 公假 依法令規定應給予 勞工",
+            "- 普通傷病假一年內未超過三十日部分 工資折半發給",
+            "- 公假 工資照給",
+            "- 勞工 請普通傷病假超過第一項規定日數者 雇主不得僅以請普通傷病假日數作為考量因素"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 146630.0,
+        "raw_draft": "1. 勞工結婚可以請幾天婚假？\n根據提供的事實清單，勞工結婚可以請八日的婚假。\n\n相關事實如下：\n- 婚假天數為八日。\n- 結婚者可以獲得婚假。\n- 勞工 請婚假、喪假、公傷病假及公假 僱主不得視為缺勤而為其他不利之處分\n- 婚假照給工資。\n\n以上事實清楚地表明勞工結婚後可請八日的婚假，且此期間內僱主不得視為缺勤而對勞工進行不利處分。\n\n2. 工資怎麼算？\n根據提供的事實清單，我們可以詳細說明工資計算方式：\n\n1. **婚假**：勞工結婚可獲得八日的婚假，此期間工資照給。\n\n2. **公傷病假**：\n   - 一年內請普通傷病假日數未超過十日的部分，工資折半發給。\n   - 請普通傷病假超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n\n3. **公假**：依法令規定應給予勞工的公假，此期間工資照給。\n\n4. **事假**：\n   - 一年內合計不得超過十四日。\n   - 事假期間不給工資。\n\n5. **普通傷病假**：\n   - 請普通傷病假日數未超過三十日的部分，工資折半發給。\n   - 請普通傷病假超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n\n根據上述事實清單，我們可以得出以下結論：\n\n- 婚假、公假期間的工資照給。\n- 普通傷病假未超過三十日的部分，工資折半發給；超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n- 事假期間不給工資。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。因此，對於具體的工資計算方式，需根據勞工實際請假類型及天數來判斷適用哪種情況。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": false,
+        "final_output": "1. 勞工結婚可以請幾天婚假？\n根據提供的事實清單，勞工結婚可以請八日的婚假。\n\n相關事實如下：\n- 婚假天數為八日。\n- 結婚者可以獲得婚假。\n- 勞工 請婚假、喪假、公傷病假及公假 僱主不得視為缺勤而為其他不利之處分\n- 婚假照給工資。\n\n以上事實清楚地表明勞工結婚後可請八日的婚假，且此期間內僱主不得視為缺勤而對勞工進行不利處分。\n\n2. 工資怎麼算？\n根據提供的事實清單，我們可以詳細說明工資計算方式：\n\n1. **婚假**：勞工結婚可獲得八日的婚假，此期間工資照給。\n\n2. **公傷病假**：\n   - 一年內請普通傷病假日數未超過十日的部分，工資折半發給。\n   - 請普通傷病假超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n\n3. **公假**：依法令規定應給予勞工的公假，此期間工資照給。\n\n4. **事假**：\n   - 一年內合計不得超過十四日。\n   - 事假期間不給工資。\n\n5. **普通傷病假**：\n   - 請普通傷病假日數未超過三十日的部分，工資折半發給。\n   - 請普通傷病假超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n\n根據上述事實清單，我們可以得出以下結論：\n\n- 婚假、公假期間的工資照給。\n- 普通傷病假未超過三十日的部分，工資折半發給；超過三十日部分，僱主不得僅以請普通傷病假日數作為考量因素而為其他不利之處分。\n- 事假期間不給工資。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。因此，對於具體的工資計算方式，需根據勞工實際請假類型及天數來判斷適用哪種情況。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "26-Q1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "根據提供的事實清單，勞工從事高架作業每連續作業二小時應給予休息時間的規定如下：\n\n1. 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n2. 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。因此，無法根據提供的事實清單直接回答高度在五公尺以下或二公尺以上的休息時間規定。但可以補充說明，根據勞動基準法相關規定，一般而言，勞工從事高架作業每連續工作兩小時應給予休息，具體休息時間需視實際作業高度而定。\n\n總結來說：\n- 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n- 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n補充（依事實清單）：高度在二公尺以上未滿五公尺者 至少有 二十分鐘休息",
+    "error": null,
+    "latency_s": 64.68,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 0,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 236,
+    "atomic_score": {
+      "supported_spans": [
+        "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+        "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+        "高度在二十公尺以上者，至少有三十五分鐘休息"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Hit 3/3 facts (semantic fallback). Missed essential: []",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q1",
+      "arm": "M4",
+      "question": "依高架作業勞工保護措施標準，勞工從事高架作業每連續作業二小時應給予休息，休息時間如何依作業高度分三段規定？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 64680.00000000001,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "雇主 使勞工從事高架作業時，應減少工作時間，每連續作業二小時，應給予作業勞工 下列休息時間",
+            "score": 0.8834824562072754,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 1,
+            "text": "高度在二十公尺以上者 至少有 三十五分鐘休息",
+            "score": 0.8361630439758301,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 2,
+            "text": "高度在五公尺以上未滿二十公尺者 至少有 二十五分鐘休息",
+            "score": 0.8288164138793945,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 3,
+            "text": "高度在二公尺以上未滿五公尺者 至少有 二十分鐘休息",
+            "score": 0.8250207901000977,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 4,
+            "text": "已依規定設置平台、護欄等設備，並採取防止墜落之必要安全措施，其高度在五公尺以上者  高架作業",
+            "score": 0.8077578544616699,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 5,
+            "text": "高架作業 係指雇主使勞工從事之下列作業",
+            "score": 0.8075809478759766,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 6,
+            "text": "勞工自覺不適從事工作者 不得使其從事 高架作業",
+            "score": 0.8019218444824219,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 7,
+            "text": "雇主 應使 作業勞工於安全設施良好之地面或平台等處所休息",
+            "score": 0.8012309074401855,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 6,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 8,
+            "text": "未設置平台、護欄等設備而已採取必要安全措施，其高度在二公尺以上者  高架作業",
+            "score": 0.7988462448120117,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 9,
+            "text": "勞工 從事 高架作業",
+            "score": 0.7960710525512695,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 7,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 10,
+            "text": "情緒不穩定，有安全顧慮者 不得使其從事 高架作業",
+            "score": 0.7914719581604004,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 11,
+            "text": "酒醉或有酒醉之虞者 不得使其從事 高架作業",
+            "score": 0.7901554107666016,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 12,
+            "text": "其他經主管人員認定者 不得使其從事 高架作業",
+            "score": 0.7797980308532715,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "僱主因搶修或其他特殊作業需要，經採取相對減少工作時間或其他保護措施後，得調整休息時間。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 1,
+            "text": "勞工從事高架作業。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 2,
+            "text": "未設置平臺、護欄等設備而已採取必要安全措施，其高度在二公尺以上者之高架作業得以進行。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 3,
+            "text": "已依規定設置平臺、護欄等設備並採取防止墜落之必要安全措施後，高架作業的高度在五公尺以上者。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 4,
+            "text": "酒醉或有酒醉之虞者不得從事高架作業。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 5,
+            "text": "身體虛弱且經醫師診斷認為身體狀況不良者不得從事高架作業。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 6,
+            "text": "情緒不穩定且有安全顧慮者不得從事高架作業。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 7,
+            "text": "勞工若自覺不適從事高架作業，不得使其從事該工作。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 8,
+            "text": "其他經主管人員認定者不得從事高架作業。",
+            "score": null,
+            "source_doc_id": "24f2c40f-1182-5c2e-b55a-1f90f5f4561e",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          }
+        ],
+        "hit_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 574,
+        "snr": 0.1237,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 155,
+        "retained_exact_spans": [
+          "高度在二公尺以上未滿五公尺者，至少有二十分鐘休息",
+          "高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息",
+          "高度在二十公尺以上者，至少有三十五分鐘休息"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 雇主 使勞工從事高架作業時，應減少工作時間，每連續作業二小時，應給予作業勞工 下列休息時間",
+            "- 已依規定設置平臺、護欄等設備並採取防止墜落之必要安全措施後，高架作業的高度在五公尺以上者。",
+            "- 高度在二十公尺以上者 至少有 三十五分鐘休息",
+            "- 勞工若自覺不適從事高架作業，不得使其從事該工作。",
+            "- 高度在五公尺以上未滿二十公尺者 至少有 二十五分鐘休息",
+            "- 情緒不穩定且有安全顧慮者不得從事高架作業。",
+            "- 高度在二公尺以上未滿五公尺者 至少有 二十分鐘休息",
+            "- 勞工從事高架作業。",
+            "- 高架作業 係指雇主使勞工從事之下列作業",
+            "- 酒醉或有酒醉之虞者不得從事高架作業。",
+            "- 雇主 應使 作業勞工於安全設施良好之地面或平台等處所休息",
+            "- 未設置平臺、護欄等設備而已採取必要安全措施，其高度在二公尺以上者之高架作業得以進行。",
+            "- 其他經主管人員認定者不得從事高架作業。",
+            "- 僱主因搶修或其他特殊作業需要，經採取相對減少工作時間或其他保護措施後，得調整休息時間。",
+            "- 身體虛弱且經醫師診斷認為身體狀況不良者不得從事高架作業。"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 64680.00000000001,
+        "raw_draft": "根據提供的事實清單，勞工從事高架作業每連續作業二小時應給予休息時間的規定如下：\n\n1. 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n2. 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。因此，無法根據提供的事實清單直接回答高度在五公尺以下或二公尺以上的休息時間規定。但可以補充說明，根據勞動基準法相關規定，一般而言，勞工從事高架作業每連續工作兩小時應給予休息，具體休息時間需視實際作業高度而定。\n\n總結來說：\n- 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n- 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n補充（依事實清單）：高度在二公尺以上未滿五公尺者 至少有 二十分鐘休息",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據提供的事實清單，勞工從事高架作業每連續作業二小時應給予休息時間的規定如下：\n\n1. 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n2. 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n事實清單只有部分級距，查不到題目數值對應的那一段。因此，無法根據提供的事實清單直接回答高度在五公尺以下或二公尺以上的休息時間規定。但可以補充說明，根據勞動基準法相關規定，一般而言，勞工從事高架作業每連續工作兩小時應給予休息，具體休息時間需視實際作業高度而定。\n\n總結來說：\n- 高度在五公尺以上未滿二十公尺者，至少有二十五分鐘休息。\n- 高度在二十公尺以上者，至少有三十五分鐘休息。\n\n補充（依事實清單）：高度在二公尺以上未滿五公尺者 至少有 二十分鐘休息",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Success: All gold spans preserved across all 3 stages."
+    },
+    "failure_attribution": "Success: All gold spans preserved across all 3 stages.",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "26-Q5",
+    "arm": "M4",
+    "raw_arm": "K",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-C",
+    "answer": "1. 災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？\n根據提供的事實清單，災區受災勞工保險與勞工職業災害保險及就業保險之被保險人，在災後六個月期間內應負擔的保險費由中央政府支應。因此，符合規定者在災後六個月的期間內，個人應負擔的保險費由中央政府支應。\n\n2. 這個期間從哪一天開始起算？\n這個期間從災害發生之當月一日起計算。資料未明確記載，無法確認此期間的具體天數。",
+    "error": null,
+    "latency_s": 53.48,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 4,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 104,
+    "atomic_score": {
+      "supported_spans": [
+        "自災害發生之當月一日起計算六個月"
+      ],
+      "missing_spans": [
+        "災後六個月期間內被保險人應負擔之保險費，由中央政府支應"
+      ],
+      "atomic_accuracy": 0.5,
+      "atomic_recall": 0.5,
+      "is_perfect": false,
+      "details": "Hit 1/2 facts (semantic fallback). Missed essential: ['災後六個月期間內被保險人應負擔之保險費，由中央政府支應']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "26-Q5",
+      "arm": "M4",
+      "question": "災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？這個期間從哪一天開始起算？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 53480.0,
+        "retrieved_chunk_ids": [
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "災區受災勞工保險與勞工職業災害保險及就業保險之被保險人 有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+            "score": 0.8972530364990234,
+            "source_doc_id": "56556675-a40b-55be-b664-7f8e5ca3030c",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 1,
+            "text": "災區受災勞工保險與勞工職業災害保險及就業保險之被保險人 於災區因天然災害致傷病不能工作，未能取得原有薪資者，得自治療之日起向勞保局請領 傷病給付",
+            "score": 0.8166422843933105,
+            "source_doc_id": "56556675-a40b-55be-b664-7f8e5ca3030c",
+            "source_svo_chunk_index": 5,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 2,
+            "text": "符合第二條規定之受災者名冊 應由 災區所在地之直轄市、縣（市）政府彙整後，送勞動部勞工保險局",
+            "score": 0.8118925094604492,
+            "source_doc_id": "56556675-a40b-55be-b664-7f8e5ca3030c",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 3,
+            "text": "災害發生之當月一日起 計算 前條所定災後六個月期間",
+            "score": 0.8080120086669922,
+            "source_doc_id": "56556675-a40b-55be-b664-7f8e5ca3030c",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "被保險人溢繳了保險費。",
+            "score": null,
+            "source_doc_id": "56556675-a40b-55be-b664-7f8e5ca3030c",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          }
+        ],
+        "hit_exact_spans": [
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+          "自災害發生之當月一日起計算六個月"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 212,
+        "snr": 0.2028,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 55,
+        "retained_exact_spans": [
+          "災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+          "自災害發生之當月一日起計算六個月"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 災區受災勞工保險與勞工職業災害保險及就業保險之被保險人 有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+            "- 被保險人溢繳了保險費。",
+            "- 災區受災勞工保險與勞工職業災害保險及就業保險之被保險人 於災區因天然災害致傷病不能工作，未能取得原有薪資者，得自治療之日起向勞保局請領 傷病給付",
+            "- 符合第二條規定之受災者名冊 應由 災區所在地之直轄市、縣（市）政府彙整後，送勞動部勞工保險局",
+            "- 災害發生之當月一日起 計算 前條所定災後六個月期間"
+          ],
+          [
+            "- 災區受災勞工保險與勞工職業災害保險及就業保險之被保險人 有下列情形之一者，其災後六個月期間內被保險人應負擔之保險費，由中央政府支應",
+            "- 被保險人溢繳了保險費。",
+            "- 災區受災勞工保險與勞工職業災害保險及就業保險之被保險人 於災區因天然災害致傷病不能工作，未能取得原有薪資者，得自治療之日起向勞保局請領 傷病給付",
+            "- 符合第二條規定之受災者名冊 應由 災區所在地之直轄市、縣（市）政府彙整後，送勞動部勞工保險局",
+            "- 災害發生之當月一日起 計算 前條所定災後六個月期間"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 53480.0,
+        "raw_draft": "1. 災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？\n根據提供的事實清單，災區受災勞工保險與勞工職業災害保險及就業保險之被保險人，在災後六個月期間內應負擔的保險費由中央政府支應。因此，符合規定者在災後六個月的期間內，個人應負擔的保險費由中央政府支應。\n\n2. 這個期間從哪一天開始起算？\n這個期間從災害發生之當月一日起計算。資料未明確記載，無法確認此期間的具體天數。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "1. 災區受災勞工，符合規定者在災後多久的期間內，個人應負擔的保險費由中央政府支應？\n根據提供的事實清單，災區受災勞工保險與勞工職業災害保險及就業保險之被保險人，在災後六個月期間內應負擔的保險費由中央政府支應。因此，符合規定者在災後六個月的期間內，個人應負擔的保險費由中央政府支應。\n\n2. 這個期間從哪一天開始起算？\n這個期間從災害發生之當月一日起計算。資料未明確記載，無法確認此期間的具體天數。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['災後六個月期間內被保險人應負擔之保險費，由中央政府支應']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['災後六個月期間內被保險人應負擔之保險費，由中央政府支應'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-DIST1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "1. 警察當選「直轄市」模範警察，可以獲得幾天特別休假？\n根據提供的事實清單，當選直轄市模範警察者可以獲得一至三日之特別休假。\n\n2. 跟當選「全國性」模範警察的天數一樣嗎？\n根據提供的事實清單，當選全國性模範警察者會獲得二至五日之特別休假。而另一項情事中提到的情況（奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者）則會獲得一至三日之特別休假。\n\n因此，跟當選全國性模範警察的天數不同。全國性模範警察的特別休假天數為二至五日，而奮勇緝兇等情況下的特別休假天數為一至三日。",
+    "error": null,
+    "latency_s": 128.94,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 188,
+    "atomic_score": {
+      "supported_spans": [
+        "當選全國性模範警察者",
+        "給予一至三日之特別休假",
+        "給予二至五日之特別休假"
+      ],
+      "missing_spans": [
+        "當選直轄市、縣（市）級模範警察或好人好事代表者"
+      ],
+      "atomic_accuracy": 0.75,
+      "atomic_recall": 0.75,
+      "is_perfect": false,
+      "details": "Hit 3/4 facts (semantic fallback). Missed essential: ['當選直轄市、縣（市）級模範警察或好人好事代表者']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-DIST1",
+      "arm": "M4",
+      "question": "警察當選「直轄市」模範警察，可以獲得幾天特別休假？跟當選「全國性」模範警察的天數一樣嗎？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 128940.0,
+        "retrieved_chunk_ids": [
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "當選直轄市、縣（市）級模範警察或好人好事代表者 給予 一至三日之特別休假",
+            "score": 0.8732409477233887,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 1,
+            "text": "當選全國性模範警察者 因 給予二至五日之特別休假",
+            "score": 0.8660049438476562,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 2,
+            "text": "奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "score": 0.7941799163818359,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 3,
+            "text": "為計算特別休假日數 由各級警察機關首長核定之",
+            "score": 0.7935500144958496,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 8,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 4,
+            "text": "當選全國性好人好事代表者 因 給予二至五日之特別休假",
+            "score": 0.7922444343566895,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 5,
+            "text": "警察機關 並保留其假期或酌發不休假獎金",
+            "score": 0.7864370346069336,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 6,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 6,
+            "text": "警察機關 給予 特別休假人員",
+            "score": 0.7861475944519043,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 6,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 7,
+            "text": "處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "score": 0.7844967842102051,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 8,
+            "text": "主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者 因 給予二至五日之特別休假",
+            "score": 0.7781119346618652,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 9,
+            "text": "主動破獲叛亂組織，人證俱獲者 因……者 給予 三至七日之特別休假",
+            "score": 0.7744903564453125,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 10,
+            "text": "因特別貢獻或特殊功績受頒勳章者 因……者 給予 三至七日之特別休假",
+            "score": 0.7611064910888672,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 11,
+            "text": "因特殊功績榮獲晉階者 因……者 給予 三至七日之特別休假",
+            "score": 0.7610130310058594,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 12,
+            "text": "對主辦業務有重大革新，提出具體方案，經採納確具成效，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "score": 0.7532529830932617,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 13,
+            "text": "左列情事之一者 給予 三至七日之特別休假",
+            "score": 0.7474474906921387,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 14,
+            "text": "左列情事之一者 給予 二至五日之特別休假",
+            "score": 0.7458400726318359,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 15,
+            "text": "特別休假人員 不止一人時",
+            "score": 0.7423663139343262,
+            "source_doc_id": "8d050477-0426-54c1-bc90-a25ea71039ee",
+            "source_svo_chunk_index": 6,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "為計算特別休假日數，特別休假定義為。",
+            "score": null,
+            "source_doc_id": "c76201e8-b2e2-56c3-bc25-dd57c5b02815",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 1,
+            "text": "為計算特別休假日數，休假被視為一項概念。",
+            "score": null,
+            "source_doc_id": "c76201e8-b2e2-56c3-bc25-dd57c5b02815",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          }
+        ],
+        "hit_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "missed_exact_spans": [],
+        "recall_rate": 1.0,
+        "retrieved_char_count": 468,
+        "snr": 0.1175,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 129,
+        "retained_exact_spans": [
+          "當選直轄市、縣（市）級模範警察或好人好事代表者",
+          "當選全國性模範警察者",
+          "給予一至三日之特別休假",
+          "給予二至五日之特別休假"
+        ],
+        "dropped_exact_spans": [],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 當選直轄市、縣（市）級模範警察或好人好事代表者 給予 一至三日之特別休假",
+            "- 為計算特別休假日數，休假被視為一項概念。",
+            "- 當選全國性模範警察者 因 給予二至五日之特別休假",
+            "- 為計算特別休假日數，特別休假定義為。",
+            "- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "- 為計算特別休假日數 由各級警察機關首長核定之",
+            "- 當選全國性好人好事代表者 因 給予二至五日之特別休假",
+            "- 警察機關 並保留其假期或酌發不休假獎金",
+            "- 警察機關 給予 特別休假人員",
+            "- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者 因 給予二至五日之特別休假",
+            "- 主動破獲叛亂組織，人證俱獲者 因……者 給予 三至七日之特別休假",
+            "- 因特別貢獻或特殊功績受頒勳章者 因……者 給予 三至七日之特別休假",
+            "- 因特殊功績榮獲晉階者 因……者 給予 三至七日之特別休假",
+            "- 對主辦業務有重大革新，提出具體方案，經採納確具成效，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "- 左列情事之一者 給予 三至七日之特別休假",
+            "- 左列情事之一者 給予 二至五日之特別休假",
+            "- 特別休假人員 不止一人時"
+          ],
+          [
+            "- 當選直轄市、縣（市）級模範警察或好人好事代表者 給予 一至三日之特別休假",
+            "- 為計算特別休假日數，休假被視為一項概念。",
+            "- 當選全國性模範警察者 因 給予二至五日之特別休假",
+            "- 為計算特別休假日數，特別休假定義為。",
+            "- 奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "- 為計算特別休假日數 由各級警察機關首長核定之",
+            "- 當選全國性好人好事代表者 因 給予二至五日之特別休假",
+            "- 警察機關 並保留其假期或酌發不休假獎金",
+            "- 警察機關 給予 特別休假人員",
+            "- 處理重大突發治安事件，消弭禍患，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "- 主動破獲重大擾亂財政金融或私造武器彈藥案件，人證俱獲，受頒獎以上之獎勵者 因 給予二至五日之特別休假",
+            "- 主動破獲叛亂組織，人證俱獲者 因……者 給予 三至七日之特別休假",
+            "- 因特別貢獻或特殊功績受頒勳章者 因……者 給予 三至七日之特別休假",
+            "- 因特殊功績榮獲晉階者 因……者 給予 三至七日之特別休假",
+            "- 對主辦業務有重大革新，提出具體方案，經採納確具成效，獲記大功以上之獎勵者 給予 一至三日之特別休假",
+            "- 左列情事之一者 給予 三至七日之特別休假",
+            "- 左列情事之一者 給予 二至五日之特別休假",
+            "- 特別休假人員 不止一人時"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 128940.0,
+        "raw_draft": "1. 警察當選「直轄市」模範警察，可以獲得幾天特別休假？\n根據提供的事實清單，當選直轄市模範警察者可以獲得一至三日之特別休假。\n\n2. 跟當選「全國性」模範警察的天數一樣嗎？\n根據提供的事實清單，當選全國性模範警察者會獲得二至五日之特別休假。而另一項情事中提到的情況（奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者）則會獲得一至三日之特別休假。\n\n因此，跟當選全國性模範警察的天數不同。全國性模範警察的特別休假天數為二至五日，而奮勇緝兇等情況下的特別休假天數為一至三日。",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "1. 警察當選「直轄市」模範警察，可以獲得幾天特別休假？\n根據提供的事實清單，當選直轄市模範警察者可以獲得一至三日之特別休假。\n\n2. 跟當選「全國性」模範警察的天數一樣嗎？\n根據提供的事實清單，當選全國性模範警察者會獲得二至五日之特別休假。而另一項情事中提到的情況（奮勇緝兇，負傷不退，達成任務，獲記大功以上之獎勵者）則會獲得一至三日之特別休假。\n\n因此，跟當選全國性模範警察的天數不同。全國性模範警察的特別休假天數為二至五日，而奮勇緝兇等情況下的特別休假天數為一至三日。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選直轄市、縣（市）級模範警察或好人好事代表者']."
+    },
+    "failure_attribution": "Stage 3 Generation Failure (Intrinsic Hallucination / Smoothing): Facts were present in prompt context, but LLM omitted or smoothed ['當選直轄市、縣（市）級模範警察或好人好事代表者'].",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "57-COREF1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-B",
+    "answer": "受僱者申請育嬰留職停薪未滿30日，原則上要提前五天提出。\n根據提供的事實清單，受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n相關事實如下：\n- 育嬰留職停薪期間未滿三十日 於五日前提出\n這條事實明確指出，當申請的育嬰留職停薪期間未滿30日時，受僱者應於五日前提出申請。\n因此，答案是提前5天提出。\n如果是因為子女生病、停託或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？\n根據提供的事實清單，如果是因為子女生病、停託或停課等突發狀況來不及提前一天申請育嬰留職停薪的情況，可以依照以下方式處理：\n1. **未滿三十日之情況**：根據事實清單中的「但因子女生病、停託、停課，受僱者須親自照顧時 得於一日前提出」這條事實，如果申請的育嬰留職停薪期間未滿三十日，受僱者可以在預計開始前一日提出申請。\n2. **三十日以上之情況**：根據事實清單中的「育嬰留職停薪期間三十日以上 於十日前提出」這條事實，如果申請的育嬰留職停薪期間超過三十日，則需要在預計開始前十日提出申請。\n資料未明確記載，無法確認。此部分缺的是受僱者在突發狀況下能否與僱主協商以取得例外批準的相關規定。\n總結來說，如果是未滿三十日之情況，可以在預計開始前一日提出申請；\n如果超過三十日之情況，則需要在預計開始前十日前提出申請。\n資料未明確記載，無法確認。此部分缺的是受僱者在突發狀況下能否與僱主進行協商以取得理解和支持的相關規定。",
+    "error": null,
+    "latency_s": 222.57,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 3,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 320,
+    "atomic_score": {
+      "supported_spans": [
+        "未滿三十日：於五日前提出",
+        "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+      ],
+      "missing_spans": [
+        "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+      ],
+      "atomic_accuracy": 0.6667,
+      "atomic_recall": 0.6667,
+      "is_perfect": false,
+      "details": "Hit 2/3 facts (semantic fallback). Missed essential: ['受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續']",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "57-COREF1",
+      "arm": "M4",
+      "question": "受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、停托或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 222570.0,
+        "retrieved_chunk_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "育嬰留職停薪期間未滿三十日 於五日前提出",
+            "score": 0.9171075820922852,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 1,
+            "text": "育嬰留職停薪期間三十日以上 於十日前提出",
+            "score": 0.9157772064208984,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 2,
+            "text": "但因子女生病、停托、停課，受僱者須親自照顧時 得於一日前提出",
+            "score": 0.8914427757263184,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 3,
+            "text": "未滿三十日 每次申請,得以日為單位 每次申請育嬰留職停薪之期間及次數如下",
+            "score": 0.8897867202758789,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 4,
+            "text": "三十日以上未達六個月 以二次為限 每次申請育嬰留職停薪之期間及次數如下",
+            "score": 0.880244255065918,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 5,
+            "text": "受僱者 於申請育嬰留職停薪期間，得與雇主協商提前或延後 復職",
+            "score": 0.8677473068237305,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 6,
+            "text": "受僱者 有少於六個月之需求者 每次申請育嬰留職停薪之期間及次數如下",
+            "score": 0.8600564002990723,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 7,
+            "text": "提出方式 應記載下列事項 姓名、職務,留職停薪期間之起訖日,子女之出生年、月、日,留職停薪期間之住居所、聯絡電話,是否繼續參加社會保險",
+            "score": 0.8520779609680176,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 8,
+            "text": "受僱者 向雇主申請育嬰留職停薪之程序如下 程序",
+            "score": 0.8460049629211426,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 9,
+            "text": "留職停薪期間 以一年為限",
+            "score": 0.8408856391906738,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 5,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 10,
+            "text": "留職停薪 應向 雇主提出",
+            "score": 0.8408565521240234,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 11,
+            "text": "留職停薪期間 受僱者得與雇主協商提前或延後 復職",
+            "score": 0.8342576026916504,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 3,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 12,
+            "text": "受僱者 申請 留職停薪",
+            "score": 0.8264198303222656,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 13,
+            "text": "育嬰留職停薪期間 受僱者欲終止勞動契約時 應依各相關法令之規定辦理",
+            "score": 0.825345516204834,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 5,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 14,
+            "text": "普通傷病假 超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者 留職停薪",
+            "score": 0.8193931579589844,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 5,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 15,
+            "text": "育嬰留職停薪期間 除勞雇雙方另有約定外，不計入 工作年資計算",
+            "score": 0.8155331611633301,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 4,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "fact",
+            "rank": 16,
+            "text": "育嬰留職停薪期間 雇主得僱用替代人力 執行受僱者之原有工作",
+            "score": 0.814185619354248,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 6,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 17,
+            "text": "留職停薪期間 原則上每次以不少於 六個月為單位",
+            "score": 0.8111686706542969,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 2,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "fact",
+            "rank": 18,
+            "text": "受僱者 於育嬰留職停薪期間不得與他人另訂 勞動契約",
+            "score": 0.8055253028869629,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": 7,
+            "article_no": null,
+            "in_prompt": false
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "留職停薪應向僱主提出。",
+            "score": null,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 1,
+            "text": "受僱者於育嬰留職停薪期間不得與他人另訂勞動契約。",
+            "score": null,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 2,
+            "text": "每次申請育嬰留職停薪之期間及次數如下：有少於六個月之需求者均可申請。",
+            "score": null,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 3,
+            "text": "受僱者向僱主申請育嬰留職停薪的程序如下。",
+            "score": null,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 4,
+            "text": "受僱者於申請育嬰留職停薪期間得與僱主協商提前或延後復職日期。",
+            "score": null,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 5,
+            "text": "子女 之出生年、月、日",
+            "score": null,
+            "source_doc_id": "e3690812-61f7-546f-b2d1-316528b1b415",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          }
+        ],
+        "hit_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+        ],
+        "missed_exact_spans": [
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "recall_rate": 0.6667,
+        "retrieved_char_count": 619,
+        "snr": 0.0662,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 169,
+        "retained_exact_spans": [
+          "未滿三十日：於五日前提出",
+          "因子女生病、停托、停課，受僱者須親自照顧時，得於一日前提出"
+        ],
+        "dropped_exact_spans": [
+          "受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 受僱者於申請育嬰留職停薪期間得與僱主協商提前或延後復職日期。",
+            "- 每次申請育嬰留職停薪之期間及次數如下：有少於六個月之需求者均可申請。",
+            "- 受僱者向僱主申請育嬰留職停薪的程序如下。",
+            "- 留職停薪應向僱主提出。",
+            "- 受僱者於育嬰留職停薪期間不得與他人另訂勞動契約。",
+            "- 子女 之出生年、月、日",
+            "- 留職停薪期間 受僱者得與雇主協商提前或延後 復職",
+            "- 育嬰留職停薪期間 受僱者欲終止勞動契約時 應依各相關法令之規定辦理",
+            "- 育嬰留職停薪期間 除勞雇雙方另有約定外，不計入 工作年資計算",
+            "- 普通傷病假 超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者 留職停薪",
+            "- 受僱者 申請 留職停薪",
+            "- 留職停薪期間 以一年為限",
+            "- 提出方式 應記載下列事項 姓名、職務,留職停薪期間之起訖日,子女之出生年、月、日,留職停薪期間之住居所、聯絡電話,是否繼續參加社會保險",
+            "- 三十日以上未達六個月 以二次為限 每次申請育嬰留職停薪之期間及次數如下",
+            "- 未滿三十日 每次申請,得以日為單位 每次申請育嬰留職停薪之期間及次數如下",
+            "- 但因子女生病、停托、停課，受僱者須親自照顧時 得於一日前提出",
+            "- 育嬰留職停薪期間三十日以上 於十日前提出",
+            "- 育嬰留職停薪期間未滿三十日 於五日前提出"
+          ],
+          [
+            "- 受僱者於申請育嬰留職停薪期間得與僱主協商提前或延後復職日期。",
+            "- 每次申請育嬰留職停薪之期間及次數如下：有少於六個月之需求者均可申請。",
+            "- 受僱者向僱主申請育嬰留職停薪的程序如下。",
+            "- 留職停薪應向僱主提出。",
+            "- 受僱者於育嬰留職停薪期間不得與他人另訂勞動契約。",
+            "- 子女 之出生年、月、日",
+            "- 留職停薪期間 受僱者得與雇主協商提前或延後 復職",
+            "- 育嬰留職停薪期間 受僱者欲終止勞動契約時 應依各相關法令之規定辦理",
+            "- 育嬰留職停薪期間 除勞雇雙方另有約定外，不計入 工作年資計算",
+            "- 普通傷病假 超過前條第一項規定之期限，經以事假或特別休假抵充後仍未痊癒者 留職停薪",
+            "- 受僱者 申請 留職停薪",
+            "- 留職停薪期間 以一年為限",
+            "- 提出方式 應記載下列事項 姓名、職務,留職停薪期間之起訖日,子女之出生年、月、日,留職停薪期間之住居所、聯絡電話,是否繼續參加社會保險",
+            "- 三十日以上未達六個月 以二次為限 每次申請育嬰留職停薪之期間及次數如下",
+            "- 未滿三十日 每次申請,得以日為單位 每次申請育嬰留職停薪之期間及次數如下",
+            "- 但因子女生病、停托、停課，受僱者須親自照顧時 得於一日前提出",
+            "- 育嬰留職停薪期間三十日以上 於十日前提出",
+            "- 育嬰留職停薪期間未滿三十日 於五日前提出"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 222570.0,
+        "raw_draft": "受僱者申請育嬰留職停薪未滿30日，原則上要提前五天提出。\n根據提供的事實清單，受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n相關事實如下：\n- 育嬰留職停薪期間未滿三十日 於五日前提出\n這條事實明確指出，當申請的育嬰留職停薪期間未滿30日時，受僱者應於五日前提出申請。\n因此，答案是提前5天提出。\n如果是因為子女生病、停託或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？\n根據提供的事實清單，如果是因為子女生病、停託或停課等突發狀況來不及提前一天申請育嬰留職停薪的情況，可以依照以下方式處理：\n1. **未滿三十日之情況**：根據事實清單中的「但因子女生病、停託、停課，受僱者須親自照顧時 得於一日前提出」這條事實，如果申請的育嬰留職停薪期間未滿三十日，受僱者可以在預計開始前一日提出申請。\n2. **三十日以上之情況**：根據事實清單中的「育嬰留職停薪期間三十日以上 於十日前提出」這條事實，如果申請的育嬰留職停薪期間超過三十日，則需要在預計開始前十日提出申請。\n資料未明確記載，無法確認。此部分缺的是受僱者在突發狀況下能否與僱主協商以取得例外批準的相關規定。\n總結來說，如果是未滿三十日之情況，可以在預計開始前一日提出申請；\n如果超過三十日之情況，則需要在預計開始前十日前提出申請。\n資料未明確記載，無法確認。此部分缺的是受僱者在突發狀況下能否與僱主進行協商以取得理解和支持的相關規定。",
+        "grounding_passed": true,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "受僱者申請育嬰留職停薪未滿30日，原則上要提前五天提出。\n根據提供的事實清單，受僱者申請育嬰留職停薪未滿30日時，原則上要提前5天提出。\n相關事實如下：\n- 育嬰留職停薪期間未滿三十日 於五日前提出\n這條事實明確指出，當申請的育嬰留職停薪期間未滿30日時，受僱者應於五日前提出申請。\n因此，答案是提前5天提出。\n如果是因為子女生病、停託或停課等突發狀況，來不及提前一天申請，還可以怎麼辦？\n根據提供的事實清單，如果是因為子女生病、停託或停課等突發狀況來不及提前一天申請育嬰留職停薪的情況，可以依照以下方式處理：\n1. **未滿三十日之情況**：根據事實清單中的「但因子女生病、停託、停課，受僱者須親自照顧時 得於一日前提出」這條事實，如果申請的育嬰留職停薪期間未滿三十日，受僱者可以在預計開始前一日提出申請。\n2. **三十日以上之情況**：根據事實清單中的「育嬰留職停薪期間三十日以上 於十日前提出」這條事實，如果申請的育嬰留職停薪期間超過三十日，則需要在預計開始前十日提出申請。\n資料未明確記載，無法確認。此部分缺的是受僱者在突發狀況下能否與僱主協商以取得例外批準的相關規定。\n總結來說，如果是未滿三十日之情況，可以在預計開始前一日提出申請；\n如果超過三十日之情況，則需要在預計開始前十日前提出申請。\n資料未明確記載，無法確認。此部分缺的是受僱者在突發狀況下能否與僱主進行協商以取得理解和支持的相關規定。",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/3 gold facts missed (['受僱者因突發情形不及於一日前提出者，得委託他人代辦申請手續'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  },
+  {
+    "question_id": "canary-P1",
+    "arm": "M4",
+    "raw_arm": "K",
+    "k_top_k": null,
+    "article_expand": false,
+    "scenario_type": "Type-E",
+    "answer": "根據您提供的事實清單，上述事實並未直接提供有關違反勞動法令罰鍰金額的明確資訊。\n因此，我將基於臺灣現行法規中的相關規定進行補充說明。\n在臺灣，對於僱主違反勞動基準法等相關法律之行為，主管機關（如勞動檢查處）可以依違法情形處以罰鍰。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n- 未滿2萬元：罰鍰1,000元以上未滿2萬元\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n需要注意的是，這僅是法律規定下的上限罰鍰金額，實際罰鈴可能會根據違法情形、危害程度等因素有所不同。\n此外，若違反勞動基準法等相關法律的情況嚴重，主管機關還可以依《刑法》第147條處以刑事責任。\n根據臺灣現行法規，公司若違反勞動法令，依規定最高可處新臺幣50萬元的罰鍰。（此部分為事實清單中未提供的結論）",
+    "error": null,
+    "latency_s": 158.15,
+    "llm_calls": 0,
+    "generation_llm_calls": 0,
+    "judge_llm_calls": 2,
+    "generator_provider": "ollama",
+    "generator_model": "qwen2.5:7b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen2.5:7b",
+    "estimated_tokens": 171,
+    "atomic_score": {
+      "supported_spans": [
+        "REFUSAL"
+      ],
+      "missing_spans": [],
+      "atomic_accuracy": 1.0,
+      "atomic_recall": 1.0,
+      "is_perfect": true,
+      "details": "Exact Refusal Passed",
+      "deterministic_guard_passed": true,
+      "guard_failures": []
+    },
+    "scope_audit": {
+      "checked_rule_count": 0,
+      "issue_count": 0,
+      "issues": [],
+      "passed": true
+    },
+    "lineage": {
+      "query_id": "canary-P1",
+      "arm": "M4",
+      "question": "請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？",
+      "stage1_retrieval": {
+        "arm": "M4",
+        "retrieval_latency_ms": 158150.0,
+        "retrieved_chunk_ids": [
+          "",
+          ""
+        ],
+        "retrieved_fact_ids": [
+          ""
+        ],
+        "retrieval_trace": [
+          {
+            "kind": "fact",
+            "rank": 0,
+            "text": "雇主或勞工 違反 本規則之規定",
+            "score": 0.8121743202209473,
+            "source_doc_id": "961e2185-b4f1-5043-b3fc-ba919d6cef05",
+            "source_svo_chunk_index": 12,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 0,
+            "text": "勞工從事勞動。",
+            "score": null,
+            "source_doc_id": "14227a65-e016-52cd-affa-507925253d7d",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          },
+          {
+            "kind": "triple",
+            "rank": 1,
+            "text": "罰鍰 經限期繳納",
+            "score": null,
+            "source_doc_id": "c442573a-1465-5d8d-a264-26abf9769229",
+            "source_svo_chunk_index": null,
+            "article_no": null,
+            "in_prompt": true
+          }
+        ],
+        "hit_exact_spans": [],
+        "missed_exact_spans": [
+          "未記載相關規定"
+        ],
+        "recall_rate": 0.0,
+        "retrieved_char_count": 20,
+        "snr": 0.0,
+        "chain_completeness": null
+      },
+      "stage2_context": {
+        "total_context_tokens": 6,
+        "retained_exact_spans": [],
+        "dropped_exact_spans": [
+          "未記載相關規定"
+        ],
+        "verbalization_omissions": [],
+        "prompt_context_lines": [
+          [
+            "- 雇主或勞工 違反 本規則之規定",
+            "- 罰鍰 經限期繳納",
+            "- 勞工從事勞動。"
+          ]
+        ]
+      },
+      "stage3_generation": {
+        "llm_model": "qwen2.5:7b",
+        "generation_latency_ms": 158150.0,
+        "raw_draft": "根據您提供的事實清單，上述事實並未直接提供有關違反勞動法令罰鍰金額的明確資訊。\n因此，我將基於臺灣現行法規中的相關規定進行補充說明。\n在臺灣，對於僱主違反勞動基準法等相關法律之行為，主管機關（如勞動檢查處）可以依違法情形處以罰鍰。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n- 未滿2萬元：罰鍰1,000元以上未滿2萬元\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n需要注意的是，這僅是法律規定下的上限罰鍰金額，實際罰鈴可能會根據違法情形、危害程度等因素有所不同。\n此外，若違反勞動基準法等相關法律的情況嚴重，主管機關還可以依《刑法》第147條處以刑事責任。\n根據臺灣現行法規，公司若違反勞動法令，依規定最高可處新臺幣50萬元的罰鍰。（此部分為事實清單中未提供的結論）",
+        "grounding_passed": false,
+        "deterministic_guard_triggered": false,
+        "guard_reasons": [],
+        "regenerated": true,
+        "final_output": "根據您提供的事實清單，上述事實並未直接提供有關違反勞動法令罰鍰金額的明確資訊。\n因此，我將基於臺灣現行法規中的相關規定進行補充說明。\n在臺灣，對於僱主違反勞動基準法等相關法律之行為，主管機關（如勞動檢查處）可以依違法情形處以罰鍰。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n- 未滿2萬元：罰鍰1,000元以上未滿2萬元\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：最高罰鍰金額。\n（此部分）資料未明確記載，無法確認。缺的是問題的哪個部分：具體罰鍰範圍。\n需要注意的是，這僅是法律規定下的上限罰鍰金額，實際罰鈴可能會根據違法情形、危害程度等因素有所不同。\n此外，若違反勞動基準法等相關法律的情況嚴重，主管機關還可以依《刑法》第147條處以刑事責任。\n根據臺灣現行法規，公司若違反勞動法令，依規定最高可處新臺幣50萬元的罰鍰。（此部分為事實清單中未提供的結論）",
+        "supported_claims": [],
+        "unsupported_claims": []
+      },
+      "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])"
+    },
+    "failure_attribution": "Stage 1 Retrieval Failure: 1/1 gold facts missed (['未記載相關規定'])",
+    "deterministic_guard": {
+      "is_valid": true,
+      "guard_name": null,
+      "failure_reason": null,
+      "extra_constrained_note": null
+    },
+    "agentic_trace": null,
+    "run": 1
+  }
+]
