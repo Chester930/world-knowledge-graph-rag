@@ -29,10 +29,12 @@ P2（拆 `routers/agent.py`，1,904 行）的驗收條件是「重構前後 K �
 | `26-Q1` | 依高架作業勞工保護措施標準，…每連續作業二小時應給予休息… | `segmented_enumeration` | 枚舉／分層家族與 enumeration guard |
 | `26-Q5` | 災區受災勞工，符合規定者在災後多久的期間內… | `cross_doc_multihop` | 跨文件多跳、範圍推導與 BFS（已知對檢索排序敏感的題） |
 | `57-DIST1` | 警察當選「直轄市」模範警察，可以獲得幾天特別休假？… | `distractor_adjacent` | 鄰近干擾、grounding／條款綁定 |
-| `57-ALIAS1` | 員工如果是在工作時發生意外受傷…可以請的假叫做什麼？ | `alias_mapping` | 種子實體「字面→語意」fallback 路徑 |
+| `57-COREF1` | 受僱者申請育嬰留職停薪未滿30日，原則上要提前幾天提出？如果是因為子女生病、… | `coreference_resolution`、`multi_fact_assembly` | 多子句、指代消解與多事實組裝（**v2 修訂：取代原 `57-ALIAS1`**，見 §6） |
 | `canary-P1` | 請問公司若違反勞動法令，依規定最高可處新臺幣多少億元的罰鍰？ | `canary_refusal` | 拒答路徑（KG 內無此資訊） |
 
-（以上 6 題皆為 `verification_status == "verified"`。使用者原先說「5 題」，本任務書多列 1 題以覆蓋 alias fallback 與拒答兩條不同路徑；如需縮減，先與 Claude 確認，**不要自行刪題**。）
+（以上 6 題皆為 `verification_status == "verified"` **且通過 harness 的資格檢查**（`services/evaluation_eligibility.py::assess_test_case`；Claude 已用該函式逐題確認 `eligible=True`）。使用者原先說「5 題」，本任務書列 6 題以覆蓋拒答與多子句指代兩條不同路徑；如需縮減，先與 Claude 確認，**不要自行刪題**。）
+>
+> **v2 修訂註記（2026-09-29，Codex 第一輪試跑後）**：原 v1 選了 `57-ALIAS1`，但題庫中**所有** `alias_mapping` 題（ALIAS1／2／3、DIST3）的 `wording_status` 都是 `gist`，被 harness 資格檢查排除，因此無法用 alias 題覆蓋「種子實體字面→語意 fallback」路徑；此路徑**本快照不覆蓋**（記為已知限制）。v1 第一輪試跑的產物（5 題、含 2 題 180 秒逾時）**作廢**，見 §6。
 
 ---
 
@@ -60,6 +62,9 @@ P2（拆 `routers/agent.py`，1,904 行）的驗收條件是「重構前後 K �
 
 ### S4　執行基準快照 run1、run2（同一份程式碼、連續兩次）
 - 依 S3 確認的指令，連續執行兩次，輸出到 `data/eval/p2_snapshot_20260929/run1/` 與 `.../run2/`。
+- **v2：兩輪都必須加 `--query-timeout-s 600`**（Claude 明確授權；理由：v1 試跑實測 K 臂單題耗時 70–180 秒，5 題中 2 題在預設 180 秒逾時、另 1 題 153 秒，逾時的題目沒有答案與檢索軌跡，無法作為黃金基準）。兩輪必須使用**完全相同**的逾時值，並記錄在報告136 §1／§2。**若 600 秒仍有題逾時，停下回報，不要再自行加大。**
+- **v2：清理 v1 試跑產物**：把 v1 試跑產出的 `data/eval/p2_snapshot_20260929/run1/`（5 題、含逾時）與舊的 `data/eval/p2_snapshot_questions_20260929.json` **移到系統暫存目錄**（不要刪除證據、也不要留在 repo 內），再用 v2 題目重新產生子集檔並重跑；最終 repo 內只保留 v2 的 run1／run2。
+- **資格檢查**：跑完後確認 manifest 的 `eligible_question_ids` 恰為 6 題（與 §0 表相同）、`excluded_questions` 為空；否則停下回報。
 - 這是**長時間任務**（每題預估 1–3 分鐘，兩輪合計約 20–40 分鐘）：請用背景執行並輪詢輸出檔，**不得中途中斷**。
 - 每輪結束後記錄：起訖時間、每題耗時、是否有逾時（`--query-timeout-s` 預設 180；若有題逾時，記錄並如實回報，**不要**改逾時設定後假裝成功）、是否有任何錯誤。
 - 兩輪之間**不得**修改任何程式碼、設定或環境。
@@ -71,10 +76,11 @@ P2（拆 `routers/agent.py`，1,904 行）的驗收條件是「重構前後 K �
 python scripts/analysis/compare_p2_snapshots.py <run_dir_A> <run_dir_B> [--out <報告.json>]
 ```
 
-行為：讀取兩個 run 目錄的結果 JSON，對**每一題**輸出三層的比對結果：
-- **L1**：`retrieval_trace`（`facts` 與 `triples` 依原順序）與 `prompt_context_lines` 是否逐字相同；不同時列出第一個差異位置與雙方內容摘要；
-- **L2**：`answer` 是否逐字相同；
-- **L3**：原子評分結果是否一致（通過／未通過與命中原子集合）；
+行為：讀取兩個 run 目錄的 `records.json`，對**每一題**輸出三層的比對結果。**v2：欄位路徑已由 Claude 對照 v1 試跑產物確認**（每筆 record 的頂層鍵為 `question_id`、`arm`、`answer`、`error`、`latency_s`、`atomic_score`、`lineage`…；檢索軌跡**不在頂層**，而在 `lineage` 底下）：
+- **L1**：`lineage.stage1_retrieval` 的 `retrieved_fact_ids`、`retrieved_chunk_ids`、`retrieval_trace`（依原順序，list of dict），以及 `lineage.stage2_context.prompt_context_lines` 是否逐字相同；**不要納入**會隨執行而變的欄位（`retrieval_latency_ms`、各種耗時，以及其他明顯的計時／延遲欄位）。不同時列出第一個差異位置與雙方內容摘要；
+- **L2**：頂層 `answer`，並附帶比對 `lineage.stage3_generation` 的 `raw_draft`、`final_output`、`grounding_passed`、`regenerated`（用來判斷差異是出在生成本身還是後處理）；不納入 `generation_latency_ms`；
+- **L3**：`atomic_score` 的 `is_perfect`、`supported_spans`、`missing_spans`（通過／未通過與命中原子集合）；
+- 任一 record 的 `error` 非空（例如逾時）時，該題標為「無資料」並使總判定失敗，不得默默略過；
 並在最後輸出總表（每題三層 ✅／❌）與「哪些題 L2 不可比、哪些題 L3 不穩定」的清單。退出碼：任一題 L1 不同時為 1，否則 0。
 
 **同時新增測試** `tests/scripts/test_compare_p2_snapshots.py`（**寫法請比照既有的 `tests/scripts/test_compare_scope_audit_runs.py`**：`tests/scripts/` 沒有 `__init__.py`，既有測試以 `sys.path.insert(0, <repo 根>)` 後 `import scripts.…` 的方式載入；先確認 `scripts/analysis/` 能以同樣方式匯入，不能的話比照該既有測試處理，**不要**為此新增 `__init__.py` 或修改既有檔案。以合成的小型結果 JSON 驗證：完全相同→全 ✅；只改 `answer`→L2 ❌ 但 L1 ✅；改 `retrieval_trace` 順序→L1 ❌ 且退出碼 1；缺少某題→明確報錯）。
@@ -135,6 +141,18 @@ python scripts/analysis/compare_p2_snapshots.py <run_dir_A> <run_dir_B> [--out <
 | A6 | 雜訊底線表可由 Claude 用腳本獨立重現（Claude 重跑 `compare_p2_snapshots.py run1 run2` 結果一致）；§6 的驗收判準與資料相符、可直接作為 P2 的比對規則 |
 | A7 | 完整回歸 = 1304＋新增測試數 passed、0 failed（Claude 獨立重跑） |
 
+## 6. v2 修訂說明（2026-09-29，Codex 第一輪試跑後）
+
+Codex 依 v1 執行至阻塞點並如實停下（無 commit、無報告 136、KG#4 計數前後一致），揭露了三件 v1 未預見的事：
+
+| # | 發現 | 處理 |
+|---|---|---|
+| 1 | harness 載入 6 題但只有 5 題 eligible：`57-ALIAS1` 的 `wording_status=gist` 被排除。**所有 `alias_mapping` 題皆為 `gist`，無可用替代** | 以 `57-COREF1` 取代；alias fallback 路徑列為本快照的已知限制（Claude 責任：v1 選題只看 `verification_status`，漏看 harness 的資格檢查） |
+| 2 | 5 題中 2 題（`17-Q1`、`canary-P1`）在預設 180 秒逾時，`57-DIST1` 耗時 153 秒；其餘 70–80 秒 | 兩輪加 `--query-timeout-s 600`（§S4） |
+| 3 | 檢索軌跡在 `records.json` 的 `lineage` 底下而非頂層（v1 §S5 未寫明路徑） | §S5 補上確切欄位路徑（本檔 v2 已更新） |
+
+v1 第一輪的產物作廢（移至暫存目錄，不進版控）。**Codex 的阻塞停止是正確的處理**（任務書禁止修改 harness 與題目物件）。
+
 ## 4. 回填區（Codex 填寫）
 
 - commit SHA：
@@ -147,7 +165,7 @@ python scripts/analysis/compare_p2_snapshots.py <run_dir_A> <run_dir_B> [--out <
 
 - **不得啟動、重啟或停止 Neo4j、Ollama、WSL**；跑測中不得中斷。
 - **不得對 Neo4j 寫入**（只讀 Cypher）；不得執行抽取 worker、匯入或重抽腳本。
-- 不得修改任何 production 程式、harness、既有測試、既有題庫檔、既有設定；不得為了讓基準穩定而調整 seed／逾時／模型參數。
+- 不得修改任何 production 程式、harness、既有測試、既有題庫檔、既有設定；不得為了讓基準穩定而調整 seed／模型參數（**逾時例外**：僅限 §S4 授權的 `--query-timeout-s 600`，兩輪相同，不得再更動）。
 - 若 L1 兩次基準就不同，**如實記錄並停下回報**，不得自行「修正」或忽略。
 - 報告與資料檔中**不得包含密碼、API 金鑰或完整 `.env` 內容**。
 - 不得 push。
