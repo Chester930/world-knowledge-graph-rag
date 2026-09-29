@@ -3,7 +3,11 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
-## 2026-09-29（報告117）：build_graph 清空前虛擬成員防護任務書，交 Codex 執行
+## 2026-09-29（報告119）：M2 第一步 P1（SM 化）前置——狀態機現況轉移盤點任務書，交 Codex 執行
+
+使用者同意（依建議）：M2 先做 P1（報告97 §6.5），因範圍小（狀態寫入約 18 處、5 個檔案）、不需凍結評測快照、且能根治 A8 那類靜默 no-op。分兩步：**119 只讀盤點（本任務）→ 121 實作**（Enum＋轉移表＋單一 `transition()`，先寫特性測試、行為不變、回歸須 ≥1183 passed）。[報告119](docs/報告/119_M2_P1前置_狀態機現況轉移盤點SDD任務書.md)：盤點 SM-1（`extraction_status`）、SM-1b（`normalization_status`）、SM-2（`task_queue.status`）的所有寫入／讀取點與**現況實際轉移矩陣**，並用離線特性重現產出 P1 特性測試的黃金依據；三個待驗證疑點 X1（`record_chunk_completed` 是否靜默覆寫 `failed`）、X2（`pending_upload` 在 SM-1 是否可達）、X3（靜默 no-op 寫入點）。成果報告編號 120。**「固定 5 題 K 臂評測快照」維持 (a)：P1 完成後、P2 拆 `agent.py` 之前再決定**（需 Neo4j＋Ollama、有 WSL 記憶體風險，不擋 P1）。**狀態：等待 Codex 執行→Claude 依§4驗收→通過才 push。**
+
+## 2026-09-29（報告117）：build_graph 清空前虛擬成員防護任務書，已完成並 push
 
 使用者同意「先做 a（風險1防護性最小修補）再 c（M2 重構第一步）」。[報告117](docs/報告/117_build_graph虛擬成員清空前防護SDD任務書.md)：`build_graph(force_rebuild=True, doc_ids=None)` 在清空 Neo4j **之前**偵測 manifest 成員缺 `_record.json`，有就拋 `VirtualMembersNotRebuildableError`（router→409）、不清空；非 force 時僅 WARNING。先寫失敗測試→修→回歸須 1183 passed。**只擋住，不支援虛擬成員**（留 M2）。成果報告編號 118。**狀態：✅ 已驗收通過（`8803184`，報告118）並 push。** Claude 離線腳本三情境驗證：虛擬 KG＋force＝拋 `VirtualMembersNotRebuildableError`、0 次 `DETACH DELETE`、0 次抽取；虛擬 KG 非 force＝無錯、不清空；實體 KG＋force＝行為不變（1 次清空、1 次抽取）。回歸基準更新為 **1183 passed**（取代 1180）。**風險1 已堵住（僅防護，非支援）**；`doc_ids` 局部重建仍靜默略過虛擬成員（僅 WARNING）、`ArticleStructureLossError` 在 router 仍回 500、風險2–4／匯入腳本／評測工具的虛擬成員支援留 M2。**下一步＝(c) M2 重構第一步**（以報告108 相依快照挑拆分目標）。
 
