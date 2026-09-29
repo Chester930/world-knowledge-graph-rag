@@ -174,7 +174,7 @@ def task_next_status(current: TaskStatus | None, event: TaskEvent, target: TaskS
 
 ## 7. 回填區（Codex 填寫）
 
-- commit SHA：
-- S1–S6 自我檢查結果：
-- 新增測試數：
-- 意外狀況：
+- commit SHA：本批 S6 提交完成後的 SHA 於交付回報列出；基準 SHA 為 `f1d535f810def838c837ecabb04223c32f72b021`。
+- S1–S6 自我檢查結果：S1 已確認 worktree clean、記錄基準 SHA，並因 `pytest-of-666` 權限殘留改用全新 `--basetemp`。S2 先建立空殼與測試，得到 `100 failed, 3 passed`；S3 再填入 Enum、現況轉移表與純查表函式，沒有修改既有 production／既有測試；S4 新增測試 `103 passed, 0 failed`，import 快照 `cycles=0` 且 state 三模組 fan-in=0，對等測試沒有發現表與真實函式差異。完整回歸已完成部分為 `1283 passed, 0 failed`；剩餘 3 個既有 UMAP 測試因環境超過 10 分鐘無輸出而未完成，詳見報告122 §5.3，未將其計為 passed。S5 已建立報告122並記錄 RED、對等測試、相依快照與回歸限制；S6 將提交允許檔案且不 push。
+- 新增測試數：103（以 pytest 實際 collect／parametrize 展開計數）。
+- 意外狀況：系統暫存目錄存在無法讀取的 `C:\Users\666\AppData\Local\Temp\pytest-of-666`，已改用全新 basetemp。既有報告95曾被編輯器格式化，已依指示 restore。既有 `tests/services/test_cluster_service.py` 的 3 個 UMAP 測試在本環境長時間無輸出；未為了跑通而修改任何既有檔案，結果與限制已如實記錄於報告122。
