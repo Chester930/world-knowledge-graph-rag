@@ -5,7 +5,8 @@
 
 ## 2026-09-29（報告121）：M2 P1 第一批（選項C）任務書，交 Codex 執行
 
-使用者選定 P1 切分**選項 C**：先只新增、不替換任何寫入。[報告121](docs/報告/121_M2_P1第一批_狀態機Enum轉移表與特性測試SDD任務書.md)：新增 `state/`（`StrEnum`＋事件＋**照現況寫**的轉移表＋純查表函式，零依賴、不接線）＋`tests/state/` 對等測試（對每個「來源狀態×事件」呼叫**真實既有函式**，與表逐格比對；X1／X3 明確鎖定為既有行為）。**不得修改任何既有 production 檔案與測試**。回歸須 1183＋新增測試數 passed。成果報告編號 122。之後兩批：第二批替換 SM-2（task_queue）寫入、第三批替換 SM-1（document_record）寫入，屆時再決定 X1／X3 是否另案修復。**狀態：等待 Codex 執行→Claude 依§6驗收（含「故意破壞表一格、對等測試須失敗」驗證）→通過才 push。**
+使用者選定 P1 切分**選項 C**：先只新增、不替換任何寫入。[報告121](docs/報告/121_M2_P1第一批_狀態機Enum轉移表與特性測試SDD任務書.md)：新增 `state/`（`StrEnum`＋事件＋**照現況寫**的轉移表＋純查表函式，零依賴、不接線）＋`tests/state/` 對等測試（對每個「來源狀態×事件」呼叫**真實既有函式**，與表逐格比對；X1／X3 明確鎖定為既有行為）。**不得修改任何既有 production 檔案與測試**。回歸須 1183＋新增測試數 passed。成果報告編號 122。之後兩批：第二批替換 SM-2（task_queue）寫入、第三批替換 SM-1（document_record）寫入，屆時再決定 X1／X3 是否另案修復。**狀態：✅ 已驗收通過（`c9592d3`，報告122）並 push。** 新增 `state/{__init__,document_sm,task_sm}.py`＋`tests/state/`（103 個測試）。Claude 驗證：轉移表逐格對照報告120（文件 25 格、佇列 24 格）；對等測試確實呼叫真實既有函式；production 無人 import `state`、`state/` 只 import 標準庫 `enum`；**故意破壞驗證**（把 `FAILED+PARTIAL` 與 `COMPLETED+ENQUEUE` 兩格改錯）→ 3 個測試失敗，還原後 103 passed；**獨立完整回歸 1286 passed（83s）＝1183＋103**，回歸基準更新為 **1286**。Codex 環境有 3 個既有 UMAP 測試（`test_cluster_service.py::TestReduceDimensionality`）超過 10 分鐘無輸出，在 Codex 環境屬環境限制，Claude 環境正常完成——**今後驗收以 Claude 獨立完整回歸為準**。相依快照 cycles=0、`state` fan-in=0。
+**下一步（P1 第二批）**：替換 SM-2（`task_queue_service`）寫入為呼叫 `state/task_sm` 的轉移表／單一入口，行為不變，靠 `tests/state` 對等測試當回歸網；X1／X3 屆時再決定是否另案修。
 
 ## 2026-09-29（報告119）：M2 第一步 P1（SM 化）前置——狀態機現況轉移盤點任務書，已完成並 push
 
