@@ -1,14 +1,17 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-09-29（報告106＋107 任務書已建立，交 Codex 執行；成果報告預定為 108／109）
+> **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
 ## 2026-09-29（報告106＋107）：M2 前置兩份只讀任務書，交 Codex 執行
 
 論文對齊系列（報告98–105）查核通過後，依使用者同意的順序進入 M2 前置：
 - [報告106](docs/報告/106_M2前置_P0回歸基準SDD任務書.md)：完整 pytest 跑兩次建立測試基準＋新增 `scripts/analysis/import_graph_snapshot.py` 產生模組相依快照（fan-in/out、循環）；成果寫入 `docs/報告/108_M2_P0回歸基準結果.md` 與 `data/analysis/import_graph_20260929.json`。**不含**固定5題K臂評測快照（需Neo4j+Ollama、有WSL記憶體風險，待使用者裁示）。
 - [報告107](docs/報告/107_A8虛擬歸屬後抽取路徑追查SDD任務書.md)：只讀追查「虛擬歸屬後 `trigger_extraction()` 以 `doc_folder.parent` 當KG資料夾，但worker到 `kg.folder_path` 找 `svo_index.json`」是否真的對不上（假設待驗證），暫存目錄重現、不碰Neo4j；成果寫入 `docs/報告/109_A8虛擬歸屬路徑追查結果.md`。KG#4由匯入腳本建立、不走此路徑。
-兩份皆**不得修改既有檔案、測試失敗只記錄不修復**。**狀態：等待 Codex 執行→Claude 依各自§驗收審核→通過才 push**。
+兩份皆**不得修改既有檔案、測試失敗只記錄不修復**。
+**狀態（已審核通過、已 push）**：
+- 報告108（`bccce0d`）：pytest 基準 **1173 passed**（Codex 兩次 82.54s／67.08s，Claude 獨立重跑 65.46s 一致）；相依快照 148 模組／415 邊／**0 循環**；`services.svo_service` fan-in 16；harness→`routers.agent` 耦合已確認。M2 每階段完成後須重跑比對。
+- 報告109（`a2fb2c5`）：**A8 判定 `BREAKS`**——虛擬歸屬下 `assign_document_to_kg()` 回傳原資料夾（`classify_service.py:615`），`trigger_extraction()` 以 `doc_folder.parent` 當 kg_folder 寫 `svo_index.json`（`svo_service.py:3641`），worker 卻讀 `Path(kg.folder_path)`（`extraction_worker.py:87`），暫存目錄實測 `_find_chunk()` 回傳 None。`/staging/classify`、`/{filename}/assign`、`/cluster/confirm` 三個網頁入口皆受影響；KG#4（匯入腳本路徑）不受影響。**修正方案僅列選項，待使用者裁示後才另開任務書，尚未實作。**
 
 ## 2026-09-29（報告105 已完成並push——論文對齊系列告一段落）
 
