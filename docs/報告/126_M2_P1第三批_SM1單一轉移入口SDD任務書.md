@@ -130,10 +130,10 @@ def _transition_normalization(
 
 ## 5. 回填區（Codex 填寫）
 
-- 第一段 commit SHA：
-- 第二段 commit SHA：
-- 自我檢查結果：
-- 意外狀況：
+- 第一段 commit SHA：本段報告127提交完成後的 SHA 於交付回報列出；基準 SHA 為 `29e108c`。
+- 第二段 commit SHA：尚未執行，等待 Claude 對報告127的明確核准。
+- 自我檢查結果：S1 已讀完本任務書與報告120 SM-1／SM-1b 現況，重新執行全專案 `git grep` 並確認 production 只有 6 個指定 status 賦值點。S2 在全新系統暫存根目錄建立快照腳本，先於任何程式碼變更跑出 `baseline_record_snapshots.json`，每個操作後讀取完整 `_record.json` 並正規化時間欄位；涵蓋正常序列、X1、total=0、normalization 四狀態與非法 status、total_chunks 改變重設、completed 後 append_assignment、X3，連跑兩次 `full_equal=True`（7 情境／33 操作）。S3 已產出 6 點替換對照表與非法 status 的 raw compatibility branch 方案；未修改 production、既有測試或公開函式行為。完整回歸 `1286 passed、0 failed`。
+- 意外狀況：起始 worktree clean；因既有 `pytest-of-666`／`.pytest_cache` 權限警告，快照與 pytest 均使用全新 `C:\Users\666\AppData\Local\Temp\codex_report126_record_snapshots_20260929_01\`。UMAP 三測試未卡住、未排除；執行時僅出現既有 requests／pytest／UMAP／jieba warnings。未啟動 Neo4j／Ollama／server，未執行匯入／重抽，未 push。
 
 ## 6. 禁止事項
 
