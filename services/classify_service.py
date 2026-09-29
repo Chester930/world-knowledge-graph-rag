@@ -548,11 +548,13 @@ def resolve_document_folder(kg_folder: Path, doc_id: str) -> Path:
 
     實體搬移模式：文件在 ``kg_folder / doc_id``；虛擬歸屬模式：文件只存一份於
     中央池／暫存區，KG 資料夾僅有 ``_members.json``，實際位置記在 manifest 的
-    ``source_path``。兩者皆找不到時回傳 ``kg_folder / doc_id``（呼叫端讀不到
-    記錄時的既有降級行為維持不變，不在此拋例外）。
+    ``source_path``。以 ``_record.json`` 存在與否判定實體位置（虛擬歸屬下 KG
+    端目錄只有 SVO 輸出、沒有記錄檔，不能以目錄存在與否判斷）。兩者皆找不到
+    時回傳 ``kg_folder / doc_id``（呼叫端讀不到記錄時的既有降級行為維持不變，
+    不在此拋例外）。
     """
     physical = kg_folder / doc_id
-    if physical.is_dir():
+    if document_record_service.read_record(physical) is not None:
         return physical
     manifest = _read_members_manifest(kg_folder)
     for entry in manifest.get("assigned_documents", []):

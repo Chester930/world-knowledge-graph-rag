@@ -147,3 +147,36 @@ def test_resolve_document_folder_cases(tmp_path):
     assert resolve_document_folder(kg_folder, "virtual-doc") == source
 
     assert resolve_document_folder(kg_folder, "missing-doc") == kg_folder / "missing-doc"
+
+
+def test_resolver_prefers_manifest_when_kg_side_has_only_svo_output(tmp_path):
+    _staging, kg_folder, _kg_id, doc_folder, _assigned_path = _stage_and_assign(tmp_path)
+    output_folder = kg_folder / doc_folder.name
+    output_folder.mkdir()
+    (output_folder / "svo_index.json").write_text("{}", encoding="utf-8")
+
+    resolved = classify_service.resolve_document_folder(kg_folder, doc_folder.name)
+
+    assert resolved == doc_folder
+
+
+@pytest.mark.asyncio
+async def test_full_flow_record_written_back_after_output_exists(tmp_path, monkeypatch):
+    staging, kg_folder, kg_id, doc_folder, assigned_path = _stage_and_assign(tmp_path)
+    _patch_trigger_dependencies(monkeypatch, tmp_path, kg_id, kg_folder)
+
+    await svo_service.trigger_extraction(
+        object(), assigned_path, kg_id, kg_folder=kg_folder,
+    )
+
+    from parser.chunk_writer import document_folder_path
+
+    resolved = classify_service.resolve_document_folder(
+        kg_folder, document_folder_path("a8_demo.txt", kg_folder).name,
+    )
+    document_record_service.record_chunk_completed(resolved, 1)
+
+    updated = document_record_service.read_record(staging / doc_folder.name)
+    assert updated is not None
+    assert 1 in updated.completed_chunk_indices
+    assert not (kg_folder / doc_folder.name / "_record.json").exists()
