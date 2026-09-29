@@ -30,6 +30,19 @@ from services.svo_chunking import read_svo_index
 
 logger = logging.getLogger(__name__)
 
+
+class _RowcountTrackingConnection:
+    def __init__(self, connection: sqlite3.Connection) -> None:
+        self._connection = connection
+        self.last_cursor = None
+
+    def execute(self, *args: object, **kwargs: object):
+        self.last_cursor = self._connection.execute(*args, **kwargs)
+        return self.last_cursor
+
+    def __getattr__(self, name: str):
+        return getattr(self._connection, name)
+
 TaskStatus = Literal["pending", "processing", "completed", "failed", "pending_upload"]
 
 _SCHEMA = """
@@ -100,12 +113,22 @@ def update_status(
     ／3.1.3 抽取結果（`pending_upload`／`failed`）／3.1.4 寫入結果
     （`completed`），本函式只負責寫入，不判斷轉換時機是否合法。"""
     with closing(_connect(db_path)) as conn:
+        conn = _RowcountTrackingConnection(conn)
         conn.execute(
             "UPDATE task_queue SET status = ?, updated_at = datetime('now') "
             "WHERE kg_id = ? AND source = ? AND chunk_index = ?",
             (status, kg_id, source, chunk_index),
         )
         conn.commit()
+        if conn.last_cursor.rowcount == 0:
+            status_value = status.value if isinstance(status, StateTaskStatus) else status
+            logger.warning(
+                "[TaskQueue] update_status：查無對應列，狀態更新被略過（kg_id=%s source=%s chunk_index=%s status=%s）",
+                kg_id,
+                source,
+                chunk_index,
+                status_value,
+            )
 
 
 def next_pending(db_path: Path, kg_id: str | None = None) -> tuple[str, str, int] | None:

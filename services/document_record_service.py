@@ -16,6 +16,7 @@ traceability design. Tests: tests/services/test_document_record_service.py.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import tempfile
 from datetime import datetime, timezone
@@ -37,6 +38,8 @@ from state.document_sm import (
 )
 
 _RECORD_FILENAME = "_record.json"
+
+logger = logging.getLogger(__name__)
 
 
 def document_uuid(source: str) -> UUID:
@@ -181,6 +184,11 @@ def update_normalization_progress(
 
     record = read_record(folder)
     if record is None:
+        logger.warning(
+            "[DocumentRecord] %s：記錄檔不存在，寫入被略過（folder=%s）——可能是 resolver／虛擬歸屬路徑錯置（見報告109／112）",
+            "update_normalization_progress",
+            folder,
+        )
         return None
 
     if total_sentences is not None:
@@ -200,6 +208,11 @@ def set_svo_chunk_total(folder: Path, total_chunks: int) -> DocumentRecord | Non
         raise ValueError("total_chunks 不可為負數")
     record = read_record(folder)
     if record is None:
+        logger.warning(
+            "[DocumentRecord] %s：記錄檔不存在，寫入被略過（folder=%s）——可能是 resolver／虛擬歸屬路徑錯置（見報告109／112）",
+            "set_svo_chunk_total",
+            folder,
+        )
         return None
     record.svo_total_chunks = total_chunks
     _write_record(folder, record)
@@ -215,6 +228,11 @@ def reset_extraction_progress(folder: Path) -> DocumentRecord | None:
     """
     record = read_record(folder)
     if record is None:
+        logger.warning(
+            "[DocumentRecord] %s：記錄檔不存在，寫入被略過（folder=%s）——可能是 resolver／虛擬歸屬路徑錯置（見報告109／112）",
+            "reset_extraction_progress",
+            folder,
+        )
         return None
     _transition_extraction(record, DocumentEvent.RESET)
     record.chunk_progress = 0
@@ -237,6 +255,11 @@ def record_chunk_completed(folder: Path, chunk_index: int) -> DocumentRecord | N
     """
     record = read_record(folder)
     if record is None:
+        logger.warning(
+            "[DocumentRecord] %s：記錄檔不存在，寫入被略過（folder=%s）——可能是 resolver／虛擬歸屬路徑錯置（見報告109／112）",
+            "record_chunk_completed",
+            folder,
+        )
         return None
     record.chunk_progress = max(record.chunk_progress, chunk_index)
     if chunk_index not in record.completed_chunk_indices:
@@ -258,6 +281,11 @@ def mark_extraction_failed(folder: Path) -> DocumentRecord | None:
     """抽取 Worker 單一 chunk 失敗（`FAIL` 節點）時回寫真實狀態來源。"""
     record = read_record(folder)
     if record is None:
+        logger.warning(
+            "[DocumentRecord] %s：記錄檔不存在，寫入被略過（folder=%s）——可能是 resolver／虛擬歸屬路徑錯置（見報告109／112）",
+            "mark_extraction_failed",
+            folder,
+        )
         return None
     _transition_extraction(record, DocumentEvent.MARK_FAILED)
     _write_record(folder, record)
