@@ -5,7 +5,15 @@
 
 ## 2026-09-29（報告115）：虛擬成員盲點追查任務書，交 Codex 執行
 
-A8 完成後的殘留項合併成一份只讀追查：[報告115](docs/報告/115_虛擬成員盲點追查SDD任務書.md)。盤點所有「以 KG 資料夾內容推論成員」的位置（`build_graph()`、`task_queue_service` 重建、`classify_service`、`_kg_source_charset`、匯入腳本），重點確認 **`build_graph(force_rebuild=True)` 先清空 Neo4j 卻不重抽虛擬成員的資料損失路徑**，並確認 KG#4 屬實體還是虛擬。成果報告編號 116。純只讀、不修復。**狀態：等待 Codex 執行→Claude 依§4驗收→通過才 push。**
+A8 完成後的殘留項合併成一份只讀追查：[報告115](docs/報告/115_虛擬成員盲點追查SDD任務書.md)。盤點所有「以 KG 資料夾內容推論成員」的位置（`build_graph()`、`task_queue_service` 重建、`classify_service`、`_kg_source_charset`、匯入腳本），重點確認 **`build_graph(force_rebuild=True)` 先清空 Neo4j 卻不重抽虛擬成員的資料損失路徑**，並確認 KG#4 屬實體還是虛擬。成果報告編號 116。純只讀、不修復。**狀態：✅ 已審核通過（`fb5d8a7`，報告116）並 push。** 結論（各項均為程式路徑＋離線 mock 重現，**未對真實資料驗證**）：
+- **風險1／資料損失**：`build_graph(force_rebuild=True, doc_ids=None)` 先 `DETACH DELETE` 清空該 KG，但虛擬成員（manifest-only）不在 `iterdir()` 的 target 內、輸出子目錄又無 `_record.json` 而被略過 → 重抽 0 件，router（`routers/knowledge_graph.py:47-52`）無任何確認或防護。**在修好之前，對任何含虛擬成員的 KG 不要呼叫 `force_rebuild=True`。**
+- 風險2：`task_queue_service.rebuild_from_records()` 掃不到虛擬成員，佇列遺失後無法還原其未完成任務。
+- 風險3：三個 `import_*`／`create_clean_*` 腳本在虛擬模式重跑，未傳 `move_physical=True` 也未傳 `kg_folder`，會踩 A8 同型問題。
+- 風險4：`_kg_source_charset()` 只讀 `kg_folder/*/original.md`，虛擬 KG 回空集合＝全轉簡繁（削弱報告25 發現4 的選擇性保護）；`routers/agent.py:1631` 傳的是 `workspace/<kg_id>`。
+- 中：eval／readiness／baseline／sweep 工具的 scope resolver 在虛擬 KG 上同樣看不到成員。
+- **OK**：`classify_service` 的 manifest／prototype／count 已正確納入虛擬成員。
+- **Q8 無法確認**：KG#4 是實體或虛擬，worktree 內無 `workspace/` 可查。（Claude 推論但未驗證：KG#4 的抽取多在 2026-09-07 前完成、早於 SDD-51 虛擬歸屬（09-15），且由匯入腳本建立，較可能是實體目錄；需在有 workspace 的機器上 `ls`＋看 `_members.json` 確認。）
+- 修正方向 5 項見報告116 §5，**待使用者裁示，尚未實作**。
 
 ## 2026-09-29（報告110＋111）：A8 修正與 05 §5.7.1 更新任務書，交 Codex 執行
 
