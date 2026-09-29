@@ -543,6 +543,26 @@ def classify_by_vector(
 
 # ── 歸檔動作（SSOT 實體來源＋Manifest 虛擬歸屬）───────────────────────────────
 
+def resolve_document_folder(kg_folder: Path, doc_id: str) -> Path:
+    """解出某文件實際所在的資料夾（報告110）。
+
+    實體搬移模式：文件在 ``kg_folder / doc_id``；虛擬歸屬模式：文件只存一份於
+    中央池／暫存區，KG 資料夾僅有 ``_members.json``，實際位置記在 manifest 的
+    ``source_path``。兩者皆找不到時回傳 ``kg_folder / doc_id``（呼叫端讀不到
+    記錄時的既有降級行為維持不變，不在此拋例外）。
+    """
+    physical = kg_folder / doc_id
+    if physical.is_dir():
+        return physical
+    manifest = _read_members_manifest(kg_folder)
+    for entry in manifest.get("assigned_documents", []):
+        if isinstance(entry, dict) and entry.get("doc_id") == doc_id:
+            source_path = Path(str(entry.get("source_path", "")))
+            if source_path.is_dir():
+                return source_path
+    return physical
+
+
 def assign_document_to_kg(
     doc_folder: Path,
     kg: KGInfo,

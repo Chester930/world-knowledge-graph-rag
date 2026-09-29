@@ -3563,6 +3563,7 @@ async def trigger_extraction(
     *,
     articles: Sequence[Mapping[str, str]] | None = None,
     cfg: KGConfig | None = None,
+    kg_folder: Path | None = None,
 ) -> None:
     """文件搬進 KG 資料夾後立即觸發抽取任務（§ 3.1.2「立即觸發抽取任務，
     不需要使用者另外按『開始建圖』」）：`CHUNKREADY`（前處理＋逐句 embedding＋
@@ -3611,6 +3612,10 @@ async def trigger_extraction(
     真正接上」可以獨立於本函式的正確性驗證分開決定。`articles is not None`
     時 `cfg.chunking` 不生效（見上方 `articles` 說明的架構侷限）。
 
+    `kg_folder`（報告110）：輸入（原文、記錄）仍從 `doc_folder` 所在資料夾讀取；
+    SVO 輸出寫入指定的 KG 資料夾。未指定時沿用 `doc_folder.parent`，因此實體搬移
+    模式與既有呼叫端行為不變。
+
     ⚠️ 誠實侷限（仍未解決，非本次範圍）：`prepare_svo_ready_chunks()` 仍以
     `mentions=None` 呼叫，跳過 §a 別名登記表階段（具名提及抽取／NER 仍是未解決
     的上游依賴，見 `services/svo_preprocessing_service.py` docstring）——別名
@@ -3638,9 +3643,13 @@ async def trigger_extraction(
     if kg is not None and kg.pronoun_lexicon_exclude:
         pronoun_lexicon = DEFAULT_PRONOUN_LEXICON - set(kg.pronoun_lexicon_exclude)
 
-    kg_folder = doc_folder.parent
+    # 報告110：輸入（原文、記錄）在 doc_folder.parent；SVO 輸出寫到 KG 資料夾，
+    # 與 extraction_worker 讀取位置一致。未指定 kg_folder（實體搬移、匯入腳本）時
+    # 兩者相同，行為與舊版完全一致。
+    input_base = doc_folder.parent
+    kg_folder = Path(kg_folder) if kg_folder is not None else input_base
     _paths, chunks = await prepare_svo_ready_chunks(
-        record.source, kg_folder, kg_folder,
+        record.source, input_base, kg_folder,
         articles=articles,
         embedding_provider=embedding_provider, pronoun_llm_provider=pronoun_llm_provider,
         pronoun_lexicon=pronoun_lexicon,

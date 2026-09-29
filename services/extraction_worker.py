@@ -28,6 +28,7 @@ from core.providers.factory import get_embedding_provider, get_llm_provider
 from parser.chunk_writer import document_folder_path
 from repositories.kg_repo import KGRepository
 from services import document_record_service, task_queue_service
+from services.classify_service import resolve_document_folder
 from services.svo_chunking import read_svo_index
 from services.svo_service import (
     _kg_source_charset,
@@ -85,7 +86,7 @@ async def _process_one(driver: AsyncDriver, kg_id: str, source: str, chunk_index
         cfg = _load_kg_config(kg_id, getattr(kg, "domain_pack", None))
 
         kg_folder = Path(kg.folder_path)
-        doc_folder = document_folder_path(source, kg_folder)
+        doc_folder = resolve_document_folder(kg_folder, document_folder_path(source, kg_folder).name)
         chunk = _find_chunk(kg_folder, source, chunk_index)
         if chunk is None:
             raise ValueError(f"找不到 SVO chunk：source={source} chunk_index={chunk_index}")

@@ -80,8 +80,7 @@ async def classify_one(filename: str):
 async def classify(payload: ClassifyRequest):
     """批次分類暫存區文件：對應 § 3.1.1 功能 ①（自動分配）／②（留在未分配池）。
 
-    自動分配成功的文件，資料夾已被 `classify_all` 內部的 `assign_document_to_kg`
-    搬進目標 KG 資料夾，此處緊接著為每一份觸發抽取任務（見
+    依預設虛擬歸屬，文件不搬移；抽取輸出寫入 KG 資料夾，此處緊接著為每一份觸發抽取任務（見
     `services.svo_service.trigger_extraction`）。
     """
     known_kgs = await _known_kgs()
@@ -95,8 +94,11 @@ async def classify(payload: ClassifyRequest):
     kg_folders = {kg.kg_id: kg.folder_path for kg in known_kgs}
     for result in results:
         if result.auto_assigned and result.matched_kg_id in kg_folders:
-            doc_folder = kg_folders[result.matched_kg_id] / result.filename
-            await svo_service.trigger_extraction(get_driver(), doc_folder, result.matched_kg_id)
+            kg_folder = kg_folders[result.matched_kg_id]
+            doc_folder = classify_service.resolve_document_folder(kg_folder, result.filename)
+            await svo_service.trigger_extraction(
+                get_driver(), doc_folder, result.matched_kg_id, kg_folder=kg_folder,
+            )
 
     return results
 
@@ -117,7 +119,9 @@ async def assign(filename: str, payload: AssignRequest):
     dest = await loop.run_in_executor(
         None, classify_service.assign_document_to_kg, doc_folder, kg_info, "manual",
     )
-    await svo_service.trigger_extraction(get_driver(), dest, kg.id)
+    await svo_service.trigger_extraction(
+        get_driver(), dest, kg.id, kg_folder=Path(kg.folder_path),
+    )
 
 
 @router.post("/cluster/analyze", response_model=ClusterAnalyzeResult)
@@ -154,6 +158,8 @@ async def confirm_cluster(payload: ClusterConfirmRequest):
             classify_service.assign_document_to_kg,
             staging / folder_name, kg_info, "ai_cluster",
         )
-        await svo_service.trigger_extraction(get_driver(), dest, kg.id)
+        await svo_service.trigger_extraction(
+            get_driver(), dest, kg.id, kg_folder=Path(kg.folder_path),
+        )
 
     return {"kg_id": kg.id, "kg_name": kg.name}
