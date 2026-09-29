@@ -1,0 +1,973 @@
+{
+ "git_head": "bd12370443254c6b4aeb8345e982d985f1f2de12",
+ "module_count": 148,
+ "edge_count": 415,
+ "syntax_errors": [],
+ "cycles": [],
+ "fan_in": {
+  "core.config": 29,
+  "core.providers.factory": 29,
+  "core.database": 28,
+  "routers.agent": 24,
+  "core.providers.base": 20,
+  "services": 18,
+  "models.knowledge_graph": 16,
+  "repositories.kg_repo": 16,
+  "services.svo_service": 16,
+  "core.kg_config": 15,
+  "services.document_record_service": 15,
+  "models.document": 13,
+  "models.eval_schema": 13,
+  "core.constants": 12,
+  "scripts.eval.run_rq1_comparison": 11,
+  "parser.chunk_writer": 9,
+  "services.classify_service": 9,
+  "parser.core": 7,
+  "services.svo_chunking": 7,
+  "core.kg_config.model": 5,
+  "routers": 5,
+  "services.atomic_scorer": 5,
+  "services.ingestion_service": 5,
+  "services.task_queue_service": 5,
+  "models.law_document": 4,
+  "services.baseline_rag_service": 4,
+  "core.providers.embedding.ollama": 3,
+  "repositories.law_document_repo": 3,
+  "services.entity_registry_service": 3,
+  "services.expand_governance_service": 3,
+  "services.extraction_worker": 3,
+  "services.semantic_span_matcher": 3,
+  "build_baseline_chunk_index": 2,
+  "core.kg_config.sources": 2,
+  "core.vector_migration": 2,
+  "filter_leave_scheduling_dataset": 2,
+  "parser.image_pipeline": 2,
+  "services.claim_scope_auditor": 2,
+  "services.cluster_service": 2,
+  "services.deterministic_guard_service": 2,
+  "services.evaluation_eligibility": 2,
+  "services.expand_worker": 2,
+  "services.interval_lookup_service": 2,
+  "services.pronoun_resolution_service": 2,
+  "core.auth": 1,
+  "core.embedding_guard": 1,
+  "core.kg_config.loader": 1,
+  "core.kg_config.stages": 1,
+  "core.providers.embedding.local": 1,
+  "core.providers.embedding.openai": 1,
+  "core.providers.llm.anthropic": 1,
+  "core.providers.llm.gemini": 1,
+  "core.providers.llm.grok": 1,
+  "core.providers.llm.ollama": 1,
+  "core.providers.llm.openai": 1,
+  "experiments.svo_feasibility.evaluator": 1,
+  "import_leave_scheduling_dataset": 1,
+  "repositories.concept_repo": 1,
+  "repositories.document_repo": 1,
+  "routers.documents": 1,
+  "routers.expand": 1,
+  "routers.knowledge_graph": 1,
+  "routers.search": 1,
+  "routers.staging": 1,
+  "scripts.eval.embedding_cache": 1,
+  "services.agentic_baseline_service": 1,
+  "services.cost_analyzer": 1,
+  "services.entity_extraction_service": 1,
+  "services.evaluation_preflight": 1,
+  "services.knowledge_graph_service": 1,
+  "services.lineage_tracker": 1,
+  "services.query_classifier": 1,
+  "services.refusal_guard": 1,
+  "services.sim_calibration_service": 1,
+  "services.svo_preprocessing_service": 1,
+  "services.verification_service": 1,
+  "standardized_rag": 1,
+  "_audit_aggr16_claim_risk_20260919": 0,
+  "_run_ablation_arm": 0,
+  "_run_ablation_arm_g4": 0,
+  "_run_bfs_slots_eval_20260919": 0,
+  "_run_fact_boundary_swap_3q_eval_20260919": 0,
+  "_run_fact_boundary_swap_eval_20260919": 0,
+  "_run_fact_boundary_swap_matched_v2": 0,
+  "_run_fact_rank_eval_20260918": 0,
+  "_run_fact_rerank_control_matched_v2": 0,
+  "_run_fact_side_rerank_eval_20260919": 0,
+  "_trace_aggr16_candidate_path_20260918": 0,
+  "ask_question": 0,
+  "build_standardized_rag_index": 0,
+  "check_comparison_readiness": 0,
+  "compare_doc_scope_retrieval": 0,
+  "compare_entity_candidate_recall": 0,
+  "core": 0,
+  "core.providers": 0,
+  "core.providers.embedding": 0,
+  "core.providers.llm": 0,
+  "create_clean_leave_scheduling_kg": 0,
+  "debug_server": 0,
+  "experiments": 0,
+  "experiments.svo_feasibility": 0,
+  "experiments.svo_feasibility.test_evaluator": 0,
+  "import_labor_compliance_dataset": 0,
+  "main": 0,
+  "models": 0,
+  "parser": 0,
+  "repositories": 0,
+  "run_chunk_size_sweep": 0,
+  "run_demo_report": 0,
+  "run_demo_report_batch2": 0,
+  "run_demo_report_batch3": 0,
+  "run_demo_report_extra": 0,
+  "run_rag_comparison": 0,
+  "run_retrieval_comparison": 0,
+  "run_t2_acceptance": 0,
+  "scripts.analysis.import_graph_snapshot": 0,
+  "scripts.analysis.source_ambiguity_audit": 0,
+  "scripts.analysis.thesis_code_coverage_inventory": 0,
+  "scripts.eval.adaptive_repeat": 0,
+  "scripts.eval.audit_scorer_disagreements": 0,
+  "scripts.eval.compare_scope_audit_runs": 0,
+  "scripts.eval.diagnose_prompt_noise": 0,
+  "scripts.eval.diagnose_retrieval_failures": 0,
+  "scripts.eval.frozen_baseline_stage": 0,
+  "scripts.eval.gap_s3_01_context_ablation": 0,
+  "scripts.eval.rescore_refusal_posthoc": 0,
+  "scripts.eval.rescore_semantic_fallback": 0,
+  "scripts.eval.rescore_with_updated_bank": 0,
+  "scripts.eval.s3_scorer_blind_crosscheck": 0,
+  "scripts.eval.s3_scorer_rule_sensitivity": 0,
+  "scripts.eval.scan_numberless_gold": 0,
+  "scripts.eval.scorer_audit_crosscheck": 0,
+  "scripts.eval.scorer_audit_crosscheck_summary": 0,
+  "scripts.eval.scorer_audit_summary": 0,
+  "scripts.eval.scorer_rule_sensitivity": 0,
+  "scripts.eval.t2_loss_gold_in_prompt": 0,
+  "scripts.eval.t2_topk40_judgement": 0,
+  "scripts.eval.upgrade_benchmark_dataset": 0,
+  "scripts.kg.backfill_naturalization_safe_edges": 0,
+  "scripts.kg.fix_report71_residual_20_facts": 0,
+  "scripts.kg.fix_report90_verified_naturalization_facts": 0,
+  "scripts.kg.reextract_chunks": 0,
+  "scripts.kg.reextraction_manifest": 0,
+  "services.adaptive_retrieval_service": 0,
+  "services.concept_engine": 0,
+  "services.retrieval_service": 0,
+  "setup_314_demo_kg": 0,
+  "verify_314_fix": 0
+ },
+ "fan_out": {
+  "main": 21,
+  "scripts.eval.run_rq1_comparison": 21,
+  "services.svo_service": 18,
+  "routers.agent": 15,
+  "create_clean_leave_scheduling_kg": 14,
+  "import_leave_scheduling_dataset": 14,
+  "run_retrieval_comparison": 12,
+  "core.providers.factory": 10,
+  "import_labor_compliance_dataset": 10,
+  "services.expand_worker": 10,
+  "services.extraction_worker": 10,
+  "routers.staging": 9,
+  "setup_314_demo_kg": 9,
+  "_trace_aggr16_candidate_path_20260918": 8,
+  "scripts.kg.reextract_chunks": 8,
+  "services.svo_preprocessing_service": 8,
+  "routers.expand": 7,
+  "compare_doc_scope_retrieval": 6,
+  "compare_entity_candidate_recall": 6,
+  "routers.documents": 6,
+  "scripts.eval.rescore_semantic_fallback": 6,
+  "services.classify_service": 6,
+  "services.knowledge_graph_service": 6,
+  "ask_question": 5,
+  "routers.knowledge_graph": 5,
+  "scripts.eval.gap_s3_01_context_ablation": 5,
+  "services.ingestion_service": 5,
+  "check_comparison_readiness": 4,
+  "core.kg_config": 4,
+  "run_demo_report": 4,
+  "run_demo_report_batch2": 4,
+  "run_demo_report_batch3": 4,
+  "run_demo_report_extra": 4,
+  "run_t2_acceptance": 4,
+  "scripts.eval.diagnose_retrieval_failures": 4,
+  "services.adaptive_retrieval_service": 4,
+  "services.cluster_service": 4,
+  "verify_314_fix": 4,
+  "_run_bfs_slots_eval_20260919": 3,
+  "_run_fact_boundary_swap_3q_eval_20260919": 3,
+  "_run_fact_boundary_swap_eval_20260919": 3,
+  "_run_fact_boundary_swap_matched_v2": 3,
+  "_run_fact_rerank_control_matched_v2": 3,
+  "_run_fact_side_rerank_eval_20260919": 3,
+  "build_baseline_chunk_index": 3,
+  "parser": 3,
+  "repositories.kg_repo": 3,
+  "run_chunk_size_sweep": 3,
+  "scripts.eval.diagnose_prompt_noise": 3,
+  "services.atomic_scorer": 3,
+  "services.lineage_tracker": 3,
+  "services.retrieval_service": 3,
+  "services.svo_chunking": 3,
+  "services.task_queue_service": 3,
+  "_audit_aggr16_claim_risk_20260919": 2,
+  "_run_ablation_arm": 2,
+  "_run_ablation_arm_g4": 2,
+  "_run_fact_rank_eval_20260918": 2,
+  "core.kg_config.loader": 2,
+  "core.providers.embedding.ollama": 2,
+  "parser.core": 2,
+  "repositories.concept_repo": 2,
+  "run_rag_comparison": 2,
+  "scripts.eval.rescore_refusal_posthoc": 2,
+  "scripts.eval.rescore_with_updated_bank": 2,
+  "scripts.kg.backfill_naturalization_safe_edges": 2,
+  "services.deterministic_guard_service": 2,
+  "services.document_record_service": 2,
+  "services.evaluation_preflight": 2,
+  "services.verification_service": 2,
+  "build_standardized_rag_index": 1,
+  "core.auth": 1,
+  "core.database": 1,
+  "core.kg_config.stages": 1,
+  "core.providers.embedding.local": 1,
+  "core.providers.embedding.openai": 1,
+  "core.providers.llm.anthropic": 1,
+  "core.providers.llm.gemini": 1,
+  "core.providers.llm.grok": 1,
+  "core.providers.llm.ollama": 1,
+  "core.providers.llm.openai": 1,
+  "core.vector_migration": 1,
+  "debug_server": 1,
+  "experiments.svo_feasibility.test_evaluator": 1,
+  "repositories.document_repo": 1,
+  "repositories.law_document_repo": 1,
+  "routers.search": 1,
+  "scripts.eval.embedding_cache": 1,
+  "scripts.eval.upgrade_benchmark_dataset": 1,
+  "scripts.kg.fix_report71_residual_20_facts": 1,
+  "scripts.kg.fix_report90_verified_naturalization_facts": 1,
+  "services.agentic_baseline_service": 1,
+  "services.baseline_rag_service": 1,
+  "services.claim_scope_auditor": 1,
+  "services.entity_extraction_service": 1,
+  "services.entity_registry_service": 1,
+  "services.evaluation_eligibility": 1,
+  "services.expand_governance_service": 1,
+  "services.pronoun_resolution_service": 1,
+  "services.query_classifier": 1,
+  "services.semantic_span_matcher": 1,
+  "core": 0,
+  "core.config": 0,
+  "core.constants": 0,
+  "core.embedding_guard": 0,
+  "core.kg_config.model": 0,
+  "core.kg_config.sources": 0,
+  "core.providers": 0,
+  "core.providers.base": 0,
+  "core.providers.embedding": 0,
+  "core.providers.llm": 0,
+  "experiments": 0,
+  "experiments.svo_feasibility": 0,
+  "experiments.svo_feasibility.evaluator": 0,
+  "filter_leave_scheduling_dataset": 0,
+  "models": 0,
+  "models.document": 0,
+  "models.eval_schema": 0,
+  "models.knowledge_graph": 0,
+  "models.law_document": 0,
+  "parser.chunk_writer": 0,
+  "parser.image_pipeline": 0,
+  "repositories": 0,
+  "routers": 0,
+  "scripts.analysis.import_graph_snapshot": 0,
+  "scripts.analysis.source_ambiguity_audit": 0,
+  "scripts.analysis.thesis_code_coverage_inventory": 0,
+  "scripts.eval.adaptive_repeat": 0,
+  "scripts.eval.audit_scorer_disagreements": 0,
+  "scripts.eval.compare_scope_audit_runs": 0,
+  "scripts.eval.frozen_baseline_stage": 0,
+  "scripts.eval.s3_scorer_blind_crosscheck": 0,
+  "scripts.eval.s3_scorer_rule_sensitivity": 0,
+  "scripts.eval.scan_numberless_gold": 0,
+  "scripts.eval.scorer_audit_crosscheck": 0,
+  "scripts.eval.scorer_audit_crosscheck_summary": 0,
+  "scripts.eval.scorer_audit_summary": 0,
+  "scripts.eval.scorer_rule_sensitivity": 0,
+  "scripts.eval.t2_loss_gold_in_prompt": 0,
+  "scripts.eval.t2_topk40_judgement": 0,
+  "scripts.kg.reextraction_manifest": 0,
+  "services": 0,
+  "services.concept_engine": 0,
+  "services.cost_analyzer": 0,
+  "services.interval_lookup_service": 0,
+  "services.refusal_guard": 0,
+  "services.sim_calibration_service": 0,
+  "standardized_rag": 0
+ },
+ "graph": {
+  "_audit_aggr16_claim_risk_20260919": [
+   "models.eval_schema",
+   "services.claim_scope_auditor"
+  ],
+  "_run_ablation_arm": [
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_ablation_arm_g4": [
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_bfs_slots_eval_20260919": [
+   "core.kg_config",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_fact_boundary_swap_3q_eval_20260919": [
+   "core.kg_config",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_fact_boundary_swap_eval_20260919": [
+   "core.kg_config",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_fact_boundary_swap_matched_v2": [
+   "core.kg_config",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_fact_rank_eval_20260918": [
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_fact_rerank_control_matched_v2": [
+   "core.kg_config",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_run_fact_side_rerank_eval_20260919": [
+   "core.kg_config",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison"
+  ],
+  "_trace_aggr16_candidate_path_20260918": [
+   "core.config",
+   "core.database",
+   "core.kg_config",
+   "core.providers.embedding.ollama",
+   "repositories.kg_repo",
+   "routers.agent",
+   "scripts.eval.run_rq1_comparison",
+   "services.svo_service"
+  ],
+  "ask_question": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "repositories.kg_repo",
+   "routers.agent"
+  ],
+  "build_baseline_chunk_index": [
+   "core.config",
+   "core.providers.factory",
+   "parser.core"
+  ],
+  "build_standardized_rag_index": [
+   "core.config"
+  ],
+  "check_comparison_readiness": [
+   "core.config",
+   "core.database",
+   "services",
+   "services.document_record_service"
+  ],
+  "compare_doc_scope_retrieval": [
+   "core.config",
+   "core.database",
+   "core.kg_config",
+   "core.providers.factory",
+   "routers.agent",
+   "services.svo_service"
+  ],
+  "compare_entity_candidate_recall": [
+   "core.config",
+   "core.constants",
+   "core.database",
+   "core.providers.factory",
+   "services.classify_service",
+   "services.svo_service"
+  ],
+  "core": [],
+  "core.auth": [
+   "core.config"
+  ],
+  "core.config": [],
+  "core.constants": [],
+  "core.database": [
+   "core.config"
+  ],
+  "core.embedding_guard": [],
+  "core.kg_config": [
+   "core.kg_config.loader",
+   "core.kg_config.model",
+   "core.kg_config.sources",
+   "core.kg_config.stages"
+  ],
+  "core.kg_config.loader": [
+   "core.kg_config.model",
+   "core.kg_config.sources"
+  ],
+  "core.kg_config.model": [],
+  "core.kg_config.sources": [],
+  "core.kg_config.stages": [
+   "core.kg_config.model"
+  ],
+  "core.providers": [],
+  "core.providers.base": [],
+  "core.providers.embedding": [],
+  "core.providers.embedding.local": [
+   "core.providers.base"
+  ],
+  "core.providers.embedding.ollama": [
+   "core.constants",
+   "core.providers.base"
+  ],
+  "core.providers.embedding.openai": [
+   "core.providers.base"
+  ],
+  "core.providers.factory": [
+   "core.config",
+   "core.providers.base",
+   "core.providers.embedding.local",
+   "core.providers.embedding.ollama",
+   "core.providers.embedding.openai",
+   "core.providers.llm.anthropic",
+   "core.providers.llm.gemini",
+   "core.providers.llm.grok",
+   "core.providers.llm.ollama",
+   "core.providers.llm.openai"
+  ],
+  "core.providers.llm": [],
+  "core.providers.llm.anthropic": [
+   "core.providers.base"
+  ],
+  "core.providers.llm.gemini": [
+   "core.providers.base"
+  ],
+  "core.providers.llm.grok": [
+   "core.providers.base"
+  ],
+  "core.providers.llm.ollama": [
+   "core.providers.base"
+  ],
+  "core.providers.llm.openai": [
+   "core.providers.base"
+  ],
+  "core.vector_migration": [
+   "core.constants"
+  ],
+  "create_clean_leave_scheduling_kg": [
+   "core.config",
+   "core.database",
+   "core.providers.factory",
+   "filter_leave_scheduling_dataset",
+   "import_leave_scheduling_dataset",
+   "models.knowledge_graph",
+   "models.law_document",
+   "parser.chunk_writer",
+   "repositories.kg_repo",
+   "repositories.law_document_repo",
+   "services.classify_service",
+   "services.document_record_service",
+   "services.ingestion_service",
+   "services.svo_service"
+  ],
+  "debug_server": [
+   "parser.core"
+  ],
+  "experiments": [],
+  "experiments.svo_feasibility": [],
+  "experiments.svo_feasibility.evaluator": [],
+  "experiments.svo_feasibility.test_evaluator": [
+   "experiments.svo_feasibility.evaluator"
+  ],
+  "filter_leave_scheduling_dataset": [],
+  "import_labor_compliance_dataset": [
+   "core.config",
+   "core.database",
+   "core.providers.factory",
+   "models.knowledge_graph",
+   "parser.chunk_writer",
+   "repositories.kg_repo",
+   "services.classify_service",
+   "services.document_record_service",
+   "services.ingestion_service",
+   "services.svo_service"
+  ],
+  "import_leave_scheduling_dataset": [
+   "core.config",
+   "core.database",
+   "core.providers.factory",
+   "filter_leave_scheduling_dataset",
+   "models.knowledge_graph",
+   "models.law_document",
+   "parser.chunk_writer",
+   "repositories.kg_repo",
+   "repositories.law_document_repo",
+   "services.classify_service",
+   "services.document_record_service",
+   "services.ingestion_service",
+   "services.svo_chunking",
+   "services.svo_service"
+  ],
+  "main": [
+   "core.auth",
+   "core.config",
+   "core.database",
+   "core.embedding_guard",
+   "core.providers.factory",
+   "core.vector_migration",
+   "repositories.concept_repo",
+   "repositories.kg_repo",
+   "routers",
+   "routers.agent",
+   "routers.documents",
+   "routers.expand",
+   "routers.knowledge_graph",
+   "routers.search",
+   "routers.staging",
+   "services",
+   "services.document_record_service",
+   "services.expand_worker",
+   "services.extraction_worker",
+   "services.svo_service",
+   "services.task_queue_service"
+  ],
+  "models": [],
+  "models.document": [],
+  "models.eval_schema": [],
+  "models.knowledge_graph": [],
+  "models.law_document": [],
+  "parser": [
+   "parser.chunk_writer",
+   "parser.core",
+   "parser.image_pipeline"
+  ],
+  "parser.chunk_writer": [],
+  "parser.core": [
+   "core.config",
+   "parser.image_pipeline"
+  ],
+  "parser.image_pipeline": [],
+  "repositories": [],
+  "repositories.concept_repo": [
+   "core.constants",
+   "core.vector_migration"
+  ],
+  "repositories.document_repo": [
+   "models.document"
+  ],
+  "repositories.kg_repo": [
+   "core.config",
+   "core.database",
+   "models.knowledge_graph"
+  ],
+  "repositories.law_document_repo": [
+   "models.law_document"
+  ],
+  "routers": [],
+  "routers.agent": [
+   "core.config",
+   "core.constants",
+   "core.database",
+   "core.kg_config",
+   "core.providers.base",
+   "core.providers.factory",
+   "models.document",
+   "models.knowledge_graph",
+   "models.law_document",
+   "repositories.kg_repo",
+   "repositories.law_document_repo",
+   "services.classify_service",
+   "services.interval_lookup_service",
+   "services.svo_service",
+   "services.verification_service"
+  ],
+  "routers.documents": [
+   "core.config",
+   "core.database",
+   "models.document",
+   "models.knowledge_graph",
+   "repositories.document_repo",
+   "services.ingestion_service"
+  ],
+  "routers.expand": [
+   "core.config",
+   "core.database",
+   "core.providers.factory",
+   "models.knowledge_graph",
+   "services",
+   "services.expand_governance_service",
+   "services.expand_worker"
+  ],
+  "routers.knowledge_graph": [
+   "core.database",
+   "models.knowledge_graph",
+   "repositories.kg_repo",
+   "services",
+   "services.knowledge_graph_service"
+  ],
+  "routers.search": [
+   "models.document"
+  ],
+  "routers.staging": [
+   "core.config",
+   "core.database",
+   "models.knowledge_graph",
+   "repositories.kg_repo",
+   "services",
+   "services.classify_service",
+   "services.cluster_service",
+   "services.document_record_service",
+   "services.svo_service"
+  ],
+  "run_chunk_size_sweep": [
+   "build_baseline_chunk_index",
+   "core.config",
+   "parser.core"
+  ],
+  "run_demo_report": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "routers.agent"
+  ],
+  "run_demo_report_batch2": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "routers.agent"
+  ],
+  "run_demo_report_batch3": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "routers.agent"
+  ],
+  "run_demo_report_extra": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "routers.agent"
+  ],
+  "run_rag_comparison": [
+   "core.providers.factory",
+   "standardized_rag"
+  ],
+  "run_retrieval_comparison": [
+   "build_baseline_chunk_index",
+   "core.config",
+   "core.database",
+   "core.kg_config",
+   "core.providers.factory",
+   "models.document",
+   "repositories.kg_repo",
+   "routers",
+   "routers.agent",
+   "services",
+   "services.baseline_rag_service",
+   "services.document_record_service"
+  ],
+  "run_t2_acceptance": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "routers.agent"
+  ],
+  "scripts.analysis.import_graph_snapshot": [],
+  "scripts.analysis.source_ambiguity_audit": [],
+  "scripts.analysis.thesis_code_coverage_inventory": [],
+  "scripts.eval.adaptive_repeat": [],
+  "scripts.eval.audit_scorer_disagreements": [],
+  "scripts.eval.compare_scope_audit_runs": [],
+  "scripts.eval.diagnose_prompt_noise": [
+   "core.providers.factory",
+   "routers",
+   "routers.agent"
+  ],
+  "scripts.eval.diagnose_retrieval_failures": [
+   "core.constants",
+   "core.providers.embedding.ollama",
+   "routers.agent",
+   "services.svo_service"
+  ],
+  "scripts.eval.embedding_cache": [
+   "core.providers.base"
+  ],
+  "scripts.eval.frozen_baseline_stage": [],
+  "scripts.eval.gap_s3_01_context_ablation": [
+   "core.providers.factory",
+   "models.eval_schema",
+   "routers",
+   "routers.agent",
+   "services.atomic_scorer"
+  ],
+  "scripts.eval.rescore_refusal_posthoc": [
+   "models.eval_schema",
+   "services.atomic_scorer"
+  ],
+  "scripts.eval.rescore_semantic_fallback": [
+   "core.providers.factory",
+   "scripts.eval.run_rq1_comparison",
+   "services",
+   "services.atomic_scorer",
+   "services.baseline_rag_service",
+   "services.semantic_span_matcher"
+  ],
+  "scripts.eval.rescore_with_updated_bank": [
+   "models.eval_schema",
+   "services.atomic_scorer"
+  ],
+  "scripts.eval.run_rq1_comparison": [
+   "core.config",
+   "core.database",
+   "core.kg_config",
+   "core.providers.factory",
+   "models.document",
+   "models.eval_schema",
+   "repositories.kg_repo",
+   "routers",
+   "routers.agent",
+   "scripts.eval.embedding_cache",
+   "services",
+   "services.agentic_baseline_service",
+   "services.atomic_scorer",
+   "services.baseline_rag_service",
+   "services.claim_scope_auditor",
+   "services.cost_analyzer",
+   "services.deterministic_guard_service",
+   "services.document_record_service",
+   "services.evaluation_eligibility",
+   "services.evaluation_preflight",
+   "services.lineage_tracker"
+  ],
+  "scripts.eval.s3_scorer_blind_crosscheck": [],
+  "scripts.eval.s3_scorer_rule_sensitivity": [],
+  "scripts.eval.scan_numberless_gold": [],
+  "scripts.eval.scorer_audit_crosscheck": [],
+  "scripts.eval.scorer_audit_crosscheck_summary": [],
+  "scripts.eval.scorer_audit_summary": [],
+  "scripts.eval.scorer_rule_sensitivity": [],
+  "scripts.eval.t2_loss_gold_in_prompt": [],
+  "scripts.eval.t2_topk40_judgement": [],
+  "scripts.eval.upgrade_benchmark_dataset": [
+   "models.eval_schema"
+  ],
+  "scripts.kg.backfill_naturalization_safe_edges": [
+   "core.config",
+   "core.database"
+  ],
+  "scripts.kg.fix_report71_residual_20_facts": [
+   "core.database"
+  ],
+  "scripts.kg.fix_report90_verified_naturalization_facts": [
+   "core.database"
+  ],
+  "scripts.kg.reextract_chunks": [
+   "core.config",
+   "core.database",
+   "core.providers.factory",
+   "services",
+   "services.document_record_service",
+   "services.extraction_worker",
+   "services.svo_service",
+   "services.task_queue_service"
+  ],
+  "scripts.kg.reextraction_manifest": [],
+  "services": [],
+  "services.adaptive_retrieval_service": [
+   "models.eval_schema",
+   "services.deterministic_guard_service",
+   "services.query_classifier",
+   "services.refusal_guard"
+  ],
+  "services.agentic_baseline_service": [
+   "services.baseline_rag_service"
+  ],
+  "services.atomic_scorer": [
+   "core.providers.base",
+   "models.eval_schema",
+   "services.semantic_span_matcher"
+  ],
+  "services.baseline_rag_service": [
+   "core.constants"
+  ],
+  "services.claim_scope_auditor": [
+   "models.eval_schema"
+  ],
+  "services.classify_service": [
+   "core.config",
+   "core.constants",
+   "core.providers.factory",
+   "models.knowledge_graph",
+   "services",
+   "services.document_record_service"
+  ],
+  "services.cluster_service": [
+   "core.constants",
+   "core.providers.factory",
+   "models.knowledge_graph",
+   "services.classify_service"
+  ],
+  "services.concept_engine": [],
+  "services.cost_analyzer": [],
+  "services.deterministic_guard_service": [
+   "services",
+   "services.interval_lookup_service"
+  ],
+  "services.document_record_service": [
+   "core.constants",
+   "models.knowledge_graph"
+  ],
+  "services.entity_extraction_service": [
+   "services.entity_registry_service"
+  ],
+  "services.entity_registry_service": [
+   "core.providers.base"
+  ],
+  "services.evaluation_eligibility": [
+   "models.eval_schema"
+  ],
+  "services.evaluation_preflight": [
+   "models.eval_schema",
+   "services.evaluation_eligibility"
+  ],
+  "services.expand_governance_service": [
+   "services.classify_service"
+  ],
+  "services.expand_worker": [
+   "core.config",
+   "core.constants",
+   "core.kg_config",
+   "core.providers.base",
+   "core.providers.factory",
+   "repositories.kg_repo",
+   "services",
+   "services.cluster_service",
+   "services.expand_governance_service",
+   "services.svo_service"
+  ],
+  "services.extraction_worker": [
+   "core.config",
+   "core.kg_config",
+   "core.providers.factory",
+   "parser.chunk_writer",
+   "repositories.kg_repo",
+   "services",
+   "services.document_record_service",
+   "services.svo_chunking",
+   "services.svo_service",
+   "services.task_queue_service"
+  ],
+  "services.ingestion_service": [
+   "models.knowledge_graph",
+   "parser.chunk_writer",
+   "parser.core",
+   "services",
+   "services.document_record_service"
+  ],
+  "services.interval_lookup_service": [],
+  "services.knowledge_graph_service": [
+   "models.knowledge_graph",
+   "repositories.kg_repo",
+   "services",
+   "services.document_record_service",
+   "services.svo_chunking",
+   "services.svo_service"
+  ],
+  "services.lineage_tracker": [
+   "core.providers.base",
+   "models.eval_schema",
+   "services.semantic_span_matcher"
+  ],
+  "services.pronoun_resolution_service": [
+   "core.providers.base"
+  ],
+  "services.query_classifier": [
+   "models.eval_schema"
+  ],
+  "services.refusal_guard": [],
+  "services.retrieval_service": [
+   "parser.chunk_writer",
+   "services.svo_chunking",
+   "services.svo_service"
+  ],
+  "services.semantic_span_matcher": [
+   "core.providers.base"
+  ],
+  "services.sim_calibration_service": [],
+  "services.svo_chunking": [
+   "core.kg_config.model",
+   "parser.chunk_writer",
+   "parser.core"
+  ],
+  "services.svo_preprocessing_service": [
+   "core.kg_config",
+   "core.providers.base",
+   "parser.chunk_writer",
+   "services.entity_extraction_service",
+   "services.entity_registry_service",
+   "services.ingestion_service",
+   "services.pronoun_resolution_service",
+   "services.svo_chunking"
+  ],
+  "services.svo_service": [
+   "core.config",
+   "core.constants",
+   "core.kg_config",
+   "core.kg_config.model",
+   "core.providers.base",
+   "core.providers.factory",
+   "models.knowledge_graph",
+   "repositories.kg_repo",
+   "services",
+   "services.classify_service",
+   "services.document_record_service",
+   "services.entity_registry_service",
+   "services.expand_governance_service",
+   "services.pronoun_resolution_service",
+   "services.sim_calibration_service",
+   "services.svo_chunking",
+   "services.svo_preprocessing_service",
+   "services.task_queue_service"
+  ],
+  "services.task_queue_service": [
+   "services",
+   "services.document_record_service",
+   "services.svo_chunking"
+  ],
+  "services.verification_service": [
+   "core.providers.base",
+   "parser.core"
+  ],
+  "setup_314_demo_kg": [
+   "core.config",
+   "core.database",
+   "core.providers.factory",
+   "models.knowledge_graph",
+   "repositories.kg_repo",
+   "services",
+   "services.extraction_worker",
+   "services.svo_service",
+   "services.task_queue_service"
+  ],
+  "standardized_rag": [],
+  "verify_314_fix": [
+   "core.database",
+   "core.providers.factory",
+   "models.document",
+   "routers.agent"
+  ]
+ }
+}
