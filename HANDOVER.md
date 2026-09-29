@@ -3,7 +3,11 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
-## 2026-09-29（報告115）：虛擬成員盲點追查任務書，交 Codex 執行
+## 2026-09-29（報告117）：build_graph 清空前虛擬成員防護任務書，交 Codex 執行
+
+使用者同意「先做 a（風險1防護性最小修補）再 c（M2 重構第一步）」。[報告117](docs/報告/117_build_graph虛擬成員清空前防護SDD任務書.md)：`build_graph(force_rebuild=True, doc_ids=None)` 在清空 Neo4j **之前**偵測 manifest 成員缺 `_record.json`，有就拋 `VirtualMembersNotRebuildableError`（router→409）、不清空；非 force 時僅 WARNING。先寫失敗測試→修→回歸須 1183 passed。**只擋住，不支援虛擬成員**（留 M2）。成果報告編號 118。**狀態：等待 Codex 執行→Claude 依§3驗收→通過才 push。** 完成後下一步＝(c) M2 重構第一步（以報告108 相依快照挑拆分目標）。
+
+## 2026-09-29（報告115）：虛擬成員盲點追查任務書，已完成並 push
 
 A8 完成後的殘留項合併成一份只讀追查：[報告115](docs/報告/115_虛擬成員盲點追查SDD任務書.md)。盤點所有「以 KG 資料夾內容推論成員」的位置（`build_graph()`、`task_queue_service` 重建、`classify_service`、`_kg_source_charset`、匯入腳本），重點確認 **`build_graph(force_rebuild=True)` 先清空 Neo4j 卻不重抽虛擬成員的資料損失路徑**，並確認 KG#4 屬實體還是虛擬。成果報告編號 116。純只讀、不修復。**狀態：✅ 已審核通過（`fb5d8a7`，報告116）並 push。** 結論（各項均為程式路徑＋離線 mock 重現，**未對真實資料驗證**）：
 - **風險1／資料損失**：`build_graph(force_rebuild=True, doc_ids=None)` 先 `DETACH DELETE` 清空該 KG，但虛擬成員（manifest-only）不在 `iterdir()` 的 target 內、輸出子目錄又無 `_record.json` 而被略過 → 重抽 0 件，router（`routers/knowledge_graph.py:47-52`）無任何確認或防護。**在修好之前，對任何含虛擬成員的 KG 不要呼叫 `force_rebuild=True`。**
