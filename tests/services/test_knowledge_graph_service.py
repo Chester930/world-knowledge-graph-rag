@@ -310,3 +310,123 @@ async def test_build_graph_skips_folders_without_record(tmp_path, monkeypatch):
 
 async def _noop():
     return None
+
+
+@pytest.mark.asyncio
+async def test_force_rebuild_aborts_before_delete_when_virtual_members_exist(tmp_path, monkeypatch):
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    virtual_doc_id = "virtual-doc"
+    (kg_folder / "_members.json").write_text(
+        json.dumps({
+            "kg_id": str(uuid4()),
+            "assigned_documents": [{"doc_id": virtual_doc_id, "source_path": str(tmp_path / "source")}],
+        }),
+        encoding="utf-8",
+    )
+    physical_folder = kg_folder / "physical.md"
+    physical_folder.mkdir()
+    document_record_service.init_record(physical_folder, source="physical.md", total_chunks=1)
+    before = document_record_service.read_record(physical_folder)
+    before.extraction_status = "completed"
+    before.chunk_progress = 1
+    before.completed_chunk_indices = [1]
+    document_record_service._write_record(physical_folder, before)
+
+    kg = _make_kg(str(kg_folder))
+    _patch_kg_repo(monkeypatch, kg)
+    triggered = []
+
+    async def _fake_trigger(driver, doc_folder, kg_id):
+        triggered.append(doc_folder)
+
+    monkeypatch.setattr("services.knowledge_graph_service.svo_service.trigger_extraction", _fake_trigger)
+    reset_calls = []
+    monkeypatch.setattr(
+        "services.knowledge_graph_service.document_record_service.reset_extraction_progress",
+        lambda folder: reset_calls.append(folder),
+    )
+
+    driver = SpyDriver()
+    with pytest.raises(svc.VirtualMembersNotRebuildableError, match=virtual_doc_id):
+        await svc.build_graph(driver, kg.id, force_rebuild=True)
+
+    assert not any("DETACH DELETE" in query for query, _ in driver.calls)
+    assert triggered == []
+    assert reset_calls == []
+    after = document_record_service.read_record(physical_folder)
+    assert after.extraction_status == "completed"
+    assert after.chunk_progress == 1
+    assert after.completed_chunk_indices == [1]
+
+
+@pytest.mark.asyncio
+async def test_force_rebuild_ok_when_manifest_members_have_kg_side_record(tmp_path, monkeypatch):
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    member_doc_id = "member.md"
+    (kg_folder / "_members.json").write_text(
+        json.dumps({
+            "kg_id": str(uuid4()),
+            "assigned_documents": [{"doc_id": member_doc_id, "source_path": str(tmp_path / "source")}],
+        }),
+        encoding="utf-8",
+    )
+    member_folder = kg_folder / member_doc_id
+    member_folder.mkdir()
+    document_record_service.init_record(member_folder, source=member_doc_id, total_chunks=1)
+
+    kg = _make_kg(str(kg_folder))
+    _patch_kg_repo(monkeypatch, kg)
+    triggered = []
+
+    async def _fake_trigger(driver, doc_folder, kg_id):
+        triggered.append(doc_folder)
+
+    monkeypatch.setattr("services.knowledge_graph_service.svo_service.trigger_extraction", _fake_trigger)
+
+    driver = SpyDriver()
+    await svc.build_graph(driver, kg.id, force_rebuild=True)
+
+    wipe_calls = [query for query, _ in driver.calls if "DETACH DELETE" in query]
+    assert len(wipe_calls) == 1
+    assert triggered == [member_folder]
+
+
+@pytest.mark.asyncio
+async def test_non_force_build_with_virtual_members_logs_warning_and_continues(
+    tmp_path, monkeypatch, caplog,
+):
+    kg_folder = tmp_path / "kg-1"
+    kg_folder.mkdir()
+    virtual_doc_id = "virtual-doc"
+    (kg_folder / "_members.json").write_text(
+        json.dumps({
+            "kg_id": str(uuid4()),
+            "assigned_documents": [{"doc_id": virtual_doc_id, "source_path": str(tmp_path / "source")}],
+        }),
+        encoding="utf-8",
+    )
+    physical_folder = kg_folder / "physical.md"
+    physical_folder.mkdir()
+    document_record_service.init_record(physical_folder, source="physical.md", total_chunks=1)
+
+    kg = _make_kg(str(kg_folder))
+    _patch_kg_repo(monkeypatch, kg)
+    triggered = []
+
+    async def _fake_trigger(driver, doc_folder, kg_id):
+        triggered.append(doc_folder)
+
+    monkeypatch.setattr("services.knowledge_graph_service.svo_service.trigger_extraction", _fake_trigger)
+    caplog.set_level(30, logger="services.knowledge_graph_service")
+
+    driver = SpyDriver()
+    await svc.build_graph(driver, kg.id, force_rebuild=False)
+
+    assert not any("DETACH DELETE" in query for query, _ in driver.calls)
+    assert triggered == [physical_folder]
+    assert any(
+        virtual_doc_id in record.message and record.levelno >= 30
+        for record in caplog.records
+    )

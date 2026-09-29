@@ -3,6 +3,7 @@
 TODO(v2 架構重整)：v1 的暫存區自動分群（LLM 分析 + 命名建議）待重新設計後遷移。
 """
 from __future__ import annotations
+import logging
 from pathlib import Path
 from uuid import UUID
 
@@ -10,8 +11,10 @@ from neo4j import AsyncDriver
 
 from models.knowledge_graph import KnowledgeGraph, KnowledgeGraphCreate
 from repositories.kg_repo import KGRepository
-from services import document_record_service, svo_service
+from services import classify_service, document_record_service, svo_service
 from services.svo_chunking import read_svo_index
+
+logger = logging.getLogger(__name__)
 
 
 class ArticleStructureLossError(RuntimeError):
@@ -20,6 +23,28 @@ class ArticleStructureLossError(RuntimeError):
     `articles` payload、只能改用一般的 `SVOGROUP` 切塊——見 `build_graph()`
     docstring §「誠實侷限」與 `docs/報告/21_抽取管線稽核與修正報告.md`。
     """
+
+
+class VirtualMembersNotRebuildableError(RuntimeError):
+    """`build_graph(force_rebuild=True, doc_ids=None)` 會先清空該 KG 在 Neo4j 的
+    全部節點，但 manifest（`_members.json`）內有成員在 KG 資料夾底下沒有
+    `_record.json`（虛擬歸屬：文件只存一份於暫存區／中央池），本函式無法重抽
+    它們——清空後這些成員的圖譜內容將永久遺失。見報告116 §1／報告117。
+    """
+
+
+def _unrebuildable_virtual_members(kg_folder: Path) -> list[str]:
+    """回傳 manifest 內「KG 資料夾底下沒有 `_record.json`」的成員 doc_id
+    （build_graph 無法重抽的虛擬成員）。無 manifest 時回傳空清單。"""
+    manifest = classify_service._read_members_manifest(kg_folder)
+    missing: list[str] = []
+    for entry in manifest.get("assigned_documents", []):
+        if not isinstance(entry, dict):
+            continue
+        doc_id = entry.get("doc_id")
+        if doc_id and document_record_service.read_record(kg_folder / doc_id) is None:
+            missing.append(str(doc_id))
+    return missing
 
 
 async def create_kg(driver: AsyncDriver, payload: KnowledgeGraphCreate) -> KnowledgeGraph:
@@ -80,6 +105,11 @@ async def build_graph(
     進行——法規全文的完整重跑，應改用當初建立此 KG 的專用匯入腳本（例如
     `import_leave_scheduling_dataset.py`，已正確傳入 `articles=`），而非
     本函式。
+
+    虛擬歸屬成員若只存在於 `_members.json`／中央池、在 KG 資料夾底下沒有
+    `_record.json`，本函式無法重抽。`force_rebuild=True, doc_ids=None` 會在清空
+    Neo4j 前拋出 `VirtualMembersNotRebuildableError`；非 force 模式只記錄 warning
+    並維持既有行為。本防呆不讓本函式支援虛擬成員，完整支援另屬 M2 設計。
     """
     kg = await KGRepository(driver).get(kg_id)
     if kg is None:
@@ -107,6 +137,20 @@ async def build_graph(
                     "build_graph(force_rebuild=True) 無法還原 articles payload、會靜默改用一般切塊、"
                     "條文邊界全部消失。請改用當初建立此文件的專用匯入腳本重新觸發，而非本函式。"
                 )
+
+    virtual_missing = _unrebuildable_virtual_members(kg_folder)
+    if virtual_missing:
+        if force_rebuild and doc_ids is None:
+            raise VirtualMembersNotRebuildableError(
+                f"KG {kg_id} 有 {len(virtual_missing)} 個虛擬歸屬成員在 KG 資料夾底下沒有 "
+                f"_record.json（{virtual_missing[:5]}…），force_rebuild 全庫清空後無法重抽，"
+                "已中止且未清空任何資料。請先讓 build_graph 支援虛擬成員（見報告116 §5），"
+                "或改用 doc_ids 局部重建。"
+            )
+        logger.warning(
+            "[build_graph] KG %s 有 %d 個虛擬歸屬成員不在 build_graph 的處理範圍內：%s",
+            kg_id, len(virtual_missing), virtual_missing[:5],
+        )
 
     if force_rebuild and doc_ids is None:
         await driver.execute_query("MATCH (n {kg_id: $kg_id}) DETACH DELETE n", kg_id=str(kg_id))

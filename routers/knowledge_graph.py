@@ -46,7 +46,10 @@ async def delete_kg(kg_id: UUID):
 
 @router.post("/{kg_id}/build-graph", status_code=202)
 async def build_graph(kg_id: UUID, payload: BuildGraphRequest):
-    await knowledge_graph_service.build_graph(
-        get_driver(), kg_id, payload.doc_ids, payload.force_rebuild,
-    )
+    try:
+        await knowledge_graph_service.build_graph(
+            get_driver(), kg_id, payload.doc_ids, payload.force_rebuild,
+        )
+    except knowledge_graph_service.VirtualMembersNotRebuildableError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return {"status": "accepted"}
