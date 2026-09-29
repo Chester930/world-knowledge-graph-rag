@@ -5,7 +5,13 @@
 
 ## 2026-09-29（報告119）：M2 第一步 P1（SM 化）前置——狀態機現況轉移盤點任務書，交 Codex 執行
 
-使用者同意（依建議）：M2 先做 P1（報告97 §6.5），因範圍小（狀態寫入約 18 處、5 個檔案）、不需凍結評測快照、且能根治 A8 那類靜默 no-op。分兩步：**119 只讀盤點（本任務）→ 121 實作**（Enum＋轉移表＋單一 `transition()`，先寫特性測試、行為不變、回歸須 ≥1183 passed）。[報告119](docs/報告/119_M2_P1前置_狀態機現況轉移盤點SDD任務書.md)：盤點 SM-1（`extraction_status`）、SM-1b（`normalization_status`）、SM-2（`task_queue.status`）的所有寫入／讀取點與**現況實際轉移矩陣**，並用離線特性重現產出 P1 特性測試的黃金依據；三個待驗證疑點 X1（`record_chunk_completed` 是否靜默覆寫 `failed`）、X2（`pending_upload` 在 SM-1 是否可達）、X3（靜默 no-op 寫入點）。成果報告編號 120。**「固定 5 題 K 臂評測快照」維持 (a)：P1 完成後、P2 拆 `agent.py` 之前再決定**（需 Neo4j＋Ollama、有 WSL 記憶體風險，不擋 P1）。**狀態：等待 Codex 執行→Claude 依§4驗收→通過才 push。**
+使用者同意（依建議）：M2 先做 P1（報告97 §6.5），因範圍小（狀態寫入約 18 處、5 個檔案）、不需凍結評測快照、且能根治 A8 那類靜默 no-op。分兩步：**119 只讀盤點（本任務）→ 121 實作**（Enum＋轉移表＋單一 `transition()`，先寫特性測試、行為不變、回歸須 ≥1183 passed）。[報告119](docs/報告/119_M2_P1前置_狀態機現況轉移盤點SDD任務書.md)：盤點 SM-1（`extraction_status`）、SM-1b（`normalization_status`）、SM-2（`task_queue.status`）的所有寫入／讀取點與**現況實際轉移矩陣**，並用離線特性重現產出 P1 特性測試的黃金依據；三個待驗證疑點 X1（`record_chunk_completed` 是否靜默覆寫 `failed`）、X2（`pending_upload` 在 SM-1 是否可達）、X3（靜默 no-op 寫入點）。成果報告編號 120。**「固定 5 題 K 臂評測快照」維持 (a)：P1 完成後、P2 拆 `agent.py` 之前再決定**（需 Neo4j＋Ollama、有 WSL 記憶體風險，不擋 P1）。**狀態：✅ 已驗收通過（`f9d4e6f` 報告120＋`703c32a` 回填任務書）並 push。** Claude 獨立驗證：SM-1 production 寫入 grep 與報告 Q1 完全吻合（`document_record_service.py:97,157,185,211,223,250`）；重跑 Codex 離線腳本，X1／X3／非法轉移皆重現。
+- **X1 成立**：`mark_extraction_failed()` 後對另一 chunk 呼叫 `record_chunk_completed()`，`failed → processing`（`document_record_service.py:211-213` 無條件覆寫，與其 docstring「不再覆寫失敗」不一致）。**未修，另案**。
+- **X2 不成立**：`pending_upload` 只由 SM-2 佇列使用，SM-1 production 從不寫入。
+- **X3 成立**：5 個記錄寫入函式＋`update_status()` 對不存在目標靜默回 None，呼叫端均未檢查回傳。**未修，另案**。
+- `update_status()` 對既存列是任意→任意（`completed→processing`、`failed→completed`、`pending→completed` 皆被接受）；`update_normalization_progress` 無 production 呼叫者。
+- **P1 轉移表必須容許的「不合理」轉移**（行為不變）見報告120 §5.2 共 6 項；P1 切分選項 A（先 SM-2）／B（先 SM-1）／C（先只加 Enum＋特性測試、再分批替換）見 §5.3，**待使用者裁示**。
+- 附註（Claude 疏漏）：報告119 §3 禁止修改其他檔案、交接指令卻要求填回填區，兩者矛盾；Codex 依交接指令填了回填區（僅該區 3 行），接受。今後任務書統一把「回填區」列為允許修改。
 
 ## 2026-09-29（報告117）：build_graph 清空前虛擬成員防護任務書，已完成並 push
 
