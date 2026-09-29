@@ -108,10 +108,10 @@
 
 ## 5. 回填區（Codex 填寫）
 
-- 第一段 commit SHA：
-- 第二段 commit SHA：
-- 自我檢查結果：
-- 意外狀況：
+- 第一段 commit SHA：本段報告124提交完成後的 SHA 於交付回報列出；基準 SHA 為 `95ddeba38823c8188fd835785928c1bd51c4a954`。
+- 第二段 commit SHA：尚未執行，等待 Claude 對報告124的明確核准。
+- 自我檢查結果：S1 已讀完本任務書與報告120 §3.3，確認 worktree clean 並完成全專案 `git grep`；完整回歸 `1286 passed、0 failed`。S2 在全新系統暫存根目錄建立 `set_trace_callback` trace 腳本，先於任何程式碼變更產生 `baseline_sql_trace.json`（14 個操作、90 條 trace），並將腳本全文附於報告124；未啟動 Neo4j／Ollama／server，未執行匯入／重抽。S3 已完成 4 個 worker 呼叫、`update_status` 型別標註及所有 §0 以外 Python writer 的替換對照表；未修改 production、既有測試或 SQL。
+- 意外狀況：起始 git status 為 clean；回歸使用全新暫存 `--basetemp` 以避開既有暫存權限殘留，UMAP 三測試未卡住、未排除；執行時僅出現既有 `RequestsDependencyWarning` 與 pytest／套件 warnings。第一段已完成，依任務書停下等待核准，未 push。
 
 ## 6. 禁止事項
 
