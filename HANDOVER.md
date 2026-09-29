@@ -3,7 +3,11 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
-## 2026-09-29（報告119）：M2 第一步 P1（SM 化）前置——狀態機現況轉移盤點任務書，交 Codex 執行
+## 2026-09-29（報告121）：M2 P1 第一批（選項C）任務書，交 Codex 執行
+
+使用者選定 P1 切分**選項 C**：先只新增、不替換任何寫入。[報告121](docs/報告/121_M2_P1第一批_狀態機Enum轉移表與特性測試SDD任務書.md)：新增 `state/`（`StrEnum`＋事件＋**照現況寫**的轉移表＋純查表函式，零依賴、不接線）＋`tests/state/` 對等測試（對每個「來源狀態×事件」呼叫**真實既有函式**，與表逐格比對；X1／X3 明確鎖定為既有行為）。**不得修改任何既有 production 檔案與測試**。回歸須 1183＋新增測試數 passed。成果報告編號 122。之後兩批：第二批替換 SM-2（task_queue）寫入、第三批替換 SM-1（document_record）寫入，屆時再決定 X1／X3 是否另案修復。**狀態：等待 Codex 執行→Claude 依§6驗收（含「故意破壞表一格、對等測試須失敗」驗證）→通過才 push。**
+
+## 2026-09-29（報告119）：M2 第一步 P1（SM 化）前置——狀態機現況轉移盤點任務書，已完成並 push
 
 使用者同意（依建議）：M2 先做 P1（報告97 §6.5），因範圍小（狀態寫入約 18 處、5 個檔案）、不需凍結評測快照、且能根治 A8 那類靜默 no-op。分兩步：**119 只讀盤點（本任務）→ 121 實作**（Enum＋轉移表＋單一 `transition()`，先寫特性測試、行為不變、回歸須 ≥1183 passed）。[報告119](docs/報告/119_M2_P1前置_狀態機現況轉移盤點SDD任務書.md)：盤點 SM-1（`extraction_status`）、SM-1b（`normalization_status`）、SM-2（`task_queue.status`）的所有寫入／讀取點與**現況實際轉移矩陣**，並用離線特性重現產出 P1 特性測試的黃金依據；三個待驗證疑點 X1（`record_chunk_completed` 是否靜默覆寫 `failed`）、X2（`pending_upload` 在 SM-1 是否可達）、X3（靜默 no-op 寫入點）。成果報告編號 120。**「固定 5 題 K 臂評測快照」維持 (a)：P1 完成後、P2 拆 `agent.py` 之前再決定**（需 Neo4j＋Ollama、有 WSL 記憶體風險，不擋 P1）。**狀態：✅ 已驗收通過（`f9d4e6f` 報告120＋`703c32a` 回填任務書）並 push。** Claude 獨立驗證：SM-1 production 寫入 grep 與報告 Q1 完全吻合（`document_record_service.py:97,157,185,211,223,250`）；重跑 Codex 離線腳本，X1／X3／非法轉移皆重現。
 - **X1 成立**：`mark_extraction_failed()` 後對另一 chunk 呼叫 `record_chunk_completed()`，`failed → processing`（`document_record_service.py:211-213` 無條件覆寫，與其 docstring「不再覆寫失敗」不一致）。**未修，另案**。
