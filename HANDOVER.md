@@ -3,7 +3,11 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
-## 2026-09-29（報告121）：M2 P1 第一批（選項C）任務書，交 Codex 執行
+## 2026-09-29（報告123）：M2 P1 第二批（SM-2 佇列詞彙統一）任務書，兩段式，交 Codex 執行
+
+使用者同意進第二批並要求「先出替換對照表、Claude 審過才准實作」。[報告123](docs/報告/123_M2_P1第二批_SM2佇列詞彙統一SDD任務書.md)：**設計發現**——SM-2 的狀態語意寫在**原子 SQL** 裡（`claim_next_pending` 的 `UPDATE…RETURNING` 是多 Worker 併發安全的關鍵），**不可**改成 Python 端讀後寫的 `transition()`；Python 端狀態寫入只有 `extraction_worker.py` 的 4 個 `update_status()` 呼叫。故第二批僅做「詞彙統一」：4 個呼叫改用 `state.task_sm.TaskStatus`（`StrEnum`，值不變）、`update_status` 型別標註放寬；**SQL 文字零變動**，並以「SQL 執行軌跡逐字比對」驗證；同時是 `state/` 的第一個 production import（驗接線無循環）。**SM-1 的單一 `transition()` 入口（JSON 記錄、無併發原子性問題）才是 P1 實質內容，留第三批。** 兩段：第一段出報告124（替換對照表＋SQL 軌跡基準腳本，只讀）→**停下等 Claude 核准**→第二段實作（報告125）。**狀態：等待 Codex 第一段→Claude 審核對照表→核准後 Codex 第二段→Claude 依§4驗收（含「故意破壞 worker 一個成員」驗證）→通過才 push。**
+
+## 2026-09-29（報告121）：M2 P1 第一批（選項C）任務書，已完成並 push
 
 使用者選定 P1 切分**選項 C**：先只新增、不替換任何寫入。[報告121](docs/報告/121_M2_P1第一批_狀態機Enum轉移表與特性測試SDD任務書.md)：新增 `state/`（`StrEnum`＋事件＋**照現況寫**的轉移表＋純查表函式，零依賴、不接線）＋`tests/state/` 對等測試（對每個「來源狀態×事件」呼叫**真實既有函式**，與表逐格比對；X1／X3 明確鎖定為既有行為）。**不得修改任何既有 production 檔案與測試**。回歸須 1183＋新增測試數 passed。成果報告編號 122。之後兩批：第二批替換 SM-2（task_queue）寫入、第三批替換 SM-1（document_record）寫入，屆時再決定 X1／X3 是否另案修復。**狀態：✅ 已驗收通過（`c9592d3`，報告122）並 push。** 新增 `state/{__init__,document_sm,task_sm}.py`＋`tests/state/`（103 個測試）。Claude 驗證：轉移表逐格對照報告120（文件 25 格、佇列 24 格）；對等測試確實呼叫真實既有函式；production 無人 import `state`、`state/` 只 import 標準庫 `enum`；**故意破壞驗證**（把 `FAILED+PARTIAL` 與 `COMPLETED+ENQUEUE` 兩格改錯）→ 3 個測試失敗，還原後 103 passed；**獨立完整回歸 1286 passed（83s）＝1183＋103**，回歸基準更新為 **1286**。Codex 環境有 3 個既有 UMAP 測試（`test_cluster_service.py::TestReduceDimensionality`）超過 10 分鐘無輸出，在 Codex 環境屬環境限制，Claude 環境正常完成——**今後驗收以 Claude 獨立完整回歸為準**。相依快照 cycles=0、`state` fan-in=0。
 **下一步（P1 第二批）**：替換 SM-2（`task_queue_service`）寫入為呼叫 `state/task_sm` 的轉移表／單一入口，行為不變，靠 `tests/state` 對等測試當回歸網；X1／X3 屆時再決定是否另案修。
