@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告171 X3）：論文位置同步第二輪（N4／N9 搬移後）收尾——[報告173](docs/報告/173_論文位置同步第二輪階段結果彙整.md)
+
+X1（報告172）＋X2 三批（`22cc96f`／`ced1492`／`5a6ab55`，共 22 處 A 類純路徑更新）皆已 push；程式碼零變更；`03_變更紀錄.md` 只追加 3 筆；論文已無 `svo_service::<被搬移符號>` 舊路徑引用；報告索引補列 171–173。C 類 0 項（論文沒有「檢索只讀」說法）。報告173 列 4 項待使用者裁示（E 類候選 7 項是否寫入含 N9 惰性 DDL 措辭、對映表是否新增 N4／N9 列、前次未決項、回研究主線或本體論對接），只列事項。
+
 ## 2026-09-30（報告171 X2 批3）：論文對齊批次3——03 五處＋04 兩處（N4／N9 已搬移符號的位置更新）；X2 完成
 
 `_rrf_fuse_fact_ids()`／`_apply_source_doc_cap()`→`services/retrieval/fact_candidates.py`，`_effective_rel_types()`／`_effective_rel_type_descriptions()`→`services/extraction/prompt.py`，守衛樣式固定處與 `_build_*_pattern()`→`services/extraction/guards.py`，`extract_svo_triples()`→`services/extraction/extract.py`，`_fix_known_simplified_compounds()`→`services/extraction/traditional.py`。純路徑更新，機制與研究主張未改。驗證同前；**回檢**：論文（不含變更紀錄）已無 `svo_service(.py)::<被搬移符號>` 的舊路徑引用。至此 22 處 A 類全數完成；E 類候選未寫入，待使用者決定。
