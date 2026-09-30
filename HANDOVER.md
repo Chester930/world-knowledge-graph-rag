@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告168 W1 切法1）：N9 G1 搬移——`services/retrieval/fact_candidates.py`（4 個純函式，行為不變）
+
+`_rrf_fuse_fact_ids`、`_filter_fact_candidates_by_source_scope`、`_apply_source_doc_cap`、`_dedupe_facts_by_key` 自 `svo_service.py` 搬入，舊名稱重新匯出（同一物件）。驗收：4 符號逐字相同、`svo_service.py` diff＝刪 109 行＋加 8 行匯入（被刪行全在新模組）、差分（搬移前 golden，四函式各 1100 案含順序、平手、空輸入、None、例外）全一致、依賴快照 +1 模組／+1 邊／無循環、故意破壞（新模組 import svo_service、重新匯出改本地包裝、改動函式內容）皆使測試失敗、`test_kg_config` golden 錨點全綠、pytest 1565 passed。切法2（G2：BFS 純輔助＋2 常數）待做。
+
 ## 2026-09-30（報告168）：下一階段任務規劃——「N9 純函式搬移（G1／G2）與 `source_article_no` 下游盤點」，**規劃對話決定、請執行對話執行，規劃對話只記錄**
 
 使用者再次指示「依照建議繼續」，採用報告164 §9 的建議與預案。[報告168](docs/報告/168_下一階段任務規劃_N9純函式搬移與article_no下游盤點.md) 定案 4 項：**W1** 把 N9 的 **G1＋G2 共 8 個純符號**（`_rrf_fuse_fact_ids`、`_filter_fact_candidates_by_source_scope`、`_apply_source_doc_cap`、`_dedupe_facts_by_key`、`_bfs_pass_cypher`、`_bfs_records_to_triples`、`_BFS_EXPAND_WHEN_BELOW`、`_BFS_PRIZE_TOP_K`）從 `svo_service.py` 搬入 `services/retrieval/`（**行為不變**，舊名稱重新匯出；規劃對話已用 AST 核對這 8 個符號對 `svo_service.py` 其他頂層符號皆無依賴；N9 補丁全綁 `routers.agent`，搬這些不會使補丁失效；`services/retrieval` 不得 import `svo_service`；**不需重跑 K 臂快照**，差分測試即足夠）。**W2** `source_article_no` 下游使用者**只讀盤點**（列出 BFS 三元組從 `None` 變有值時各使用位置的行為差異，**不建議要不要改**）。**W3** 節點卡登記「N9 檢索路徑含冪等 DDL」並更新搬移後位置（純文件，等 W1）。**W4** 彙整。**不做**：`chat()`／`routers/agent.py`、G3–G8、`GraphSchemaPort` 遷移、N4 事件契約、N5、來源回取、論文同步。**停止條件**見報告168 §4。編號：168 為本規劃，**執行對話自 169 起**（156 保留）；每個任務（W1 為每一刀）驗收並 push 後以訊息回報。**狀態：已派工，等待執行。**
