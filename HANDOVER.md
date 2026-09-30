@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告160 U3）：來源回取再探測（含 BFS 三元組）完成（[報告162](docs/報告/162_KG來源回取再探測_含BFS三元組結果.md)）
+
+環境前置通過（Neo4j `kg2-neo4j`@17990、Ollama@11434，未啟動／重啟任何服務，唯讀、無 LLM）。**結論：仍不支持**——預算對齊下 R1'（Fact＋三元組→來源）recall==1 為 25／42，與 T5 僅 Fact 相同，B1 為 29／42；三元組來源 100% 可解析（citations_json），但預算內新增命中 0；不設預算時三元組多帶回 8 個 span（28／42，字元約 1.7 倍）仍不高於 B1。重跑與凍結重疊：Fact Jaccard 0.975、三元組 0.895。關係型別解析因禁 LLM 全為 None（不篩選），已列為偏離。發現：`services/context/telemetry.py::build_retrieval_trace` 把三元組的 `source_svo_chunk_index`／`article_no` 寫死為 `None`（T5 三元組無 chunk 索引的原因，未改）。新增 `scripts/eval/kg_source_recall_probe_v2.py`。
+
 ## 2026-09-30（報告160 U2）：`GraphStorePort` 設計提案完成（[報告161](docs/報告/161_GraphStorePort設計提案_語意介面與分階段.md)；純文件，不寫 `.py`，**不決定位置**、不含 `bfs_query`）
 
 分階段：P-A DDL／索引群（14 函式，`VectorIndexSpec` 值物件收斂 6 種向量索引）、P-B 單純 CRUD 群（拆 `KGCatalogPort`／`DocumentGraphPort`／`ExtractionWritePort`／`QueryReadPort`）、P-C 檢索群只列名；`bfs_query` 只寫「為何最後」。介面位置 4 個選項與取捨（A `core/ports`、B `repositories`、C 節點內 `ports.py`、D 先放第一個使用者旁）；`ensure_vector_index` 與 8 個索引建立函式關係只列事實與 3 個選項；5 個待裁示問題。搬移策略：先宣告→轉接（委派現有函式，行為逐位元不變）→逐呼叫端遷移，補丁改注入假 Port。
