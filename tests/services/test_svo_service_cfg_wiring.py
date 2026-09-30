@@ -8,6 +8,7 @@ import pytest
 from core.kg_config import DedupConfig, ExtractionConfig, KGConfig, RelTypeConfig
 from models.knowledge_graph import SVOTriple
 from services import expand_worker, svo_service as svc
+from services.extraction import extract as extract_mod, reltype as reltype_mod  # 報告160 U1：補丁目標改指向呼叫者所在的新模組
 
 
 class RecordingLLM:
@@ -44,7 +45,7 @@ async def test_reconcile_rel_type_uses_cfg_compare_threshold(monkeypatch):
     async def fake_classify_relation_by_embedding(verb, embedding_provider, descriptions=None):
         return "CAUSES", 0.80
 
-    monkeypatch.setattr(svc, "classify_relation_by_embedding", fake_classify_relation_by_embedding)
+    monkeypatch.setattr(reltype_mod, "classify_relation_by_embedding", fake_classify_relation_by_embedding)
 
     default_llm = RecordingLLM("CAUSES")
     default_result = await svc._reconcile_rel_type(
@@ -82,11 +83,11 @@ async def test_extract_svo_triples_forwards_cfg_to_relation_reconciliation(monke
         received_cfgs.append(kwargs["cfg"])
         return llm_rel_type
 
-    monkeypatch.setattr(svc, "_parse_triples_payload", lambda _: [{
+    monkeypatch.setattr(extract_mod, "_parse_triples_payload", lambda _: [{
         "subject": "甲", "subject_type": "機構", "verb": "提供",
         "object": "乙", "object_type": "機構", "rel_type": "CAUSES",
     }])
-    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+    monkeypatch.setattr(extract_mod, "_reconcile_rel_type", fake_reconcile)
 
     triples = await svc.extract_svo_triples(
         "甲提供乙。", RecordingJsonLLM(), object(), cfg=cfg,
@@ -139,9 +140,9 @@ async def test_completeness_check_forwards_same_cfg_to_both_extraction_passes(mo
         assert kwargs["cfg"] is cfg
         return list(original_sentences)
 
-    monkeypatch.setattr(svc, "extract_svo_triples", fake_extract)
-    monkeypatch.setattr(svc, "_find_uncovered_sentences", fake_find_uncovered)
-    monkeypatch.setattr(svc, "_filter_ungrounded_quantity_triples", lambda triples, *_: triples)
+    monkeypatch.setattr(extract_mod, "extract_svo_triples", fake_extract)
+    monkeypatch.setattr(extract_mod, "_find_uncovered_sentences", fake_find_uncovered)
+    monkeypatch.setattr(extract_mod, "_filter_ungrounded_quantity_triples", lambda triples, *_: triples)
 
     result = await svc.extract_svo_triples_with_completeness_check(
         "甲提供乙。", ["甲提供乙。"], RecordingLLM(""), object(), cfg=cfg,

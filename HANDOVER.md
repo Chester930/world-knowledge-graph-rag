@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告160 U1 切法3）：N4 搬移完成——`_reconcile_rel_type`（含 SQLite 副作用）與 `extract_svo_triples*` 搬入 `services/extraction/`（62／62）；新增 `services/extraction/NODE.md`
+
+行為不變：EXPAND／ESCALATE3 寫 SQLite 原樣保留（未改事件契約）。**測試補丁遷移 11 處**（`test_svo_service.py` 5、`test_svo_service_cfg_wiring.py` 6）：原補丁 `svc._reconcile_rel_type`／`classify_relation_by_embedding`／`_parse_triples_payload`／`extract_svo_triples`／`_find_uncovered_sentences`／`_filter_ungrounded_quantity_triples` 只改到 `svo_service` 的綁定，搬移後不再影響已搬走的呼叫者，改指向呼叫者所在模組（`services.extraction.extract`／`reltype`）——等價理由：函式的全域名稱查找發生在其所在模組。新增陷阱文件化測試。驗收：62 符號逐字（1 個允許路徑修正）、`svo_service.py` diff＝刪 269 行＋加 11 行匯入（svo_service 3923→3013 行）、差分 1536 案一致、依賴快照累計 161→167 模組／433→460 邊／無循環、三項故意破壞皆使測試失敗、三張節點卡 0 警告、pytest 1500 passed。節點歸屬債務（11 個共用輔助）與事件契約 E1–E5 仍待裁示。
+
 ## 2026-09-30（報告160 U1 切法2）：N4 搬移——`services/extraction/reltype.py`（3 符號：型別描述 embedding 快取與 `classify_relation_by_embedding`）
 
 累計 57／62。驗收：逐字相同、`svo_service.py` diff 只有刪除 42 行＋7 行匯入、被刪行全部在新模組找到、差分 1536 案一致、依賴快照 +1 模組／+4 邊／無循環、故意破壞（重新定義本地 `classify_relation_by_embedding`）使測試失敗、pytest 1489 passed。測試補丁 `svc.classify_relation_by_embedding`（cfg_wiring）仍有效：`_reconcile_rel_type` 尚在 `svo_service`，仍以其全域名稱呼叫（切法3 才遷移）。

@@ -13,7 +13,7 @@ EXTRACTION = REPO / "services" / "extraction"
 # 搬移時唯一允許與搬移前不同的符號（路徑定位修正，見報告160 U1 設計 #3）
 ALLOWED_DIFF = {"_EXTENDED_ENTITY_TYPES_PATH"}
 # 目前已搬移的符號數；每一刀更新，最後一刀必須是 62
-EXPECTED_MOVED = 57
+EXPECTED_MOVED = 62
 
 
 def _locations() -> dict[str, tuple[str, str]]:
@@ -78,3 +78,16 @@ def test_extended_entity_type_lookup_is_loaded_and_non_empty():
     lookup = prompt._load_extended_entity_type_lookup()
     assert len(lookup) >= 900  # schema.org 939 類
     assert prompt.resolve_entity_type("Local Business") != ""
+
+
+def test_patching_svo_service_name_does_not_affect_moved_callers(monkeypatch):
+    """補丁陷阱（報告158 §7／報告160 U1）：補丁 `svo_service._reconcile_rel_type` 不影響已搬走的
+    `extract_svo_triples`；補丁必須指向呼叫者所在模組（`services.extraction.extract`）。"""
+    from services import svo_service
+    from services.extraction import extract, reltype
+
+    original = reltype._reconcile_rel_type
+    monkeypatch.setattr(svo_service, "_reconcile_rel_type", lambda *a, **k: None)
+    assert extract._reconcile_rel_type is original
+    monkeypatch.setattr(extract, "_reconcile_rel_type", lambda *a, **k: None)
+    assert extract._reconcile_rel_type is not original

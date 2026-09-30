@@ -13,6 +13,7 @@ from core.kg_config import ConfigLoader, FileConfigSource, GuardConfig, KGConfig
 from models.knowledge_graph import SVOTriple
 from services import document_record_service, ingestion_service, svo_service as svc
 from services import task_queue_service
+from services.extraction import extract as extract_mod  # 報告160 U1：N4 補丁目標改指向呼叫者所在的新模組
 from services.svo_chunking import SVOChunk
 
 
@@ -4825,7 +4826,7 @@ async def test_completeness_check_skips_second_call_when_fully_covered(monkeypat
     """
     async def fake_reconcile(verb, llm_rel_type, **kwargs):
         return llm_rel_type
-    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+    monkeypatch.setattr(extract_mod, "_reconcile_rel_type", fake_reconcile)
 
     sentence = "勞工因有事故必須親自處理，得請事假。"
     llm = FakeLLM(
@@ -4850,7 +4851,7 @@ async def test_completeness_check_triggers_supplement_and_merges_when_uncovered(
     monkeypatch `_reconcile_rel_type()` 理由同上一則測試。"""
     async def fake_reconcile(verb, llm_rel_type, **kwargs):
         return llm_rel_type
-    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+    monkeypatch.setattr(extract_mod, "_reconcile_rel_type", fake_reconcile)
 
     main_sentence = "勞工因有事故必須親自處理，得請事假。"
     missed_sentence = "勞工得擇定以小時為請假單位。"
@@ -4878,7 +4879,7 @@ async def test_completeness_check_dedupes_supplement_against_first_pass(monkeypa
     合併時應去重，不重複計入。monkeypatch `_reconcile_rel_type()` 理由同上。"""
     async def fake_reconcile(verb, llm_rel_type, **kwargs):
         return llm_rel_type
-    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+    monkeypatch.setattr(extract_mod, "_reconcile_rel_type", fake_reconcile)
 
     sentence = "勞工因有事故必須親自處理，得請事假。"
     duplicate_payload = (
@@ -4943,7 +4944,7 @@ async def test_completeness_check_drops_triple_with_ungrounded_quantity(monkeypa
     數值忠實性核對，含跨條文挪用數字的三元組應被丟棄。"""
     async def fake_reconcile(verb, llm_rel_type, **kwargs):
         return llm_rel_type
-    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+    monkeypatch.setattr(extract_mod, "_reconcile_rel_type", fake_reconcile)
 
     text = "有左列情事之一者，給予三至七日之特別休假：一、主動破獲叛亂組織，人證俱獲者。"
     llm = FakeLLM(
@@ -5152,7 +5153,7 @@ def test_filter_drops_clause_mis_bound_triple():
 async def test_completeness_check_drops_clause_mis_bound_triple(monkeypatch):
     async def fake_reconcile(verb, llm_rel_type, **kwargs):
         return llm_rel_type
-    monkeypatch.setattr(svc, "_reconcile_rel_type", fake_reconcile)
+    monkeypatch.setattr(extract_mod, "_reconcile_rel_type", fake_reconcile)
 
     llm = FakeLLM(
         '{"triples":['
