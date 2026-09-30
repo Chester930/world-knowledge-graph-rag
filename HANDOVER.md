@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告171 X2 批1）：論文對齊批次1——00 對映表 4 處＋02 文獻探討 3 處（N4／N9 已搬移符號的位置更新）
+
+純路徑更新，機制與研究主張未改；`svo_service.py` 以匯入重新匯出、`routers/agent.py` 仍以 `_` 私有別名重新匯出（已寫入論文與變更紀錄）。驗證：新字串逐字命中、舊字串消失、`git diff --check` 通過、`git diff --stat -- '*.py'` 為空；`03_變更紀錄.md` 只追加一筆。批2（03 八處）、批3（03 五處＋04 兩處）待做。
+
 ## 2026-09-30（報告171 X1）：論文與程式現況差異盤點（N4／N9 搬移後）完成（[報告172](docs/報告/172_論文與程式現況差異盤點結果_N4N9搬移後.md)；論文與程式零變更）
 
 70 個被搬移符號在論文命中 138 行（A 21 行／22 處帶 `svo_service` 路徑需更新、B 66 行僅名稱不改、D 51 行變更紀錄不改）；**C 類無需修改項**——特別檢查：論文**沒有**「檢索只讀 Neo4j」說法（無需使用者確認）、沒有 `svo_service.py` 行數／職責描述、沒有殘留測試基準、沒有 `retrieval_trace` 描述。E 類候選 7 項（extraction／retrieval 新模組、core/ports、trace 三元組 chunk 索引、N9 惰性 DDL、節點卡、重新匯出慣例）只列不寫。X2 計畫 3 批（7／8／7 處，皆純路徑更新、無需確認）。新增 `scripts/analysis/thesis_move_inventory.py`。
