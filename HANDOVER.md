@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告155 T3）：Neo4j 操作只讀盤點完成（[報告157](docs/報告/157_Neo4j操作只讀盤點結果.md)；`GraphStorePort` 前置資料，**不含介面決定**）
+
+盤點 74 個存取 Neo4j 的函式／120 個執行點；**`services/`＋`routers/` 直接寫 Cypher：38 函式／67 處**（`svo_service.py` 33 函式／62 處、`knowledge_graph_service.py` 1、`routers/agent.py` 4）。包裝函式 3 個（`_execute_with_constraint_retry`、`ensure_vector_index`〔只有 `ConceptRepository` 用〕、腳本內 `_query_batches`）＋Cypher 組裝函式 `_bfs_pass_cypher`。`svo_service.py` 的 8 個索引建立函式沒有走 `ensure_vector_index`。測試補丁多綁在使用者模組名稱（`<agent>.vector_search_facts`×18 等），指向 `svo_service.X` 的補丁有 3 個測試檔。交叉檢查：`svo_service.py` 執行點 AST 62 ＝ grep 63 行 − 1 行 `def`；檔案清單兩種方法完全一致。新增 `scripts/analysis/neo4j_access_inventory.py`（純分析腳本，可重跑）；正式程式零變更。
+
 ## 2026-09-30（報告155 T1）：N9／N10 節點卡已建立（`services/retrieval/NODE.md`、`services/context/NODE.md`；純文件、零程式變更）
 
 節點卡格式首批試作。逐葉節點列出**現在實際位置**並標「已搬移／仍在原處」：N9 只有 N9.5／N9.7 過濾／N9.8 在 `services/retrieval/scope.py`，其餘（種子實體、`vector_search_facts`、`bfs_query`、`resolve_query_relation_type`、條文擴充）**仍在** `routers/agent.py`／`services/svo_service.py`；N10 的 N10.1／N10.6 與遙測在 `services/context/`，`_arrange_fact_lines`／`_rrf_order`／`_build_prompt` **仍在** `routers/agent.py`。決策槽（`GRAPH_PRUNING`、`FACT_RETRIEVAL_MODE`、`ARTICLE_EXPANSION`、`KG_RETRIEVAL_DEPTH`、`KG_CONTEXT_MODE`）皆標「規劃」，`.py` 零命中。驗收：26 個 `檔案::函式（行號）` 主張以 AST 逐一核對全數成立、連結可解析、`git diff` 只有 `*.md`。基準重測：pytest（`--ignore=tests/core/test_embedding_migration.py`）**1353 passed**（報告155 寫 1351，差 +2）。
