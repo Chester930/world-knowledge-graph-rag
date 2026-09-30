@@ -1,0 +1,220 @@
+{
+  "run_a": "C:\\Users\\666\\AppData\\Local\\Temp\\report139_after_cut1_20260930_01\\run1",
+  "run_b": "D:\\Users\\666\\Desktop\\world knowledge graph rag\\.claude\\worktrees\\sdd-retrieval-comparison\\data\\eval\\p2_snapshot_20260929\\run1",
+  "question_ids": [
+    "17-Q1",
+    "26-Q1",
+    "26-Q5",
+    "57-DIST1",
+    "57-COREF1",
+    "canary-P1"
+  ],
+  "questions": {
+    "17-Q1": {
+      "status": "ok",
+      "l1": {
+        "equal": true,
+        "fields": {
+          "lineage.stage1_retrieval.retrieved_fact_ids": true,
+          "lineage.stage1_retrieval.retrieved_chunk_ids": true,
+          "lineage.stage1_retrieval.retrieval_trace": true,
+          "lineage.stage2_context.prompt_context_lines": true
+        },
+        "differences": []
+      },
+      "l2": {
+        "equal": true,
+        "fields": {
+          "answer": true,
+          "lineage.stage3_generation.raw_draft": true,
+          "lineage.stage3_generation.final_output": true,
+          "lineage.stage3_generation.grounding_passed": true,
+          "lineage.stage3_generation.regenerated": true
+        },
+        "differences": []
+      },
+      "l3": {
+        "equal": true,
+        "fields": {
+          "atomic_score.is_perfect": true,
+          "atomic_score.supported_spans": true,
+          "atomic_score.missing_spans": true
+        },
+        "differences": []
+      }
+    },
+    "26-Q1": {
+      "status": "ok",
+      "l1": {
+        "equal": true,
+        "fields": {
+          "lineage.stage1_retrieval.retrieved_fact_ids": true,
+          "lineage.stage1_retrieval.retrieved_chunk_ids": true,
+          "lineage.stage1_retrieval.retrieval_trace": true,
+          "lineage.stage2_context.prompt_context_lines": true
+        },
+        "differences": []
+      },
+      "l2": {
+        "equal": true,
+        "fields": {
+          "answer": true,
+          "lineage.stage3_generation.raw_draft": true,
+          "lineage.stage3_generation.final_output": true,
+          "lineage.stage3_generation.grounding_passed": true,
+          "lineage.stage3_generation.regenerated": true
+        },
+        "differences": []
+      },
+      "l3": {
+        "equal": true,
+        "fields": {
+          "atomic_score.is_perfect": true,
+          "atomic_score.supported_spans": true,
+          "atomic_score.missing_spans": true
+        },
+        "differences": []
+      }
+    },
+    "26-Q5": {
+      "status": "ok",
+      "l1": {
+        "equal": true,
+        "fields": {
+          "lineage.stage1_retrieval.retrieved_fact_ids": true,
+          "lineage.stage1_retrieval.retrieved_chunk_ids": true,
+          "lineage.stage1_retrieval.retrieval_trace": true,
+          "lineage.stage2_context.prompt_context_lines": true
+        },
+        "differences": []
+      },
+      "l2": {
+        "equal": true,
+        "fields": {
+          "answer": true,
+          "lineage.stage3_generation.raw_draft": true,
+          "lineage.stage3_generation.final_output": true,
+          "lineage.stage3_generation.grounding_passed": true,
+          "lineage.stage3_generation.regenerated": true
+        },
+        "differences": []
+      },
+      "l3": {
+        "equal": true,
+        "fields": {
+          "atomic_score.is_perfect": true,
+          "atomic_score.supported_spans": true,
+          "atomic_score.missing_spans": true
+        },
+        "differences": []
+      }
+    },
+    "57-DIST1": {
+      "status": "ok",
+      "l1": {
+        "equal": true,
+        "fields": {
+          "lineage.stage1_retrieval.retrieved_fact_ids": true,
+          "lineage.stage1_retrieval.retrieved_chunk_ids": true,
+          "lineage.stage1_retrieval.retrieval_trace": true,
+          "lineage.stage2_context.prompt_context_lines": true
+        },
+        "differences": []
+      },
+      "l2": {
+        "equal": true,
+        "fields": {
+          "answer": true,
+          "lineage.stage3_generation.raw_draft": true,
+          "lineage.stage3_generation.final_output": true,
+          "lineage.stage3_generation.grounding_passed": true,
+          "lineage.stage3_generation.regenerated": true
+        },
+        "differences": []
+      },
+      "l3": {
+        "equal": true,
+        "fields": {
+          "atomic_score.is_perfect": true,
+          "atomic_score.supported_spans": true,
+          "atomic_score.missing_spans": true
+        },
+        "differences": []
+      }
+    },
+    "57-COREF1": {
+      "status": "ok",
+      "l1": {
+        "equal": true,
+        "fields": {
+          "lineage.stage1_retrieval.retrieved_fact_ids": true,
+          "lineage.stage1_retrieval.retrieved_chunk_ids": true,
+          "lineage.stage1_retrieval.retrieval_trace": true,
+          "lineage.stage2_context.prompt_context_lines": true
+        },
+        "differences": []
+      },
+      "l2": {
+        "equal": true,
+        "fields": {
+          "answer": true,
+          "lineage.stage3_generation.raw_draft": true,
+          "lineage.stage3_generation.final_output": true,
+          "lineage.stage3_generation.grounding_passed": true,
+          "lineage.stage3_generation.regenerated": true
+        },
+        "differences": []
+      },
+      "l3": {
+        "equal": true,
+        "fields": {
+          "atomic_score.is_perfect": true,
+          "atomic_score.supported_spans": true,
+          "atomic_score.missing_spans": true
+        },
+        "differences": []
+      }
+    },
+    "canary-P1": {
+      "status": "ok",
+      "l1": {
+        "equal": true,
+        "fields": {
+          "lineage.stage1_retrieval.retrieved_fact_ids": true,
+          "lineage.stage1_retrieval.retrieved_chunk_ids": true,
+          "lineage.stage1_retrieval.retrieval_trace": true,
+          "lineage.stage2_context.prompt_context_lines": true
+        },
+        "differences": []
+      },
+      "l2": {
+        "equal": true,
+        "fields": {
+          "answer": true,
+          "lineage.stage3_generation.raw_draft": true,
+          "lineage.stage3_generation.final_output": true,
+          "lineage.stage3_generation.grounding_passed": true,
+          "lineage.stage3_generation.regenerated": true
+        },
+        "differences": []
+      },
+      "l3": {
+        "equal": true,
+        "fields": {
+          "atomic_score.is_perfect": true,
+          "atomic_score.supported_spans": true,
+          "atomic_score.missing_spans": true
+        },
+        "differences": []
+      }
+    }
+  },
+  "overall": {
+    "l1": true,
+    "l2": true,
+    "l3": true
+  },
+  "l2_uncomparable": [],
+  "l3_unstable": [],
+  "exit_code": 0
+}

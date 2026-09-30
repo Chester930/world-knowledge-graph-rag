@@ -137,11 +137,11 @@ python -m scripts.eval.run_rq1_comparison --questions data/eval/p2_snapshot_ques
 
 ## 4. 回填區（Codex 填寫）
 
-- commit SHA：
-- 自我檢查結果：
-- 新增測試數：
-- K 臂快照新 run 的暫存目錄路徑與起訖時間：
-- 意外狀況：
+- commit SHA：本次唯一提交（最終回報列出）
+- 自我檢查結果：S2 先 RED（5 failed），S4 AST／差分行為／alias 身分／相依快照全通過；完整回歸 1314 passed、0 failed；K 臂兩次基準比對符合 S5-2，KG#4 前後計數相同。
+- 新增測試數：5
+- K 臂快照新 run 的暫存目錄路徑與起訖時間：`C:\Users\666\AppData\Local\Temp\report139_after_cut1_20260930_01\run1`；2026-09-30T08:19:30.3708403+08:00 ～ 2026-09-30T08:39:11.9890532+08:00。
+- 意外狀況：完整回歸未遇 UMAP 阻塞；Neo4j 跑測期間僅出現既有不存在 relationship type warning，未修改查詢或資料；新 run 對基準 run2 的 17-Q1 L2 差異符合既定基準不穩定例外，其餘驗收均通過。
 
 ## 5. 禁止事項
 
