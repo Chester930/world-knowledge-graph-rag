@@ -122,10 +122,10 @@ from services.context.telemetry import (
 
 ## 4. 回填區（Codex 填寫）
 
-- commit SHA：
-- 自我檢查結果：
-- 新增測試數：
-- 意外狀況：
+- commit SHA：本次唯一提交（最終回報列出）
+- 自我檢查結果：S2 RED 為 12 failed；S4 AST（第三刀 4 函式＋前兩刀 5 函式／3 常數）、固定種子 1000 組＋20 組邊界差分（`==` 與 `json.dumps(ensure_ascii=False)`）、agent.py diff 形狀與相依快照全通過；完整回歸 1344 passed、0 failed。
+- 新增測試數：12
+- 意外狀況：未啟動或使用 Neo4j／Ollama／server／harness，未跑 K 臂快照（依核定的依賴封閉純函式快照頻率 (b)）；完整回歸未遇 UMAP 阻塞，未使用 `--deselect`。
 
 ## 5. 禁止事項
 
