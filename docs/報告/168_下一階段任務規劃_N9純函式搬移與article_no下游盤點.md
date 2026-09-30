@@ -115,7 +115,7 @@ W?｜結論（通過／有條件通過／失敗／停止）｜commit SHA｜關�
 
 | ID | 狀態 | 結論 | commit | 備註 |
 | --- | --- | --- | --- | --- |
-| W1 | ⏳ 待執行 | — | — | 分刀由執行對話決定 |
+| W1 | 🔄 進行中（**切法1 ✅ 通過**；切法2＝G2 待完成） | **切法1**：G1 四個純函式（`_rrf_fuse_fact_ids`、`_filter_fact_candidates_by_source_scope`、`_apply_source_doc_cap`、`_dedupe_facts_by_key`）搬入 `services/retrieval/fact_candidates.py`；逐字 4／4；`svo_service.py` 刪 109 行＋加 8 行匯入（被刪行全在新模組）；差分 golden 於搬移前產生（6 函式各 1100 案＋2 常數，共 6602 案；含順序、平手、空輸入、`None`、例外型別與訊息）四函式全一致；重新匯出身分 4／4；`services/retrieval` 不得 import `svo_service` 的 AST 測試通過；依賴快照 174→175 模組、479→480 邊、循環 0；故意破壞（新模組 import `svo_service`／重新匯出改本地包裝／改動函式內容）皆使測試失敗；`tests/core/test_kg_config.py` golden 錨點全綠；**pytest 1565 passed**；前置檢查無 drain／Worker 行程；補丁無需改。**切法2 計畫**：G2（`_bfs_pass_cypher`、`_bfs_records_to_triples`、2 個 `_BFS_` 常數）→ `services/retrieval/bfs.py` | 切法1：`e51b8fb`（差分 golden 基準另 `0b90a04`） | **規劃對話獨立驗證（切法1）**：① commit 只含新模組、`svo_service.py`（+8／−109）、測試與 HANDOVER；production 僅 `A fact_candidates.py`＋`M svo_service.py`；② AST 比對（取 `e51b8fb~1` 的 `svo_service.py`）：**4 個函式全部逐字相同，無差異符號**；③ 新模組的**真實 import 只有標準函式庫**（`math`、`typing.Collection`、`uuid.UUID`），**沒有 `svo_service`**；④ 重新匯出身分 4／4 為同一物件；`svo_service.py` 內**已無這 4 個函式的定義**；⑤ `check_node_cards.py` 3 張卡、0 警告（節點卡位置更新屬 W3）；⑥ **隔離 worktree 完整回歸 1565 passed**，與回報一致。**偏離**：無。註：驗證時共用工作樹已有切法2 的未提交修改（`bfs.py`），故用隔離環境驗收 |
 | W2 | ⏳ 待執行 | — | — | — |
 | W3 | ⏳ 待執行（等 W1） | — | — | — |
 | W4 | ⏳ 待執行 | — | — | — |
