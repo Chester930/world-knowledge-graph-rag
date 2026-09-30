@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告155 T4）：N4 依賴與副作用只讀盤點完成（[報告158](docs/報告/158_N4依賴與副作用只讀盤點結果.md)；P3／S6 共同前置，**不含先後建議**）
+
+N4＝`svo_service.py` 62 個頂層符號（40 函式＋22 常數）；**檔內自身封閉**（只依賴 `logger`）、不碰 Neo4j；唯一寫入副作用是 `_reconcile_rel_type` 的 EXPAND 候選池與 ESCALATE3 事件寫 SQLite（`:426-434`，`add_candidate` 內含一次 `encode(verb)`）。**11 個 N4 符號被 N5／N9／維護函式使用**（守衛樣式、轉繁、關係型別詞彙），`routers/agent.py:1188` 與 `extraction_worker.py` 也直接引用 N4 名稱。隱性耦合：`_EXTENDED_ENTITY_TYPES_PATH` 以 `__file__.parent.parent` 定位 `data/`，讀取失敗回空 dict 不報錯，搬深一層會靜默失效。Q8：EXPAND 池只有治理 Worker 讀（每 300 秒每 KG，池 pending≥10 才分群，一次取全部）；`escalate3_log` 沒有 runtime 讀取者；列出 5 個寫入延後會造成差異的具體情境（E1 復活順序終態不同、E2 失敗 chunk 殘留、E3 中止、E4／E3 標「需實測」、E5 寫入失敗連動）。新增 `scripts/analysis/n4_dependency_inventory.py`；正式程式零變更。
+
 ## 2026-09-30（報告155 T3）：Neo4j 操作只讀盤點完成（[報告157](docs/報告/157_Neo4j操作只讀盤點結果.md)；`GraphStorePort` 前置資料，**不含介面決定**）
 
 盤點 74 個存取 Neo4j 的函式／120 個執行點；**`services/`＋`routers/` 直接寫 Cypher：38 函式／67 處**（`svo_service.py` 33 函式／62 處、`knowledge_graph_service.py` 1、`routers/agent.py` 4）。包裝函式 3 個（`_execute_with_constraint_retry`、`ensure_vector_index`〔只有 `ConceptRepository` 用〕、腳本內 `_query_batches`）＋Cypher 組裝函式 `_bfs_pass_cypher`。`svo_service.py` 的 8 個索引建立函式沒有走 `ensure_vector_index`。測試補丁多綁在使用者模組名稱（`<agent>.vector_search_facts`×18 等），指向 `svo_service.X` 的補丁有 3 個測試檔。交叉檢查：`svo_service.py` 執行點 AST 62 ＝ grep 63 行 − 1 行 `def`；檔案清單兩種方法完全一致。新增 `scripts/analysis/neo4j_access_inventory.py`（純分析腳本，可重跑）；正式程式零變更。
