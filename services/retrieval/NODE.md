@@ -40,7 +40,7 @@
 | N9.7 關係型別後篩（解析） | 由整句問題解析關係型別 | `services/svo_service.py::resolve_query_relation_type`（`:315`） | 仍在原處 |
 | N9.7 關係型別後篩（過濾） | 依關係型別過濾三元組 | `services/retrieval/scope.py::filter_triples_by_relation_type`（`:153`） | 已搬移；以 `_filter_triples_by_relation_type` 重新匯出 |
 | N9.8 範圍兜底 | Cypher fallback 時仍擋離題結果 | `services/retrieval/scope.py::filter_triples_by_source_doc_ids`（`:120`）、`filter_facts_by_source_doc_ids`（`:131`）、`scope_by_source_doc_ids`（`:99`） | 已搬移；以 `_filter_*` 名稱重新匯出 |
-| （N9 之後、N10 之前）條文擴充 | opt-in：補同條文的兄弟 Fact | `routers/agent.py::_expand_facts_by_article`（`:231`） | 仍在原處；**在報告95 §11 的 N9.1–N9.8 之外**，歸屬（N9 或 N10）**未定案**，本卡僅登記 |
+| 條文擴充（N9 成員；opt-in，位於 N9.8 之後、N10 之前） | 補同條文的兄弟 Fact | `routers/agent.py::_expand_facts_by_article`（`:231`） | 仍在原處；**歸屬 N9**（報告155 §10.1 裁示；報告95 §11 的 N9.1–N9.8 未列，卡內編為 N9 成員，未另編號）|
 
 **呼叫順序（`chat()` 內，`routers/agent.py:1296-1396`）**：`get_embedding_provider`／`encode` → 〔`run_bfs` 時〕`_find_seed_entities`、`_relevant_doc_ids_from_seeds` → 〔`run_facts` 時〕`_resolve_doc_scope`＋`vector_search_facts` → `_relevant_doc_ids_from_facts`、`_resolve_doc_scope` → 〔`run_bfs` 時〕`bfs_query` → 〔非 `bfs_only`〕`resolve_query_relation_type`、`_filter_triples_by_relation_type` → `_filter_triples_by_source_doc_ids`、`_filter_facts_by_source_doc_ids` → 〔`article_expand` 時〕`_expand_facts_by_article`。
 

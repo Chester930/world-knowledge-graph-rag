@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告160 U0）：N9 節點卡更新——`_expand_facts_by_article` 歸 N9
+
+依報告155 §10.1 裁示，`services/retrieval/NODE.md` 將條文擴充登記為 N9 成員（仍在 `routers/agent.py`）；`_build_prompt` 與 N11 界線、N9.1／N9.2 內嵌於 `chat()` 維持「未定案／事實」登記不動。`check_node_cards.py` 0 警告；只改 1 個 `.md`。前置檢查（U1）：無 uvicorn／drain／抽取 Worker 行程。
+
 ## 2026-09-30（報告160）：下一階段任務規劃——「N4 獨立化（行為不變）與來源回取再探測」，**規劃對話決定、請執行對話執行，規劃對話只記錄**
 
 使用者指示「按照建議繼續」，採用報告155 §10 的建議。[報告160](docs/報告/160_下一階段任務規劃_N4獨立化準備與來源回取再探測.md) 定案 5 項：**U0** N9 節點卡更新（`_expand_facts_by_article` 歸 N9，純文件）；**U1 N4 搬移（行為不變）**——把 N4 全部 62 個符號從 `svo_service.py` 搬到 `services/extraction/`，分 ≤3 刀，舊名稱重新匯出；**已決定**：11 個共用輔助一併搬（歸屬登記為債務、不裁定）、**EXPAND／ESCALATE3 寫 SQLite 的副作用原樣保留**（改回傳事件是下一步）、**必須修正 `_EXTENDED_ENTITY_TYPES_PATH` 並新增「載入後非空」測試**；驗收沿用 P2 方法（AST 逐字、假 provider 差分含例外與副作用呼叫序列、補丁目標逐一處理、三項故意破壞）。**U2 `GraphStorePort` 設計提案**（語意介面、僅 DDL／CRUD 群，**純文件、不決定介面位置**）。**U3 來源回取再探測**（含 BFS 三元組的 `citations_json`；需 Neo4j＋Ollama，**環境不可用就跳過並回報，不得自行啟動 Docker／WSL**）。**U4** 彙整。**不做**：事件契約改動、`GraphStorePort` 實作、N5／N9 搬移、論文修改。**停止條件**見報告160 §4。編號：160 為本規劃，**執行對話自 161 起**（156 保留）；每個任務（U1 為每一刀）驗收並 push 後以訊息回報。**狀態：已派工，等待執行。**
