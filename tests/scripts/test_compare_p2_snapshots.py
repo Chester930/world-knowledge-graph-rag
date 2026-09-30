@@ -123,5 +123,34 @@ class CompareP2SnapshotsTests(unittest.TestCase):
         self.assertEqual(result["exit_code"], 1)
 
 
+class TripleSourceFieldOptionTests(unittest.TestCase):
+    """報告164 V3：選用旗標忽略 retrieval_trace 三元組條目的 source_svo_chunk_index／article_no。"""
+
+    def _runs(self, root, old_idx, new_idx, fact_text_new="甲"):
+        def trace(idx, fact_text):
+            return [
+                {"kind": "fact", "rank": 0, "text": fact_text, "source_svo_chunk_index": 1, "article_no": None},
+                {"kind": "triple", "rank": 0, "text": "乙", "source_svo_chunk_index": idx, "article_no": None},
+            ]
+        a = _write_run(root, "a", [_record("Q1", trace=trace(old_idx, "甲"))])
+        b = _write_run(root, "b", [_record("Q1", trace=trace(new_idx, fact_text_new))])
+        return a, b
+
+    def test_default_flags_triple_source_field_difference(self):
+        with tempfile.TemporaryDirectory() as d:
+            a, b = self._runs(Path(d), None, 3)
+            self.assertFalse(compare_runs(a, b)["overall"]["l1"])
+
+    def test_option_ignores_only_triple_source_fields(self):
+        with tempfile.TemporaryDirectory() as d:
+            a, b = self._runs(Path(d), None, 3)
+            self.assertTrue(compare_runs(a, b, ignore_trace_triple_source_fields=True)["overall"]["l1"])
+
+    def test_option_still_detects_other_trace_differences(self):
+        with tempfile.TemporaryDirectory() as d:
+            a, b = self._runs(Path(d), None, 3, fact_text_new="不同")
+            self.assertFalse(compare_runs(a, b, ignore_trace_triple_source_fields=True)["overall"]["l1"])
+
+
 if __name__ == "__main__":
     unittest.main()

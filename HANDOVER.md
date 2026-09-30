@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告164 V3）：`build_retrieval_trace` 三元組 chunk 索引修補完成（[報告165](docs/報告/165_build_retrieval_trace三元組欄位修補調查與結果.md)）
+
+調查：`bfs_query` 回傳的 SVOTriple **已帶** `source_svo_chunk_index`（975／975，與 `citations_json[-1]` 逐條相同）、**未帶** `source_article_no`（`_bfs_records_to_triples` 沒對應；要帶需改 `svo_service.py`，本階段禁止）。故只修 `services/context/telemetry.py` 三元組分支（chunk 索引填入，`article_no` 讀 `t.source_article_no`＝BFS 下仍 None）；鍵名順序不變、無值時逐位元同舊版。差分 1200 組（json.dumps 字串相同）；`compare_p2_snapshots.py` 新增選用旗標 `--ignore-trace-triple-source-fields`（預設關）；pytest 1508 passed。**部分修補（article_no 未修）已於回報註明。**
+
 ## 2026-09-30（報告164）：下一階段任務規劃——「`GraphSchemaPort` 第一步、N9 只讀盤點、trace 欄位修補」，**規劃對話決定、請執行對話執行，規劃對話只記錄**
 
 使用者再次指示「按照建議繼續」，採用報告160 §9 的建議。[報告164](docs/報告/164_下一階段任務規劃_GraphSchemaPort與N9盤點與trace修補.md) 定案 4 項：**V1** `GraphSchemaPort` P-A **第一步**——`core/ports/graph_schema.py`（Protocol＋`VectorIndexSpec` 等值物件，位置採 A）＋`services/graph_store/neo4j_schema.py`（**委派**既有函式的轉接層）＋假實作＋契約／委派／依賴方向測試，**只新增檔案、既有 `.py` 零修改、不遷移任何呼叫端**；規劃對話暫定：採 `VectorIndexSpec` 值物件、**多資料庫管理方法本輪不納入**（三者無測試，`create`／`list` 無呼叫者）、轉接層放 services 層。**V2** N9 依賴與副作用**只讀盤點**（含 `chat()` 內嵌的 N9.1／N9.2、補丁目標、哪些搬移需重跑 K 臂快照；**不搬移、不建議與 N5 先後**）。**V3** `build_retrieval_trace` 三元組欄位修補（**有條件**：先調查 `bfs_query` 回傳的 `SVOTriple` 是否已帶 chunk 索引／`article_no`；已帶才改 `telemetry.py` 的三元組分支，未帶就停止回報，**不得改 `bfs_query`／`svo_service.py`**）。**V4** 彙整。**不做**：N4 事件契約、N5／N9 搬移、來源回取、論文同步。**事實更正**（規劃對話已記入報告160 §9.2）：報告163 §3 #2／報告161 §7 稱 P-A 的 DDL 函式「單一呼叫端 `main.py`」**不正確**（`svo_service.py` 內部另有多處呼叫、根目錄腳本也有）；本輪不遷移呼叫端故不受影響。**停止條件**見報告164 §4（含：需改任何既有函式、任何任務需改 `svo_service.py`、事實不符請直接回報）。編號：164 為本規劃，**執行對話自 165 起**（156 保留）；每個任務驗收並 push 後以訊息回報。**狀態：已派工，等待執行。**

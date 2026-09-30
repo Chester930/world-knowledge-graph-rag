@@ -89,14 +89,33 @@ def _first_difference(left: Any, right: Any, path: str = "$") -> dict[str, str] 
     return {"path": path, "left": _short(left), "right": _short(right)}
 
 
+_TRACE_FIELD = "lineage.stage1_retrieval.retrieval_trace"
+_TRIPLE_SOURCE_KEYS = ("source_svo_chunk_index", "article_no")
+
+
+def _strip_triple_source_fields(trace: Any) -> Any:
+    """報告164 V3：`build_retrieval_trace` 開始填入三元組的 chunk 索引／`article_no`；舊快照這兩欄恆為 None。
+    選用：比對時把 `kind=triple` 條目的這兩欄拿掉，避免純記錄欄位的補填被誤判為 L1 差異。"""
+    if not isinstance(trace, list):
+        return trace
+    return [
+        {k: v for k, v in e.items() if k not in _TRIPLE_SOURCE_KEYS} if isinstance(e, dict) and e.get("kind") == "triple" else e
+        for e in trace
+    ]
+
+
 def _compare_fields(
-    left: dict[str, Any], right: dict[str, Any], fields: tuple[tuple[str, tuple[str, ...]], ...]
+    left: dict[str, Any], right: dict[str, Any], fields: tuple[tuple[str, tuple[str, ...]], ...],
+    *, ignore_trace_triple_source_fields: bool = False,
 ) -> dict[str, Any]:
     differences: list[dict[str, str]] = []
     field_results: dict[str, bool] = {}
     for name, path in fields:
         left_value = _at_path(left, path)
         right_value = _at_path(right, path)
+        if ignore_trace_triple_source_fields and name == _TRACE_FIELD:
+            left_value = _strip_triple_source_fields(left_value)
+            right_value = _strip_triple_source_fields(right_value)
         equal = left_value == right_value
         field_results[name] = equal
         if not equal:
@@ -112,7 +131,9 @@ def _has_error(record: dict[str, Any]) -> bool:
     return error is not None and error != ""
 
 
-def compare_runs(run_a: str | Path, run_b: str | Path) -> dict[str, Any]:
+def compare_runs(
+    run_a: str | Path, run_b: str | Path, *, ignore_trace_triple_source_fields: bool = False
+) -> dict[str, Any]:
     """Compare two run directories and return a JSON-serializable report."""
     records_a = _index_records(_load_records(run_a), "run A")
     records_b = _index_records(_load_records(run_b), "run B")
@@ -144,7 +165,9 @@ def compare_runs(run_a: str | Path, run_b: str | Path) -> dict[str, Any]:
             continue
         questions[question_id] = {
             "status": "ok",
-            "l1": _compare_fields(left, right, L1_FIELDS),
+            "l1": _compare_fields(
+                left, right, L1_FIELDS, ignore_trace_triple_source_fields=ignore_trace_triple_source_fields
+            ),
             "l2": _compare_fields(left, right, L2_FIELDS),
             "l3": _compare_fields(left, right, L3_FIELDS),
         }
@@ -181,9 +204,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("run_dir_a")
     parser.add_argument("run_dir_b")
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--ignore-trace-triple-source-fields", action="store_true",
+                        help="L1 比對時忽略 retrieval_trace 三元組條目的 source_svo_chunk_index／article_no（報告164 V3）")
     args = parser.parse_args(argv)
     try:
-        result = compare_runs(args.run_dir_a, args.run_dir_b)
+        result = compare_runs(
+            args.run_dir_a, args.run_dir_b, ignore_trace_triple_source_fields=args.ignore_trace_triple_source_fields
+        )
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

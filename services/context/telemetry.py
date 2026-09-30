@@ -94,8 +94,13 @@ def build_retrieval_trace(
             "text": raw or "",
             "score": None,
             "source_doc_id": str(t.source_doc_id) if t.source_doc_id is not None else None,
-            "source_svo_chunk_index": None,
-            "article_no": None,
+            # 報告164 V3：`bfs_query()` 回傳的 SVOTriple 已帶 `source_svo_chunk_index`（取自邊上
+            # citations_json 最後一筆）；`source_article_no` 目前 BFS 路徑不會填入（恆為 None），
+            # 仍照實讀取，讓日後 BFS 帶出時自然生效。無值時維持 None（與修補前逐位元相同）。
+            "source_svo_chunk_index": (
+                int(t.source_svo_chunk_index) if t.source_svo_chunk_index is not None else None
+            ),
+            "article_no": t.source_article_no,
             "in_prompt": _in_prompt(f"- {strip_type_markers(raw or '')}"),
         })
 
