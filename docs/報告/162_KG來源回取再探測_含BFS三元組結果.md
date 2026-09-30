@@ -4,6 +4,8 @@
 > **性質**：只做檢索、**唯讀 Neo4j、不呼叫任何 LLM**、不改 production 程式、**禁止以 gold 選段**。承接 T5（[任務書](任務書_KG來源回取召回優先探測_v0.1.md)「結果」節）：T5 只能用 Fact 候選（46%），BFS 三元組候選（54%）因記錄沒有 chunk 索引被排除，結論只是下界。
 > **腳本與輸出**：`scripts/eval/kg_source_recall_probe_v2.py`；`data/eval/candidate_runs/kg_source_recall_probe_v2/`（`retrieval_rerun.json`＝42 題重跑檢索原始結果含邊上 `citations_json`、`per_question.json`＝逐題逐面向）。
 
+> **更正（2026-09-30，報告166 §10）**：下文「唯讀 Neo4j」指**只讀取資料、沒有任何節點／關係寫入**。但被呼叫的 `vector_search_facts` 每次查詢會先執行冪等的 `CREATE VECTOR INDEX … IF NOT EXISTS`（`svo_service.py:1544`；索引早已存在＝無變更；hybrid 時另建全文索引），本探測當時未查到這一點，措辭因此不夠精確。結論與數字不受影響。
+
 ## 0. 結論（先看這裡）
 
 - **不支持「納入三元組後，來源回取優於 B1」。** 預算對齊（以 B1 記錄的 `retrieved_char_count` 為上限）下，Fact＋三元組→來源（R1'）recall==1 為 **25／42**，與 T5 只用 Fact 的 R1 **完全相同**（25／42、平均 recall 0.724），B1 為 **29／42**（0.817）。Type-C＋D：R1' **7／21**、B1 **11／21**。

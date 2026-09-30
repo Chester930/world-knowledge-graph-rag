@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告164 V4）：GraphSchemaPort 第一步、N9 盤點、trace 修補階段收尾——[報告167](docs/報告/167_GraphSchemaPort第一步N9盤點與trace修補階段結果彙整.md)
+
+V3／V1／V2 已 push（`5d9679b`／`808ec01`／`2d09f76`）；`svo_service.py` 全程零修改；pytest 1549 passed；報告索引補列 164–167。**報告162 已加註**：U3「唯讀」＝只讀取資料、無節點／關係寫入，但檢索路徑（`vector_search_facts`）含冪等 `CREATE VECTOR INDEX IF NOT EXISTS`，結論與數字不受影響。報告167 列 8 項待使用者裁示（`GraphSchemaPort` 是否進一步、惰性 DDL 是否改啟動時建立、N9 搬移與切法、`article_no` 是否讓 BFS 帶出、N4 事件契約、共用輔助歸屬與 N5、來源回取、論文同步），只列事項。
+
 ## 2026-09-30（報告164 V2）：N9 依賴與副作用只讀盤點完成（[報告166](docs/報告/166_N9依賴與副作用只讀盤點結果.md)；不搬移、不建議與 N5 先後）
 
 N9＝30 符號（`routers/agent.py` 8、`svo_service.py` 15、`scope.py` 7）；`chat()` 內嵌 N9.1＝`agent.py:1265-1274`、N9 區塊＝`:1296-1396`（在 `_stream` 內，區塊後仍讀 5 個區域變數＋`cfg`）。**重要發現：`vector_search_facts` 每次查詢惰性執行 `CREATE VECTOR INDEX IF NOT EXISTS`（`svo_service.py:1544`），hybrid 另建全文索引——N9「唯讀」路徑含冪等 DDL**（報告162 U3「唯讀 Neo4j」措辭需加註）。測試補丁全綁在 `routers.agent`（`<agent>.*` 共 6 種、17–18 次），與 N4 方向相反（搬 `chat()` 才失效）；3 個根目錄腳本以賦值替換 `routers.agent.vector_search_facts`。列 8 個依賴封閉群（G1–G8）與哪些須重跑 K 臂快照；N9→N4、N9→P-A 的跨節點匯入。新增 `scripts/analysis/n9_dependency_inventory.py`；程式碼零變更。
