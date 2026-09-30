@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告168 W3）：N9 節點卡更新（純文件）
+
+`services/retrieval/NODE.md`：G1／G2 共 8 個符號登記為「已搬移」（`fact_candidates.py`、`bfs.py`，`check_node_cards` 以 AST 核對），頭部說明改為三個模組；「已知缺口」新增**N9 檢索路徑含冪等 DDL**（`vector_search_facts` 每次查詢先 `create_fact_vector_index`（`IF NOT EXISTS`），hybrid 另建全文索引；N9 非純讀取、對唯讀帳號會失敗〔未實測〕、與 `GraphStorePort` P-A 有相依）。三張卡 0 警告；只改 1 個 `.md`。
+
 ## 2026-09-30（報告168 W1 切法2）：N9 G2 搬移完成——`services/retrieval/bfs.py`（`_bfs_pass_cypher`、`_bfs_records_to_triples`、`_BFS_EXPAND_WHEN_BELOW`、`_BFS_PRIZE_TOP_K`；累計 8／8）
 
 行為不變。驗收：逐字 4/4；`svo_service.py` diff＝刪 74 行＋加 8 行匯入；差分（`_bfs_pass_cypher` 字串逐字、`_bfs_records_to_triples` 的 SVOTriple 清單與例外，各 1100 案）全一致；2 個常數值與身分相同，`tests/core/test_kg_config.py` golden 錨點全綠（故意改常數值→4 個測試失敗）；根目錄 `_trace_aggr16…` 的 from-import 名稱仍可由 `svo_service` 取得（AST 檢查，未執行）；依賴快照累計 174→176 模組、479→482 邊、無循環；pytest 1574 passed。W3（節點卡）接著做。

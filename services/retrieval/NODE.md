@@ -3,7 +3,7 @@
 > **基準**：`worktree-sdd-retrieval-comparison` @ `80077e6`（2026-09-30 核對；程式碼相對 `4f6ae52` 零變更）。
 > **性質**：節點卡格式的第一批試作（報告155 T1；草案 [§6.1](../../docs/報告/BT_SM節點化結構設計草案_v0.1.md)）。
 > **書寫規則**：只寫經程式碼核對的事實；設計中的內容一律標「**規劃**」；沒核對的標「**未核對**」。
-> **重要**：本資料夾（`services/retrieval/`）目前**只有 `scope.py`**（N9.5、N9.8 的純函式）。N9 的其餘葉節點**仍在** `routers/agent.py` 與 `services/svo_service.py`，本卡逐一標明實際位置，**不得**因為資料夾叫 `retrieval` 就當成整個 N9 已搬入。
+> **重要**：本資料夾（`services/retrieval/`）目前有 `scope.py`（N9.5、N9.8 的純函式）、`fact_candidates.py`（Fact 候選純處理，報告168 W1 切法1）與 `bfs.py`（BFS 純輔助與 2 個預設值常數，報告168 W1 切法2）。N9 的其餘葉節點（`vector_search_facts`、`vector_search_entities`、`bfs_query`、`resolve_query_relation_type`、`routers/agent.py` 內的成員、`chat()` 內嵌的 N9.1／N9.2）**仍在**原處，本卡逐一標明實際位置，**不得**因為資料夾叫 `retrieval` 就當成整個 N9 已搬入。
 
 ## 1. 目的與規劃狀態
 
@@ -37,6 +37,8 @@
 | N9.5 文件範圍（語意） | 由 Fact 結果推導文件集合 | `services/retrieval/scope.py::relevant_doc_ids_from_facts`（`:12`） | 已搬移（報告145）；`routers/agent.py` 以 `_relevant_doc_ids_from_facts` 重新匯出 |
 | N9.5 範圍合併 | 種子優先、語意 fallback、與 `scope_doc_ids` 取交集 | `services/retrieval/scope.py::resolve_doc_scope`（`:71`）、`intersect_doc_scopes`（`:48`） | 已搬移；以 `_resolve_doc_scope`、`_intersect_doc_scopes` 重新匯出 |
 | N9.6 BFS（L0/L1） | 沿圖取回相鄰事實 | `services/svo_service.py::bfs_query`（`:3754`） | 仍在原處 |
+| N9.4 輔助（Fact 候選處理，G1） | RRF 融合、來源範圍過濾、同來源上限、去重（`vector_search_facts` 使用） | `services/retrieval/fact_candidates.py::_rrf_fuse_fact_ids`（`:8`）、`_filter_fact_candidates_by_source_scope`（`:24`）、`_apply_source_doc_cap`（`:43`）、`_dedupe_facts_by_key`（`:82`） | 已搬移（報告168 W1）；`svo_service.py` 重新匯出 |
+| N9.6 輔助（BFS 純輔助，G2） | Cypher 字串組裝、記錄轉三元組（`bfs_query` 使用）；另有預設值常數 `_BFS_EXPAND_WHEN_BELOW`（`bfs.py:15`）、`_BFS_PRIZE_TOP_K`（`bfs.py:23`），為 `KGConfig` golden test 錨點 | `services/retrieval/bfs.py::_bfs_pass_cypher`（`:26`）、`_bfs_records_to_triples`（`:65`） | 已搬移（報告168 W1）；`svo_service.py` 重新匯出 |
 | N9.7 關係型別後篩（解析） | 由整句問題解析關係型別 | `services/svo_service.py::resolve_query_relation_type`（`:315`） | 仍在原處 |
 | N9.7 關係型別後篩（過濾） | 依關係型別過濾三元組 | `services/retrieval/scope.py::filter_triples_by_relation_type`（`:153`） | 已搬移；以 `_filter_triples_by_relation_type` 重新匯出 |
 | N9.8 範圍兜底 | Cypher fallback 時仍擋離題結果 | `services/retrieval/scope.py::filter_triples_by_source_doc_ids`（`:120`）、`filter_facts_by_source_doc_ids`（`:131`）、`scope_by_source_doc_ids`（`:99`） | 已搬移；以 `_filter_*` 名稱重新匯出 |
@@ -125,3 +127,4 @@ flowchart TD
 | 檢索結果沒有獨立輸出型別／contract | 規劃 | `triples`／`fact_results` 為 `chat()` 區域變數 |
 | `GraphStorePort` | 規劃 | 未有；形態未定（T3 盤點提供資料，不做決定） |
 | N9.1／N9.2 無獨立函式 | 現況 | 內嵌於 `chat()`；搬移時需先決定是否拆出 |
+| **N9 檢索路徑含冪等 DDL** | 事實（報告166 §1、§8） | `vector_search_facts` **每次查詢都先呼叫 `create_fact_vector_index`**（`CREATE VECTOR INDEX … IF NOT EXISTS`，維度取 `len(query_vector)`）；`hybrid=True` 時另在 try 區塊內呼叫 `create_fact_fulltext_index`。含義：N9 並非純讀取；對 KG 唯讀帳號會失敗（**未實測**）；與 `GraphStorePort` P-A 有相依（`create_fact_*_index` 屬 DDL／索引群）。本節點的「不得改變行為」搬移需連同此行為一併保留。 |
