@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告164 V1）：`GraphSchemaPort` P-A 第一步——宣告＋轉接＋假實作＋契約／委派測試（不遷移任何呼叫端）
+
+新增 `core/ports/{__init__,graph_schema,fake_graph_schema}.py`（Protocol＋`VectorIndexSpec`／`FulltextIndexSpec`／`EmbeddingMeta`／`VectorTarget`（6 種）／`FulltextTarget`，只依賴標準庫）、`services/graph_store/neo4j_schema.py`（逐一委派既有函式，呼叫當下以模組屬性查找以便 spy）、`tests/core/test_graph_schema_port.py`（41 個）。**既有 `.py` 零修改**（`git status` 只有新增）。方法為 5 個有忠實對應函式者：`ensure_entity_uniqueness`、`ensure_vector_index(spec)`（6 目標）、`ensure_fulltext_index(spec)`、`migrate_vector_indexes`、`check_embedding_meta`；報告161 草案的 `list_vector_indexes`／`drop_indexes`／`read/register_embedding_meta` 現有程式沒有可忠實委派的單一函式，未納入。驗收：契約測試對假實作與轉接層（spy）各跑、委派測試（同函式同引數）、依賴方向 AST（`core/ports` 只依賴標準庫；無 production 模組 import `services.graph_store`）、三項故意破壞皆使測試失敗、依賴快照 +5 模組（2 套件）／+8 邊／無循環、pytest 1549 passed。
+
 ## 2026-09-30（報告164 V3）：`build_retrieval_trace` 三元組 chunk 索引修補完成（[報告165](docs/報告/165_build_retrieval_trace三元組欄位修補調查與結果.md)）
 
 調查：`bfs_query` 回傳的 SVOTriple **已帶** `source_svo_chunk_index`（975／975，與 `citations_json[-1]` 逐條相同）、**未帶** `source_article_no`（`_bfs_records_to_triples` 沒對應；要帶需改 `svo_service.py`，本階段禁止）。故只修 `services/context/telemetry.py` 三元組分支（chunk 索引填入，`article_no` 讀 `t.source_article_no`＝BFS 下仍 None）；鍵名順序不變、無值時逐位元同舊版。差分 1200 組（json.dumps 字串相同）；`compare_p2_snapshots.py` 新增選用旗標 `--ignore-trace-triple-source-fields`（預設關）；pytest 1508 passed。**部分修補（article_no 未修）已於回報註明。**
