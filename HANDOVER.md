@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告155 T1）：N9／N10 節點卡已建立（`services/retrieval/NODE.md`、`services/context/NODE.md`；純文件、零程式變更）
+
+節點卡格式首批試作。逐葉節點列出**現在實際位置**並標「已搬移／仍在原處」：N9 只有 N9.5／N9.7 過濾／N9.8 在 `services/retrieval/scope.py`，其餘（種子實體、`vector_search_facts`、`bfs_query`、`resolve_query_relation_type`、條文擴充）**仍在** `routers/agent.py`／`services/svo_service.py`；N10 的 N10.1／N10.6 與遙測在 `services/context/`，`_arrange_fact_lines`／`_rrf_order`／`_build_prompt` **仍在** `routers/agent.py`。決策槽（`GRAPH_PRUNING`、`FACT_RETRIEVAL_MODE`、`ARTICLE_EXPANSION`、`KG_RETRIEVAL_DEPTH`、`KG_CONTEXT_MODE`）皆標「規劃」，`.py` 零命中。驗收：26 個 `檔案::函式（行號）` 主張以 AST 逐一核對全數成立、連結可解析、`git diff` 只有 `*.md`。基準重測：pytest（`--ignore=tests/core/test_embedding_migration.py`）**1353 passed**（報告155 寫 1351，差 +2）。
+
 ## 2026-09-30（報告155）：下一階段任務規劃——「節點化準備階段」，**由規劃對話決定、請執行對話執行，規劃對話只記錄**
 
 使用者指示：P6 結案後由 Claude（規劃對話，名稱 `project refactor review sdd`）決定下一階段任務，由執行對話執行，規劃對話只記錄執行階段與結果。[報告155](docs/報告/155_下一階段任務規劃_節點化準備階段.md) 定案 6 項：**T1** N9／N10 節點卡（純文件）、**T2** 節點卡檢查腳本（警告模式，等 T1）、**T3** Neo4j 操作只讀盤點、**T4** N4 依賴與副作用只讀盤點（含 EXPAND 池讀取時機，回答 Q8 等價風險）、**T5** KG 來源回取召回優先離線探測（任務書已備，未編號）、**T6** 階段驗收與彙整。T1／T3／T4／T5 可並行；**不做**：P3／S6 實質搬移（先後未定）、`GraphStorePort` 實作、S5a、KG 預設模式行為變更、本體對接、論文修改。**停止條件**見報告155 §5（需改 production 程式、需對草案 §10.2a 第 2–11 項做決定、事實不符、回歸下降、他人未提交檔案——一律停止回報，commit 不得 `git add -A`）。編號：155 為本規劃，**執行對話自 157 起**（156 保留）。每個任務驗收並 push 後，請以訊息回報規劃對話（格式見 §7）。**本階段不修改論文、草案與報告155 本身。** **狀態：已派工，等待執行。**
