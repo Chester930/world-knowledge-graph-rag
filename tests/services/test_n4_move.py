@@ -13,7 +13,7 @@ EXTRACTION = REPO / "services" / "extraction"
 # 搬移時唯一允許與搬移前不同的符號（路徑定位修正，見報告160 U1 設計 #3）
 ALLOWED_DIFF = {"_EXTENDED_ENTITY_TYPES_PATH"}
 # 目前已搬移的符號數；每一刀更新，最後一刀必須是 62
-EXPECTED_MOVED = 54
+EXPECTED_MOVED = 57
 
 
 def _locations() -> dict[str, tuple[str, str]]:

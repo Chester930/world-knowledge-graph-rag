@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告160 U1 切法2）：N4 搬移——`services/extraction/reltype.py`（3 符號：型別描述 embedding 快取與 `classify_relation_by_embedding`）
+
+累計 57／62。驗收：逐字相同、`svo_service.py` diff 只有刪除 42 行＋7 行匯入、被刪行全部在新模組找到、差分 1536 案一致、依賴快照 +1 模組／+4 邊／無循環、故意破壞（重新定義本地 `classify_relation_by_embedding`）使測試失敗、pytest 1489 passed。測試補丁 `svc.classify_relation_by_embedding`（cfg_wiring）仍有效：`_reconcile_rel_type` 尚在 `svo_service`，仍以其全域名稱呼叫（切法3 才遷移）。
+
 ## 2026-09-30（報告160 U1 切法1）：N4 搬移——`services/extraction/{prompt,guards,traditional}.py`（54 符號，行為不變）
 
 無副作用的 N4 符號（提示詞與型別詞彙、數值／類別／子句守衛、選擇性轉繁）自 `svo_service.py` 搬入新資料夾，舊名稱重新匯出（同一物件）。`_EXTENDED_ENTITY_TYPES_PATH` 改為不依賴目錄深度的定位並新增「載入後非空（939 類）」測試。驗收：53 個符號原始碼與搬移前逐字相同、1 個（`_EXTENDED_ENTITY_TYPES_PATH`）為允許的路徑修正、`svo_service.py` diff 只有刪除搬移區塊＋62 行匯入區塊、差分 1536 案（搬移前 golden）全一致、依賴快照新增 4 模組／10 條邊／無循環、三項故意破壞皆使測試失敗、pytest 1483 passed。此刀無測試補丁需改。切法2、3 待做。
