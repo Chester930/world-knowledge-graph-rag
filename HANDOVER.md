@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告160 U4）：N4 獨立化與來源回取再探測階段收尾——[報告163](docs/報告/163_N4獨立化與來源回取再探測階段結果彙整.md)
+
+U0–U3 皆已 push（`ea8b6f8`／`7eaa33d`+`e4dc60e`+`f3a884a`／`4cf2b7b`／`84c0209`）。**N4 已整組（62 符號）搬入 `services/extraction/`，行為不變**（差分 1536 案一致；EXPAND／ESCALATE3 寫 SQLite 原樣保留）；`svo_service.py` 3923→3013 行；pytest 1503 passed；三張節點卡 0 警告；報告索引已補列 160–163。報告163 列 7 項**待使用者裁示**（N4 事件契約語意、`GraphStorePort` 位置與 P-A 開工、11 個共用輔助歸屬、N5／N9 是否接著搬、來源回取是否繼續、是否修 `build_retrieval_trace`、論文位置同步），**只列事項，未代為決定**。
+
 ## 2026-09-30（報告160 U3）：來源回取再探測（含 BFS 三元組）完成（[報告162](docs/報告/162_KG來源回取再探測_含BFS三元組結果.md)）
 
 環境前置通過（Neo4j `kg2-neo4j`@17990、Ollama@11434，未啟動／重啟任何服務，唯讀、無 LLM）。**結論：仍不支持**——預算對齊下 R1'（Fact＋三元組→來源）recall==1 為 25／42，與 T5 僅 Fact 相同，B1 為 29／42；三元組來源 100% 可解析（citations_json），但預算內新增命中 0；不設預算時三元組多帶回 8 個 span（28／42，字元約 1.7 倍）仍不高於 B1。重跑與凍結重疊：Fact Jaccard 0.975、三元組 0.895。關係型別解析因禁 LLM 全為 None（不篩選），已列為偏離。發現：`services/context/telemetry.py::build_retrieval_trace` 把三元組的 `source_svo_chunk_index`／`article_no` 寫死為 `None`（T5 三元組無 chunk 索引的原因，未改）。新增 `scripts/eval/kg_source_recall_probe_v2.py`。
