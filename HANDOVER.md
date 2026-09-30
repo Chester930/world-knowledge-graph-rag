@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告168 W4）：N9 純函式搬移與 `article_no` 盤點階段收尾——[報告170](docs/報告/170_N9純函式搬移與article_no盤點階段結果彙整.md)
+
+W1（G1＋G2，8 個純符號搬入 `services/retrieval/{fact_candidates,bfs}.py`，行為不變；差分 6602 案 golden 全一致）、W3（N9 節點卡）、W2（報告169）皆已 push（`e51b8fb`＋`f714f39`／`e057c70`／`a98b43f`）；`chat()`／`routers/agent.py`／G3–G8 未動；pytest 1574 passed；報告索引補列 168–170。報告170 列 7 項待使用者裁示（`article_no` 是否讓 BFS 帶出、N9 G3–G8 是否繼續、惰性 DDL、`GraphSchemaPort` 是否進一步、N4 事件契約／共用輔助／N5、來源回取、論文位置同步），只列事項。
+
 ## 2026-09-30（報告168 W2）：`source_article_no` 下游使用者只讀盤點完成（[報告169](docs/報告/169_source_article_no下游使用者只讀盤點結果.md)；不建議是否改）
 
 `_bfs_records_to_triples` 沒讀 citation 的 `article_no`（唯一修改點，加一行即可）。資料端：42 題 975 條 BFS 三元組中 973 條最後一筆 citation 帶條號（缺的 2 條為附表文件；69 條邊的多筆 citations 條號不一致，取最後一筆）；非法規 KG 結構上必為 None（只有 ArticleAwareChunking 會填）。**下游：正式問答路徑（prompt、生成、接地、評分、SSE `sources`）沒有讀取者**，None→有值只影響 `build_retrieval_trace` 的 `article_no`（遙測）與讀 trace 的離線腳本：`source_ambiguity_audit.py`（對新 records 可能改變比對，**需實測**）、recall probe 的解析路徑（結果應相同）、`compare_p2_snapshots`（已有旗標）；若日後把 BFS 三元組寫回圖，`SUPPORTED_BY` 會改連 `LawArticle`（現況無此路徑）。連動測試／基準：`n9_symbol_source_baseline.json`、`n9_differential_golden.json`、快照 L1。程式碼零變更、未啟動 Neo4j／Ollama。
