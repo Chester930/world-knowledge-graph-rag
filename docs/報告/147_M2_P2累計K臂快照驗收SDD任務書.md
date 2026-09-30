@@ -22,10 +22,10 @@ P2 第二、三、四刀依使用者決定的頻率 (b) **沒有各自跑 K 臂�
 1. `git status -s` 必須為空；記錄 `git rev-parse HEAD`。
 2. **確認被驗證的程式碼狀態**：對下列路徑，`HEAD` 相對於 commit `4f6ae52` **不得有任何變更**（另一個 Claude 對話會在同一工作目錄提交設計文件，這些**文件**變更是允許的，但**程式碼**變更不允許）：`routers/`、`services/`、`state/`、`core/`、`models/`、`repositories/`、`scripts/`、`main.py`。用 `git diff --stat 4f6ae52 HEAD -- routers services state core models repositories scripts main.py` 驗證輸出為空；有輸出則停下回報。**此檢查在 S3 跑完後必須再做一次**，兩次都為空。
 3. 連接埠探測：`localhost:17990`（Neo4j Bolt）與 `localhost:11434`（Ollama）皆須開啟。
-4. Ollama 唯讀查詢：`/api/tags` 含 `qwen2.5:7b` 與 `bge-m3`，且 digest 與報告136 §1 相同（`qwen2.5:7b`＝`845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e`、`bge-m3:latest`＝`7907646426070047a77226ac3e684fbbe8410524f7b4a74d02837e43f2146bab`）；記錄 Ollama 版本（報告136：`0.34.4`）。
-5. 確認沒有其他 harness、抽取 worker、匯入或重抽腳本在執行（例如檢視長時間運行的 Python 行程）。**本工作目錄可能同時有另一個 Claude 對話存在，但它只做文件變更；若發現它在跑評測或動用 Neo4j／Ollama，停下回報。**
+4. Ollama 唯讀查詢：`/api/tags` 含 `qwen2.5:7b` 與 `bge-m3`，且 digest 與報告136 §1 相同（`qwen2.5:7b`＝`845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e`、`bge-m3:latest`＝`7907646426070047a77226ac3e684fbbe8410524f7b4a74d02837e43f2146bab`）——**模型 digest 必須相同（硬性）**；記錄 Ollama 版本（`ollama --version` 與 `/api/version`）。**（v2 修訂）Ollama 版本允許與報告136 的 `0.34.4` 不同**：Codex 第一次試跑發現目前為 `0.35.0`（環境自動升級，模型 digest 不變）。這**不是停止條件**，但是**混淆因子**——見 S4 的「Ollama 版本漂移的處理規則」。報告148 §1 必須並列記錄「基準版本 0.34.4」與「本次版本」。
+5. 確認沒有其他 harness、抽取 worker、匯入或重抽腳本在執行。**（v2 修訂）若作業系統權限使你無法檢視所有 Python 行程，這不是停止條件**：在報告148 §1 明確記錄「行程檢查受權限限制，僅能檢視到 N 個 Python 行程，其中無 `run_rq1_comparison`／抽取 worker／匯入腳本」，並**以使用者確認環境空閒為準**（使用者已於 2026-09-30 確認 Neo4j／Ollama 維持開啟並保留給本任務）。本工作目錄可能同時有另一個 Claude 對話存在，但它只做文件變更；若能看到它在跑評測或動用 Neo4j／Ollama，才停下回報。
 6. KG#4（`236903cf-055a-40a8-8923-b9d06601f3b7`）唯讀計數：`Fact`＝16826、`Entity`＝12296、`Document`＝64、`LawArticle`＝3303（與報告136 §1 相同）；**跑完後再查一次必須完全相同**。
-7. 確認題目檔 `data/eval/p2_snapshot_questions_20260929.json` 的 SHA-256 為 `2a572105ccabdaedaa6a2302821bd4c3860648613a6d128796823d3328ffc49c`（報告136 §3），且 6 題與 `data/eval/test_cases.json` 逐題相等。
+7. 確認題目檔 `data/eval/p2_snapshot_questions_20260929.json` 與凍結基準**位元組相同**：**（v2 修訂，更正 v1 的錯誤）** 檔案的**位元組 SHA-256 必須為 `5b899bde651ba25f712c217e5722662d57231ade75de668ac14f472c1a1ed2f1`**——這是 harness 自己記錄在基準 run1／run2 的 `manifest.json` 的 `dataset_sha256`（harness 以 `_sha256_file` 對檔案位元組計算），也是 Codex 第一次試跑實際算出的值。**v1 誤寫的 `2a572105…` 是題目檔 `meta.subset_sha256` 內記錄的「正規化 JSON 雜湊」（報告136 §3 所引用），不是檔案位元組雜湊，不可拿來比對檔案**（Claude 已驗證：檔案自 commit `30b38d6` 起未被改動、題庫原檔 `test_cases.json` 亦未變）。同時確認 6 題與 `data/eval/test_cases.json` 逐題相等；並在報告148 §1 註明兩種雜湊的差異。
 
 > ⚠️ WSL 記憶體風險：全程一次只能有一個 harness 行程；**不得在跑測中途中斷**，也不得重啟 Ollama／WSL。Ollama 無回應時等待並記錄，超過 20 分鐘無進展才停下回報。**報告與提交檔不得含任何密碼、金鑰或完整 `.env` 內容。**
 
@@ -55,6 +55,12 @@ python -m scripts.eval.run_rq1_comparison --questions data/eval/p2_snapshot_ques
 **任何違反判準：停下回報，貼出完整差異，不得自行判定為雜訊、不得修改任何程式碼或重跑以「湊」出通過。** 特別是：
 - 若 **L1** 在任一題不同：這代表 P2 某一刀改變了檢索行為（純搬移不該發生）。報告中詳述差異位置（哪一題、`retrieved_fact_ids`／`retrieved_chunk_ids`／`retrieval_trace`／`prompt_context_lines` 的哪個欄位、第一個差異內容），**不要嘗試診斷或修復**，由 Claude 用各刀的 commit 二分定位（第一刀 `729f763`、第二刀 `0e14a1c`、第三刀 `bac1f82`、第四刀 `f92a44c`）。
 - 若**穩定題的 L2** 不同而 L1 相同：先如實回報，並可（在使用者已授權的前提下不需再問）用**完全相同的指令與參數**再跑第二輪一次，以確認是否為執行期雜訊；兩輪結果都要如實回報。
+
+#### Ollama 版本漂移的處理規則（v2 新增）
+基準凍結時 Ollama 為 `0.34.4`，本次為 `0.35.0`（模型 digest 相同）。Ollama 升級**理論上**可能改變 `bge-m3` 的向量數值（影響向量檢索排序，即 L1）或 `qwen2.5:7b` 的生成（影響 L2）。因此：
+- **若判準全部成立**：結論同時證明「P2 四刀不改變行為」與「這次 Ollama 升級對這 6 題沒有可觀察影響」，照常提交。
+- **若 L1 或穩定題 L2 有差異**：此時**無法**區分是 P2 重構造成、還是 Ollama 升級造成。**停下回報完整差異，不要診斷、不要修改程式**；由 Claude 決定是否做**對照組**（在**搬移前的程式碼狀態**——commit `3ddc001`，用 `git worktree` 於暫存位置檢出，**不得在本工作目錄切換分支**——以目前的 Ollama 與同一指令再跑一輪，看差異是否同樣出現）。**本任務不要自行做對照組。**
+- 不論結果，報告148 §1 與 §5 必須明確列出「Ollama 版本由 0.34.4 變為 0.35.0」這個混淆因子。
 
 ### S5　收尾檢查
 1. 重跑 S1-2（程式碼未變）與 S1-6（KG 計數前後相同）；任一不符停下回報。
