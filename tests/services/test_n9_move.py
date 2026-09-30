@@ -10,7 +10,7 @@ from tests.services.n4_symbols import top_level_defs
 from tests.services.n9_symbols import BASELINE, N9_NAMES, REPO
 
 RETRIEVAL = REPO / "services" / "retrieval"
-EXPECTED_MOVED = 4  # 每一刀更新；最後一刀必須是 8
+EXPECTED_MOVED = 8  # 每一刀更新；最後一刀必須是 8
 
 
 def _locations() -> dict[str, tuple[str, str]]:
@@ -77,3 +77,14 @@ def test_golden_anchor_constants_equal_kgconfig_defaults():
     cfg = KGConfig()
     assert cfg.bfs.expand_when_below == svo_service._BFS_EXPAND_WHEN_BELOW
     assert cfg.bfs.prize_top_k == svo_service._BFS_PRIZE_TOP_K
+
+
+def test_root_script_imports_from_svo_service_still_resolve():
+    """根目錄 `_trace_aggr16_candidate_path_20260918.py` 以 from-import 取用私有輔助；只做 AST 檢查名稱仍可取得，不執行該腳本。"""
+    from services import svo_service
+
+    tree = ast.parse((REPO / "_trace_aggr16_candidate_path_20260918.py").read_text(encoding="utf-8"))
+    names = [a.name for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module == "services.svo_service" for a in n.names]
+    assert names, "預期該腳本有 from services.svo_service import …"
+    for name in names:
+        assert hasattr(svo_service, name), name

@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告168 W1 切法2）：N9 G2 搬移完成——`services/retrieval/bfs.py`（`_bfs_pass_cypher`、`_bfs_records_to_triples`、`_BFS_EXPAND_WHEN_BELOW`、`_BFS_PRIZE_TOP_K`；累計 8／8）
+
+行為不變。驗收：逐字 4/4；`svo_service.py` diff＝刪 74 行＋加 8 行匯入；差分（`_bfs_pass_cypher` 字串逐字、`_bfs_records_to_triples` 的 SVOTriple 清單與例外，各 1100 案）全一致；2 個常數值與身分相同，`tests/core/test_kg_config.py` golden 錨點全綠（故意改常數值→4 個測試失敗）；根目錄 `_trace_aggr16…` 的 from-import 名稱仍可由 `svo_service` 取得（AST 檢查，未執行）；依賴快照累計 174→176 模組、479→482 邊、無循環；pytest 1574 passed。W3（節點卡）接著做。
+
 ## 2026-09-30（報告168 W1 切法1）：N9 G1 搬移——`services/retrieval/fact_candidates.py`（4 個純函式，行為不變）
 
 `_rrf_fuse_fact_ids`、`_filter_fact_candidates_by_source_scope`、`_apply_source_doc_cap`、`_dedupe_facts_by_key` 自 `svo_service.py` 搬入，舊名稱重新匯出（同一物件）。驗收：4 符號逐字相同、`svo_service.py` diff＝刪 109 行＋加 8 行匯入（被刪行全在新模組）、差分（搬移前 golden，四函式各 1100 案含順序、平手、空輸入、None、例外）全一致、依賴快照 +1 模組／+1 邊／無循環、故意破壞（新模組 import svo_service、重新匯出改本地包裝、改動函式內容）皆使測試失敗、`test_kg_config` golden 錨點全綠、pytest 1565 passed。切法2（G2：BFS 純輔助＋2 常數）待做。
