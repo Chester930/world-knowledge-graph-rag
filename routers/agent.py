@@ -489,7 +489,7 @@ _FACT_LINE_REORDER_THRESHOLD_K = 35
 # 報告25 § 4 發現6：BFS 鄰居剪枝與 rank fusion 的參數（皆未實測校準，除 RRF k）。
 # `_BFS_KEEP_MAX`：BFS 三元組行先對問題 embedding 排序，只留前這麼多筆——
 #   SAGE（Titiya et al., 2026）「expand → 用 dense retrieval 過濾鄰居、只選 k'」
-#   的簡化對應；BFS 本身無問題相關性排序（`bfs_query()` 無 LIMIT），不剪枝會
+#   的簡化對應；BFS 本身無問題相關性排序（`bfs_query()` 只有每 seed 的扇出上限），不剪枝會
 #   讓一條文的列舉樣板（如 N0080016 第5條「訓練計畫書應包括…」8 行）佔滿清單。
 # `_MIN_BFS_SLOTS`：截斷時保底給 BFS 的名額，避免「答案由 BFS 三元組提供」
 #   （報告22「每週總時數四十小時」案例）被語意 Fact 全數擠掉。
@@ -589,7 +589,7 @@ async def _arrange_fact_lines(
     改為分來源處理（文獻見 `docs/參考文獻/21_圖遍歷與向量檢索結果融合/`）：
 
     1. **BFS 鄰居剪枝**（SAGE, Titiya et al., 2026）：`bfs_lines` 本身無問題
-       相關性排序（`bfs_query()` 無 LIMIT），先用 `_score_lines_by_embedding()`
+       相關性排序（`bfs_query()` 只有每 seed 的扇出上限），先用 `_score_lines_by_embedding()`
        對問題排序、只留前 `_BFS_KEEP_MAX` 筆。
     2. **語意 Fact 為主、BFS 為輔的名額分配**（Han et al. 2024/2025 綜述：
        BFS 鄰居爆炸稀釋 LLM 焦點、需重排優先化；SAGE：k' additional on top
