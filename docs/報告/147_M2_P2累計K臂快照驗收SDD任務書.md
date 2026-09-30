@@ -104,10 +104,10 @@ python -m scripts.eval.run_rq1_comparison --questions data/eval/p2_snapshot_ques
 
 ## 3. 回填區（Codex 填寫）
 
-- commit SHA：
-- 新 run 的暫存目錄路徑與起訖時間：
-- 判準檢查結果（一行）：
-- 意外狀況：
+- commit SHA：本次唯一提交（最終回報列出）
+- 新 run 的暫存目錄路徑與起訖時間：`C:\Users\666\AppData\Local\Temp\report147_after_cut4_20260930_02\run1`；`2026-09-30 11:43:28.794299 +08:00`–`2026-09-30 12:02:08.286368 +08:00`
+- 判準檢查結果（一行）：兩個基準的 6 題 L1 全部通過；五個穩定題 L2 全部通過；`17-Q1` L3 通過且其 L2 為基準內既知不穩定；全部 L3 通過、無 error/timeout。
+- 意外狀況：Ollama 基準 `0.34.4` 漂移至 `0.35.0`（模型 digest 相同，依 v2 列為混淆因子）；Windows 行程檢查僅能檢視 11 個 Python（含 pythonw）行程，未見 harness/抽取/匯入腳本，依使用者確認環境空閒繼續；另一對話於快照期間只提交設計文件，S1 HEAD `c08b6d9`、S5 HEAD `2f2cb4f`，程式碼 diff 仍為空。Neo4j 只有既有不存在 relationship type warning，未造成 error/timeout。
 
 ## 4. 驗收（Claude 審核）
 
