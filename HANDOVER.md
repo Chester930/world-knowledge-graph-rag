@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告171 X2 批3）：論文對齊批次3——03 五處＋04 兩處（N4／N9 已搬移符號的位置更新）；X2 完成
+
+`_rrf_fuse_fact_ids()`／`_apply_source_doc_cap()`→`services/retrieval/fact_candidates.py`，`_effective_rel_types()`／`_effective_rel_type_descriptions()`→`services/extraction/prompt.py`，守衛樣式固定處與 `_build_*_pattern()`→`services/extraction/guards.py`，`extract_svo_triples()`→`services/extraction/extract.py`，`_fix_known_simplified_compounds()`→`services/extraction/traditional.py`。純路徑更新，機制與研究主張未改。驗證同前；**回檢**：論文（不含變更紀錄）已無 `svo_service(.py)::<被搬移符號>` 的舊路徑引用。至此 22 處 A 類全數完成；E 類候選未寫入，待使用者決定。
+
 ## 2026-09-30（報告171 X2 批2）：論文對齊批次2——03 §3.1.3／§3.4 八處（N4 已搬移符號的位置更新）
 
 `extract_svo_triples_with_completeness_check()`／`extract_svo_triples()`／`_reconcile_rel_type()`／`classify_relation_by_embedding()`→`services/extraction/{extract,reltype}.py`，`_filter_ungrounded_quantity_triples()`／`_quantity_mis_bound_to_clause()`／`_LEAVE_TYPE_FAMILY`／`_ENUM_GUARD_PATTERN`→`services/extraction/guards.py`；純路徑更新，機制與研究主張未改；帶 commit 的歷史句保留並註明當時位置；`svo_service.py`／`routers/agent.py` 重新匯出已寫明。驗證同批1（8 處新字串命中、舊字串消失、diff --check 通過、`.py` 零變更、變更紀錄只追加）。批3（03 五處＋04 兩處）待做。
