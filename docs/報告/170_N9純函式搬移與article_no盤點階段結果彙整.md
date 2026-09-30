@@ -19,6 +19,7 @@
 ## 2. 偏離報告168 或需留意之處
 
 1. 無偏離（W1 分兩刀：G1 一個模組、G2 一個模組，符合建議）。
+1a. **更正報告169 一處說法**（規劃對話指出）：初稿稱「`article_no` 只有 `ArticleAwareChunking` 會填、非法規 KG 必為 `None`」。實際上 `svo_chunking.py:126-131`（`build_svo_chunks`）在 `KGConfig.chunking.strategy=header_anchored`（預設 `sliding_window`）且主旨符合「第X條」時，一般切塊路徑也會以正則填入 `article_no`。正確說法：**預設設定下非法規 KG 為 `None`；若某 KG 設為 `header_anchored`，其 `article_no` 也可能有值**。已修正報告169 §2；主結論（正式問答路徑無讀取者）不變。
 2. **W2 的重要事實**：BFS 三元組的 `source_article_no` **在正式問答路徑沒有下游讀取者**（prompt、生成、接地、評分、scope audit、SSE `sources` 皆不讀），只影響遙測 trace 與離線分析腳本；其中 `source_ambiguity_audit.py` 對新產生 records 的影響**需實測**（報告169 §4 #12）。
 3. `git add HANDOVER.md` 前皆先看 `git diff -U0`；`svo_service.py` 僅被機械刪除搬移區塊（W1）。
 

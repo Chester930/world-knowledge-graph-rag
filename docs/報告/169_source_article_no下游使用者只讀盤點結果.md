@@ -11,13 +11,13 @@
 
 | 步驟 | 位置 | 說明 |
 | --- | --- | --- |
-| chunk 帶條號 | `services/svo_chunking.py`（`SVOChunk.article_no`，`:49`；`ArticleAwareChunking` `:126-148`、`:230-245`） | 只有**法條感知切塊**（一條文一個 chunk，需要 `articles` payload，來自法規匯入腳本如 `import_leave_scheduling_dataset.py`）才有值；一般文件（`SVOGROUP`）恆為 `None` |
+| chunk 帶條號 | `services/svo_chunking.py`（`SVOChunk.article_no`，`:49`）。**兩個來源**：① **法條感知切塊 `ArticleAwareChunking`**（`:230-245`；一條文一個 chunk，需要 `articles` payload，來自法規匯入腳本如 `import_leave_scheduling_dataset.py`）；② **`build_svo_chunks` 內的 `header_anchored` 路徑**（`:126-131`）：當設定了標題樣式（`KGConfig.chunking.strategy=header_anchored`，預設為 `sliding_window`）且區塊所屬主旨符合 `第X條`，以正則填入條號（`trigger_extraction` 經 `prepare_svo_ready_chunks(chunking_config=…)` 傳入設定） | 預設設定下一般文件（`SVOGROUP`／`sliding_window`）為 `None`；**若某 KG 設為 `header_anchored`，一般切塊路徑的 `article_no` 也可能有值** |
 | chunk → 三元組 | `services/extraction_worker.py:134-137`：`triple.source_article_no = chunk.get("article_no")` | 抽取時逐筆指派 |
 | 三元組 → citation | `services/svo_service.py:857-859`（`_new_citation`）：`"article_no": triple.source_article_no` | 累積在邊的 `citations_json`（每次抽取到同一關係追加一筆） |
 | 三元組 → Fact／`SUPPORTED_BY` | `svo_service.py:1305`（`merge_triples_to_graph` → `_create_fact_node(article_no=triple.source_article_no)`，`:1085-1144`）；`backfill` 路徑 `:1720` 直接讀 `citation.get("article_no")` | 有值時 `SUPPORTED_BY` 連向 `(:LawArticle)`，否則連向 `Chunk` |
 | 重抽守衛 | `services/knowledge_graph_service.py:130-136` | 偵測到先前用 `ArticleAwareChunking`（任一 chunk 有 `article_no`）就拒絕靜默覆寫 |
 
-**其他 KG（非法規）是否必為 `None`**：由程式碼決定——`article_no` 只有 `ArticleAwareChunking` 會填（需 `articles` payload，目前只有法規匯入腳本提供）；`SVOGROUP` 產生的 chunk `article_no=None`，`chunk.get("article_no")` 也就是 `None`。因此**非法規／一般文件的 KG 必為 `None`（結構上）**；「必」的保證來自程式路徑，本盤點未逐一檢視其他 KG 的實際資料（只有 KG#4 的資料可離線取得）。
+**其他 KG（非法規）是否必為 `None`**：**預設設定下為 `None`，但不是「必」**——`article_no` 有兩個填入來源（見上表）：`ArticleAwareChunking`（需 `articles` payload，目前只有法規匯入腳本提供）與 `header_anchored` 標題樣式（`KGConfig.chunking.strategy`，預設 `sliding_window`；某 KG 若設為 `header_anchored` 且主旨符合「第X條」，一般文件也會有值）。（2026-09-30 更正：本報告初稿寫成「只有 `ArticleAwareChunking` 會填、非法規 KG 必為 `None`」，經規劃對話指出 `svo_chunking.py:126-131` 而修正；不影響本報告的主結論，只影響「日後 BFS 帶出時哪些 KG 會有值」的描述。）本盤點未逐一檢視其他 KG 的實際資料（只有 KG#4 的資料可離線取得）。
 
 ## 3. 資料面（報告162 重跑資料，42 題、975 條 BFS 三元組）
 
