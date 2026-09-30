@@ -100,7 +100,7 @@
 | 槽名 | 所屬大節點 | 候選策略 | 現況 | 決策由誰做 |
 | --- | --- | --- | --- | --- |
 | `QUERY_PATH` | N8／N9（查詢入口） | 純 LLM（D）／chunk-RAG（B0、B1）／agentic（B2）／完整 KG（K）／fact_only／bfs_only | 由請求參數 `retrieval_mode` 或評測腳本指定；`query_classifier`／`adaptive_retrieval_service` 有實作但**未接線** | 待定（規則／KG 設定／分類器） |
-| `CHUNK_STRATEGY` | N3 | 條文感知（`ArticleAwareChunking`）／`sliding_window`（預設 5 句、重疊 2）／`header_anchored`／**自動語意切分** | 由匯入腳本依「有無 articles」決定；`ChunkingConfig.strategy` 只有前兩者；**程式中查無語意切分實作** | 待定 |
+| `CHUNK_STRATEGY` | N3 | N3.A 條文感知（`ArticleAwareChunking`，即使用者所稱「自動語意切分」）／N3.4 SVOGROUP（`sliding_window`，預設 5 句、重疊 2）／`header_anchored`（N3.4 變體，是否獨立列為候選待裁示） | 由呼叫端依「有無 `articles`」隱性決定；`ChunkingConfig.strategy` 無法表達條文感知；詳見 §3.5 | 規則＋KG 設定（Q4 已裁示） |
 | `REL_TYPE_ARBITRATION` | N4 | embedding 判定／比對／LLM 升級 | 已是 Fallback 串接 ✅ | 分數門檻 |
 | `ENTITY_DEDUP` | N5 | 守衛精確比對／編輯距離／cosine／LLM | 已是 Fallback 串接 ✅ | 分數門檻＋守衛 |
 | `GEN_MODE` | N11 | 單次生成／規則式分解逐題／baseline（不套分解與修正） | 由多個問號與 baseline 旗標決定 | 規則 |
@@ -116,6 +116,56 @@ RQ1 顯示 K 整體沒有勝過 B1（42 題：13/42 對 21/42），論文定位�
 - **過擬合**：Type-C 行為樹規則對題庫過擬合（報告95 §11），因此**決策規則上線前須有評測把關**（沿用逐階段評分閘控），且不得用題庫題目文字設計規則。
 - **槽不要一次開太多**：先做 2–3 個（建議 `QUERY_PATH`、`CHUNK_STRATEGY`，再加一個），其餘維持現況。
 - **每次決策必留紀錄**：沒有紀錄的選擇等於回到隱性狀態。
+
+### 3.5 案例：`CHUNK_STRATEGY` 決策槽（N3.A／N3.4，使用者 2026-09-30 指定）
+
+> 使用者指出「五句」與「自動語意切分」就是報告95 的 **N3.4 SVOGROUP** 與 **N3.A 條文感知切塊**。本節依此建立 BT。**先前「查無語意切分」的疑慮解除**（Q6 已回答，見 §10.2）。
+
+**現況（程式核對）**：選擇是**隱性的、在呼叫端**——
+
+- `prepare_svo_ready_chunks(articles=…)`：`articles is not None` → `ArticleAwareChunking`（N3.A，按條文邊界，**完全不讀 `ChunkingConfig`**）；否則 → `build_svo_chunks(config=…)`（N3.4，預設 5 句、重疊 2）。
+- `articles` 只由法規匯入腳本傳入，**沒有持久化**，所以產品上傳路徑**無法選到 N3.A**（現以 `ArticleStructureLossError` 防呆）。
+- `ChunkingConfig.strategy` 只能表達 `sliding_window`／`header_anchored`，**無法表達「條文感知」**；且 `header_anchored`（用 `header_regex` 從句子清單辨識「第X條」）其實是 N3.4 內部一個能在**沒有預先解析 articles** 時處理法規型文件的變體。
+- 兩條路徑的**下游步驟不同**：一般路徑有代名詞消解（N3.2）與標準化句子節點（N3.6）；條文感知路徑沒有。所以這個決策選的不是單一葉節點，而是**兩條子 Pipeline**。
+
+**目標結構（提案）**：決策節點選子 Pipeline，兩者共用尾段。
+
+```mermaid
+flowchart TD
+    R["→ N3 CHUNKREADY"] --> D{"? CHUNK_STRATEGY（決策槽）"}
+    D --> C1["◇ C1：KG 設定明確指定策略"]
+    D --> C2["◇ C2：文件具條文結構<br/>（articles 可得，或條文標題命中率達門檻）"]
+    D --> C3["預設"]
+    C1 --> SEL["→ 該策略的子 Pipeline"]
+    C2 --> PA
+    C3 --> PB
+    subgraph PA["Pipeline N3.A 條文感知"]
+        A1["▢ ARTICLECHUNK<br/>一條＝一塊"]
+    end
+    subgraph PB["Pipeline N3.4 SVOGROUP"]
+        B1["N3.1 句子清單"] --> B2["N3.2 代名詞消解"] --> B3["N3.3 逐句 embedding"] --> B4["N3.4 滑動窗切塊<br/>5 句、重疊 2"]
+    end
+    PA --> T["共用尾段：N3.5 chunk 向量化 → N3.7 ENQUEUE"]
+    PB --> T
+    PB -.-> S["N3.6 標準化句子節點（只寫不讀）"]
+    D -. "決策紀錄 {slot, chosen, rule_id, inputs}" .-> REC[("SM-1 文件紀錄<br/>chunk_strategy＋參數")]
+```
+
+**決策規則（有序，第一個成立者勝出）**：
+
+| 序 | 規則 | 選擇 | 現況 |
+| --- | --- | --- | --- |
+| C1 | `KGConfig.chunking.strategy` 明確指定 | 該策略 | ⚠️ 需先擴充設定值（目前無 `article_aware`） |
+| C2 | 文件具條文結構 | N3.A | 🟡 現況等價於「呼叫端有傳 `articles`」；產品路徑要能成立，須先讓 articles 可持久化或可由 `original.md` 重建 |
+| C3 | 預設 | N3.4（`sliding_window`，5／2） | ✅ 現況 |
+
+**待使用者裁示（本案例特有）**：
+
+1. **`header_anchored` 要不要列為第三個候選？** 它能在沒有預解析 articles 時近似條文感知，可當產品路徑上「偵測到條文標題就用它」的中間方案。
+2. **C2 的「條文結構」要怎麼判定？** 選項：(a) 只認呼叫端明確傳入 `articles`（等價現況）；(b) 由 `original.md` 用 `header_regex` 偵測命中率。(b) 才能讓一般上傳自動走法規路徑，但屬**行為變更**。
+3. 決策紀錄寫入 SM-1（重抽時須沿用同策略；`ArticleStructureLossError` 防呆的根因就是策略沒被記錄）。
+
+**S5 因此拆成兩步**：**S5a** 只把現有隱性決策顯性化並記錄（選擇結果與現況逐字相同，等價重構）；**S5b** 新增 C1／C2(b)（改行為，須另開任務，依評測與抽取結果把關）。
 
 ## 4. SM 歸屬與 BT／SM 介面
 
@@ -241,7 +291,8 @@ tests/<node>/              節點自己的測試（抽離測試用假 ports）
 | **S2** | 為**已成形的節點**補節點卡：N10（`services/context/`）、N9 的 `services/retrieval/`（第四刀完成後） | 否（純文件） | 節點卡與程式代號互查 |
 | **S3** | 寫防漂移檢查腳本＋測試（§6.2） | 否 | pytest 全綠；故意破壞可被抓到 |
 | **S4** | 定義 `GraphStorePort`（Protocol）＋以 Neo4j 實作包住現有 Cypher，**先只宣告介面與轉接，不改呼叫端** | 否 | 既有測試全綠 |
-| **S5** | 決策槽試點：`CHUNK_STRATEGY`——把現有「有 articles 就走條文感知」的隱性決策顯性化成 Decision 節點＋決策紀錄，**選擇結果與現況逐字相同** | 否（等價重構） | 對現有匯入路徑輸出逐字相同 |
+| **S5a** | 決策槽試點：`CHUNK_STRATEGY`——把現有「有 articles 就走條文感知」的隱性決策顯性化成 Decision 節點＋決策紀錄（寫入 SM-1），**選擇結果與現況逐字相同**（見 §3.5） | 否（等價重構） | 對現有匯入路徑輸出逐字相同 |
+| **S5b** | `CHUNK_STRATEGY` 新增 C1（KG 設定指定，需擴充設定值）與 C2(b)（由原文偵測條文結構）；articles 可持久化或重建 | **是** | 須另開任務；依評測與抽取結果把關 |
 | **S6** | 抽離測試試點：N4（只需 LLM、Embedding） | 否 | 抽離測試通過 |
 | **S7** | 決策槽 `QUERY_PATH`：先把 `retrieval_mode` 等現有參數登記為候選與規則，**不新增自動分流** | 否 | 同上 |
 | **S8** | 新增**自動分流**規則（會改行為，須先有評測條件；另開任務、另設閘控） | **是** | 依評測閘控，屬 M3 |
@@ -277,10 +328,10 @@ tests/<node>/              節點自己的測試（抽離測試用假 ports）
 | # | 問題 | 建議（未裁示） | 影響 |
 | --- | --- | --- | --- |
 | Q5 | **補充其他預備了多種做法的環節** | 使用者暫無補充；等實際整理節點卡時再補 | §3.2 清單完整度 |
-| Q6 | **「自動語意切分」是否已有實作？** 本次核對只找到 `sliding_window`、`header_anchored`、`ArticleAwareChunking`，**查無語意切分程式**；若在其他分支或未提交，請指出位置 | 使用者暫無資訊；**在確認位置或決定規劃前，`CHUNK_STRATEGY` 候選清單只列現有三種，語意切分標為 📐 規劃** | **阻擋 S5**（CHUNK_STRATEGY 決策槽試點）、S7 |
+| Q6 | ~~自動語意切分是否已有實作？~~ **已回答（2026-09-30）**：使用者指出就是報告95 的 **N3.A（條文感知）與 N3.4（SVOGROUP）** | 依此建立 BT，見 §3.5 | S5 解除阻擋；**§3.5 有 3 個本案例特有的待裁示**（是否列 `header_anchored`、C2 判定方式、決策紀錄寫 SM-1） |
 | Q7 | 本草案要不要寫進論文（03 §3.1 表示法約定、01 §1.3 產品工程貢獻）？ | **先不寫**；等 S5／S6 試點證明可行後，再以實際結果為依據寫入，避免 M1 已定稿的章節反覆修改（報告97 §1.3 的同一理由） | 論文對齊工作量 |
 
-**S1 狀態**：Q1–Q4 已裁示，**S2、S3、S4、S6 可在報告145 驗收後啟動**；S5、S7 等 Q6（與 Q5）。**尚未授權任何程式改動的實際排程**，仍依使用者指派。
+**S1 狀態**：Q1–Q4 已裁示、Q6 已回答，**S2、S3、S4、S6 可在報告145 驗收後啟動**；**S5a 待 §3.5 的三項待裁示確認**；S7 待 Q5 補充後決定範圍。**尚未授權任何程式改動的實際排程**，仍依使用者指派。
 
 ### 10.3 原問題（保留）
 
@@ -296,6 +347,7 @@ tests/<node>/              節點自己的測試（抽離測試用假 ports）
 
 ## 11. 本次核對的事實（2026-09-30，基準 `d40a6ff`）
 
+- （2026-09-30 補）`prepare_svo_ready_chunks(articles=…)`：`articles is not None` → `ArticleAwareChunking`，否則 `build_svo_chunks(config=…)`；條文感知路徑不讀 `ChunkingConfig`（`services/svo_preprocessing_service.py:189-229`）。「自動語意切分」即 N3.A，非另有程式。
 - `ChunkingConfig.strategy` 的取值只有 `sliding_window`／`header_anchored`（`core/kg_config/model.py:180`）；預設 `max_sentences=5`、`overlap_sentences=2`；`ArticleAwareChunking` 是 `services/svo_chunking.py` 內的另一個類別，由呼叫端（匯入腳本）選用。
 - `retrieval_mode: Literal["both","bfs_only","fact_only"]`（`models/document.py:70`）由請求帶入。
 - `svo_service.py` 的圖存取函式以參數注入 `AsyncDriver`，型別為 `neo4j.AsyncDriver`；`create_*_index` 等定義在同檔。
