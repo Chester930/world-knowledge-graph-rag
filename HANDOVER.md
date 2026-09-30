@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告155 T5）：KG 來源回取召回優先離線探測完成（結果寫回[任務書](docs/報告/任務書_KG來源回取召回優先探測_v0.1.md)「結果」節）
+
+**結論：不明確、偏不支持**——預算對齊下 R1（K 事實候選→來源 chunk）recall==1 為 25／42，B1 為 29／42；Type-C＋D 7／21 對 11／21；SNR 相同。正面訊號只在效率：Type-A／B 16 題 R1_m5（約 600–800 字元）即全滿，B1 需約 2,000 字元。**R1 對 K 現行的大幅領先不可採信**：K 事實文字是改寫，嚴格逐字本來命不中；記錄值靠 LLM 語意 fallback（22／42 對嚴格 7／42）。R0 因此無法 0 差異重現（28 題不同，全為記錄≥嚴格）；R2 字元數 0 差異、3 題 recall 因 fallback 不同。限制：BFS 三元組候選（54%）沒有 chunk 索引、`article_no` 全空，R1 只能用 Fact 候選，是下界。來源資料夾在 `D:/Users/666/Desktop/kg-runtime/236903cf-…`（唯讀）。新增腳本與 7 個測試，pytest 1368 passed。
+
 ## 2026-09-30（報告155 T4）：N4 依賴與副作用只讀盤點完成（[報告158](docs/報告/158_N4依賴與副作用只讀盤點結果.md)；P3／S6 共同前置，**不含先後建議**）
 
 N4＝`svo_service.py` 62 個頂層符號（40 函式＋22 常數）；**檔內自身封閉**（只依賴 `logger`）、不碰 Neo4j；唯一寫入副作用是 `_reconcile_rel_type` 的 EXPAND 候選池與 ESCALATE3 事件寫 SQLite（`:426-434`，`add_candidate` 內含一次 `encode(verb)`）。**11 個 N4 符號被 N5／N9／維護函式使用**（守衛樣式、轉繁、關係型別詞彙），`routers/agent.py:1188` 與 `extraction_worker.py` 也直接引用 N4 名稱。隱性耦合：`_EXTENDED_ENTITY_TYPES_PATH` 以 `__file__.parent.parent` 定位 `data/`，讀取失敗回空 dict 不報錯，搬深一層會靜默失效。Q8：EXPAND 池只有治理 Worker 讀（每 300 秒每 KG，池 pending≥10 才分群，一次取全部）；`escalate3_log` 沒有 runtime 讀取者；列出 5 個寫入延後會造成差異的具體情境（E1 復活順序終態不同、E2 失敗 chunk 殘留、E3 中止、E4／E3 標「需實測」、E5 寫入失敗連動）。新增 `scripts/analysis/n4_dependency_inventory.py`；正式程式零變更。
