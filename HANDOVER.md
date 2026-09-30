@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告168）：下一階段任務規劃——「N9 純函式搬移（G1／G2）與 `source_article_no` 下游盤點」，**規劃對話決定、請執行對話執行，規劃對話只記錄**
+
+使用者再次指示「依照建議繼續」，採用報告164 §9 的建議與預案。[報告168](docs/報告/168_下一階段任務規劃_N9純函式搬移與article_no下游盤點.md) 定案 4 項：**W1** 把 N9 的 **G1＋G2 共 8 個純符號**（`_rrf_fuse_fact_ids`、`_filter_fact_candidates_by_source_scope`、`_apply_source_doc_cap`、`_dedupe_facts_by_key`、`_bfs_pass_cypher`、`_bfs_records_to_triples`、`_BFS_EXPAND_WHEN_BELOW`、`_BFS_PRIZE_TOP_K`）從 `svo_service.py` 搬入 `services/retrieval/`（**行為不變**，舊名稱重新匯出；規劃對話已用 AST 核對這 8 個符號對 `svo_service.py` 其他頂層符號皆無依賴；N9 補丁全綁 `routers.agent`，搬這些不會使補丁失效；`services/retrieval` 不得 import `svo_service`；**不需重跑 K 臂快照**，差分測試即足夠）。**W2** `source_article_no` 下游使用者**只讀盤點**（列出 BFS 三元組從 `None` 變有值時各使用位置的行為差異，**不建議要不要改**）。**W3** 節點卡登記「N9 檢索路徑含冪等 DDL」並更新搬移後位置（純文件，等 W1）。**W4** 彙整。**不做**：`chat()`／`routers/agent.py`、G3–G8、`GraphSchemaPort` 遷移、N4 事件契約、N5、來源回取、論文同步。**停止條件**見報告168 §4。編號：168 為本規劃，**執行對話自 169 起**（156 保留）；每個任務（W1 為每一刀）驗收並 push 後以訊息回報。**狀態：已派工，等待執行。**
+
 ## 2026-09-30（報告164 V4）：GraphSchemaPort 第一步、N9 盤點、trace 修補階段收尾——[報告167](docs/報告/167_GraphSchemaPort第一步N9盤點與trace修補階段結果彙整.md)
 
 V3／V1／V2 已 push（`5d9679b`／`808ec01`／`2d09f76`）；`svo_service.py` 全程零修改；pytest 1549 passed；報告索引補列 164–167。**報告162 已加註**：U3「唯讀」＝只讀取資料、無節點／關係寫入，但檢索路徑（`vector_search_facts`）含冪等 `CREATE VECTOR INDEX IF NOT EXISTS`，結論與數字不受影響。報告167 列 8 項待使用者裁示（`GraphSchemaPort` 是否進一步、惰性 DDL 是否改啟動時建立、N9 搬移與切法、`article_no` 是否讓 BFS 帶出、N4 事件契約、共用輔助歸屬與 N5、來源回取、論文同步），只列事項。
