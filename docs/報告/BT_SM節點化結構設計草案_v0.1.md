@@ -105,7 +105,12 @@
 | `ENTITY_DEDUP` | N5 | 守衛精確比對／編輯距離／cosine／LLM | 已是 Fallback 串接 ✅ | 分數門檻＋守衛 |
 | `GEN_MODE` | N11 | 單次生成／規則式分解逐題／baseline（不套分解與修正） | 由多個問號與 baseline 旗標決定 | 規則 |
 | `CORRECTION_MODE` | N11 | 無需修正／定向修正／限制性重生成 | 由接地核對結果決定 ✅ | 核對結果 |
-| （待使用者補充） | | | | |
+| `GRAPH_PRUNING` | N9 | 無剪枝／L1（剔除樞紐，現行）／L2 向量引導（`bfs_query(prize_top_k=…)`） | L2 已實作、預設關 | 規則（**上線須評測閘控**，RQ6） |
+| `FACT_RETRIEVAL_MODE` | N9 | 純向量（現行）／`hybrid`／`source_doc_cap` | 參數已有、預設關；n=3 消融中 `hybrid` 反而使品質下降 | **登記槽、預設固定為純向量，暫不寫自動規則**（有負面證據） |
+| `ARTICLE_EXPANSION` | N9 | 不擴充（現行）／`_expand_facts_by_article` | opt-in；S2 無淨增 | 同上：登記槽、預設固定 |
+| `PRONOUN_RESOLUTION` | N3 | 全面／per-KG 排除詞／跳過 | 已由 per-KG 設定驅動（法規排除「其」「該」） | KG 設定（不需另寫規則） |
+
+**Q5 處理（2026-09-30，依 Claude 建議）**：上表新增四列，採用準則＝「**已有 2 種以上實作且已有切換開關**」。**不列為決策槽**的：生成後核對的 judge 是否獨立（純設定）、抽取 few-shot／關係詞彙（`KGConfig` 分層已涵蓋，屬設定而非執行期決策）。**負面證據的選項只登記、不寫自動規則**，避免重蹈 Type-C 過擬合。使用者日後仍可補充。
 
 ### 3.3 為什麼 `QUERY_PATH` 最重要
 
@@ -327,11 +332,19 @@ tests/<node>/              節點自己的測試（抽離測試用假 ports）
 
 | # | 問題 | 建議（未裁示） | 影響 |
 | --- | --- | --- | --- |
-| Q5 | **補充其他預備了多種做法的環節** | 使用者暫無補充；等實際整理節點卡時再補 | §3.2 清單完整度 |
+| Q5 | ~~補充其他預備了多種做法的環節~~ **已處理（2026-09-30）**：依 Claude 建議補進 §3.2 四列（`GRAPH_PRUNING`、`FACT_RETRIEVAL_MODE`、`ARTICLE_EXPANSION`、`PRONOUN_RESOLUTION`） | 使用者授權「有明確理由就依建議」；日後仍可補充 | §3.2 清單 |
 | Q6 | ~~自動語意切分是否已有實作？~~ **已回答（2026-09-30）**：使用者指出就是報告95 的 **N3.A（條文感知）與 N3.4（SVOGROUP）** | 依此建立 BT，見 §3.5 | S5a 解除阻擋；§3.5 三項裁示已定（列 `header_anchored`、S5a 的 C2 只認明確傳入 `articles`、決策紀錄寫 SM-1） |
-| Q7 | 本草案要不要寫進論文（03 §3.1 表示法約定、01 §1.3 產品工程貢獻）？ | **先不寫**；等 S5／S6 試點證明可行後，再以實際結果為依據寫入，避免 M1 已定稿的章節反覆修改（報告97 §1.3 的同一理由） | 論文對齊工作量 |
+| Q7 | ~~本草案要不要寫進論文~~ **已採建議（2026-09-30）：先不寫**（03 §3.1 表示法約定、01 §1.3 產品工程貢獻）。 | 等 S5／S6 試點證明可行後，再以實際結果為依據寫入，避免 M1 已定稿的章節反覆修改（報告97 §1.3 的同一理由） | 論文對齊工作量 |
 
 **S1 狀態**：Q1–Q4 已裁示、Q6 已回答，**S2、S3、S4、S6 可在報告145 驗收後啟動**；**S5a 已可在報告145 驗收後啟動（§3.5 三項裁示已定）**；S7 待 Q5 補充後決定範圍。**尚未授權任何程式改動的實際排程**，仍依使用者指派。
+
+### 10.2b 新增（附錄 A 的 N4 contract 草稿引出）
+
+| # | 問題 | 狀態 / 建議 | 影響 |
+| --- | --- | --- | --- |
+| Q8 | N4 的 EXPAND 候選池與 ESCALATE3 仲裁事件目前由 N4 內部直接寫入 SQLite。改為**由 N4 回傳事件、由 X3 寫入**？ | **採建議（理由明確：R2，SM-4 屬 X3）**；實作時須驗證與現況等價（寫入時機由「函式內途中」變成「回傳後」） | S6 的範圍；N4 簽名不再需要 `kg_id`、`calibration_db_path` |
+| Q9 | `SVOTriple` 混合了「抽取結果欄位」與「來源追溯欄位」（約 10 個 provenance 欄位）。是否拆成兩個型別？ | **待討論**：牽涉 N4、N5、N9、評測共用，影響面大；建議先不拆，僅在 `contract.py` 重新匯出並註記欄位分群 | N4／N5 邊界 |
+| Q10 | `QUERY_PATH` 的**產品**候選是否含 B2（agentic）？ | **待討論**：B2 n=41 略低於 B1（0.681 對 0.693）、約 3 倍呼叫、維持 optional；目前只是評測臂 | `QUERY_PATH` 候選清單 |
 
 ### 10.3 原問題（保留）
 
@@ -353,3 +366,50 @@ tests/<node>/              節點自己的測試（抽離測試用假 ports）
 - `svo_service.py` 的圖存取函式以參數注入 `AsyncDriver`，型別為 `neo4j.AsyncDriver`；`create_*_index` 等定義在同檔。
 - `services/context/`（`fact_lines.py`、`telemetry.py`）與 `state/`（`document_sm.py`、`task_sm.py`）已存在；`services/retrieval/` 由報告145 建立中。
 - 回歸基準：1344 passed（HANDOVER 2026-09-30）。
+
+---
+
+## 附錄 A：N4 SVO 抽取的 contract 草稿（S6 抽離試點用）
+
+> **依據**：`services/svo_service.py` 函式簽名核對（`extract_svo_triples` 第 438 行、`extract_svo_triples_with_completeness_check` 第 1012 行、`_reconcile_rel_type` 第 364 行）與 `models/knowledge_graph.py::SVOTriple`。**草稿，未實作。**
+
+### A.1 現況簽名（核對結果）
+
+```text
+extract_svo_triples_with_completeness_check(
+    text, original_sentences,
+    llm_provider=None, embedding_provider=None,
+    *, cfg: KGConfig|None, kg_id: str|None, calibration_db_path: Path|None
+) -> list[SVOTriple]
+```
+
+### A.2 核對發現的三個問題
+
+| # | 發現 | 為何影響獨立性 |
+| --- | --- | --- |
+| 1 | **隱性副作用**：`kg_id` 與 `calibration_db_path` 都提供時，`_reconcile_rel_type` 會把**未知動詞寫入 EXPAND 候選池**，並把 **ESCALATE3 仲裁事件寫入 SQLite**（第 426–433 行） | 「抽取」節點竟寫入 X3 擁有的 SM-4 資料；違反 R2；抽離後必須帶著 SQLite 才能跑 |
+| 2 | `llm_provider`、`embedding_provider` 皆可為 `None`，`None` 代表**靜默降級**（如無 embedding 就直接採信 LLM 自報型別） | contract 必須把「降級」寫成明確語意，否則呼叫端不知道少了什麼 |
+| 3 | 失敗時例外向上拋，由 `extraction_worker._process_one` 吞掉並標 `failed`（報告57 附錄C） | 違反 R6：失敗原因沒有進入 SM |
+
+### A.3 contract 草稿
+
+```text
+輸入  ExtractionInput
+        text: str
+        original_sentences: Sequence[str]      # 完整性核對用
+        config: KGConfig 的抽取段（規則、few-shot、門檻、型別詞彙）
+ports LLMPort（必要）、EmbeddingPort（可選，缺則明確降級並在結果標記）
+輸出  ExtractionResult
+        triples: list[SVOTriple]               # N4→N5 的共用資料型別
+        arbitration_events: list[...]          # 原本寫 SQLite 的 ESCALATE3 事件（Q8）
+        expand_candidates: list[...]           # 原本寫 EXPAND 池的未知動詞（Q8）
+        degraded: list[str]                    # 例：["no_embedding"]
+        status / failure_reason                # R6
+簽名不再需要  kg_id、calibration_db_path      # 寫入改由 X3 依 result 執行
+```
+
+### A.4 抽離測試（S6 驗收）
+
+- 只用**假的 LLMPort／EmbeddingPort**，不連 Neo4j、不建 SQLite，N4 自己的測試通過。
+- 差分測試：同一批輸入，抽離後結果的 `triples` 與現況**逐字相同**；`arbitration_events`／`expand_candidates` 與現況實際寫入 SQLite 的內容相同。
+- 依賴檢查：N4 資料夾不得 import `repositories`、`neo4j`、`sqlite3`。
