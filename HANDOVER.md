@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告160 U2）：`GraphStorePort` 設計提案完成（[報告161](docs/報告/161_GraphStorePort設計提案_語意介面與分階段.md)；純文件，不寫 `.py`，**不決定位置**、不含 `bfs_query`）
+
+分階段：P-A DDL／索引群（14 函式，`VectorIndexSpec` 值物件收斂 6 種向量索引）、P-B 單純 CRUD 群（拆 `KGCatalogPort`／`DocumentGraphPort`／`ExtractionWritePort`／`QueryReadPort`）、P-C 檢索群只列名；`bfs_query` 只寫「為何最後」。介面位置 4 個選項與取捨（A `core/ports`、B `repositories`、C 節點內 `ports.py`、D 先放第一個使用者旁）；`ensure_vector_index` 與 8 個索引建立函式關係只列事實與 3 個選項；5 個待裁示問題。搬移策略：先宣告→轉接（委派現有函式，行為逐位元不變）→逐呼叫端遷移，補丁改注入假 Port。
+
 ## 2026-09-30（報告160 U1 切法3）：N4 搬移完成——`_reconcile_rel_type`（含 SQLite 副作用）與 `extract_svo_triples*` 搬入 `services/extraction/`（62／62）；新增 `services/extraction/NODE.md`
 
 行為不變：EXPAND／ESCALATE3 寫 SQLite 原樣保留（未改事件契約）。**測試補丁遷移 11 處**（`test_svo_service.py` 5、`test_svo_service_cfg_wiring.py` 6）：原補丁 `svc._reconcile_rel_type`／`classify_relation_by_embedding`／`_parse_triples_payload`／`extract_svo_triples`／`_find_uncovered_sentences`／`_filter_ungrounded_quantity_triples` 只改到 `svo_service` 的綁定，搬移後不再影響已搬走的呼叫者，改指向呼叫者所在模組（`services.extraction.extract`／`reltype`）——等價理由：函式的全域名稱查找發生在其所在模組。新增陷阱文件化測試。驗收：62 符號逐字（1 個允許路徑修正）、`svo_service.py` diff＝刪 269 行＋加 11 行匯入（svo_service 3923→3013 行）、差分 1536 案一致、依賴快照累計 161→167 模組／433→460 邊／無循環、三項故意破壞皆使測試失敗、三張節點卡 0 警告、pytest 1500 passed。節點歸屬債務（11 個共用輔助）與事件契約 E1–E5 仍待裁示。
