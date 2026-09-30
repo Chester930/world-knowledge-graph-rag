@@ -141,10 +141,10 @@ from services.retrieval.scope import (
 
 ## 4. 回填區（Codex 填寫）
 
-- commit SHA：
-- 自我檢查結果：
-- 新增測試數：
-- 意外狀況：
+- commit SHA：本次唯一提交（最終回報列出）
+- 自我檢查結果：S2 RED 為 7 failed；S4 AST 7 函式逐字相同、`services/context/fact_lines.py` 與 `services/context/telemetry.py` 整個模組 AST 未變；固定種子 145 的 1000 組隨機＋20 組手寫邊界＋4 組例外差分全數相同（`==`、原樣回傳分支 `is`、例外型別與訊息）；agent.py diff 形狀與相依快照全通過；直接 import 與 180 個相關測試全通過。完整回歸在既有 3 個 UMAP 測試卡住，依規格 deselect 後為 1348 passed、3 deselected、0 failed（基準 1341 passed、3 deselected）。
+- 新增測試數：7
+- 意外狀況：依指示還原編輯器自動格式化的報告95；完整回歸未排除命令卡在既有 UMAP 測試，已註明實際 deselect 數字。未啟動或使用 Neo4j／Ollama／server／harness，未跑 K 臂快照；未 push。
 
 ## 5. 禁止事項
 
