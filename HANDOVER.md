@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-09-30（報告164 V2）：N9 依賴與副作用只讀盤點完成（[報告166](docs/報告/166_N9依賴與副作用只讀盤點結果.md)；不搬移、不建議與 N5 先後）
+
+N9＝30 符號（`routers/agent.py` 8、`svo_service.py` 15、`scope.py` 7）；`chat()` 內嵌 N9.1＝`agent.py:1265-1274`、N9 區塊＝`:1296-1396`（在 `_stream` 內，區塊後仍讀 5 個區域變數＋`cfg`）。**重要發現：`vector_search_facts` 每次查詢惰性執行 `CREATE VECTOR INDEX IF NOT EXISTS`（`svo_service.py:1544`），hybrid 另建全文索引——N9「唯讀」路徑含冪等 DDL**（報告162 U3「唯讀 Neo4j」措辭需加註）。測試補丁全綁在 `routers.agent`（`<agent>.*` 共 6 種、17–18 次），與 N4 方向相反（搬 `chat()` 才失效）；3 個根目錄腳本以賦值替換 `routers.agent.vector_search_facts`。列 8 個依賴封閉群（G1–G8）與哪些須重跑 K 臂快照；N9→N4、N9→P-A 的跨節點匯入。新增 `scripts/analysis/n9_dependency_inventory.py`；程式碼零變更。
+
 ## 2026-09-30（報告164 V1）：`GraphSchemaPort` P-A 第一步——宣告＋轉接＋假實作＋契約／委派測試（不遷移任何呼叫端）
 
 新增 `core/ports/{__init__,graph_schema,fake_graph_schema}.py`（Protocol＋`VectorIndexSpec`／`FulltextIndexSpec`／`EmbeddingMeta`／`VectorTarget`（6 種）／`FulltextTarget`，只依賴標準庫）、`services/graph_store/neo4j_schema.py`（逐一委派既有函式，呼叫當下以模組屬性查找以便 spy）、`tests/core/test_graph_schema_port.py`（41 個）。**既有 `.py` 零修改**（`git status` 只有新增）。方法為 5 個有忠實對應函式者：`ensure_entity_uniqueness`、`ensure_vector_index(spec)`（6 目標）、`ensure_fulltext_index(spec)`、`migrate_vector_indexes`、`check_embedding_meta`；報告161 草案的 `list_vector_indexes`／`drop_indexes`／`read/register_embedding_meta` 現有程式沒有可忠實委派的單一函式，未納入。驗收：契約測試對假實作與轉接層（spy）各跑、委派測試（同函式同引數）、依賴方向 AST（`core/ports` 只依賴標準庫；無 production 模組 import `services.graph_store`）、三項故意破壞皆使測試失敗、依賴快照 +5 模組（2 套件）／+8 邊／無循環、pytest 1549 passed。
