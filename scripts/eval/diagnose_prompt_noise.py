@@ -25,16 +25,23 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
-for _k, _v in {
+DEFAULT_ENV = {
     "WORKSPACE_DIR": "D:/Users/666/Desktop/kg-runtime",
     "NEO4J_URI": "bolt://localhost:17990",
     "NEO4J_PASSWORD": "kg2_test_2026",
     "OLLAMA_BASE_URL": "http://127.0.0.1:11434",
-}.items():
-    os.environ.setdefault(_k, _v)
+}
 
-from core.providers.factory import get_llm_provider, init_providers  # noqa: E402
-from routers import agent  # noqa: E402
+
+def apply_default_env() -> None:
+    """命令列入口才寫入預設環境變數（`setdefault`，不覆蓋既有值）。
+
+    匯入本模組不得有行程級副作用（舊版在模組層級寫 `os.environ`，匯入即汙染同一行程內的
+    其他測試）。`core.*`／`routers.*` 依賴這些環境變數，所以它們改在 `main_async()` 內、
+    套用環境之後才匯入——命令列執行時「先環境、後匯入」的順序不變。
+    """
+    for k, v in DEFAULT_ENV.items():
+        os.environ.setdefault(k, v)
 
 DATA = REPO_ROOT / "data" / "eval"
 STAGES = [
@@ -76,6 +83,10 @@ async def generate(llm, prompt: str) -> str:
 
 
 async def main_async(args: argparse.Namespace) -> None:
+    apply_default_env()  # 冪等；須先於下面對 core／routers 的匯入
+    from core.providers.factory import get_llm_provider, init_providers  # noqa: PLC0415
+    from routers import agent  # noqa: PLC0415
+
     rec = load_record(args.qid)
     bank = {q["id"]: q for q in json.loads((DATA / "test_cases.json").read_text(encoding="utf-8"))["questions"]}
     tc = bank[args.qid]
@@ -113,6 +124,7 @@ def main() -> None:
     p.add_argument("--keep-keyword", action="append", help="relevant 條件額外保留含此關鍵字的行")
     p.add_argument("--repeats", type=int, default=2)
     p.add_argument("--out")
+    apply_default_env()
     asyncio.run(main_async(p.parse_args()))
 
 
