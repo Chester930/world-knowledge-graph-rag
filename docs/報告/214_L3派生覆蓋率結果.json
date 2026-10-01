@@ -1,0 +1,687 @@
+{
+  "before": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "entity_type_categories": {
+    "empty": 805,
+    "concept_only": 8023,
+    "standard": 2481,
+    "standard_with_concept": 0,
+    "outside_raw": 987
+  },
+  "marks": {
+    "entity": {
+      "strict": {
+        "已解決": 2481,
+        "不適用": 0,
+        "未知": 805,
+        "尚未處理": 987,
+        "無法由現有資料判定": 8023
+      },
+      "A": {
+        "已解決": 2481,
+        "不適用": 0,
+        "未知": 8828,
+        "尚未處理": 987,
+        "無法由現有資料判定": 0
+      },
+      "B": {
+        "已解決": 10504,
+        "不適用": 0,
+        "未知": 805,
+        "尚未處理": 987,
+        "無法由現有資料判定": 0
+      }
+    },
+    "relation": {
+      "strict": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "A": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "B": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      }
+    },
+    "article": {
+      "strict": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "A": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "B": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      }
+    },
+    "empty": {
+      "strict": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "A": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "B": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      }
+    }
+  },
+  "fact_empty_combos": {
+    "subject=0,object=0,verb=0": 11545,
+    "subject=0,object=1,verb=0": 4597,
+    "subject=0,object=0,verb=1": 482,
+    "subject=1,object=0,verb=0": 26,
+    "subject=0,object=1,verb=1": 143,
+    "subject=1,object=1,verb=1": 2,
+    "subject=1,object=1,verb=0": 22,
+    "subject=1,object=0,verb=1": 9
+  },
+  "storage_marker_candidates": [],
+  "after": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "comparison": [
+    {
+      "path": "entity_type_categories",
+      "expected_phase0": {
+        "concept_only": 8023,
+        "standard": 2481,
+        "outside_raw": 987,
+        "empty": 805,
+        "standard_with_concept": 0
+      },
+      "actual_l3": {
+        "empty": 805,
+        "concept_only": 8023,
+        "standard": 2481,
+        "standard_with_concept": 0,
+        "outside_raw": 987
+      },
+      "status": "一致"
+    },
+    {
+      "path": "entity_type_marks.strict",
+      "expected_phase0": {
+        "已解決": 2481,
+        "不適用": 0,
+        "未知": 805,
+        "尚未處理": 987,
+        "無法由現有資料判定": 8023
+      },
+      "actual_l3": {
+        "已解決": 2481,
+        "不適用": 0,
+        "未知": 805,
+        "尚未處理": 987,
+        "無法由現有資料判定": 8023
+      },
+      "status": "一致"
+    },
+    {
+      "path": "relation_type_marks.strict",
+      "expected_phase0": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "actual_l3": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "status": "一致"
+    },
+    {
+      "path": "source_article_no_marks.strict",
+      "expected_phase0": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "empty_field_marks.strict",
+      "expected_phase0": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "entity_type_marks.A",
+      "expected_phase0": {
+        "已解決": 2481,
+        "不適用": 0,
+        "未知": 8828,
+        "尚未處理": 987,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 2481,
+        "不適用": 0,
+        "未知": 8828,
+        "尚未處理": 987,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "relation_type_marks.A",
+      "expected_phase0": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "actual_l3": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "status": "一致"
+    },
+    {
+      "path": "source_article_no_marks.A",
+      "expected_phase0": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "empty_field_marks.A",
+      "expected_phase0": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "entity_type_marks.B",
+      "expected_phase0": {
+        "已解決": 10504,
+        "不適用": 0,
+        "未知": 805,
+        "尚未處理": 987,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 10504,
+        "不適用": 0,
+        "未知": 805,
+        "尚未處理": 987,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "relation_type_marks.B",
+      "expected_phase0": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "actual_l3": {
+        "已解決": 1832,
+        "不適用": 0,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 14994
+      },
+      "status": "一致"
+    },
+    {
+      "path": "source_article_no_marks.B",
+      "expected_phase0": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 16773,
+        "不適用": 53,
+        "未知": 0,
+        "尚未處理": 0,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "empty_field_marks.B",
+      "expected_phase0": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "actual_l3": {
+        "已解決": 11545,
+        "不適用": 0,
+        "未知": 145,
+        "尚未處理": 5136,
+        "無法由現有資料判定": 0
+      },
+      "status": "一致"
+    },
+    {
+      "path": "fact_empties.combos",
+      "expected_phase0": {
+        "subject=0,object=0,verb=0": 11545,
+        "subject=0,object=0,verb=1": 482,
+        "subject=0,object=1,verb=0": 4597,
+        "subject=0,object=1,verb=1": 143,
+        "subject=1,object=0,verb=0": 26,
+        "subject=1,object=0,verb=1": 9,
+        "subject=1,object=1,verb=0": 22,
+        "subject=1,object=1,verb=1": 2
+      },
+      "actual_l3": {
+        "subject=0,object=0,verb=0": 11545,
+        "subject=0,object=1,verb=0": 4597,
+        "subject=0,object=0,verb=1": 482,
+        "subject=1,object=0,verb=0": 26,
+        "subject=0,object=1,verb=1": 143,
+        "subject=1,object=1,verb=1": 2,
+        "subject=1,object=1,verb=0": 22,
+        "subject=1,object=0,verb=1": 9
+      },
+      "status": "一致"
+    },
+    {
+      "path": "before_totals",
+      "expected_phase0": {
+        "nodes": 57451,
+        "rels": 137873,
+        "facts": 16826,
+        "entities": 12296
+      },
+      "actual_l3": {
+        "nodes": 57451,
+        "rels": 137873,
+        "facts": 16826,
+        "entities": 12296
+      },
+      "status": "一致"
+    },
+    {
+      "path": "after_totals",
+      "expected_phase0": {
+        "nodes": 57451,
+        "rels": 137873,
+        "facts": 16826,
+        "entities": 12296
+      },
+      "actual_l3": {
+        "nodes": 57451,
+        "rels": 137873,
+        "facts": 16826,
+        "entities": 12296
+      },
+      "status": "一致"
+    }
+  ],
+  "coverage": {
+    "entity_type": {
+      "population": 12296,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 0,
+      "derived_non_indeterminate_share": 0.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "relation_type": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 0,
+      "derived_non_indeterminate_share": 0.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "source_article_no": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 0,
+      "derived_non_indeterminate_share": 0.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "empty_fields_among_facts_with_any_empty": {
+      "population": 5281,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 0,
+      "derived_non_indeterminate_share": 0.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "entity_type.strict": {
+      "population": 12296,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 4273,
+      "derived_non_indeterminate_share": 0.3475113858165257,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "relation_type.strict": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 1832,
+      "derived_non_indeterminate_share": 0.10887911565434447,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "source_article_no.strict": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 16826,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "empty_fields_among_facts_with_any_empty.strict": {
+      "population": 5281,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 5281,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "entity_type.A": {
+      "population": 12296,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 12296,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "relation_type.A": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 1832,
+      "derived_non_indeterminate_share": 0.10887911565434447,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "source_article_no.A": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 16826,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "empty_fields_among_facts_with_any_empty.A": {
+      "population": 5281,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 5281,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "entity_type.B": {
+      "population": 12296,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 12296,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "relation_type.B": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 1832,
+      "derived_non_indeterminate_share": 0.10887911565434447,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "source_article_no.B": {
+      "population": 16826,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 16826,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    },
+    "empty_fields_among_facts_with_any_empty.B": {
+      "population": 5281,
+      "storage_explicit_marked": 0,
+      "storage_explicit_share": 0.0,
+      "derived_non_indeterminate": 5281,
+      "derived_non_indeterminate_share": 1.0,
+      "note": "乙為查詢時派生函式的輸出，不代表已寫入儲存層。"
+    }
+  },
+  "phase0_baseline_reference": {
+    "entity_type": {
+      "population": 12296,
+      "already_explicitly_marked": 0,
+      "already_explicitly_marked_share": 0.0,
+      "derivable_read_only": 4273,
+      "derivable_read_only_share": 0.3475,
+      "needs_human_or_llm": 8023,
+      "needs_human_or_llm_share": 0.6525,
+      "partition_ok": true,
+      "note": "嚴格算法：「概念」的預設／真實含意無法唯讀判定，列入需人工／LLM；A／B 兩種假設算法見 entity_type_marks。outside_raw 依報告201 §1.2 對應『尚未處理』，但 §1.1 指出無法分辨『尚未對應』與『已判定非 schema.org』。"
+    },
+    "relation_type": {
+      "population": 16826,
+      "already_explicitly_marked": 0,
+      "already_explicitly_marked_share": 0.0,
+      "derivable_read_only": 1832,
+      "derivable_read_only_share": 0.1089,
+      "needs_human_or_llm": 14994,
+      "needs_human_or_llm_share": 0.8911,
+      "partition_ok": true,
+      "note": "嚴格算法：僅非 RELATED_TO 可確定；RELATED_TO 來源不明（報告201 §2.1）。R-D 假設算法見 rel_type_marks。"
+    },
+    "source_article_no": {
+      "population": 16826,
+      "already_explicitly_marked": 0,
+      "already_explicitly_marked_share": 0.0,
+      "derivable_read_only": 16826,
+      "derivable_read_only_share": 1.0,
+      "needs_human_or_llm": 0,
+      "needs_human_or_llm_share": 0.0,
+      "partition_ok": true,
+      "note": "母體＝邊上的引用（citations_json）；文件層判定，本 KG 100% 可唯讀確定。"
+    },
+    "empty_fields_among_facts_with_any_empty": {
+      "population": 5281,
+      "already_explicitly_marked": 0,
+      "already_explicitly_marked_share": 0.0,
+      "derivable_read_only": 145,
+      "derivable_read_only_share": 0.0275,
+      "needs_human_or_llm": 5136,
+      "needs_human_or_llm_share": 0.9725,
+      "partition_ok": true,
+      "note": "母體＝至少有一個空欄位（主詞／受詞／verb）的 Fact；完整 Fact 不需標示。唯讀可確定＝空受詞且空 verb；其餘需人工／LLM 區分『不適用』與『未知』。"
+    }
+  },
+  "totals_identical": true,
+  "cypher_log": [
+    {
+      "label": "before:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    },
+    {
+      "label": "L3 儲存層節點屬性鍵",
+      "cypher": "MATCH (n {kg_id: $k}) UNWIND keys(n) AS key RETURN labels(n)[0] AS owner, key, count(*) AS n ORDER BY owner, n DESC",
+      "rows": 43
+    },
+    {
+      "label": "L3 儲存層關係屬性鍵",
+      "cypher": "MATCH ()-[r {kg_id: $k}]->() UNWIND keys(r) AS key RETURN type(r) AS owner, key, count(*) AS n ORDER BY owner, n DESC",
+      "rows": 112
+    },
+    {
+      "label": "L3 Entity type 分布",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN e.type AS t, count(*) AS n",
+      "rows": 351
+    },
+    {
+      "label": "L3 Fact rel_type 分布",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN f.rel_type AS t, count(*) AS n",
+      "rows": 28
+    },
+    {
+      "label": "L3 事實邊 citations_json",
+      "cypher": "MATCH (s:Entity {kg_id: $k})-[r]->(o:Entity {kg_id: $k}) WHERE r.citations_json IS NOT NULL RETURN r.citations_json AS c",
+      "rows": 14021
+    },
+    {
+      "label": "L3 Fact 空欄位組合",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN trim(coalesce(f.subject, '')) = '' AS es, trim(coalesce(f.object, '')) = '' AS eo, trim(coalesce(f.verb, '')) = '' AS ev, count(*) AS n",
+      "rows": 8
+    },
+    {
+      "label": "after:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    }
+  ]
+}
