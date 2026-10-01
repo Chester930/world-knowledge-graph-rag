@@ -119,7 +119,7 @@ K2 的基準線將成為 v0.2 §10 的新基準；K3 的結果將更新 §10.7 �
 
 | ID | 狀態 | 結論 | commit | 備註 |
 | --- | --- | --- | --- | --- |
-| K1 | ⏳ 已派工 | — | — | — |
+| K1 | ✅ 通過（規劃對話自行 AST 比對與讀新註解） | 改 2 檔僅註解：`services/svo_service.py` 兩處（原 1256-1266 與同一錯誤說法的 1786-1791）、`models/knowledge_graph.py` 一處（212-217）。依逐字讀 `fact_lines.py` 改寫：現行 `is_contentful_line` 只看渲染後文字、空受詞但 payload 在 verb 的事實**保留**、空主詞丟棄、舊 `not t.subject or not t.object` 過濾已於報告25 §4 發現6 移除；`source_sentence_start/end` 改為 chunk／條文內相對索引、追溯鍵＝chunk＋`source_article_no`（僅 SVOGROUP 才是全域索引）。Grep 全專案同一錯誤說法：`svo_service.py:1788` 已改；僅列不改：`svo_chunking.py:5` 模組 docstring、`extraction_worker.py:66` docstring（描述中性）、`parser/core.py:912`（談 SVOGROUP）。全量 pytest 1593 passed／0 failed | `24014e8` | **我驗**：自行用 `ast.parse` 比對 `24014e8~1` 與 `24014e8` 兩個 production 檔，`svo_service.py` 與 `knowledge_graph.py` 的 `ast.dump` **皆完全相同**，**非註解的改動行 0**（svo_service 31 行、knowledge_graph 8 行皆為註解）；本 commit 動到的非文件檔僅這兩個；新註解逐項對照 `services/context/fact_lines.py`（`is_contentful_line:39-53`、`_add_bfs:97-98` 空主詞 return、`_add_fact:115-117` 空主詞 return）與現況一致。全量 pytest 1593 採信執行對話（變更僅註解且 AST 相同，風險極低） |
 | K2 | ⏳ 已派工 | — | — | — |
 | K3 | ⏳ 已派工 | — | — | — |
 | K4 | ⏳ 待執行 | — | — | — |
