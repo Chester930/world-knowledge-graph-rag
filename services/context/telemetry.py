@@ -47,6 +47,10 @@ def build_retrieval_trace(
     triples: list[SVOTriple],
     fact_results: list[dict],
     prompt_lines: list[list[str]] | None,
+    include_semantic_marks: bool = False,
+    concept_scheme: str = "A",
+    type_lookups: tuple[dict[str, str], dict[str, str]] | None = None,
+    document_article_applicable: dict[str, bool] | None = None,
 ) -> dict:
     """報告62 T0：把「檢索到什麼、排第幾、有沒有進 prompt」整理成可序列化的 trace。
 
@@ -62,7 +66,39 @@ def build_retrieval_trace(
     `_split_fact_lines()` 去重／過濾掉的證據本來就不會出現在任何 prompt 行，
     因此 `in_prompt=False`，不等於「被截斷」——兩種情況要看 `prompt_lines`
     與 rank 一起判讀。
+
+    `include_semantic_marks`（報告216 M1，影子模式，預設關閉）：為 True 時，每筆 fact／triple
+    多一個 `semantic_marks` 鍵，內容由 `services/semantic_marks.py` 純派生（PROVISIONAL，
+    不寫回資料、不影響排序／截斷／prompt）；False 時輸出與新增前完全相同。
+    `concept_scheme`：「概念」佔位的處理（A／B／strict）。`type_lookups`：`(core_lookup, ext_lookup)`，
+    僅 triple 的實體型別標示需要，未提供則省略 `subject_type`／`object_type`。
+    `document_article_applicable`：`source_doc_id` → 該文件是否適用條號；無條號且查無此文件時標為
+    「無法由現有資料判定」，不猜測。
     """
+    if include_semantic_marks:
+        from services import semantic_marks as _sm
+
+        if concept_scheme not in _sm.CONCEPT_SCHEMES:
+            raise ValueError(f"concept_scheme 必須是 {_sm.CONCEPT_SCHEMES} 之一，收到 {concept_scheme!r}")
+
+        def _marks(subject, obj, verb, rel_type, article_no, doc_id, subject_type=None, object_type=None):
+            if _sm.has_article_no(article_no):
+                article_mark = _sm.RESOLVED
+            elif document_article_applicable is not None and doc_id in document_article_applicable:
+                article_mark = _sm.mark_article_no(article_no, document_article_applicable[doc_id])
+            else:
+                article_mark = _sm.INDETERMINATE
+            marks = {
+                "fields": _sm.mark_fact_fields(subject, obj, verb),
+                "relation_type": _sm.mark_relation_type(rel_type),
+                "article_no": article_mark,
+            }
+            if type_lookups is not None and subject_type is not None:
+                core, ext = type_lookups
+                marks["subject_type"] = _sm.mark_entity_type(subject_type, core, ext, concept_scheme)
+                marks["object_type"] = _sm.mark_entity_type(object_type, core, ext, concept_scheme)
+            return marks
+
     prompt_set = (
         {ln for lines in prompt_lines for ln in lines} if prompt_lines is not None else None
     )
@@ -84,6 +120,11 @@ def build_retrieval_trace(
             "article_no": f.get("article_no"),
             "in_prompt": _in_prompt(f"- {strip_type_markers(text)}"),
         })
+        if include_semantic_marks:
+            fact_entries[-1]["semantic_marks"] = _marks(
+                f.get("subject"), f.get("object"), f.get("verb"), f.get("rel_type"),
+                f.get("article_no"), fact_entries[-1]["source_doc_id"],
+            )
 
     triple_entries = []
     for rank, t in enumerate(triples):
@@ -103,6 +144,11 @@ def build_retrieval_trace(
             "article_no": t.source_article_no,
             "in_prompt": _in_prompt(f"- {strip_type_markers(raw or '')}"),
         })
+        if include_semantic_marks:
+            triple_entries[-1]["semantic_marks"] = _marks(
+                t.subject, t.object, t.verb, t.rel_type, t.source_article_no,
+                triple_entries[-1]["source_doc_id"], t.subject_type, t.object_type,
+            )
 
     return {"facts": fact_entries, "triples": triple_entries, "prompt_lines": prompt_lines}
 
