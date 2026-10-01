@@ -69,6 +69,6 @@
 
 | ID | 狀態 | 結論 | commit | 備註 |
 | --- | --- | --- | --- | --- |
-| M1 | ⏳ 待使用者同意後派工 | — | — | — |
+| M1 | ✅ 通過（Claude 執行對話完成；規劃對話獨立驗證） | `build_retrieval_trace()` 新增 4 個選用參數（`include_semantic_marks=False`、`concept_scheme="A"`、`type_lookups=None`、`document_article_applicable=None`）；旗標開啟時每筆 fact／triple 多 `semantic_marks` 鍵；全量 pytest 1656 passed（基準 1646＋10 新測試） | `7faa62e`（報告216） | **我驗**：範圍＝`git diff --name-status` 僅 `telemetry.py`（+46 行、0 刪）、新測試檔、報告216；未動規劃文件／其他 production／資料。**`ast.dump` 前後比對**：模組層節點 only_old／only_new 皆空，唯一變動的是 `build_retrieval_trace`，原三參數順序不變、僅尾端追加 4 個帶預設值參數，`semantic_marks` 於旗標分支內才 import。**無接線**：`git grep` 除 `telemetry.py` 本身外，非測試的 production 檔無任何引用；`routers/agent.py` 仍以舊三參數呼叫（旗標恆為預設關閉，行為零變更）。**全量 pytest 我重跑＝1656 passed／0 failed**（63 秒）。**我看到的設計細節**：①fact 路徑不傳實體型別，所以 fact 只有 `fields`／`relation_type`／`article_no` 三項標示，實體型別標示只在 triple 且提供 `type_lookups` 時出現——M2 離線重放時要注意 fact 缺實體型別維度；②無條號且查無文件適用資訊時標「無法由現有資料判定」（不猜，符合任務書）；③無效 `concept_scheme` 會 `ValueError`（僅旗標開啟時） |
 | M2 | ⏳ | — | — | — |
 | M3 | ⏳ | — | — | — |
