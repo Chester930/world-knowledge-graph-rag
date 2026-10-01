@@ -55,6 +55,41 @@ K2／K3（條文擴充）有條號的 Fact 進 prompt 比例：K2 stage_a 661/1,
 - 選項 A：授權一次唯讀 join（KG#4，`assert_read_only`／`ReadOnlyRunner`、前後總數 57,451／137,873／16,826／12,296、先 `ListAgents`），以 `(source_doc_id, source_svo_chunk_index, fact_text)` 對回 Fact 取欄位後重放 M1 派生。
 - 選項 B：日後讓 `build_retrieval_trace` 的呼叫端在下次評測時保存 `semantic_marks`（即 M1 旗標），屬新評測，需另行決定。
 
-## 7. 驗證
+## 7. 驗證（§1–§6 的離線部分）
 
-腳本 5 項單元測試通過；腳本唯讀 `data/eval`，輸出僅寫 `data/analysis/semantic_marks_replay_20261001.json`；未連線、未改 production。
+腳本 5 項單元測試通過；離線部分唯讀 `data/eval`，輸出寫 `data/analysis/semantic_marks_replay_20261001.json`；未連線、未改 production。
+
+## 8. 補充：唯讀 join 結果（使用者於 2026-10-01 授權選項 A）
+
+**做法**：`python scripts/analysis/semantic_marks_replay.py --join-neo4j --env-file <.env> --out data/analysis/semantic_marks_replay_join_20261001.json`。沿用 `ReadOnlyRunner`（READ session＋`assert_read_only` 白名單），只執行 1 條 Fact 全表查詢（`MATCH (f:Fact {kg_id}) OPTIONAL MATCH (f)-[:SUPPORTED_BY]->(a:LawArticle) RETURN …`）加前後各 4 條總數查詢；前後總數均為 57,451／137,873／16,826／12,296，**完全一致**（`totals_identical=true`）。`ListAgents` 確認當時無其他會連 Neo4j 的 session（唯一 peer 為規劃對話）；未啟動 Ollama、未印出密碼、KG#4 未寫入。以 `(source_doc_id, source_svo_chunk_index, fact_text)` 對回 Fact，再用 `services/semantic_marks.py` 對等函式派生（文件層條號適用性取自 Fact 全表：該文件任一 Fact 有 `LawArticle.article_no` 即「適用」）。同鍵多筆且標示不一致者列為「歧義」不計入（KG#4 有 225 組重複鍵；實測各檔歧義＝0）。**只涵蓋 Fact；triple 的標示未做**（edge 無 Fact 對應鍵，且實體型別需另 join Entity，列為剩餘缺口）。
+
+### 8.1 Fact「欄位完整性」與「關係型別」分布（以對到的 Fact 為分母）
+
+| 來源設定 | Fact 筆數 | 對到（未對到） | 被檢索：已解決（完整）／尚未處理／未知 | 進 prompt：已解決／尚未處理／未知 | 關係型別「已解決」占比（被檢索／進 prompt） |
+| --- | --- | --- | --- | --- | --- |
+| 凍結基準 s0（r1+resume1+r2） | 1,460 | 1,460（0） | 1,160（79.5%）／290（19.9%）／10（0.7%） | 836（75.9%）／266（24.1%）／0 （共1,102） | 9.9%／9.4% |
+| s2_k1_topk40（a+b+c） | 2,811 | 2,811（0） | 2,156（76.7%）／637（22.7%）／18（0.6%） | 1,101（73.3%）／402（26.7%）／0 （共1,503） | 10.5%／9.6% |
+| s2_k2 條文擴充（a+b+c） | 4,231 | 4,231（0） | 3,127（73.9%）／1,042（24.6%）／62（1.5%） | 1,110（73.3%）／405（26.7%）／0 （共1,515） | 10.7%／9.0% |
+| s2_k3 條文擴充 top40（a+b+c） | 8,293 | 8,293（0） | 6,280（75.7%）／1,931（23.3%）／82（1.0%） | 1,181（73.8%）／420（26.2%）／0 （共1,601） | 10.2%／8.8% |
+| t2_k1_topk40（全部 stage） | 3,026 | 2,881（145） | 2,186（75.9%）／678（23.5%）／17（0.6%） | 1,620（72.3%）／621（27.7%）／0 （共2,241） | 10.3%／9.8% |
+
+（逐檔數字見 `data/analysis/semantic_marks_replay_join_20261001.json`。同一事實跨 stage／run 會重複計，僅描述各設定內的分布，不跨設定相加。）
+
+**Phase 0 全圖對照（Fact 16,826）**：完整 68.6%／尚未處理 30.5%／未知 0.9%；關係型別「已解決」10.9%（其餘 RELATED_TO＝來源不明）。
+
+### 8.2 描述性觀察（不作品質結論）
+
+1. **被檢索 Fact 的「尚未處理」占比（19.9%–24.6%）低於全圖 30.5%，「完整」占比（73.9%–79.5%）高於全圖 68.6%**——檢索結果中殘缺事實略少於母體，各設定方向一致。
+2. **進 prompt 的 Fact 中「尚未處理」占比（24.1%–27.7%）又高於被檢索集合（19.9%–24.6%）**；進 prompt 的「未知」（空受詞且空 verb）在所有設定皆為 **0 筆**，與現行 `is_contentful_line`／渲染過濾一致（被檢索的「未知」共 10–82 筆）。換言之，現行過濾已排除「未知」，但「尚未處理」（多為空受詞但有 verb）大量進入 prompt，約每 4 筆進 prompt 的 Fact 有 1 筆屬此類——這正是 215 §1 P1／P2 所指與現行過濾重疊之處。
+3. **關係型別**：被檢索與進 prompt 的 Fact 中，「已解決」（非 RELATED_TO）約 9–11%，與全圖 10.9% 接近；進 prompt 略低（8.8%–9.8%）。
+4. **條號**：對到的 Fact 幾乎都有條號（「已解決」；僅 2 筆「不適用」，屬無條號文件），與 Phase 0（99.7%）一致；§4 的 trace 內「無法判定」確為 trace 欄位缺失造成的重放假象。
+5. 未對到（`t2_k1_topk40` 系列 145 筆）：該批 run 為較早的 KG 狀態（Fact 文字後來有變動），其餘設定 0 筆未對到。
+
+### 8.3 剩餘缺口
+
+- triple（BFS 邊）標示與實體型別標示未做（需 edge／Entity join，且 trace 的 triple `text` 為自然語句）。
+- 這些是「被檢索／進 prompt 的描述性分布」，**不顯示殘缺事實是否影響答案品質**，亦未與答對／答錯交叉；是否接進 prompt 或降權屬使用者決定（215 §5-3）。
+
+### 8.4 驗證
+
+腳本單元測試 9 項（含 join 函式以假 runner 測，無需連線）；全量 pytest 見回報。

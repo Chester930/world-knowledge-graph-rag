@@ -1,0 +1,964 @@
+{
+  "per_file": {
+    "baseline_runs/20260923_rebased/stage_s0_r1/records.json": {
+      "fact_entries": 760,
+      "matched": 760,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 605,
+          "尚未處理": 151,
+          "未知": 4
+        },
+        "relation_type": {
+          "無法由現有資料判定": 687,
+          "已解決": 73
+        },
+        "article_no": {
+          "已解決": 758,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 427,
+          "尚未處理": 136
+        },
+        "relation_type": {
+          "無法由現有資料判定": 512,
+          "已解決": 51
+        },
+        "article_no": {
+          "已解決": 561,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 563
+    },
+    "baseline_runs/20260923_rebased/stage_s0_r1_resume1/records.json": {
+      "fact_entries": 60,
+      "matched": 60,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "尚未處理": 15,
+          "已解決": 44,
+          "未知": 1
+        },
+        "relation_type": {
+          "無法由現有資料判定": 53,
+          "已解決": 7
+        },
+        "article_no": {
+          "已解決": 60
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "尚未處理": 14,
+          "已解決": 36
+        },
+        "relation_type": {
+          "無法由現有資料判定": 45,
+          "已解決": 5
+        },
+        "article_no": {
+          "已解決": 50
+        }
+      },
+      "in_prompt_matched": 50
+    },
+    "baseline_runs/20260923_rebased/stage_s0_r2/records.json": {
+      "fact_entries": 640,
+      "matched": 640,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 511,
+          "尚未處理": 124,
+          "未知": 5
+        },
+        "relation_type": {
+          "無法由現有資料判定": 575,
+          "已解決": 65
+        },
+        "article_no": {
+          "已解決": 638,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 373,
+          "尚未處理": 116
+        },
+        "relation_type": {
+          "無法由現有資料判定": 441,
+          "已解決": 48
+        },
+        "article_no": {
+          "已解決": 487,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 489
+    },
+    "candidate_runs/s1_k1b_topk40_bfs16_stage_a/records.json": {
+      "fact_entries": 1633,
+      "matched": 1633,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 1256,
+          "尚未處理": 368,
+          "未知": 9
+        },
+        "relation_type": {
+          "無法由現有資料判定": 1468,
+          "已解決": 165
+        },
+        "article_no": {
+          "已解決": 1631,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 644,
+          "尚未處理": 231
+        },
+        "relation_type": {
+          "無法由現有資料判定": 793,
+          "已解決": 82
+        },
+        "article_no": {
+          "已解決": 873,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 875
+    },
+    "candidate_runs/s1_k1b_topk40_bfs16_stage_b/records.json": {
+      "fact_entries": 1138,
+      "matched": 1138,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 870,
+          "尚未處理": 260,
+          "未知": 8
+        },
+        "relation_type": {
+          "無法由現有資料判定": 1012,
+          "已解決": 126
+        },
+        "article_no": {
+          "已解決": 1136,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 432,
+          "尚未處理": 161
+        },
+        "relation_type": {
+          "無法由現有資料判定": 534,
+          "已解決": 59
+        },
+        "article_no": {
+          "已解決": 591,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 593
+    },
+    "candidate_runs/s2_k1_topk40_stage_a/records.json": {
+      "fact_entries": 1560,
+      "matched": 1560,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 1196,
+          "尚未處理": 355,
+          "未知": 9
+        },
+        "relation_type": {
+          "無法由現有資料判定": 1398,
+          "已解決": 162
+        },
+        "article_no": {
+          "已解決": 1558,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 607,
+          "尚未處理": 224
+        },
+        "relation_type": {
+          "無法由現有資料判定": 751,
+          "已解決": 80
+        },
+        "article_no": {
+          "已解決": 829,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 831
+    },
+    "candidate_runs/s2_k1_topk40_stage_b/records.json": {
+      "fact_entries": 1131,
+      "matched": 1131,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 864,
+          "尚未處理": 260,
+          "未知": 7
+        },
+        "relation_type": {
+          "無法由現有資料判定": 1023,
+          "已解決": 108
+        },
+        "article_no": {
+          "已解決": 1129,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 446,
+          "尚未處理": 163
+        },
+        "relation_type": {
+          "無法由現有資料判定": 555,
+          "已解決": 54
+        },
+        "article_no": {
+          "已解決": 607,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 609
+    },
+    "candidate_runs/s2_k1_topk40_stage_c/records.json": {
+      "fact_entries": 120,
+      "matched": 120,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 96,
+          "尚未處理": 22,
+          "未知": 2
+        },
+        "relation_type": {
+          "無法由現有資料判定": 95,
+          "已解決": 25
+        },
+        "article_no": {
+          "已解決": 120
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 48,
+          "尚未處理": 15
+        },
+        "relation_type": {
+          "無法由現有資料判定": 52,
+          "已解決": 11
+        },
+        "article_no": {
+          "已解決": 63
+        }
+      },
+      "in_prompt_matched": 63
+    },
+    "candidate_runs/s2_k2_article_expand_stage_a/records.json": {
+      "fact_entries": 2373,
+      "matched": 2373,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 1756,
+          "尚未處理": 584,
+          "未知": 33
+        },
+        "relation_type": {
+          "無法由現有資料判定": 2128,
+          "已解決": 245
+        },
+        "article_no": {
+          "已解決": 2371,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 638,
+          "尚未處理": 226
+        },
+        "relation_type": {
+          "無法由現有資料判定": 789,
+          "已解決": 75
+        },
+        "article_no": {
+          "已解決": 864
+        }
+      },
+      "in_prompt_matched": 864
+    },
+    "candidate_runs/s2_k2_article_expand_stage_b/records.json": {
+      "fact_entries": 1736,
+      "matched": 1736,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 1265,
+          "尚未處理": 443,
+          "未知": 28
+        },
+        "relation_type": {
+          "無法由現有資料判定": 1558,
+          "已解決": 178
+        },
+        "article_no": {
+          "已解決": 1734,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 442,
+          "尚未處理": 171
+        },
+        "relation_type": {
+          "無法由現有資料判定": 560,
+          "已解決": 53
+        },
+        "article_no": {
+          "已解決": 613
+        }
+      },
+      "in_prompt_matched": 613
+    },
+    "candidate_runs/s2_k2_article_expand_stage_c/records.json": {
+      "fact_entries": 122,
+      "matched": 122,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 106,
+          "尚未處理": 15,
+          "未知": 1
+        },
+        "relation_type": {
+          "已解決": 28,
+          "無法由現有資料判定": 94
+        },
+        "article_no": {
+          "已解決": 122
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 30,
+          "尚未處理": 8
+        },
+        "relation_type": {
+          "已解決": 9,
+          "無法由現有資料判定": 29
+        },
+        "article_no": {
+          "已解決": 38
+        }
+      },
+      "in_prompt_matched": 38
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_a/records.json": {
+      "fact_entries": 4558,
+      "matched": 4558,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 3444,
+          "尚未處理": 1070,
+          "未知": 44
+        },
+        "relation_type": {
+          "無法由現有資料判定": 4091,
+          "已解決": 467
+        },
+        "article_no": {
+          "已解決": 4556,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 653,
+          "尚未處理": 234
+        },
+        "relation_type": {
+          "無法由現有資料判定": 808,
+          "已解決": 79
+        },
+        "article_no": {
+          "已解決": 887
+        }
+      },
+      "in_prompt_matched": 887
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_b/records.json": {
+      "fact_entries": 3612,
+      "matched": 3612,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 2739,
+          "尚未處理": 835,
+          "未知": 38
+        },
+        "relation_type": {
+          "無法由現有資料判定": 3246,
+          "已解決": 366
+        },
+        "article_no": {
+          "已解決": 3610,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 513,
+          "尚未處理": 181
+        },
+        "relation_type": {
+          "無法由現有資料判定": 632,
+          "已解決": 62
+        },
+        "article_no": {
+          "已解決": 694
+        }
+      },
+      "in_prompt_matched": 694
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_c/records.json": {
+      "fact_entries": 123,
+      "matched": 123,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 97,
+          "尚未處理": 26
+        },
+        "relation_type": {
+          "無法由現有資料判定": 110,
+          "已解決": 13
+        },
+        "article_no": {
+          "已解決": 123
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 15,
+          "尚未處理": 5
+        },
+        "relation_type": {
+          "無法由現有資料判定": 20
+        },
+        "article_no": {
+          "已解決": 20
+        }
+      },
+      "in_prompt_matched": 20
+    },
+    "candidate_runs/t0_trace_check_20260921/records.json": {
+      "fact_entries": 20,
+      "matched": 20,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 16,
+          "尚未處理": 4
+        },
+        "relation_type": {
+          "無法由現有資料判定": 19,
+          "已解決": 1
+        },
+        "article_no": {
+          "已解決": 19,
+          "不適用": 1
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 15,
+          "尚未處理": 4
+        },
+        "relation_type": {
+          "無法由現有資料判定": 18,
+          "已解決": 1
+        },
+        "article_no": {
+          "已解決": 18,
+          "不適用": 1
+        }
+      },
+      "in_prompt_matched": 19
+    },
+    "candidate_runs/t2_k1_topk40_stage_a/records.json": {
+      "fact_entries": 1054,
+      "matched": 1011,
+      "unmatched": 43,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 760,
+          "尚未處理": 250,
+          "未知": 1
+        },
+        "relation_type": {
+          "無法由現有資料判定": 925,
+          "已解決": 86
+        },
+        "article_no": {
+          "已解決": 1009,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 553,
+          "尚未處理": 230
+        },
+        "relation_type": {
+          "無法由現有資料判定": 719,
+          "已解決": 64
+        },
+        "article_no": {
+          "已解決": 781,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 783
+    },
+    "candidate_runs/t2_k1_topk40_stage_a2/records.json": {
+      "fact_entries": 539,
+      "matched": 522,
+      "unmatched": 17,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 404,
+          "尚未處理": 110,
+          "未知": 8
+        },
+        "relation_type": {
+          "無法由現有資料判定": 454,
+          "已解決": 68
+        },
+        "article_no": {
+          "已解決": 522
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 305,
+          "尚未處理": 101
+        },
+        "relation_type": {
+          "無法由現有資料判定": 356,
+          "已解決": 50
+        },
+        "article_no": {
+          "已解決": 406
+        }
+      },
+      "in_prompt_matched": 406
+    },
+    "candidate_runs/t2_k1_topk40_stage_a3/records.json": {
+      "fact_entries": 40,
+      "matched": 31,
+      "unmatched": 9,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 26,
+          "尚未處理": 5
+        },
+        "relation_type": {
+          "無法由現有資料判定": 26,
+          "已解決": 5
+        },
+        "article_no": {
+          "已解決": 31
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 21,
+          "尚未處理": 4
+        },
+        "relation_type": {
+          "無法由現有資料判定": 21,
+          "已解決": 4
+        },
+        "article_no": {
+          "已解決": 25
+        }
+      },
+      "in_prompt_matched": 25
+    },
+    "candidate_runs/t2_k1_topk40_stage_b/records.json": {
+      "fact_entries": 454,
+      "matched": 423,
+      "unmatched": 31,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 298,
+          "尚未處理": 124,
+          "未知": 1
+        },
+        "relation_type": {
+          "無法由現有資料判定": 390,
+          "已解決": 33
+        },
+        "article_no": {
+          "已解決": 423
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 205,
+          "尚未處理": 118
+        },
+        "relation_type": {
+          "無法由現有資料判定": 301,
+          "已解決": 22
+        },
+        "article_no": {
+          "已解決": 323
+        }
+      },
+      "in_prompt_matched": 323
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2a/records.json": {
+      "fact_entries": 320,
+      "matched": 315,
+      "unmatched": 5,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 249,
+          "尚未處理": 66
+        },
+        "relation_type": {
+          "無法由現有資料判定": 290,
+          "已解決": 25
+        },
+        "article_no": {
+          "已解決": 313,
+          "不適用": 2
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "尚未處理": 60,
+          "已解決": 190
+        },
+        "relation_type": {
+          "無法由現有資料判定": 228,
+          "已解決": 22
+        },
+        "article_no": {
+          "已解決": 248,
+          "不適用": 2
+        }
+      },
+      "in_prompt_matched": 250
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2b/records.json": {
+      "fact_entries": 280,
+      "matched": 265,
+      "unmatched": 15,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "尚未處理": 52,
+          "已解決": 210,
+          "未知": 3
+        },
+        "relation_type": {
+          "無法由現有資料判定": 224,
+          "已解決": 41
+        },
+        "article_no": {
+          "已解決": 265
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "尚未處理": 44,
+          "已解決": 160
+        },
+        "relation_type": {
+          "無法由現有資料判定": 180,
+          "已解決": 24
+        },
+        "article_no": {
+          "已解決": 204
+        }
+      },
+      "in_prompt_matched": 204
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2c/records.json": {
+      "fact_entries": 259,
+      "matched": 247,
+      "unmatched": 12,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 188,
+          "尚未處理": 55,
+          "未知": 4
+        },
+        "relation_type": {
+          "已解決": 30,
+          "無法由現有資料判定": 217
+        },
+        "article_no": {
+          "已解決": 247
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 144,
+          "尚未處理": 51
+        },
+        "relation_type": {
+          "已解決": 26,
+          "無法由現有資料判定": 169
+        },
+        "article_no": {
+          "已解決": 195
+        }
+      },
+      "in_prompt_matched": 195
+    },
+    "candidate_runs/t2_k1_topk40_stage_c/records.json": {
+      "fact_entries": 80,
+      "matched": 67,
+      "unmatched": 13,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 51,
+          "尚未處理": 16
+        },
+        "relation_type": {
+          "無法由現有資料判定": 58,
+          "已解決": 9
+        },
+        "article_no": {
+          "已解決": 67
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 42,
+          "尚未處理": 13
+        },
+        "relation_type": {
+          "無法由現有資料判定": 47,
+          "已解決": 8
+        },
+        "article_no": {
+          "已解決": 55
+        }
+      },
+      "in_prompt_matched": 55
+    },
+    "candidate_runs/t2_probe_topk40_20260921/records.json": {
+      "fact_entries": 40,
+      "matched": 40,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 32,
+          "尚未處理": 8
+        },
+        "relation_type": {
+          "無法由現有資料判定": 38,
+          "已解決": 2
+        },
+        "article_no": {
+          "已解決": 39,
+          "不適用": 1
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 25,
+          "尚未處理": 6
+        },
+        "relation_type": {
+          "無法由現有資料判定": 29,
+          "已解決": 2
+        },
+        "article_no": {
+          "已解決": 30,
+          "不適用": 1
+        }
+      },
+      "in_prompt_matched": 31
+    },
+    "p2_snapshot_20260929/run1/records.json": {
+      "fact_entries": 66,
+      "matched": 66,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 53,
+          "尚未處理": 13
+        },
+        "relation_type": {
+          "無法由現有資料判定": 60,
+          "已解決": 6
+        },
+        "article_no": {
+          "已解決": 66
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 38,
+          "尚未處理": 11
+        },
+        "relation_type": {
+          "無法由現有資料判定": 45,
+          "已解決": 4
+        },
+        "article_no": {
+          "已解決": 49
+        }
+      },
+      "in_prompt_matched": 49
+    },
+    "p2_snapshot_20260929/run2/records.json": {
+      "fact_entries": 66,
+      "matched": 66,
+      "unmatched": 0,
+      "ambiguous": 0,
+      "retrieved": {
+        "fields": {
+          "已解決": 53,
+          "尚未處理": 13
+        },
+        "relation_type": {
+          "無法由現有資料判定": 60,
+          "已解決": 6
+        },
+        "article_no": {
+          "已解決": 66
+        }
+      },
+      "in_prompt": {
+        "fields": {
+          "已解決": 38,
+          "尚未處理": 11
+        },
+        "relation_type": {
+          "無法由現有資料判定": 45,
+          "已解決": 4
+        },
+        "article_no": {
+          "已解決": 49
+        }
+      },
+      "in_prompt_matched": 49
+    }
+  },
+  "fact_index_keys": 16551,
+  "before": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "after": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "totals_identical": true,
+  "cypher_log": [
+    {
+      "label": "before:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    },
+    {
+      "label": "M2 join：Fact 全表",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) OPTIONAL MATCH (f)-[:SUPPORTED_BY]->(a:LawArticle) RETURN f.source_doc_id AS doc, f.source_svo_chunk_index AS idx, f.fact_text AS text, f.subject AS subject, f.object AS object, f.verb AS verb, f.rel_type AS rel_type, a.article_no AS article_no",
+      "rows": 16826
+    },
+    {
+      "label": "after:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    }
+  ]
+}

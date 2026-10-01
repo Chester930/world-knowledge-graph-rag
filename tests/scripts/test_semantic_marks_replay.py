@@ -80,3 +80,70 @@ def test_run_dedups_across_files_and_skips_backup(tmp_path):
     assert u["by_kind"]["fact"]["retrieved"] == 1
     assert u["by_kind"]["fact"]["in_prompt_true"] == 1  # 任一次進過即計
     assert "fields" in res["not_replayable"]
+
+
+# ── 唯讀 join（報告217 §8）──────────────────────────────────────────────────
+class _FakeRunner:
+    def __init__(self, rows):
+        self.rows = rows
+        self.calls = []
+
+    def run(self, label, cypher, **params):
+        self.calls.append((label, cypher, params))
+        return self.rows
+
+
+def _row(doc, idx, text, s="甲", o="乙", v="規定", rel="REGULATES", art="第1條"):
+    return {"doc": doc, "idx": idx, "text": text, "subject": s, "object": o, "verb": v,
+            "rel_type": rel, "article_no": art}
+
+
+def test_fetch_fact_table_uses_runner_with_kg_param_and_is_read_only_cypher():
+    r = _FakeRunner([_row("d", 1, "t")])
+    assert replay.fetch_fact_table(r, "kg1") == r.rows
+    assert r.calls[0][2] == {"k": "kg1"}
+    words = set(r.calls[0][1].upper().split())
+    assert not words & {"SET", "MERGE", "DELETE", "CREATE", "REMOVE"}
+
+
+def test_build_index_marks_and_document_level_article_applicability():
+    rows = [
+        _row("d1", 1, "完整"),
+        _row("d1", 2, "空受詞", o="", rel="RELATED_TO", art=None),  # d1 有條號 → 此筆無條號＝未知
+        _row("d2", 1, "空受詞空verb", o=" ", v="", art=None),      # d2 全無條號 → 不適用
+    ]
+    idx = replay.build_fact_index(rows)
+    assert idx[("d1", 1, "完整")][0] == {
+        "fields": sm.RESOLVED, "relation_type": sm.RESOLVED, "article_no": sm.RESOLVED}
+    m2 = idx[("d1", 2, "空受詞")][0]
+    assert (m2["fields"], m2["relation_type"], m2["article_no"]) == (sm.PENDING, sm.INDETERMINATE, sm.UNKNOWN)
+    m3 = idx[("d2", 1, "空受詞空verb")][0]
+    assert (m3["fields"], m3["article_no"]) == (sm.UNKNOWN, sm.NOT_APPLICABLE)
+
+
+def test_join_summarize_matched_unmatched_ambiguous_and_in_prompt():
+    rows = [
+        _row("d1", 1, "完整"),
+        _row("d1", 2, "空受詞", o=""),
+        _row("d1", 3, "重複", o=""), _row("d1", 3, "重複", o="乙"),    # 同鍵但標示不一致 → 歧義
+        _row("d1", 4, "重複同", o=""), _row("d1", 4, "重複同", o=""),  # 同鍵且標示一致 → 可用
+    ]
+    idx = replay.build_fact_index(rows)
+    entries = [
+        ("Q", _e("fact", "完整", True, doc="d1", idx=1)),
+        ("Q", _e("fact", "空受詞", False, doc="d1", idx=2)),
+        ("Q", _e("fact", "不存在", True, doc="d1", idx=9)),
+        ("Q", _e("fact", "重複", True, doc="d1", idx=3)),
+        ("Q", _e("fact", "重複同", True, doc="d1", idx=4)),
+        ("Q", _e("triple", "忽略", True)),
+    ]
+    s = replay.join_summarize(entries, idx)
+    assert (s["fact_entries"], s["matched"], s["unmatched"], s["ambiguous"]) == (5, 3, 1, 1)
+    assert s["retrieved"]["fields"] == {sm.RESOLVED: 1, sm.PENDING: 2}
+    assert s["in_prompt"]["fields"] == {sm.RESOLVED: 1, sm.PENDING: 1}
+    assert s["in_prompt_matched"] == 2
+
+
+def test_join_summarize_empty():
+    s = replay.join_summarize([], {})
+    assert s["fact_entries"] == 0 and s["retrieved"]["fields"] == {}
