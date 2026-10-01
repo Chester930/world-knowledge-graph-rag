@@ -1254,15 +1254,18 @@ async def merge_triples_to_graph(
         # 因此也反映最新一次抽取的措辭，不是累積歷史多個版本。
         #
         # ⚠️ **忠實性防護（2026-09-01，真實小規模回填抽查發現並修正，見
-        # 報告24 §5 階段4）**：subject／object 任一為空字串的殘缺三元組
-        # （見 `_merge_fact_lines()` 的既有殘缺過濾說明），若仍呼叫LLM改寫，
-        # 真實觀察到LLM會自行編造內容補完空白受詞（例如 object 為空時，
-        # 生成「本標準自發布日起施行」這種原文完全沒有依據的句子）——這正是
-        # `_naturalize_triple()` docstring 借鏡 KAPING 提出的偏離風險，在
-        # 真實資料上重現。殘缺三元組本來就會被 `_merge_fact_lines()` 的既有
-        # 過濾（`if not t.subject or not t.object: continue`）擋下、不會被
-        # LLM看到，因此不影響使用者體驗，但仍應在源頭跳過，避免浪費LLM呼叫、
-        # 避免資料庫累積不會被使用且內容有疑慮的欄位。
+        # 報告24 §5 階段4）**：subject／object 任一為空字串的殘缺三元組，
+        # 若仍呼叫LLM改寫，真實觀察到LLM會自行編造內容補完空白受詞（例如
+        # object 為空時，生成「本標準自發布日起施行」這種原文完全沒有依據的
+        # 句子）——這正是 `_naturalize_triple()` docstring 借鏡 KAPING 提出的
+        # 偏離風險，在真實資料上重現。因此在源頭跳過，避免浪費LLM呼叫、避免
+        # 資料庫累積內容有疑慮的欄位。
+        # 注意（2026-10-01 更正，報告207 K1）：這裡跳過 LLM 改寫，**不等於**
+        # 查詢端會把這類三元組丟掉。現行 `services/context/fact_lines.py`
+        # 只看**渲染後的文字**（`is_contentful_line()`）：空受詞但 payload 在
+        # verb 的事實會**保留**；空主詞（`not t.subject`）才丟棄；只剩 subject、
+        # 沒有動詞／受詞內容的行才算殘缺。舊版 `if not t.subject or not t.object`
+        # 過濾已於報告25 §4 發現6 移除。
         if llm_provider is not None and subject_name and object_name:
             set_clause += ", r.natural_text = $natural_text"
             set_params["natural_text"] = await _naturalize_triple(
@@ -1784,11 +1787,11 @@ async def backfill_natural_text(
             citations = json.loads(edge["citations_json"] or "[]")
             verb = citations[-1].get("verb", "") if citations else ""
             # 忠實性防護（2026-09-01，真實小規模回填抽查發現並修正，見報告24
-            # §5 階段4）：subject／object 任一為空字串的殘缺三元組（見
-            # `_merge_fact_lines()` 既有殘缺過濾說明）若仍呼叫LLM改寫，真實
-            # 觀察到LLM會自行編造內容補完空白受詞——不呼叫LLM，直接退回樣板
-            # 拼接（雖然殘缺三元組本來就會被 `_merge_fact_lines()` 擋下不會
-            # 被使用，源頭跳過可省下LLM呼叫、避免資料庫累積有疑慮的內容）。
+            # §5 階段4）：subject／object 任一為空字串的殘缺三元組若仍呼叫LLM
+            # 改寫，真實觀察到LLM會自行編造內容補完空白受詞——不呼叫LLM，直接
+            # 退回樣板拼接（源頭跳過可省下LLM呼叫、避免資料庫累積有疑慮的內容；
+            # 注意查詢端現行只看渲染後文字，空受詞但 payload 在 verb 的事實
+            # 會保留，見 `services/context/fact_lines.py`，報告207 K1 更正）。
             if verb and edge["subject"] and edge["object"]:
                 natural_text = await _naturalize_triple(
                     edge["subject"], edge["subject_type"], verb,

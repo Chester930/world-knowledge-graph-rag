@@ -210,7 +210,13 @@ class SVOTriple(BaseModel):
     # 的短函釋，檔名完全相同）時，這是唯一能可靠定位文件的欄位。
     source: str | None = None
     # 句子/chunk 層級來源追溯。source_doc_id 只定位到文件；以下欄位定位到
-    # SVO 專用 chunk 與 original.md 中的句子範圍（1-based，閉區間）。
+    # SVO 專用 chunk 及其內的句子範圍（1-based，閉區間）。
+    # 更正（2026-10-01，報告207 K1）：`source_sentence_start/end` 是 **chunk 內
+    # （法規為條文內）的相對區域索引**，不是 original.md 的全域句子索引
+    # （見 `services/svo_chunking.py` 的 `build_article_aware_chunks()` 說明與
+    # 對 `source_sentence_start=1` 的賦值；KG#4 實測 3,304／3,307 個 chunk 的
+    # start=1）。追溯鍵是 **chunk（`source_svo_chunk_*`）＋`source_article_no`**。
+    # 僅 SVOGROUP（固定句數聚合）產生的 chunk 才是文件全域句子索引。
     source_svo_chunk_index: int | None = Field(default=None, ge=1)
     source_svo_chunk_file: str | None = None
     source_sentence_start: int | None = Field(default=None, ge=1)
