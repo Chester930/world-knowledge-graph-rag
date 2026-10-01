@@ -1,0 +1,840 @@
+{
+  "per_file": {
+    "baseline_runs/20260923_rebased/stage_s0_r1/records.json": {
+      "questions": 39,
+      "by_kind": {
+        "fact": {
+          "retrieved": 760,
+          "in_prompt_true": 563,
+          "in_prompt_false": 197,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 760
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 563
+          }
+        },
+        "triple": {
+          "retrieved": 881,
+          "in_prompt_true": 316,
+          "in_prompt_false": 565,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 881
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 316
+          }
+        }
+      }
+    },
+    "baseline_runs/20260923_rebased/stage_s0_r1_resume1/records.json": {
+      "questions": 3,
+      "by_kind": {
+        "fact": {
+          "retrieved": 60,
+          "in_prompt_true": 50,
+          "in_prompt_false": 10,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 60
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 50
+          }
+        },
+        "triple": {
+          "retrieved": 94,
+          "in_prompt_true": 29,
+          "in_prompt_false": 65,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 94
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 29
+          }
+        }
+      }
+    },
+    "baseline_runs/20260923_rebased/stage_s0_r2/records.json": {
+      "questions": 33,
+      "by_kind": {
+        "fact": {
+          "retrieved": 640,
+          "in_prompt_true": 489,
+          "in_prompt_false": 151,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 640
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 489
+          }
+        },
+        "triple": {
+          "retrieved": 848,
+          "in_prompt_true": 295,
+          "in_prompt_false": 553,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 848
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 295
+          }
+        }
+      }
+    },
+    "candidate_runs/s1_k1b_topk40_bfs16_stage_a/records.json": {
+      "questions": 42,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1633,
+          "in_prompt_true": 875,
+          "in_prompt_false": 758,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 1633
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 875
+          }
+        },
+        "triple": {
+          "retrieved": 975,
+          "in_prompt_true": 638,
+          "in_prompt_false": 337,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 975
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 638
+          }
+        }
+      }
+    },
+    "candidate_runs/s1_k1b_topk40_bfs16_stage_b/records.json": {
+      "questions": 29,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1138,
+          "in_prompt_true": 593,
+          "in_prompt_false": 545,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 1138
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 593
+          }
+        },
+        "triple": {
+          "retrieved": 762,
+          "in_prompt_true": 466,
+          "in_prompt_false": 296,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 762
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 466
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k1_topk40_stage_a/records.json": {
+      "questions": 40,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1560,
+          "in_prompt_true": 831,
+          "in_prompt_false": 729,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 1560
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 831
+          }
+        },
+        "triple": {
+          "retrieved": 936,
+          "in_prompt_true": 606,
+          "in_prompt_false": 330,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 936
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 606
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k1_topk40_stage_b/records.json": {
+      "questions": 29,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1131,
+          "in_prompt_true": 609,
+          "in_prompt_false": 522,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 1131
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 609
+          }
+        },
+        "triple": {
+          "retrieved": 654,
+          "in_prompt_true": 444,
+          "in_prompt_false": 210,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 654
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 444
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k1_topk40_stage_c/records.json": {
+      "questions": 3,
+      "by_kind": {
+        "fact": {
+          "retrieved": 120,
+          "in_prompt_true": 63,
+          "in_prompt_false": 57,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 120
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 63
+          }
+        },
+        "triple": {
+          "retrieved": 161,
+          "in_prompt_true": 56,
+          "in_prompt_false": 105,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 161
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 56
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k2_article_expand_stage_a/records.json": {
+      "questions": 42,
+      "by_kind": {
+        "fact": {
+          "retrieved": 2373,
+          "in_prompt_true": 864,
+          "in_prompt_false": 1509,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 513,
+            "已解決": 1860
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 203,
+            "已解決": 661
+          }
+        },
+        "triple": {
+          "retrieved": 975,
+          "in_prompt_true": 638,
+          "in_prompt_false": 337,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 975
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 638
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k2_article_expand_stage_b/records.json": {
+      "questions": 31,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1736,
+          "in_prompt_true": 613,
+          "in_prompt_false": 1123,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 384,
+            "已解決": 1352
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 145,
+            "已解決": 468
+          }
+        },
+        "triple": {
+          "retrieved": 773,
+          "in_prompt_true": 494,
+          "in_prompt_false": 279,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 773
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 494
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k2_article_expand_stage_c/records.json": {
+      "questions": 2,
+      "by_kind": {
+        "fact": {
+          "retrieved": 122,
+          "in_prompt_true": 38,
+          "in_prompt_false": 84,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 21,
+            "已解決": 101
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 6,
+            "已解決": 32
+          }
+        },
+        "triple": {
+          "retrieved": 80,
+          "in_prompt_true": 40,
+          "in_prompt_false": 40,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 80
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 40
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_a/records.json": {
+      "questions": 41,
+      "by_kind": {
+        "fact": {
+          "retrieved": 4558,
+          "in_prompt_true": 887,
+          "in_prompt_false": 3671,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 957,
+            "已解決": 3601
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 210,
+            "已解決": 677
+          }
+        },
+        "triple": {
+          "retrieved": 930,
+          "in_prompt_true": 608,
+          "in_prompt_false": 322,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 930
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 608
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_b/records.json": {
+      "questions": 32,
+      "by_kind": {
+        "fact": {
+          "retrieved": 3612,
+          "in_prompt_true": 694,
+          "in_prompt_false": 2918,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 757,
+            "已解決": 2855
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 153,
+            "已解決": 541
+          }
+        },
+        "triple": {
+          "retrieved": 789,
+          "in_prompt_true": 483,
+          "in_prompt_false": 306,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 789
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 483
+          }
+        }
+      }
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_c/records.json": {
+      "questions": 1,
+      "by_kind": {
+        "fact": {
+          "retrieved": 123,
+          "in_prompt_true": 20,
+          "in_prompt_false": 103,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 28,
+            "已解決": 95
+          },
+          "article_in_prompt": {
+            "已解決": 16,
+            "無法由現有資料判定": 4
+          }
+        },
+        "triple": {
+          "retrieved": 45,
+          "in_prompt_true": 30,
+          "in_prompt_false": 15,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 45
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 30
+          }
+        }
+      }
+    },
+    "candidate_runs/t0_trace_check_20260921/records.json": {
+      "questions": 1,
+      "by_kind": {
+        "fact": {
+          "retrieved": 20,
+          "in_prompt_true": 19,
+          "in_prompt_false": 1,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 20
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 19
+          }
+        },
+        "triple": {
+          "retrieved": 29,
+          "in_prompt_true": 16,
+          "in_prompt_false": 13,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 29
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 16
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a/records.backup_before_resume.json": {
+      "questions": 27,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1054,
+          "in_prompt_true": 807,
+          "in_prompt_false": 247,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 1054
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 807
+          }
+        },
+        "triple": {
+          "retrieved": 509,
+          "in_prompt_true": 184,
+          "in_prompt_false": 325,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 509
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 184
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a/records.json": {
+      "questions": 27,
+      "by_kind": {
+        "fact": {
+          "retrieved": 1054,
+          "in_prompt_true": 807,
+          "in_prompt_false": 247,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 1054
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 807
+          }
+        },
+        "triple": {
+          "retrieved": 509,
+          "in_prompt_true": 184,
+          "in_prompt_false": 325,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 509
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 184
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a2/records.json": {
+      "questions": 14,
+      "by_kind": {
+        "fact": {
+          "retrieved": 539,
+          "in_prompt_true": 419,
+          "in_prompt_false": 120,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 539
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 419
+          }
+        },
+        "triple": {
+          "retrieved": 463,
+          "in_prompt_true": 76,
+          "in_prompt_false": 387,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 463
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 76
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a3/records.json": {
+      "questions": 1,
+      "by_kind": {
+        "fact": {
+          "retrieved": 40,
+          "in_prompt_true": 29,
+          "in_prompt_false": 11,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 40
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 29
+          }
+        },
+        "triple": {
+          "retrieved": 38,
+          "in_prompt_true": 12,
+          "in_prompt_false": 26,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 38
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 12
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b/records.json": {
+      "questions": 12,
+      "by_kind": {
+        "fact": {
+          "retrieved": 454,
+          "in_prompt_true": 339,
+          "in_prompt_false": 115,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 454
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 339
+          }
+        },
+        "triple": {
+          "retrieved": 200,
+          "in_prompt_true": 93,
+          "in_prompt_false": 107,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 200
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 93
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2a/records.json": {
+      "questions": 8,
+      "by_kind": {
+        "fact": {
+          "retrieved": 320,
+          "in_prompt_true": 253,
+          "in_prompt_false": 67,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 320
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 253
+          }
+        },
+        "triple": {
+          "retrieved": 167,
+          "in_prompt_true": 43,
+          "in_prompt_false": 124,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 167
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 43
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2b/records.json": {
+      "questions": 7,
+      "by_kind": {
+        "fact": {
+          "retrieved": 280,
+          "in_prompt_true": 214,
+          "in_prompt_false": 66,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 280
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 214
+          }
+        },
+        "triple": {
+          "retrieved": 283,
+          "in_prompt_true": 50,
+          "in_prompt_false": 233,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 283
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 50
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2c/records.json": {
+      "questions": 7,
+      "by_kind": {
+        "fact": {
+          "retrieved": 259,
+          "in_prompt_true": 202,
+          "in_prompt_false": 57,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 259
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 202
+          }
+        },
+        "triple": {
+          "retrieved": 219,
+          "in_prompt_true": 37,
+          "in_prompt_false": 182,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 219
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 37
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_c/records.json": {
+      "questions": 2,
+      "by_kind": {
+        "fact": {
+          "retrieved": 80,
+          "in_prompt_true": 62,
+          "in_prompt_false": 18,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 80
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 62
+          }
+        },
+        "triple": {
+          "retrieved": 101,
+          "in_prompt_true": 16,
+          "in_prompt_false": 85,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 101
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 16
+          }
+        }
+      }
+    },
+    "candidate_runs/t2_probe_topk40_20260921/records.json": {
+      "questions": 1,
+      "by_kind": {
+        "fact": {
+          "retrieved": 40,
+          "in_prompt_true": 31,
+          "in_prompt_false": 9,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 40
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 31
+          }
+        },
+        "triple": {
+          "retrieved": 29,
+          "in_prompt_true": 4,
+          "in_prompt_false": 25,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 29
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 4
+          }
+        }
+      }
+    },
+    "p2_snapshot_20260929/run1/records.json": {
+      "questions": 6,
+      "by_kind": {
+        "fact": {
+          "retrieved": 66,
+          "in_prompt_true": 49,
+          "in_prompt_false": 17,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 66
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 49
+          }
+        },
+        "triple": {
+          "retrieved": 23,
+          "in_prompt_true": 23,
+          "in_prompt_false": 0,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 23
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 23
+          }
+        }
+      }
+    },
+    "p2_snapshot_20260929/run2/records.json": {
+      "questions": 6,
+      "by_kind": {
+        "fact": {
+          "retrieved": 66,
+          "in_prompt_true": 49,
+          "in_prompt_false": 17,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 66
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 49
+          }
+        },
+        "triple": {
+          "retrieved": 23,
+          "in_prompt_true": 23,
+          "in_prompt_false": 0,
+          "in_prompt_unmeasured": 0,
+          "article_retrieved": {
+            "無法由現有資料判定": 23
+          },
+          "article_in_prompt": {
+            "無法由現有資料判定": 23
+          }
+        }
+      }
+    }
+  },
+  "unique_union": {
+    "questions": 42,
+    "by_kind": {
+      "fact": {
+        "retrieved": 4815,
+        "in_prompt_true": 1758,
+        "in_prompt_false": 3057,
+        "in_prompt_unmeasured": 0,
+        "article_retrieved": {
+          "無法由現有資料判定": 1706,
+          "已解決": 3109
+        },
+        "article_in_prompt": {
+          "無法由現有資料判定": 1325,
+          "已解決": 433
+        }
+      },
+      "triple": {
+        "retrieved": 1044,
+        "in_prompt_true": 677,
+        "in_prompt_false": 367,
+        "in_prompt_unmeasured": 0,
+        "article_retrieved": {
+          "無法由現有資料判定": 1044
+        },
+        "article_in_prompt": {
+          "無法由現有資料判定": 677
+        }
+      }
+    }
+  },
+  "replayable_marks": [
+    "article_no",
+    "in_prompt"
+  ],
+  "not_replayable": [
+    "fields",
+    "relation_type",
+    "subject_type",
+    "object_type"
+  ]
+}
