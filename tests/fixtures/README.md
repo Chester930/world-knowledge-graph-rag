@@ -1,13 +1,31 @@
 # 測試 fixture 來源
 
-`law_version_real_sample.json` 是報告235 P2 使用的小型真實材料，來源為姊妹專案允許讀取的：
+`law_version_real_sample.json` 是報告238 F2 重建後、供報告235 P2 使用的 12 筆真實材料，來源為姊妹專案允許讀取的：
 
 `D:\Users\666\Desktop\labor-compliance-collector\data\processed\moj_laws\moj_history_20260819T093233Z-history.json`
 
 - 來源檔筆數：209
 - 來源檔 SHA-256：`3a8aceb9c176fb98ea6cc5cacbba0843daa46385ce08d30b538de62448129d40`
-- fixture 筆數：12（N0030001 第 2、3、8 條；N0030006 第 7、9、12 條，各含 2023／1984 舊版與 2024／2025 現行版）
-- `version_id`、`content_hash`、日期與狀態欄位依來源列抄錄。
-- 為保持 fixture 小型，N0030006 第 12 條只保留必要法規正文與導覽標記片段；不代表完整網頁尾巴。P1 全量盤點仍直接讀來源檔，不使用 fixture 代替。
+- fixture 筆數：12（N0030001 第 2、3、8 條；N0030006 第 7、9、12 條，各含舊版與現行版）
+- `fixture_scope`、所有欄位與 `content` 均逐字依來源列抄錄；不裁剪、不以合成文字代替，包含 `law_name` 的「 EN」後綴與第 12 條完整導覽雜訊尾巴。
+
+## 逐筆來源索引
+
+以下每列的來源檔均為上述同一檔案；`sha256(content)` 應與 `content_hash` 相同，`version_id` 應與 `(pcode|article_no|valid_from|content_hash)` 的 SHA-256 建構式相同。
+
+| pcode／條號 | valid_from | version_id | content sha256 |
+| --- | --- | --- | --- |
+| N0030001／2 | 1984-07-30 | `808fa35e3ea736036a3b92fbc97bb084aa26e62f99d7bd6e369299011cdafab0` | `95e7a8da825cc0f39d49994249d48e44dcc664dc25c76ba3f41782acf4807520` |
+| N0030001／2 | 2024-07-31 | `20fb9672ac63372a4615ec13bcdb9753e8c858d759a3332f9cda618529ad1077` | `f877e3dd2c4897d642def07d493cb8c48ae8def4ea66c0f2c3d2273945c9c59e` |
+| N0030001／3 | 1984-07-30 | `b730dd8b09a7d34dcb0d2ec6130c0a31eadd95c59b32b272baafa5e4ede919c8` | `c5f599d2132f886a61bd87f82c35ab213dd17ff5a7dad30083021dbeb24ab163` |
+| N0030001／3 | 2024-07-31 | `6fcbdc6e05d7a978ef61cb1970477fe74a839b97058a17c805f9897bb472f052` | `6f42e16f156d00e9b9298cf5592616126fe69871bff1a6d5a93d5bbd350eb334` |
+| N0030001／8 | 1984-07-30 | `f79e4e113d05eb767b1f8c3476639b7603b52a50a27f47f27ee3d07790986b0a` | `2d1f9c15106185eef791bacf0077e774b8f4eb32f88ac77e04fce44cce8ccab2` |
+| N0030001／8 | 2024-07-31 | `d040232e26deb7d1702fa9c1ffa79c00c1807cf8db598a870ab46fb0dfadbe4b` | `73d0d822ea7ec4c12fac4f2b858089e9da96dedbbd33d850406d9c38870e6765` |
+| N0030006／7 | 2023-05-01 | `066241f507edf04b7ee6af84215b7ca6757be6de43407c200069e3420ee8eca6` | `11df414dc3941fe3267811c6820336fbfc19ff5ec02cbcd2b68a624459da4047` |
+| N0030006／7 | 2025-12-09 | `011778d70c2a6557f7703546b4f0c43337e2b9cce3ee34f23a111594b8859603` | `fb7da03dea39df81d4d565db21913b99a535c2a9b8ae4f2511d3abe62701edb7` |
+| N0030006／9 | 2023-05-01 | `e1264c69e55ee84eda7ba0b069c889e53787f96a5dd5ae87b92ae88410f2d222` | `5ebf6b2d8b03bd9ca4c15b362ac7e06aac5751127e44a7fc3f03c5d42f377a47` |
+| N0030006／9 | 2025-12-09 | `a1f68c224078d5d237bf2d1d453096a8ab173bf653e72397090bc3e20cbb157e` | `f3af8badff87b3eab9d44d4373d13fb2d2f74b8b76bc5d25ae3e06408e34c993` |
+| N0030006／12 | 2023-05-01 | `d7462a89db13345b515ba3c8ffcb412427ece180e013107b9a0514de59cfcf63` | `d392cc65cf7fcb1f23f821494d25967627f2f604c23c19e231804892fc9c8c67` |
+| N0030006／12 | 2025-12-09 | `ee8d03b1af08301e4d15815c61360c6efa95ad2e13945892d1ddcdf08f5baa16` | `19ce6899538e9040e51cd22bcc03421ae10e96a4b615b603894007e829e0a9f0` |
 
 fixture 僅存放本專案內；未讀取姊妹專案的 `.env`、`.claude`、`.git`，未執行其程式，未在該專案寫入任何檔案。

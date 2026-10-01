@@ -6,10 +6,10 @@
     "source_sha256": "3a8aceb9c176fb98ea6cc5cacbba0843daa46385ce08d30b538de62448129d40",
     "source_record_count": 209,
     "fixture_record_count": 12,
-    "scope": "P2 必要的小型真實材料；content 取必要條文文字，N0030006 第12條保留法規正文與導覽標記的最小片段。version_id、content_hash 與來源列一致，但 fixture 的第12條 content 是必要片段而非完整網頁尾巴。"
+    "scope": "F2 逐字真實材料；指定 12 筆所有來源欄位與 content 完整保留，包含 law_name 的 EN 後綴、N0030006 第12條完整內容與導覽雜訊尾巴；不裁剪、不以合成文字代替。"
   },
   "prototype": {
-    "rule": "以 (pcode, article_no) 為版本鏈；非最新版本以後繼 valid_from 產生新版取代；差異分類共用 classify_content_difference。",
+    "rule": "先以 (pcode, article_no, valid_from, normalized_content) 收斂重複快照，再以 (pcode, article_no) 建立版本鏈；非最新版本以後繼 valid_from 產生新版取代；差異分類共用 classify_content_difference。",
     "chains": [
       {
         "pcode": "N0030001",
@@ -493,6 +493,14 @@
       }
     ],
     "exclusivity_violations": [],
+    "snapshot_collapses": [],
+    "snapshot_field_conflicts": [],
+    "current_flag_anomalies": {
+      "before_collapse_multiple_current": [],
+      "after_collapse_zero_current": [],
+      "after_collapse_multiple_current": [],
+      "note": "current_flag_anomalies 是來源旗標品質摘要；exclusivity_violations 只檢查事件重播後的有效狀態，兩者語意不同。"
+    },
     "counts": {
       "chains": 6,
       "versions": 12,
