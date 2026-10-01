@@ -1,0 +1,262 @@
+{
+ "K3-1": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "主詞(雇主招收學徒…)不在所給原句，來自他處，跨句錯接"
+ },
+ "K3-2": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "三元組與原句(不低於百分之五十)不對應，跨句錯接"
+ },
+ "K3-3": {
+  "label": "b",
+  "confidence": "中",
+  "reason": "動作與對象『採行…措施』被併入verb欄，實為後接子項"
+ },
+ "K3-4": {
+  "label": "c",
+  "confidence": "低",
+  "reason": "條件句當主詞，verb含歸入對象，本金及累積收益在他句"
+ },
+ "K3-5": {
+  "label": "b",
+  "confidence": "中",
+  "reason": "『應負連帶清償責任』責任為受詞併入verb；主詞原/新亦有誤"
+ },
+ "K3-6": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "『轉介』不在所給原句，對應不唯一"
+ },
+ "K3-7": {
+  "label": "c",
+  "confidence": "高",
+  "reason": "verb只剩『於退保後』片段，真正動作(申請津貼)未入"
+ },
+ "K3-8": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "verb僅剩條件片段『若有剩餘』，主動作繳還未入"
+ },
+ "K3-9": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "受詞(檢查紀錄)放主詞位、施事雇主在verb，錯位難定"
+ },
+ "K3-10": {
+  "label": "a",
+  "confidence": "中",
+  "reason": "內容為人數門檻之狀態/數量，無獨立受詞(來源句數字略異)"
+ },
+ "K3-11": {
+  "label": "a",
+  "confidence": "低",
+  "reason": "『得依…分別訂定』受詞為主題化之守則，無另一受詞"
+ },
+ "K3-12": {
+  "label": "b",
+  "confidence": "高",
+  "reason": "verb欄含『執行下列事項：一…二…』，事項(受詞)併入"
+ },
+ "K3-13": {
+  "label": "a",
+  "confidence": "中",
+  "reason": "『應依下列規定』為依據補語，後接條列，無獨立受詞"
+ },
+ "K3-14": {
+  "label": "b",
+  "confidence": "中",
+  "reason": "『查看安全器』受詞安全器併入verb"
+ },
+ "K3-15": {
+  "label": "c",
+  "confidence": "高",
+  "reason": "verb為目的子句片段，主句(雇主應調查…)未對應"
+ },
+ "K3-16": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "條列名詞片語無謂語，verb僅重複『之處理』"
+ },
+ "K3-17": {
+  "label": "c",
+  "confidence": "高",
+  "reason": "verb空，僅標題『自動控制裝置：』"
+ },
+ "K3-18": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "原句無『配管』主體，不含配管為子項，錯接"
+ },
+ "K3-19": {
+  "label": "a",
+  "confidence": "中",
+  "reason": "條列項為方式/地點名詞片語，本無獨立受詞"
+ },
+ "K3-20": {
+  "label": "c",
+  "confidence": "中",
+  "reason": "條列名詞片語，verb為佔位關係且空，無法判定"
+ },
+ "L1-8": {
+  "label": "C",
+  "confidence": "中",
+  "reason": "『亦得請領…給付』為行為/權利片段，無更合適標準型別"
+ },
+ "L1-12": {
+  "label": "C",
+  "confidence": "中",
+  "reason": "為規範性謂語片段(工作期間限制)，抽象規定"
+ },
+ "L1-16": {
+  "label": "C",
+  "confidence": "高",
+  "reason": "為給付排除條件，屬抽象條件概念"
+ },
+ "L1-19": {
+  "label": "C",
+  "confidence": "低",
+  "reason": "業務範疇列舉，或可視Service，但屬抽象類別；P/C稍有歧義"
+ },
+ "L1-22": {
+  "label": "C",
+  "confidence": "中",
+  "reason": "『應按勞工每月工資』為謂語片段，指涉工資基準"
+ },
+ "L1-25": {
+  "label": "C",
+  "confidence": "高",
+  "reason": "為違規行為情形之描述，非實體"
+ },
+ "L1-30": {
+  "label": "C",
+  "confidence": "高",
+  "reason": "為死亡/退保之狀態條件，抽象條件"
+ },
+ "L1-32": {
+  "label": "C",
+  "confidence": "中",
+  "reason": "為應載明事項(設備與方法)，抽象項目"
+ },
+ "L1-36": {
+  "label": "C",
+  "confidence": "低",
+  "reason": "證明文件之條件描述，或可DigitalDocument；歧義在文件vs條件"
+ },
+ "L1-41": {
+  "label": "C",
+  "confidence": "中",
+  "reason": "為設置條件描述，無原句佐證，傾向條件概念"
+ },
+ "L1-47": {
+  "label": "C",
+  "confidence": "低",
+  "reason": "『運用』為行為/業務概念，可視Action但過於泛稱"
+ },
+ "L1-49": {
+  "label": "C",
+  "confidence": "高",
+  "reason": "為團體協約約定內容之子句，抽象規定"
+ },
+ "O2-6": {
+  "label": "S",
+  "confidence": "低",
+  "reason": "主體+條件(青年組或身障…前三名每位選手)；三元組與原句亦錯位"
+ },
+ "O2-7": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "條列類別名詞片語，無謂語，名稱長屬正常"
+ },
+ "O2-8": {
+  "label": "L",
+  "confidence": "低",
+  "reason": "名詞片語『具有…之轉轍器及轍鎖』，無完整謂語"
+ },
+ "O2-10": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "以法條界定之指稱名詞片語，無謂語"
+ },
+ "O2-11": {
+  "label": "L",
+  "confidence": "高",
+  "reason": "條文引用名詞片語，法規指稱"
+ },
+ "O2-12": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "勞工與可燃物品…燃燒之危險性被黏接，為半句條文"
+ },
+ "O2-13": {
+  "label": "L",
+  "confidence": "低",
+  "reason": "文件條列名詞片語，含並列但無完整謂語，可拆"
+ },
+ "O2-18": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "名詞片語(平均收益率)，謂語在三元組外"
+ },
+ "O2-20": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含『比照…向保險人申報的』主謂結構，為半句條文"
+ },
+ "O2-24": {
+  "label": "L",
+  "confidence": "高",
+  "reason": "簡單名詞並列片語"
+ },
+ "O2-26": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "條列項名詞片語，無謂語"
+ },
+ "O2-28": {
+  "label": "L",
+  "confidence": "低",
+  "reason": "『指定應放假之日』為名詞片語，法規指稱"
+ },
+ "O2-30": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "設備名稱列舉名詞片語"
+ },
+ "O2-38": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "機構類別列舉，無謂語"
+ },
+ "O2-39": {
+  "label": "L",
+  "confidence": "高",
+  "reason": "條項引用列舉，法規指稱"
+ },
+ "O2-41": {
+  "label": "L",
+  "confidence": "高",
+  "reason": "文件名稱，簡單名詞並列"
+ },
+ "O2-44": {
+  "label": "S",
+  "confidence": "低",
+  "reason": "『裝置於…之鐵線』含動詞修飾，可拆主體+條件"
+ },
+ "O2-46": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "化學品名稱列舉，無謂語"
+ },
+ "O2-48": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "地點範圍名詞片語"
+ },
+ "O2-49": {
+  "label": "L",
+  "confidence": "低",
+  "reason": "名詞片語含『非屬』條件，無完整謂語"
+ }
+}
