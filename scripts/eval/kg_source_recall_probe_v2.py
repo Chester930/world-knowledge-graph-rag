@@ -38,9 +38,27 @@ def load_env() -> None:
             return
 
 
-load_env()
+class _LazyV1:
+    """延遲載入 `kg_source_recall_probe`（v1）。
 
-from scripts.eval import kg_source_recall_probe as v1  # noqa: E402
+    匯入本模組不得有行程級副作用（舊版在模組層級呼叫 `load_env()`，匯入即把
+    kg-reextract 的 `.env` 寫進 `os.environ`，汙染同一行程內的其他測試）。v1 會匯入
+    `services.*`／`core.config`，依賴環境變數，所以環境載入必須先於 v1 的匯入——
+    改為首次存取 `v1.<屬性>` 時才「載入環境 → 匯入 v1」，命令列執行的先後順序不變。
+    """
+
+    _mod = None
+
+    def __getattr__(self, name: str):
+        if _LazyV1._mod is None:
+            load_env()
+            from scripts.eval import kg_source_recall_probe as mod  # noqa: PLC0415
+
+            _LazyV1._mod = mod
+        return getattr(_LazyV1._mod, name)
+
+
+v1 = _LazyV1()
 
 OUT = REPO / "data" / "eval" / "candidate_runs" / "kg_source_recall_probe_v2"
 KG_ID = "236903cf-055a-40a8-8923-b9d06601f3b7"
@@ -187,6 +205,7 @@ def analyse(rerun: dict, kg_folder: Path) -> dict:
 
 
 def main() -> int:
+    load_env()  # 命令列入口：先載入環境（setdefault，與 v1 延遲載入時的呼叫冪等）
     ap = argparse.ArgumentParser()
     ap.add_argument("--kg-folder", type=Path, default=v1.DEFAULT_KG)
     ap.add_argument("--analyse-only", action="store_true")
