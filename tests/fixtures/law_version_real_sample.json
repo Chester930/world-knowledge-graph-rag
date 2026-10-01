@@ -1,0 +1,152 @@
+{
+  "source_file": "labor-compliance-collector/data/processed/moj_laws/moj_history_20260819T093233Z-history.json",
+  "source_sha256": "3a8aceb9c176fb98ea6cc5cacbba0843daa46385ce08d30b538de62448129d40",
+  "source_record_count": 209,
+  "fixture_scope": "P2 必要的小型真實材料；content 取必要條文文字，N0030006 第12條保留法規正文與導覽標記的最小片段。version_id、content_hash 與來源列一致，但 fixture 的第12條 content 是必要片段而非完整網頁尾巴。",
+  "records": [
+    {
+      "pcode": "N0030001",
+      "law_name": "勞動基準法",
+      "article_no": "2",
+      "version_date": "1984-07-30",
+      "valid_from": "1984-07-30",
+      "valid_to": "2024-07-29",
+      "is_current": false,
+      "version_id": "808fa35e3ea736036a3b92fbc97bb084aa26e62f99d7bd6e369299011cdafab0",
+      "content_hash": "95e7a8da825cc0f39d49994249d48e44dcc664dc25c76ba3f41782acf4807520",
+      "content": "本法用辭定義如左： 一、勞工：謂受雇主僱用從工作獲致工資者。 二、雇主：謂僱用勞工之事業主、事業經營之負責人或代表事業主處理有關勞工事務之人 。 三、工資：謂勞工因工作而獲得之報酬：包括工資、薪金及按計時、計日、計月、計件以 現金或實物等方式給付之獎金、津貼及其他任何名義之經常性給與均屬之。 四、平均工資：謂計算事由發生之當日前六個月內所得工資總額除以該期間之總日數所得 之金額。工作未滿六個月者，謂工作期間所得工資總額除以工作期間所得工資總額除以工作期間之總日數所得之 金額。 五、事業單位：謂適用本法各業僱用勞工從事工作之機構。 六、勞動契約：謂約定勞雇關係之契約。"
+    },
+    {
+      "pcode": "N0030001",
+      "law_name": "勞動基準法",
+      "article_no": "2",
+      "version_date": "2024-07-31",
+      "valid_from": "2024-07-31",
+      "valid_to": null,
+      "is_current": true,
+      "version_id": "20fb9672ac63372a4615ec13bcdb9753e8c858d759a3332f9cda618529ad1077",
+      "content_hash": "f877e3dd2c4897d642def07d493cb8c48ae8def4ea66c0f2c3d2273945c9c59e",
+      "content": "本法用詞，定義如下： 一、勞工：指受雇主僱用從事工作獲致工資者。 二、雇主：指僱用勞工之事業主、事業經營之負責人或代表事業主處理有關勞工事務之人。 三、工資：指勞工因工作而獲得之報酬；包括工資、薪金及按計時、計日、計月、計件以現金或實物等方式給付之獎金、津貼及其他任何名義之經常性給與均屬之。 四、平均工資：指計算事由發生之當日前六個月內所得工資總額除以該期間之總日數所得之金額。工作未滿六個月者，指工作期間所得工資總額除以工作期間所得工資總額之總日數所得之金額。 五、事業單位：指適用本法各業僱用勞工從事工作之機構。 六、勞動契約：指約定勞雇關係而具有從屬性之契約。 七、派遣事業單位：指從事勞動派遣業務之事業單位。 八、要派單位：指依據要派契約，實際指揮監督管理派遣勞工從事工作者。 九、派遣勞工：指受派遣事業單位僱用，並向要派單位提供勞務者。 十、要派契約：指要派單位與派遣事業單位就勞動派遣事項所訂立之契約。"
+    },
+    {
+      "pcode": "N0030001",
+      "law_name": "勞動基準法",
+      "article_no": "3",
+      "version_date": "1984-07-30",
+      "valid_from": "1984-07-30",
+      "valid_to": "2024-07-29",
+      "is_current": false,
+      "version_id": "b730dd8b09a7d34dcb0d2ec6130c0a31eadd95c59b32b272baafa5e4ede919c8",
+      "content_hash": "c5f599d2132f886a61bd87f82c35ab213dd17ff5a7dad30083021dbeb24ab163",
+      "content": "本法於左列各業適用之： 一、農、林、漁、牧業。 二、礦業及土石採取業。 三、製造業。 四、營造業。 五、水電、煤氣業。 六、運輪、倉儲及通信業。 七、大眾傳播業。 八、其他經中央主管機關指定之事業。"
+    },
+    {
+      "pcode": "N0030001",
+      "law_name": "勞動基準法",
+      "article_no": "3",
+      "version_date": "2024-07-31",
+      "valid_from": "2024-07-31",
+      "valid_to": null,
+      "is_current": true,
+      "version_id": "6fcbdc6e05d7a978ef61cb1970477fe74a839b97058a17c805f9897bb472f052",
+      "content_hash": "6f42e16f156d00e9b9298cf5592616126fe69871bff1a6d5a93d5bbd350eb334",
+      "content": "本法於左列各業適用之： 一、農、林、漁、牧業。 二、礦業及土石採取業。 三、製造業。 四、營造業。 五、水電、煤氣業。 六、運輸、倉儲及通信業。 七、大眾傳播業。 八、其他經中央主管機關指定之事業。 依前項第八款指定時，得就事業之部分工作場所或工作者指定適用。 本法適用於一切勞雇關係。但因經營型態、管理制度及工作特性等因素適用本法確有窒礙難行者，並經中央主管機關指定公告之行業或工作者，不適用之。"
+    },
+    {
+      "pcode": "N0030001",
+      "law_name": "勞動基準法",
+      "article_no": "8",
+      "version_date": "1984-07-30",
+      "valid_from": "1984-07-30",
+      "valid_to": "2024-07-29",
+      "is_current": false,
+      "version_id": "f79e4e113d05eb767b1f8c3476639b7603b52a50a27f47f27ee3d07790986b0a",
+      "content_hash": "2d1f9c15106185eef791bacf0077e774b8f4eb32f88ac77e04fce44cce8ccab2",
+      "content": "雇主對於僱用之勞工，應預防職業上災害，建立適當之工作環境及福利設施。其有關安全 衛生及福利事項，依有關法律之規定。 第二章 勞動契約"
+    },
+    {
+      "pcode": "N0030001",
+      "law_name": "勞動基準法",
+      "article_no": "8",
+      "version_date": "2024-07-31",
+      "valid_from": "2024-07-31",
+      "valid_to": null,
+      "is_current": true,
+      "version_id": "d040232e26deb7d1702fa9c1ffa79c00c1807cf8db598a870ab46fb0dfadbe4b",
+      "content_hash": "73d0d822ea7ec4c12fac4f2b858089e9da96dedbbd33d850406d9c38870e6765",
+      "content": "雇主對於僱用之勞工，應預防職業上災害，建立適當之工作環境及福利設施。其有關安全衛生及福利事項，依有關法律之規定。 第 二 章 勞動契約"
+    },
+    {
+      "pcode": "N0030006",
+      "law_name": "勞工請假規則",
+      "article_no": "7",
+      "version_date": "2023-05-01",
+      "valid_from": "2023-05-01",
+      "valid_to": "2025-12-07",
+      "is_current": false,
+      "version_id": "066241f507edf04b7ee6af84215b7ca6757be6de43407c200069e3420ee8eca6",
+      "content_hash": "11df414dc3941fe3267811c6820336fbfc19ff5ec02cbcd2b68a624459da4047",
+      "content": "勞工因有事故必須親自處理者，得請事假，一年內合計不得超過十四日。事假期間不給工資。"
+    },
+    {
+      "pcode": "N0030006",
+      "law_name": "勞工請假規則",
+      "article_no": "7",
+      "version_date": "2025-12-09",
+      "valid_from": "2025-12-09",
+      "valid_to": null,
+      "is_current": true,
+      "version_id": "011778d70c2a6557f7703546b4f0c43337e2b9cce3ee34f23a111594b8859603",
+      "content_hash": "fb7da03dea39df81d4d565db21913b99a535c2a9b8ae4f2511d3abe62701edb7",
+      "content": "勞工因有事故必須親自處理，得請事假，一年內合計不得超過十四日。事假期間不給工資。 勞工為親自照顧家庭成員，除本法或其他法律另有規定者外，得依前項規定請事假，並得擇定以小時為請假單位。"
+    },
+    {
+      "pcode": "N0030006",
+      "law_name": "勞工請假規則",
+      "article_no": "9",
+      "version_date": "2023-05-01",
+      "valid_from": "2023-05-01",
+      "valid_to": "2025-12-07",
+      "is_current": false,
+      "version_id": "e1264c69e55ee84eda7ba0b069c889e53787f96a5dd5ae87b92ae88410f2d222",
+      "content_hash": "5ebf6b2d8b03bd9ca4c15b362ac7e06aac5751127e44a7fc3f03c5d42f377a47",
+      "content": "雇主不得因勞工請婚假、喪假、公傷病假及公假，扣發全勤獎金；勞工因妊娠未滿三個月流產未請產假，而請普通傷病假者，亦同。"
+    },
+    {
+      "pcode": "N0030006",
+      "law_name": "勞工請假規則",
+      "article_no": "9",
+      "version_date": "2025-12-09",
+      "valid_from": "2025-12-09",
+      "valid_to": null,
+      "is_current": true,
+      "version_id": "a1f68c224078d5d237bf2d1d453096a8ab173bf653e72397090bc3e20cbb157e",
+      "content_hash": "f3af8badff87b3eab9d44d4373d13fb2d2f74b8b76bc5d25ae3e06408e34c993",
+      "content": "勞工有下列情形，雇主不得視為缺勤而影響其全勤獎金；其他法律另有規定者，從其規定： 一、勞工請婚假、喪假、公傷病假及公假。 二、勞工因妊娠未滿三個月流產未請產假，而請普通傷病假。 三、勞工因親自照顧家庭成員，依第七條規定請事假。 勞工請前項第二款以外之普通傷病假，其全勤獎金之扣發，應按請普通傷病假日數依比例計算。"
+    },
+    {
+      "pcode": "N0030006",
+      "law_name": "勞工請假規則",
+      "article_no": "12",
+      "version_date": "2023-05-01",
+      "valid_from": "2023-05-01",
+      "valid_to": "2025-12-07",
+      "is_current": false,
+      "version_id": "d7462a89db13345b515ba3c8ffcb412427ece180e013107b9a0514de59cfcf63",
+      "content_hash": "d392cc65cf7fcb1f23f821494d25967627f2f604c23c19e231804892fc9c8c67",
+      "content": "本規則自發布日施行。 ::: 最新訊息 中央法規 司法解釋"
+    },
+    {
+      "pcode": "N0030006",
+      "law_name": "勞工請假規則",
+      "article_no": "12",
+      "version_date": "2025-12-09",
+      "valid_from": "2025-12-09",
+      "valid_to": null,
+      "is_current": true,
+      "version_id": "ee8d03b1af08301e4d15815c61360c6efa95ad2e13945892d1ddcdf08f5baa16",
+      "content_hash": "19ce6899538e9040e51cd22bcc03421ae10e96a4b615b603894007e829e0a9f0",
+      "content": "本規則自發布日施行。 本規則中華民國一百十四年十二月九日修正發布之條文，自一百十五年一月一日施行。 ::: 最新訊息 中央法規 司法解釋"
+    }
+  ]
+}

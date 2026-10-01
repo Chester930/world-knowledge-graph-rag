@@ -39,8 +39,12 @@ RULED_OTHER = "裁決以他條為準"
 REPLACED = "新版取代"          # 修法生效／新版出現
 TERMINATE = "終止"            # 廢止／關係結束
 REACTIVATE = "重新生效"        # 結束後重新開始
+REVOKED = "撤銷"               # 已採信關係被撤銷 → 已駁回
 CORE_EVENTS = frozenset({EXTRACTED, VERIFIED, VERIFY_FAILED, CONTRADICTION, RULED_KEEP, RULED_OTHER, REPLACED,
-                         TERMINATE, REACTIVATE})
+                         TERMINATE, REACTIVATE, REVOKED})
+
+# D3：參數化的預設可檢索狀態集合；None 代表欄位缺席／尚未處理。
+DEFAULT_RETRIEVABLE_STATES = frozenset({None, CANDIDATE, VALID, DISPUTED})
 
 TRIGGER_KINDS = ("時間", "事件", "偵測", "人工")  # 僅記錄用，不影響轉換合法性
 
@@ -55,6 +59,9 @@ CORE_TRANSITIONS: Mapping[tuple[str | None, str], str] = MappingProxyType({
     (DISPUTED, RULED_KEEP): VALID,
     (DISPUTED, RULED_OTHER): SUPERSEDED,
     (TERMINATED, REACTIVATE): VALID,
+    (VALID, REVOKED): REJECTED,
+    (DISPUTED, REVOKED): REJECTED,
+    (TERMINATED, REVOKED): REJECTED,
 })
 
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -178,6 +185,19 @@ def resolve_spec(spec: LifecycleSpec) -> Lifecycle:
 def lifecycle_for(relation_type: str, extensions: Mapping[str, Lifecycle] | None = None) -> Lifecycle:
     """依關係型別取生命週期；沒有擴充＝核心。（呼叫端自備 `relation_type → 已解析擴充` 的對照表。）"""
     return (extensions or {}).get(relation_type, CORE_LIFECYCLE)
+
+
+def is_retrievable(
+    state: str | None, retrievable: frozenset[str | None] = DEFAULT_RETRIEVABLE_STATES
+) -> bool:
+    """回報狀態是否屬於可檢索集合。
+
+    集合是參數、不是定案 schema；預設集合也不是把檢索行為接入本模組。
+    在還沒有自動「驗證通過」流程前，不可把「候選」排除，否則新抽取的
+    Fact 會全部停在候選而讓檢索消失。``None`` 代表舊 Fact 缺席狀態，
+    即「尚未處理」。
+    """
+    return state in retrievable
 
 
 # ── 轉換與重播 ───────────────────────────────────────────────────────────────

@@ -10,7 +10,7 @@ import pytest
 
 from services import relation_lifecycle as rl
 from services.relation_lifecycle import (
-    CANDIDATE, CONTRADICTION, DISPUTED, EXTRACTED, REACTIVATE, REJECTED, REPLACED, RULED_KEEP, RULED_OTHER,
+    CANDIDATE, CONTRADICTION, DISPUTED, EXTRACTED, REACTIVATE, REJECTED, REPLACED, REVOKED, RULED_KEEP, RULED_OTHER,
     SUPERSEDED, TERMINATE, TERMINATED, VALID, VERIFIED, VERIFY_FAILED,
     LifecycleEvent as Ev, LifecycleSpec, RelationInstance, apply_event, check_exclusivity, explain, replay,
 )
@@ -27,6 +27,9 @@ ALLOWED = [
     (DISPUTED, RULED_KEEP, VALID),
     (DISPUTED, RULED_OTHER, SUPERSEDED),
     (TERMINATED, REACTIVATE, VALID),
+    (VALID, REVOKED, REJECTED),
+    (DISPUTED, REVOKED, REJECTED),
+    (TERMINATED, REVOKED, REJECTED),
 ]
 ALL_STATES = [None, *sorted(rl.CORE_STATES)]
 ILLEGAL = [(s, e) for s in ALL_STATES for e in sorted(rl.CORE_EVENTS) if (s, e) not in {(a, b) for a, b, _ in ALLOWED}]
@@ -37,7 +40,7 @@ def test_states_events_and_provisional_flag():
     assert rl.PROVISIONAL is True
     assert rl.CORE_STATES == {"候選", "有效", "已被取代", "已終止", "爭議", "已駁回"}
     assert rl.CORE_TERMINAL_STATES == {"已被取代", "已駁回"}
-    assert len(rl.CORE_EVENTS) == 9 and len(rl.CORE_TRANSITIONS) == 9
+    assert len(rl.CORE_EVENTS) == 10 and len(rl.CORE_TRANSITIONS) == 12
     assert len(ALL_STATES) * len(rl.CORE_EVENTS) == len(ALLOWED) + len(ILLEGAL)
 
 
@@ -67,9 +70,25 @@ def test_superseded_and_rejected_cannot_return_to_valid():
     assert not apply_event(REJECTED, Ev(VERIFIED)).ok
 
 
-def test_terminated_can_reactivate_but_nothing_else():
-    assert rl.allowed_events(TERMINATED) == (REACTIVATE,)
+def test_terminated_can_reactivate_or_be_revoked():
+    assert rl.allowed_events(TERMINATED) == tuple(sorted((REACTIVATE, REVOKED)))
     assert apply_event(TERMINATED, Ev(REACTIVATE)).to_state == VALID
+
+
+def test_revoke_is_allowed_for_accepted_states_but_not_candidate():
+    for state in (VALID, DISPUTED, TERMINATED):
+        result = apply_event(state, Ev(REVOKED))
+        assert result.ok and result.to_state == REJECTED
+    denied = apply_event(CANDIDATE, Ev(REVOKED))
+    assert not denied.ok and denied.to_state == CANDIDATE and REVOKED in denied.reason
+
+
+def test_default_retrievable_states_are_parameterized_and_pure():
+    assert rl.DEFAULT_RETRIEVABLE_STATES == {None, CANDIDATE, VALID, DISPUTED}
+    assert [rl.is_retrievable(s) for s in (None, CANDIDATE, VALID, DISPUTED)] == [True] * 4
+    assert [rl.is_retrievable(s) for s in (SUPERSEDED, TERMINATED, REJECTED)] == [False] * 3
+    assert rl.is_retrievable(REJECTED, frozenset({REJECTED})) is True
+    assert rl.is_retrievable(CANDIDATE, frozenset({VALID})) is False
 
 
 def test_unknown_state_and_unknown_event_are_rejected_not_raised():
