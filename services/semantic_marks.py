@@ -165,3 +165,53 @@ def mark_fact_fields(subject: str | None, obj: str | None, verb: str | None) -> 
     if empty_subject or empty_object or empty_verb:
         return PENDING
     return RESOLVED
+
+
+# ── ⑤ 實體名稱形態：疑似整句條文（報告224 Q1／報告223 O1 操作型定義）────────────────
+# **PROVISIONAL**。完全重用報告223／`scripts/analysis/clause_entity_quantify.py` 的門檻與字面特徵，
+# 不自行發明規則（`tests/services/test_semantic_marks_name_shape.py` 以逐項比對守住兩處不漂移）。
+NAME_SHAPE_CLAUSE_STRONG = "疑似子句（長度＋特徵）"   # 長度達門檻且至少一項字面特徵（報告223「強候選」）
+NAME_SHAPE_CLAUSE_LENGTH_ONLY = "疑似子句（僅長度）"  # 長度達門檻、無任何字面特徵
+NAME_SHAPE_NOT_CLAUSE = "非子句"                      # 長度未達門檻（即使含特徵，如「勞工之」）
+NAME_SHAPE_INDETERMINATE = "無法判定"                 # 空名稱／None／非字串
+NAME_SHAPES = (NAME_SHAPE_CLAUSE_STRONG, NAME_SHAPE_CLAUSE_LENGTH_ONLY, NAME_SHAPE_NOT_CLAUSE, NAME_SHAPE_INDETERMINATE)
+NAME_SHAPE_DEFAULT_THRESHOLD = 12  # 報告223 主門檻；報告223 另報 8／20 兩檔，以參數表示
+
+NAME_SHAPE_KEYWORDS = ("者", "之", "應", "得", "不得", "視為", "以上", "未滿", "其", "前項")
+_NAME_SHAPE_PUNCT_RE = re.compile(r"[，、,；;（）()「」『』：:]")
+_NAME_SHAPE_NUM = r"[0-9０-９一二三四五六七八九十百千萬零〇兩]+"
+_NAME_SHAPE_NUM_UNIT_RE = re.compile(_NAME_SHAPE_NUM + r"\s*(?:日|天|年|月|週|周|星期|小時|分鐘|元|人|歲|倍|%|％|成|次|項|款|條)")
+
+
+def name_shape_features(name: str) -> dict[str, bool]:
+    """三項字面特徵（條文用語／標點括號／數字加單位），與報告223 §2 相同。"""
+    return {
+        "條文用語": any(k in name for k in NAME_SHAPE_KEYWORDS),
+        "標點括號": _NAME_SHAPE_PUNCT_RE.search(name) is not None,
+        "數字加單位": _NAME_SHAPE_NUM_UNIT_RE.search(name) is not None,
+    }
+
+
+def is_suspected_clause_shape(shape: str) -> bool:
+    """`mark_entity_name_shape()` 的值是否屬兩級「疑似子句」之一。"""
+    return shape in (NAME_SHAPE_CLAUSE_STRONG, NAME_SHAPE_CLAUSE_LENGTH_ONLY)
+
+
+def mark_entity_name_shape(name: str | None, length_threshold: int = NAME_SHAPE_DEFAULT_THRESHOLD) -> str:
+    """實體名稱形態 → 標示（**描述性字面規則，不是語意判定**）。
+
+    規則（同報告223）：名稱**原字串長度**（不 strip，同 O1）≥ `length_threshold`＝疑似子句；其中至少命中一項字面特徵
+    者為「長度＋特徵」（強候選），否則為「僅長度」；長度未達門檻＝非子句（即使含特徵）；空白／`None`／非字串＝無法判定。
+
+    **誤判風險**：長名稱不一定是子句——「勞動基準法施行細則第三十五條」「中華民國勞動部勞工保險局」都是合法長名稱，
+    前者還會因含數字加單位而被判為「長度＋特徵」。「之」「得」「其」等單字特徵更常出現在合法名稱。報告223 O2 的
+    50 筆草稿判讀中合法長名稱僅 6%、無法判斷 30%（草稿，未經使用者確認）；本標示只供日後與答對／答錯交叉，
+    不得據以過濾、降權或改寫實體名稱，也**不得寫回任何儲存資料**。
+    """
+    if not isinstance(name, str) or is_blank(name):
+        return NAME_SHAPE_INDETERMINATE
+    if len(name) < length_threshold:
+        return NAME_SHAPE_NOT_CLAUSE
+    if any(name_shape_features(name).values()):
+        return NAME_SHAPE_CLAUSE_STRONG
+    return NAME_SHAPE_CLAUSE_LENGTH_ONLY

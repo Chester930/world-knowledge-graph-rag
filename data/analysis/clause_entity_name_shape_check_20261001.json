@@ -1,0 +1,125 @@
+{
+  "rows": [
+    {
+      "item": "≥12 字數量",
+      "report223": 5227,
+      "recomputed": 5227,
+      "status": "一致"
+    },
+    {
+      "item": "≥12 字 強候選（長度＋特徵）",
+      "report223": 4676,
+      "recomputed": 4676,
+      "status": "一致"
+    },
+    {
+      "item": "≥12 字 僅長度（＝數量−強候選）",
+      "report223": 551,
+      "recomputed": 551,
+      "status": "一致"
+    },
+    {
+      "item": "≥12 字 概念型別",
+      "report223": 3536,
+      "recomputed": 3536,
+      "status": "一致"
+    },
+    {
+      "item": "≥12 字 非概念型別",
+      "report223": 1691,
+      "recomputed": 1691,
+      "status": "一致"
+    },
+    {
+      "item": "≥12 字 特徵命中",
+      "report223": {
+        "條文用語": 3994,
+        "標點括號": 2057,
+        "數字加單位": 1199
+      },
+      "recomputed": {
+        "條文用語": 3994,
+        "標點括號": 2057,
+        "數字加單位": 1199
+      },
+      "status": "一致"
+    },
+    {
+      "item": "≥20 字數量",
+      "report223": 2284,
+      "recomputed": 2284,
+      "status": "一致"
+    },
+    {
+      "item": "≥20 字 強候選（長度＋特徵）",
+      "report223": 2216,
+      "recomputed": 2216,
+      "status": "一致"
+    },
+    {
+      "item": "≥20 字 僅長度（＝數量−強候選）",
+      "report223": 68,
+      "recomputed": 68,
+      "status": "一致"
+    },
+    {
+      "item": "≥20 字 概念型別",
+      "report223": 1547,
+      "recomputed": 1547,
+      "status": "一致"
+    },
+    {
+      "item": "≥20 字 非概念型別",
+      "report223": 737,
+      "recomputed": 737,
+      "status": "一致"
+    },
+    {
+      "item": "≥20 字 特徵命中",
+      "report223": {
+        "條文用語": 1959,
+        "標點括號": 1422,
+        "數字加單位": 634
+      },
+      "recomputed": {
+        "條文用語": 1959,
+        "標點括號": 1422,
+        "數字加單位": 634
+      },
+      "status": "一致"
+    },
+    {
+      "item": "強候選群組實體數",
+      "report223": 4676,
+      "recomputed": 4676,
+      "status": "一致"
+    },
+    {
+      "item": "O2 樣本數",
+      "report223": 50,
+      "recomputed": 50,
+      "status": "一致"
+    },
+    {
+      "item": "O2 樣本皆為疑似子句（長度≥12）",
+      "report223": 50,
+      "recomputed": 50,
+      "status": "一致"
+    },
+    {
+      "item": "O2 樣本 length 欄位與名稱長度一致",
+      "report223": true,
+      "recomputed": true,
+      "status": "一致"
+    }
+  ],
+  "all_consistent": true,
+  "o2_sample_shape_counts": {
+    "疑似子句（長度＋特徵）": 46,
+    "疑似子句（僅長度）": 4
+  },
+  "not_checkable": [
+    "≥8 字檔（8–11 字名稱未保存）",
+    "全圖 12,296 分母與全圖型別／度數分布"
+  ]
+}

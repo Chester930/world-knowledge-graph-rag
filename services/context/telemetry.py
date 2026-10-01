@@ -97,6 +97,9 @@ def build_retrieval_trace(
                 core, ext = type_lookups
                 marks["subject_type"] = _sm.mark_entity_type(subject_type, core, ext, concept_scheme)
                 marks["object_type"] = _sm.mark_entity_type(object_type, core, ext, concept_scheme)
+            # 報告225 Q2：實體名稱形態（疑似整句條文；描述性字面規則，門檻用預設 12）；附加於既有鍵之後
+            marks["subject_name_shape"] = _sm.mark_entity_name_shape(subject)
+            marks["object_name_shape"] = _sm.mark_entity_name_shape(obj)
             return marks
 
     prompt_set = (
