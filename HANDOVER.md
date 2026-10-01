@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-10-01（報告185）：下一階段任務規劃——「RQ4a 前置檢查（只讀 Neo4j）、AGGR7 核對材料、腳本匯入期副作用根治」，**規劃對話決定、執行對話執行、規劃對話只記錄**
+
+使用者「依照建議繼續」＝採用規劃對話對報告184 §3 的建議：#2 RQ4a 前置檢查**做（唯讀 Cypher、不啟動 Ollama／LLM、KG#4 資料絕不可 wipe）**、#3 AGGR7 先備並排原文給使用者核對、#4 根治 probe_v2 匯入期 `load_env()`；#1 出題（待使用者核對 gold）、#5 跑實驗、#6 舊事項**維持暫停**。[報告185](docs/報告/185_下一階段任務規劃_RQ4a前置檢查與AGGR7核對材料與腳本副作用根治.md) 定案：**C1** 唯讀查 KG#4 的 `rel_type` 分布（前置：確認無他 session 使用同一 Neo4j／Ollama；前後節點／關係總數須不變）；**C2** AGGR7 兩份來源條文並排逐字摘錄（不判斷法規對錯、語料缺母法就寫無資料）；**C3** 把 `scripts/eval/kg_source_recall_probe_v2.py` 模組層級 `load_env()` 移入 `main()`（全量 ≥1579 passed、新測試須能被刻意破壞打出失敗）；**C4** 彙整。**不跑實驗、不重抽、不改論文。** 編號：185 為本規劃，**執行對話自 186 起**（156 保留）。每項 push 後 `SendMessage` 回報 `project refactor review sdd`。**狀態：已派工，等待執行。**
+
 ## 2026-10-01（報告182 B1–B4）：組別定義入論文、順序相依測試修復、補題最小批次準備完成——[報告184](docs/報告/184_組別定義入論文與補題準備階段結果彙整.md)
 
 B1（`777947c`）全量 1578 passed／0 failed，根因＝`tests/scripts/test_kg_source_recall_probe_v2.py` 匯入的 probe 腳本於模組層級 `load_env()` 汙染 `os.environ`（收集階段，影響 `Settings(_env_file=None)` 測試），測試端快照還原；B2（`722805d`）論文 `05` §5.2.3 寫入 RQ4a／RQ4b 組別的操作型定義（〔事實〕／〔提案〕／〔無資料〕標記；NER 事實更正：`SpacyNerTagger` 已存在但未接線）；B3（`5be4424`，[報告183](docs/報告/183_補題最小第一批核對材料.md)）5 個別名實例的原文摘錄＋RQ4a 7 題前置檢查（`rel_type` 6 題無資料，`svo_index.json` 無此欄）。未跑實驗、未啟動服務、未新增題庫條目。待使用者裁示見報告184 §3。
