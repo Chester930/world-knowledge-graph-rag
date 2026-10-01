@@ -11,7 +11,8 @@
       "B_reason": "主詞(雇主招收學徒…)不在所給原句，來自他處，跨句錯接",
       "agree": false,
       "consensus": "c",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "c"
     },
     "K3-2": {
       "draft": "c",
@@ -23,7 +24,8 @@
       "B_reason": "三元組與原句(不低於百分之五十)不對應，跨句錯接",
       "agree": false,
       "consensus": "c",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "c"
     },
     "K3-3": {
       "draft": "c",
@@ -107,7 +109,8 @@
       "B_reason": "受詞(檢查紀錄)放主詞位、施事雇主在verb，錯位難定",
       "agree": false,
       "consensus": "c",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "c"
     },
     "K3-10": {
       "draft": "c",
@@ -167,7 +170,8 @@
       "B_reason": "『查看安全器』受詞安全器併入verb",
       "agree": false,
       "consensus": "c",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "c"
     },
     "K3-15": {
       "draft": "c",
@@ -179,7 +183,8 @@
       "B_reason": "verb為目的子句片段，主句(雇主應調查…)未對應",
       "agree": false,
       "consensus": "c",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "c"
     },
     "K3-16": {
       "draft": "c",
@@ -395,7 +400,8 @@
       "B_reason": "主體+條件(青年組或身障…前三名每位選手)；三元組與原句亦錯位",
       "agree": false,
       "consensus": "U",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "N"
     },
     "O2-7": {
       "draft": "U",
@@ -587,7 +593,8 @@
       "B_reason": "『裝置於…之鐵線』含動詞修飾，可拆主體+條件",
       "agree": false,
       "consensus": "U",
-      "status": "不一致→疑問未決"
+      "status": "使用者確認（2026-10-01，採規劃對話建議）",
+      "user_final": "N"
     },
     "O2-46": {
       "draft": "U",
@@ -625,5 +632,6 @@
       "consensus": "L",
       "status": "兩人一致"
     }
-  }
+  },
+  "note_user_decisions": "2026-10-01 使用者確認 7 筆不一致項目：K3-1／2／9／14／15 維持 c（無法判斷）；O2 長名稱標準新增第四類 N（無謂語的長名詞片語），O2-6／O2-44 歸 N。其餘 45 筆仍為模型多數決複核，非使用者確認。"
 }
