@@ -75,6 +75,12 @@ class Settings(BaseSettings):
     api_key: str = ""     # 設定後，管理端點需帶 X-API-Key header；留空 = 不驗證（僅建議本機開發環境使用）
     max_upload_size_mb: int = 50
 
+    # ── 檢索 trace 影子標示（報告220／221）──────────────────────────────────────
+    # 預設關閉。TRACE_SEMANTIC_MARKS=1 時，`include_retrieval_trace` 的 trace 每筆事實多一個
+    # `semantic_marks`（純派生、只記錄，不改回答／排序／prompt）。「概念」處理：A（預設）／B／strict。
+    trace_semantic_marks: bool = False
+    trace_semantic_marks_concept_scheme: str = "A"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

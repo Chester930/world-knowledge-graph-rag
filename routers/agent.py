@@ -56,6 +56,7 @@ from services.context.telemetry import (
     serialize_document as _serialize_document,
     serialize_sources as _serialize_sources,
 )
+from services.context.trace_marks import semantic_marks_trace_kwargs
 
 # P2 第四刀（報告145）：檢索範圍／過濾純函式群已抽出至 services/retrieval/scope.py；
 # 此處以原私有名稱重新匯出，維持既有引用（含腳本的 from routers.agent import …）與 agent.py 內部呼叫不變。
@@ -1438,7 +1439,13 @@ async def chat(payload: ChatRequest):
                 triples, fact_results, resolved_rel_type, document_map,
                 retrieval_telemetry=retrieval_telemetry,
                 retrieval_trace=(
-                    _build_retrieval_trace(triples, fact_results, prompt_trace)
+                    _build_retrieval_trace(
+                        triples, fact_results, prompt_trace,
+                        **semantic_marks_trace_kwargs(
+                            settings.trace_semantic_marks,
+                            settings.trace_semantic_marks_concept_scheme,
+                        ),
+                    )
                     if payload.include_retrieval_trace else None
                 ),
             ),
