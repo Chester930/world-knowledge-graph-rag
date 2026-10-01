@@ -1,0 +1,808 @@
+{
+ "kg_id": "236903cf-055a-40a8-8923-b9d06601f3b7",
+ "before": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "type_tables": {
+  "core_size": 52,
+  "extended_size": 939
+ },
+ "property_keys_nodes": [
+  [
+   "Chunk",
+   "kg_id",
+   3307
+  ],
+  [
+   "Chunk",
+   "source_doc_id",
+   3307
+  ],
+  [
+   "Chunk",
+   "embedding",
+   3307
+  ],
+  [
+   "Chunk",
+   "chunk_index",
+   3307
+  ],
+  [
+   "Chunk",
+   "source",
+   3307
+  ],
+  [
+   "Chunk",
+   "chunk_file",
+   3307
+  ],
+  [
+   "Document",
+   "kg_id",
+   64
+  ],
+  [
+   "Document",
+   "title",
+   64
+  ],
+  [
+   "Document",
+   "source_doc_id",
+   64
+  ],
+  [
+   "Document",
+   "source",
+   64
+  ],
+  [
+   "Document",
+   "record_type",
+   64
+  ],
+  [
+   "Document",
+   "content_hash",
+   64
+  ],
+  [
+   "Document",
+   "update_date",
+   64
+  ],
+  [
+   "Document",
+   "source_url",
+   64
+  ],
+  [
+   "Document",
+   "effective_note",
+   16
+  ],
+  [
+   "Document",
+   "effective_date",
+   15
+  ],
+  [
+   "Entity",
+   "kg_id",
+   12296
+  ],
+  [
+   "Entity",
+   "name",
+   12296
+  ],
+  [
+   "Entity",
+   "type",
+   12296
+  ],
+  [
+   "Entity",
+   "name_embedding",
+   12296
+  ],
+  [
+   "Entity",
+   "aliases",
+   12296
+  ],
+  [
+   "Fact",
+   "kg_id",
+   16826
+  ],
+  [
+   "Fact",
+   "source_doc_id",
+   16826
+  ],
+  [
+   "Fact",
+   "verb",
+   16826
+  ],
+  [
+   "Fact",
+   "confidence",
+   16826
+  ],
+  [
+   "Fact",
+   "fact_embedding",
+   16826
+  ],
+  [
+   "Fact",
+   "fact_text",
+   16826
+  ],
+  [
+   "Fact",
+   "subject",
+   16826
+  ],
+  [
+   "Fact",
+   "rel_type",
+   16826
+  ],
+  [
+   "Fact",
+   "source_svo_chunk_index",
+   16826
+  ],
+  [
+   "Fact",
+   "object",
+   16826
+  ],
+  [
+   "LawArticle",
+   "kg_id",
+   3303
+  ],
+  [
+   "LawArticle",
+   "source_doc_id",
+   3303
+  ],
+  [
+   "LawArticle",
+   "article_no",
+   3303
+  ],
+  [
+   "LawArticle",
+   "article_content",
+   3303
+  ],
+  [
+   "LawArticle",
+   "chapter_title",
+   2951
+  ],
+  [
+   "Sentence",
+   "kg_id",
+   13
+  ],
+  [
+   "Sentence",
+   "source_doc_id",
+   13
+  ],
+  [
+   "Sentence",
+   "chunk_index",
+   13
+  ],
+  [
+   "Sentence",
+   "source",
+   13
+  ],
+  [
+   "Sentence",
+   "sentence_index",
+   13
+  ],
+  [
+   "Sentence",
+   "sentence_text",
+   13
+  ],
+  [
+   "Sentence",
+   "sentence_embedding",
+   13
+  ]
+ ],
+ "property_keys_edges_top": [
+  [
+   "RELATED_TO",
+   "kg_id",
+   12321
+  ],
+  [
+   "RELATED_TO",
+   "confidence",
+   12321
+  ],
+  [
+   "RELATED_TO",
+   "citations_json",
+   12321
+  ],
+  [
+   "RELATED_TO",
+   "verb_embedding",
+   11818
+  ],
+  [
+   "RELATED_TO",
+   "natural_text",
+   9803
+  ],
+  [
+   "HAS_PREREQUISITE",
+   "kg_id",
+   376
+  ],
+  [
+   "HAS_PREREQUISITE",
+   "confidence",
+   376
+  ],
+  [
+   "HAS_PREREQUISITE",
+   "citations_json",
+   376
+  ],
+  [
+   "USED_FOR",
+   "kg_id",
+   346
+  ],
+  [
+   "USED_FOR",
+   "confidence",
+   346
+  ],
+  [
+   "USED_FOR",
+   "citations_json",
+   346
+  ],
+  [
+   "HAS_PREREQUISITE",
+   "natural_text",
+   291
+  ],
+  [
+   "USED_FOR",
+   "natural_text",
+   205
+  ],
+  [
+   "MOTIVATED_BY_GOAL",
+   "kg_id",
+   199
+  ],
+  [
+   "MOTIVATED_BY_GOAL",
+   "confidence",
+   199
+  ],
+  [
+   "MOTIVATED_BY_GOAL",
+   "citations_json",
+   199
+  ],
+  [
+   "MOTIVATED_BY_GOAL",
+   "natural_text",
+   178
+  ],
+  [
+   "RECEIVES_ACTION",
+   "kg_id",
+   175
+  ],
+  [
+   "RECEIVES_ACTION",
+   "confidence",
+   175
+  ],
+  [
+   "RECEIVES_ACTION",
+   "citations_json",
+   175
+  ],
+  [
+   "OBSTRUCTED_BY",
+   "kg_id",
+   131
+  ],
+  [
+   "OBSTRUCTED_BY",
+   "confidence",
+   131
+  ],
+  [
+   "OBSTRUCTED_BY",
+   "citations_json",
+   131
+  ],
+  [
+   "RECEIVES_ACTION",
+   "natural_text",
+   126
+  ],
+  [
+   "CAPABLE_OF",
+   "kg_id",
+   116
+  ],
+  [
+   "CAPABLE_OF",
+   "confidence",
+   116
+  ],
+  [
+   "CAPABLE_OF",
+   "citations_json",
+   116
+  ],
+  [
+   "OBSTRUCTED_BY",
+   "natural_text",
+   95
+  ],
+  [
+   "CAPABLE_OF",
+   "natural_text",
+   70
+  ],
+  [
+   "HAS_PROPERTY",
+   "kg_id",
+   67
+  ],
+  [
+   "HAS_PROPERTY",
+   "confidence",
+   67
+  ],
+  [
+   "HAS_PROPERTY",
+   "citations_json",
+   67
+  ],
+  [
+   "CAUSES",
+   "kg_id",
+   55
+  ],
+  [
+   "CAUSES",
+   "confidence",
+   55
+  ],
+  [
+   "CAUSES",
+   "citations_json",
+   55
+  ],
+  [
+   "DEFINED_AS",
+   "kg_id",
+   54
+  ],
+  [
+   "DEFINED_AS",
+   "confidence",
+   54
+  ],
+  [
+   "DEFINED_AS",
+   "citations_json",
+   54
+  ],
+  [
+   "CAUSES",
+   "natural_text",
+   42
+  ],
+  [
+   "HAS_PROPERTY",
+   "natural_text",
+   37
+  ],
+  [
+   "DEFINED_AS",
+   "natural_text",
+   30
+  ],
+  [
+   "HAS_LAST_SUBEVENT",
+   "kg_id",
+   27
+  ],
+  [
+   "HAS_LAST_SUBEVENT",
+   "confidence",
+   27
+  ],
+  [
+   "HAS_LAST_SUBEVENT",
+   "citations_json",
+   27
+  ],
+  [
+   "DESIRES",
+   "kg_id",
+   24
+  ],
+  [
+   "DESIRES",
+   "confidence",
+   24
+  ],
+  [
+   "DESIRES",
+   "citations_json",
+   24
+  ],
+  [
+   "HAS_LAST_SUBEVENT",
+   "natural_text",
+   21
+  ],
+  [
+   "CREATED_BY",
+   "kg_id",
+   20
+  ],
+  [
+   "CREATED_BY",
+   "confidence",
+   20
+  ],
+  [
+   "CREATED_BY",
+   "citations_json",
+   20
+  ],
+  [
+   "DESIRES",
+   "natural_text",
+   18
+  ],
+  [
+   "MANNER_OF",
+   "kg_id",
+   18
+  ],
+  [
+   "MANNER_OF",
+   "confidence",
+   18
+  ],
+  [
+   "MANNER_OF",
+   "citations_json",
+   18
+  ],
+  [
+   "IS_A",
+   "kg_id",
+   16
+  ],
+  [
+   "IS_A",
+   "confidence",
+   16
+  ],
+  [
+   "IS_A",
+   "citations_json",
+   16
+  ],
+  [
+   "IS_A",
+   "natural_text",
+   16
+  ],
+  [
+   "CREATED_BY",
+   "natural_text",
+   15
+  ]
+ ],
+ "marker_key_candidates": [],
+ "entity_type_raw_distinct": 351,
+ "entity_type_categories": {
+  "concept_only": 8023,
+  "standard": 2481,
+  "outside_raw": 987,
+  "empty": 805,
+  "standard_with_concept": 0
+ },
+ "entity_type_marks": {
+  "total": 12296,
+  "strict": {
+   "不適用": 0,
+   "未知": 805,
+   "尚未處理": 987,
+   "已解決": 2481,
+   "無法由現有資料判定": 8023
+  },
+  "scheme_A_concept_as_unknown": {
+   "不適用": 0,
+   "未知": 8828,
+   "尚未處理": 987,
+   "已解決": 2481,
+   "無法由現有資料判定": 0
+  },
+  "scheme_B_concept_as_real": {
+   "不適用": 0,
+   "未知": 805,
+   "尚未處理": 987,
+   "已解決": 10504,
+   "無法由現有資料判定": 0
+  }
+ },
+ "entity_empty_name_type": [
+  {
+   "type": "概念",
+   "n": 1
+  }
+ ],
+ "entity_concept_only_top_check": 8023,
+ "rel_type_tally": {
+  "declared_non_related_to": 1832,
+  "related_to_with_verb": 14447,
+  "related_to_empty_verb": 547,
+  "rel_type_null": 0
+ },
+ "rel_type_marks": {
+  "total": 16826,
+  "strict": {
+   "不適用": 0,
+   "已解決": 1832,
+   "無法由現有資料判定（RELATED_TO 來源不明）": 14994
+  },
+  "scheme_RD_related_to_as_unknown": {
+   "不適用": 0,
+   "已解決": 1832,
+   "未知（來源不明）": 14994
+  }
+ },
+ "edge_verb_embedding_distribution": {
+  "related_to_with_ve": 11818,
+  "related_to_without_ve": 503,
+  "other_with_ve": 0,
+  "other_without_ve": 1700
+ },
+ "edge_verb_embedding_note": "僅描述分布；verb_embedding 不是『兜底』專屬標記（報告201 §2.1：RELATED_TO 且有 verb 時一律寫入）。",
+ "article_scope": {
+  "known": 16773,
+  "not_applicable": 53,
+  "unknown": 0
+ },
+ "article_docs": {
+  "docs": 65,
+  "docs_with_any_article_no": 64
+ },
+ "fact_supported_by_target_labels": [
+  [
+   "LawArticle",
+   16773
+  ],
+  [
+   "Chunk",
+   53
+  ]
+ ],
+ "document_nodes": [
+  {
+   "rt": "law",
+   "n": 64
+  }
+ ],
+ "fact_empties": {
+  "combos": {
+   "subject=0,object=0,verb=0": 11545,
+   "subject=0,object=0,verb=1": 482,
+   "subject=0,object=1,verb=0": 4597,
+   "subject=0,object=1,verb=1": 143,
+   "subject=1,object=0,verb=0": 26,
+   "subject=1,object=0,verb=1": 9,
+   "subject=1,object=1,verb=0": 22,
+   "subject=1,object=1,verb=1": 2
+  },
+  "categories": {
+   "complete": 11545,
+   "pending_needs_human_or_llm": 5136,
+   "unknown_determinate": 145
+  },
+  "single_counts": {
+   "empty_subject": 59,
+   "empty_object": 4764,
+   "empty_verb": 636
+  },
+  "facts_total": 16826,
+  "facts_with_any_empty": 5281
+ },
+ "fact_null_fields": {
+  "null_subject": 0,
+  "null_object": 0,
+  "null_verb": 0
+ },
+ "baseline": {
+  "entity_type": {
+   "population": 12296,
+   "already_explicitly_marked": 0,
+   "already_explicitly_marked_share": 0.0,
+   "derivable_read_only": 4273,
+   "derivable_read_only_share": 0.3475,
+   "needs_human_or_llm": 8023,
+   "needs_human_or_llm_share": 0.6525,
+   "partition_ok": true,
+   "note": "嚴格算法：「概念」的預設／真實含意無法唯讀判定，列入需人工／LLM；A／B 兩種假設算法見 entity_type_marks。outside_raw 依報告201 §1.2 對應『尚未處理』，但 §1.1 指出無法分辨『尚未對應』與『已判定非 schema.org』。"
+  },
+  "relation_type": {
+   "population": 16826,
+   "already_explicitly_marked": 0,
+   "already_explicitly_marked_share": 0.0,
+   "derivable_read_only": 1832,
+   "derivable_read_only_share": 0.1089,
+   "needs_human_or_llm": 14994,
+   "needs_human_or_llm_share": 0.8911,
+   "partition_ok": true,
+   "note": "嚴格算法：僅非 RELATED_TO 可確定；RELATED_TO 來源不明（報告201 §2.1）。R-D 假設算法見 rel_type_marks。"
+  },
+  "source_article_no": {
+   "population": 16826,
+   "already_explicitly_marked": 0,
+   "already_explicitly_marked_share": 0.0,
+   "derivable_read_only": 16826,
+   "derivable_read_only_share": 1.0,
+   "needs_human_or_llm": 0,
+   "needs_human_or_llm_share": 0.0,
+   "partition_ok": true,
+   "note": "母體＝邊上的引用（citations_json）；文件層判定，本 KG 100% 可唯讀確定。"
+  },
+  "empty_fields_among_facts_with_any_empty": {
+   "population": 5281,
+   "already_explicitly_marked": 0,
+   "already_explicitly_marked_share": 0.0,
+   "derivable_read_only": 145,
+   "derivable_read_only_share": 0.0275,
+   "needs_human_or_llm": 5136,
+   "needs_human_or_llm_share": 0.9725,
+   "partition_ok": true,
+   "note": "母體＝至少有一個空欄位（主詞／受詞／verb）的 Fact；完整 Fact 不需標示。唯讀可確定＝空受詞且空 verb；其餘需人工／LLM 區分『不適用』與『未知』。"
+  }
+ },
+ "baseline_marked_basis": "已有明確標示件數＝0 的依據：marker_key_candidates 為空（資料中無 status／origin／scope 類屬性鍵）；若非空須人工判讀後再填。",
+ "after": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_identical": true,
+ "cypher_log": [
+  {
+   "label": "before:總節點",
+   "cypher": "MATCH (n) RETURN count(n) AS v",
+   "rows": 1
+  },
+  {
+   "label": "before:總關係",
+   "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+   "rows": 1
+  },
+  {
+   "label": "before:Fact",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+   "rows": 1
+  },
+  {
+   "label": "before:Entity",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+   "rows": 1
+  },
+  {
+   "label": "屬性鍵（節點）",
+   "cypher": "MATCH (n {kg_id: $k}) UNWIND keys(n) AS key RETURN labels(n)[0] AS l, key, count(*) AS n ORDER BY l, n DESC",
+   "rows": 43
+  },
+  {
+   "label": "屬性鍵（邊）",
+   "cypher": "MATCH ()-[r {kg_id: $k}]->() UNWIND keys(r) AS key RETURN type(r) AS t, key, count(*) AS n ORDER BY t, n DESC",
+   "rows": 112
+  },
+  {
+   "label": "① 實體 type 分布",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN e.type AS t, count(*) AS n",
+   "rows": 351
+  },
+  {
+   "label": "① 空名實體的 type",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) WHERE trim(coalesce(e.name, '')) = '' RETURN e.type AS type, count(*) AS n",
+   "rows": 1
+  },
+  {
+   "label": "① 「概念」精確字串實體數",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) WHERE e.type = '概念' RETURN count(*) AS v",
+   "rows": 1
+  },
+  {
+   "label": "② Fact rel_type × verb 是否空",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN f.rel_type AS t, trim(coalesce(f.verb, '')) = '' AS ev, count(*) AS n",
+   "rows": 41
+  },
+  {
+   "label": "② 事實邊 × verb_embedding 有無",
+   "cypher": "MATCH (s:Entity {kg_id: $k})-[r]->(o:Entity {kg_id: $k}) WHERE r.citations_json IS NOT NULL RETURN type(r) AS t, r.verb_embedding IS NOT NULL AS ve, count(*) AS n",
+   "rows": 29
+  },
+  {
+   "label": "③ 事實邊引用",
+   "cypher": "MATCH (s:Entity {kg_id: $k})-[r]->(o:Entity {kg_id: $k}) WHERE r.citations_json IS NOT NULL RETURN r.citations_json AS c",
+   "rows": 14021
+  },
+  {
+   "label": "③ Fact SUPPORTED_BY 目標標籤",
+   "cypher": "MATCH (f:Fact {kg_id: $k})-[:SUPPORTED_BY]->(t) RETURN labels(t)[0] AS l, count(*) AS n ORDER BY n DESC",
+   "rows": 2
+  },
+  {
+   "label": "③ Document 節點數與 record_type",
+   "cypher": "MATCH (d:Document {kg_id: $k}) RETURN d.record_type AS rt, count(*) AS n",
+   "rows": 1
+  },
+  {
+   "label": "④ Fact 空主詞×空受詞×空 verb",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN trim(coalesce(f.subject, '')) = '' AS es, trim(coalesce(f.object, '')) = '' AS eo, trim(coalesce(f.verb, '')) = '' AS ev, count(*) AS n",
+   "rows": 8
+  },
+  {
+   "label": "④ Fact 欄位為 NULL（非空字串）的數量",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN sum(CASE WHEN f.subject IS NULL THEN 1 ELSE 0 END) AS null_subject, sum(CASE WHEN f.object IS NULL THEN 1 ELSE 0 END) AS null_object, sum(CASE WHEN f.verb IS NULL THEN 1 ELSE 0 END) AS null_verb",
+   "rows": 1
+  },
+  {
+   "label": "after:總節點",
+   "cypher": "MATCH (n) RETURN count(n) AS v",
+   "rows": 1
+  },
+  {
+   "label": "after:總關係",
+   "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+   "rows": 1
+  },
+  {
+   "label": "after:Fact",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+   "rows": 1
+  },
+  {
+   "label": "after:Entity",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+   "rows": 1
+  }
+ ]
+}
