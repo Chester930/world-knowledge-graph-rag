@@ -1,0 +1,252 @@
+{
+ "O2-1": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含「不得…行之」謂語，為整句條文"
+ },
+ "O2-2": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含「避免油料溢濺」目的謂語結構，為半句條文"
+ },
+ "O2-3": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「使其不超過…規定」含謂語，為目的子句"
+ },
+ "O2-4": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「不得辦理參加」含情態謂語；亦可視為者字指稱，有歧義"
+ },
+ "O2-5": {
+  "label": "N",
+  "confidence": "低",
+  "reason": "「僱用…者」為依規模分類之指稱，雖含動詞但像類別描述；有歧義"
+ },
+ "O2-6": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "無謂語的長名詞片語，指稱獲獎選手類別"
+ },
+ "O2-7": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "條列項名詞片語，無謂語"
+ },
+ "O2-8": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "帶修飾語的設備名詞片語"
+ },
+ "O2-9": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含「離婚或死亡而依法得居留工作」條件結構"
+ },
+ "O2-10": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "以法條引用限定的指稱人，無謂語；有歧義"
+ },
+ "O2-11": {
+  "label": "L",
+  "confidence": "中",
+  "reason": "指涉特定法條規定的引用名稱，近專有名詞"
+ },
+ "O2-12": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "名詞片語（可燃物品…危險性），無完整謂語"
+ },
+ "O2-13": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "文件清單名詞片語"
+ },
+ "O2-14": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含「持有證明而無法參加」謂語與條件情形"
+ },
+ "O2-15": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "完整句，含謂語「審認之」"
+ },
+ "O2-16": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句條文，含「得解除職務並應通知」"
+ },
+ "O2-17": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含「均屬之」謂語的定義句"
+ },
+ "O2-18": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "無謂語的長名詞片語"
+ },
+ "O2-19": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含「得…請求返還」"
+ },
+ "O2-20": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "名詞片語帶關係子句修飾「薪資」；有歧義"
+ },
+ "O2-21": {
+  "label": "N",
+  "confidence": "低",
+  "reason": "「連結」為動名詞，近名詞片語但含動作；有歧義"
+ },
+ "O2-22": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "動賓結構「持有…證明」，為資格條件"
+ },
+ "O2-23": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含多個謂語的條件句"
+ },
+ "O2-24": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "名詞片語"
+ },
+ "O2-25": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含「離職未滿一年再受僱」條件結構"
+ },
+ "O2-26": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "條列項名詞片語"
+ },
+ "O2-27": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「未依規定辦理…」為違規行為子句"
+ },
+ "O2-28": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "帶修飾語的指稱名詞片語"
+ },
+ "O2-29": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "帶修飾語的作業名詞片語"
+ },
+ "O2-30": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "多項目頓號串列"
+ },
+ "O2-31": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "多項目串列，尾端「構成」略帶動詞；有歧義"
+ },
+ "O2-32": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含謂語「準用…規定」，為半句條文"
+ },
+ "O2-33": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含「由…定之」"
+ },
+ "O2-34": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含條件與「應給付違約金」"
+ },
+ "O2-35": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「當選…代表者」動詞性者字結構；有歧義"
+ },
+ "O2-36": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含條件結構「罹災人數在三人以上者」"
+ },
+ "O2-37": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含條件「眷屬為養子女時」，為條件結構片段"
+ },
+ "O2-38": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "機構類別頓號串列，非專有名詞"
+ },
+ "O2-39": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "法條條次列舉引用，無謂語；亦可視為L，有歧義"
+ },
+ "O2-40": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句條文含多謂語"
+ },
+ "O2-41": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "文件名稱類名詞片語"
+ },
+ "O2-42": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含「無親屬關係，有…情形」謂語"
+ },
+ "O2-43": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含「應具備」"
+ },
+ "O2-44": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "帶修飾語的名詞片語"
+ },
+ "O2-45": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含主謂「贊助單位提供…」結構"
+ },
+ "O2-46": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "化學物質頓號串列"
+ },
+ "O2-47": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "動賓結構「遺失…文件」，為行為子句"
+ },
+ "O2-48": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "處所名詞片語"
+ },
+ "O2-49": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "帶修飾語的設備名詞片語"
+ },
+ "O2-50": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "職稱名詞片語"
+ }
+}

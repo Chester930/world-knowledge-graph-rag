@@ -1,0 +1,252 @@
+{
+ "O2-1": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含「不得…行之」謂語，整句條文"
+ },
+ "O2-2": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "以避免…目的子句，含謂語"
+ },
+ "O2-3": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "使其不超過…，含謂語的結果子句"
+ },
+ "O2-4": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「依法不得…者」為條件式者字結構"
+ },
+ "O2-5": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "含動詞「僱用」的者字結構，屬條件"
+ },
+ "O2-6": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "無謂語的長名詞片語，指稱選手"
+ },
+ "O2-7": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "條列項名稱，無謂語"
+ },
+ "O2-8": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "名詞片語，無謂語"
+ },
+ "O2-9": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含離婚、死亡、得居留等謂語與條件"
+ },
+ "O2-10": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "「所定之人」修飾名詞，法條引用但非專名"
+ },
+ "O2-11": {
+  "label": "L",
+  "confidence": "低",
+  "reason": "法規條文引用；亦可視為帶修飾語名詞片語，界線歧義"
+ },
+ "O2-12": {
+  "label": "N",
+  "confidence": "低",
+  "reason": "含「燃燒」但整體為「…之危險性」名詞片語"
+ },
+ "O2-13": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "文件名稱列舉，無謂語"
+ },
+ "O2-14": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含謂語與條件「因傷病…而無法參加」"
+ },
+ "O2-15": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含謂語「審認之」"
+ },
+ "O2-16": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含「得解除職務」謂語"
+ },
+ "O2-17": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "以「均屬之」收尾的整句"
+ },
+ "O2-18": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "名詞片語，無謂語"
+ },
+ "O2-19": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含「得…請求返還」謂語"
+ },
+ "O2-20": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "「…的薪資」帶長修飾語的名詞片語，內含動詞但整體為名詞"
+ },
+ "O2-21": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "動賓結構「確實連結」，無主體，近半句"
+ },
+ "O2-22": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "動賓結構「持有…證明」，為條件而非名詞"
+ },
+ "O2-23": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含多個動詞：接受、合格、領有"
+ },
+ "O2-24": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "名詞片語，條列項"
+ },
+ "O2-25": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含離職、再受僱的條件者字結構"
+ },
+ "O2-26": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "名詞片語，條列項"
+ },
+ "O2-27": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含「未依規定辦理」謂語"
+ },
+ "O2-28": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "「…指定應放假之日」帶修飾名詞片語"
+ },
+ "O2-29": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "作業類別描述，帶條件修飾的名詞片語"
+ },
+ "O2-30": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "零件列舉名詞片語"
+ },
+ "O2-31": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "構件列舉，末尾「構成」為殘餘，整體近名詞列舉"
+ },
+ "O2-32": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含「準用…規定」謂語"
+ },
+ "O2-33": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "「由…定之」謂語"
+ },
+ "O2-34": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含條件與義務"
+ },
+ "O2-35": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「當選…者」含動詞的者字條件"
+ },
+ "O2-36": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "「罹災人數在三人以上者」為條件式者字結構"
+ },
+ "O2-37": {
+  "label": "S",
+  "confidence": "低",
+  "reason": "條件「為養子女時」加名詞，屬截斷子句"
+ },
+ "O2-38": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "機構類別列舉，無謂語"
+ },
+ "O2-39": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "條項引用列舉，非整句；亦可視為L，界線歧義"
+ },
+ "O2-40": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "整句，含主體與行為"
+ },
+ "O2-41": {
+  "label": "N",
+  "confidence": "中",
+  "reason": "文件名稱，無謂語；亦近專名"
+ },
+ "O2-42": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "含謂語「無親屬關係，有…情形」"
+ },
+ "O2-43": {
+  "label": "S",
+  "confidence": "高",
+  "reason": "主謂結構「應具備」"
+ },
+ "O2-44": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "「裝置於…之鐵線」名詞片語"
+ },
+ "O2-45": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "主謂結構「贊助單位提供…」"
+ },
+ "O2-46": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "化學物質列舉"
+ },
+ "O2-47": {
+  "label": "S",
+  "confidence": "中",
+  "reason": "動賓結構「遺失…文件」，為事件條件"
+ },
+ "O2-48": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "處所名詞片語"
+ },
+ "O2-49": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "設備類別描述，名詞片語"
+ },
+ "O2-50": {
+  "label": "N",
+  "confidence": "高",
+  "reason": "職稱名詞片語"
+ }
+}
