@@ -68,8 +68,9 @@
       "D_conf": "中",
       "D_reason": "含動詞「僱用」的者字結構，屬條件",
       "agree": false,
-      "consensus_4class": "未決",
-      "status": "模型多數決複核（四類標準），非使用者確認"
+      "consensus_4class": "S",
+      "status": "使用者確認為 S（2026-10-01，採規劃對話建議；C/D 原不一致）",
+      "user_final": "S"
     },
     "O2-6": {
       "draft_3class": "U",
@@ -319,8 +320,9 @@
       "D_conf": "中",
       "D_reason": "動賓結構「確實連結」，無主體，近半句",
       "agree": false,
-      "consensus_4class": "未決",
-      "status": "模型多數決複核（四類標準），非使用者確認"
+      "consensus_4class": "S",
+      "status": "使用者確認為 S（2026-10-01，採規劃對話建議；C/D 原不一致）",
+      "user_final": "S"
     },
     "O2-22": {
       "draft_3class": "S",
@@ -761,5 +763,6 @@
       "consensus_4class": "N",
       "status": "模型多數決複核（四類標準），非使用者確認"
     }
-  }
+  },
+  "note_user_decisions": "2026-10-01 使用者確認：O2-6／O2-44 為 N；O2-5／O2-21 為 S。O2 四類共識（含使用者確認）：S 27／N 22／L 1／未決 0。其餘為模型複核，非使用者確認。"
 }
