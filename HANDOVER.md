@@ -1,7 +1,19 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告236–237 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告239 F2／F1 已由 Codex 執行，等待規劃對話獨立驗證；**目前無進行中的派工**）
+
+## 2026-10-02（報告239；F2／F1 Codex 執行，待規劃對話獨立驗證）
+
+依報告238 順序完成 F2 → F1；本條只記錄執行結果，不宣稱規劃對話已驗證。
+
+- **F2**：以 collector `moj_history_20260819T093233Z-history.json`（來源 209 筆、SHA-256 `3a8aceb9c176fb98ea6cc5cacbba0843daa46385ce08d30b538de62448129d40`）逐字重建 12 筆 fixture；所有欄位與 `content` 完整保留，含 `law_name` 的「 EN」後綴與第12條完整導覽雜訊。逐筆 `content_hash`／`version_id` 自洽核對 12／12；README 已逐筆列出來源 ID 與 hash。
+- **F1**：`services/law_version_events.py` 依 `(pcode, article_no, valid_from, normalize_content(content))` 收斂，代表列取最大 `retrieved_at`；同日期不同正規化內容保留並標異常；新增 `snapshot_collapses`、`snapshot_field_conflicts`、獨立 `current_flag_anomalies`。四檔原始 750 → 沿用 P1 canonical 220 → 收斂後 209 版／111 鏈／516 事件；4 個收斂群、4 個欄位衝突群；收斂前多 current 2 條（勞基法第86、請假規則第12），收斂後 0，多日期不同內容 0，互斥違規 0。109 條未收斂鏈的 final_state／事件序列與舊行為比對差異 0。
+- **示範與測試**：fixture 更新後示範仍為 6 鏈／12 版／30 事件／6 異常鏈／0 互斥違規；focused pytest 16 passed；全量 `python -m pytest -q -p no:cacheprovider --basetemp .pytest-tmp-f2-f1`＝**1868 passed／0 failed**（8 warnings、1 subtests passed）；`check_node_cards.py`＝3 張節點卡、0 警告。
+- **範圍**：未連 Neo4j、未啟動 Ollama／WSL、未呼叫 LLM／embedding／外網；未執行或修改 collector，未修改 KG#4、報告236／237、規劃文件、論文、題庫或其他 production 檔。collector `valid_to` 觀察只依報告238附錄記錄，未在本任務處理。
+- **提交**：實作與報告239 為 `5a719b9`；等待本條 HANDOVER 提交後推送。
+
+**狀態：F2／F1 執行完成，等待規劃對話獨立驗證。**
 
 ## 2026-10-01（報告236–237；Codex 執行，待規劃對話獨立驗證）
 
