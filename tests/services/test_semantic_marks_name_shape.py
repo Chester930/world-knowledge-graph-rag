@@ -16,8 +16,8 @@ _SPEC = importlib.util.spec_from_file_location("clause_entity_quantify", _ROOT /
 cq = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(cq)
 
-STRONG, LEN_ONLY, NOT, IND = (sm.NAME_SHAPE_CLAUSE_STRONG, sm.NAME_SHAPE_CLAUSE_LENGTH_ONLY,
-                              sm.NAME_SHAPE_NOT_CLAUSE, sm.NAME_SHAPE_INDETERMINATE)
+STRONG, LEN_ONLY, NOT, IND = (sm.NAME_SHAPE_LONG_STRONG, sm.NAME_SHAPE_LONG_LENGTH_ONLY,
+                              sm.NAME_SHAPE_NOT_LONG, sm.NAME_SHAPE_INDETERMINATE)
 
 
 def test_values_do_not_collide_with_existing_mark_values():
@@ -68,9 +68,9 @@ def test_length_is_raw_length_not_stripped_same_as_o1():
     assert cq.is_strong_candidate(padded) is False
 
 
-def test_is_suspected_clause_shape():
-    assert sm.is_suspected_clause_shape(STRONG) and sm.is_suspected_clause_shape(LEN_ONLY)
-    assert not sm.is_suspected_clause_shape(NOT) and not sm.is_suspected_clause_shape(IND)
+def test_is_long_name_shape():
+    assert sm.is_long_name_shape(STRONG) and sm.is_long_name_shape(LEN_ONLY)
+    assert not sm.is_long_name_shape(NOT) and not sm.is_long_name_shape(IND)
 
 
 def test_definition_constants_identical_to_report223_script():
@@ -92,7 +92,7 @@ def test_agrees_with_o1_functions_on_a_name_corpus():
             if not n.strip():
                 assert shape == IND
                 continue
-            assert sm.is_suspected_clause_shape(shape) == (len(n) >= th)
+            assert sm.is_long_name_shape(shape) == (len(n) >= th)
             assert (shape == STRONG) == cq.is_strong_candidate(n, th)
             assert sm.name_shape_features(n) == cq.name_features(n)
 

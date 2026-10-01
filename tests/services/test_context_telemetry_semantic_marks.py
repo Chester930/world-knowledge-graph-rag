@@ -60,14 +60,14 @@ def test_marks_values_and_edge_cases():
                                type_lookups=(CORE, EXT),
                                document_article_applicable={str(doc): True})
     f0, f1 = (e["semantic_marks"] for e in on["facts"])
-    # 報告225 Q2：既有三鍵不變，名稱形態兩鍵附加於最後（短名稱＝非子句；空受詞＝無法判定）
+    # 報告225 Q2：既有三鍵不變，名稱形態兩鍵附加於最後（短名稱＝非長名稱；空受詞＝無法判定）
     assert f0 == {"fields": sm.RESOLVED, "relation_type": sm.RESOLVED, "article_no": sm.RESOLVED,
-                  "subject_name_shape": sm.NAME_SHAPE_NOT_CLAUSE, "object_name_shape": sm.NAME_SHAPE_NOT_CLAUSE}
+                  "subject_name_shape": sm.NAME_SHAPE_NOT_LONG, "object_name_shape": sm.NAME_SHAPE_NOT_LONG}
     assert list(f0) == ["fields", "relation_type", "article_no", "subject_name_shape", "object_name_shape"]
     # 空受詞＋空 verb＝未知；RELATED_TO＝無法判定；無條號且無文件資訊＝無法判定（不猜）
     assert f1 == {"fields": sm.UNKNOWN, "relation_type": sm.INDETERMINATE,
                   "article_no": sm.INDETERMINATE,
-                  "subject_name_shape": sm.NAME_SHAPE_NOT_CLAUSE, "object_name_shape": sm.NAME_SHAPE_INDETERMINATE}
+                  "subject_name_shape": sm.NAME_SHAPE_NOT_LONG, "object_name_shape": sm.NAME_SHAPE_INDETERMINATE}
     t0, t1 = (e["semantic_marks"] for e in on["triples"])
     assert t0["subject_type"] == sm.RESOLVED and t0["object_type"] == sm.UNKNOWN  # 概念，方案A
     assert t0["article_no"] == sm.RESOLVED

@@ -167,14 +167,14 @@ def mark_fact_fields(subject: str | None, obj: str | None, verb: str | None) -> 
     return RESOLVED
 
 
-# ── ⑤ 實體名稱形態：疑似整句條文（報告224 Q1／報告223 O1 操作型定義）────────────────
+# ── ⑤ 實體名稱形態：長名稱（報告224 Q1／報告223 O1 操作型定義；報告227／228 改為中性名稱）──────
 # **PROVISIONAL**。完全重用報告223／`scripts/analysis/clause_entity_quantify.py` 的門檻與字面特徵，
 # 不自行發明規則（`tests/services/test_semantic_marks_name_shape.py` 以逐項比對守住兩處不漂移）。
-NAME_SHAPE_CLAUSE_STRONG = "疑似子句（長度＋特徵）"   # 長度達門檻且至少一項字面特徵（報告223「強候選」）
-NAME_SHAPE_CLAUSE_LENGTH_ONLY = "疑似子句（僅長度）"  # 長度達門檻、無任何字面特徵
-NAME_SHAPE_NOT_CLAUSE = "非子句"                      # 長度未達門檻（即使含特徵，如「勞工之」）
-NAME_SHAPE_INDETERMINATE = "無法判定"                 # 空名稱／None／非字串
-NAME_SHAPES = (NAME_SHAPE_CLAUSE_STRONG, NAME_SHAPE_CLAUSE_LENGTH_ONLY, NAME_SHAPE_NOT_CLAUSE, NAME_SHAPE_INDETERMINATE)
+NAME_SHAPE_LONG_STRONG = "長名稱（含條文用語）"     # 長度達門檻且至少一項字面特徵（報告223「強候選」）
+NAME_SHAPE_LONG_LENGTH_ONLY = "長名稱（僅長度）"    # 長度達門檻、無任何字面特徵
+NAME_SHAPE_NOT_LONG = "非長名稱"                    # 長度未達門檻（即使含特徵，如「勞工之」）
+NAME_SHAPE_INDETERMINATE = "無法判定"               # 空名稱／None／非字串
+NAME_SHAPES = (NAME_SHAPE_LONG_STRONG, NAME_SHAPE_LONG_LENGTH_ONLY, NAME_SHAPE_NOT_LONG, NAME_SHAPE_INDETERMINATE)
 NAME_SHAPE_DEFAULT_THRESHOLD = 12  # 報告223 主門檻；報告223 另報 8／20 兩檔，以參數表示
 
 NAME_SHAPE_KEYWORDS = ("者", "之", "應", "得", "不得", "視為", "以上", "未滿", "其", "前項")
@@ -192,26 +192,31 @@ def name_shape_features(name: str) -> dict[str, bool]:
     }
 
 
-def is_suspected_clause_shape(shape: str) -> bool:
-    """`mark_entity_name_shape()` 的值是否屬兩級「疑似子句」之一。"""
-    return shape in (NAME_SHAPE_CLAUSE_STRONG, NAME_SHAPE_CLAUSE_LENGTH_ONLY)
+def is_long_name_shape(shape: str) -> bool:
+    """`mark_entity_name_shape()` 的值是否屬兩級「長名稱」之一。"""
+    return shape in (NAME_SHAPE_LONG_STRONG, NAME_SHAPE_LONG_LENGTH_ONLY)
 
 
 def mark_entity_name_shape(name: str | None, length_threshold: int = NAME_SHAPE_DEFAULT_THRESHOLD) -> str:
-    """實體名稱形態 → 標示（**描述性字面規則，不是語意判定**）。
+    """實體名稱形態 → 標示（**描述性字面規則，不是語意判定，更不是「子句」判定**）。
 
-    規則（同報告223）：名稱**原字串長度**（不 strip，同 O1）≥ `length_threshold`＝疑似子句；其中至少命中一項字面特徵
-    者為「長度＋特徵」（強候選），否則為「僅長度」；長度未達門檻＝非子句（即使含特徵）；空白／`None`／非字串＝無法判定。
+    規則（同報告223）：名稱**原字串長度**（不 strip，同 O1）≥ `length_threshold`＝長名稱；其中至少命中一項字面特徵
+    者為「長名稱（含條文用語）」（報告223 稱「強候選」），否則為「長名稱（僅長度）」；長度未達門檻＝非長名稱
+    （即使含特徵）；空白／`None`／非字串＝無法判定。
+
+    **校準資訊（為何不叫「子句」）**：報告223 全圖 ≥12 字名稱 5,227 個中，「含條文用語」者占 89%（4,676／5,227），
+    但這只是字面命中，不是子句數。報告226 §5c 的 O2 盲測複核（50 筆、雙獨立標註員，含使用者對 2 筆的確認；
+    樣本小、信賴區間寬、屬模型複核而非人工全面標註）顯示：含謂語的子句 54%（27／50）、無謂語名詞片語 44%（22／50）、
+    專有名詞 2%（1／50）。因此**不得把「長名稱（含條文用語）」的數量當作子句數**。
 
     **誤判風險**：長名稱不一定是子句——「勞動基準法施行細則第三十五條」「中華民國勞動部勞工保險局」都是合法長名稱，
-    前者還會因含數字加單位而被判為「長度＋特徵」。「之」「得」「其」等單字特徵更常出現在合法名稱。報告223 O2 的
-    50 筆草稿判讀中合法長名稱僅 6%、無法判斷 30%（草稿，未經使用者確認）；本標示只供日後與答對／答錯交叉，
-    不得據以過濾、降權或改寫實體名稱，也**不得寫回任何儲存資料**。
+    前者還會因含數字加單位而被判為「長名稱（含條文用語）」。「之」「得」「其」等單字特徵更常出現在合法名稱。
+    本標示只供日後與答對／答錯交叉，不得據以過濾、降權或改寫實體名稱，也**不得寫回任何儲存資料**。
     """
     if not isinstance(name, str) or is_blank(name):
         return NAME_SHAPE_INDETERMINATE
     if len(name) < length_threshold:
-        return NAME_SHAPE_NOT_CLAUSE
+        return NAME_SHAPE_NOT_LONG
     if any(name_shape_features(name).values()):
-        return NAME_SHAPE_CLAUSE_STRONG
-    return NAME_SHAPE_CLAUSE_LENGTH_ONLY
+        return NAME_SHAPE_LONG_STRONG
+    return NAME_SHAPE_LONG_LENGTH_ONLY

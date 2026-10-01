@@ -22,10 +22,10 @@ def _ents():
 
 def test_recompute_counts_by_threshold():
     r = chk.recompute(_ents(), 12)
-    assert (r["suspected"], r["strong"], r["length_only"], r["concept"], r["non_concept"]) == (3, 1, 2, 2, 1)
+    assert (r["long_names"], r["strong"], r["length_only"], r["concept"], r["non_concept"]) == (3, 1, 2, 2, 1)
     assert r["features"]["條文用語"] == 1
     r20 = chk.recompute(_ents(), 20)
-    assert r20["suspected"] == 1 and r20["length_only"] == 1 and r20["strong"] == 0
+    assert r20["long_names"] == 1 and r20["length_only"] == 1 and r20["strong"] == 0
 
 
 def _quant(ents):
@@ -33,7 +33,7 @@ def _quant(ents):
     for th in (12, 20):
         r = chk.recompute([e for e in ents if len(e["name"]) >= th], th)
         out["summary"]["by_threshold"][str(th)] = {
-            "count": r["suspected"], "strong_candidates": r["strong"], "concept": r["concept"],
+            "count": r["long_names"], "strong_candidates": r["strong"], "concept": r["concept"],
             "non_concept": r["non_concept"], "features": r["features"]}
     out["groups"]["strong(len>=12+特徵)"] = {"count": chk.recompute(ents, 12)["strong"]}
     return out
@@ -56,7 +56,7 @@ def test_compare_all_consistent_and_detects_mismatch():
 
 def test_sample_shape_counts():
     assert chk.sample_shape_counts([{"name": STRONG_NAME}, {"name": LONG_PLAIN}, {"name": "短"}]) == {
-        sm.NAME_SHAPE_CLAUSE_STRONG: 1, sm.NAME_SHAPE_CLAUSE_LENGTH_ONLY: 1, sm.NAME_SHAPE_NOT_CLAUSE: 1}
+        sm.NAME_SHAPE_LONG_STRONG: 1, sm.NAME_SHAPE_LONG_LENGTH_ONLY: 1, sm.NAME_SHAPE_NOT_LONG: 1}
 
 
 def test_real_saved_data_is_consistent_with_report223():
