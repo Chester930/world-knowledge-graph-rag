@@ -1,9 +1,20 @@
+import os
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.eval.kg_source_recall_probe_v2 import triple_candidates  # noqa: E402
+
+# 被測模組在匯入時會呼叫 `load_env()`，把 kg-reextract 的 `.env` 寫進 `os.environ`
+# （收集階段即發生、整個 pytest 行程共用），會汙染 `Settings(_env_file=None)` 這類
+# 依賴「沒有環境變數覆寫」的測試（例如 tests/core/test_embedding_migration.py）。
+# 匯入後立刻還原環境變數，讓本檔不留下行程級副作用。
+_ENV_BEFORE_IMPORT = dict(os.environ)
+try:
+    from scripts.eval.kg_source_recall_probe_v2 import triple_candidates  # noqa: E402
+finally:
+    os.environ.clear()
+    os.environ.update(_ENV_BEFORE_IMPORT)
 
 
 class TripleCandidatesTest(unittest.TestCase):
