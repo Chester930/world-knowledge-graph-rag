@@ -1,0 +1,1473 @@
+{
+  "summary": {
+    "entities": 12296,
+    "concept_entities": 8023,
+    "length": {
+      "min": 0,
+      "p25": 6.0,
+      "median": 10.0,
+      "p75": 17.0,
+      "p90": 26.0,
+      "p99": 54.0,
+      "max": 252
+    },
+    "histogram": {
+      "1-3": 1116,
+      "4-7": 3524,
+      "8-11": 2428,
+      "12-19": 2943,
+      "20-39": 1887,
+      "40+": 397,
+      "0": 1
+    },
+    "by_threshold": {
+      "8": {
+        "count": 7655,
+        "share_of_all": 0.6225601821730644,
+        "concept": 5122,
+        "share_of_concept_entities": 0.6384145581453322,
+        "non_concept": 2533,
+        "share_of_non_concept_entities": 0.5927919494500351,
+        "features": {
+          "條文用語": 5239,
+          "標點括號": 2210,
+          "數字加單位": 1486
+        },
+        "strong_candidates": 6174,
+        "legal_name_like": 114
+      },
+      "12": {
+        "count": 5227,
+        "share_of_all": 0.4250975927130774,
+        "concept": 3536,
+        "share_of_concept_entities": 0.44073289293281814,
+        "non_concept": 1691,
+        "share_of_non_concept_entities": 0.39574069740229345,
+        "features": {
+          "條文用語": 3994,
+          "標點括號": 2057,
+          "數字加單位": 1199
+        },
+        "strong_candidates": 4676,
+        "legal_name_like": 94
+      },
+      "20": {
+        "count": 2284,
+        "share_of_all": 0.18575146389069616,
+        "concept": 1547,
+        "share_of_concept_entities": 0.19282064065810794,
+        "non_concept": 737,
+        "share_of_non_concept_entities": 0.17247835244558857,
+        "features": {
+          "條文用語": 1959,
+          "標點括號": 1422,
+          "數字加單位": 634
+        },
+        "strong_candidates": 2216,
+        "legal_name_like": 56
+      }
+    }
+  },
+  "groups": {
+    "len>=8": {
+      "count": 7655,
+      "type_marks": {
+        "A": {
+          "未知": 5642,
+          "已解決": 1404,
+          "尚未處理": 609
+        },
+        "B": {
+          "已解決": 6526,
+          "尚未處理": 609,
+          "未知": 520
+        },
+        "strict": {
+          "無法由現有資料判定": 5122,
+          "已解決": 1404,
+          "尚未處理": 609,
+          "未知": 520
+        }
+      },
+      "degree_docs": {
+        "entities": 7655,
+        "degree_quantiles": {
+          "min": 0,
+          "p25": 1.0,
+          "median": 1.0,
+          "p75": 1.0,
+          "p90": 2.0,
+          "p99": 9.0,
+          "max": 111
+        },
+        "degree_hist": {
+          "0": 88,
+          "1": 6011,
+          "2": 870,
+          "3-5": 508,
+          "6+": 178
+        },
+        "degree_eq_1_share": 0.7852384062704115,
+        "doc_count_hist": {
+          "0": 88,
+          "1": 6938,
+          "2+": 629
+        },
+        "single_doc_share": 0.9063357282821685
+      },
+      "affected_facts": {
+        "facts_total": 16826,
+        "as_subject": 5532,
+        "as_object": 5844,
+        "either": 9589,
+        "either_share": 0.5698918340663259
+      },
+      "near_duplicates": {
+        "entities": 7655,
+        "groups": 7650,
+        "duplicate_groups": 5,
+        "entities_in_duplicate_groups": 10,
+        "examples": [
+          [
+            "基金之收支,運用情形及其積存數額",
+            "基金之收支、運用情形及其積存數額"
+          ],
+          [
+            "身心障礙證明或受監護宣告之證明文件",
+            "身心障礙證明，或受監護宣告之證明文件"
+          ],
+          [
+            "當地主管機關,入出國管理機關及警察機關",
+            "當地主管機關、入出國管理機關及警察機關"
+          ],
+          [
+            "符合本法第四十三條失能程度且有工作能力之職業災害勞工",
+            "符合本法第四十三條失能程度，且有工作能力之職業災害勞工"
+          ],
+          [
+            "符合第二十條第一項第六款,第九款,第二項,第三項及第二十一條規定之資格文件",
+            "符合第二十條第一項第六款、第九款、第二項、第三項及第二十一條規定之資格文件"
+          ]
+        ],
+        "bias_note": "只比對去除標點／空白後完全相同；實體名稱在 KG 內唯一，故只會抓到標點差異，其餘近似重複皆漏計（保守偏低）。"
+      }
+    },
+    "len>=12": {
+      "count": 5227,
+      "type_marks": {
+        "A": {
+          "未知": 3918,
+          "已解決": 894,
+          "尚未處理": 415
+        },
+        "B": {
+          "已解決": 4430,
+          "尚未處理": 415,
+          "未知": 382
+        },
+        "strict": {
+          "無法由現有資料判定": 3536,
+          "已解決": 894,
+          "尚未處理": 415,
+          "未知": 382
+        }
+      },
+      "degree_docs": {
+        "entities": 5227,
+        "degree_quantiles": {
+          "min": 0,
+          "p25": 1.0,
+          "median": 1.0,
+          "p75": 1.0,
+          "p90": 2.0,
+          "p99": 7.0,
+          "max": 32
+        },
+        "degree_hist": {
+          "0": 74,
+          "1": 4262,
+          "2": 537,
+          "3-5": 275,
+          "6+": 79
+        },
+        "degree_eq_1_share": 0.8153816720872393,
+        "doc_count_hist": {
+          "0": 74,
+          "1": 4799,
+          "2+": 354
+        },
+        "single_doc_share": 0.9181174669982781
+      },
+      "affected_facts": {
+        "facts_total": 16826,
+        "as_subject": 3265,
+        "as_object": 3801,
+        "either": 6399,
+        "either_share": 0.38030429097824797
+      },
+      "near_duplicates": {
+        "entities": 5227,
+        "groups": 5222,
+        "duplicate_groups": 5,
+        "entities_in_duplicate_groups": 10,
+        "examples": [
+          [
+            "基金之收支,運用情形及其積存數額",
+            "基金之收支、運用情形及其積存數額"
+          ],
+          [
+            "身心障礙證明或受監護宣告之證明文件",
+            "身心障礙證明，或受監護宣告之證明文件"
+          ],
+          [
+            "當地主管機關,入出國管理機關及警察機關",
+            "當地主管機關、入出國管理機關及警察機關"
+          ],
+          [
+            "符合本法第四十三條失能程度且有工作能力之職業災害勞工",
+            "符合本法第四十三條失能程度，且有工作能力之職業災害勞工"
+          ],
+          [
+            "符合第二十條第一項第六款,第九款,第二項,第三項及第二十一條規定之資格文件",
+            "符合第二十條第一項第六款、第九款、第二項、第三項及第二十一條規定之資格文件"
+          ]
+        ],
+        "bias_note": "只比對去除標點／空白後完全相同；實體名稱在 KG 內唯一，故只會抓到標點差異，其餘近似重複皆漏計（保守偏低）。"
+      }
+    },
+    "len>=20": {
+      "count": 2284,
+      "type_marks": {
+        "A": {
+          "未知": 1755,
+          "已解決": 361,
+          "尚未處理": 168
+        },
+        "B": {
+          "已解決": 1908,
+          "尚未處理": 168,
+          "未知": 208
+        },
+        "strict": {
+          "無法由現有資料判定": 1547,
+          "已解決": 361,
+          "尚未處理": 168,
+          "未知": 208
+        }
+      },
+      "degree_docs": {
+        "entities": 2284,
+        "degree_quantiles": {
+          "min": 0,
+          "p25": 1.0,
+          "median": 1.0,
+          "p75": 1.0,
+          "p90": 2.0,
+          "p99": 5.0,
+          "max": 17
+        },
+        "degree_hist": {
+          "0": 39,
+          "1": 1932,
+          "2": 198,
+          "3-5": 98,
+          "6+": 17
+        },
+        "degree_eq_1_share": 0.8458844133099825,
+        "doc_count_hist": {
+          "0": 39,
+          "1": 2116,
+          "2+": 129
+        },
+        "single_doc_share": 0.9264448336252189
+      },
+      "affected_facts": {
+        "facts_total": 16826,
+        "as_subject": 1242,
+        "as_object": 1592,
+        "either": 2749,
+        "either_share": 0.16337810531320576
+      },
+      "near_duplicates": {
+        "entities": 2284,
+        "groups": 2282,
+        "duplicate_groups": 2,
+        "entities_in_duplicate_groups": 4,
+        "examples": [
+          [
+            "符合本法第四十三條失能程度且有工作能力之職業災害勞工",
+            "符合本法第四十三條失能程度，且有工作能力之職業災害勞工"
+          ],
+          [
+            "符合第二十條第一項第六款,第九款,第二項,第三項及第二十一條規定之資格文件",
+            "符合第二十條第一項第六款、第九款、第二項、第三項及第二十一條規定之資格文件"
+          ]
+        ],
+        "bias_note": "只比對去除標點／空白後完全相同；實體名稱在 KG 內唯一，故只會抓到標點差異，其餘近似重複皆漏計（保守偏低）。"
+      }
+    },
+    "strong(len>=12+特徵)": {
+      "count": 4676,
+      "type_marks": {
+        "A": {
+          "未知": 3526,
+          "已解決": 772,
+          "尚未處理": 378
+        },
+        "B": {
+          "已解決": 3942,
+          "尚未處理": 378,
+          "未知": 356
+        },
+        "strict": {
+          "無法由現有資料判定": 3170,
+          "已解決": 772,
+          "尚未處理": 378,
+          "未知": 356
+        }
+      },
+      "degree_docs": {
+        "entities": 4676,
+        "degree_quantiles": {
+          "min": 0,
+          "p25": 1.0,
+          "median": 1.0,
+          "p75": 1.0,
+          "p90": 2.0,
+          "p99": 6.0,
+          "max": 32
+        },
+        "degree_hist": {
+          "0": 68,
+          "1": 3860,
+          "2": 460,
+          "3-5": 224,
+          "6+": 64
+        },
+        "degree_eq_1_share": 0.825491873396065,
+        "doc_count_hist": {
+          "0": 68,
+          "1": 4308,
+          "2+": 300
+        },
+        "single_doc_share": 0.9213002566295979
+      },
+      "affected_facts": {
+        "facts_total": 16826,
+        "as_subject": 2851,
+        "as_object": 3363,
+        "either": 5716,
+        "either_share": 0.33971234993462496
+      },
+      "near_duplicates": {
+        "entities": 4676,
+        "groups": 4671,
+        "duplicate_groups": 5,
+        "entities_in_duplicate_groups": 10,
+        "examples": [
+          [
+            "身心障礙證明或受監護宣告之證明文件",
+            "身心障礙證明，或受監護宣告之證明文件"
+          ],
+          [
+            "符合本法第四十三條失能程度且有工作能力之職業災害勞工",
+            "符合本法第四十三條失能程度，且有工作能力之職業災害勞工"
+          ],
+          [
+            "符合第二十條第一項第六款,第九款,第二項,第三項及第二十一條規定之資格文件",
+            "符合第二十條第一項第六款、第九款、第二項、第三項及第二十一條規定之資格文件"
+          ],
+          [
+            "基金之收支、運用情形及其積存數額",
+            "基金之收支,運用情形及其積存數額"
+          ],
+          [
+            "當地主管機關、入出國管理機關及警察機關",
+            "當地主管機關,入出國管理機關及警察機關"
+          ]
+        ],
+        "bias_note": "只比對去除標點／空白後完全相同；實體名稱在 KG 內唯一，故只會抓到標點差異，其餘近似重複皆漏計（保守偏低）。"
+      }
+    }
+  },
+  "baseline_all_entities": {
+    "type_marks": {
+      "A": {
+        "未知": 8828,
+        "已解決": 2481,
+        "尚未處理": 987
+      },
+      "B": {
+        "已解決": 10504,
+        "尚未處理": 987,
+        "未知": 805
+      },
+      "strict": {
+        "無法由現有資料判定": 8023,
+        "已解決": 2481,
+        "尚未處理": 987,
+        "未知": 805
+      }
+    },
+    "degree_docs": {
+      "entities": 12296,
+      "degree_quantiles": {
+        "min": 0,
+        "p25": 1.0,
+        "median": 1.0,
+        "p75": 2.0,
+        "p90": 3.0,
+        "p99": 14.0,
+        "max": 3011
+      },
+      "degree_hist": {
+        "0": 124,
+        "1": 8850,
+        "2": 1647,
+        "3-5": 1129,
+        "6+": 546
+      },
+      "degree_eq_1_share": 0.7197462589459988,
+      "doc_count_hist": {
+        "0": 124,
+        "1": 10573,
+        "2+": 1599
+      },
+      "single_doc_share": 0.8598731294729993
+    }
+  },
+  "retrieval_cross_per_file": {
+    "baseline_runs/20260923_rebased/stage_s0_r1/records.json": {
+      "fact": {
+        "entries": 760,
+        "matched": 760,
+        "retrieved": {
+          "len>=8": 449,
+          "len>=12": 334,
+          "strong(len>=12+特徵)": 308,
+          "len>=20": 162
+        },
+        "in_prompt": {
+          "len>=8": 367,
+          "len>=12": 276,
+          "strong(len>=12+特徵)": 262,
+          "len>=20": 139
+        },
+        "matched_in_prompt": 563
+      },
+      "triple": {
+        "entries": 881,
+        "matched": 877,
+        "retrieved": {
+          "len>=8": 402,
+          "len>=12": 257,
+          "len>=20": 94,
+          "strong(len>=12+特徵)": 219
+        },
+        "in_prompt": {
+          "len>=8": 115,
+          "len>=12": 75,
+          "len>=20": 24,
+          "strong(len>=12+特徵)": 59
+        },
+        "matched_in_prompt": 315
+      }
+    },
+    "baseline_runs/20260923_rebased/stage_s0_r1_resume1/records.json": {
+      "fact": {
+        "entries": 60,
+        "matched": 60,
+        "retrieved": {
+          "len>=8": 38,
+          "len>=12": 29,
+          "len>=20": 11,
+          "strong(len>=12+特徵)": 23
+        },
+        "in_prompt": {
+          "len>=8": 35,
+          "len>=12": 26,
+          "len>=20": 11,
+          "strong(len>=12+特徵)": 23
+        },
+        "matched_in_prompt": 50
+      },
+      "triple": {
+        "entries": 94,
+        "matched": 94,
+        "retrieved": {
+          "len>=8": 49,
+          "len>=12": 32,
+          "strong(len>=12+特徵)": 23,
+          "len>=20": 13
+        },
+        "in_prompt": {
+          "len>=8": 13,
+          "len>=12": 9,
+          "strong(len>=12+特徵)": 5,
+          "len>=20": 4
+        },
+        "matched_in_prompt": 29
+      }
+    },
+    "baseline_runs/20260923_rebased/stage_s0_r2/records.json": {
+      "fact": {
+        "entries": 640,
+        "matched": 640,
+        "retrieved": {
+          "len>=8": 400,
+          "len>=12": 292,
+          "len>=20": 140,
+          "strong(len>=12+特徵)": 264
+        },
+        "in_prompt": {
+          "len>=8": 339,
+          "len>=12": 250,
+          "len>=20": 125,
+          "strong(len>=12+特徵)": 234
+        },
+        "matched_in_prompt": 489
+      },
+      "triple": {
+        "entries": 848,
+        "matched": 844,
+        "retrieved": {
+          "len>=8": 402,
+          "len>=12": 255,
+          "strong(len>=12+特徵)": 214,
+          "len>=20": 93
+        },
+        "in_prompt": {
+          "len>=8": 113,
+          "len>=12": 74,
+          "strong(len>=12+特徵)": 55,
+          "len>=20": 24
+        },
+        "matched_in_prompt": 294
+      }
+    },
+    "candidate_runs/s1_k1b_topk40_bfs16_stage_a/records.json": {
+      "fact": {
+        "entries": 1633,
+        "matched": 1633,
+        "retrieved": {
+          "len>=8": 987,
+          "len>=12": 723,
+          "strong(len>=12+特徵)": 664,
+          "len>=20": 341
+        },
+        "in_prompt": {
+          "len>=8": 565,
+          "len>=12": 415,
+          "strong(len>=12+特徵)": 390,
+          "len>=20": 201
+        },
+        "matched_in_prompt": 875
+      },
+      "triple": {
+        "entries": 975,
+        "matched": 971,
+        "retrieved": {
+          "len>=8": 451,
+          "len>=12": 289,
+          "len>=20": 107,
+          "strong(len>=12+特徵)": 242
+        },
+        "in_prompt": {
+          "len>=8": 273,
+          "len>=12": 181,
+          "len>=20": 73,
+          "strong(len>=12+特徵)": 150
+        },
+        "matched_in_prompt": 634
+      }
+    },
+    "candidate_runs/s1_k1b_topk40_bfs16_stage_b/records.json": {
+      "fact": {
+        "entries": 1138,
+        "matched": 1138,
+        "retrieved": {
+          "len>=8": 732,
+          "len>=12": 526,
+          "len>=20": 254,
+          "strong(len>=12+特徵)": 481
+        },
+        "in_prompt": {
+          "len>=8": 414,
+          "len>=12": 295,
+          "len>=20": 146,
+          "strong(len>=12+特徵)": 274
+        },
+        "matched_in_prompt": 593
+      },
+      "triple": {
+        "entries": 762,
+        "matched": 758,
+        "retrieved": {
+          "len>=8": 366,
+          "len>=12": 229,
+          "strong(len>=12+特徵)": 194,
+          "len>=20": 83
+        },
+        "in_prompt": {
+          "len>=8": 208,
+          "len>=12": 136,
+          "strong(len>=12+特徵)": 113,
+          "len>=20": 52
+        },
+        "matched_in_prompt": 462
+      }
+    },
+    "candidate_runs/s2_k1_topk40_stage_a/records.json": {
+      "fact": {
+        "entries": 1560,
+        "matched": 1560,
+        "retrieved": {
+          "len>=8": 954,
+          "len>=12": 698,
+          "strong(len>=12+特徵)": 640,
+          "len>=20": 333
+        },
+        "in_prompt": {
+          "len>=8": 540,
+          "len>=12": 396,
+          "strong(len>=12+特徵)": 371,
+          "len>=20": 194
+        },
+        "matched_in_prompt": 831
+      },
+      "triple": {
+        "entries": 936,
+        "matched": 932,
+        "retrieved": {
+          "len>=8": 437,
+          "len>=12": 277,
+          "len>=20": 103,
+          "strong(len>=12+特徵)": 231
+        },
+        "in_prompt": {
+          "len>=8": 263,
+          "len>=12": 172,
+          "len>=20": 69,
+          "strong(len>=12+特徵)": 142
+        },
+        "matched_in_prompt": 602
+      }
+    },
+    "candidate_runs/s2_k1_topk40_stage_b/records.json": {
+      "fact": {
+        "entries": 1131,
+        "matched": 1131,
+        "retrieved": {
+          "len>=8": 723,
+          "len>=12": 521,
+          "strong(len>=12+特徵)": 473,
+          "len>=20": 240
+        },
+        "in_prompt": {
+          "len>=8": 413,
+          "len>=12": 296,
+          "strong(len>=12+特徵)": 276,
+          "len>=20": 137
+        },
+        "matched_in_prompt": 609
+      },
+      "triple": {
+        "entries": 654,
+        "matched": 650,
+        "retrieved": {
+          "len>=8": 320,
+          "len>=12": 214,
+          "strong(len>=12+特徵)": 181,
+          "len>=20": 78
+        },
+        "in_prompt": {
+          "len>=8": 206,
+          "len>=12": 142,
+          "strong(len>=12+特徵)": 117,
+          "len>=20": 53
+        },
+        "matched_in_prompt": 440
+      }
+    },
+    "candidate_runs/s2_k1_topk40_stage_c/records.json": {
+      "fact": {
+        "entries": 120,
+        "matched": 120,
+        "retrieved": {
+          "len>=8": 76,
+          "len>=12": 51,
+          "len>=20": 36,
+          "strong(len>=12+特徵)": 47
+        },
+        "in_prompt": {
+          "len>=8": 43,
+          "len>=12": 28,
+          "len>=20": 23,
+          "strong(len>=12+特徵)": 25
+        },
+        "matched_in_prompt": 63
+      },
+      "triple": {
+        "entries": 161,
+        "matched": 161,
+        "retrieved": {
+          "len>=8": 71,
+          "len>=12": 36,
+          "len>=20": 12,
+          "strong(len>=12+特徵)": 29
+        },
+        "in_prompt": {
+          "len>=8": 17,
+          "len>=12": 8,
+          "len>=20": 5,
+          "strong(len>=12+特徵)": 6
+        },
+        "matched_in_prompt": 56
+      }
+    },
+    "candidate_runs/s2_k2_article_expand_stage_a/records.json": {
+      "fact": {
+        "entries": 2373,
+        "matched": 2373,
+        "retrieved": {
+          "len>=8": 1371,
+          "len>=12": 979,
+          "len>=20": 444,
+          "strong(len>=12+特徵)": 885
+        },
+        "in_prompt": {
+          "len>=8": 507,
+          "len>=12": 374,
+          "len>=20": 173,
+          "strong(len>=12+特徵)": 352
+        },
+        "matched_in_prompt": 864
+      },
+      "triple": {
+        "entries": 975,
+        "matched": 971,
+        "retrieved": {
+          "len>=8": 451,
+          "len>=12": 289,
+          "len>=20": 107,
+          "strong(len>=12+特徵)": 242
+        },
+        "in_prompt": {
+          "len>=8": 273,
+          "len>=12": 181,
+          "len>=20": 73,
+          "strong(len>=12+特徵)": 150
+        },
+        "matched_in_prompt": 634
+      }
+    },
+    "candidate_runs/s2_k2_article_expand_stage_b/records.json": {
+      "fact": {
+        "entries": 1736,
+        "matched": 1736,
+        "retrieved": {
+          "len>=8": 1031,
+          "len>=12": 748,
+          "len>=20": 329,
+          "strong(len>=12+特徵)": 671
+        },
+        "in_prompt": {
+          "len>=8": 389,
+          "len>=12": 288,
+          "len>=20": 131,
+          "strong(len>=12+特徵)": 270
+        },
+        "matched_in_prompt": 613
+      },
+      "triple": {
+        "entries": 773,
+        "matched": 771,
+        "retrieved": {
+          "len>=8": 369,
+          "len>=12": 239,
+          "strong(len>=12+特徵)": 197,
+          "len>=20": 83
+        },
+        "in_prompt": {
+          "len>=8": 219,
+          "len>=12": 151,
+          "strong(len>=12+特徵)": 125,
+          "len>=20": 56
+        },
+        "matched_in_prompt": 492
+      }
+    },
+    "candidate_runs/s2_k2_article_expand_stage_c/records.json": {
+      "fact": {
+        "entries": 122,
+        "matched": 122,
+        "retrieved": {
+          "len>=8": 75,
+          "len>=12": 46,
+          "len>=20": 31,
+          "strong(len>=12+特徵)": 43
+        },
+        "in_prompt": {
+          "len>=8": 22,
+          "len>=12": 12,
+          "len>=20": 8,
+          "strong(len>=12+特徵)": 12
+        },
+        "matched_in_prompt": 38
+      },
+      "triple": {
+        "entries": 80,
+        "matched": 80,
+        "retrieved": {
+          "len>=8": 33,
+          "len>=12": 15,
+          "strong(len>=12+特徵)": 14,
+          "len>=20": 7
+        },
+        "in_prompt": {
+          "len>=8": 17,
+          "len>=12": 5,
+          "strong(len>=12+特徵)": 4,
+          "len>=20": 3
+        },
+        "matched_in_prompt": 40
+      }
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_a/records.json": {
+      "fact": {
+        "entries": 4558,
+        "matched": 4558,
+        "retrieved": {
+          "len>=8": 2727,
+          "len>=12": 1911,
+          "len>=20": 835,
+          "strong(len>=12+特徵)": 1706
+        },
+        "in_prompt": {
+          "len>=8": 527,
+          "len>=12": 387,
+          "len>=20": 177,
+          "strong(len>=12+特徵)": 361
+        },
+        "matched_in_prompt": 887
+      },
+      "triple": {
+        "entries": 930,
+        "matched": 928,
+        "retrieved": {
+          "len>=8": 429,
+          "len>=12": 276,
+          "len>=20": 106,
+          "strong(len>=12+特徵)": 233
+        },
+        "in_prompt": {
+          "len>=8": 258,
+          "len>=12": 173,
+          "len>=20": 73,
+          "strong(len>=12+特徵)": 144
+        },
+        "matched_in_prompt": 606
+      }
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_b/records.json": {
+      "fact": {
+        "entries": 3612,
+        "matched": 3612,
+        "retrieved": {
+          "len>=8": 2239,
+          "len>=12": 1591,
+          "len>=20": 705,
+          "strong(len>=12+特徵)": 1423
+        },
+        "in_prompt": {
+          "len>=8": 426,
+          "len>=12": 308,
+          "len>=20": 151,
+          "strong(len>=12+特徵)": 289
+        },
+        "matched_in_prompt": 694
+      },
+      "triple": {
+        "entries": 789,
+        "matched": 787,
+        "retrieved": {
+          "len>=8": 381,
+          "len>=12": 245,
+          "strong(len>=12+特徵)": 206,
+          "len>=20": 87
+        },
+        "in_prompt": {
+          "len>=8": 219,
+          "len>=12": 148,
+          "strong(len>=12+特徵)": 124,
+          "len>=20": 56
+        },
+        "matched_in_prompt": 481
+      }
+    },
+    "candidate_runs/s2_k3_article_expand_topk40_stage_c/records.json": {
+      "fact": {
+        "entries": 123,
+        "matched": 123,
+        "retrieved": {
+          "len>=8": 76,
+          "len>=12": 54,
+          "strong(len>=12+特徵)": 49,
+          "len>=20": 23
+        },
+        "in_prompt": {
+          "len>=8": 10,
+          "len>=12": 5,
+          "strong(len>=12+特徵)": 5,
+          "len>=20": 5
+        },
+        "matched_in_prompt": 20
+      },
+      "triple": {
+        "entries": 45,
+        "matched": 43,
+        "retrieved": {
+          "len>=8": 22,
+          "len>=12": 13,
+          "strong(len>=12+特徵)": 9,
+          "len>=20": 1
+        },
+        "in_prompt": {
+          "len>=8": 15,
+          "len>=12": 8,
+          "strong(len>=12+特徵)": 6,
+          "len>=20": 0
+        },
+        "matched_in_prompt": 28
+      }
+    },
+    "candidate_runs/t0_trace_check_20260921/records.json": {
+      "fact": {
+        "entries": 20,
+        "matched": 20,
+        "retrieved": {
+          "len>=8": 15,
+          "len>=12": 10,
+          "len>=20": 6,
+          "strong(len>=12+特徵)": 9
+        },
+        "in_prompt": {
+          "len>=8": 15,
+          "len>=12": 10,
+          "len>=20": 6,
+          "strong(len>=12+特徵)": 9
+        },
+        "matched_in_prompt": 19
+      },
+      "triple": {
+        "entries": 29,
+        "matched": 29,
+        "retrieved": {
+          "len>=8": 17,
+          "len>=12": 13,
+          "strong(len>=12+特徵)": 11,
+          "len>=20": 6
+        },
+        "in_prompt": {
+          "len>=8": 9,
+          "len>=12": 8,
+          "strong(len>=12+特徵)": 6,
+          "len>=20": 3
+        },
+        "matched_in_prompt": 16
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a/records.json": {
+      "fact": {
+        "entries": 1054,
+        "matched": 1011,
+        "retrieved": {
+          "len>=8": 535,
+          "len>=12": 413,
+          "strong(len>=12+特徵)": 392,
+          "len>=20": 180
+        },
+        "in_prompt": {
+          "len>=8": 449,
+          "len>=12": 348,
+          "strong(len>=12+特徵)": 333,
+          "len>=20": 156
+        },
+        "matched_in_prompt": 783
+      },
+      "triple": {
+        "entries": 509,
+        "matched": 465,
+        "retrieved": {
+          "len>=8": 188,
+          "len>=12": 136,
+          "strong(len>=12+特徵)": 119,
+          "len>=20": 56
+        },
+        "in_prompt": {
+          "len>=8": 45,
+          "len>=12": 34,
+          "strong(len>=12+特徵)": 29,
+          "len>=20": 8
+        },
+        "matched_in_prompt": 165
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a2/records.json": {
+      "fact": {
+        "entries": 539,
+        "matched": 522,
+        "retrieved": {
+          "len>=8": 367,
+          "len>=12": 261,
+          "strong(len>=12+特徵)": 229,
+          "len>=20": 143
+        },
+        "in_prompt": {
+          "len>=8": 295,
+          "len>=12": 208,
+          "strong(len>=12+特徵)": 189,
+          "len>=20": 118
+        },
+        "matched_in_prompt": 406
+      },
+      "triple": {
+        "entries": 463,
+        "matched": 445,
+        "retrieved": {
+          "len>=8": 236,
+          "len>=12": 136,
+          "len>=20": 43,
+          "strong(len>=12+特徵)": 114
+        },
+        "in_prompt": {
+          "len>=8": 35,
+          "len>=12": 17,
+          "len>=20": 4,
+          "strong(len>=12+特徵)": 11
+        },
+        "matched_in_prompt": 69
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_a3/records.json": {
+      "fact": {
+        "entries": 40,
+        "matched": 31,
+        "retrieved": {
+          "len>=8": 20,
+          "len>=12": 15,
+          "strong(len>=12+特徵)": 11,
+          "len>=20": 6
+        },
+        "in_prompt": {
+          "len>=8": 19,
+          "len>=12": 14,
+          "strong(len>=12+特徵)": 11,
+          "len>=20": 6
+        },
+        "matched_in_prompt": 25
+      },
+      "triple": {
+        "entries": 38,
+        "matched": 29,
+        "retrieved": {
+          "len>=8": 12,
+          "len>=12": 6,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 3
+        },
+        "in_prompt": {
+          "len>=8": 1,
+          "len>=12": 0,
+          "len>=20": 0,
+          "strong(len>=12+特徵)": 0
+        },
+        "matched_in_prompt": 6
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b/records.json": {
+      "fact": {
+        "entries": 454,
+        "matched": 423,
+        "retrieved": {
+          "len>=8": 195,
+          "len>=12": 155,
+          "len>=20": 62,
+          "strong(len>=12+特徵)": 149
+        },
+        "in_prompt": {
+          "len>=8": 171,
+          "len>=12": 138,
+          "len>=20": 54,
+          "strong(len>=12+特徵)": 134
+        },
+        "matched_in_prompt": 323
+      },
+      "triple": {
+        "entries": 200,
+        "matched": 173,
+        "retrieved": {
+          "len>=8": 51,
+          "len>=12": 41,
+          "strong(len>=12+特徵)": 38,
+          "len>=20": 18
+        },
+        "in_prompt": {
+          "len>=8": 15,
+          "len>=12": 14,
+          "strong(len>=12+特徵)": 12,
+          "len>=20": 3
+        },
+        "matched_in_prompt": 78
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2a/records.json": {
+      "fact": {
+        "entries": 320,
+        "matched": 315,
+        "retrieved": {
+          "len>=8": 185,
+          "len>=12": 147,
+          "strong(len>=12+特徵)": 138,
+          "len>=20": 64
+        },
+        "in_prompt": {
+          "len>=8": 156,
+          "len>=12": 121,
+          "strong(len>=12+特徵)": 114,
+          "len>=20": 55
+        },
+        "matched_in_prompt": 250
+      },
+      "triple": {
+        "entries": 167,
+        "matched": 162,
+        "retrieved": {
+          "len>=8": 75,
+          "len>=12": 59,
+          "len>=20": 28,
+          "strong(len>=12+特徵)": 52
+        },
+        "in_prompt": {
+          "len>=8": 10,
+          "len>=12": 9,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 6
+        },
+        "matched_in_prompt": 41
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2b/records.json": {
+      "fact": {
+        "entries": 280,
+        "matched": 265,
+        "retrieved": {
+          "len>=8": 180,
+          "len>=12": 125,
+          "len>=20": 87,
+          "strong(len>=12+特徵)": 112
+        },
+        "in_prompt": {
+          "len>=8": 151,
+          "len>=12": 107,
+          "len>=20": 79,
+          "strong(len>=12+特徵)": 97
+        },
+        "matched_in_prompt": 204
+      },
+      "triple": {
+        "entries": 283,
+        "matched": 259,
+        "retrieved": {
+          "len>=8": 120,
+          "len>=12": 61,
+          "len>=20": 14,
+          "strong(len>=12+特徵)": 48
+        },
+        "in_prompt": {
+          "len>=8": 20,
+          "len>=12": 6,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 6
+        },
+        "matched_in_prompt": 43
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_b2c/records.json": {
+      "fact": {
+        "entries": 259,
+        "matched": 247,
+        "retrieved": {
+          "len>=8": 193,
+          "len>=12": 138,
+          "strong(len>=12+特徵)": 118,
+          "len>=20": 61
+        },
+        "in_prompt": {
+          "len>=8": 155,
+          "len>=12": 108,
+          "strong(len>=12+特徵)": 96,
+          "len>=20": 49
+        },
+        "matched_in_prompt": 195
+      },
+      "triple": {
+        "entries": 219,
+        "matched": 210,
+        "retrieved": {
+          "len>=8": 132,
+          "len>=12": 81,
+          "len>=20": 28,
+          "strong(len>=12+特徵)": 70
+        },
+        "in_prompt": {
+          "len>=8": 18,
+          "len>=12": 12,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 7
+        },
+        "matched_in_prompt": 31
+      }
+    },
+    "candidate_runs/t2_k1_topk40_stage_c/records.json": {
+      "fact": {
+        "entries": 80,
+        "matched": 67,
+        "retrieved": {
+          "len>=8": 48,
+          "len>=12": 34,
+          "len>=20": 18,
+          "strong(len>=12+特徵)": 26
+        },
+        "in_prompt": {
+          "len>=8": 43,
+          "len>=12": 29,
+          "len>=20": 16,
+          "strong(len>=12+特徵)": 23
+        },
+        "matched_in_prompt": 55
+      },
+      "triple": {
+        "entries": 101,
+        "matched": 83,
+        "retrieved": {
+          "len>=8": 37,
+          "len>=12": 19,
+          "len>=20": 5,
+          "strong(len>=12+特徵)": 10
+        },
+        "in_prompt": {
+          "len>=8": 1,
+          "len>=12": 0,
+          "len>=20": 0,
+          "strong(len>=12+特徵)": 0
+        },
+        "matched_in_prompt": 8
+      }
+    },
+    "candidate_runs/t2_probe_topk40_20260921/records.json": {
+      "fact": {
+        "entries": 40,
+        "matched": 40,
+        "retrieved": {
+          "len>=8": 32,
+          "len>=12": 23,
+          "len>=20": 10,
+          "strong(len>=12+特徵)": 22
+        },
+        "in_prompt": {
+          "len>=8": 25,
+          "len>=12": 17,
+          "len>=20": 8,
+          "strong(len>=12+特徵)": 16
+        },
+        "matched_in_prompt": 31
+      },
+      "triple": {
+        "entries": 29,
+        "matched": 29,
+        "retrieved": {
+          "len>=8": 17,
+          "len>=12": 13,
+          "strong(len>=12+特徵)": 11,
+          "len>=20": 6
+        },
+        "in_prompt": {
+          "len>=8": 2,
+          "len>=12": 2,
+          "strong(len>=12+特徵)": 1,
+          "len>=20": 0
+        },
+        "matched_in_prompt": 4
+      }
+    },
+    "p2_snapshot_20260929/run1/records.json": {
+      "fact": {
+        "entries": 66,
+        "matched": 66,
+        "retrieved": {
+          "len>=8": 40,
+          "len>=12": 28,
+          "strong(len>=12+特徵)": 28,
+          "len>=20": 14
+        },
+        "in_prompt": {
+          "len>=8": 32,
+          "len>=12": 24,
+          "strong(len>=12+特徵)": 24,
+          "len>=20": 12
+        },
+        "matched_in_prompt": 49
+      },
+      "triple": {
+        "entries": 23,
+        "matched": 23,
+        "retrieved": {
+          "len>=8": 10,
+          "len>=12": 5,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 5
+        },
+        "in_prompt": {
+          "len>=8": 10,
+          "len>=12": 5,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 5
+        },
+        "matched_in_prompt": 23
+      }
+    },
+    "p2_snapshot_20260929/run2/records.json": {
+      "fact": {
+        "entries": 66,
+        "matched": 66,
+        "retrieved": {
+          "len>=8": 40,
+          "len>=12": 28,
+          "strong(len>=12+特徵)": 28,
+          "len>=20": 14
+        },
+        "in_prompt": {
+          "len>=8": 32,
+          "len>=12": 24,
+          "strong(len>=12+特徵)": 24,
+          "len>=20": 12
+        },
+        "matched_in_prompt": 49
+      },
+      "triple": {
+        "entries": 23,
+        "matched": 23,
+        "retrieved": {
+          "len>=8": 10,
+          "len>=12": 5,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 5
+        },
+        "in_prompt": {
+          "len>=8": 10,
+          "len>=12": 5,
+          "len>=20": 2,
+          "strong(len>=12+特徵)": 5
+        },
+        "matched_in_prompt": 23
+      }
+    }
+  },
+  "before": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "after": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "totals_identical": true,
+  "cypher_log": [
+    {
+      "label": "before:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "before:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    },
+    {
+      "label": "O1：Entity 名稱與型別",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN e.name AS name, e.type AS type",
+      "rows": 12296
+    },
+    {
+      "label": "M2b：Fact 全表（含條號、主受詞 Entity 型別）",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) OPTIONAL MATCH (f)-[:SUPPORTED_BY]->(a:LawArticle) OPTIONAL MATCH (se:Entity {kg_id: $k, name: f.subject}) OPTIONAL MATCH (oe:Entity {kg_id: $k, name: f.object}) RETURN f.source_doc_id AS doc, f.source_svo_chunk_index AS idx, f.fact_text AS text, f.subject AS subject, f.object AS object, f.verb AS verb, f.rel_type AS rel_type, a.article_no AS article_no, se.type AS subject_type, se.name AS subject_entity, oe.type AS object_type, oe.name AS object_entity",
+      "rows": 16826
+    },
+    {
+      "label": "M2b：Entity 邊全表（含 citations_json）",
+      "cypher": "MATCH (s:Entity {kg_id: $k})-[x]->(o:Entity {kg_id: $k}) RETURN s.name AS subject, s.type AS subject_type, type(x) AS rel_type, x.natural_text AS natural_text, o.name AS object, o.type AS object_type, x.citations_json AS citations_json",
+      "rows": 14021
+    },
+    {
+      "label": "after:總節點",
+      "cypher": "MATCH (n) RETURN count(n) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:總關係",
+      "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Fact",
+      "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+      "rows": 1
+    },
+    {
+      "label": "after:Entity",
+      "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+      "rows": 1
+    }
+  ],
+  "definition": {
+    "thresholds": [
+      8,
+      12,
+      20
+    ],
+    "main_threshold": 12,
+    "keywords": [
+      "者",
+      "之",
+      "應",
+      "得",
+      "不得",
+      "視為",
+      "以上",
+      "未滿",
+      "其",
+      "前項"
+    ],
+    "features": [
+      "條文用語",
+      "標點括號",
+      "數字加單位"
+    ],
+    "legal_name_re": "(?:法|條例|辦法|細則|標準|規則|準則|規程|要點|通則|綱要|公約|協定)(?:第[0-9一二三四五六七八九十百零〇]+條(?:之[0-9一二三四五六七八九十]+)?(?:第[0-9一二三四五六七八九十]+[項款])?)?$"
+  }
+}

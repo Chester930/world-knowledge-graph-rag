@@ -1,0 +1,302 @@
+{
+  "1": {
+    "label": "S",
+    "question": false,
+    "reason": "含謂語的句尾子句（不得…行之），整句條文被當實體",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "2": {
+    "label": "S",
+    "question": false,
+    "reason": "目的子句（以避免…），非名詞性實體",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "3": {
+    "label": "S",
+    "question": false,
+    "reason": "目的子句（使其不超過…規定）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "4": {
+    "label": "S",
+    "question": false,
+    "reason": "「依法不得…者」條件句主體，含條件與否定謂語",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "5": {
+    "label": "S",
+    "question": false,
+    "reason": "「僱用…者」條件句主體；可拆成主體（受僱者人數）＋門檻",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "6": {
+    "label": "U",
+    "question": true,
+    "reason": "長限定語名詞組（競賽名次＋每位選手），無謂語；是角色描述還是子句難定",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "7": {
+    "label": "U",
+    "question": true,
+    "reason": "條文列舉項「其他…之費用」的概括類別，無謂語；非專有名詞也非子句",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "8": {
+    "label": "U",
+    "question": true,
+    "reason": "設備名詞組帶限定語（具有充分效能之…），無謂語",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "9": {
+    "label": "S",
+    "question": false,
+    "reason": "含條件與連接詞的長條文主體（前款之…者）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "10": {
+    "label": "U",
+    "question": true,
+    "reason": "引用法條定義的名詞組（…所定之人），無謂語；可視為條文引用式名稱",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "11": {
+    "label": "L",
+    "question": true,
+    "reason": "條文引用式名稱（法規條項＋有關罰鍰之規定），傾向合法長名稱，但帶描述成分",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "12": {
+    "label": "S",
+    "question": true,
+    "reason": "名詞組內嵌謂語（可燃物品…燃燒之危險性），且與來源句語意落差大，需人看",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "13": {
+    "label": "S",
+    "question": true,
+    "reason": "兩個文件以「或」連接並帶說明語（足以證明…），疑為合併多項",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "14": {
+    "label": "S",
+    "question": false,
+    "reason": "條件句主體（因傷病診療…者）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "15": {
+    "label": "S",
+    "question": false,
+    "reason": "完整子句（含「應依…審認之」）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "16": {
+    "label": "S",
+    "question": false,
+    "reason": "完整子句（含「得」「應」）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "17": {
+    "label": "S",
+    "question": false,
+    "reason": "完整條文句（…均屬之）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "18": {
+    "label": "U",
+    "question": true,
+    "reason": "指標名詞組（…之平均收益率），無謂語；是專有指標或描述難定",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "19": {
+    "label": "S",
+    "question": false,
+    "reason": "謂語子句（得…請求其返還）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "20": {
+    "label": "S",
+    "question": true,
+    "reason": "含「申報的」關係子句；且該事實原句找不到唯一定位",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "21": {
+    "label": "S",
+    "question": false,
+    "reason": "謂語子句（…確實連結）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "22": {
+    "label": "S",
+    "question": false,
+    "reason": "動詞片語（持有…證明）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "23": {
+    "label": "S",
+    "question": false,
+    "reason": "多重條件的長條文（教育訓練期滿、測驗合格、領有證書）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "24": {
+    "label": "U",
+    "question": true,
+    "reason": "列舉項名詞組（名稱及基本辨識資訊），無謂語",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "25": {
+    "label": "S",
+    "question": false,
+    "reason": "條件句主體（…離職未滿一年再受僱者）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "26": {
+    "label": "U",
+    "question": true,
+    "reason": "多個項目以頓號串成的名詞組；且有主詞／受詞同為本實體的自環事實",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "27": {
+    "label": "S",
+    "question": false,
+    "reason": "違規行為子句（未依規定辦理…）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "28": {
+    "label": "U",
+    "question": true,
+    "reason": "名詞組帶關係子句（…指定應放假之日），可視為條文引用式稱呼",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "29": {
+    "label": "S",
+    "question": false,
+    "reason": "以條件（高度＋面積）界定的作業類別，含條件子句",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "30": {
+    "label": "U",
+    "question": true,
+    "reason": "多個機件以頓號列舉的名詞組，非子句但亦非單一名稱",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "31": {
+    "label": "S",
+    "question": false,
+    "reason": "列舉加謂語（…構成），整句",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "32": {
+    "label": "S",
+    "question": false,
+    "reason": "謂語子句（準用…規定）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "33": {
+    "label": "S",
+    "question": false,
+    "reason": "被動謂語子句（由…定之）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "34": {
+    "label": "S",
+    "question": false,
+    "reason": "完整條件＋效果子句",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "35": {
+    "label": "S",
+    "question": false,
+    "reason": "條件句主體（當選…者）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "36": {
+    "label": "S",
+    "question": false,
+    "reason": "條件句主體（…在三人以上者）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "37": {
+    "label": "S",
+    "question": false,
+    "reason": "條件子句（…時）加主題",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "38": {
+    "label": "U",
+    "question": true,
+    "reason": "八類機構以頓號列舉的名詞組，非子句",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "39": {
+    "label": "U",
+    "question": true,
+    "reason": "多個條項引用的列舉，非子句；可視為條文引用式名稱",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "40": {
+    "label": "S",
+    "question": false,
+    "reason": "完整條文子句（…得以…，或逕向…申請）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "41": {
+    "label": "L",
+    "question": true,
+    "reason": "兩個文件名稱以「或」連接；各自是合法名稱，合併為一個實體",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "42": {
+    "label": "S",
+    "question": false,
+    "reason": "謂語子句（無親屬關係，有…情形）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "43": {
+    "label": "S",
+    "question": false,
+    "reason": "完整子句（…應具備補助掛鈎）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "44": {
+    "label": "U",
+    "question": true,
+    "reason": "名詞組帶分詞限定語（裝置於…之鐵線），無謂語",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "45": {
+    "label": "S",
+    "question": false,
+    "reason": "謂語子句（贊助單位提供…）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "46": {
+    "label": "U",
+    "question": true,
+    "reason": "三種化學物質以逗號串成；非子句，且事實原句找不到唯一定位",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "47": {
+    "label": "S",
+    "question": false,
+    "reason": "謂語子句（遺失…文件）",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "48": {
+    "label": "U",
+    "question": true,
+    "reason": "位置名詞組（…四周二公尺以內），無謂語",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "49": {
+    "label": "U",
+    "question": true,
+    "reason": "名詞組帶排除條件（非屬…之設備），無謂語",
+    "annotation_status": "草稿，未經使用者確認"
+  },
+  "50": {
+    "label": "L",
+    "question": false,
+    "reason": "職稱／人員類別，名詞組；長是正常的",
+    "annotation_status": "草稿，未經使用者確認"
+  }
+}

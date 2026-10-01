@@ -71,7 +71,9 @@ def _flatten_types(role: str, per_scheme: Mapping[str, str]) -> dict[str, str]:
     return {f"{role}_type_{s}": m for s, m in per_scheme.items()}
 
 
-def build_fact_index(rows: Iterable[dict], core: Mapping[str, str], ext: Mapping[str, str]) -> dict[tuple, list[dict]]:
+def build_fact_index(
+    rows: Iterable[dict], core: Mapping[str, str], ext: Mapping[str, str], extra_fields: tuple[str, ...] = ()
+) -> dict[tuple, list[dict]]:
     rows = list(rows)
     docs_with_article = {str(r.get("doc")) for r in rows if sm.has_article_no(r.get("article_no"))}
     index: dict[tuple, list[dict]] = {}
@@ -85,6 +87,7 @@ def build_fact_index(rows: Iterable[dict], core: Mapping[str, str], ext: Mapping
             r.get("subject_type"), r.get("subject_entity") is not None, core, ext)))
         marks.update(_flatten_types("object", entity_type_marks(
             r.get("object_type"), r.get("object_entity") is not None, core, ext)))
+        marks.update({f: r.get(f) for f in extra_fields})  # 報告223：呼叫端可附帶原列欄位（如端點名稱）；預設無
         index.setdefault((str(r.get("doc")), r.get("idx"), r.get("text")), []).append(marks)
     return index
 
@@ -99,7 +102,9 @@ def _parse(raw: Any) -> list[dict]:
     return [c for c in data if isinstance(c, dict)] if isinstance(data, list) else []
 
 
-def build_edge_index(rows: Iterable[dict], core: Mapping[str, str], ext: Mapping[str, str]) -> dict[tuple, list[dict]]:
+def build_edge_index(
+    rows: Iterable[dict], core: Mapping[str, str], ext: Mapping[str, str], extra_fields: tuple[str, ...] = ()
+) -> dict[tuple, list[dict]]:
     """以邊最後一筆引用建鍵（同 `bfs._bfs_records_to_triples`）。無引用的邊無法產生與 trace 一致的鍵，略過。"""
     rows = list(rows)
     docs_with_article: set[str] = set()
@@ -123,6 +128,7 @@ def build_edge_index(rows: Iterable[dict], core: Mapping[str, str], ext: Mapping
         }
         marks.update(_flatten_types("subject", entity_type_marks(r.get("subject_type"), True, core, ext)))
         marks.update(_flatten_types("object", entity_type_marks(r.get("object_type"), True, core, ext)))
+        marks.update({f: r.get(f) for f in extra_fields})
         index.setdefault((doc, text), []).append({"idx": latest.get("source_svo_chunk_index"), "marks": marks})
     return index
 
