@@ -1,0 +1,826 @@
+{
+  "disclaimer": "全部為虛構玩具資料，不代表任何真實法規或 KG#4；狀態／事件／轉換為 PROVISIONAL 提案。",
+  "scenarios": [
+    {
+      "no": 1,
+      "title": "正常生命週期",
+      "note": "候選 → 有效",
+      "instances": [
+        {
+          "instance_id": "S1-a",
+          "key": [
+            "甲公司",
+            "應給",
+            "乙福利"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": "2020-01-01",
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": "2020-02-01",
+              "reason": "候選 —[驗證通過]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：2020-01-01）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：2020-02-01；原因：人工確認）\n最終狀態：有效",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 2,
+      "title": "修法取代，新版自己走候選→有效",
+      "note": "舊版有效 → 已被取代；新版是另一個實例（同鍵），自己走候選→有效；互斥檢查通過",
+      "instances": [
+        {
+          "instance_id": "S2-v1",
+          "key": [
+            "丙公司",
+            "應給",
+            "丁津貼"
+          ],
+          "lifecycle": "核心",
+          "final_state": "已被取代",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": "2018-01-01",
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": "2018-02-01",
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "新版取代",
+              "to": "已被取代",
+              "date": "2022-07-01",
+              "reason": "有效 —[新版取代]→ 已被取代"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：2018-01-01）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：2018-02-01）\n第3步 ✓ 有效 —[新版取代]→ 已被取代　（日期：2022-07-01；原因：第二版生效）\n最終狀態：已被取代",
+          "deterministic": true
+        },
+        {
+          "instance_id": "S2-v2",
+          "key": [
+            "丙公司",
+            "應給",
+            "丁津貼"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": "2022-06-01",
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": "2022-07-01",
+              "reason": "候選 —[驗證通過]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：2022-06-01）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：2022-07-01）\n最終狀態：有效",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 3,
+      "title": "終止後重新生效（結束後重新開始）",
+      "note": "同一個實例走過兩段有效期；舊的「同鍵併成一條」做法無法表示這件事",
+      "instances": [
+        {
+          "instance_id": "S3-a",
+          "key": [
+            "戊機構",
+            "適用",
+            "己計畫"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": "2015-01-01",
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": "2015-02-01",
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "終止",
+              "to": "已終止",
+              "date": "2019-01-01",
+              "reason": "有效 —[終止]→ 已終止"
+            },
+            {
+              "ok": true,
+              "from": "已終止",
+              "event": "重新生效",
+              "to": "有效",
+              "date": "2023-01-01",
+              "reason": "已終止 —[重新生效]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：2015-01-01）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：2015-02-01）\n第3步 ✓ 有效 —[終止]→ 已終止　（日期：2019-01-01；原因：計畫停止適用）\n第4步 ✓ 已終止 —[重新生效]→ 有效　（日期：2023-01-01；原因：計畫恢復）\n最終狀態：有效",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 4,
+      "title": "爭議：裁決保留本條",
+      "note": "有效 → 爭議 → 有效",
+      "instances": [
+        {
+          "instance_id": "S4-a",
+          "key": [
+            "庚部門",
+            "規定",
+            "辛上限"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "偵測到矛盾",
+              "to": "爭議",
+              "date": null,
+              "reason": "有效 —[偵測到矛盾]→ 爭議"
+            },
+            {
+              "ok": true,
+              "from": "爭議",
+              "event": "裁決保留",
+              "to": "有效",
+              "date": null,
+              "reason": "爭議 —[裁決保留]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n第3步 ✓ 有效 —[偵測到矛盾]→ 爭議　（日期：未提供；原因：與另一來源矛盾）\n第4步 ✓ 爭議 —[裁決保留]→ 有效　（日期：未提供；原因：確認本條正確）\n最終狀態：有效",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 5,
+      "title": "爭議：裁決以他條為準",
+      "note": "有效 → 爭議 → 已被取代",
+      "instances": [
+        {
+          "instance_id": "S5-a",
+          "key": [
+            "壬部門",
+            "規定",
+            "癸期限"
+          ],
+          "lifecycle": "核心",
+          "final_state": "已被取代",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "偵測到矛盾",
+              "to": "爭議",
+              "date": null,
+              "reason": "有效 —[偵測到矛盾]→ 爭議"
+            },
+            {
+              "ok": true,
+              "from": "爭議",
+              "event": "裁決以他條為準",
+              "to": "已被取代",
+              "date": null,
+              "reason": "爭議 —[裁決以他條為準]→ 已被取代"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n第3步 ✓ 有效 —[偵測到矛盾]→ 爭議　（日期：未提供）\n第4步 ✓ 爭議 —[裁決以他條為準]→ 已被取代　（日期：未提供；原因：以另一條為準）\n最終狀態：已被取代",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 6,
+      "title": "候選被駁回",
+      "note": "候選 → 已駁回（終點）",
+      "instances": [
+        {
+          "instance_id": "S6-a",
+          "key": [
+            "子單位",
+            "允許",
+            "丑行為"
+          ],
+          "lifecycle": "核心",
+          "final_state": "已駁回",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證不通過",
+              "to": "已駁回",
+              "date": null,
+              "reason": "候選 —[驗證不通過]→ 已駁回"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證不通過]→ 已駁回　（日期：未提供；原因：來源查無此規定）\n最終狀態：已駁回",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 7,
+      "title": "非法轉換被拒",
+      "note": "已被取代→有效、已駁回→有效、尚未建立就驗證，皆被拒；狀態維持，重播繼續",
+      "instances": [
+        {
+          "instance_id": "S7-a",
+          "key": [
+            "寅單位",
+            "需要",
+            "卯文件"
+          ],
+          "lifecycle": "核心",
+          "final_state": "已被取代",
+          "ok": false,
+          "first_illegal": {
+            "step": 4,
+            "event": "重新生效",
+            "reason": "「已被取代」是終點狀態，不得有任何轉出（收到事件「重新生效」；需要新的關係實例重新走候選→有效）"
+          },
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "新版取代",
+              "to": "已被取代",
+              "date": null,
+              "reason": "有效 —[新版取代]→ 已被取代"
+            },
+            {
+              "ok": false,
+              "from": "已被取代",
+              "event": "重新生效",
+              "to": "已被取代",
+              "date": null,
+              "reason": "「已被取代」是終點狀態，不得有任何轉出（收到事件「重新生效」；需要新的關係實例重新走候選→有效）"
+            },
+            {
+              "ok": false,
+              "from": "已被取代",
+              "event": "驗證通過",
+              "to": "已被取代",
+              "date": null,
+              "reason": "「已被取代」是終點狀態，不得有任何轉出（收到事件「驗證通過」；需要新的關係實例重新走候選→有效）"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n第3步 ✓ 有效 —[新版取代]→ 已被取代　（日期：未提供）\n第4步 ✗ 事件「重新生效」被拒，狀態維持「已被取代」：「已被取代」是終點狀態，不得有任何轉出（收到事件「重新生效」；需要新的關係實例重新走候選→有效）　（日期：未提供；原因：企圖讓已被取代者復活）\n第5步 ✗ 事件「驗證通過」被拒，狀態維持「已被取代」：「已被取代」是終點狀態，不得有任何轉出（收到事件「驗證通過」；需要新的關係實例重新走候選→有效）　（日期：未提供）\n最終狀態：已被取代",
+          "deterministic": true
+        },
+        {
+          "instance_id": "S7-b",
+          "key": [
+            "辰單位",
+            "需要",
+            "巳文件"
+          ],
+          "lifecycle": "核心",
+          "final_state": "已駁回",
+          "ok": false,
+          "first_illegal": {
+            "step": 3,
+            "event": "驗證通過",
+            "reason": "「已駁回」是終點狀態，不得有任何轉出（收到事件「驗證通過」；需要新的關係實例重新走候選→有效）"
+          },
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證不通過",
+              "to": "已駁回",
+              "date": null,
+              "reason": "候選 —[驗證不通過]→ 已駁回"
+            },
+            {
+              "ok": false,
+              "from": "已駁回",
+              "event": "驗證通過",
+              "to": "已駁回",
+              "date": null,
+              "reason": "「已駁回」是終點狀態，不得有任何轉出（收到事件「驗證通過」；需要新的關係實例重新走候選→有效）"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證不通過]→ 已駁回　（日期：未提供）\n第3步 ✗ 事件「驗證通過」被拒，狀態維持「已駁回」：「已駁回」是終點狀態，不得有任何轉出（收到事件「驗證通過」；需要新的關係實例重新走候選→有效）　（日期：未提供；原因：企圖讓已駁回者通過）\n最終狀態：已駁回",
+          "deterministic": true
+        },
+        {
+          "instance_id": "S7-c",
+          "key": [
+            "午單位",
+            "需要",
+            "未文件"
+          ],
+          "lifecycle": "核心",
+          "final_state": null,
+          "ok": false,
+          "first_illegal": {
+            "step": 1,
+            "event": "驗證通過",
+            "reason": "尚未建立：第一個事件必須是「抽取完成」，收到「驗證通過」"
+          },
+          "steps": [
+            {
+              "ok": false,
+              "from": null,
+              "event": "驗證通過",
+              "to": null,
+              "date": null,
+              "reason": "尚未建立：第一個事件必須是「抽取完成」，收到「驗證通過」"
+            }
+          ],
+          "explain": "第1步 ✗ 事件「驗證通過」被拒，狀態維持「（無）」：尚未建立：第一個事件必須是「抽取完成」，收到「驗證通過」　（日期：未提供；原因：尚未建立就驗證）\n最終狀態：（尚未建立）",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 8,
+      "title": "互斥違規被偵測",
+      "note": "同一鍵同時兩個「有效」實例",
+      "instances": [
+        {
+          "instance_id": "S8-a",
+          "key": [
+            "申公司",
+            "應給",
+            "酉獎金"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n最終狀態：有效",
+          "deterministic": true
+        },
+        {
+          "instance_id": "S8-b",
+          "key": [
+            "申公司",
+            "應給",
+            "酉獎金"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n最終狀態：有效",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": [
+        {
+          "key": [
+            "申公司",
+            "應給",
+            "酉獎金"
+          ],
+          "instance_ids": [
+            "S8-a",
+            "S8-b"
+          ]
+        }
+      ]
+    },
+    {
+      "no": 9,
+      "title": "無日期與有日期事件並存",
+      "note": "同一事件序列，有日期與無日期版本的狀態轉換完全相同（時間不影響合法性）",
+      "instances": [
+        {
+          "instance_id": "S9-dated",
+          "key": [
+            "戌公司",
+            "應給",
+            "亥補貼"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": "2020-01-01",
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": "2020-02-01",
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "偵測到矛盾",
+              "to": "爭議",
+              "date": "2021-03-01",
+              "reason": "有效 —[偵測到矛盾]→ 爭議"
+            },
+            {
+              "ok": true,
+              "from": "爭議",
+              "event": "裁決保留",
+              "to": "有效",
+              "date": "2021-04-01",
+              "reason": "爭議 —[裁決保留]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：2020-01-01）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：2020-02-01）\n第3步 ✓ 有效 —[偵測到矛盾]→ 爭議　（日期：2021-03-01）\n第4步 ✓ 爭議 —[裁決保留]→ 有效　（日期：2021-04-01）\n最終狀態：有效",
+          "deterministic": true
+        },
+        {
+          "instance_id": "S9-undated",
+          "key": [
+            "戌公司",
+            "應給",
+            "亥補貼二"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "偵測到矛盾",
+              "to": "爭議",
+              "date": null,
+              "reason": "有效 —[偵測到矛盾]→ 爭議"
+            },
+            {
+              "ok": true,
+              "from": "爭議",
+              "event": "裁決保留",
+              "to": "有效",
+              "date": null,
+              "reason": "爭議 —[裁決保留]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n第3步 ✓ 有效 —[偵測到矛盾]→ 爭議　（日期：未提供）\n第4步 ✓ 爭議 —[裁決保留]→ 有效　（日期：未提供）\n最終狀態：有效",
+          "deterministic": true
+        },
+        {
+          "instance_id": "S9-mixed",
+          "key": [
+            "戌公司",
+            "應給",
+            "亥補貼三"
+          ],
+          "lifecycle": "核心",
+          "final_state": "有效",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": "2020-01-01",
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "偵測到矛盾",
+              "to": "爭議",
+              "date": "2021-03-01",
+              "reason": "有效 —[偵測到矛盾]→ 爭議"
+            },
+            {
+              "ok": true,
+              "from": "爭議",
+              "event": "裁決保留",
+              "to": "有效",
+              "date": null,
+              "reason": "爭議 —[裁決保留]→ 有效"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：2020-01-01）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n第3步 ✓ 有效 —[偵測到矛盾]→ 爭議　（日期：2021-03-01）\n第4步 ✓ 爭議 —[裁決保留]→ 有效　（日期：未提供）\n最終狀態：有效",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    },
+    {
+      "no": 10,
+      "title": "擴充範例：虛構關係型別追加「暫停」狀態",
+      "note": "暫停適用／恢復適用不是終止／重新生效；擴充不影響核心",
+      "instances": [
+        {
+          "instance_id": "S10-a",
+          "key": [
+            "虛構子公司",
+            "虛構-暫停適用",
+            "虛構方案"
+          ],
+          "lifecycle": "虛構-暫停適用",
+          "final_state": "已終止",
+          "ok": true,
+          "first_illegal": null,
+          "steps": [
+            {
+              "ok": true,
+              "from": null,
+              "event": "抽取完成",
+              "to": "候選",
+              "date": null,
+              "reason": "（無） —[抽取完成]→ 候選"
+            },
+            {
+              "ok": true,
+              "from": "候選",
+              "event": "驗證通過",
+              "to": "有效",
+              "date": null,
+              "reason": "候選 —[驗證通過]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "暫停適用",
+              "to": "暫停",
+              "date": "2021-01-01",
+              "reason": "有效 —[暫停適用]→ 暫停"
+            },
+            {
+              "ok": true,
+              "from": "暫停",
+              "event": "恢復適用",
+              "to": "有效",
+              "date": "2021-06-01",
+              "reason": "暫停 —[恢復適用]→ 有效"
+            },
+            {
+              "ok": true,
+              "from": "有效",
+              "event": "暫停適用",
+              "to": "暫停",
+              "date": "2022-01-01",
+              "reason": "有效 —[暫停適用]→ 暫停"
+            },
+            {
+              "ok": true,
+              "from": "暫停",
+              "event": "終止",
+              "to": "已終止",
+              "date": "2022-03-01",
+              "reason": "暫停 —[終止]→ 已終止"
+            }
+          ],
+          "explain": "第1步 ✓ （無） —[抽取完成]→ 候選　（日期：未提供）\n第2步 ✓ 候選 —[驗證通過]→ 有效　（日期：未提供）\n第3步 ✓ 有效 —[暫停適用]→ 暫停　（日期：2021-01-01）\n第4步 ✓ 暫停 —[恢復適用]→ 有效　（日期：2021-06-01）\n第5步 ✓ 有效 —[暫停適用]→ 暫停　（日期：2022-01-01）\n第6步 ✓ 暫停 —[終止]→ 已終止　（日期：2022-03-01）\n最終狀態：已終止",
+          "deterministic": true
+        }
+      ],
+      "exclusivity_violations": []
+    }
+  ],
+  "dated_vs_undated_identical_transitions": true,
+  "all_deterministic": true,
+  "extension": {
+    "relation_type": "虛構-暫停適用",
+    "valid": true,
+    "errors": []
+  },
+  "bad_extensions": {
+    "終點狀態加轉出": {
+      "ok": false,
+      "errors": [
+        "終點狀態「已被取代」不得有任何轉出：已被取代—[復活]→有效"
+      ]
+    },
+    "改道核心轉換": {
+      "ok": false,
+      "errors": [
+        "不得改寫或重述核心轉換：有效—[終止]→已駁回"
+      ]
+    },
+    "刪除核心轉換": {
+      "ok": false,
+      "errors": [
+        "不得刪除核心轉換 有效—[終止]→已終止"
+      ]
+    }
+  },
+  "exclusivity_whole_toy_graph": [
+    {
+      "key": [
+        "申公司",
+        "應給",
+        "酉獎金"
+      ],
+      "instance_ids": [
+        "S8-a",
+        "S8-b"
+      ]
+    }
+  ],
+  "counts": {
+    "scenarios": 10,
+    "instances": 16,
+    "illegal_events": 4
+  }
+}
