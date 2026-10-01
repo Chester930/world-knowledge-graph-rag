@@ -97,5 +97,5 @@ C?｜結論（通過／有條件通過／失敗／停止）｜commit SHA｜關�
 | --- | --- | --- | --- | --- |
 | C1 | ⏳ 已派工 | — | — | — |
 | C2 | ✅ 通過（規劃對話獨立抽查） | 題庫 `57-AGGR7` verified／verbatim；頂層 `source_article`＝「N0090055 §24；N0090058 §1、§6」，但同題 `gold_answer`、`complexity_label`、`atomic_gold_facts` 明確是母法§24（補助基礎）、母法§27（授權）、子法§1（授權句）、子法§6（門檻）——**題庫內部兩欄粒度不同（文字事實，不判斷漏列或有意）**。語料內有母法 `N0090055_中高齡者及高齡者就業促進法`（名稱與子法第1條所寫一致），母法版本／修正日期無資料。報告並排逐字摘錄母法第24–27條、子法第1／3／6條全文；題庫 3 筆 `exact_span` 與原文逐字比對皆「是」。**唯一待使用者確認**：AGGR7 來源標註是否應含母法第27條 | `6542515`（報告186） | 我驗：僅新增報告186、題庫零變更；摘錄逐字抽查——3 條在 N0090055／N0090058 `original.md` 內確認存在（我的批次檢查因巢狀引用 `> >` 前綴誤報，已改查原檔確認）、其餘行為標題／路徑行 |
-| C3 | ⏳ 已派工 | — | — | — |
+| C3 | ✅ 通過（規劃對話獨立驗證） | 因 v1（`kg_source_recall_probe`）匯入 `services.*`／`core.config` 依賴環境，不能只把 `load_env()` 搬進 `main()`（會改順序）；改為 `v1` 變成延遲代理 `_LazyV1`：首次存取 `v1.<屬性>` 才「`load_env()` → 匯入 v1」，命令列順序不變；`main()` 開頭另呼叫一次 `load_env()`（`setdefault`、冪等）。新增測試 `ImportHasNoEnvironSideEffectTest`（假 .env、不依賴本機有無該檔）＋證明明確呼叫 `load_env()` 仍會載入；刻意破壞（模組層級加回 `load_env()`）新測試失敗。全量 1580 passed／0 failed。`scripts/eval` 其餘同模式（只列未改）：`diagnose_prompt_noise.py:28-34` 模組層級 `os.environ.setdefault`（匯入即寫環境）；`kg_source_recall_probe_v2` 仍有模組層級 `sys.path.insert(0, REPO)` | `f7fd359` | 我驗：diff 僅 `scripts/eval/kg_source_recall_probe_v2.py`＋對應測試；實測匯入後 `os.environ` 不變；`--help` 正常；scripts＋core 兩個相關測試檔 9 passed。未重跑全量（採信 1580） |
 | C4 | ⏳ 待執行 | — | — | — |
