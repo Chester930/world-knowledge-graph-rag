@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-09-29（報告108／109 已審核並 push；A8 = BREAKS，待裁示修正方案）
 
+## 2026-10-01（報告185 C1–C4）：RQ4a 前置檢查、AGGR7 核對材料、腳本副作用根治完成——[報告188](docs/報告/188_RQ4a前置檢查與AGGR7核對與腳本副作用根治階段結果彙整.md)
+
+C2（`6542515`，[報告186](docs/報告/186_AGGR7兩份來源條文並排核對材料.md)）AGGR7 母法／子法條文並排逐字摘錄（題庫頂層 `source_article` 與 gold／atomic 粒度不同，不判斷）；C3（`f7fd359`）`kg_source_recall_probe_v2.py` 匯入無環境副作用（延遲載入 v1、新測試、全量 1580 passed）；C1（`c8fea4d`，[報告187](docs/報告/187_RQ4a前置檢查_7題relType實際分布.md)）唯讀 Neo4j：KG#4 前後總數相同，`RELATED_TO` 占 89.1%，7 題答案直接相關邊全為 `RELATED_TO`＋原始 verb，既有紀錄顯示後篩不作用→〔推論〕這 7 題對 RQ4a 無法區分。未跑實驗、未重抽、未啟動 Ollama／LLM。待使用者裁示見報告188 §4。
+
 ## 2026-10-01（報告185）：下一階段任務規劃——「RQ4a 前置檢查（只讀 Neo4j）、AGGR7 核對材料、腳本匯入期副作用根治」，**規劃對話決定、執行對話執行、規劃對話只記錄**
 
 使用者「依照建議繼續」＝採用規劃對話對報告184 §3 的建議：#2 RQ4a 前置檢查**做（唯讀 Cypher、不啟動 Ollama／LLM、KG#4 資料絕不可 wipe）**、#3 AGGR7 先備並排原文給使用者核對、#4 根治 probe_v2 匯入期 `load_env()`；#1 出題（待使用者核對 gold）、#5 跑實驗、#6 舊事項**維持暫停**。[報告185](docs/報告/185_下一階段任務規劃_RQ4a前置檢查與AGGR7核對材料與腳本副作用根治.md) 定案：**C1** 唯讀查 KG#4 的 `rel_type` 分布（前置：確認無他 session 使用同一 Neo4j／Ollama；前後節點／關係總數須不變）；**C2** AGGR7 兩份來源條文並排逐字摘錄（不判斷法規對錯、語料缺母法就寫無資料）；**C3** 把 `scripts/eval/kg_source_recall_probe_v2.py` 模組層級 `load_env()` 移入 `main()`（全量 ≥1579 passed、新測試須能被刻意破壞打出失敗）；**C4** 彙整。**不跑實驗、不重抽、不改論文。** 編號：185 為本規劃，**執行對話自 186 起**（156 保留）。每項 push 後 `SendMessage` 回報 `project refactor review sdd`。**狀態：已派工，等待執行。**
