@@ -1,7 +1,19 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告239 F2／F1 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告241 T0／T1／T2 Codex 執行，待規劃對話獨立驗證；**目前無進行中的派工**）
+
+## 2026-10-02（報告241；T0／T1／T2 Codex 執行，待規劃對話獨立驗證）
+
+依報告240 順序完成 T0 → T1 → T2；本條只記錄執行結果，不宣稱規劃對話已驗證。
+
+- **T0**：新增 `scripts/analysis/disposable_fact_state_validation.py` 與 `tests/scripts/test_disposable_fact_state_validation.py`；連線閘門只允許臨時容器 `127.0.0.1:27687`／`localhost:27687`，拒絕受保護 KG 的 kg_id／URI／埠；固定容器參數為 `kg2-throwaway-neo4j`、`neo4j:5.26-enterprise`、27474／27687、3 GB、無 volume／mount；密碼只在記憶體與子程序環境中存在。focused pytest **9 passed**。
+- **T1**：在合成 Fact／Entity 圖上呼叫現有 `vector_search_facts`、`revoke_chunk_facts`、`bfs_query` 記錄現行行為；腳本內另測先狀態過濾後去重、保留撤銷 Fact、Fact 狀態聚合、缺席狀態檢索與事件重播／漂移稽核。C1–C5 的 `matches_inference` **均為 true**；C3 約 1,001 個 Fact，聚合查詢 **0.167762 秒**。
+- **T2**：臨時容器 `docker stop`／`docker rm` exit code 均 0，拆除後 `docker ps -a` 無 `kg2-throwaway-neo4j`；`kg2-neo4j` 前後均 `running`，`StartedAt=2026-10-01T12:36:49.303373783Z`，`kg4_unchanged=true`。無連線 KG#4、無 Ollama／WSL／LLM／embedding／外網；未修改 production、論文、題庫、規劃文件或報告236／237／239 原文。
+- **產物**：[報告241](docs/報告/241_P3拋棄式Neo4j驗證Fact層狀態設計風險執行紀錄.md)、[驗證腳本](scripts/analysis/disposable_fact_state_validation.py)、[T0測試](tests/scripts/test_disposable_fact_state_validation.py)、[輸出 JSON](data/analysis/disposable_fact_state_validation_20261002.json)；Neo4j 合成圖缺少其他關係型別所產生的通知與既有 requests 依賴警告已記錄於 JSON／報告。
+- **提交**：驗證產物、報告與索引為 `4fe90eb`；本條 HANDOVER 待另提交。
+
+**狀態：T0／T1／T2 執行完成；等待規劃對話（Claude）另行獨立驗證與裁示。**
 
 ## 2026-10-02（報告239；F2／F1 Codex 執行，待規劃對話獨立驗證）
 
