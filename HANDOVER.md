@@ -15,6 +15,10 @@
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-02（報告260）：使用者同意做 L2；**查證後把 L2 縮小為 L2′（只補 P3／P4 未驗證的四項），任務書已寫成並派給實作對話；同時更正報告257 G1 的一個錯誤**
+
+[報告260](docs/報告/260_下一階段任務規劃_L2補驗_as_of時間維度與L1真實資料庫行為_交Claude實作對話.md)：P3／P4（報告240–243）已在拋棄式 Neo4j 驗證過先過濾後去重、撤銷、BFS 狀態推導、事件重播與漂移、簡繁合併與改邊型別影響；**L2′ 只補**：S1 L1 真實資料庫行為（`UnknownPropertyKey` 通知在屬性鍵存在後是否消失、trace 實際顯示狀態）、S2 `state_as_of` 整合進先過濾後去重、S3 BFS 邊來源混合（G2）、S4 條文層「新版取代」連動 Fact（G3）、S5 17k Fact 規模耗時。**更正報告257 G1**：「尚未施行」Fact 若只把「驗證通過」事件延到施行日，「抽取完成」早於 `as_of` 時重播＝候選，**仍可檢索**；正確設計＝該 Fact **所有事件**都以施行日為 `effective_date`，`state_as_of` 回傳 `no_events`（舊資料，可檢索）／`not_yet_effective`（不可檢索）／`replayed`（依狀態）。另讀碼確認 `replay` 遇非法事件不停止、`final_state` 已忽略被拒事件。**分工**：實作對話（使用者規則禁 docker／連 Neo4j）寫 `state_as_of`（只新增於零接線的 `relation_lifecycle.py`）、驗證腳本與測試；**規劃對話起拋棄式容器 `kg2-throwaway-neo4j`（新基準閘門、不碰 `kg2-neo4j`／KG#4）實跑、逐場景對照預期、失敗則貼回修**。實作者報告自 **261**、規劃對話下一編號 **262**。KG#4 仍無寫入核准。
+
 ## 2026-10-02（報告258 §10）：**L1 已實作並由規劃對話獨立驗證通過**（`108fdd2`；pytest 2007 passed；差分測試旗標關閉 0 不一致；KG#4 唯讀實測語法取捨）
 
 實作對話完成 L1：`TRACE_SEMANTIC_MARKS` 旗標下，檢索 trace 的 fact `semantic_marks` 末尾多一個 `lifecycle_state`（目前全為「尚未處理」）；`vector_search_facts` 兩處 `RETURN` 以 `properties(node)['lifecycle_state']` 多帶該屬性。**不寫入、不過濾、不改 prompt／API；`relation_lifecycle` 仍零接線。** 我對 KG#4 **唯讀實測四種取值語法**：`node.lifecycle_state`／`node['…']` 會每次查詢發 `UnknownPropertyKeyWarning`（耗時≈基準）；`properties(node)[…]` 無通知但每次多 +2.7（80 候選）／+6.1（160 候選）ms（物化整個屬性 map）→ **裁定接受 `properties(node)`**，待 L4 後資料庫有該屬性鍵再考慮改回 `node.lifecycle_state`。改了一個既有測試預期（鎖鍵順序的完全相等，多一鍵必改，我同意）。限制：未端到端實跑向量索引 `CALL`（唯讀守衛不放行、不放寬）。**下一步（待使用者裁示）**：L2（拋棄式 Neo4j 虛構資料驗證 W1／W3／R2／R3／`state_as_of`，需新基準閘門與起臨時容器許可）；D3（試點多版本資料口徑）仍待使用者提供。報告下一編號 **260**。KG#4 仍無寫入核准。
