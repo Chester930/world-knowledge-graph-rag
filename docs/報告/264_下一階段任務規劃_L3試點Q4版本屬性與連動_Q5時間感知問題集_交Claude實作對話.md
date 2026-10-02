@@ -74,4 +74,4 @@ async def asof_search(driver, kg_id, query_vector, as_of, top_k, *, mode="asof",
 
 ## 9. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成，將以 SendMessage 派給實作對話；試點抽取進行中。KG#4 仍無任何寫入核准。
+✅ **Q4／Q5 已於 2026-10-03 由規劃對話獨立驗證通過**（實作者 commit `27800de`；紀錄見[報告265](265_L3試點Q4版本屬性連動與as_of檢索_Q5時間感知問題集執行紀錄.md)；**我實跑 `--execute` 與評測的完整結果見[報告266](266_L3試點KG執行與時間感知檢索評測結果.md)**）。摘要：題庫 34 題由我**不重用實作者驗證器**獨立核對 0 問題、選題集合與我重算完全一致；`pilot_apply_versions.py --execute` 寫入 128 版本屬性／64 條取代關係／757 個 Fact 事件（330 已被取代、427 有效），我獨立稽核 0 漂移、冪等；預先寫死判準的評測（雜湊 `07648c6a…`）：**主要指標通過**（`asof` leak 0%／hit 100%，`naive` leak 100%／hit 100%）。實作者對既有測試守衛（`test_no_writes_of_lifecycle_state_anywhere`）的一行例外：**接受**。全量 pytest 2190 passed。KG#4 仍無任何寫入核准。

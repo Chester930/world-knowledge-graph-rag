@@ -1,0 +1,784 @@
+{
+ "criteria_sha256": "07648c6a7fe70024c3b767d1e772fe6960c873acd3134ee2a6306d864c08a1de",
+ "top_k": 20,
+ "question_count": 34,
+ "summary": {
+  "n": {
+   "asof": 34,
+   "naive": 34
+  },
+  "primary": {
+   "asof": {
+    "n": 24,
+    "hit_rate": 1.0,
+    "leak_rate": 0.0
+   },
+   "naive": {
+    "n": 24,
+    "hit_rate": 1.0,
+    "leak_rate": 1.0
+   }
+  },
+  "control": {
+   "asof": {
+    "n": 6,
+    "hit_rate": 1.0,
+    "leak_rate": null
+   },
+   "naive": {
+    "n": 6,
+    "hit_rate": 1.0,
+    "leak_rate": null
+   }
+  },
+  "conflict": {
+   "asof": {
+    "n": 4,
+    "hit_rate": 0.0,
+    "leak_rate": 0.0
+   },
+   "naive": {
+    "n": 4,
+    "hit_rate": 0.0,
+    "leak_rate": 0.0
+   }
+  },
+  "verdict": {
+   "asof_leak_rate_le_0.05": true,
+   "asof_hit_rate_ge_naive": true,
+   "control_hit_equal": true,
+   "secondary_naive_leak_rate": 1.0,
+   "secondary_hit_rate_diff_asof_minus_naive": 0.0,
+   "primary_pass": true
+  }
+ },
+ "per_question": [
+  {
+   "id": "PTQ-N0030001-2-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 2,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-2-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 2,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 2,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-9-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 9,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-9-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 8,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 9,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-21-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 7,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-21-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 7,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-30-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 6,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-30-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 6,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 6,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-37-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-37-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-45-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-45-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-53-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-53-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-58-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 7,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-58-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 6,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 7,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-72-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 8,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-72-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 8,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-77-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "1984-07-30"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-77-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-86-old",
+   "asof": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   },
+   "naive": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   }
+  },
+  {
+   "id": "PTQ-N0030001-86-new",
+   "asof": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   },
+   "naive": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   }
+  },
+  {
+   "id": "PTQ-N0030006-7-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "2023-05-01"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "2023-05-01",
+     "2025-12-09"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030006-7-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "2025-12-09"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 5,
+    "versions_returned": [
+     "2023-05-01",
+     "2025-12-09"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030006-9-old",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 2,
+    "versions_returned": [
+     "2023-05-01"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 6,
+    "versions_returned": [
+     "2023-05-01",
+     "2025-12-09"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030006-9-new",
+   "asof": {
+    "hit": true,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "2025-12-09"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": true,
+    "n_results": 20,
+    "n_target": 6,
+    "versions_returned": [
+     "2023-05-01",
+     "2025-12-09"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030006-12-old",
+   "asof": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   },
+   "naive": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   }
+  },
+  {
+   "id": "PTQ-N0030006-12-new",
+   "asof": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   },
+   "naive": {
+    "hit": false,
+    "leak": false,
+    "n_results": 20,
+    "n_target": 0,
+    "versions_returned": []
+   }
+  },
+  {
+   "id": "PTQ-N0030001-1-ctl-format_only",
+   "asof": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 4,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-13-ctl-format_only",
+   "asof": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-20-ctl-format_only",
+   "asof": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 2,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-5-ctl-same_hash",
+   "asof": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 2,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-18-ctl-same_hash",
+   "asof": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 3,
+    "versions_returned": [
+     "1984-07-30",
+     "2024-07-31"
+    ]
+   }
+  },
+  {
+   "id": "PTQ-N0030001-26-ctl-same_hash",
+   "asof": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   },
+   "naive": {
+    "hit": true,
+    "leak": null,
+    "n_results": 20,
+    "n_target": 1,
+    "versions_returned": [
+     "2024-07-31"
+    ]
+   }
+  }
+ ],
+ "embedding_provider_called": true
+}
