@@ -1,0 +1,57 @@
+{
+  "totals_before_ok": true,
+  "a_subject": {
+    "total": 16826,
+    "stale": 1102
+  },
+  "a_object": {
+    "total": 16826,
+    "stale": 764
+  },
+  "a_no_link": {
+    "facts_missing_link": 0
+  },
+  "b_rel": {
+    "total": 16826,
+    "no_edge": 0,
+    "stale_unique": 0,
+    "multi_edge": 1684,
+    "reltype_not_among_edges": 0
+  },
+  "d_flat_groups": {
+    "groups": 14229,
+    "facts": 16826,
+    "multi_groups": 1144
+  },
+  "d_entity_groups": {
+    "groups": 14021,
+    "facts": 16826,
+    "multi_groups": 1275
+  },
+  "a_samples": [
+    {
+      "flat": "保障勞工權益",
+      "entity": "勞工權益"
+    },
+    {
+      "flat": "加強勞雇關係",
+      "entity": "勞雇關係"
+    },
+    {
+      "flat": "促進社會與經濟發展",
+      "entity": "社會及經濟發展"
+    },
+    {
+      "flat": "本法未規定者",
+      "entity": "本辦法未規定者"
+    },
+    {
+      "flat": "當事人之一方",
+      "entity": "勞資爭議當事人之一方"
+    }
+  ],
+  "totals_after_identical": true,
+  "queries": 15,
+  "measured_at": "2026-10-02（本機時間）；Neo4j 唯讀（ReadOnlyRunner），KG#4＝236903cf-055a-40a8-8923-b9d06601f3b7",
+  "note": "只含聚合數字與5個不一致名稱樣本；未輸出來源文字；前後總數相同"
+}
