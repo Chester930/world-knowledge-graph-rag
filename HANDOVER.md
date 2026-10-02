@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-10-02 17:30（**KG#4 冷備份已完成並以真實資料驗證可還原，見報告249**；`kg2-neo4j` 新基準 StartedAt＝`2026-10-02T09:14:47.91915022Z`；目前無進行中的派工）
 
+## 2026-10-02（報告261；L2 補驗 N1–N4 Claude 實作對話完成，待規劃對話重跑驗收）：[報告261](docs/報告/261_L2補驗程式與驗證腳本執行紀錄.md)
+
+`services/relation_lifecycle.py` 僅新增 `AsOfResult`／`state_as_of`／`is_retrievable_as_of`（零接線）；新增驗證腳本 `scripts/analysis/disposable_lifecycle_l2_validation.py`（S1–S5，新基準 `2026-10-02T11:09:32.79429649Z`）與 57 個測試（全量 pytest 2064 passed）。依規劃對話第一次實跑回饋已修：S1 探針移除 `fixture_id` 並改以「指名 lifecycle_state 的 UnknownPropertyKey 通知」判定；S5 單獨改 1024 維。**實作對話未執行腳本、未連 Neo4j／docker／.env**；一行指令見報告261 §7，由規劃對話重跑並以重跑結果為準。
+
 ## 2026-10-02（報告259；L1 T0–T7 Claude 實作對話執行，待規劃對話獨立驗證）：[報告259](docs/報告/259_L1檢索trace顯示生命週期狀態執行紀錄.md)
 
 `TRACE_SEMANTIC_MARKS` 開啟時，trace 的 fact `semantic_marks` 末尾多 `lifecycle_state`（`semantic_marks.mark_lifecycle_state`，本地常數 `LIFECYCLE_STATES`；目前全為「尚未處理」）；`vector_search_facts` 兩處 `RETURN` 多帶 `properties(node)['lifecycle_state'] AS lifecycle_state`。只讀只顯示、零接線 `relation_lifecycle`。新增 34 測試，全量 pytest 2007 passed。**需規劃對話確認**：改了一個既有測試預期（T4 多一鍵，§5-1）、守衛排除 `disposable_*`（§5-2）、`properties(node)` 的真實 Neo4j 行為與耗時（含 fact_embedding 物化疑慮）未實測。未連 KG#4／docker／.env。

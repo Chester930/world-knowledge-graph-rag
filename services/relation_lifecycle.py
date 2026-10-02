@@ -318,3 +318,56 @@ def explain(history: ReplayResult | Sequence[TransitionResult]) -> str:
     final = history.final_state if isinstance(history, ReplayResult) else (steps[-1].to_state if steps else None)
     lines.append(f"最終狀態：{final or '（尚未建立）'}")
     return "\n".join(lines)
+
+
+# ── 時間維度：as_of 重播（報告260 N1；新增，零接線）─────────────────────────────────
+# 註：以下以 ISO 字串（YYYY-MM-DD，與 `LifecycleEvent.effective_date` 同形狀）做字典序比較來判定事件是否已生效；
+# 這是本模組第一次「比較」日期（模組開頭的說明寫「不比較」是指上方既有函式）。仍不解析日期、不使用時間函式。
+AS_OF_STATUSES = ("no_events", "not_yet_effective", "replayed", "illegal")
+
+
+@dataclass(frozen=True)
+class AsOfResult:
+    """`state_as_of` 結果。`status`：`no_events`（Fact 沒有任何事件＝尚未處理）、`not_yet_effective`（有事件但全部晚於
+    `as_of`＝尚未生效）、`replayed`（以生效事件重播且全部合法）、`illegal`（重播時有被拒事件；`state` 仍取
+    `final_state`＝已忽略被拒事件的投影，只是標示事件紀錄有異常供稽核）。`included`／`excluded`＝納入／排除的事件數。"""
+
+    state: str | None
+    status: str
+    included: int
+    excluded: int
+    replay: ReplayResult | None
+
+
+def state_as_of(
+    events: Sequence[LifecycleEvent], as_of: str, lifecycle: Lifecycle = CORE_LIFECYCLE
+) -> AsOfResult:
+    """只重播 `effective_date` 為 `None` 或 `<= as_of` 的事件（**保持原順序**，不依日期重排），回傳狀態與判定類別。
+
+    `as_of` 必須是 `YYYY-MM-DD`，否則 `ValueError`。不修改 `replay`；被拒事件的語意以 `replay` 為準。
+    """
+    if not isinstance(as_of, str) or not _ISO_DATE_RE.match(as_of):
+        raise ValueError(f"as_of 必須是 YYYY-MM-DD 字串，收到 {as_of!r}")
+    events = tuple(events)
+    if not events:
+        return AsOfResult(None, "no_events", 0, 0, None)
+    included = tuple(e for e in events if e.effective_date is None or e.effective_date <= as_of)
+    excluded = len(events) - len(included)
+    if not included:
+        return AsOfResult(None, "not_yet_effective", 0, excluded, None)
+    result = replay(included, lifecycle=lifecycle)
+    return AsOfResult(result.final_state, "replayed" if result.ok else "illegal", len(included), excluded, result)
+
+
+def is_retrievable_as_of(
+    result: AsOfResult, retrievable: frozenset[str | None] = DEFAULT_RETRIEVABLE_STATES
+) -> bool:
+    """`no_events`→`None in retrievable`；`not_yet_effective`→`False`；`replayed`／`illegal`→狀態是否在可檢索集合。
+
+    `illegal` 採不隱藏（fail-open，與現有 zero-out 行為一致）；呼叫端應依 `result.status` 另行報告異常。
+    """
+    if result.status == "not_yet_effective":
+        return False
+    if result.status == "no_events":
+        return None in retrievable
+    return is_retrievable(result.state, retrievable)
