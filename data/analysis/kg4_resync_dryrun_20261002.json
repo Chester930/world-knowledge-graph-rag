@@ -1,0 +1,33 @@
+{
+  "totals_before_ok": true,
+  "names_only": {
+    "rows": 16826,
+    "query_seconds": 0.81,
+    "stats": {
+      "subject_changed": 1102,
+      "object_changed": 764,
+      "rel_type_changed": 0,
+      "rel_type_skipped_multi_edge": 0,
+      "rel_type_skipped_no_edge": 0,
+      "unchanged": 15037,
+      "facts_without_links": 0
+    }
+  },
+  "with_rel_type": {
+    "rows": 16826,
+    "query_seconds": 0.95,
+    "stats": {
+      "subject_changed": 1102,
+      "object_changed": 764,
+      "rel_type_changed": 0,
+      "rel_type_skipped_multi_edge": 1684,
+      "rel_type_skipped_no_edge": 0,
+      "unchanged": 15037,
+      "facts_without_links": 0
+    }
+  },
+  "totals_after_identical": true,
+  "queries_run": 10,
+  "note": "規劃對話以等價純 MATCH 查詢（ReadOnlyRunner/assert_read_only，無 CALL 子查詢）取得資料列，再交 Codex 原型的純運算規劃函式 _plan_resync_updates；未寫入任何東西；前後總數相同；KG#4＝236903cf-055a-40a8-8923-b9d06601f3b7",
+  "measured_at": "2026-10-02（本機時間）"
+}

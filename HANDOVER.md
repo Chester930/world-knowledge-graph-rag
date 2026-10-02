@@ -1,7 +1,7 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告246 W0–W5 Codex 執行；等待規劃對話獨立驗證；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告246 W0–W5 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
 
 ## 2026-10-02（報告246；W0–W5 Codex 執行，待規劃對話獨立驗證）
 
@@ -16,7 +16,8 @@
 - **回歸**：原有測試基準（排除本次 10 個測試）1887 passed／0 failed；含新增測試 1897 passed／0 failed；節點卡 3 張、0 警告。
 - **誠實揭露**：三次未採用的中間結果分別暴露 async driver 收尾、裸容器索引初始化、假 provider 主客體誤合併問題；均修正後重跑，未把中間結果當結論。報告246另記錄了「驗證腳本先建／等 production vector index」這項環境補充。
 
-**狀態：W0–W5 執行完成；等待規劃對話獨立驗證與使用者後續裁示。**
+**狀態：W0–W5 執行完成；規劃對話已於 2026-10-02 獨立驗證通過（詳見報告245 §10），含規劃對話補做的「真實 KG#4 唯讀 dry-run」。**
+**規劃對話驗證摘要**：①production 與 P3／P4 腳本零變動；②新腳本重用 P3／P4 閘門（import）、自訂新基準、`17990` 在新檔完全不出現（只在測試的拒絕案例）；③**規劃對話自行重跑一次（56 秒）：W1–W4 全部重現**；④`kg2-neo4j` 啟動時間仍為新基準、臨時容器無殘留、工作區乾淨；⑤全量 pytest 1897 passed、節點卡 0 警告、無密碼外洩。**結論**：W1 以 production 路徑（`merge_triples_to_graph`→`merge_entity`）重現「標準名提升改名後 Fact 抄本過時」，**證實報告244 的根因推論**；W2 方案 B 原型（`dry_run` 與實際變更數相等、冪等、只改 `subject`／`object`／`rel_type`、`dry_run` 不寫入）成立；W3 同步後重跑回填：`fact_text` 重建、`encode` 次數＝實際改變數、`vector_search_facts` 去重 2→1、BFS 與 Fact 鍵對齊；W4 不變量、跨 KG 隔離、邊界案例皆成立。**規劃對話補充（Codex 驗證的限制，我已補做）**：Codex 的 17,000 Fact 規模測試把全部 Fact 掛在**同一對實體**、**沒有任何關係邊**、**只開名稱同步**（型別同步未在規模上測），故其耗時（約 1 秒）只代表最簡拓撲；我改以 `ReadOnlyRunner`（`assert_read_only` 拒絕了含 `CALL {}` 子查詢的原語句，我**未放寬防護**，改用等價純 MATCH 查詢）對**真實 KG#4** 唯讀取得 16,826 筆資料列並交原型的純運算規劃函式：**取資料列 1–3 秒；`subject_changed=1,102`、`object_changed=764`、`rel_type_changed=0`、`rel_type_skipped_multi_edge=1,684`、`unchanged=15,037`（需更新的 Fact＝16,826−15,037＝1,789 筆）**，與規劃對話先前獨立量測逐項吻合；前後總數相同、未寫入。證據：`data/analysis/kg4_resync_dryrun_20261002.json`。**待做／未驗證**：備份與還原演練（G2）、正式模組化（G3）、對 KG#4 套用（G4）；`backfill_fact_text_embeddings` 實際重算向量的數量（可能多於 1,789）與 embedding 成本尚未估；改邊型別漏複製 `verb_embedding`／`natural_text`（使用者決定暫不處理）。
 
 ## 2026-10-02（報告243；V0–V5 Codex 執行，待規劃對話獨立驗證）
 
