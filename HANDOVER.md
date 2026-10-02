@@ -1,7 +1,7 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告241 T0／T1／T2 Codex 執行，待規劃對話獨立驗證；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告241 T0／T1／T2 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
 
 ## 2026-10-02（報告241；T0／T1／T2 Codex 執行，待規劃對話獨立驗證）
 
@@ -13,7 +13,8 @@
 - **產物**：[報告241](docs/報告/241_P3拋棄式Neo4j驗證Fact層狀態設計風險執行紀錄.md)、[驗證腳本](scripts/analysis/disposable_fact_state_validation.py)、[T0測試](tests/scripts/test_disposable_fact_state_validation.py)、[輸出 JSON](data/analysis/disposable_fact_state_validation_20261002.json)；Neo4j 合成圖缺少其他關係型別所產生的通知與既有 requests 依賴警告已記錄於 JSON／報告。
 - **提交**：驗證產物、報告與索引為 `4fe90eb`；本條 HANDOVER 待另提交。
 
-**狀態：T0／T1／T2 執行完成；等待規劃對話（Claude）另行獨立驗證與裁示。**
+**狀態：T0／T1／T2 執行完成；規劃對話已於 2026-10-02 獨立驗證通過（詳見報告240 §10）。**
+**規劃對話驗證摘要**：①範圍僅新增驗證腳本／測試／輸出 JSON／報告，**production 零變動**；②`kg2-neo4j` 的 `StartedAt` 與派工前基準完全相同，臨時容器無殘留、連接埠已釋放；③閘門程式碼讀碼確認：連線前檢查、17990／`kg2-neo4j`／KG#4 的 `kg_id` 一律拒絕、docker 指令僅限白名單、密碼只在記憶體與子程序環境變數、`17990` 在新檔中只出現在「拒絕」邏輯與測試；④**規劃對話自行重跑驗證腳本一次（輸出導到暫存目錄）：C1–C5 五個情境全部重現**（41 秒、容器自動拆除、kg2-neo4j 未變）；⑤全量 pytest 1877 passed、節點卡 0 警告、無密碼外洩（含檢查疑似隨機 token）。**結論**：報告233／234 推論的五個讀寫風險在真實 Neo4j 5.26 上得到證實——現行 `vector_search_facts` 依三元組去重會留下分數高的「已被取代」舊版；`revoke_chunk_facts` 實體刪除 Fact；`bfs_query` 不讀 Fact 狀態；缺席狀態的 Fact 在「先過濾後去重」下仍可檢索；事件清單重播與狀態快取的漂移可被稽核偵測。**限制**：合成資料、單一小圖；C3 只驗證「可檢索 Fact 計數」，未完整驗證報告234 §6 的邊狀態聚合規則；未驗證寫入端（W1／W4／W5）。
 
 ## 2026-10-02（報告239；F2／F1 Codex 執行，待規劃對話獨立驗證）
 
