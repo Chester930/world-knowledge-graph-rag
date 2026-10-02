@@ -1,7 +1,7 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告243 V0–V5 Codex 執行，待規劃對話獨立驗證；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告243 V0–V5 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
 
 ## 2026-10-02（報告243；V0–V5 Codex 執行，待規劃對話獨立驗證）
 
@@ -16,7 +16,8 @@
 - **假說總結**：H1／H2／H3／H4／H5／H6 **均符合預測**。全量 pytest `1887 passed／0 failed`（8 warnings、1 subtests passed）；`check_node_cards.py` 為 3 張、0 警告。
 - **誠實揭露**：初次 harness 執行發現 W4／W5 共用 `RELATED_TO` 導致跨情境污染；該次結果未採用，改用不同合法關係型別後完整重跑。限制仍為合成資料／單一小圖，只驗證 W1／W4／W5，不代表寫入端已可落地。
 
-**狀態：V0–V5 執行完成；等待規劃對話獨立驗證與使用者裁示。**
+**狀態：V0–V5 執行完成；規劃對話已於 2026-10-02 獨立驗證通過（詳見報告242 §10），含 2 項規劃對話另行補充的發現。**
+**規劃對話驗證摘要**：①範圍僅新增驗證腳本／測試／輸出 JSON／報告，**production 與 P3 腳本零變動**；②新腳本**重用 P3 閘門函式（import 而非複製）**、自訂新基準 `2026-10-02T04:10:38.389676557Z`、從不呼叫舊基準執行器，全檔唯一一處建立驅動且先過閘門，**17990 只出現在測試的「拒絕」案例**；③**規劃對話自行重跑一次（輸出導到暫存目錄，34 秒）：H1–H6 全部重現**；④`kg2-neo4j` 啟動時間仍為新基準、臨時容器無殘留、工作區乾淨；⑤全量 pytest 1887 passed、節點卡 0 警告、無密碼外洩（含疑似隨機 token 掃描）。**結論（真實 Neo4j 5.26）**：實體改名／簡繁合併後 Fact 與生命週期屬性存活、`HAS_SUBJECT`／`HAS_OBJECT` 已指向新實體，但 Fact 的扁平 `subject`／`object` 仍是舊名稱，導致同實體對的兩個 Fact 去重鍵不同、`vector_search_facts` 不去重（H1／H2）；改邊型別後 Fact 的 `rel_type` 仍是 `RELATED_TO`，BFS 側與 Fact 側同一事實兩行都保留（H3／H4）；以 `HAS_SUBJECT`／`HAS_OBJECT` 反查回寫可修復扁平屬性且冪等（H5）；新建 Fact 多帶兩個生命週期屬性不影響 `vector_search_facts`／`backfill_fact_text_embeddings`（H6）。**規劃對話補充發現（Codex 報告未列）**：①**同步扁平屬性後 `fact_text` 仍是舊文字**（例：「职員A RELATED_TO 职務A」），而 `fact_embedding` 由 `fact_text` 算出——所以 H5 的「修復」只限扁平屬性；讀碼推論（**未實測**）正確順序應為「同步扁平屬性 → 重跑 `backfill_fact_text_embeddings`（它由 `subject`／`verb`／`object` 重建 `fact_text` 並僅在不同時重算向量）」；②`backfill_related_to_edges` 建新邊時只複製 `kg_id`／`citations_json`／`confidence`，**既未複製 `verb_embedding`（Codex 已列），也未複製邊上的 `natural_text`**（讀碼，未實測）。**限制**：合成資料、單一小圖；`rel_type` 同步只在端點間僅一條關係邊時成立；未涵蓋 `merge_triples_to_graph` 全流程、`backfill_fact_nodes`、抽取端、真實分布與效能。
 
 ## 2026-10-02（報告241；T0／T1／T2 Codex 執行，待規劃對話獨立驗證）
 
