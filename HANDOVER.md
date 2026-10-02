@@ -19,6 +19,10 @@
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-02（報告260 §11）：**L2′ 已實作並由規劃對話獨立驗證通過（S1–S5 全部符合預期；`15efacf`；pytest 2064 passed）；KG#4 全程未碰**
+
+規劃對話起拋棄式容器 `kg2-throwaway-neo4j`（新基準閘門、無磁碟區）實跑兩次：第一次 S1 探針被 `fixture_id` 污染、S5 用 16 維不具代表性（兩個腳本缺陷，已退回修）；**第二次 S1–S5 全過，容器已拆除、`kg2-neo4j` StartedAt 不變**。**結論**：①L1 假設在真實資料庫成立（`node.lifecycle_state` 的 UnknownPropertyKey 警告只在屬性鍵尚不存在時出現，L4 寫入後可改回，省約 1.5–3 ms）；②現行 `vector_search_facts` 在同鍵新舊版共存時**留下已被取代的舊版、漏掉現行版**（S2 實證），`state_as_of` 先過濾後去重可修正，`not_yet_effective`／`no_events` 語意在真實 Neo4j 正確（報告257 G1 更正設計成立）；③BFS 邊無法區分版本（一條邊、引用含新舊、`natural_text` 為後寫者）；④條文連動冪等且無漂移，但**識別鍵須含法規識別**（只用條號＋版本會誤抓他法同號條文）；⑤L4 建議在 Fact 快取衍生的 `effective_from`／`effective_to`，讀取端不解析事件 JSON（連事件 JSON 一起取回 160 候選多約 +4 ms）。限制：全合成、S1–S4 16 維／S5 1024 維、3 GB、S5 單次量測雜訊明顯。**待辦**：`relation_lifecycle.py` 模組 docstring 仍寫「不比較日期」，建議同步修正（交實作對話）。**下一步**：L3′（試點 KG）待 **D3**（collector 哪個 snapshot 為準）與使用者同意；L4 前須再備份＋逐項同意。報告下一編號 **262**。KG#4 仍無寫入核准。
+
 ## 2026-10-02（報告260）：使用者同意做 L2；**查證後把 L2 縮小為 L2′（只補 P3／P4 未驗證的四項），任務書已寫成並派給實作對話；同時更正報告257 G1 的一個錯誤**
 
 [報告260](docs/報告/260_下一階段任務規劃_L2補驗_as_of時間維度與L1真實資料庫行為_交Claude實作對話.md)：P3／P4（報告240–243）已在拋棄式 Neo4j 驗證過先過濾後去重、撤銷、BFS 狀態推導、事件重播與漂移、簡繁合併與改邊型別影響；**L2′ 只補**：S1 L1 真實資料庫行為（`UnknownPropertyKey` 通知在屬性鍵存在後是否消失、trace 實際顯示狀態）、S2 `state_as_of` 整合進先過濾後去重、S3 BFS 邊來源混合（G2）、S4 條文層「新版取代」連動 Fact（G3）、S5 17k Fact 規模耗時。**更正報告257 G1**：「尚未施行」Fact 若只把「驗證通過」事件延到施行日，「抽取完成」早於 `as_of` 時重播＝候選，**仍可檢索**；正確設計＝該 Fact **所有事件**都以施行日為 `effective_date`，`state_as_of` 回傳 `no_events`（舊資料，可檢索）／`not_yet_effective`（不可檢索）／`replayed`（依狀態）。另讀碼確認 `replay` 遇非法事件不停止、`final_state` 已忽略被拒事件。**分工**：實作對話（使用者規則禁 docker／連 Neo4j）寫 `state_as_of`（只新增於零接線的 `relation_lifecycle.py`）、驗證腳本與測試；**規劃對話起拋棄式容器 `kg2-throwaway-neo4j`（新基準閘門、不碰 `kg2-neo4j`／KG#4）實跑、逐場景對照預期、失敗則貼回修**。實作者報告自 **261**、規劃對話下一編號 **262**。KG#4 仍無寫入核准。

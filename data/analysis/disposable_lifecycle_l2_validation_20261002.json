@@ -1,0 +1,553 @@
+{
+  "S1": {
+    "current": {
+      "before_key_exists": {
+        "production_properties_map": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": null,
+            "特別休假": null,
+            "加班": null,
+            "勞動契約": null
+          }
+        },
+        "dot_property_same_text": {
+          "notification_codes": [
+            "Neo.ClientNotification.Statement.UnknownPropertyKeyWarning"
+          ],
+          "notification_details": [
+            {
+              "code": "Neo.ClientNotification.Statement.UnknownPropertyKeyWarning",
+              "title": "The provided property key is not in the database",
+              "description": "One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: lifecycle_state)"
+            }
+          ],
+          "lifecycle_state_warnings": 1,
+          "values": {
+            "職業災害": null,
+            "特別休假": null,
+            "加班": null,
+            "勞動契約": null
+          }
+        },
+        "map_same_text": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": null,
+            "特別休假": null,
+            "加班": null,
+            "勞動契約": null
+          }
+        },
+        "dot_property_fresh_plan": {
+          "notification_codes": [
+            "Neo.ClientNotification.Statement.UnknownPropertyKeyWarning"
+          ],
+          "notification_details": [
+            {
+              "code": "Neo.ClientNotification.Statement.UnknownPropertyKeyWarning",
+              "title": "The provided property key is not in the database",
+              "description": "One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: lifecycle_state)"
+            }
+          ],
+          "lifecycle_state_warnings": 1,
+          "values": {
+            "職業災害": null,
+            "特別休假": null,
+            "加班": null,
+            "勞動契約": null
+          }
+        },
+        "map_fresh_plan": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": null,
+            "特別休假": null,
+            "加班": null,
+            "勞動契約": null
+          }
+        }
+      },
+      "property_key_existed_before": false,
+      "property_key_exists_after": true
+    },
+    "proposal": {
+      "after_key_exists": {
+        "production_properties_map": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": "有效",
+            "特別休假": "已被取代",
+            "加班": null,
+            "勞動契約": "候選"
+          }
+        },
+        "dot_property_same_text": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": "有效",
+            "特別休假": "已被取代",
+            "加班": null,
+            "勞動契約": "候選"
+          }
+        },
+        "map_same_text": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": "有效",
+            "特別休假": "已被取代",
+            "加班": null,
+            "勞動契約": "候選"
+          }
+        },
+        "dot_property_fresh_plan": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": "有效",
+            "特別休假": "已被取代",
+            "加班": null,
+            "勞動契約": "候選"
+          }
+        },
+        "map_fresh_plan": {
+          "notification_codes": [],
+          "notification_details": [],
+          "lifecycle_state_warnings": 0,
+          "values": {
+            "職業災害": "有效",
+            "特別休假": "已被取代",
+            "加班": null,
+            "勞動契約": "候選"
+          }
+        }
+      },
+      "trace_marks": {
+        "職業災害": "有效",
+        "特別休假": "已被取代",
+        "加班": "尚未處理",
+        "勞動契約": "候選"
+      }
+    },
+    "expected": {
+      "before_key_exists": {
+        "dot_property": "有指名 lifecycle_state 的 UnknownPropertyKey 警告",
+        "properties_map": "無指名 lifecycle_state 的警告"
+      },
+      "after_key_exists": {
+        "both_styles": "無指名 lifecycle_state 的警告",
+        "properties_map_values": {
+          "勞動契約": "候選",
+          "職業災害": "有效",
+          "特別休假": "已被取代",
+          "加班": null
+        }
+      },
+      "trace_marks": {
+        "勞動契約": "候選",
+        "職業災害": "有效",
+        "特別休假": "已被取代",
+        "加班": "尚未處理"
+      }
+    },
+    "matches_expected": true,
+    "unexpected_findings": []
+  },
+  "S2": {
+    "current": {
+      "vector_search_facts_top_k_5": [
+        "B",
+        "D",
+        "E"
+      ],
+      "scores": {
+        "B": 0.9998013973236084,
+        "A": 0.9973287582397461,
+        "C": 0.989835262298584,
+        "D": 0.9401527047157288,
+        "E": 0.8856595158576965
+      },
+      "misses_C": true,
+      "keeps_superseded_B": true
+    },
+    "proposal": {
+      "2026-10-02": {
+        "kept": [
+          "C",
+          "D",
+          "E"
+        ],
+        "decisions": {
+          "B": "replayed",
+          "A": "not_yet_effective",
+          "C": "replayed",
+          "D": "no_events",
+          "E": "replayed"
+        }
+      },
+      "2024-01-01": {
+        "kept": [
+          "B",
+          "D",
+          "E"
+        ],
+        "decisions": {
+          "B": "replayed",
+          "A": "not_yet_effective",
+          "C": "not_yet_effective",
+          "D": "no_events",
+          "E": "replayed"
+        }
+      },
+      "2027-01-01": {
+        "kept": [
+          "A",
+          "D",
+          "E"
+        ],
+        "decisions": {
+          "B": "replayed",
+          "A": "replayed",
+          "C": "replayed",
+          "D": "no_events",
+          "E": "replayed"
+        }
+      }
+    },
+    "expected": {
+      "proposal_kept": {
+        "2026-10-02": [
+          "C",
+          "D",
+          "E"
+        ],
+        "2024-01-01": [
+          "B",
+          "D",
+          "E"
+        ],
+        "2027-01-01": [
+          "A",
+          "D",
+          "E"
+        ]
+      },
+      "current": [
+        "B",
+        "D",
+        "E"
+      ]
+    },
+    "matches_expected": true,
+    "unexpected_findings": []
+  },
+  "S3": {
+    "current": {
+      "edge_rows": 1,
+      "citation_sources": [
+        "cf4b2b45-2cbf-4179-b19d-e9d28e56c184",
+        "019bafd4-7412-4717-bc6d-fb099e0c4f11"
+      ],
+      "natural_text": "依新版規定，甲公司應給付乙津貼。",
+      "bfs_triples": [
+        {
+          "source_doc_id": "019bafd4-7412-4717-bc6d-fb099e0c4f11",
+          "natural_text": "依新版規定，甲公司應給付乙津貼。"
+        }
+      ],
+      "fact_states": {
+        "old": "已被取代",
+        "new": "有效"
+      },
+      "old_doc": "cf4b2b45-2cbf-4179-b19d-e9d28e56c184",
+      "new_doc": "019bafd4-7412-4717-bc6d-fb099e0c4f11"
+    },
+    "proposal": {
+      "edge_can_distinguish_versions": false,
+      "svo_triple_version_fields": [],
+      "note": "邊只有最後一筆來源與 natural_text；舊版 Fact 已被取代，邊卻仍呈現（新版措辭）——這是要量化的風險，不是要修的"
+    },
+    "expected": {
+      "edge_rows": 1,
+      "citations": 2,
+      "natural_text": "最後寫入者（新版）",
+      "bfs_source": "新版",
+      "fact_states": {
+        "old": "已被取代",
+        "new": "有效"
+      },
+      "edge_distinguishes_versions": false
+    },
+    "matches_expected": true,
+    "unexpected_findings": []
+  },
+  "S4": {
+    "current": {
+      "first_run": {
+        "matched": 2,
+        "appended": 2,
+        "skipped_existing": 0,
+        "skipped_illegal": 0,
+        "skipped_no_date": 0
+      },
+      "second_run": {
+        "matched": 2,
+        "appended": 0,
+        "skipped_existing": 2,
+        "skipped_illegal": 0,
+        "skipped_no_date": 0
+      },
+      "per_fact": {
+        "LAW-A:v1:僱主": {
+          "events": 3,
+          "cached": "已被取代",
+          "replayed": "已被取代",
+          "state_as_of": {
+            "2025-12-08": "有效",
+            "2025-12-09": "已被取代"
+          }
+        },
+        "LAW-A:v1:工會": {
+          "events": 3,
+          "cached": "已被取代",
+          "replayed": "已被取代",
+          "state_as_of": {
+            "2025-12-08": "有效",
+            "2025-12-09": "已被取代"
+          }
+        },
+        "LAW-A:v2:學校": {
+          "events": 2,
+          "cached": "有效",
+          "replayed": "有效",
+          "state_as_of": {
+            "2025-12-08": null,
+            "2025-12-09": "有效"
+          }
+        },
+        "LAW-A:v2:醫院": {
+          "events": 2,
+          "cached": "有效",
+          "replayed": "有效",
+          "state_as_of": {
+            "2025-12-08": null,
+            "2025-12-09": "有效"
+          }
+        },
+        "LAW-B:v1:銀行": {
+          "events": 2,
+          "cached": "有效",
+          "replayed": "有效",
+          "state_as_of": {
+            "2025-12-08": "有效",
+            "2025-12-09": "有效"
+          }
+        }
+      },
+      "naive_match_without_law_id_count": 3
+    },
+    "proposal": {
+      "linkage": "link_new_version_supersedes（以 law_id＋article_no＋version_id 精確比對）"
+    },
+    "expected": {
+      "first_appended": 2,
+      "second_appended": 0,
+      "old_facts": "3 事件／已被取代",
+      "others": "2 事件／有效",
+      "no_drift": true
+    },
+    "matches_expected": true,
+    "unexpected_findings": []
+  },
+  "S5": {
+    "current": {
+      "embedding_dim": 1024,
+      "timings_ms": {
+        "no_column@k80": {
+          "n": 40,
+          "median_ms": 12.28,
+          "p95_ms": 24.374,
+          "min_ms": 8.407,
+          "max_ms": 43.826
+        },
+        "properties_map@k80": {
+          "n": 40,
+          "median_ms": 13.771,
+          "p95_ms": 17.716,
+          "min_ms": 9.625,
+          "max_ms": 40.111
+        },
+        "dot_property@k80": {
+          "n": 40,
+          "median_ms": 8.546,
+          "p95_ms": 19.551,
+          "min_ms": 7.016,
+          "max_ms": 33.995
+        },
+        "map_with_events_json@k80": {
+          "n": 40,
+          "median_ms": 13.98,
+          "p95_ms": 18.683,
+          "min_ms": 10.477,
+          "max_ms": 33.138
+        },
+        "no_column@k160": {
+          "n": 40,
+          "median_ms": 10.578,
+          "p95_ms": 17.512,
+          "min_ms": 9.542,
+          "max_ms": 20.591
+        },
+        "properties_map@k160": {
+          "n": 40,
+          "median_ms": 13.381,
+          "p95_ms": 16.343,
+          "min_ms": 11.58,
+          "max_ms": 35.142
+        },
+        "dot_property@k160": {
+          "n": 40,
+          "median_ms": 10.78,
+          "p95_ms": 15.047,
+          "min_ms": 9.657,
+          "max_ms": 21.376
+        },
+        "map_with_events_json@k160": {
+          "n": 40,
+          "median_ms": 17.308,
+          "p95_ms": 21.625,
+          "min_ms": 15.658,
+          "max_ms": 30.773
+        },
+        "production_vector_search_facts@top_k20": {
+          "n": 40,
+          "median_ms": 16.115,
+          "p95_ms": 29.283,
+          "min_ms": 11.859,
+          "max_ms": 32.396
+        },
+        "production_vector_search_facts@top_k40": {
+          "n": 40,
+          "median_ms": 18.943,
+          "p95_ms": 25.753,
+          "min_ms": 16.118,
+          "max_ms": 37.233
+        },
+        "filter_as_of_then_dedupe@160_candidates": {
+          "n": 40,
+          "median_ms": 0.415,
+          "p95_ms": 0.814,
+          "min_ms": 0.339,
+          "max_ms": 0.824
+        }
+      },
+      "row_counts": {
+        "no_column@k80": 80,
+        "properties_map@k80": 80,
+        "dot_property@k80": 80,
+        "map_with_events_json@k80": 80,
+        "no_column@k160": 160,
+        "properties_map@k160": 160,
+        "dot_property@k160": 160,
+        "map_with_events_json@k160": 160,
+        "production_vector_search_facts@top_k20": 20,
+        "production_vector_search_facts@top_k40": 40
+      },
+      "kept_after_filter_160": 160
+    },
+    "proposal": {
+      "dot_vs_map_when_key_exists": {
+        "k80": {
+          "dot_property_minus_properties_map_median_ms": -5.225,
+          "properties_map_minus_no_column_median_ms": 1.491,
+          "dot_property_cheaper": true
+        },
+        "k160": {
+          "dot_property_minus_properties_map_median_ms": -2.601,
+          "properties_map_minus_no_column_median_ms": 2.803,
+          "dot_property_cheaper": true
+        }
+      },
+      "notification_details": {
+        "no_column@k80": [],
+        "properties_map@k80": [],
+        "dot_property@k80": [],
+        "map_with_events_json@k80": [],
+        "no_column@k160": [],
+        "properties_map@k160": [],
+        "dot_property@k160": [],
+        "map_with_events_json@k160": []
+      }
+    },
+    "expected": {
+      "fact_count": 17000,
+      "stateful_count": 1800,
+      "candidate_rows": "80／160",
+      "embedding_dim": 1024,
+      "no_lifecycle_state_unknown_key_warning_when_key_exists": true,
+      "claim_to_test": "報告258 §10『L4 後可改回較便宜寫法』是否成立（dot_property_cheaper）"
+    },
+    "matches_expected": true,
+    "unexpected_findings": []
+  },
+  "summary": {
+    "scenarios": {
+      "S1": true,
+      "S2": true,
+      "S3": true,
+      "S4": true,
+      "S5": true
+    },
+    "all_match": true
+  },
+  "status": "completed",
+  "w0": {
+    "baseline_expected": "2026-10-02T11:09:32.79429649Z",
+    "kg4_start": {
+      "status": "running",
+      "started_at": "2026-10-02T11:09:32.79429649Z"
+    },
+    "kg4_end": {
+      "status": "running",
+      "started_at": "2026-10-02T11:09:32.79429649Z"
+    },
+    "kg4_unchanged": true,
+    "container_args": {
+      "name": "kg2-throwaway-neo4j",
+      "image": "neo4j:5.26-enterprise",
+      "ports": [
+        27474,
+        27687
+      ],
+      "memory": "3g",
+      "volume": false,
+      "bind_mount": false,
+      "pull": false
+    }
+  },
+  "w5": {
+    "teardown": {
+      "present_before": [
+        "kg2-throwaway-neo4j"
+      ],
+      "stop_exit_code": 0,
+      "rm_exit_code": 0,
+      "present_after": []
+    },
+    "temp_absent_after": true,
+    "kg4_unchanged": true
+  }
+}

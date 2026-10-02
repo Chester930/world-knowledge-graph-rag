@@ -111,4 +111,55 @@ def is_retrievable_as_of(result: AsOfResult, retrievable: frozenset[str | None] 
 
 ## 11. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成，將以 SendMessage 派給實作對話。KG#4 仍無任何寫入核准；本任務不涉及 KG#4。
+✅ **L2′ 已於 2026-10-02 由規劃對話獨立驗證通過**（實作者＝實作對話「fact-rag vector search implementation」，commit `15efacf`；程式與測試紀錄見[報告261](261_L2補驗程式與驗證腳本執行紀錄.md)；原始證據 `data/analysis/disposable_lifecycle_l2_validation_20261002.json`）。**本任務全程未連 KG#4、未碰 `kg2-neo4j`；KG#4 仍無任何寫入核准。**
+
+### 11.1 驗證摘要
+
+1. **範圍**：`git diff 8dfd8e2..HEAD` 只有實作者自己的 7 個檔案；`services/relation_lifecycle.py` **只新增 53 行、零刪除**（`AsOfResult`、`AS_OF_STATUSES`、`state_as_of`、`is_retrievable_as_of`）；`services/` 內仍只有 `law_version_events.py` 真正匯入它，零接線不變。
+2. **閘門讀碼**：沿用已驗證的 P3 閘門與容器函式；自訂新基準 `2026-10-02T11:09:32.79429649Z`；容器 `kg2-throwaway-neo4j`（埠 27474／27687、3 GB、**不掛載任何磁碟區**）；腳本不含 `17990`／`kg2_neo4j_data`／`docker pull`；`--mount` 只出現在說明文字。實作者把閘門的「磁碟區前綴檢查」改為「斷言容器 argv 完全不含 `-v`／`--mount`／`kg2_neo4j_data`」——更嚴格（容器本來就不用磁碟區），我接受。
+3. **第一次實跑（只當「已知腳本缺陷」記錄，不採用）**：S2／S3／S4 符合預期；**S1** 的探針查詢含 `node.fixture_id`，而 S1 用 production merge 建的 Fact 沒有此屬性，每個探針固定多 1 個與 `lifecycle_state` 無關的 `UnknownPropertyKeyWarning`，被誤判為「通知未消失」；**S5** 用 16 維向量，量不到物化 1024 維 `fact_embedding` 的成本。已請實作者修（S1 去掉 `fixture_id` 並改以通知描述指名 `lifecycle_state` 才計；S5 單獨改 1024 維）。
+4. **第二次實跑（採用）**：**S1–S5 全部 `matches_expected＝true`**；容器 `stop`／`rm` exit code 均 0，拆除後精確名稱與磁碟區皆無殘留；`kg2-neo4j` StartedAt 前後皆為新基準、`kg4_unchanged＝true`。
+5. 全量 pytest **2064 passed**（2007＋57）、節點卡 0 警告、`.env` 敏感值對 8 個檔（含輸出 JSON）0 命中、JSON 無連線憑證樣式。（全量測試這次跑了 6 分鐘，先前約 1 分鐘；新增的 57 個測試合計 0.58 秒，慢的是機器當時負載，不是新測試。）
+
+### 11.2 場景結果（〔事實〕；Neo4j 5.26 Enterprise、3 GB、全合成資料）
+
+| 場景 | 預期 | 結果 |
+| --- | --- | --- |
+| **S1 L1 真實行為** | 屬性鍵不存在時 `node.lifecycle_state` 有 UnknownPropertyKey 警告、`properties(node)[…]` 無；存在後皆無；trace 顯示正確 | ✅ 屬性鍵不存在：`node.lifecycle_state` **恰 1 個 `lifecycle_state` 警告**，`properties(node)[…]` 與 production `vector_search_facts` **0 個**；屬性鍵存在後**全部 0 個**；回傳值 `候選／有效／已被取代／None` 正確；`build_retrieval_trace` 顯示「候選／有效／已被取代／尚未處理」 |
+| **S2 `state_as_of` 先過濾後去重** | 現行去重留下舊版、漏掉現行版；過濾後依 `as_of` 正確 | ✅ 現行 `vector_search_facts(top_k=5)` 回 `[B,D,E]`（**留下已被取代的 B、漏掉現行 C**）；`as_of=2026-10-02` → `[C,D,E]`、`2024-01-01` → `[B,D,E]`、`2027-01-01` → `[A,D,E]`；A（所有事件＝施行日 2027-01-01）在今日判為 `not_yet_effective`，D（無事件）判為 `no_events` 仍可檢索 |
+| **S3 BFS 邊來源混合** | 一條邊、兩筆引用、`natural_text` 為後寫者 | ✅ 邊 1 條；`citations_json` 含新舊兩個來源；`natural_text`＝新版措辭；`bfs_query` 回傳單筆、帶新版來源；舊版 Fact 已被取代而邊仍呈現（**邊無法區分版本**；`SVOTriple` 無版本欄位） |
+| **S4 條文層連動** | 舊版 2 個 Fact 各追加事件、冪等、無漂移 | ✅ 第一次追加 2、**第二次 0**；舊版 Fact 3 事件／已被取代、新版與他法 2 事件／有效；事件重播＝快取；`state_as_of` 取代日前後各為有效／已被取代。**附帶發現**：只用「條號＋版本」比對（不含法規識別）會誤抓另一部法規的同號條文（3 筆 vs 正確 2 筆） |
+| **S5 規模與耗時**（17,000 Fact，**1024 維**，1,800 帶狀態） | 通知無；耗時差距量化 | ✅ 見下表；屬性鍵存在時無 UnknownPropertyKey 通知 |
+
+**S5 耗時（中位數 ms；候選 80／160；各 40 次、先暖機；單一臨時容器，雜訊明顯，僅供方向參考）**
+
+| 查詢 | 候選 80 | 候選 160 |
+| --- | --- | --- |
+| 不取該欄位（基準） | 12.3 | 10.6 |
+| `node.lifecycle_state` | 8.5 | 10.8 |
+| `properties(node)['lifecycle_state']`（L1 現行） | 13.8（**+1.5**） | 13.4（**+2.8**） |
+| 同上＋`lifecycle_events_json` | 14.0 | 17.3（**+6.7**） |
+
+`production vector_search_facts` 中位 16.1 ms（top_k=20）／18.9 ms（top_k=40）；`filter_as_of_then_dedupe`（160 候選）**0.42 ms**。
+
+### 11.3 發現與對設計的影響（〔推論〕，供 L3′／L4 設計）
+
+1. **L1 的假設在真實資料庫成立**：`node.lifecycle_state` 的 `UnknownPropertyKey` 警告只在屬性鍵尚不存在時發生，**L4 寫入第一筆狀態後就消失**，屆時可把 L1 的 `properties(node)[…]` 改回 `node.lifecycle_state`（省約 1.5–3 ms／次）。
+2. **檢索端過濾不要每次解析事件 JSON**：連事件 JSON 一起取回，160 候選時再多約 +4 ms（17.3 vs 13.4），且每筆都要 `json.loads`＋重播。建議 L4 在 Fact 上**與 `lifecycle_state` 同樣快取**衍生的 `effective_from`／`effective_to`（或 `state_as_of` 所需的最小欄位），讀取端只比對純量；事件 JSON 仍是真相來源、以稽核腳本核對漂移。
+3. **BFS 邊無法區分版本**（S3）：納入舊版條文後，邊會同時背負新舊來源、`natural_text` 只留後寫者。第一階段維持「檢索評測以 Fact 向量檢索為主、BFS 只標示」；L3′ 要評估是否讓 BFS 改走 Fact 層或在邊上依版本拆分。
+4. **條文連動的識別鍵必須含法規識別**（S4）：（法規識別, 條號, 版本）；KG#4 的法規識別可由 `Document.source` 的 pcode 前綴取得（報告257 §3-3）。
+5. **`state_as_of` 的三種「沒有狀態」語意在真實 Neo4j 上行為正確**：舊資料（`no_events`）仍可檢索、尚未生效不可檢索、時光回溯可行——報告257 G1 的更正設計成立。
+
+### 11.4 限制與誠實揭露
+
+- **全合成資料**；S1–S4 用 16 維 one-hot 向量（避免實體去重誤合併合成實體），僅 S5 用 1024 維；容器僅 3 GB、單一 Neo4j 5.26 Enterprise。
+- `filter_as_of_then_dedupe`、連動 Cypher、事件追加都是**驗證腳本內的原型**，不是 production 程式；S3 的 `natural_text` 由腳本化 LLM 提供。
+- S5 是**單次、單一容器**的量測，中位數互相交錯（例如候選 80 時 `node.lifecycle_state` 比不取欄位還快），**只能看方向，不能看精確毫秒**；與先前在 KG#4 的實測（`properties(node)` +2.7／+6.1 ms）方向一致、幅度略小。
+- 全量 pytest 當次因機器負載較慢，非本任務造成。
+- **不涵蓋**：寫入 KG#4、正式 W1／W3／R2／R3 實作、BFS 標示、試點 KG（L3′）、`effective_note` 解析（D4）。
+
+### 11.5 待辦與待使用者裁示
+
+1. **小待辦**（實作者提出）：`services/relation_lifecycle.py` 模組開頭 docstring 仍寫「不比較日期」，而 `state_as_of` 首次以 ISO 字串比較日期——建議同步修正 docstring（純文字，可交實作對話一併做）。
+2. **下一階段 L3′**（試點 KG）仍待 **D3**（collector 哪個 snapshot 為準）與你同意；L3′ 需要另起專用容器長期存放、抽取舊版法規（本機 Ollama 狀態在 Docker／WSL 重啟後未知，需先確認）。
+3. **L4 之前**（對 KG#4 寫入與檢索過濾）須再備份＋你逐項同意，且依 §11.3-2 先決定衍生欄位設計。
