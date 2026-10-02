@@ -7,6 +7,10 @@
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-02（報告252）：使用者同意採用新基準；**重啟後 KG#4 指紋複驗通過**；已派「回填向量重算數估算」
+
+使用者「同意建議，繼續」：①採用新基準 `kg2-neo4j` StartedAt＝**`2026-10-02T11:09:32.79429649Z`**；②規劃對話以 `ReadOnlyRunner` 做重啟後唯讀指紋（17 條查詢、7.8 秒）：**與備份前十項指紋逐項相同**（總數 57,451／137,873／16,826／12,296、標籤、關係型別、16 個索引全 `ONLINE`、實體名稱／Fact／實體邊三個摘要雜湊、三種向量統計），證據 `data/analysis/kg4_fingerprint_after_docker_restart_20261002.json`（只含聚合數字與雜湊）；③寫成[報告252](docs/報告/252_下一階段任務規劃_回填向量重算數估算_唯讀_交Claude實作對話.md)（純估算、對 KG#4 唯讀、不呼叫 embedding provider），以 SendMessage 派給實作對話「fact-rag vector search implementation」，完成後它直接回報規劃對話；新報告自 **253** 起。**n8n／dify 仍 Exited（使用者自行啟動）。KG#4 仍無任何寫入核准；G4 須再備份＋逐項同意。**
+
 ## 2026-10-02（報告250 §10）：**G3 已實作並由規劃對話獨立驗證通過**（`46a80c9`；pytest 1936 passed；AST 對照＋4 萬次隨機等價 0 不一致；零接線）。⚠️ 驗證時發現 **Docker 整體重啟**：`kg2-neo4j` 新 StartedAt＝**`2026-10-02T11:09:32.79429649Z`**（舊基準 `09:14:47…` 失效，新腳本須改用新基準）；n8n／dify 目前 Exited；KG#4 重啟後指紋尚未複驗。詳見[報告250 §10](docs/報告/250_下一階段任務規劃_G3重同步方案B正式模組化_交Claude實作對話.md)。下一步待使用者確認後：唯讀指紋複驗 → 回填向量重算數估算 → G4（需再備份＋逐項同意）。
 
 ## 2026-10-02（報告250）：**G3 任務書已寫成，尚未派工**（已被上一條取代）——[報告250](docs/報告/250_下一階段任務規劃_G3重同步方案B正式模組化_交Claude實作對話.md)
