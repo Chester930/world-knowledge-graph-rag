@@ -15,6 +15,10 @@
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-02（報告258 §10）：**L1 已實作並由規劃對話獨立驗證通過**（`108fdd2`；pytest 2007 passed；差分測試旗標關閉 0 不一致；KG#4 唯讀實測語法取捨）
+
+實作對話完成 L1：`TRACE_SEMANTIC_MARKS` 旗標下，檢索 trace 的 fact `semantic_marks` 末尾多一個 `lifecycle_state`（目前全為「尚未處理」）；`vector_search_facts` 兩處 `RETURN` 以 `properties(node)['lifecycle_state']` 多帶該屬性。**不寫入、不過濾、不改 prompt／API；`relation_lifecycle` 仍零接線。** 我對 KG#4 **唯讀實測四種取值語法**：`node.lifecycle_state`／`node['…']` 會每次查詢發 `UnknownPropertyKeyWarning`（耗時≈基準）；`properties(node)[…]` 無通知但每次多 +2.7（80 候選）／+6.1（160 候選）ms（物化整個屬性 map）→ **裁定接受 `properties(node)`**，待 L4 後資料庫有該屬性鍵再考慮改回 `node.lifecycle_state`。改了一個既有測試預期（鎖鍵順序的完全相等，多一鍵必改，我同意）。限制：未端到端實跑向量索引 `CALL`（唯讀守衛不放行、不放寬）。**下一步（待使用者裁示）**：L2（拋棄式 Neo4j 虛構資料驗證 W1／W3／R2／R3／`state_as_of`，需新基準閘門與起臨時容器許可）；D3（試點多版本資料口徑）仍待使用者提供。報告下一編號 **260**。KG#4 仍無寫入核准。
+
 ## 2026-10-02（報告258）：使用者同意（採納報告257 建議）；**已派 L1「檢索 trace 顯示 Fact 生命週期狀態」給實作對話**
 
 使用者「同意」＝同意做 **L1**，並採納報告257 §8 對 D1（需要時間感知檢索，先以試點驗證）／D5（允許另起專用試點容器）／D6（可檢索集合初始值）的建議；**D3（試點多版本資料口徑／snapshot 權威）待使用者提供、D4（尚未施行標示）排在 L2 之後**。[報告258](docs/報告/258_下一階段任務規劃_L1檢索trace顯示生命週期狀態_交Claude實作對話.md)：在既有 `TRACE_SEMANTIC_MARKS` 旗標下，fact 的 `semantic_marks` 多一個 `lifecycle_state`（目前全為「尚未處理」）；`vector_search_facts` 兩處 `RETURN` 多帶該屬性（以不觸發 Neo4j 未知屬性通知的語法）；**不寫入、不過濾、不改 prompt／API**；`services/relation_lifecycle.py` 仍零接線。實作對話受其使用者規則限制（不連 KG#4／docker／.env），故 Cypher 以假 driver 測試，**真實行為由規劃對話對 KG#4 唯讀驗證**。實作者回報後我獨立驗證；新報告自 **259** 起（實作者）、規劃對話下一編號 **260**。KG#4 仍無任何寫入核准。

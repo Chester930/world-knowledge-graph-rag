@@ -99,4 +99,24 @@
 
 ## 10. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成，將以 SendMessage 派給實作對話「fact-rag vector search implementation」。KG#4 仍無任何寫入核准。
+✅ **L1 已於 2026-10-02 由規劃對話獨立驗證通過**（實作者＝實作對話「fact-rag vector search implementation」，commit `108fdd2`；執行紀錄見[報告259](259_L1檢索trace顯示生命週期狀態執行紀錄.md)）。
+
+**規劃對話驗證摘要**：
+1. **範圍**：`git diff d37d47e..HEAD` 只有 `services/semantic_marks.py`（新增 `LIFECYCLE_STATES`＋`mark_lifecycle_state`）、`services/svo_service.py`（兩處 `RETURN`＋docstring）、`services/context/telemetry.py`（fact 的 `semantic_marks` 末尾 4 行）、新增測試 `tests/services/test_trace_lifecycle_state.py`（34 個）、改一個既有測試預期、報告259＋索引＋HANDOVER；`relation_lifecycle.py`、`routers/`、`core/`、既有 `scripts/analysis/*` 零變動。
+2. **讀碼**：全部與 §4 規格相符；`mark_lifecycle_state` 對 `None`／空白→「尚未處理」、六個核心狀態→原樣（去空白）、其他→「未知」。
+3. **接受實作者改的既有測試**：`test_marks_values_and_edge_cases` 本來就對 fact 的 `semantic_marks` 做完全相等並鎖鍵順序，多一鍵必然要改；差異只有 `lifecycle_state: PENDING`（沿用報告225 的做法）。這是§2-2 沒列的例外，**我同意**，已寫入報告259 §5。
+4. **差分測試（我自寫，舊版 `d37d47e` vs 新版 `build_retrieval_trace`，餵凍結評測真實 trace 衍生資料，6 種狀態輸入組合）**：旗標關閉輸出 **0 不一致**；旗標開啟時其他鍵與值 **0 不一致**，`lifecycle_state` 恆為 `semantic_marks` 的最後一鍵。
+5. **KG#4 唯讀實測（純 MATCH＋READ session；同一套 `assert_read_only`；未放寬守衛；候選數 80／160 各 40 次、四種語法交錯、先暖機）**：四種寫法回傳的其他欄位與基準逐筆相同、`lifecycle_state` 全為 `None`。**〔事實〕語法取捨**：
+
+| 語法 | 通知 | 中位耗時（80／160 候選） | 相對基準 |
+| --- | --- | --- | --- |
+| A　基準（不取該欄位） | 無 | 6.2／9.3 ms | — |
+| B　`node.lifecycle_state` | **`UnknownPropertyKeyWarning`（每次查詢）** | 6.3／9.6 ms | +0.1／+0.3 ms |
+| C　`properties(node)['lifecycle_state']`（**實作者採用**） | 無 | 8.9／15.4 ms | **+2.7／+6.1 ms** |
+| D　`node['lifecycle_state']` | **`UnknownPropertyKeyWarning`（每次查詢）** | 6.5／10.3 ms | +0.3／+1.0 ms |
+
+   **裁定：接受 C。** 理由：①實作者「`node.lifecycle_state` 會發通知」的推論**經實測成立**，且 D 也有同樣通知；②C 每次檢索多約 3–6 毫秒（來自物化整個屬性 map，含 1024 維向量），相對於整個問答流程（凍結評測每題數分鐘，主要是本機 LLM 生成）可忽略；③C 避免每次查詢一條 WARNING 通知（driver 預設會記進日誌）。**後續**：等 L4 之後資料庫裡已有 `lifecycle_state` 屬性鍵，通知就不再發生，屆時可改回 `node.lifecycle_state` 省掉這點成本（記為待辦，不是現在要做的事）。
+6. **結構檢查（我自己 grep）**：`services/`、`routers/`、`core/`、`repositories/`、`models/`、`main.py` 內 `relation_lifecycle` 僅被既有的 `law_version_events.py` 匯入（`semantic_marks.py` 只在註解提到）；`lifecycle_events_json`、`SET … lifecycle_state`、檢索路徑使用 `DEFAULT_RETRIEVABLE_STATES` 皆**無**。
+7. 全量 pytest **2007 passed**（1973＋34）、節點卡 0 警告、`.env` 敏感值對 8 個改動檔 0 命中；`kg2-neo4j` StartedAt 前後皆為新基準；KG#4 全程唯讀。
+
+**限制**：我沒有對真實 `CALL db.index.vector.queryNodes` 路徑端到端實跑（唯讀守衛不放行該 `CALL`，我**不放寬守衛**）；以純 MATCH 取等量節點量測「取值語法」的成本與通知，向量索引查詢本身不受此欄位影響，但**完整端到端耗時未量**。真實 trace 的差分測試只用 2 筆凍結評測紀錄衍生的資料。**KG#4 仍無任何寫入核准。**
