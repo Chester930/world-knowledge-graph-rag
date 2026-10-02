@@ -1,0 +1,406 @@
+{
+  "port": 17990,
+  "totals": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "labels": [
+    {
+      "label": "Chunk",
+      "c": 6611
+    },
+    {
+      "label": "Document",
+      "c": 128
+    },
+    {
+      "label": "Entity",
+      "c": 18843
+    },
+    {
+      "label": "Fact",
+      "c": 25247
+    },
+    {
+      "label": "Fact_236903cf_055a_40a8_8923_b9d06601f3b7",
+      "c": 16826
+    },
+    {
+      "label": "Fact_76bc98ff_2cbd_447e_a087_7f2df6898655",
+      "c": 8421
+    },
+    {
+      "label": "KnowledgeGraph",
+      "c": 2
+    },
+    {
+      "label": "LawArticle",
+      "c": 6606
+    },
+    {
+      "label": "Sentence",
+      "c": 13
+    },
+    {
+      "label": "Sentence_236903cf_055a_40a8_8923_b9d06601f3b7",
+      "c": 13
+    },
+    {
+      "label": "_EmbeddingMeta",
+      "c": 1
+    }
+  ],
+  "rel_types": [
+    {
+      "t": "ANTONYM",
+      "c": 2
+    },
+    {
+      "t": "AT_LOCATION",
+      "c": 7
+    },
+    {
+      "t": "CAPABLE_OF",
+      "c": 171
+    },
+    {
+      "t": "CAUSES",
+      "c": 84
+    },
+    {
+      "t": "CAUSES_DESIRE",
+      "c": 15
+    },
+    {
+      "t": "CREATED_BY",
+      "c": 26
+    },
+    {
+      "t": "DEFINED_AS",
+      "c": 85
+    },
+    {
+      "t": "DERIVED_FROM",
+      "c": 15
+    },
+    {
+      "t": "DESIRES",
+      "c": 39
+    },
+    {
+      "t": "DISTINCT_FROM",
+      "c": 17
+    },
+    {
+      "t": "HAS_A",
+      "c": 4
+    },
+    {
+      "t": "HAS_CONTEXT",
+      "c": 1
+    },
+    {
+      "t": "HAS_ENTITY",
+      "c": 34730
+    },
+    {
+      "t": "HAS_FIRST_SUBEVENT",
+      "c": 3
+    },
+    {
+      "t": "HAS_LAST_SUBEVENT",
+      "c": 42
+    },
+    {
+      "t": "HAS_OBJECT",
+      "c": 25247
+    },
+    {
+      "t": "HAS_PREREQUISITE",
+      "c": 533
+    },
+    {
+      "t": "HAS_PROPERTY",
+      "c": 93
+    },
+    {
+      "t": "HAS_SUBEVENT",
+      "c": 2
+    },
+    {
+      "t": "HAS_SUBJECT",
+      "c": 25246
+    },
+    {
+      "t": "IS_A",
+      "c": 24
+    },
+    {
+      "t": "LOCATED_NEAR",
+      "c": 15
+    },
+    {
+      "t": "MADE_OF",
+      "c": 7
+    },
+    {
+      "t": "MANNER_OF",
+      "c": 23
+    },
+    {
+      "t": "MOTIVATED_BY_GOAL",
+      "c": 402
+    },
+    {
+      "t": "OBSTRUCTED_BY",
+      "c": 170
+    },
+    {
+      "t": "PART_OF",
+      "c": 6618
+    },
+    {
+      "t": "RECEIVES_ACTION",
+      "c": 240
+    },
+    {
+      "t": "RELATED_TO",
+      "c": 18321
+    },
+    {
+      "t": "SIMILAR_TO",
+      "c": 1
+    },
+    {
+      "t": "SUPPORTED_BY",
+      "c": 25247
+    },
+    {
+      "t": "USED_FOR",
+      "c": 443
+    }
+  ],
+  "indexes": [
+    {
+      "name": "chunk_embedding_vector",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Chunk"
+      ],
+      "properties": [
+        "embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "concept_kg_id",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ConceptNode"
+      ],
+      "properties": [
+        "kg_id"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "concept_q_vector",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "ConceptNode"
+      ],
+      "properties": [
+        "q_vector"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "entity_kg_id",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Entity"
+      ],
+      "properties": [
+        "kg_id"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "entity_kg_name_unique",
+      "type": "RANGE",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Entity"
+      ],
+      "properties": [
+        "kg_id",
+        "name"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "entity_name_fulltext",
+      "type": "FULLTEXT",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Entity"
+      ],
+      "properties": [
+        "name"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "entity_name_vector",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Entity"
+      ],
+      "properties": [
+        "name_embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "fact_embedding_vector_236903cf_055a_40a8_8923_b9d06601f3b7",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Fact_236903cf_055a_40a8_8923_b9d06601f3b7"
+      ],
+      "properties": [
+        "fact_embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "fact_embedding_vector_76bc98ff_2cbd_447e_a087_7f2df6898655",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Fact_76bc98ff_2cbd_447e_a087_7f2df6898655"
+      ],
+      "properties": [
+        "fact_embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "fact_embedding_vector_99a25aca_5e8c_4c4f_aad5_060c818e82fe",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Fact_99a25aca_5e8c_4c4f_aad5_060c818e82fe"
+      ],
+      "properties": [
+        "fact_embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "fact_embedding_vector_a53203ab_b982_4c2d_bb7d_c05aeebc5993",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Fact_a53203ab_b982_4c2d_bb7d_c05aeebc5993"
+      ],
+      "properties": [
+        "fact_embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "fact_embedding_vector_c15949bf_cf96_46ad_90a2_a8579d7b20b4",
+      "type": "VECTOR",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Fact_c15949bf_cf96_46ad_90a2_a8579d7b20b4"
+      ],
+      "properties": [
+        "fact_embedding"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "fact_text_fulltext_236903cf_055a_40a8_8923_b9d06601f3b7",
+      "type": "FULLTEXT",
+      "entityType": "NODE",
+      "labelsOrTypes": [
+        "Fact_236903cf_055a_40a8_8923_b9d06601f3b7"
+      ],
+      "properties": [
+        "fact_text"
+      ],
+      "state": "ONLINE"
+    },
+    {
+      "name": "index_343aff4e",
+      "type": "LOOKUP",
+      "entityType": "NODE",
+      "labelsOrTypes": null,
+      "properties": null,
+      "state": "ONLINE"
+    },
+    {
+      "name": "index_f7700477",
+      "type": "LOOKUP",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": null,
+      "properties": null,
+      "state": "ONLINE"
+    },
+    {
+      "name": "related_to_verb_embedding",
+      "type": "VECTOR",
+      "entityType": "RELATIONSHIP",
+      "labelsOrTypes": [
+        "RELATED_TO"
+      ],
+      "properties": [
+        "verb_embedding"
+      ],
+      "state": "ONLINE"
+    }
+  ],
+  "entity_name_digest": [
+    "76b69b55c17631370968fae8ec17a8da9b0282bad1795eea8a099c738a802222",
+    12296
+  ],
+  "fact_digest": [
+    "0b0437cffefa991f084a84463f5edad68066c1e4c3e425387be3fc31ff16d50a",
+    16826
+  ],
+  "entity_edge_digest": [
+    "3f6c40d67a57c945927e01fc66e3ba098628aeba33269a27b9b0d48be2a8eedb",
+    14021
+  ],
+  "fact_embeddings": {
+    "n": 16826,
+    "dims": 17228800,
+    "s0": -4429588985.0
+  },
+  "entity_embeddings": {
+    "n": 12296,
+    "dims": 12590080
+  },
+  "chunk_embeddings": {
+    "chunks": 3307,
+    "n": 3307
+  },
+  "totals_after": {
+    "nodes": 57451,
+    "rels": 137873,
+    "facts": 16826,
+    "entities": 12296
+  },
+  "totals_stable": true,
+  "queries": 17,
+  "seconds": 11.9
+}
