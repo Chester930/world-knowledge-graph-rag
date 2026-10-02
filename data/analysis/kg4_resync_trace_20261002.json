@@ -1,0 +1,11817 @@
+{
+ "facts_total": 16826,
+ "attribute_updates": {
+  "subject": 1102,
+  "object": 764,
+  "rel_type": 0
+ },
+ "evidence_by_category": {
+  "shrink": {
+   "text:both": 129,
+   "forms:flat_only": 101,
+   "forms:both": 32,
+   "text:new_only": 75,
+   "forms:new_only": 56,
+   "forms:neither": 24,
+   "text:neither": 9
+  },
+  "ALL": {
+   "text:both": 508,
+   "forms:flat_only": 1149,
+   "text:flat_only": 988,
+   "forms:both": 428,
+   "text:neither": 208,
+   "text:new_only": 162,
+   "forms:neither": 160,
+   "forms:new_only": 129
+  },
+  "rewrite": {
+   "text:flat_only": 456,
+   "forms:flat_only": 482,
+   "text:neither": 121,
+   "text:both": 136,
+   "forms:both": 172,
+   "text:new_only": 68,
+   "forms:new_only": 53,
+   "forms:neither": 74
+  },
+  "law_ref_change": {
+   "text:flat_only": 7,
+   "forms:flat_only": 6,
+   "text:new_only": 1,
+   "forms:new_only": 1,
+   "forms:neither": 1
+  },
+  "expand": {
+   "text:flat_only": 406,
+   "forms:flat_only": 426,
+   "text:both": 167,
+   "forms:both": 157,
+   "text:neither": 47,
+   "forms:neither": 37
+  },
+  "critical_token_change": {
+   "text:flat_only": 119,
+   "forms:flat_only": 134,
+   "text:neither": 31,
+   "text:both": 76,
+   "forms:both": 67,
+   "forms:neither": 24,
+   "text:new_only": 18,
+   "forms:new_only": 19
+  }
+ },
+ "entity_alias_conflicts": {
+  "entities_with_other_forms": 1934,
+  "entities_by_conflict_category": {
+   "critical_token_change": 295,
+   "law_ref_change": 22,
+   "shrink": 189,
+   "rewrite": 1080,
+   "expand": 661
+  },
+  "facts_touching_entities_by_category": {
+   "critical_token_change": 2134,
+   "law_ref_change": 179,
+   "shrink": 6343,
+   "rewrite": 7904,
+   "expand": 3160
+  }
+ },
+ "chunk_files_read": 882,
+ "chunk_files_missing": 0,
+ "pair_evidence": [
+  {
+   "side": "subject",
+   "old": "保障勞工權益",
+   "new": "勞工權益",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "加強勞雇關係",
+   "new": "勞雇關係",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "促進社會與經濟發展",
+   "new": "社會及經濟發展",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本法未規定者",
+   "new": "本辦法未規定者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "當事人之一方",
+   "new": "勞資爭議當事人之一方",
+   "text": {
+    "flat_only": 3,
+    "neither": 3
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工退休金事項",
+   "new": "其他有關勞工退休金事項",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中高齡者及高齡者",
+   "new": "中高齡者",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "both": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "人力資源",
+   "new": "人力資源政策",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中高齡者及高齡者就業事項",
+   "new": "中高齡者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業訓練法",
+   "new": "職業訓練",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "留職停薪者",
+   "new": "留職停薪期間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動基金運用局",
+   "new": "之投資運用管理業務，由勞動部勞動基金運用局辦理",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保單位",
+   "new": "同一投保單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "外國技術人力",
+   "new": "外國技術人力之親屬關係",
+   "text": {
+    "flat_only": 33
+   },
+   "forms": {
+    "flat_only": 32,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "安全設計",
+   "new": "安全設計方案",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "事前調查資訊",
+   "new": "規劃階段事前調查資訊",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "施工者",
+   "new": "施工者之一為主施工者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "主施工者",
+   "new": "施工者之一為主施工者",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業安全衛生業務主管",
+   "new": "職業安全衛生業務主管及管理人員",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "高壓氣體作業主管",
+   "new": "高壓氣體供應及消費作業主管",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特殊作業人員",
+   "new": "作業人員",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工健康服務護理人員及勞工健康服務相關人員",
+   "new": "勞工健康服務護理人員、勞工健康服務相關人員及急救人員安全衛生教育訓練為限",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "一般勞工",
+   "new": "同一勞工",
+   "text": {
+    "neither": 1,
+    "new_only": 1,
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "安全衛生在職教育訓練",
+   "new": "安全衛生教育訓練",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他經中央主管機關指定之安全衛生教育訓練",
+   "new": "中央主管機關指定之職業安全衛生教育訓練網路教學課程",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "私立就業服務機構",
+   "new": "私立就業服務機構及其分支機構",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "非營利就業服務機構",
+   "new": "私立就業服務機構及其分支機構",
+   "text": {
+    "flat_only": 2,
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "技能競賽",
+   "new": "分區技能競賽裁判長",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "分區技能競賽",
+   "new": "分區技能競賽裁判長",
+   "text": {
+    "flat_only": 6
+   },
+   "forms": {
+    "flat_only": 6
+   }
+  },
+  {
+   "side": "subject",
+   "old": "全國技能競賽",
+   "new": "全國身心障礙者技能競賽同職類技能競賽",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "全國身心障礙者技能競賽",
+   "new": "全國身心障礙者技能競賽同職類技能競賽",
+   "text": {
+    "flat_only": 8
+   },
+   "forms": {
+    "flat_only": 8
+   }
+  },
+  {
+   "side": "subject",
+   "old": "國際技能競賽",
+   "new": "國際展能節職業技能競賽國手選拔賽",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "國際展能節職業技能競賽",
+   "new": "國際展能節職業技能競賽國手選拔賽",
+   "text": {
+    "flat_only": 7
+   },
+   "forms": {
+    "flat_only": 7
+   }
+  },
+  {
+   "side": "subject",
+   "old": "父母、養父母、繼父母、配偶喪亡者",
+   "new": "祖父母、子女、配偶之父母、配偶之養父母或繼父母喪亡者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "非自願離職者",
+   "new": "非自願性離職中高齡者",
+   "text": {
+    "flat_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項所定人員",
+   "new": "前項人員",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業傷害或罹患職業病之審查",
+   "new": "職業傷害或罹患職業病",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "原投保單位",
+   "new": "同一投保單位",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主或受領勞務者",
+   "new": "雇主或勞工",
+   "text": {
+    "flat_only": 9,
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 9,
+    "neither": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "僱用職業災害勞工補助",
+   "new": "不予發給僱用職業災害勞工補助",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "危險性機械或設備",
+   "new": "危險性機械或設備檢查合格證明",
+   "text": {
+    "flat_only": 1,
+    "neither": 3
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "團體",
+   "new": "定團體",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中央主管機關監理",
+   "new": "中央主管機關",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他有關本保險監理事項",
+   "new": "其他關於本保險基金運用之監理事項",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "局長",
+   "new": "副局長",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "母性健康保護",
+   "new": "母性健康保護期間",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "露天開挖作業",
+   "new": "露天開挖之作業",
+   "text": {
+    "both": 1,
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業災害預防",
+   "new": "其他與職業災害預防相關之事項",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動場所",
+   "new": "勞工提供勞務之場所",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "提供就業服務之機構",
+   "new": "公立就業服務機構",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞資雙方當事人",
+   "new": "勞資爭議經雙方當事人書面同意",
+   "text": {
+    "flat_only": 4,
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 7
+   }
+  },
+  {
+   "side": "subject",
+   "old": "普通事故保險",
+   "new": "普通事故保險費率",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特定高壓氣體",
+   "new": "高壓氣體",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "受僱勞工",
+   "new": "受僱員工或實際從事勞動之人員",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞資爭議",
+   "new": "勞資爭議處理政策",
+   "text": {
+    "neither": 4,
+    "flat_only": 1
+   },
+   "forms": {
+    "neither": 4,
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞方代表",
+   "new": "勞方代表選舉",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特高壓",
+   "new": "連接於特高壓電路",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他經中央主管機關指定之高溫作業",
+   "new": "其他經中央主管機關指定公告者",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主或其代理人",
+   "new": "雇主代理人",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "具有職業安全管理師、職業衛生管理師、職業安全衛生管理員資格",
+   "new": "經職業安全管理師、職業衛生管理師、職業安全衛生管理員教育訓練合格領有結業證書",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "接受雇主委任",
+   "new": "接受雇主或外國人委任",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "室內作業或儲槽等場所",
+   "new": "室內作業或儲槽等場所高度計算方式",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請繼續加保者",
+   "new": "被保險人願繼續加保",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "依本辦法繼續加保者",
+   "new": "不得依本辦法繼續加保",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "僱用安定措施",
+   "new": "被保險人之僱用安定措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "僱用獎助措施",
+   "new": "僱用獎助",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "補助求職交通費用",
+   "new": "得發給求職交通補助金",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工作與生活平衡",
+   "new": "勞工之工作與生活平衡",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保人數及投保薪資統計表",
+   "new": "投保單位、投保人數及投保薪資統計",
+   "text": {
+    "both": 1,
+    "neither": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "拒絕接受健康檢查或提供不實檢體",
+   "new": "曾拒絕接受健康檢查或提供不實檢體",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業訓練補助",
+   "new": "職業訓練",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "身心障礙者職業訓練機構",
+   "new": "身心障礙者職業訓練機構地址變動",
+   "text": {
+    "flat_only": 8,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 8,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "營造業",
+   "new": "營造作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "未成年人",
+   "new": "未成年",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "代表雇主行使管理權或代表雇主處理有關受僱者事務之人",
+   "new": "雇主或代表雇主行使管理權之人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "可燃性氣體",
+   "new": "可燃性氣體低溫儲槽",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氣體",
+   "new": "該氣體",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他經中央主管機關規定之必要文件",
+   "new": "其他經中央主管機關規定之文件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "既有危險性機械",
+   "new": "具有危險性之機械",
+   "text": {
+    "flat_only": 1,
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工安全管理師",
+   "new": "一級單位之職業安全衛生人員",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工安全衛生管理員",
+   "new": "一級單位之職業安全衛生人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "教育訓練課程",
+   "new": "教育訓練",
+   "text": {
+    "both": 1,
+    "new_only": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "求職人或雇主",
+   "new": "雇主、受僱者或求職者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經執行機關同意者",
+   "new": "經執行機關審核同意者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "各學期間假期",
+   "new": "各學期間假期之工作時間規定",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "行為者",
+   "new": "行為人",
+   "text": {
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "壓力",
+   "new": "壓力計",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主所採取母性健康保護",
+   "new": "雇主所採取之母性健康管理措施",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "記錄",
+   "new": "紀錄",
+   "text": {
+    "both": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人及投保單位",
+   "new": "投保單位或被保險人",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "企劃管理組",
+   "new": "企劃管理事項",
+   "text": {
+    "flat_only": 2,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業災害給付組",
+   "new": "職業災害醫療給付",
+   "text": {
+    "flat_only": 10
+   },
+   "forms": {
+    "flat_only": 10
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動關係司",
+   "new": "勞動關係",
+   "text": {
+    "both": 11
+   },
+   "forms": {
+    "flat_only": 11
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動保險司",
+   "new": "勞動保險司掌理事項",
+   "text": {
+    "flat_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動條件及就業平等司",
+   "new": "其他有關勞動條件及就業平等事項",
+   "text": {
+    "flat_only": 1,
+    "both": 9
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 9
+   }
+  },
+  {
+   "side": "subject",
+   "old": "保單價值準備金",
+   "new": "依前項結算之保單價值準備金",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "過負荷防止裝置",
+   "new": "防止超過負荷裝置",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "緊急照明系統",
+   "new": "平常照明系統失效時使用之緊急照明系統",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工程特性",
+   "new": "工程特性實施",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工程規劃安全分析",
+   "new": "工程規劃設計安全分析報告提供予施工者",
+   "text": {
+    "flat_only": 6
+   },
+   "forms": {
+    "flat_only": 6
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申訴案件之申訴人",
+   "new": "申訴人",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業安全衛生管理人員",
+   "new": "一級單位之職業安全衛生人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經中央主管機關發給測驗合格證明，並取得就業服務專業人員證書",
+   "new": "就業服務職類技能檢定合格，經中央主管機關發給技術士證，並取得就業服務專業人員證書",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "國際技能競賽國手選拔賽",
+   "new": "參加全國技能競賽或國手選拔賽時",
+   "text": {
+    "flat_only": 3,
+    "neither": 3
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "家庭暴力被害人",
+   "new": "家庭暴力及性侵害被害人",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他經中央主管機關規定之文件、資料",
+   "new": "其他經中央主管機關規定之文件",
+   "text": {
+    "new_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "new_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "訓練計畫書一式十份",
+   "new": "訓練計畫書",
+   "text": {
+    "both": 10
+   },
+   "forms": {
+    "both": 10
+   }
+  },
+  {
+   "side": "subject",
+   "old": "僱用安定措施諮詢會議",
+   "new": "被保險人之僱用安定措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "營繕工程或建築技術",
+   "new": "營繕工程或建築技術工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "環境保護",
+   "new": "環境保護工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "設立計畫書",
+   "new": "設立計畫書內容",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "法人登記、商業登記或工廠登記等證明文件影本",
+   "new": "雇主身份證、工廠登記、公司登記及商業登記證明文件影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "全民健康保險特約醫院或診所",
+   "new": "緊急傷病至非全民健康保險特約醫院或診所提供的治療",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "扣留求職人或員工財物或收取保證金",
+   "new": "扣留求職人財物或收取推介就業保證金",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "辦理聘僱外國人之申請許可、招募、引進或管理事項，提供不實資料或健康檢查檢體",
+   "new": "接受委任辦理聘僱外國人之申請許可、招募、引進或管理事項，提供不實資料或健康檢查檢體",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "行政院勞工委員會勞工保險局",
+   "new": "行政院勞工委員會勞工保險監理委員會",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工退休金",
+   "new": "退休金",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "爭議行為",
+   "new": "爭議行為期間",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動政策",
+   "new": "勞動教育政策",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "國際組織",
+   "new": "國際非政府組織",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "逾期未繳者",
+   "new": "屆期仍未繳回者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "事業單位單一性別勞工人數",
+   "new": "事業單位勞工人數",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "車輛系營建機械",
+   "new": "車輛機械",
+   "text": {
+    "both": 21
+   },
+   "forms": {
+    "both": 21
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工程規劃設計安全分析報告",
+   "new": "工程規劃設計安全分析報告提供予施工者",
+   "text": {
+    "both": 6
+   },
+   "forms": {
+    "both": 6
+   }
+  },
+  {
+   "side": "subject",
+   "old": "為特定目的舉辦之技能競賽",
+   "new": "全國技能競賽或為特定目的舉辦之技能競賽各職類",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "低收入戶",
+   "new": "中低收入戶",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "諮詢會議",
+   "new": "諮詢會議召開時",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本法施行前已參加勞工保險之勞工",
+   "new": "本法施行前，仍參加勞工保險職業災害保險或就業保險之被保險人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "下列情形之一者",
+   "new": "被保險人有下列情形之一者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "組織工會",
+   "new": "組織之企業工會",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "無一定雇主或自營作業而參加職業工會者",
+   "new": "無一定雇主或自營作業而參加漁會之甲類會員",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "一般傷病補助",
+   "new": "普通傷害補助費",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "地方主管機關應不予受理",
+   "new": "地方主管機關",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "教育訓練課程及時數",
+   "new": "教育訓練",
+   "text": {
+    "both": 5,
+    "new_only": 2
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "從業人員人數",
+   "new": "機構從業人員人數",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "私立就業服務機構或其分支機構",
+   "new": "申請設立私立就業服務機構及其分支機構所需文件",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "文件、資料",
+   "new": "前項文件資料",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "許可證",
+   "new": "許可證影本",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "供應者",
+   "new": "供應",
+   "text": {
+    "both": 9
+   },
+   "forms": {
+    "flat_only": 8,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞動者",
+   "new": "件工勞動者",
+   "text": {
+    "flat_only": 12
+   },
+   "forms": {
+    "flat_only": 12
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本國籍勞工",
+   "new": "本國勞工",
+   "text": {
+    "flat_only": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "受委任工作者",
+   "new": "勞工或受委任工作者個人基本資料",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞資一方",
+   "new": "勞資之一方",
+   "text": {
+    "flat_only": 2,
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "照明燈具",
+   "new": "防爆型照明燈具",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "手推車",
+   "new": "軌道手推車",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "安全衛生費用",
+   "new": "量化編列安全衛生費用",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "該項工作",
+   "new": "從事該項工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經中央主管機關會商中央目的事業主管機關專案同意者",
+   "new": "中央主管機關及中央目的事業主管機關",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經中央主管機關會商中央目的事業主管機關專案同意屬具創新能力之新創事業者",
+   "new": "中央主管機關及中央目的事業主管機關",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "就業保險失業給付",
+   "new": "就業保險失業給付之實施",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "neither": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "積欠工資墊償基金墊償業務",
+   "new": "積欠工資墊償基金之墊償及追償",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "產檢假薪資補助",
+   "new": "陪產檢及陪產假薪資補助審核",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "陪產檢及陪產假薪資補助",
+   "new": "陪產檢及陪產假薪資補助審核",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "育嬰留職停薪薪資補助",
+   "new": "育嬰留職停薪薪資補助審核",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工保險經費收支及帳務管理",
+   "new": "勞工職業災害保險經費收支及帳務管理",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "積欠工資墊償基金經費收支及帳務管理",
+   "new": "積欠工資墊償基金運用之審議、監督及考核",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "製造者或輸入者",
+   "new": "製造者, 輸入者, 供應者, 雇主",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會聯合組織",
+   "new": "工會聯合組織之理事",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "之工會聯合組織",
+   "new": "工會聯合組織之理事",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "協商代表",
+   "new": "協商代表之人數",
+   "text": {
+    "both": 5
+   },
+   "forms": {
+    "both": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工福利及服務制度之研究、規劃及推動",
+   "new": "勞工工作與生活服務制度之研擬規劃及推動",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "競業禁止之期間",
+   "new": "離職後競業禁止之期間",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "高壓氣體製造安全主任",
+   "new": "高壓氣體製造安全作業主管",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業安全衛生組織",
+   "new": "下列職業安全衛生人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "所僱之職業安全衛生人員",
+   "new": "一級單位之職業安全衛生人員",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "new_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業安全衛生委員會",
+   "new": "下列職業安全衛生人員",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "逾期未通知者",
+   "new": "屆期仍未繳回者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "與在中華民國境內設有戶籍之國民結婚",
+   "new": "外國人與在中華民國境內設有戶籍之國民",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中央主管機關或中央目的事業主管機關代表",
+   "new": "經營其他經中央主管機關會商中央目的事業主管機關指定之農、林、牧或養殖漁業產業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "不予核發",
+   "new": "不予受理",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "業者",
+   "new": "失業者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "派遣事業單位與派遣勞工",
+   "new": "派遣事業單位積欠派遣勞工工資",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "補助",
+   "new": "補助項目",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞資爭議雙方當事人",
+   "new": "勞資爭議經雙方當事人書面同意",
+   "text": {
+    "flat_only": 3,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "各企業工會",
+   "new": "該企業之工會",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "年金保險單條款",
+   "new": "勞工退休年金保險單條款",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "公司登記證明、有限合夥登記證明、商業登記證明、工廠登記證明或特許事業許可證等影本",
+   "new": "其公司登記證明、有限合夥登記證明、商業登記證明、旅館業登記證或特許事業許可證等影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞資會議代表",
+   "new": "勞資會議",
+   "text": {
+    "both": 9,
+    "new_only": 3
+   },
+   "forms": {
+    "flat_only": 7,
+    "new_only": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "休假期間",
+   "new": "產假期間",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "裁判長",
+   "new": "分區裁判長",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "為無正當理由",
+   "new": "正當理由",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請人國內金融機構存摺封面影本",
+   "new": "被保險人本人名義之國內金融機構存摺影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "檢查日期",
+   "new": "檢查年月日",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保單位之名稱、地址或通訊地址",
+   "new": "投保單位之名稱、地址或其通訊地址",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "製造者,輸入者或供應者",
+   "new": "製造者, 輸入者, 供應者, 雇主",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工安全衛生之教育訓練及宣導",
+   "new": "職業安全衛生之教育訓練、宣導及輔導",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業災害勞工之職業重建",
+   "new": "職業災害勞工之職業輔導評量",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他與職業災害預防及職業重建有關之事項",
+   "new": "其他有關職業災害預防、職業病防治、職業災害勞工重建與協助職業災害勞工及其家屬之相關事項",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "調解之申請",
+   "new": "請求調解事項",
+   "text": {
+    "both": 4
+   },
+   "forms": {
+    "both": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "下列作業主管",
+   "new": "作業主管",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "計測裝置及控制裝置",
+   "new": "計測裝置、控制裝置等",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "移動",
+   "new": "移動梯",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "調解人",
+   "new": "調解會議",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "團體協約雙方當事人",
+   "new": "團體協約當事人之一方或雙方",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業災害補償政策",
+   "new": "職業災害補償",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "neither": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他經中央主管機關會同中央目的事業主管機關指定者",
+   "new": "經營其他經中央主管機關會商中央目的事業主管機關指定之農、林、牧或養殖漁業產業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "代表雇主行使管理權之人或代表雇主處理有關受僱者事務之人",
+   "new": "雇主或代表雇主行使管理權之人",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "外國技術人力受前條雇主聘僱從事雙語翻譯工作總人數",
+   "new": "外國技術人力受前條雇主聘僱從事廚師及其相關工作總人數",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "甲種職業安全衛生業務主管一人",
+   "new": "職業安全衛生業務主管",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "領有職業安全管理甲級技術士證照",
+   "new": "領有職業安全衛生管理乙級技術士證照",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項利息補貼",
+   "new": "利息補貼",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中央主管機關或勞動檢查機構之抽驗及市場查驗",
+   "new": "中央主管機關或勞動檢查機構",
+   "text": {
+    "new_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "new_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本條例施行前已適用勞動基準法之勞工",
+   "new": "本法施行前，仍參加勞工保險職業災害保險或就業保險之被保險人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "保留之工作年資",
+   "new": "工作年資",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "差別待遇",
+   "new": "差別之待遇",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "延長工作時間之工資",
+   "new": "其延長工作時間之工資",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "學徒關係與技術生、養成工、見習生、建教合作班之學生及其他與技術生性質相類之人",
+   "new": "雇主招收學徒或技術生、養成工、見習生、建教合作班之學生及其他與技術生性質相類之人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氯酸鉀,氯酸鈉,氯酸銨",
+   "new": "過氯酸鉀,過氯酸鈉,過氯酸銨",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "討論事項",
+   "new": "討論事項及決議",
+   "text": {
+    "flat_only": 7
+   },
+   "forms": {
+    "flat_only": 7
+   }
+  },
+  {
+   "side": "subject",
+   "old": "鍋爐操作人員",
+   "new": "小型鍋爐操作人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "全國副裁判長",
+   "new": "全國副裁判長應隨同解聘",
+   "text": {
+    "both": 4
+   },
+   "forms": {
+    "both": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "用人單位規定辦理",
+   "new": "用人單位未規定者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "得予留職停薪",
+   "new": "留職停薪",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "農民保險組",
+   "new": "農民健康保險者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "農民健康保險",
+   "new": "農民健康保險者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "答案卡",
+   "new": "答案卡損壞",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前述情形",
+   "new": "前項情形",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保單位於其所屬勞工入會、到訓之當日通知保險人者",
+   "new": "投保單位非於其所屬勞工入會、到訓之當日通知保險人者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "歇業或轉讓時",
+   "new": "雇方歇業或轉讓",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "虧損或業務緊縮時",
+   "new": "歇業、虧損或業務緊縮者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "業務性質變更，有減少勞工之必要，又無適當工作可供安置時",
+   "new": "業務性質變更，有減少受僱者之必要，又無適當工作可供安置者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項作業",
+   "new": "前項",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業疾病認定",
+   "new": "職業疾病認定結果",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "調解委員會",
+   "new": "調解委員會開會時間",
+   "text": {
+    "flat_only": 6
+   },
+   "forms": {
+    "flat_only": 4,
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氣體設備",
+   "new": "不包括在高壓氣體設備內",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保薪資調整表",
+   "new": "逕行調整之投保薪資",
+   "text": {
+    "flat_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙炔",
+   "new": "(乙炔氣為)",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙烯",
+   "new": "氯乙烯",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "從事仲介外國人至中華民國工作",
+   "new": "經中央主管機關許可籌設之從事仲介本國人至臺灣地區以外工作者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "從事仲介香港或澳門居民、大陸地區人民至臺灣地區工作",
+   "new": "經中央主管機關許可籌設之從事仲介香港或澳門居民、大陸地區人民至臺灣地區工作",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請設立私立就業服務機構及其分支機構者",
+   "new": "申請設立私立就業服務機構及其分支機構所需文件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經中央主管機關許可籌設之從事仲介外國人至中華民國工作",
+   "new": "經中央主管機關許可籌設之從事仲介本國人至臺灣地區以外工作者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項檢查項目",
+   "new": "前項檢查",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "作業環境監測計劃",
+   "new": "作業環境監測",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "new_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "坑內作業場所",
+   "new": "作業場所",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "該職業災害勞工",
+   "new": "職業災害勞工",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業訓練契約",
+   "new": "職業訓練契約內容",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項實績費率實施之辦法",
+   "new": "前項實績費率計算、調整及相關事項之辦法",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "保險效力之停止",
+   "new": "保險效力",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "公告年金保險單條款",
+   "new": "勞工退休年金保險單條款",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "高壓氣體設備",
+   "new": "不包括在高壓氣體設備內",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "提供不實或失效資料",
+   "new": "為虛偽之說明或提供不實資料者",
+   "text": {
+    "flat_only": 1,
+    "neither": 3
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙炔熔接裝置",
+   "new": "氧乙炔熔接裝置",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙炔發生器,導管,吹管等所構成",
+   "new": "乙炔及氧氣容器,導管,吹管構成的設備",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "從業人員名冊",
+   "new": "異動後之從業人員名冊",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "就業服務專業人員證書及其國民身分證正反面影本",
+   "new": "新聘就業服務專業人員證書及其國民身分證正反面影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主所需機型之有效檢定證明",
+   "new": "持有雇主所需機型之有效檢定證明",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "有效體格檢查合格證明",
+   "new": "持有有效體格檢查合格證明",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "搬遷補助金",
+   "new": "申請核發搬遷補助金",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "停訓",
+   "new": "停止辦理訓練業務",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主每月負擔之年金保險費",
+   "new": "前項雇主應負擔之年金保險費",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會會員代表",
+   "new": "工會聯合組織之會員代表",
+   "text": {
+    "flat_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人薪資",
+   "new": "被保險人投保薪資金額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人之薪資",
+   "new": "被保險人投保薪資金額",
+   "text": {
+    "flat_only": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工資各項目計算方式",
+   "new": "工資各項目計算方式明細",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "處理設備",
+   "new": "處理煙火之設備",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "婚生子女",
+   "new": "非婚生子女",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請聘僱許可",
+   "new": "得申請聘僱許可",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "養子女",
+   "new": "子女",
+   "text": {
+    "both": 3,
+    "new_only": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 2,
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工程契約總金額",
+   "new": "營造工程契約總金額",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中央主管機關認為有必要者",
+   "new": "其他經中央主管機關認為有必要者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主, 雇主代理人, 其他勞工",
+   "new": "雇主、雇主代理人、勞工及其他有關人員",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "月提繳工資",
+   "new": "月提繳工資金額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會會員大會",
+   "new": "工會設有會員代表大會者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "調整後之投保薪資",
+   "new": "逕行調整之投保薪資",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "事業單位之勞工",
+   "new": "事業單位全部勞工",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "適掌之採光或照明",
+   "new": "適當之採光照明",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主承建之民間重大經建工程",
+   "new": "雇主承建之符合資格之一之民間重大經建工程",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "無一定雇主之勞工或其他受工作場所負責人指揮或監督從事勞動之人員",
+   "new": "受工作場所負責人指揮或監督從事勞動之人員",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "變更管理",
+   "new": "變更管理程序",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "解召證明文件",
+   "new": "證明書",
+   "text": {
+    "neither": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "neither": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "失業勞工",
+   "new": "作業勞工",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "身分證明文件影本",
+   "new": "身分證明文件",
+   "text": {
+    "neither": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "理事",
+   "new": "置副理事長",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "屬於團體協約當事團體之雇主及勞工",
+   "new": "團體協約簽訂後，加入團體協約當事團體之雇主及勞工",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "理事長",
+   "new": "置副理事長",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "監事會議",
+   "new": "不得為監事會召集人",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "監事會議召集人",
+   "new": "不得為監事會召集人",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "除前款規定者外",
+   "new": "除前列各款規定者外",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "車輛系營建機械作業",
+   "new": "車輛機械",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "缺氧作業",
+   "new": "從事缺氧危險作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "局限空間作業",
+   "new": "缺氧危險或局限空間作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氧乙炔熔接裝置作業",
+   "new": "氧乙炔熔接裝置",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "製造、處置或使用危害性化學品作業",
+   "new": "危害性化學品之製造、處置及使用作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主或其代理人的指示",
+   "new": "雇主代理人",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "僱用期間",
+   "new": "聘僱期間",
+   "text": {
+    "flat_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "與職業訓練有關之設備費",
+   "new": "其他與職業訓練有關之費用",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "繩索",
+   "new": "鋼索",
+   "text": {
+    "flat_only": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "調整後之投保薪資",
+   "new": "依前項規定逥行調整之投保薪資",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "理事會",
+   "new": "工會理事會",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業災害保險費",
+   "new": "同一職業災害保險費率",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "無法達成共識者",
+   "new": "未能協議者",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "人字臂起重桿",
+   "new": "人字臂起重桿組拆作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "吊籠",
+   "new": "吊籠作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人疾病",
+   "new": "被保險人罹患精神疾病",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "屆期未補正者",
+   "new": "屆期未補正或補正未完全者",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "新進勞工工資",
+   "new": "勞工工資",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "相關目的事業主管機關",
+   "new": "目的事業主管機關",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "中央衛生福利主管機關醫院評鑑合格者或大專校院設有醫、護科系者",
+   "new": "勞工健康服務護理人員及勞工健康服務相關人員訓練時，應與中央衛生福利主管機關醫院評鑑合格者或大專校院設有醫、護科系者合辦",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "壓力容器",
+   "new": "小型壓力容器",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "高壓氣體特定設備",
+   "new": "高壓氣體特定設備之操作作業",
+   "text": {
+    "flat_only": 1,
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "學科測試",
+   "new": "學科測試成績",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "術科測試",
+   "new": "但術科測測試題",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "異常氣壓作業",
+   "new": "異常氣壓之工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會理事",
+   "new": "工會常務理事",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其事項",
+   "new": "事項",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請書及給付收據",
+   "new": "失蹤津貼申請書及給付收據",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "國內金融機構存摺影本",
+   "new": "國內金融機構存摺封面影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "不符申請規定，經限期補正，屆期不補正",
+   "new": "不符申請規定經限期補正",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "管制區",
+   "new": "管制通行區",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項津貼發給業務",
+   "new": "前項津貼",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特定項目之健康檢查",
+   "new": "特定對象及特定項目之健康檢查",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "檢查結果之紀錄",
+   "new": "檢查結果",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "延長勞工工作時間",
+   "new": "雇主延長勞工工作時間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "但年金保險契約",
+   "new": "所屬年金保險契約之保險費",
+   "text": {
+    "flat_only": 1,
+    "neither": 5
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "信號燈",
+   "new": "信號",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "設置號誌、標示或柵欄等設施",
+   "new": "前項交通號誌、標示或柵欄等設施",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "不行使其權利",
+   "new": "亦不得行使權利",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "三、可能危害之防止措施",
+   "new": "可能危害之防止設備及措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "營利就業服務機構申請變更後之營業處所之公司登記地址或商業登記地址",
+   "new": "營利就業服務機構申請為營業處所之公司登記地址或商業登記地址，已設有私立就業服務機構者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前款被保險人",
+   "new": "前項被保險人",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項被保險人或投保單位",
+   "new": "投保單位或被保險人",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "提繳之勞工退休金運用收益",
+   "new": "不足之提繳之勞工退休金運用收益",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會會員大會",
+   "new": "經會員大會或會員代表大會議決",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "參加年金保險之申報資料",
+   "new": "投保及收繳年金保險費之資料",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "向工作所在地之公立就業服務機構提出申請",
+   "new": "工作場所所在地之公立就業服務機構",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "內燃機車",
+   "new": "內燃動力車",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工職業災害保險傷病給付",
+   "new": "勞工保險傷病給付",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "專戶內之存款",
+   "new": "前項專戶內之存款",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職場霸凌",
+   "new": "職場霸凌行為",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "情節重大者",
+   "new": "應檢人情節重大者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "杆柱間距",
+   "new": "立柱之間距",
+   "text": {
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "坑內監視工作",
+   "new": "監視性工作",
+   "text": {
+    "neither": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "年金保險內容",
+   "new": "年金保險費",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "new_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "催收",
+   "new": "催收結果",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特許事業許可證",
+   "new": "免辦特許事業許可證者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "聘僱外國人從事營造工作者",
+   "new": "聘僱外國人從事家庭幫傭及家庭看護工作",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "聘僱外國人從事家庭看護工作者",
+   "new": "聘僱外國人從事家庭幫傭及家庭看護工作",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本辦法規定舉辦勞資會議",
+   "new": "已依規定舉辦勞資會議",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "居住處所查詢同意書",
+   "new": "居住處所及租賃事實查詢同意書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "留職停薪事由及期間",
+   "new": "留職停薪期間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他法律有關消滅時效規定",
+   "new": "其他法律有關請求權消滅時效規定",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "洗艙水",
+   "new": "各艙清洗所得之污油水",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "家庭看護工",
+   "new": "家庭看護技術工作",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "已聘僱外國人",
+   "new": "前項受聘僱之外國人",
+   "text": {
+    "flat_only": 1,
+    "neither": 6
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 6
+   }
+  },
+  {
+   "side": "subject",
+   "old": "農、林、牧或養殖漁業工作",
+   "new": "從事農、林、牧或養殖漁業技術工作",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "農、林、牧或養殖漁業技術工作",
+   "new": "從事農、林、牧或養殖漁業技術工作",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "當年度分區技能競賽青年組各區辦理單位",
+   "new": "當年度分區技能競賽青少年組各區辦理單位",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "安全衛生組織",
+   "new": "安全衛生組織、人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "農藥製造工作場所",
+   "new": "火藥類製造工作場所",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "異氰酸甲酯",
+   "new": "二異氰酸二苯甲烷",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "鋼構組配作業",
+   "new": "鋼構組配作業主管",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "仲裁",
+   "new": "仲裁判斷",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "仲裁人",
+   "new": "仲裁委員名冊",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "補休之期限",
+   "new": "前項補休期限",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "甲類製造事業單位",
+   "new": "甲類製造事業單位之製造事業單位",
+   "text": {
+    "flat_only": 7
+   },
+   "forms": {
+    "flat_only": 7
+   }
+  },
+  {
+   "side": "subject",
+   "old": "入出國管理機關及警察機關",
+   "new": "當地主管機關,入出國管理機關及警察機關",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "使用時",
+   "new": "使用道板時",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "農務工作人力配置、督導及教育訓練機制規劃",
+   "new": "工作人力數額與配置、督導及教育訓練機制規劃",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "就業服務專業人員異動申請表",
+   "new": "就業服務專業人員",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "實習機具及設備",
+   "new": "場地,實習機具及設備",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "職業衛生管理師",
+   "new": "職業安全衛生管理員",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氣象、地震、海象、技術研究及指導之工作",
+   "new": "氣象、地震、海象技術人才之培育與訓練及氣象、地震、海象、火山、海嘯等事實鑑定之工作",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "具墜落危險之下列作業",
+   "new": "具倒塌、崩塌危險之下列作業",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人在保險有效期間遭遇",
+   "new": "被保險人於保險有效期間發生傷病事故",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "安全母索",
+   "new": "安全母索之下端",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "補助繩移動之安全帶",
+   "new": "補助繩移動之安全帶應具備補助掛鈎",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "水平安全母索",
+   "new": "安全母索之下端",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保年金保險",
+   "new": "選擇投保年金保險之勞工",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雙方當事人",
+   "new": "勞資爭議雙方當事人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "仲裁人名冊",
+   "new": "仲裁委員名冊",
+   "text": {
+    "flat_only": 1,
+    "new_only": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會會員大會或會員代表大會",
+   "new": "經會員大會或會員代表大會議決",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特定高壓氣體消費事業單位",
+   "new": "前條以外之液化石油氣消費事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "壓縮天然氣",
+   "new": "壓縮天然氣之灌氣容器",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "私立就業服務機構之許可證",
+   "new": "私立就業服務機構",
+   "text": {
+    "both": 1,
+    "new_only": 4
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "監評人員",
+   "new": "監場或監評人員",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項平均月投保薪資",
+   "new": "平均月投保薪資",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "文件或書面",
+   "new": "書面或電子文件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請交付仲裁者",
+   "new": "一方申請交付仲裁者",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "both": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特定液化石油氣消費事業單位",
+   "new": "前條以外之液化石油氣消費事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "該作業",
+   "new": "該項作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "從事作業",
+   "new": "從事監督作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他必要之防護措施",
+   "new": "其他必要之設備及措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "監場人員",
+   "new": "繳交監場人員",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主使勞工於休息日工作",
+   "new": "雇主使勞工於休息日工作之時間",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "父母",
+   "new": "祖父母",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "寄發或遞送保險費繳款單",
+   "new": "保險費繳款單",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特別休假日數",
+   "new": "為計算特別休假日數",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "選手",
+   "new": "選手證",
+   "text": {
+    "flat_only": 9
+   },
+   "forms": {
+    "flat_only": 9
+   }
+  },
+  {
+   "side": "subject",
+   "old": "請領人",
+   "new": "再補辦請領手續",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "預告期間",
+   "new": "各該預告期間",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "請領手續",
+   "new": "再補辦請領手續",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "事業場所",
+   "new": "事業場所外面",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "承受轉換保單時",
+   "new": "承受轉換保單之保險人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "回轉體",
+   "new": "高速回轉體",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "覆網",
+   "new": "覆網有劣化、破損、腐蝕等情況",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "事業單位或承攬人",
+   "new": "前項事業單位或承攬人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "煙火場所",
+   "new": "煙火之處置場所",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主與被看護者間",
+   "new": "雇主或被看護者",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "三親等內之旁系血親",
+   "new": "直系血親或三親等內之旁系血親",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "為曾受該外國人照顧之被看護者本人，有前項規定情形",
+   "new": "與曾受該外國人照顧之被看護者無親屬關係，有前項規定情形",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "許可證、收費項目及金額明細表、就業服務專業人員證書",
+   "new": "未依規定揭示私立就業服務機構許可證、收費項目及金額明細表、就業服務專業人員證書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "鋼索及吊鏈",
+   "new": "鋼索、吊鏈及吊具",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "配線、集電裝置、配電盤、開關及控制裝置",
+   "new": "配線、集電裝置、配電盤、開關及其他機械電氣項目",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "停工日數",
+   "new": "全部停工日數",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "未經公立就業服務機構為失業再認定者",
+   "new": "自行進用未經公立就業服務機構推介之失業者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "以日定報酬者",
+   "new": "以星期定報酬者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工會為爭議事件之當事人者，其會員、理事、監事或會務人員",
+   "new": "雇主團體或雇主為爭議事件之當事人者，其會員、理事、監事、會務人員或其受僱人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "領有執業執照之醫師或助產士",
+   "new": "領有執業執照之醫師",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "自可燃性氣體製造設備",
+   "new": "自可燃性氣體製造設備之高壓氣體設備",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "有母性健康危害之虞之工作",
+   "new": "有母性健康危害之虞之工作項目",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "具資訊傳輸、感應、拍攝、記錄功能之器材及設備",
+   "new": "具資訊傳輸、感應、拍攝、記錄功能之器材及設備等",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他經中央主管機關會商中央目的事業主管機關認定得聘僱前條外國人之機構",
+   "new": "獸醫師之執業機構或其他經中央主管機關會商中央目的事業主管機關認定之機構",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "物料",
+   "new": "材料",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "會員或會員代表",
+   "new": "出席會議之會員或會員代表",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保單位應適用的職業災害保險行業別及費率",
+   "new": "職業災害保險行業別及費率",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "已熔礦物或礦渣之處理",
+   "new": "已熔礦物或礦渣之處理工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人所屬之投保單位",
+   "new": "被保險人所屬投保單位",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "作業前",
+   "new": "作業",
+   "text": {
+    "both": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工退休基金來源",
+   "new": "勞工退休基金",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經其本國主管部門驗證之外國人入國工作費用及工資切結書",
+   "new": "經外國人本國主管部門驗證之外國人入國工作費用及工資切結書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前條之安全衛生工作守則",
+   "new": "適合其需要之安全衛生工作守則",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "出版事業",
+   "new": "出版事業者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "電影業",
+   "new": "電影事業者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "學科測試應檢人",
+   "new": "學科測試進行中應檢人",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "無線、有線及衛星廣播電視業",
+   "new": "無線、有線或衛星廣播電視業者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "鋼材",
+   "new": "使用之鋼材等金屬材料",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "外國人生活照顧服務計畫書",
+   "new": "外國人生活照顧服務計畫書有變更",
+   "text": {
+    "flat_only": 7
+   },
+   "forms": {
+    "both": 7
+   }
+  },
+  {
+   "side": "subject",
+   "old": "外國人招募許可之申請表",
+   "new": "外國人展延聘僱許可之申請表",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "堆積場",
+   "new": "堆積場所",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主、雇主代理人或工作場所負責人",
+   "new": "雇主代理人",
+   "text": {
+    "neither": 3
+   },
+   "forms": {
+    "neither": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "委員會組織、職掌等",
+   "new": "前項委員會組織、職掌等",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "前項醫療給付",
+   "new": "醫療給付",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "金額",
+   "new": "該金額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "故障者",
+   "new": "故障",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "醫療書單",
+   "new": "前項職業傷病醫療書單",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "裁決之申請",
+   "new": "請求裁決之事項",
+   "text": {
+    "flat_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "原領工資",
+   "new": "實領工資",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "採防護措施者",
+   "new": "採取必要防護措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "在試場內使用行動電話、穿戴式裝置或其他具資訊傳輸、感應、拍攝、記錄功能之器材及設備",
+   "new": "隨身攜帶行動電話、穿戴式裝置或其他具資訊傳輸、感應、拍攝、記錄功能之器材及設備，或置於抽屜、桌椅或座位旁",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "未遵守本規則，不接受監場人員勸導，擾亂試場內外秩序",
+   "new": "未遵守本規則,不接受監評或監場人員勸導,擾亂試場內外秩序",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "傳遞文稿、參考資料、書寫有關文字之物件或有關信號",
+   "new": "隨身夾帶書籍文件、參考資料、有關文字之物件或有關信號",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主聘僱外國技術人力",
+   "new": "雇主聘僱之外國人",
+   "text": {
+    "flat_only": 1,
+    "neither": 7
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 7
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙炔熔接裝置（除此等裝置之配管埋設於地下之部分外）",
+   "new": "乙炔熔接裝置（除此等裝置之配管埋設於地下之部分外）之損傷、變形、腐蝕等及其性能",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "自備工具等物品，未依監場人員之指示辦理",
+   "new": "自備工具、工件及相關物品之處置,未依監評或監場人員之指示辦理",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "醫療費用",
+   "new": "所收取之保險醫療費用",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "裁決委員",
+   "new": "裁決委員會",
+   "text": {
+    "flat_only": 2,
+    "both": 4
+   },
+   "forms": {
+    "flat_only": 6
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工之死亡補償",
+   "new": "死亡補償",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "設備故障",
+   "new": "故障",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "財團法人",
+   "new": "文教財團法人",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "所屬年金保險契約",
+   "new": "所屬年金保險契約之保險費",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "拒絕、規避或阻撓主管機關業務查核或評鑑",
+   "new": "規避、妨礙或拒絕中央主管機關或公立就業服務機構查核",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "隨同居留之外國籍配偶",
+   "new": "隨同居留之外國籍配偶從事工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "出場後",
+   "new": "繳件出場後",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "受僱或僱用期間",
+   "new": "聘僱期間",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "裁決委員會",
+   "new": "常務裁決委員",
+   "text": {
+    "both": 4
+   },
+   "forms": {
+    "both": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "互換工件",
+   "new": "互換工件或圖說",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "申請本辦法補助",
+   "new": "依本辦法領取補助",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "得請領失能年金",
+   "new": "請領失能年金之被保險人",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "被保險人之勞工保險普通事故保險費率",
+   "new": "被保險人之勞工保險普通事故保險費率調降之情形",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "執行保護管束保外就醫或假釋中者",
+   "new": "執行保護管束、僅受通緝尚未到案、保外就醫及假釋中者",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "內政部",
+   "new": "內部",
+   "text": {
+    "flat_only": 1,
+    "new_only": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "准考證",
+   "new": "准考證號碼",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "施工架",
+   "new": "施工架及施工構臺",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "技術生",
+   "new": "稱技術生者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "於發生災害或有發生災害之虞時",
+   "new": "於發生災害或有發生災害之虞時立即採取必要措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "計畫",
+   "new": "計畫書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "外國籍配偶",
+   "new": "外國人之外國籍配偶",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "規避、妨礙或拒絕主管機關或公立就業服務機構查核",
+   "new": "規避、妨礙或拒絕中央主管機關或公立就業服務機構查核",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "災難報告書或其他相關事故證明",
+   "new": "災難報告書或失蹤人口緊急報案紀錄等相關事故證明",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氧氣、乙炔存量、位置及使用情形",
+   "new": "船上氧氣、乙炔儲存量、位置及其使用情形",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "文件、資料",
+   "new": "外文文件、資料",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "於國外製作之文件、資料",
+   "new": "於大陸地區製作之文件、資料",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "監評或監場人員",
+   "new": "由監評或監場人員予以記錄",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "自本法施行之當日零時起算",
+   "new": "自本法施行之日起",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經通知限期改善，屆期未改善",
+   "new": "經通知限期改善，屆期未改善者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "煉焦作業",
+   "new": "從事煉焦作業",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "施工架",
+   "new": "施工架上",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "自有資本與風險資本比率",
+   "new": "保險人之自有資本與風險資本比率",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "得請領遺屬年金",
+   "new": "遺屬年金",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "new_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "政府機關（構）或行政法人",
+   "new": "政府機關（構）",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "熔接接頭",
+   "new": "對頭熔接部",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "後順序之遺屬",
+   "new": "第一順序之遺屬",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "第一順序之遺屬主張請領或再符合請領條件時",
+   "new": "前項遺屬年金嗣第一順序之遺屬主張請領或再符合請領條件時",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "液化氣體儲槽",
+   "new": "液化氣體之儲存",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "外國技術人力於聘僱許可有效期間內",
+   "new": "外國技術人力於聘僱許可有效期間屆滿",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "未共同具領或保險人核定前另有他人提出請領",
+   "new": "未共同具領或保險人核定前如另有他人提出請領",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "受聘僱之外國人",
+   "new": "前項受聘僱之外國人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "局部排氣裝置",
+   "new": "局部排氣或整體換氣裝置",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工件",
+   "new": "大尺寸工件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "雇主聘僱之外國人",
+   "new": "前項受聘僱之外國人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "行政費用",
+   "new": "行政費用上限",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "可操作之緊急遮斷裝置",
+   "new": "緊急遮斷裝置",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "踏腳桁",
+   "new": "踏腳桁之尺寸",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "特許事業許可證書",
+   "new": "免辦特許事業許可證者",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "就業安定費",
+   "new": "就業安定費之數額",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "消防設備",
+   "new": "設置預防火災所需之設備",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "涉及試題實質內容者",
+   "new": "未涉及試題實質內容者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "懸吊之鋼索",
+   "new": "懸吊之纖維索",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "領取年金給付者或其繼承人",
+   "new": "領取年金給付者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "投保單位填具之門診就診單或住院申請書",
+   "new": "投保單位出具之職業傷病門診就診單或住院申請書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "保險給付金額",
+   "new": "本保險年金給付金額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "灌裝壓縮乙炔氣於容器之場所",
+   "new": "壓縮機或灌裝壓縮乙炔氣於容器之場所",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "全國裁判長及訓練老師",
+   "new": "選手,全國裁判長及訓練老師",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "單管施工架",
+   "new": "單管式鋼管施工架",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "學科測試",
+   "new": "學、術科測試",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "書面勞動契約",
+   "new": "定期書面勞動契約",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "由中央主管機關會同該保險業務之主管機關定之",
+   "new": "資格由中央主管機關會同該保險業務之主管機關定之",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "法院或行政執行機關之扣押命令所扣押之金額",
+   "new": "依法院或行政執行機關之扣押命令所扣押之金額",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "其他法律規定得自工資逕予扣除之項目及金額",
+   "new": "依其他法律規定得自工資逕予扣除之項目及金額",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "支柱、支柱之水平繫材、斜撐材及構臺之梁等連結部分、接觸部分及安裝部分",
+   "new": "支柱、支柱之水平繫材、斜撐材及構臺之梁等連結部分、接觸部分及安裝部分之鬆動狀況",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "生育給付申請書及給付收據",
+   "new": "老年給付差額申請書及給付收據",
+   "text": {
+    "neither": 3
+   },
+   "forms": {
+    "neither": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "測試另行擇期舉行時",
+   "new": "術科測試須另行擇日辦理時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "承攬人或中間承攬人",
+   "new": "事業單位或承攬人或中間承攬人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "承攬人或再承攬人",
+   "new": "承攬人或再承攬人所僱用勞工",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "閥之相關裝置",
+   "new": "閥之相關裝置操作場所",
+   "text": {
+    "both": 4
+   },
+   "forms": {
+    "both": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本章規定",
+   "new": "本法罰則章規定",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "本保險失能年金給付",
+   "new": "本保險之年金給付金額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "壓縮氣體及液氨、液化二氧化碳及液氯",
+   "new": "有異音之壓縮氣體及液氨、液化二氧化碳及液氯無縫容器",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "液化石油氣",
+   "new": "液化石油氣儲存場",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "擋土支撐",
+   "new": "擋土支撐之構築",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "眷屬為配偶時，戶籍謄本",
+   "new": "眷屬為養子女時，戶籍謄本",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "經查核符合條件者",
+   "new": "經查證符合給付條件者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "從事修理等相關作業時",
+   "new": "開放氣體設備從事修理等相關作業時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "閥或旋塞",
+   "new": "閥、旋塞等",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "加熱灌氣容器、閥或灌裝管路",
+   "new": "從事加熱灌裝用高壓氣體之容器、閥或配管",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "老年年金給付",
+   "new": "亦得請領老年年金給付",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "可燃性氣體之容器放置場",
+   "new": "可燃性氣體或氧氣之容器放置場",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "未加入本保險之勞工",
+   "new": "未加入勞工保險之勞工",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "載有領取年金給付者死亡日期之戶籍謄本",
+   "new": "載有死亡日期之全戶戶籍謄本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "死亡時與裁定時均在被保險人投保期間內者",
+   "new": "死亡時在被保險人投保期間內，而裁定時已退保者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "無謀生能力者",
+   "new": "無謀生能力之範圍",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "保險給付或其他補助、津貼",
+   "new": "保險給付、津貼、補助或醫療費用",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "法人之代表人",
+   "new": "法人之代表人或自然人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "灌裝",
+   "new": "灌裝時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙類製造事業單位以外之製造事業單位",
+   "new": "乙類製造事業單位以外之冷凍高壓氣體製造事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙炔、乙烯或氫氣中含氧容量",
+   "new": "氧氣中乙炔、乙烯及氫氣之容量合計",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乙類製造事業單位以外之液化石油氣製造事業單位",
+   "new": "乙類製造事業單位以外之冷凍高壓氣體製造事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "勞工保險被保險人或受益人",
+   "new": "勞工保險被保險人",
+   "text": {
+    "both": 5
+   },
+   "forms": {
+    "both": 5
+   }
+  },
+  {
+   "side": "subject",
+   "old": "作業人員專用通路",
+   "new": "除工作人員專用通路外",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "液化石油氣供應事業單位",
+   "new": "特定液化石油氣消費事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "容器以配管連接者",
+   "new": "容器未以配管連接者",
+   "text": {
+    "flat_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "容器搬動",
+   "new": "搬運容器時",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "接頭者",
+   "new": "接頭",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "具有充分強度之鉤環或金屬固定具",
+   "new": "具有充分強度之鉤環或金-metallic fixing device",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "高壓氣體儲存場",
+   "new": "高壓氣體儲存場所",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "灌氣容器",
+   "new": "灌氣容器等",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "但駕駛者依規定就位者",
+   "new": "但駕駛者依規定就位者或另採安全措施者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "駕駛者離開其位置時",
+   "new": "堆高機於駕駛者離開其位置時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "裝卸",
+   "new": "裝卸時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "構件",
+   "new": "各構件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "強度計算書及施工圖說",
+   "new": "簽章確認強度計算書及施工圖說",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "工作車推進前軌道",
+   "new": "工作車推進或灌漿前",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "消費設備",
+   "new": "特定消費設備",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "subject",
+   "old": "模板支撐作業主管",
+   "new": "模板支支撐作業主管",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "模板支撐之側面、架面及交叉斜撐材面方向",
+   "new": "模板支撐之架面方向之二端及交叉斜撐材面方向",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "液氨或液氯之消費設備之配管",
+   "new": "液氨或液氯之消費設備之管接頭及閥之接合",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "防護裝置",
+   "new": "應有防護裝置",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "但有下列情形之一者",
+   "new": "有下列情形之一者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "最高永久性樓板",
+   "new": "地面或最高永久性樓板層上",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "鏈及鏈環",
+   "new": "輔助之鏈及鏈環",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "可燃性氣體管、蒸汽管或水管等管線",
+   "new": "電線管、可燃性氣體管、蒸氣管、水管等管線",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "液化石油氣容器串接",
+   "new": "液化石油氣容器串接供廠場使用",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "指派專人督導",
+   "new": "指派專人",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "冷凍高壓氣體製造事業單位",
+   "new": "冷凍用高壓氣體製造事業單位",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "subject",
+   "old": "制造安全負責人",
+   "new": "製造安全負責人從事製造安全技術管理事務",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "設置儲槽純供灌裝高壓氣體之事業單位",
+   "new": "設置儲槽純供灌裝液化石油氣之事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "曾擔任製造安全主任之經驗年資",
+   "new": "曾擔任製造安全作業主管及製造安全主任之合計經驗年資",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "設置冷卻用途之灑水設備",
+   "new": "設置冷卻或滅火用途之必要設備",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "製造安全",
+   "new": "製造設備之安全",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "氣體軟管或吹管",
+   "new": "氣體軟管或吹管相互連接處",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "建築物之牆壁、柱、樓板、樑、樓梯",
+   "new": "建築物之牆壁、柱、樓板、樑、樓梯等",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "船舶設備內使用之高壓氣體",
+   "new": "原子能設施內使用之高壓氣體",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乾燥設備",
+   "new": "乾燥設備之外面",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "乾燥設備或其附屬設備有異常時",
+   "new": "乾燥設備內部之溫度、換氣狀況及乾燥狀況有異常時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "產生之乙炔",
+   "new": "經發生器產生之乙炔",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "電氣器具",
+   "new": "電氣機械器具操作部份",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "電氣機械器具",
+   "new": "電氣機械器具操作部份",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "高壓",
+   "new": "特高壓",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "配電盤",
+   "new": "配電盤處",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "subject",
+   "old": "執行紀錄或文件",
+   "new": "前項所定執行紀錄或文件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "廢棄物",
+   "new": "前項廢棄物",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "九十",
+   "new": "九十七",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "一百一十",
+   "new": "一百一十五",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "成效評估及改善",
+   "new": "執行成效之評估及改善",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "坑內作業場所",
+   "new": "坑內等特殊作業場所",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "一、須精辨物體如細車床、較詳細檢查及精密試驗、分別等級、織布、淺色毛織等",
+   "new": "須極細辨物體，而有較佳之對襯，如精密組合、精細車床、精細檢查及精密試驗、分別等級、織布、淺色毛織等",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "subject",
+   "old": "人因性危害預防計畫",
+   "new": "訂定人因性危害預防計畫",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業災害預防",
+   "new": "其他與職業災害預防相關之事項",
+   "text": {
+    "flat_only": 2,
+    "neither": 5
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 5
+   }
+  },
+  {
+   "side": "object",
+   "old": "促進社會與經濟發展",
+   "new": "社會及經濟發展",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "加強勞雇關係",
+   "new": "勞雇關係",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "再就業",
+   "new": "就業",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本法未規定者",
+   "new": "本辦法未規定者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞資爭議",
+   "new": "勞資爭議處理政策",
+   "text": {
+    "flat_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保障勞工權益",
+   "new": "勞工權益",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他有關法律",
+   "new": "其他法律",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本辦法規定舉辦勞資會議",
+   "new": "已依規定舉辦勞資會議",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "檢查費",
+   "new": "檢查費收費標準",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "就業服務業務",
+   "new": "始得從事就業服務業務",
+   "text": {
+    "flat_only": 3,
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "國際技能組織主辦",
+   "new": "國際技能組織亞洲分會主辦",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "危險性機械或設備",
+   "new": "危險性機械或設備檢查合格證明",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關監理",
+   "new": "中央主管機關",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "所屬人員",
+   "new": "所屬人員執行",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工,自營作業者及其他受工作場所負責人指揮或監督從事勞動之人員",
+   "new": "原事業單位及其承攬人、再承攬人之勞工及其他受工作場所負責人指揮或監督從事勞動之人員",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "受僱從事工作獲致工資者",
+   "new": "指受雇主僱用從事工作獲致薪資之人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "提供就業服務之機構",
+   "new": "公立就業服務機構",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "聘、雇用員工從事工作者",
+   "new": "指僱用受僱者之人、公私立機構或機關",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "行政院勞工委員會",
+   "new": "行政院勞工委員會勞工保險監理委員會",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "普通事故保險",
+   "new": "普通事故保險費率",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "object",
+   "old": "新臺幣八千元",
+   "new": "新臺幣元",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "依下列規定辦理繼續加保",
+   "new": "下列規定辦理",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "申請繼續加保者",
+   "new": "被保險人願繼續加保",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "母性健康保護",
+   "new": "應實施母性健康保護",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工保險監理委員會監理",
+   "new": "保險人或勞工保險監理委員會",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業",
+   "new": "職業病",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "視為工作許可",
+   "new": "視為工作許可之期限",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "僱用獎助措施",
+   "new": "僱用獎助",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞方代表",
+   "new": "勞方代表選舉",
+   "text": {
+    "neither": 1,
+    "both": 2
+   },
+   "forms": {
+    "neither": 1,
+    "both": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "資格之一",
+   "new": "具下列資格條件之一者",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "收據存根",
+   "new": "各項收費之收據存根",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "使用材料",
+   "new": "構築使用之材料",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "總工作時間",
+   "new": "實際工作時間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "前項之規定",
+   "new": "前項規定",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "補助",
+   "new": "補助項目",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險費",
+   "new": "精算之保險費率",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "neither": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "公司登記或商業登記證明",
+   "new": "公司登記證明文件或商業登記證明文件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工廠登記證明及特許事業許可證等文件之影本",
+   "new": "雇主身份證、工廠登記、公司登記及商業登記證明文件影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他經中央主管機關規定之必要文件",
+   "new": "其他經中央主管機關規定之文件",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "地方主管機關應不予受理",
+   "new": "地方主管機關",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "相關投保證明文件",
+   "new": "相關證明文件",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本法或本辦法之規定",
+   "new": "其他違反本法或本辦法之規定",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞動檢查",
+   "new": "新進勞動檢查員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關定之",
+   "new": "中央主管機關備查",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "立方公分數",
+   "new": "每立方公分根數",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "最高容許濃度",
+   "new": "容許濃度",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "健康指導及管理",
+   "new": "健康管理",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "經採取母性健康保護",
+   "new": "雇主採取母性健康保護",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "採取變更工作條件、調整工時、調換工作等母性健康保護",
+   "new": "應參採醫師之建議，變更其作業場所、更換工作或縮短工作時間，並採取健康管理措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "文件及紀錄",
+   "new": "相關文件及紀錄",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "向中央主管機關申請審議",
+   "new": "雇主得向中央主管機關申請遞補",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險權益事項",
+   "new": "其他有關保險權益事項",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "就業市場需求",
+   "new": "就業市場人力供需狀況",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "與在中華民國境內設有戶籍之國民結婚，且獲准在臺灣地區居留之外國人、大陸地區人民、香港或澳門居民",
+   "new": "與在中華民國境內設有戶籍之國民結婚，且獲准居留依法在臺灣地區工作之外國人、大陸地區人民、香港居民或澳門居民",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "組織工會",
+   "new": "組織之企業工會",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工退休金事項",
+   "new": "其他有關勞工退休金事項",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "緊急照明系統",
+   "new": "平常照明系統失效時使用之緊急照明系統",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工程特性",
+   "new": "工程特性實施",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工程規劃安全分析",
+   "new": "工程規劃設計安全分析報告提供予施工者",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業安全衛生管理人員",
+   "new": "一級單位之職業安全衛生人員",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "下列資格之一者",
+   "new": "具下列資格條件之一者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "出監證明或其他身分證明文件影本",
+   "new": "國民身分證或其他身分證明文件影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "訓練計畫書一式十份",
+   "new": "訓練計畫書",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "證明文件",
+   "new": "證明書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "專家",
+   "new": "學者專家",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "僱用安定措施諮詢會議",
+   "new": "被保險人之僱用安定措施",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "下列情形之一",
+   "new": "被保險人有下列情形之一者",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞資爭議之處理",
+   "new": "勞資爭議處理政策",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "促進勞動條件",
+   "new": "勞動條件",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞動政策",
+   "new": "勞動教育政策",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "國際組織",
+   "new": "國際非政府組織",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "設計時",
+   "new": "設計",
+   "text": {
+    "both": 2,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全衛生圖說及規範",
+   "new": "編製安全衛生圖說及規範",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全衛生費用",
+   "new": "量化編列安全衛生費用",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "工程規劃設計安全分析報告",
+   "new": "工程規劃設計安全分析報告提供予施工者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "主施工者",
+   "new": "施工者之一為主施工者",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "甲種職業安全衛生業務主管一人",
+   "new": "職業安全衛生業務主管",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "視為職業傷害",
+   "new": "不得視為職業傷害",
+   "text": {
+    "flat_only": 6
+   },
+   "forms": {
+    "flat_only": 6
+   }
+  },
+  {
+   "side": "object",
+   "old": "依法成立之法人",
+   "new": "依法設立之非營利法人",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "參加本保險",
+   "new": "本法規定參加本保險",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "列表通知保險人",
+   "new": "列表通知保險人辦理投保手續",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自投保單位申報參加勞工保險生效之日起",
+   "new": "自投保單位申報勞工保險退保效力停止之日起",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "防止機械、設備或器具等引起之危害",
+   "new": "機械、設備或原料、材料危害之預防措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "辦理仲介業務之私立就業服務機構之許可、停業及廢止許可",
+   "new": "仲介本國人在國內工作之私立就業服務機構之許可、停業及廢止許可",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "仲介外國人至中華民國境內工作",
+   "new": "仲介本國人至臺灣地區以外之地區工作",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "雇主已支付之補償金額",
+   "new": "雇主已給與賠償或補償金額者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工退休金",
+   "new": "退休金",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "為無正當理由",
+   "new": "正當理由",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "直轄市或縣（市）主管機關得依職權交付仲裁",
+   "new": "雙方當事人得共同向直轄市或縣（市）主管機關申請交付仲裁",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "團體協約政策",
+   "new": "團體協約",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不當勞動行為裁決制度",
+   "new": "不當勞動行為裁決委員會",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "年金保險契約",
+   "new": "所屬年金保險契約之保險費",
+   "text": {
+    "flat_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "事業單位單一性別勞工人數",
+   "new": "事業單位勞工人數",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "所屬各地區事業單位作業勞工人數",
+   "new": "以各該地區事業單位作業勞工之總人數為準",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他經中央主管機關規定之文件、資料",
+   "new": "其他經中央主管機關規定之文件",
+   "text": {
+    "new_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "new_only": 1,
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "該職業災害勞工",
+   "new": "職業災害勞工",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "負責人國民身分證正背面影本及各目的事業主管機關核發之相關證件影本",
+   "new": "負責人國民身份證正背面影本及各目的事業主管機關核發的相關證明文件影本",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "運輸業許可證書或有關認定證明文件",
+   "new": "登記證書或有關認定證明文件",
+   "text": {
+    "new_only": 2,
+    "neither": 1
+   },
+   "forms": {
+    "both": 2,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "立案或登記證明書",
+   "new": "申請單位之登記或立案證明",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險費收繳之處理",
+   "new": "保險費收繳及給付之帳務處理",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工會、漁會、機關團體與職業訓練機構之加保",
+   "new": "工會、漁會、機關團體及職業訓練機構納保違法之查處",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工會、漁會、機關團體及職業訓練機構保險費之計算",
+   "new": "工會、漁會、機關團體及職業訓練機構納保違法之查處",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "送中央主管機關審核",
+   "new": "中央主管機關備查",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "許可證",
+   "new": "許可證影本",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "所僱之職業安全衛生人員",
+   "new": "一級單位之職業安全衛生人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不得產製運出廠場",
+   "new": "不得產製運出廠場或輸入",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "應於中央主管機關指定之資訊申報網站登錄",
+   "new": "應在中央主管機關指定之網站登錄事件處理結果",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞動者",
+   "new": "件工勞動者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央目的事業主管機關及地方主管機關",
+   "new": "中央目的事業主管機關或中央主管機關認定情節重大",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "他方保守秘密",
+   "new": "保守秘密",
+   "text": {
+    "both": 1,
+    "new_only": 3
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞動保險事項",
+   "new": "勞動保險司掌理事項",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "僱用勞工人數",
+   "new": "雇主僱用勞工人數",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "藉人力行駛於工作場所，供搬運貨物之車輛",
+   "new": "藉人力行駛於工作場所之軌道，供搬運貨物之車輛",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "參與國際技能競賽",
+   "new": "參與國際展能節職業技能競賽",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "該項工作",
+   "new": "從事該項工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "相關目的事業主管機關",
+   "new": "目的事業主管機關",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工作環境及福利設施",
+   "new": "適當之工作環境及福利設施",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "停工",
+   "new": "停工理由",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "聯合組織",
+   "new": "聯合組織章程",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "之工會聯合組織",
+   "new": "工會聯合組織之理事",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "薪資表",
+   "new": "薪資明細表",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "外國技術人力",
+   "new": "外國技術人力之親屬關係",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "不得超過",
+   "new": "不得逾合理範圍",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "高壓氣體作業主管之安全衛生教育訓練",
+   "new": "高壓氣體製造安全主任安全衛生教育訓練",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關指定之機械",
+   "new": "中央主管機關指定之機械、設備或器具",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關指定之設備或器具",
+   "new": "中央主管機關指定之機械、設備或器具",
+   "text": {
+    "new_only": 9
+   },
+   "forms": {
+    "both": 9
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全衛生管理事項",
+   "new": "該工作場所之安全衛生管理事項",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "both": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全衛生在職教育訓練",
+   "new": "安全衛生教育訓練",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險費率",
+   "new": "精算之保險費率",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關或勞動檢查機構之抽驗及市場查驗",
+   "new": "中央主管機關或勞動檢查機構",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "定期契約",
+   "new": "視為不定期契約",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不定期契約",
+   "new": "視為不定期契約",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "向勞保局辦理提繳手續",
+   "new": "依下列規定向勞保局辦理提繳手續",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞資爭議雙方當事人",
+   "new": "勞資爭議經雙方當事人書面同意",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業災害補償政策",
+   "new": "職業災害補償",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "年金保險內容",
+   "new": "年金保險費",
+   "text": {
+    "flat_only": 1,
+    "neither": 1,
+    "new_only": 8
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1,
+    "new_only": 8
+   }
+  },
+  {
+   "side": "object",
+   "old": "下列危險物",
+   "new": "下列之危險物或有害物",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "薪資補貼",
+   "new": "薪資補貼金額",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "車輛機械之作業方法",
+   "new": "車輛機械之作業或移動",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "化學品",
+   "new": "化學藥品",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "雇主或其代理人的指示",
+   "new": "雇主代理人",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "調解之申請",
+   "new": "請求調解事項",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "如為法人、雇主團體或工會時，其名稱、代表人及事務所或營業所",
+   "new": "如為法人、雇主團體或工會，其名稱、代表人及主事務所或主營業所",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "應經主管機關核可",
+   "new": "應經行政院人事行政局核可",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "應經其上級主管機關核可",
+   "new": "應經行政院人事行政局核可",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "投保手續",
+   "new": "投保或退保手續",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "下列作業主管",
+   "new": "作業主管",
+   "text": {
+    "both": 9,
+    "new_only": 7
+   },
+   "forms": {
+    "flat_only": 9,
+    "neither": 7
+   }
+  },
+  {
+   "side": "object",
+   "old": "送交保險人",
+   "new": "相關文件送交保險人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "請領條件",
+   "new": "符合請領條件者",
+   "text": {
+    "flat_only": 5
+   },
+   "forms": {
+    "flat_only": 5
+   }
+  },
+  {
+   "side": "object",
+   "old": "應於事前使其接受安全衛生教育訓練",
+   "new": "應依工作性質使其接受安全衛生在職教育訓練",
+   "text": {
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 3,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "申請人之請求",
+   "new": "申請人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "調解人",
+   "new": "調解會議",
+   "text": {
+    "flat_only": 3,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 3,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "理事、監事名冊",
+   "new": "常務理事、監事名額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "出納、財務、營繕、採購及其他事務管理",
+   "new": "議事、出納、財務、營繕、採購及其他事務管理",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "國會聯絡、媒體公關事務之規劃、研擬及執行",
+   "new": "國會聯絡、媒體公關事務之政策規劃、研擬、執行及管考",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他防護具",
+   "new": "其他必要之安全防護設施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "全國裁判長",
+   "new": "全國副裁判長應隨同解聘",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "全國副裁判長",
+   "new": "全國副裁判長應隨同解聘",
+   "text": {
+    "flat_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業衛生管理師資格",
+   "new": "職業安全衛生物理員資格",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "both": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "原寄郵局郵戳為準",
+   "new": "原寄郵局郵戳之日期",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本人之身分證明或居留證明文件之影本",
+   "new": "身分證明文件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本人名義之國內金融機構存摺封面影本",
+   "new": "被保險人本人名義之國內金融機構存摺影本",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "向工作所在地之公立就業服務機構提出申請",
+   "new": "工作場所所在地之公立就業服務機構",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "員工名冊、出勤工作記錄及薪資帳冊",
+   "new": "僱用名冊、載明受僱者工作時數之薪資清冊、出勤紀錄",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "留職停薪事由及期間",
+   "new": "留職停薪期間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "身心障礙年金給付",
+   "new": "國民年金保險身心障礙年金給付",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "身心障礙基本保證年金",
+   "new": "國民年金保險身心障礙年金給付",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "學員考查紀錄",
+   "new": "學員名冊及考查紀錄",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "投保單位應於離職、退會、結（退）訓之當日列表通知保險人辦理退保手續",
+   "new": "投保單位應於死亡、離職、退會、結（退）訓之當日填具退保申報表送交保險人",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "作業環境監測計劃",
+   "new": "作業環境監測",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業訓練補助",
+   "new": "職業訓練",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關所辦之事項",
+   "new": "中央主管機關規定之其他事項",
+   "text": {
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "會址",
+   "new": "會議地點",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "當事人、相關人員或事業單位",
+   "new": "當事人、相關人員或事業單位以言詞或書面提出說明",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "差別待遇",
+   "new": "差別之待遇",
+   "text": {
+    "flat_only": 15
+   },
+   "forms": {
+    "flat_only": 15
+   }
+  },
+  {
+   "side": "object",
+   "old": "章程之修改。",
+   "new": "工會章程之修改或",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "由投保單位負責賠償",
+   "new": "應由投保單位負賠償之責",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "教育訓練課程及時數",
+   "new": "教育訓練",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "氯酸鉀,氯酸鈉,氯酸銨",
+   "new": "過氯酸鉀,過氯酸鈉,過氯酸銨",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "討論事項",
+   "new": "討論事項及決議",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "用人單位規定辦理",
+   "new": "用人單位未規定者",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工作所在地之公立就業服務機構",
+   "new": "就業當地轄區之公立就業服務機構",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "前項利息補貼",
+   "new": "利息補貼",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自本法施行之日起算",
+   "new": "自本法施行之日起",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "自雇主領有執業證照、依法已辦理登記或設有稅籍之當日起算",
+   "new": "自雇主領有執業證照、依法已辦理登記或設有稅籍之當日零時起算",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自該公告指定日期起算",
+   "new": "自該公告指定日期之當日零時起算",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自申報之日起生效",
+   "new": "自補正之翌日起生效",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業災害勞工恢復原工作、調整職務或安置適當工作",
+   "new": "協助職業災害勞工恢復原工作、調整職務或安排其他工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自本法施行之當日零時起算",
+   "new": "自本法施行之日起",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "供應者",
+   "new": "供應",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "公告年金保險單條款",
+   "new": "勞工退休年金保險單條款",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "乙炔發生器,導管,吹管等所構成",
+   "new": "乙炔及氧氣容器,導管,吹管構成的設備",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "乙炔熔接裝置",
+   "new": "氧乙炔熔接裝置",
+   "text": {
+    "flat_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "僱用職業災害勞工補助",
+   "new": "不予發給僱用職業災害勞工補助",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "身心障礙者，另檢附社政主管機關核發之身心障礙證明",
+   "new": "受扶養之子女為身心障礙者，另檢附社政主管機關核發之身心障礙證明",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "所屬勞工名冊",
+   "new": "勞工名冊",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "製程安全評估",
+   "new": "製程安全評估報告",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "委員出席",
+   "new": "委員親自出席",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "會員代表",
+   "new": "工會聯合組織之會員代表",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "投保單位未依前項規定辦理變更手續者",
+   "new": "投保單位未依前項規定辦理變更手續時的投保單位信息",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "健康管理、職業病預防及健康促進事項",
+   "new": "健康管理、職業病與工作相關疾病之預防及健康促進等勞工健康保護事項",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "失業勞工之求職登記",
+   "new": "失業被保險人之求職登記",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "以勞工未有參加就業保險、勞工保險或勞工職業災害保險紀錄之日起算",
+   "new": "中高齡者及高齡者未有參加就業保險、勞工保險或勞工職業災害保險紀錄之日起算",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "使勞工誤信而有受損害之虞",
+   "new": "使勞動者誤信而有受損害之虞",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "雇主, 雇主代理人, 其他勞工",
+   "new": "雇主、雇主代理人、勞工及其他有關人員",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "調解委員會",
+   "new": "調解委員會開會時間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "實際薪資為准",
+   "new": "實際薪資為准則",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險費或滯納金",
+   "new": "未清繳之保險費或滯納金",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "適掌之採光或照明",
+   "new": "適當之採光照明",
+   "text": {
+    "new_only": 1,
+    "neither": 5
+   },
+   "forms": {
+    "new_only": 1,
+    "neither": 5
+   }
+  },
+  {
+   "side": "object",
+   "old": "失業勞工",
+   "new": "作業勞工",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "身分證明文件影本",
+   "new": "身分證明文件",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不得使用",
+   "new": "不得繼續使用",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "當事人",
+   "new": "於當事人間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "相關人員",
+   "new": "其他有關人員",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "理事長",
+   "new": "置副理事長",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "遺屬",
+   "new": "其遺屬",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關指定之值",
+   "new": "中央主管機關指定公告之國家標準",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "液化氣體",
+   "new": "液化氣體之儲存",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "適當之托兒措施",
+   "new": "托兒設施或適當之托兒措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "測測試",
+   "new": "測試",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工有落水之虞",
+   "new": "防止勞工落水遭致危害",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "得向保險人申請",
+   "new": "得向保險人申請照護補助",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "最低服務年限之約定",
+   "new": "不得與勞工為最低服務年限之約定",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "二異氰酸甲苯",
+   "new": "二異氰酸二苯甲烷",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央目的事業主管機關核發之民用航空運輸業許可證",
+   "new": "中央目的事業主管機關核發之中華民國普通航空業許可證",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "申請核發異地就業交通補助金",
+   "new": "異地就業交通補助金",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "預告期間",
+   "new": "各該預告期間",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "應按月向其所屬投保單位繳納，於次月底前繳清",
+   "new": "應按月向其原投保單位或勞工團體繳納，由原投保單位或勞工團體於次月底前負責彙繳保險人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本國籍勞工",
+   "new": "本國勞工",
+   "text": {
+    "new_only": 2
+   },
+   "forms": {
+    "new_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "僱用期間",
+   "new": "聘僱期間",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "訓練單位",
+   "new": "遭訓練單位退訓",
+   "text": {
+    "flat_only": 12
+   },
+   "forms": {
+    "flat_only": 12
+   }
+  },
+  {
+   "side": "object",
+   "old": "原投保單位",
+   "new": "同一投保單位",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "記載事項",
+   "new": "列記載事項",
+   "text": {
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "予以補助",
+   "new": "補助",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "育嬰留職停薪津貼申請書",
+   "new": "育嬰留職停薪津貼所需書件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "發給津貼",
+   "new": "發給津貼單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "前項檢查項目",
+   "new": "前項檢查",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "調解不成立",
+   "new": "視為調解不成立",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "指派專人督導",
+   "new": "指派專人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "疑似有身心障礙",
+   "new": "職業災害勞工疑似有身心障礙",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "被保險人負擔部分之保險費",
+   "new": "得免繳被保險人負擔部分之保險費者",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "雇主應通知保險人",
+   "new": "通知保險人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "加氣站以外設有儲槽或導管之固定式製造設備",
+   "new": "加氣站以外未設有儲槽或導管之固定式製造設備",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "主管機關應不予許可",
+   "new": "中央主管機關應不予許可",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "經限期改善，屆期未改善",
+   "new": "經通知限期改善，屆期未改善者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "相關資料",
+   "new": "得查對相關文件、資料",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "當事人一方",
+   "new": "當事人之一方",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "請領",
+   "new": "再補辦請領手續",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不予合併計算",
+   "new": "應合併計算",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "清艙作業流程圖",
+   "new": "操作程序、清艙作業流程圖及應注意事項",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "參加年金保險之申報資料",
+   "new": "投保及收繳年金保險費之資料",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "前項文件未備齊者",
+   "new": "未提具符合前項規定文件者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不予核發",
+   "new": "不予受理",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "電路、制動器及連結裝置之有無異常",
+   "new": "制動器、連結裝置、各種儀器之有無異常",
+   "text": {
+    "flat_only": 6
+   },
+   "forms": {
+    "flat_only": 6
+   }
+  },
+  {
+   "side": "object",
+   "old": "就業當地轄區之公立就業服務機構",
+   "new": "就業當地轄區公立就業服務機構申請異地就業交通補助金",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "經勞保局核付後不得變更",
+   "new": "經保險人核付後，不得變更",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "坑內監視工作",
+   "new": "監視性工作",
+   "text": {
+    "neither": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "年金保險費數額",
+   "new": "年金保險費繳款單所載金額",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "得查對相關資料",
+   "new": "得查對相關文件、資料",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工到職投保就業保險生效之日起算",
+   "new": "自勞工到職投保就業保險生效之日起算",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關另以辦法定之",
+   "new": "中央主管機關定之",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "急救訓練時，應與中央衛生福利主管機關醫院評鑑合格或大專校院設有醫、護科系者合辦",
+   "new": "勞工健康服務護理人員及勞工健康服務相關人員訓練時，應與中央衛生福利主管機關醫院評鑑合格者或大專校院設有醫、護科系者合辦",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "選手",
+   "new": "選手競賽成績",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "從事勞動所獲致之報酬",
+   "new": "受僱者因工作而獲得之報酬",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "農藥製造工作場所",
+   "new": "火藥類製造工作場所",
+   "text": {
+    "flat_only": 6
+   },
+   "forms": {
+    "flat_only": 6
+   }
+  },
+  {
+   "side": "object",
+   "old": "職場霸凌",
+   "new": "職場霸凌行為",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "專業人士或民間團體",
+   "new": "得請專業人士或團體協助",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "實物",
+   "new": "其實物",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "仲裁",
+   "new": "仲裁判斷",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "入出國管理機關及警察機關",
+   "new": "當地主管機關,入出國管理機關及警察機關",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "家庭看護工",
+   "new": "家庭看護技術工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關不予許可",
+   "new": "中央主管機關應不予許可",
+   "text": {
+    "new_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "變更時亦同",
+   "new": "變更時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "餐廳",
+   "new": "用餐地點",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "具墜落危險之下列作業",
+   "new": "具倒塌、崩塌危險之下列作業",
+   "text": {
+    "both": 7
+   },
+   "forms": {
+    "both": 7
+   }
+  },
+  {
+   "side": "object",
+   "old": "得不受前項限制",
+   "new": "不受前項規定之限制",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業病種類",
+   "new": "職業病種類表",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全母索僅能繫掛一條安全帶",
+   "new": "每條安全母索能繫掛安全帶之條數，應標示於母索錨錠端",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "投保年金保險",
+   "new": "選擇投保年金保險之勞工",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "設置適當照明",
+   "new": "有適當之安全照明",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "建築法規另有規定者",
+   "new": "但相關法規另有規定者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "制動裝置、離合器及操作裝置有無異常",
+   "new": "制動器、連結裝置、各種儀器之有無異常",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關公告之每小時最低工資核給",
+   "new": "以不低於中央主管機關公告之最低工資進用",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "每月最低工資",
+   "new": "每小時最低工資",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "申請交付仲裁者",
+   "new": "一方申請交付仲裁者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "應依左列規定",
+   "new": "左列規定",
+   "text": {
+    "both": 2,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "有適當之人獸隔離設備與措施",
+   "new": "應有保持人獸間必要之隔離設施或充分之安全距離",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他必要之防護措施",
+   "new": "其他必要之設備及措施",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "未辦理或經不予許可者",
+   "new": "未依規定辦理聘僱許可或經不予許可者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "被保險人之薪資",
+   "new": "被保險人投保薪資金額",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "寄發或遞送保險費繳款單",
+   "new": "保險費繳款單",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中華民國專利師",
+   "new": "中華民國專利代理人",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "不得引進或聘僱",
+   "new": "不得引進或聘僱外國技術人力",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "選手",
+   "new": "選手證",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "學、術科測試辦理單位",
+   "new": "中央主管機關或學、術科測試辦理單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "回轉體",
+   "new": "高速回轉體",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "失業之中高齡者及高齡者",
+   "new": "中高齡者及高齡者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "新進勞工工資",
+   "new": "勞工工資",
+   "text": {
+    "new_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "new_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險給付權利",
+   "new": "各種保險給付的權利",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "結業證書（格式十一）",
+   "new": "結業證書核發清冊（格式十六）",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "前項求職紀錄",
+   "new": "前項求職假",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職場學習及再適應津貼,用人單位行政管理及輔導費",
+   "new": "用人單位申領職場學習及再適應津貼、行政管理費及輔導費",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "物料",
+   "new": "材料",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "領有執業執照之助產士",
+   "new": "領有執業執照之醫師",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞保局",
+   "new": "勞工保險局",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "具資訊傳輸、感應、拍攝、記錄功能之器材及設備",
+   "new": "具資訊傳輸、感應、拍攝、記錄功能之器材及設備等",
+   "text": {
+    "flat_only": 3
+   },
+   "forms": {
+    "flat_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "下列情形之一",
+   "new": "有下列情形之一者",
+   "text": {
+    "flat_only": 10
+   },
+   "forms": {
+    "flat_only": 10
+   }
+  },
+  {
+   "side": "object",
+   "old": "現金給付",
+   "new": "現金給付之用",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "both": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "修正後之規定",
+   "new": "均依修正施行後之規定",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險人得以其本人或其受益人請領之保險給付扣減之",
+   "new": "保險人得自其本人或受益人所領取之本保險給付扣減之",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工退休基金來源",
+   "new": "勞工退休基金",
+   "text": {
+    "new_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "坑內作業場所",
+   "new": "作業場所",
+   "text": {
+    "new_only": 3
+   },
+   "forms": {
+    "neither": 1,
+    "new_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "被聘僱",
+   "new": "受聘僱從事工作",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "中央主管機關得不予認可",
+   "new": "中央主管機關應不予許可",
+   "text": {
+    "flat_only": 16,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 16,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全防護具",
+   "new": "安全帽等防護具",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "防護設備之準備、維持及使用",
+   "new": "準備之防護設備、救援設備及使用方法",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "妊娠中之女性勞工從事下列危險性或有害性工作",
+   "new": "雇主不得使妊娠中之女性勞工從事下列危險性或有害性工作",
+   "text": {
+    "both": 14
+   },
+   "forms": {
+    "both": 14
+   }
+  },
+  {
+   "side": "object",
+   "old": "作業場所可能之危害",
+   "new": "製程或作業可能之危害",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "紀錄及點名等相關事項",
+   "new": "受訓學員簽到紀錄及點名等相關事項",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他有利於本基金收益之投資",
+   "new": "其他經中央主管機關核准有利於本保險基金收益之投資",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工或受委任工作者",
+   "new": "勞工或受委任工作者個人基本資料",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "文件通知當地主管機關實施檢查",
+   "new": "檢附文件通知當地主管機關實施檢查",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "錄影或拍照",
+   "new": "可以錄影或拍照",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "全民健康保險保險人辦理",
+   "new": "保險人委託全民健康保險保險人辦理",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "全民健康保險特約醫院或診所診療",
+   "new": "緊急傷病至非全民健康保險特約醫院或診所提供的治療",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞保局及保險人",
+   "new": "勞保局及保險人申報",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險人請領",
+   "new": "由其指定受益人請領保險金",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "經查明屬實後",
+   "new": "經查明屬實後發給",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "前項醫療書單",
+   "new": "前項職業傷病醫療書單",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "原領工資",
+   "new": "實領工資",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "醫療費用",
+   "new": "所收取之保險醫療費用",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本法規定",
+   "new": "違反本法規定",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "歸還委任人保管之許可文件及其他相關文件",
+   "new": "通知委任人，並將保管之許可文件及其他相關文件歸還委任人",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工之死亡補償",
+   "new": "死亡補償",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "所屬年金保險契約",
+   "new": "所屬年金保險契約之保險費",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "氣密試驗測試合格",
+   "new": "耐壓試驗, 氣密試驗合格",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "拒絕、規避或阻撓主管機關業務查核或評鑑",
+   "new": "規避、妨礙或拒絕中央主管機關或公立就業服務機構查核",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "監場人員",
+   "new": "繳交監場人員",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "外國人之許可工作期間",
+   "new": "不得逾外國人之許可工作期間",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "得請領失能年金",
+   "new": "請領失能年金之被保險人",
+   "text": {
+    "flat_only": 4,
+    "neither": 4
+   },
+   "forms": {
+    "flat_only": 4,
+    "neither": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "作業安全業務",
+   "new": "職業安全衛生業務",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "競賽結束後發現前項情事之一者",
+   "new": "競賽結束後發現選手有前項情事之一者",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "作業前",
+   "new": "作業",
+   "text": {
+    "new_only": 4
+   },
+   "forms": {
+    "new_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險人自設或特約醫療院、所申請診療",
+   "new": "保險人自設或特約醫療院、所診療之權利",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "足以適應該氣體之種類、性狀、溫度及壓力等諸性質之要求",
+   "new": "足以適應該氣體之種類、性狀、溫度及壓力等諸性質之要求者",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "六十公分以上",
+   "new": "六十公分",
+   "text": {
+    "both": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "計畫",
+   "new": "計畫書",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "附屬",
+   "new": "附屬品",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "行政院設立或指定機構或委託之民間團體驗證",
+   "new": "行政院於香港或澳門設立或指定機構或委託之民間團體驗證",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "煉焦作業",
+   "new": "從事煉焦作業",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "施工架",
+   "new": "施工架上",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本條例規定業務之一切帳冊",
+   "new": "本條例規定業務之一切帳冊、單據及業務收支",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "政府機關（構）或行政法人",
+   "new": "政府機關（構）",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "得請領遺屬年金",
+   "new": "遺屬年金",
+   "text": {
+    "new_only": 1,
+    "both": 3
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "適當之壓力表",
+   "new": "適當之安全閥及壓力表",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "實施或補助計畫",
+   "new": "得訂定實施或補助計劃",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業災害勞工穩定就業",
+   "new": "其他促進職業災害勞工穩定就業措施",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險醫療費用",
+   "new": "所收取之保險醫療費用",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "公立或已立案私立大專校院",
+   "new": "公立或已立案私立高級中等以上學校",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "假扣押或假處分",
+   "new": "假扣押或假處分之裁定",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "但已發放在第一順序之遺屬主張請領或再符合請領條件時",
+   "new": "前項遺屬年金嗣第一順序之遺屬主張請領或再符合請領條件時",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "可燃性氣體及毒性氣體",
+   "new": "可燃性氣體或毒性氣體之容器",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "工件",
+   "new": "大尺寸工件",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "未用完之測試材料",
+   "new": "成品、工件、未用完之測試材料",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "監評或監場人員",
+   "new": "由監評或監場人員予以記錄",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "護籠等安全設施",
+   "new": "設置之護籏等安全設施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "信號燈",
+   "new": "信號",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "發給勞工退休金",
+   "new": "勞工退休準備金",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "爭議行為",
+   "new": "爭議行為期間",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "可操作之緊急遮斷裝置",
+   "new": "緊急遮斷裝置",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "午後八時至翌晨六時之時間內工作",
+   "new": "女工於午後十時至翌晨六時之時間內工作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工保險之特約醫療院、所",
+   "new": "前項勞工保險特約醫療院、所",
+   "text": {
+    "both": 3
+   },
+   "forms": {
+    "both": 3
+   }
+  },
+  {
+   "side": "object",
+   "old": "由中央主管機關會同該保險業務之主管機關定之",
+   "new": "資格由中央主管機關會同該保險業務之主管機關定之",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "neither": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "就業安定費",
+   "new": "就業安定費之數額",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "both": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險人得予以查證",
+   "new": "相關證明送保險人查核",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險人得於查證期間停止發給",
+   "new": "保險人得予以查證，並得於查證期間停止發給",
+   "text": {
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "生育給付申請書及給付收據",
+   "new": "老年給付差額申請書及給付收據",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "下列之運用",
+   "new": "為左列之運用",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "子女在學",
+   "new": "子女、孫子女在學",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "配偶、子女為無謀生能力",
+   "new": "配偶、子女、孫子女、兄弟姊妹為無謀生能力",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "給付方式",
+   "new": "工資給付方式",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自有資本與風險資本比率",
+   "new": "保險人之自有資本與風險資本比率",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "基金之收支、保管及運用",
+   "new": "基金之收支,運用情形及其積存數額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "基金之收支、保管及運用辦法",
+   "new": "基金之收支,運用情形及其積存數額",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "支柱、支柱之水平繫材、斜撐材及構臺之梁等連結部分、接觸部分及安裝部分",
+   "new": "支柱、支柱之水平繫材、斜撐材及構臺之梁等連結部分、接觸部分及安裝部分之鬆動狀況",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "相關機關提供",
+   "new": "相關機關提供之",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "保險人審核",
+   "new": "保險人查核",
+   "text": {
+    "flat_only": 1,
+    "new_only": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "老年給付",
+   "new": "亦得請領老年年金給付",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "老年年金給付",
+   "new": "亦得請領老年年金給付",
+   "text": {
+    "flat_only": 10,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 9,
+    "neither": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "應採取下列措施",
+   "new": "下列措施",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "new_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "外國技術人力之姓名,性別,年齡,國籍,入國日期,工作期限,聘僱許可文號及外僑居留證影本等資料",
+   "new": "外國人之姓名、性別、年齡、國籍、入國日期、工作期限、招募許可或聘僱許可文號及外僑居留證影本等資料",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業災害勞工工作分析",
+   "new": "職業災害勞工工作能力評估",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "為該外國技術人力辦理手續並使其出國",
+   "new": "為其辦理手續並使其出國",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "有下列情事之一",
+   "new": "有下列情事之一經令其出國者",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "露天開挖作業",
+   "new": "露天開挖之作業",
+   "text": {
+    "flat_only": 4
+   },
+   "forms": {
+    "flat_only": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "受益人為孫子女或兄弟姊妹",
+   "new": "受益人為孫子女或兄弟姊妹者",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "消防法有關規定設必要之消防設備",
+   "new": "消防法有關規定設置必要之消防設備",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "過負荷防止裝置",
+   "new": "防止超過負荷裝置",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "離合器",
+   "new": "離合器性能",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "過捲預防裝置、制動器、離合器及控制裝置之性能",
+   "new": "過捲預防裝置、制動器、控制裝置及其他安全裝置之機能",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "停止作業時",
+   "new": "勞工停止作業",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "作業計畫實施作業",
+   "new": "作業計畫",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "顯著之損傷,變形或腐蝕",
+   "new": "有顯著損傷、變形或腐蝕之材料",
+   "text": {
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "安全塊、安全插梢或安全開關鎖匙等之裝置",
+   "new": "雇主提供之安全塊、安全插梢或安全開關鎖匙",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "申請許可及核發證照",
+   "new": "受理申請許可及核發證照費用",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "職業災害預防事項",
+   "new": "其他與職業災害預防相關之事項",
+   "text": {
+    "both": 5
+   },
+   "forms": {
+    "both": 5
+   }
+  },
+  {
+   "side": "object",
+   "old": "其辦法",
+   "new": "其管理辦法",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "本章之規定",
+   "new": "本規則之規定",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "其他必要之防護具",
+   "new": "其他必要之安全防護設施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "告知勞工",
+   "new": "於事前告知從事作業之勞工",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "液化石油氣",
+   "new": "液化石油氣儲存場",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "灌裝",
+   "new": "灌裝時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "自動檢查",
+   "new": "自動檢查計畫",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "定期檢查及重點檢查",
+   "new": "前項自動檢查之定期檢查及重點檢查",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "高壓氣體消費事業單位",
+   "new": "冷凍用高壓氣體製造事業單位",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "消費事業單位安全狀況",
+   "new": "記載有消費事業單位安全狀況之紀錄簿冊",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "以導管之輸送",
+   "new": "儲存及以導管之輸送",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "冷媒氣體者",
+   "new": "冷媒氣體外洩",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "通風良好場所",
+   "new": "通風良好之處所為之",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "通風良好之場所",
+   "new": "通風良好之場所為之",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "具有充分強度之鉤環或金屬固定具",
+   "new": "具有充分強度之鉤環或金-metallic fixing device",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "閥或旋塞",
+   "new": "閥、旋塞等",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "經特殊作業安全衛生教育訓練人員操作",
+   "new": "經特殊安全衛生教育、訓練合格人員操作",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "強度計算書及施工圖說",
+   "new": "簽章確認強度計算書及施工圖說",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "熔接接頭",
+   "new": "對頭熔接部",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "neither": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "拆除",
+   "new": "拆除進行中",
+   "text": {
+    "flat_only": 1,
+    "both": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "應依規定",
+   "new": "應依規定辦理",
+   "text": {
+    "neither": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "避雷器",
+   "new": "適當避雷裝置",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "永久性樓板",
+   "new": "地面或最高永久性樓板層上",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "曲率半徑",
+   "new": "曲率半徑決定",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "結構物之牆、柱或其他類似構造物",
+   "new": "拆除無支撐之牆、柱或其他類似構造物時",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "損傷閥等之措施",
+   "new": "翻倒及損傷其閥之措施",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "勞工燙傷之設施",
+   "new": "防止勞工燙傷之設施",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "環境衛生",
+   "new": "環境衛生之維護",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "加濕",
+   "new": "人工濕潤",
+   "text": {
+    "flat_only": 7
+   },
+   "forms": {
+    "flat_only": 7
+   }
+  },
+  {
+   "side": "object",
+   "old": "適合於其設置場所危險區域劃分使用之防爆性能構造",
+   "new": "適宜於設臵場所以及其危險區域劃分使用的防爆性能結構",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "高壓氣體製造安全主任安全衛生教育訓練",
+   "new": "高壓氣體製造安全作業主管安全衛生教育訓練",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "製造方法與其高壓氣體之製造有關之下列技術事項",
+   "new": "製造方法與其液化石油氣之製造有關之下列技術事項",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "與高壓氣體之製造有關之安全作業標準、設備管理基準、承攬管理基準及災害之發生或有虞發生災害之必要措施",
+   "new": "對與高壓氣體之製造有關之安全作業標準、設備管理、承攬管理及防止災害之發生或有發生災害之虞時之必要措施提供建議",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "災害或有發生災害之虞時，採取必要措施",
+   "new": "於發生災害或有發生災害之虞時立即採取必要措施",
+   "text": {
+    "flat_only": 1,
+    "neither": 1
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "設置冷卻用途之灑水設備",
+   "new": "設置冷卻或滅火用途之必要設備",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "與液化石油氣之製造有關之安全作業標準、設備管理基準、承攬管理基準及災害之發生或有虞發生災害之必要措施",
+   "new": "對與高壓氣體之製造有關之安全作業標準、設備管理、承攬管理及防止災害之發生或有發生災害之虞時之必要措施提供建議",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "高壓氣體供應安全技術事項",
+   "new": "液化石油氣供應安全技術事項",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "flat_only": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "承受設備",
+   "new": "滑槽、承受設備",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "特高壓電路",
+   "new": "連接於特高壓電路",
+   "text": {
+    "both": 4
+   },
+   "forms": {
+    "both": 4
+   }
+  },
+  {
+   "side": "object",
+   "old": "戴用絕緣用防護具",
+   "new": "勞工戴用絕緣用防護具",
+   "text": {
+    "both": 2
+   },
+   "forms": {
+    "flat_only": 1,
+    "neither": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "絕緣用防護具",
+   "new": "絕緣用防護裝備",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "適當之照明設備",
+   "new": "照明設備",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "絕緣用防護裝備、防護具、活線作業用工具",
+   "new": "絕絕緣用防護裝裝備、防防護具、活線作業用工工具",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "呼吸防護具",
+   "new": "呼吸防護計畫",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "成效評估及改善",
+   "new": "執行成效之評估及改善",
+   "text": {
+    "flat_only": 2
+   },
+   "forms": {
+    "flat_only": 2
+   }
+  },
+  {
+   "side": "object",
+   "old": "人因性危害預防計畫",
+   "new": "訂定人因性危害預防計畫",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "聯苯胺",
+   "new": "二氯聯苯胺",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "健康危害分類、散布狀況及使用量等情形",
+   "new": "特定化學物質之健康危害分類、散布狀況及使用量等情形",
+   "text": {
+    "both": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  },
+  {
+   "side": "object",
+   "old": "鉛封或採取其他同等有效之措施",
+   "new": "加鎖、鉛封或採取其他同等有效之措施不在此限",
+   "text": {
+    "flat_only": 1
+   },
+   "forms": {
+    "both": 1
+   }
+  }
+ ],
+ "totals_before": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_after": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_stable": true,
+ "embedding_provider_called": false
+}
