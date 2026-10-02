@@ -1,0 +1,82 @@
+{
+ "as_of": "20261002",
+ "documents": 64,
+ "record_types": {
+  "law": 64
+ },
+ "with_update_date": 64,
+ "with_effective_date": 15,
+ "with_effective_note": 16,
+ "effective_date_8digit": 15,
+ "pcode_prefixed_sources": 64,
+ "article_no_shapes": {
+  "第 # 條": 3039,
+  "第 #-# 條": 264
+ },
+ "facts_in_docs_with_effective_date": 5820,
+ "future_effective_documents": [
+  {
+   "source": "N0060009_職業安全衛生設施規則",
+   "update_date": "20260630",
+   "effective_date": "20270101",
+   "articles": 374,
+   "facts": 1829,
+   "effective_note": "一百十五年六月三十日修正之第 21-3、57、116、185-1～185-4 條，自 一百十六年一月一日施行。"
+  },
+  {
+   "source": "N0060010_職業安全衛生教育訓練規則",
+   "update_date": "20260625",
+   "effective_date": "20270101",
+   "articles": 50,
+   "facts": 359,
+   "effective_note": "一百十五年六月二十五日修正之第 1、17、18、20、40、43 條條文及第 3 條條文之附表一、第 4 條條文之附表二、第 5 條條文之附表三、第 6 條條文之附表四、第 11 條條文之附表九、第 12 條條文之附表十、第 13 條條文之附表十一、第 14 條條文之附表十二、第 35 條條文之附表 十五；增訂第 42-4 條條文，依第 43 條規定：除第 3 條條文之附表一 、第 4 條條文之附"
+  },
+  {
+   "source": "N0060004_勞工作業場所容許暴露標準",
+   "update_date": "20250411",
+   "effective_date": "20270101",
+   "articles": 11,
+   "facts": 41,
+   "effective_note": "一百十四年四月十一日修正發布第 2 條條文之附表一編號十五、二百十 一、四百四十五及附表二，自一百十六年一月一日施行。"
+  },
+  {
+   "source": "N0060014_營造安全衛生設施標準",
+   "update_date": "20260630",
+   "effective_date": "20270701",
+   "articles": 184,
+   "facts": 1066,
+   "effective_note": "一百十五年六月三十日增訂之第 11-2 條，自一百十六年七月一日施行。"
+  },
+  {
+   "source": "N0060022_勞工健康保護規則",
+   "update_date": "20260626",
+   "effective_date": "20280101",
+   "articles": 29,
+   "facts": 176,
+   "effective_note": "一百十五年六月二十六日修正之全文 29 條，依第 29 條規定：除第 5 條、第 6 條第 2～4 項、第 13 條第 3 項自一百十六年七月一日施行 ，及第 2 條附表一、第 16 條附表九、附表十、第 17、18、20、21 條 自一百十七年一月一日施行外，自一百十五年七月一日施行。"
+  }
+ ],
+ "facts_in_future_effective_documents_upper_bound": 3471,
+ "law_article_keys": [
+  "article_content",
+  "article_no",
+  "chapter_title",
+  "kg_id",
+  "source_doc_id"
+ ],
+ "law_articles": 3303,
+ "totals_before": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_after": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_stable": true,
+ "embedding_provider_called": false
+}
