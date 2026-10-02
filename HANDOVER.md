@@ -23,6 +23,10 @@ Q1 `scripts/analysis/pilot_version_corpus_builder.py`：collector 歷史檔 → 
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-03（報告264）：使用者「同意 繼續」；**Q3 進行中——試點容器已起、匯入完成、抽取 worker 運行中；Q4／Q5 離線任務已派給實作對話**
+
+**試點環境（規劃對話，全程未碰 `kg2-neo4j`／KG#4）**：容器 `kg2-pilot-neo4j`（`neo4j:5.26-enterprise`，具名磁碟區 `kg2-pilot-data`，埠 28474／28687，3 GB；密碼隨機產生、存於 repo 之外的 `D:\Users\666\Desktop\kg-runtime-pilot\pilot_neo4j.env`，**不得印出或進 repo**）；`pilot_import.py --execute` 成功：4 `Document`／128 `LawArticle`／128 `Chunk`／佇列 128 筆；抽取 worker 已啟動（Windows Ollama 0.35.0、`qwen2.5:7b`＋`bge-m3`，強制 `OLLAMA_BASE_URL=127.0.0.1`）；最初 6 個區塊 4 分鐘內完成，產出 36 Fact／26 實體，**抽樣 Fact 均正確 `SUPPORTED_BY` 到對應版本的 `LawArticle`**（1984 版保留「用辭定義如左」舊用語）；預估全部 128 區塊約 1.5–2 小時。啟動器 `C:\Users\666\.claude\jobs\ff938510\tmp\pilot_run.py --execute|--worker`（讀密碼檔、設環境變數、不印密碼）。**實作者三個不確定點**：①`trigger_extraction` 傳 `kg_folder` 可行（已入佇列）；②「已匯入」判斷未測；③Document 日期欄位留空（Q4 決定）。[報告264](docs/報告/264_下一階段任務規劃_L3試點Q4版本屬性與連動_Q5時間感知問題集_交Claude實作對話.md)：Q4-A `pilot_apply_versions.py`（LawArticle 版本屬性、`SUPERSEDED_BY` 譜系、Fact 事件連動、事後稽核）、Q4-B `pilot_asof_search.py`（asof／naive 兩種檢索）、Q5 時間感知問題集（決定性選題＋預先寫死判準：asof leak 率 ≤5%、hit ≥ naive）；實作者報告自 **265**、我下一編號 **266**。KG#4 仍無寫入核准。
+
 ## 2026-10-03（報告262 §9）：**L3′ Q1／Q2 已由規劃對話獨立驗證通過（`f724562`；pytest 2114 passed）；下一步 Q3（規劃對話起試點容器、匯入、小型試跑、抽取）**
 
 我**獨立重算**（直接讀 collector 最新 snapshot）：209 版本／111 條文章／98 相鄰對；same_hash 23／format_only 31／substantive 44，與 manifest 相同；128 個條文版本逐條比對 0 不一致；輸出與 KG#4 `original.md` 檔頭位元組相同；重跑決定性（5 檔 SHA-256 相同）；`--plan`：4 文件／128 LawArticle／128 SVO chunk、`connects:false`。裁定：衝突條文實質修改對仍入選（`is_conflict` 標記，主指標排除）、對照組全在勞基法（接受並揭露）。**重要限制**：collector `content` 無換行，與 KG#4 `original.md`（有項目換行與章標題）不同，試點抽取品質不可與 KG#4 比較；試點內部新舊版同源，時間感知驗證不受影響。Q3 前仍須確認：無其他對話佔用 Ollama／記憶體、Ollama 0.35.0（≠凍結評測 0.34.2）。報告下一編號 **264**（規劃對話）。KG#4 仍無寫入核准。
