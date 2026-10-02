@@ -72,4 +72,4 @@
 
 ## 9. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成，將以 SendMessage 派給實作對話「fact-rag vector search implementation」。KG#4 仍無任何寫入核准。
+✅ **已完成並由規劃對話獨立驗證**（commit `ba278e2`；結果與驗證見[報告253](253_回填向量重算數估算執行紀錄.md) §4／§4.1）。**分工調整**：實作對話的使用者硬規則禁止連 KG#4／docker／讀 `.env`，故暫停並回報；改由實作者只做純函式／測試／報告結構（E1／E2／E4），E0／E3 連線由規劃對話（已獲使用者授權唯讀）執行。結果：`facts_total 16,826`、`resync_changed_facts 1,789`、`would_reencode_without_resync 0`、**`would_reencode_after_resync 1,789`**（約 5.4 萬字元）；規劃對話獨立重算逐項一致；pytest 1951 passed；KG#4 前後總數相同、StartedAt 仍為新基準；未呼叫 embedding provider。**⚠️ 同步會把過度合併的實體名稱傳進 `fact_text`**（樣本見報告253 §4.2），G4 前建議先抽樣審核 1,789 筆。KG#4 仍無任何寫入核准。

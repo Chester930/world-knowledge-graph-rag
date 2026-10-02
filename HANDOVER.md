@@ -11,6 +11,10 @@
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-02（報告253）：**回填向量重算數估算完成並驗證——需重算 1,789 個向量（約 5.4 萬字元）；⚠️ 同步會把過度合併的實體名稱傳進 fact_text，G4 前建議先抽樣審核**
+
+實作對話因其使用者規則不連 KG#4，只做純函式／測試／報告結構（commit `ba278e2`），規劃對話執行唯讀連線並**獨立重算**：`facts_total 16,826`、`resync_changed_facts 1,789`、`would_reencode_without_resync 0`、**`would_reencode_after_resync 1,789`**、`without_not_in_after 0`（沒有回填反而改回舊名稱的情況）；新文字平均 30 字／P95 60／最大 157；`source_charset` 為選擇性白名單（2,161 字）；pytest **1951 passed**；KG#4 前後總數相同、StartedAt 仍為 `2026-10-02T11:09:32.79429649Z`；未呼叫 embedding provider。**風險**：樣本顯示同步可能傳播實體過度合併（「本法」→「本辦法」、「再就業」→「就業」），見[報告253 §4.2](docs/報告/253_回填向量重算數估算執行紀錄.md)。**下一步（待使用者裁示）**：抽樣審核 1,789 筆（唯讀分析）→ 決定全量／安全子集 → G4（需再備份＋逐項同意）。KG#4 仍無寫入核准；報告下一編號 **254**。
+
 ## 2026-10-02（報告252）：使用者同意採用新基準；**重啟後 KG#4 指紋複驗通過**；已派「回填向量重算數估算」
 
 使用者「同意建議，繼續」：①採用新基準 `kg2-neo4j` StartedAt＝**`2026-10-02T11:09:32.79429649Z`**；②規劃對話以 `ReadOnlyRunner` 做重啟後唯讀指紋（17 條查詢、7.8 秒）：**與備份前十項指紋逐項相同**（總數 57,451／137,873／16,826／12,296、標籤、關係型別、16 個索引全 `ONLINE`、實體名稱／Fact／實體邊三個摘要雜湊、三種向量統計），證據 `data/analysis/kg4_fingerprint_after_docker_restart_20261002.json`（只含聚合數字與雜湊）；③寫成[報告252](docs/報告/252_下一階段任務規劃_回填向量重算數估算_唯讀_交Claude實作對話.md)（純估算、對 KG#4 唯讀、不呼叫 embedding provider），以 SendMessage 派給實作對話「fact-rag vector search implementation」，完成後它直接回報規劃對話；新報告自 **253** 起。**n8n／dify 仍 Exited（使用者自行啟動）。KG#4 仍無任何寫入核准；G4 須再備份＋逐項同意。**

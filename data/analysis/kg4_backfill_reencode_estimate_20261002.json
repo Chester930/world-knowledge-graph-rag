@@ -1,0 +1,188 @@
+{
+ "facts_total": 16826,
+ "would_reencode_without_resync": 0,
+ "would_reencode_after_resync": 1789,
+ "resync_changed_facts": 1789,
+ "reencode_caused_by_resync_only": 1789,
+ "reencode_overlap": 0,
+ "without_not_in_after": 0,
+ "text_chars_total_after": {
+  "total": 53719,
+  "mean": 30.027,
+  "p95": 60,
+  "max": 157,
+  "median": 27
+ },
+ "scan_pages": 85,
+ "samples_caused_by_resync_only": [
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28037",
+   "old": "本辦法 加強 職業災害預防",
+   "new": "本辦法 加強 其他與職業災害預防相關之事項"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28050",
+   "old": "本辦法 為防止 職業災害預防",
+   "new": "本辦法 為防止 其他與職業災害預防相關之事項"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28058",
+   "old": "保障勞工權益  制定本法",
+   "new": "勞工權益  制定本法"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28060",
+   "old": "加強勞雇關係  制定本法",
+   "new": "勞雇關係  制定本法"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28062",
+   "old": "促進社會與經濟發展  制定本法",
+   "new": "社會及經濟發展  制定本法"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28064",
+   "old": "本法未規定者 適用 其他法律之規定",
+   "new": "本辦法未規定者 適用 其他法律之規定"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28073",
+   "old": "當事人之一方 對於 他方在從屬關係提供其職業上之勞動力",
+   "new": "勞資爭議當事人之一方 對於 他方在從屬關係提供其職業上之勞動力"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28080",
+   "old": "本辦法 以增進 促進社會與經濟發展",
+   "new": "本辦法 以增進 社會及經濟發展"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28086",
+   "old": "本條例 加強 加強勞雇關係",
+   "new": "本條例 加強 勞雇關係"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28089",
+   "old": "勞工退休金事項 優先適用 本條例",
+   "new": "其他有關勞工退休金事項 優先適用 本條例"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28096",
+   "old": "中高齡者 促進 再就業",
+   "new": "中高齡者 促進 就業"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28098",
+   "old": "中高齡者及高齡者 保障 經濟安全",
+   "new": "中高齡者 保障 經濟安全"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28100",
+   "old": "中高齡者及高齡者 鼓勵 世代合作與經驗傳承",
+   "new": "中高齡者 鼓勵 世代合作與經驗傳承"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28102",
+   "old": "中高齡者及高齡者 維護 就業權益",
+   "new": "中高齡者 維護 就業權益"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28106",
+   "old": "人力資源 促進其運用",
+   "new": "人力資源政策 促進其運用"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28108",
+   "old": "中高齡者及高齡者就業事項 依 本法未規定者",
+   "new": "中高齡者 依 本辦法未規定者"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28118",
+   "old": "職業訓練法 適用 未規定之事項",
+   "new": "職業訓練 適用 未規定之事項"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28120",
+   "old": "本辦法 為處理 勞資爭議",
+   "new": "本辦法 為處理 勞資爭議處理政策"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28121",
+   "old": "本辦法 保障 保障勞工權益",
+   "new": "本辦法 保障 勞工權益"
+  },
+  {
+   "eid": "4:e98c5070-f9d3-4e84-808d-8c0e8fa6e8c4:28135",
+   "old": "本條例 未規定者適用 其他有關法律",
+   "new": "本條例 未規定者適用 其他法律"
+  }
+ ],
+ "samples_baseline_already_stale": [],
+ "source_charset": {
+  "kg_folder": "D:\\Users\\666\\Desktop\\kg-runtime\\236903cf-055a-40a8-8923-b9d06601f3b7",
+  "chars": 2161,
+  "mode": "selective(來源字集白名單)"
+ },
+ "totals_before": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_after": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_stable": true,
+ "started_at_before": "2026-10-02T11:09:32.79429649Z",
+ "started_at_after": "2026-10-02T11:09:32.79429649Z",
+ "embedding_provider_called": false,
+ "cypher_log": [
+  {
+   "label": "before:總節點",
+   "cypher": "MATCH (n) RETURN count(n) AS v",
+   "rows": 1
+  },
+  {
+   "label": "before:總關係",
+   "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+   "rows": 1
+  },
+  {
+   "label": "before:Fact",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+   "rows": 1
+  },
+  {
+   "label": "before:Entity",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+   "rows": 1
+  },
+  {
+   "label": "Fact 重建文字所需欄位",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) OPTIONAL MATCH (f)-[:HAS_SUBJECT]->(s:Entity) WITH f, collect(s)[0] AS s OPTIONAL MATCH (f)-[:HAS_OBJECT]->(o:Entity) WITH f, s, collect(o)[0] AS o RETURN elementId(f) AS eid, f.subject AS flat_subject, f.object AS flat_object, f.rel_type AS flat_rel_type, f.verb AS verb, f.fact_text AS fact_text, s IS NOT NULL AS subject_exists, o IS NOT NULL AS object_exists, s.name AS subject_name, o.name AS object_name, 0 AS edge_count, [] AS edge_types ORDER BY elementId(f)",
+   "rows": 16826
+  },
+  {
+   "label": "after:總節點",
+   "cypher": "MATCH (n) RETURN count(n) AS v",
+   "rows": 1
+  },
+  {
+   "label": "after:總關係",
+   "cypher": "MATCH ()-[r]->() RETURN count(r) AS v",
+   "rows": 1
+  },
+  {
+   "label": "after:Fact",
+   "cypher": "MATCH (f:Fact {kg_id: $k}) RETURN count(f) AS v",
+   "rows": 1
+  },
+  {
+   "label": "after:Entity",
+   "cypher": "MATCH (e:Entity {kg_id: $k}) RETURN count(e) AS v",
+   "rows": 1
+  }
+ ]
+}
