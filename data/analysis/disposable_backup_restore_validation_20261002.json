@@ -1,0 +1,3060 @@
+{
+  "status": "completed",
+  "b0": {
+    "kg4_start": {
+      "status": "running",
+      "started_at": "2026-10-02T04:10:38.389676557Z"
+    },
+    "protected_volume_start": {
+      "volume": "kg2_neo4j_data",
+      "links": "1",
+      "size": "2.268GB",
+      "raw_line": "kg2_neo4j_data                                                     1         2.268GB"
+    }
+  },
+  "b1": {
+    "targets": {
+      "Entity": 12000,
+      "Chunk": 3000,
+      "Fact": 17000,
+      "Document": 25000
+    },
+    "expected_relationship_count": 138000,
+    "fingerprint": {
+      "label_counts": [
+        {
+          "label": "Chunk",
+          "count": 3000
+        },
+        {
+          "label": "Document",
+          "count": 25000
+        },
+        {
+          "label": "Entity",
+          "count": 12000
+        },
+        {
+          "label": "Fact",
+          "count": 17000
+        },
+        {
+          "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+          "count": 17000
+        }
+      ],
+      "relationship_counts": [
+        {
+          "type": "HAS_ENTITY",
+          "count": 3000
+        },
+        {
+          "type": "HAS_OBJECT",
+          "count": 17000
+        },
+        {
+          "type": "HAS_SUBJECT",
+          "count": 17000
+        },
+        {
+          "type": "RELATED_TO",
+          "count": 84000
+        },
+        {
+          "type": "SUPPORTED_BY",
+          "count": 17000
+        }
+      ],
+      "fact_count": 17000,
+      "entity_count": 12000,
+      "node_count": 57000,
+      "relationship_count": 138000,
+      "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+      "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+      "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+      "indexes": [
+        {
+          "name": "chunk_embedding_vector",
+          "state": "ONLINE",
+          "type": "VECTOR",
+          "entityType": "NODE",
+          "labelsOrTypes": [
+            "Chunk"
+          ],
+          "properties": [
+            "embedding"
+          ],
+          "options": {
+            "indexConfig": {
+              "vector.dimensions": 1024,
+              "vector.hnsw.m": 16,
+              "vector.quantization.enabled": true,
+              "vector.similarity_function": "COSINE",
+              "vector.hnsw.ef_construction": 100
+            },
+            "indexProvider": "vector-2.0"
+          }
+        },
+        {
+          "name": "entity_name_vector",
+          "state": "ONLINE",
+          "type": "VECTOR",
+          "entityType": "NODE",
+          "labelsOrTypes": [
+            "Entity"
+          ],
+          "properties": [
+            "name_embedding"
+          ],
+          "options": {
+            "indexConfig": {
+              "vector.dimensions": 1024,
+              "vector.hnsw.m": 16,
+              "vector.quantization.enabled": true,
+              "vector.similarity_function": "COSINE",
+              "vector.hnsw.ef_construction": 100
+            },
+            "indexProvider": "vector-2.0"
+          }
+        },
+        {
+          "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+          "state": "ONLINE",
+          "type": "VECTOR",
+          "entityType": "NODE",
+          "labelsOrTypes": [
+            "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+          ],
+          "properties": [
+            "fact_embedding"
+          ],
+          "options": {
+            "indexConfig": {
+              "vector.dimensions": 1024,
+              "vector.hnsw.m": 16,
+              "vector.quantization.enabled": true,
+              "vector.similarity_function": "COSINE",
+              "vector.hnsw.ef_construction": 100
+            },
+            "indexProvider": "vector-2.0"
+          }
+        },
+        {
+          "name": "g2_chunk_lookup",
+          "state": "ONLINE",
+          "type": "RANGE",
+          "entityType": "NODE",
+          "labelsOrTypes": [
+            "Chunk"
+          ],
+          "properties": [
+            "synthetic_id"
+          ],
+          "options": {
+            "indexConfig": {},
+            "indexProvider": "range-1.0"
+          }
+        },
+        {
+          "name": "g2_entity_lookup",
+          "state": "ONLINE",
+          "type": "RANGE",
+          "entityType": "NODE",
+          "labelsOrTypes": [
+            "Entity"
+          ],
+          "properties": [
+            "synthetic_id"
+          ],
+          "options": {
+            "indexConfig": {},
+            "indexProvider": "range-1.0"
+          }
+        },
+        {
+          "name": "g2_fact_lookup",
+          "state": "ONLINE",
+          "type": "RANGE",
+          "entityType": "NODE",
+          "labelsOrTypes": [
+            "Fact"
+          ],
+          "properties": [
+            "synthetic_id"
+          ],
+          "options": {
+            "indexConfig": {},
+            "indexProvider": "range-1.0"
+          }
+        },
+        {
+          "name": "index_343aff4e",
+          "state": "ONLINE",
+          "type": "LOOKUP",
+          "entityType": "NODE",
+          "labelsOrTypes": null,
+          "properties": null,
+          "options": {
+            "indexConfig": {},
+            "indexProvider": "token-lookup-1.0"
+          }
+        },
+        {
+          "name": "index_f7700477",
+          "state": "ONLINE",
+          "type": "LOOKUP",
+          "entityType": "RELATIONSHIP",
+          "labelsOrTypes": null,
+          "properties": null,
+          "options": {
+            "indexConfig": {},
+            "indexProvider": "token-lookup-1.0"
+          }
+        }
+      ],
+      "knn_samples": [
+        [
+          {
+            "fact_id": "fact-05114",
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-06138",
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-12282",
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-16378",
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-01018",
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "score": 0.999993801
+          }
+        ],
+        [
+          {
+            "fact_id": "fact-01031",
+            "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-05127",
+            "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-06151",
+            "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-07175",
+            "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-00007",
+            "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+            "score": 0.999993801
+          }
+        ],
+        [
+          {
+            "fact_id": "fact-01044",
+            "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-04116",
+            "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-11284",
+            "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-12308",
+            "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-00020",
+            "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+            "score": 0.999993801
+          }
+        ],
+        [
+          {
+            "fact_id": "fact-12321",
+            "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-11297",
+            "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+            "score": 0.999993801
+          },
+          {
+            "fact_id": "fact-11948",
+            "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+            "score": 0.69998759
+          },
+          {
+            "fact_id": "fact-12102",
+            "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+            "score": 0.69998759
+          },
+          {
+            "fact_id": "fact-00000",
+            "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+            "score": 0.501562417
+          }
+        ],
+        [
+          {
+            "fact_id": "fact-00171",
+            "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+            "score": 0.501562417
+          },
+          {
+            "fact_id": "fact-00304",
+            "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+            "score": 0.501562417
+          },
+          {
+            "fact_id": "fact-00982",
+            "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+            "score": 0.501562417
+          },
+          {
+            "fact_id": "fact-01195",
+            "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+            "score": 0.501562417
+          },
+          {
+            "fact_id": "fact-00000",
+            "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+            "score": 0.501562417
+          }
+        ]
+      ],
+      "production_vector_search": [
+        {
+          "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-06138",
+          "object": "entity-06979",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00138",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-05114",
+          "object": "entity-11811",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-02114",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-00282",
+          "object": "entity-01987",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00282",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-04378",
+          "object": "entity-06659",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01378",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-01018",
+          "object": "entity-07139",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01018",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        }
+      ]
+    }
+  },
+  "admin_help": {
+    "backup_requires_configured_service": true,
+    "dump_requires_offline_database": true,
+    "load_accepts_dump_or_full_backup": true
+  },
+  "b2": {
+    "backup_seconds": 8.740478,
+    "backup": {
+      "path": "D:\\Users\\666\\Desktop\\kg-drill-tmp\\method-a",
+      "file_count": 1,
+      "size_bytes": 6349164,
+      "sha256": "cc8be35e9bb8886c516cc981b6872caf7ae759f1bc2f86958a24a022b08874d2",
+      "files": [
+        "neo4j-2026-10-02T07-10-54.backup"
+      ]
+    },
+    "downtime_seconds": 0.0,
+    "restore": {
+      "restore_seconds": 37.291453,
+      "fingerprint_equal": true,
+      "before_fingerprint": {
+        "label_counts": [
+          {
+            "label": "Chunk",
+            "count": 3000
+          },
+          {
+            "label": "Document",
+            "count": 25000
+          },
+          {
+            "label": "Entity",
+            "count": 12000
+          },
+          {
+            "label": "Fact",
+            "count": 17000
+          },
+          {
+            "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "count": 17000
+          }
+        ],
+        "relationship_counts": [
+          {
+            "type": "HAS_ENTITY",
+            "count": 3000
+          },
+          {
+            "type": "HAS_OBJECT",
+            "count": 17000
+          },
+          {
+            "type": "HAS_SUBJECT",
+            "count": 17000
+          },
+          {
+            "type": "RELATED_TO",
+            "count": 84000
+          },
+          {
+            "type": "SUPPORTED_BY",
+            "count": 17000
+          }
+        ],
+        "fact_count": 17000,
+        "entity_count": 12000,
+        "node_count": 57000,
+        "relationship_count": 138000,
+        "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+        "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+        "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+        "indexes": [
+          {
+            "name": "chunk_embedding_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "entity_name_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "name_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+            ],
+            "properties": [
+              "fact_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "g2_chunk_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_entity_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_fact_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "index_343aff4e",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "NODE",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          },
+          {
+            "name": "index_f7700477",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "RELATIONSHIP",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          }
+        ],
+        "knn_samples": [
+          [
+            {
+              "fact_id": "fact-05114",
+              "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06138",
+              "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12282",
+              "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-16378",
+              "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-01018",
+              "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01031",
+              "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-05127",
+              "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06151",
+              "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-07175",
+              "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00007",
+              "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01044",
+              "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-04116",
+              "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11284",
+              "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12308",
+              "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00020",
+              "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-12321",
+              "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11297",
+              "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11948",
+              "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-12102",
+              "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-00171",
+              "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00304",
+              "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00982",
+              "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-01195",
+              "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ]
+        ],
+        "production_vector_search": [
+          {
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-06138",
+            "object": "entity-06979",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00138",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-05114",
+            "object": "entity-11811",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-02114",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-00282",
+            "object": "entity-01987",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00282",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-04378",
+            "object": "entity-06659",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01378",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-01018",
+            "object": "entity-07139",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01018",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          }
+        ]
+      },
+      "after_fingerprint": {
+        "label_counts": [
+          {
+            "label": "Chunk",
+            "count": 3000
+          },
+          {
+            "label": "Document",
+            "count": 25000
+          },
+          {
+            "label": "Entity",
+            "count": 12000
+          },
+          {
+            "label": "Fact",
+            "count": 17000
+          },
+          {
+            "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "count": 17000
+          }
+        ],
+        "relationship_counts": [
+          {
+            "type": "HAS_ENTITY",
+            "count": 3000
+          },
+          {
+            "type": "HAS_OBJECT",
+            "count": 17000
+          },
+          {
+            "type": "HAS_SUBJECT",
+            "count": 17000
+          },
+          {
+            "type": "RELATED_TO",
+            "count": 84000
+          },
+          {
+            "type": "SUPPORTED_BY",
+            "count": 17000
+          }
+        ],
+        "fact_count": 17000,
+        "entity_count": 12000,
+        "node_count": 57000,
+        "relationship_count": 138000,
+        "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+        "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+        "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+        "indexes": [
+          {
+            "name": "chunk_embedding_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "entity_name_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "name_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+            ],
+            "properties": [
+              "fact_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "g2_chunk_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_entity_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_fact_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "index_343aff4e",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "NODE",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          },
+          {
+            "name": "index_f7700477",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "RELATIONSHIP",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          }
+        ],
+        "knn_samples": [
+          [
+            {
+              "fact_id": "fact-05114",
+              "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06138",
+              "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12282",
+              "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-16378",
+              "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-01018",
+              "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01031",
+              "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-05127",
+              "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06151",
+              "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-07175",
+              "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00007",
+              "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01044",
+              "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-04116",
+              "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11284",
+              "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12308",
+              "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00020",
+              "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-12321",
+              "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11297",
+              "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11948",
+              "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-12102",
+              "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-00171",
+              "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00304",
+              "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00982",
+              "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-01195",
+              "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ]
+        ],
+        "production_vector_search": [
+          {
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-06138",
+            "object": "entity-06979",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00138",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-05114",
+            "object": "entity-11811",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-02114",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-00282",
+            "object": "entity-01987",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00282",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-04378",
+            "object": "entity-06659",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01378",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-01018",
+            "object": "entity-07139",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01018",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          }
+        ]
+      },
+      "production_vector_search_equal": true,
+      "production_vector_search_after": [
+        {
+          "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-06138",
+          "object": "entity-06979",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00138",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-05114",
+          "object": "entity-11811",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-02114",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-00282",
+          "object": "entity-01987",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00282",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-04378",
+          "object": "entity-06659",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01378",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-01018",
+          "object": "entity-07139",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01018",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        }
+      ],
+      "write_readback": [
+        {
+          "method": "A"
+        }
+      ],
+      "write_readback_ok": true
+    },
+    "restore_container_teardown": {
+      "name": "kg2-throwaway-restore",
+      "present_before": true,
+      "stop_exit_code": 0,
+      "rm_exit_code": 0,
+      "present_after": false
+    },
+    "restore_volume_teardown": {
+      "name": "kg2-throwaway-restore-data",
+      "present_before": true,
+      "rm_exit_code": 0,
+      "present_after": false
+    }
+  },
+  "b3": {
+    "backup_seconds": 5.193536,
+    "backup": {
+      "path": "D:\\Users\\666\\Desktop\\kg-drill-tmp\\method-b",
+      "file_count": 1,
+      "size_bytes": 16812186,
+      "sha256": "ee508e2906667669e1155596f83c90e5126cad317be0bde3747746927b030af8",
+      "files": [
+        "neo4j.dump"
+      ]
+    },
+    "downtime_seconds": 5.193536,
+    "restore": {
+      "restore_seconds": 36.851545,
+      "fingerprint_equal": true,
+      "before_fingerprint": {
+        "label_counts": [
+          {
+            "label": "Chunk",
+            "count": 3000
+          },
+          {
+            "label": "Document",
+            "count": 25000
+          },
+          {
+            "label": "Entity",
+            "count": 12000
+          },
+          {
+            "label": "Fact",
+            "count": 17000
+          },
+          {
+            "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "count": 17000
+          }
+        ],
+        "relationship_counts": [
+          {
+            "type": "HAS_ENTITY",
+            "count": 3000
+          },
+          {
+            "type": "HAS_OBJECT",
+            "count": 17000
+          },
+          {
+            "type": "HAS_SUBJECT",
+            "count": 17000
+          },
+          {
+            "type": "RELATED_TO",
+            "count": 84000
+          },
+          {
+            "type": "SUPPORTED_BY",
+            "count": 17000
+          }
+        ],
+        "fact_count": 17000,
+        "entity_count": 12000,
+        "node_count": 57000,
+        "relationship_count": 138000,
+        "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+        "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+        "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+        "indexes": [
+          {
+            "name": "chunk_embedding_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "entity_name_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "name_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+            ],
+            "properties": [
+              "fact_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "g2_chunk_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_entity_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_fact_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "index_343aff4e",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "NODE",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          },
+          {
+            "name": "index_f7700477",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "RELATIONSHIP",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          }
+        ],
+        "knn_samples": [
+          [
+            {
+              "fact_id": "fact-05114",
+              "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06138",
+              "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12282",
+              "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-16378",
+              "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-01018",
+              "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01031",
+              "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-05127",
+              "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06151",
+              "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-07175",
+              "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00007",
+              "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01044",
+              "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-04116",
+              "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11284",
+              "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12308",
+              "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00020",
+              "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-12321",
+              "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11297",
+              "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11948",
+              "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-12102",
+              "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-00171",
+              "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00304",
+              "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00982",
+              "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-01195",
+              "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ]
+        ],
+        "production_vector_search": [
+          {
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-06138",
+            "object": "entity-06979",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00138",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-05114",
+            "object": "entity-11811",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-02114",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-00282",
+            "object": "entity-01987",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00282",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-04378",
+            "object": "entity-06659",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01378",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-01018",
+            "object": "entity-07139",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01018",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          }
+        ]
+      },
+      "after_fingerprint": {
+        "label_counts": [
+          {
+            "label": "Chunk",
+            "count": 3000
+          },
+          {
+            "label": "Document",
+            "count": 25000
+          },
+          {
+            "label": "Entity",
+            "count": 12000
+          },
+          {
+            "label": "Fact",
+            "count": 17000
+          },
+          {
+            "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "count": 17000
+          }
+        ],
+        "relationship_counts": [
+          {
+            "type": "HAS_ENTITY",
+            "count": 3000
+          },
+          {
+            "type": "HAS_OBJECT",
+            "count": 17000
+          },
+          {
+            "type": "HAS_SUBJECT",
+            "count": 17000
+          },
+          {
+            "type": "RELATED_TO",
+            "count": 84000
+          },
+          {
+            "type": "SUPPORTED_BY",
+            "count": 17000
+          }
+        ],
+        "fact_count": 17000,
+        "entity_count": 12000,
+        "node_count": 57000,
+        "relationship_count": 138000,
+        "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+        "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+        "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+        "indexes": [
+          {
+            "name": "chunk_embedding_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "entity_name_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "name_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+            ],
+            "properties": [
+              "fact_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "g2_chunk_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_entity_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_fact_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "index_343aff4e",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "NODE",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          },
+          {
+            "name": "index_f7700477",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "RELATIONSHIP",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          }
+        ],
+        "knn_samples": [
+          [
+            {
+              "fact_id": "fact-05114",
+              "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06138",
+              "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12282",
+              "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-16378",
+              "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-01018",
+              "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01031",
+              "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-05127",
+              "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06151",
+              "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-07175",
+              "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00007",
+              "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01044",
+              "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-04116",
+              "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11284",
+              "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12308",
+              "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00020",
+              "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-12321",
+              "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11297",
+              "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11948",
+              "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-12102",
+              "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-00171",
+              "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00304",
+              "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00982",
+              "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-01195",
+              "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ]
+        ],
+        "production_vector_search": [
+          {
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-06138",
+            "object": "entity-06979",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00138",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-05114",
+            "object": "entity-11811",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-02114",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-00282",
+            "object": "entity-01987",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00282",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-04378",
+            "object": "entity-06659",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01378",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-01018",
+            "object": "entity-07139",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01018",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          }
+        ]
+      },
+      "production_vector_search_equal": true,
+      "production_vector_search_after": [
+        {
+          "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-06138",
+          "object": "entity-06979",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00138",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-05114",
+          "object": "entity-11811",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-02114",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-00282",
+          "object": "entity-01987",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00282",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-04378",
+          "object": "entity-06659",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01378",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-01018",
+          "object": "entity-07139",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01018",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        }
+      ],
+      "write_readback": [
+        {
+          "method": "B"
+        }
+      ],
+      "write_readback_ok": true
+    },
+    "restore_container_teardown": {
+      "name": "kg2-throwaway-restore",
+      "present_before": true,
+      "stop_exit_code": 0,
+      "rm_exit_code": 0,
+      "present_after": false
+    },
+    "restore_volume_teardown": {
+      "name": "kg2-throwaway-restore-data",
+      "present_before": true,
+      "rm_exit_code": 0,
+      "present_after": false
+    }
+  },
+  "corrupted_backup": {
+    "source": "D:\\Users\\666\\Desktop\\kg-drill-tmp\\method-b\\neo4j.dump",
+    "corrupt_copy": "D:\\Users\\666\\Desktop\\kg-drill-tmp\\corrupt\\neo4j.dump",
+    "original_size_bytes": 16812186,
+    "corrupt_size_bytes": 8406093,
+    "load_returncode": 1,
+    "explicit_failure": true,
+    "error_message_sanitized": "Files: 1/144, data:  0.0%"
+  },
+  "b4": {
+    "backup_seconds": 6.389471,
+    "backup": {
+      "path": "D:\\Users\\666\\Desktop\\kg-drill-tmp\\data.tar.gz",
+      "file_count": 1,
+      "size_bytes": 20964599,
+      "sha256": "5729c772a85b5dd63382aad63605f38244b2271d0db98c06fb0169c215f8d4a2",
+      "files": [
+        "data.tar.gz"
+      ]
+    },
+    "downtime_seconds": 6.389471,
+    "restore": {
+      "restore_seconds": 24.876387,
+      "fingerprint_equal": true,
+      "before_fingerprint": {
+        "label_counts": [
+          {
+            "label": "Chunk",
+            "count": 3000
+          },
+          {
+            "label": "Document",
+            "count": 25000
+          },
+          {
+            "label": "Entity",
+            "count": 12000
+          },
+          {
+            "label": "Fact",
+            "count": 17000
+          },
+          {
+            "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "count": 17000
+          }
+        ],
+        "relationship_counts": [
+          {
+            "type": "HAS_ENTITY",
+            "count": 3000
+          },
+          {
+            "type": "HAS_OBJECT",
+            "count": 17000
+          },
+          {
+            "type": "HAS_SUBJECT",
+            "count": 17000
+          },
+          {
+            "type": "RELATED_TO",
+            "count": 84000
+          },
+          {
+            "type": "SUPPORTED_BY",
+            "count": 17000
+          }
+        ],
+        "fact_count": 17000,
+        "entity_count": 12000,
+        "node_count": 57000,
+        "relationship_count": 138000,
+        "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+        "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+        "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+        "indexes": [
+          {
+            "name": "chunk_embedding_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "entity_name_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "name_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+            ],
+            "properties": [
+              "fact_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "g2_chunk_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_entity_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_fact_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "index_343aff4e",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "NODE",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          },
+          {
+            "name": "index_f7700477",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "RELATIONSHIP",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          }
+        ],
+        "knn_samples": [
+          [
+            {
+              "fact_id": "fact-05114",
+              "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06138",
+              "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12282",
+              "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-16378",
+              "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-01018",
+              "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01031",
+              "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-05127",
+              "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06151",
+              "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-07175",
+              "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00007",
+              "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01044",
+              "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-04116",
+              "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11284",
+              "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12308",
+              "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00020",
+              "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-12321",
+              "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11297",
+              "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11948",
+              "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-12102",
+              "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-00171",
+              "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00304",
+              "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00982",
+              "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-01195",
+              "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ]
+        ],
+        "production_vector_search": [
+          {
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-06138",
+            "object": "entity-06979",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00138",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-05114",
+            "object": "entity-11811",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-02114",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-00282",
+            "object": "entity-01987",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00282",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-04378",
+            "object": "entity-06659",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01378",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-01018",
+            "object": "entity-07139",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01018",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          }
+        ]
+      },
+      "after_fingerprint": {
+        "label_counts": [
+          {
+            "label": "Chunk",
+            "count": 3000
+          },
+          {
+            "label": "Document",
+            "count": 25000
+          },
+          {
+            "label": "Entity",
+            "count": 12000
+          },
+          {
+            "label": "Fact",
+            "count": 17000
+          },
+          {
+            "label": "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "count": 17000
+          }
+        ],
+        "relationship_counts": [
+          {
+            "type": "HAS_ENTITY",
+            "count": 3000
+          },
+          {
+            "type": "HAS_OBJECT",
+            "count": 17000
+          },
+          {
+            "type": "HAS_SUBJECT",
+            "count": 17000
+          },
+          {
+            "type": "RELATED_TO",
+            "count": 84000
+          },
+          {
+            "type": "SUPPORTED_BY",
+            "count": 17000
+          }
+        ],
+        "fact_count": 17000,
+        "entity_count": 12000,
+        "node_count": 57000,
+        "relationship_count": 138000,
+        "entity_name_digest": "8905a6452356cb8fc1d52ded7f276da11fb2f3c63a3a83c26eb7bbf0ebabd4d6",
+        "entity_edge_digest": "b796ce31cdb421d053a53d4b4b7d8345a42699ba8a1f535e25b08acc8fd75a78",
+        "fact_properties_digest": "f2ab16b3ca76613440ef0c4f6025a2561649d8eaeaf483ad90b385d0870f5a59",
+        "indexes": [
+          {
+            "name": "chunk_embedding_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "entity_name_vector",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "name_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "fact_embedding_vector_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31",
+            "state": "ONLINE",
+            "type": "VECTOR",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact_5d2e1b1a_1f36_4b7e_9a7f_0d2d5b5a4e31"
+            ],
+            "properties": [
+              "fact_embedding"
+            ],
+            "options": {
+              "indexConfig": {
+                "vector.dimensions": 1024,
+                "vector.hnsw.m": 16,
+                "vector.quantization.enabled": true,
+                "vector.similarity_function": "COSINE",
+                "vector.hnsw.ef_construction": 100
+              },
+              "indexProvider": "vector-2.0"
+            }
+          },
+          {
+            "name": "g2_chunk_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Chunk"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_entity_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Entity"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "g2_fact_lookup",
+            "state": "ONLINE",
+            "type": "RANGE",
+            "entityType": "NODE",
+            "labelsOrTypes": [
+              "Fact"
+            ],
+            "properties": [
+              "synthetic_id"
+            ],
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "range-1.0"
+            }
+          },
+          {
+            "name": "index_343aff4e",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "NODE",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          },
+          {
+            "name": "index_f7700477",
+            "state": "ONLINE",
+            "type": "LOOKUP",
+            "entityType": "RELATIONSHIP",
+            "labelsOrTypes": null,
+            "properties": null,
+            "options": {
+              "indexConfig": {},
+              "indexProvider": "token-lookup-1.0"
+            }
+          }
+        ],
+        "knn_samples": [
+          [
+            {
+              "fact_id": "fact-05114",
+              "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06138",
+              "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12282",
+              "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-16378",
+              "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-01018",
+              "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01031",
+              "fact_text": "合成實體01031 RELATED_TO 合成實體07230",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-05127",
+              "fact_text": "合成實體05127 RELATED_TO 合成實體11902",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-06151",
+              "fact_text": "合成實體06151 RELATED_TO 合成實體07070",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-07175",
+              "fact_text": "合成實體07175 RELATED_TO 合成實體02238",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00007",
+              "fact_text": "合成實體00007 RELATED_TO 合成實體00062",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-01044",
+              "fact_text": "合成實體01044 RELATED_TO 合成實體07321",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-04116",
+              "fact_text": "合成實體04116 RELATED_TO 合成實體04825",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11284",
+              "fact_text": "合成實體11284 RELATED_TO 合成實體07001",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-12308",
+              "fact_text": "合成實體00308 RELATED_TO 合成實體02169",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-00020",
+              "fact_text": "合成實體00020 RELATED_TO 合成實體00153",
+              "score": 0.999993801
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-12321",
+              "fact_text": "合成實體00321 RELATED_TO 合成實體02260",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11297",
+              "fact_text": "合成實體11297 RELATED_TO 合成實體07092",
+              "score": 0.999993801
+            },
+            {
+              "fact_id": "fact-11948",
+              "fact_text": "合成實體11948 RELATED_TO 合成實體11649",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-12102",
+              "fact_text": "合成實體00102 RELATED_TO 合成實體00727",
+              "score": 0.69998759
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ],
+          [
+            {
+              "fact_id": "fact-00171",
+              "fact_text": "合成實體00171 RELATED_TO 合成實體01210",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00304",
+              "fact_text": "合成實體00304 RELATED_TO 合成實體02141",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00982",
+              "fact_text": "合成實體00982 RELATED_TO 合成實體06887",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-01195",
+              "fact_text": "合成實體01195 RELATED_TO 合成實體08378",
+              "score": 0.501562417
+            },
+            {
+              "fact_id": "fact-00000",
+              "fact_text": "合成實體00000 RELATED_TO 合成實體00013",
+              "score": 0.501562417
+            }
+          ]
+        ],
+        "production_vector_search": [
+          {
+            "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-06138",
+            "object": "entity-06979",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00138",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-05114",
+            "object": "entity-11811",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-02114",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-00282",
+            "object": "entity-01987",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-00282",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-04378",
+            "object": "entity-06659",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01378",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          },
+          {
+            "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+            "verb": "RELATED_TO",
+            "confidence": 0.75,
+            "subject": "entity-01018",
+            "object": "entity-07139",
+            "rel_type": "RELATED_TO",
+            "source_doc_id": "doc-01018",
+            "source_svo_chunk_index": 0,
+            "score": 0.999993801
+          }
+        ]
+      },
+      "production_vector_search_equal": true,
+      "production_vector_search_after": [
+        {
+          "fact_text": "合成實體06138 RELATED_TO 合成實體06979",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-06138",
+          "object": "entity-06979",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00138",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體05114 RELATED_TO 合成實體11811",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-05114",
+          "object": "entity-11811",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-02114",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體00282 RELATED_TO 合成實體01987",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-00282",
+          "object": "entity-01987",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-00282",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體04378 RELATED_TO 合成實體06659",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-04378",
+          "object": "entity-06659",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01378",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        },
+        {
+          "fact_text": "合成實體01018 RELATED_TO 合成實體07139",
+          "verb": "RELATED_TO",
+          "confidence": 0.75,
+          "subject": "entity-01018",
+          "object": "entity-07139",
+          "rel_type": "RELATED_TO",
+          "source_doc_id": "doc-01018",
+          "source_svo_chunk_index": 0,
+          "score": 0.999993801
+        }
+      ],
+      "write_readback": [
+        {
+          "method": "C"
+        }
+      ],
+      "write_readback_ok": true
+    },
+    "restore_container_teardown": {
+      "name": "kg2-throwaway-restore",
+      "present_before": true,
+      "stop_exit_code": 0,
+      "rm_exit_code": 0,
+      "present_after": false
+    },
+    "restore_volume_teardown": {
+      "name": "kg2-throwaway-restore-data",
+      "present_before": true,
+      "rm_exit_code": 0,
+      "present_after": false
+    },
+    "temp_dir_listing_digest": "79122f11c72e588f74573aaa0919d3de57c191e8331585144ed11036e96f29e3"
+  },
+  "cleanup": [
+    {
+      "name": "kg2-throwaway-data",
+      "present_before": true,
+      "rm_exit_code": 0,
+      "present_after": false
+    }
+  ],
+  "temp_dir_teardown": {
+    "exists_before": true,
+    "removed": true,
+    "exists_after": false
+  },
+  "b6": {
+    "kg4_end": {
+      "status": "running",
+      "started_at": "2026-10-02T04:10:38.389676557Z"
+    },
+    "kg4_unchanged": true,
+    "protected_volume_end": {
+      "volume": "kg2_neo4j_data",
+      "links": "1",
+      "size": "2.268GB",
+      "raw_line": "kg2_neo4j_data                                                     1         2.268GB"
+    },
+    "protected_volume_unchanged": true,
+    "temp_containers_absent": true,
+    "temp_volumes_absent": true,
+    "temp_dir_absent": true
+  }
+}

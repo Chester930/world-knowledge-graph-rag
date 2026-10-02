@@ -3,6 +3,20 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-10-02（報告246 W0–W5 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
 
+## 2026-10-02（報告248；G2 B0–B6 Codex 執行，待規劃對話獨立驗證）
+
+依報告247 順序完成 B0 → B6；本條只記錄 Codex 執行結果，不宣稱規劃對話已驗證，也不宣稱 KG#4 已有備份。新增 `scripts/analysis/disposable_backup_restore_validation.py`、`tests/scripts/test_disposable_backup_restore_validation.py`、輸出 JSON 與報告248／索引；未修改 production、既有 disposable 驗證腳本／測試、規劃文件、論文、題庫或歷史報告原文。
+
+- **B0**：新增兩個精確臨時容器名稱、`kg2-throwaway-*` volume、指定 `kg-drill-tmp`、`docker run/cp/exec` 與受保護容器參照閘門；focused **9 passed**。本機 help 確認 5.26 `backup` 須預先配置 backup service，`dump` 不可對執行中掛載資料庫，`load` 可載入 dump／Enterprise backup。
+- **B1**：3GB 容器建立 **57,000 節點／138,000 關係／17,000 Fact／12,000 Entity**；Fact／Entity／Chunk 1024 維向量與索引均 `ONLINE`；記錄三個摘要 hash、索引清單與 5 組 KNN top-5。
+- **B2–B4**：A 線上 backup **8.740478s／6,349,164B／停機0s／還原37.291453s**；B dump/load **5.193536s／16,812,186B／停機5.193536s／還原36.851545s**；C `/data` tar **6.389471s／20,964,599B／停機6.389471s／還原24.876387s**。三法指紋、production `vector_search_facts` 與還原環境寫入讀回均相同。
+- **損毀情境**：B dump 截半後 `neo4j-admin database load` `returncode=1`，錯誤首行 `Files: 1/144, data:  0.0%`，明確失敗；損毀目標已拆除。
+- **B5／B6**：報告248另寫 KG#4 三法程序草案並明示「尚未在 KG#4 上執行過，執行前必須使用者逐項同意」；最終兩個容器、兩個 throwaway volume、`D:\Users\666\Desktop\kg-drill-tmp\` 均不存在。`kg2-neo4j` 前後均 `running`／StartedAt `2026-10-02T04:10:38.389676557Z`；`kg2_neo4j_data` 前後 `docker system df -v` 均 `2.268GB`。
+- **收尾測試**：focused **9 passed**；`python -m pytest -q --capture=no -p no:cacheprovider --basetemp .pytest-tmp-g2-q-nocap` 為 **1906 passed、8 warnings、1 subtest passed，44.40 秒**；`check_node_cards.py` 為 3 張節點卡、0 警告。未加 `--capture=no` 的 `-q` 在本機 Windows 約 33% 後長時間無法返回；改以 `--capture=no` 重跑同一套即完成，故以後者作為全量結果，並將前者記為 pytest 輸出捕捉／終端互動異常，非測試失敗。
+- **原始證據**：[報告248](docs/報告/248_G2備份與還原演練執行紀錄.md)、[JSON](data/analysis/disposable_backup_restore_validation_20261002.json)。
+
+**狀態：B0–B6 執行完成；等待規劃對話獨立驗證與使用者裁示。**
+
 ## 2026-10-02（報告246；W0–W5 Codex 執行，待規劃對話獨立驗證）
 
 依報告245 順序完成 W0 → W5；本條只記錄 Codex 執行結果，不宣稱規劃對話已驗證，也不宣稱方案 B 已可套用到 KG#4。
