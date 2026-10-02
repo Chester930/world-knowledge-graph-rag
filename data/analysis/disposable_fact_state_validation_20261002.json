@@ -1,0 +1,245 @@
+{
+  "synthetic_kg_id": "ca81e7a8-98fd-4145-b7e3-44289d0dcf97",
+  "c1": {
+    "current": {
+      "returned": [
+        {
+          "fixture_id": "c1-old",
+          "key": [
+            "同一主詞",
+            "RELATED_TO",
+            "同一受詞"
+          ],
+          "lifecycle_state": "已被取代",
+          "score": 1.0
+        }
+      ]
+    },
+    "proposal": {
+      "raw": [
+        {
+          "fixture_id": "c1-old",
+          "key": [
+            "同一主詞",
+            "RELATED_TO",
+            "同一受詞"
+          ],
+          "lifecycle_state": "已被取代",
+          "score": 1.0
+        },
+        {
+          "fixture_id": "c1-new",
+          "key": [
+            "同一主詞",
+            "RELATED_TO",
+            "同一受詞"
+          ],
+          "lifecycle_state": "有效",
+          "score": 0.99736214
+        },
+        {
+          "fixture_id": "c4-missing",
+          "key": [
+            "舊資料主詞",
+            "RELATED_TO",
+            "舊資料受詞"
+          ],
+          "lifecycle_state": null,
+          "score": 0.50197864
+        },
+        {
+          "fixture_id": "c2-current",
+          "key": [
+            "C2-A",
+            "RELATED_TO",
+            "C2-B"
+          ],
+          "lifecycle_state": "有效",
+          "score": 0.5
+        },
+        {
+          "fixture_id": "c4-superseded",
+          "key": [
+            "舊資料主詞",
+            "RELATED_TO",
+            "舊資料受詞"
+          ],
+          "lifecycle_state": "已被取代",
+          "score": 0.5
+        }
+      ],
+      "returned": [
+        {
+          "fixture_id": "c1-new",
+          "key": [
+            "同一主詞",
+            "RELATED_TO",
+            "同一受詞"
+          ],
+          "lifecycle_state": "有效",
+          "score": 0.99736214
+        }
+      ]
+    },
+    "matches_inference": true,
+    "unexpected_findings": []
+  },
+  "c2": {
+    "current": {
+      "before_fact_count": 1,
+      "revoke_stats": {
+        "facts_deleted": 1,
+        "edges_updated": 0,
+        "edges_deleted": 1
+      },
+      "after_fact_count": 0
+    },
+    "proposal": {
+      "state": "已駁回",
+      "events_json": "[{\"event_type\": \"抽取完成\"}, {\"event_type\": \"驗證通過\"},{\"event_type\":\"撤銷\",\"reason\":\"synthetic P3 revoke\"}]",
+      "retrievable_count": 0
+    },
+    "matches_inference": true,
+    "unexpected_findings": []
+  },
+  "c3": {
+    "current": {
+      "bfs_return_count": 1,
+      "bfs_seconds": 0.334259
+    },
+    "proposal": {
+      "one_fact": {
+        "fact_count": 1,
+        "retrievable_count": 0
+      },
+      "about_1000_facts": {
+        "fact_count": 1001,
+        "retrievable_count": 0
+      },
+      "about_1000_query_seconds": 0.167762
+    },
+    "matches_inference": true,
+    "unexpected_findings": []
+  },
+  "c4": {
+    "current": {
+      "returned": [
+        {
+          "fixture_id": "c4-superseded",
+          "key": [
+            "舊資料主詞",
+            "RELATED_TO",
+            "舊資料受詞"
+          ],
+          "lifecycle_state": "已被取代",
+          "score": 1.0
+        }
+      ]
+    },
+    "proposal": {
+      "raw": [
+        {
+          "fixture_id": "c4-superseded",
+          "key": [
+            "舊資料主詞",
+            "RELATED_TO",
+            "舊資料受詞"
+          ],
+          "lifecycle_state": "已被取代",
+          "score": 1.0
+        },
+        {
+          "fixture_id": "c4-missing",
+          "key": [
+            "舊資料主詞",
+            "RELATED_TO",
+            "舊資料受詞"
+          ],
+          "lifecycle_state": null,
+          "score": 0.99016762
+        },
+        {
+          "fixture_id": "c1-new",
+          "key": [
+            "同一主詞",
+            "RELATED_TO",
+            "同一受詞"
+          ],
+          "lifecycle_state": "有效",
+          "score": 0.55248028
+        },
+        {
+          "fixture_id": "c2-proposal",
+          "key": [
+            "C2-A",
+            "RELATED_TO",
+            "C2-B"
+          ],
+          "lifecycle_state": "已駁回",
+          "score": 0.5
+        },
+        {
+          "fixture_id": "c1-old",
+          "key": [
+            "同一主詞",
+            "RELATED_TO",
+            "同一受詞"
+          ],
+          "lifecycle_state": "已被取代",
+          "score": 0.5
+        }
+      ],
+      "returned": [
+        {
+          "fixture_id": "c4-missing",
+          "key": [
+            "舊資料主詞",
+            "RELATED_TO",
+            "舊資料受詞"
+          ],
+          "lifecycle_state": null,
+          "score": 0.99016762
+        }
+      ]
+    },
+    "matches_inference": true,
+    "unexpected_findings": []
+  },
+  "c5": {
+    "current": {
+      "cached_state_after_append": "有效",
+      "event_count": 2,
+      "replay_final_state": "有效",
+      "replay_ok": true
+    },
+    "proposal": {
+      "drift_state": "已駁回",
+      "audit_detected_drift": true
+    },
+    "matches_inference": true,
+    "unexpected_findings": []
+  },
+  "kg4_baseline": {
+    "status": "running",
+    "started_at": "2026-10-01T12:36:49.303373783Z"
+  },
+  "kg4_final": {
+    "status": "running",
+    "started_at": "2026-10-01T12:36:49.303373783Z"
+  },
+  "kg4_unchanged": true,
+  "environment_observations": [
+    "bfs_query 在僅建立 RELATED_TO 的合成圖上仍枚舉既有 SVO 關係型別清單；Neo4j 對不存在的其他型別發出通知，但 RELATED_TO 結果仍為 1 筆。",
+    "production import 產生既有 requests 依賴版本警告；未呼叫 LLM、embedding 或 Ollama。"
+  ],
+  "temp_teardown": {
+    "present_before": [
+      "kg2-throwaway-neo4j"
+    ],
+    "stop_exit_code": 0,
+    "rm_exit_code": 0,
+    "present_after": []
+  },
+  "temp_absent_after": true,
+  "status": "completed"
+}
