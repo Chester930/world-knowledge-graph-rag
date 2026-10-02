@@ -1,0 +1,325 @@
+{
+  "w1": {
+    "production_path": "merge_triples_to_graph -> merge_entity",
+    "source_doc_count": 3,
+    "entity_promotion": {
+      "expected": true,
+      "actual": true,
+      "final_subject_targets": [
+        "勞動法"
+      ]
+    },
+    "fact_links_survive": true,
+    "stale_subject_count": 2,
+    "stale_fact_text_count": 2,
+    "fact_count": 3
+  },
+  "w2": {
+    "dry_run_stats": {
+      "subject_changed": 2,
+      "object_changed": 0,
+      "rel_type_changed": 0,
+      "rel_type_skipped_multi_edge": 0,
+      "rel_type_skipped_no_edge": 0,
+      "unchanged": 1,
+      "facts_without_links": 0
+    },
+    "actual_stats": {
+      "subject_changed": 2,
+      "object_changed": 0,
+      "rel_type_changed": 0,
+      "rel_type_skipped_multi_edge": 0,
+      "rel_type_skipped_no_edge": 0,
+      "unchanged": 1,
+      "facts_without_links": 0
+    },
+    "dry_run_equals_actual": true,
+    "dry_run_no_write": true,
+    "idempotent_second_run_changed_zero": true,
+    "second_run_stats": {
+      "subject_changed": 0,
+      "object_changed": 0,
+      "rel_type_changed": 0,
+      "rel_type_skipped_multi_edge": 0,
+      "rel_type_skipped_no_edge": 0,
+      "unchanged": 3,
+      "facts_without_links": 0
+    },
+    "only_three_attributes": true,
+    "second_run_no_additional_write": true
+  },
+  "w3": {
+    "backfill_first_updated": 2,
+    "backfill_first_encode_calls": 2,
+    "backfill_encode_equals_text_updates": true,
+    "backfill_second_updated": 0,
+    "backfill_second_encode_calls": 0,
+    "vector_keys_before_resync": [
+      [
+        "勞動法規",
+        "RELATED_TO",
+        "對象甲"
+      ],
+      [
+        "勞動法",
+        "RELATED_TO",
+        "對象甲"
+      ]
+    ],
+    "vector_keys_after_resync": [
+      [
+        "勞動法",
+        "RELATED_TO",
+        "對象甲"
+      ]
+    ],
+    "vector_dedupe_before_count": 2,
+    "vector_dedupe_after_count": 1,
+    "vector_dedupe_after_one": true,
+    "split_fact_lines_before": {
+      "bfs": 1,
+      "fact": 1
+    },
+    "split_fact_lines_after": {
+      "bfs": 1,
+      "fact": 0
+    },
+    "bfs_fact_key_dedup_after": true,
+    "graph_invariants_preserved_through_w3": true,
+    "w3_text_update_count": 2
+  },
+  "w4": {
+    "boundary": {
+      "dry_run_stats": {
+        "subject_changed": 4,
+        "object_changed": 3,
+        "rel_type_changed": 1,
+        "rel_type_skipped_multi_edge": 1,
+        "rel_type_skipped_no_edge": 2,
+        "unchanged": 1,
+        "facts_without_links": 2
+      },
+      "actual_stats": {
+        "subject_changed": 4,
+        "object_changed": 3,
+        "rel_type_changed": 1,
+        "rel_type_skipped_multi_edge": 1,
+        "rel_type_skipped_no_edge": 2,
+        "unchanged": 1,
+        "facts_without_links": 2
+      },
+      "dry_run_equals_actual": true,
+      "dry_run_no_write": true,
+      "idempotent_second_run_changed_zero": true,
+      "second_run_stats": {
+        "subject_changed": 0,
+        "object_changed": 0,
+        "rel_type_changed": 0,
+        "rel_type_skipped_multi_edge": 1,
+        "rel_type_skipped_no_edge": 2,
+        "unchanged": 5,
+        "facts_without_links": 2
+      },
+      "only_three_attributes": true,
+      "edge_and_node_counts_preserved": true,
+      "boundary_fact_rows": [
+        {
+          "fixture_id": "consistent",
+          "subject": "一致主詞",
+          "object": "一致受詞",
+          "rel_type": "UNIQUE_EDGE",
+          "fact_text": "一致主詞 合成動詞 一致受詞",
+          "verb": "合成動詞",
+          "subject_target": "一致主詞",
+          "object_target": "一致受詞"
+        },
+        {
+          "fixture_id": "empty-values",
+          "subject": "空主詞",
+          "object": "空受詞",
+          "rel_type": "UNIQUE_EDGE",
+          "fact_text": "合成動詞",
+          "verb": "合成動詞",
+          "subject_target": "空主詞",
+          "object_target": "空受詞"
+        },
+        {
+          "fixture_id": "missing-both",
+          "subject": "舊主詞",
+          "object": "舊受詞",
+          "rel_type": "OLD",
+          "fact_text": "舊主詞 合成動詞 舊受詞",
+          "verb": "合成動詞",
+          "subject_target": null,
+          "object_target": null
+        },
+        {
+          "fixture_id": "missing-object-link",
+          "subject": "舊主詞",
+          "object": "舊受詞",
+          "rel_type": "OLD",
+          "fact_text": "舊主詞 合成動詞 舊受詞",
+          "verb": "合成動詞",
+          "subject_target": "缺連結主詞",
+          "object_target": null
+        },
+        {
+          "fixture_id": "multi-edge",
+          "subject": "多邊主詞",
+          "object": "多邊受詞",
+          "rel_type": "OLD",
+          "fact_text": "舊多邊主詞 合成動詞 舊多邊受詞",
+          "verb": "合成動詞",
+          "subject_target": "多邊主詞",
+          "object_target": "多邊受詞"
+        },
+        {
+          "fixture_id": "no-edge",
+          "subject": "無邊主詞",
+          "object": "無邊受詞",
+          "rel_type": "OLD",
+          "fact_text": "舊無邊主詞 合成動詞 舊無邊受詞",
+          "verb": "合成動詞",
+          "subject_target": "無邊主詞",
+          "object_target": "無邊受詞"
+        },
+        {
+          "fixture_id": "whitespace-name",
+          "subject": "  含 空白  ",
+          "object": "空白受詞",
+          "rel_type": "OLD",
+          "fact_text": "舊主詞 合成動詞 空白受詞",
+          "verb": "合成動詞",
+          "subject_target": "  含 空白  ",
+          "object_target": "空白受詞"
+        }
+      ]
+    },
+    "isolation": {
+      "kg_b_before": {
+        "node_count": 3,
+        "edge_count": 3,
+        "entity_count": 2,
+        "entity_names_digest": "f3b7132c5bf888e4d0c5fbbe5891c4e6051a578f5931d0b01b41adda7fb3ab88",
+        "edge_digest": "3ca0f35b5ba148a2b3737089d0e61edd33b2b721204f406deda431285638c2bb",
+        "fact_count": 1,
+        "fact_all_digest": "a53415cb78c55ab2828e3d51c8bf45cb29d75a38a58497c987c35ede33bc77f3",
+        "fact_non_target_digest": "2c61e9d5891368eef37179321011dafbe35ebdf3ba43fb6d37625667f8e81f99"
+      },
+      "kg_b_after": {
+        "node_count": 3,
+        "edge_count": 3,
+        "entity_count": 2,
+        "entity_names_digest": "f3b7132c5bf888e4d0c5fbbe5891c4e6051a578f5931d0b01b41adda7fb3ab88",
+        "edge_digest": "3ca0f35b5ba148a2b3737089d0e61edd33b2b721204f406deda431285638c2bb",
+        "fact_count": 1,
+        "fact_all_digest": "a53415cb78c55ab2828e3d51c8bf45cb29d75a38a58497c987c35ede33bc77f3",
+        "fact_non_target_digest": "2c61e9d5891368eef37179321011dafbe35ebdf3ba43fb6d37625667f8e81f99"
+      },
+      "kg_b_fact_before": [
+        {
+          "fixture_id": "isolated",
+          "subject": "隔離舊主詞",
+          "object": "隔離舊受詞",
+          "rel_type": "OLD",
+          "fact_text": "隔離舊主詞 合成動詞 隔離舊受詞",
+          "verb": "合成動詞",
+          "subject_target": "隔離主詞",
+          "object_target": "隔離受詞"
+        }
+      ],
+      "kg_b_fact_after": [
+        {
+          "fixture_id": "isolated",
+          "subject": "隔離舊主詞",
+          "object": "隔離舊受詞",
+          "rel_type": "OLD",
+          "fact_text": "隔離舊主詞 合成動詞 隔離舊受詞",
+          "verb": "合成動詞",
+          "subject_target": "隔離主詞",
+          "object_target": "隔離受詞"
+        }
+      ],
+      "kg_b_unchanged": true
+    },
+    "scale_17000": {
+      "fact_count_expected": 17000,
+      "stale_count_expected": 1800,
+      "fact_count_actual": 17000,
+      "dry_run_stats": {
+        "subject_changed": 1800,
+        "object_changed": 0,
+        "rel_type_changed": 0,
+        "rel_type_skipped_multi_edge": 0,
+        "rel_type_skipped_no_edge": 0,
+        "unchanged": 15200,
+        "facts_without_links": 0
+      },
+      "actual_stats": {
+        "subject_changed": 1800,
+        "object_changed": 0,
+        "rel_type_changed": 0,
+        "rel_type_skipped_multi_edge": 0,
+        "rel_type_skipped_no_edge": 0,
+        "unchanged": 15200,
+        "facts_without_links": 0
+      },
+      "dry_run_equals_actual": true,
+      "idempotent_second_run_changed_zero": true,
+      "second_run_stats": {
+        "subject_changed": 0,
+        "object_changed": 0,
+        "rel_type_changed": 0,
+        "rel_type_skipped_multi_edge": 0,
+        "rel_type_skipped_no_edge": 0,
+        "unchanged": 17000,
+        "facts_without_links": 0
+      },
+      "timings_seconds": {
+        "dry_run_seconds": 0.8504,
+        "apply_seconds": 0.9664,
+        "idempotent_second_seconds": 0.6703
+      },
+      "container_memory_limit": "3g",
+      "completed": true,
+      "invariants_preserved": true
+    }
+  },
+  "status": "completed",
+  "w0": {
+    "baseline_expected": "2026-10-02T04:10:38.389676557Z",
+    "kg4_start": {
+      "status": "running",
+      "started_at": "2026-10-02T04:10:38.389676557Z"
+    },
+    "kg4_end": {
+      "status": "running",
+      "started_at": "2026-10-02T04:10:38.389676557Z"
+    },
+    "kg4_unchanged": true,
+    "container_args": {
+      "name": "kg2-throwaway-neo4j",
+      "image": "neo4j:5.26-enterprise",
+      "ports": [
+        27474,
+        27687
+      ],
+      "memory": "3g",
+      "volume": false,
+      "bind_mount": false,
+      "pull": false
+    }
+  },
+  "w5": {
+    "teardown": {
+      "present_before": [
+        "kg2-throwaway-neo4j"
+      ],
+      "stop_exit_code": 0,
+      "rm_exit_code": 0,
+      "present_after": []
+    },
+    "temp_absent_after": true,
+    "kg4_unchanged": true
+  }
+}

@@ -1,7 +1,22 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告243 V0–V5 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告246 W0–W5 Codex 執行；等待規劃對話獨立驗證；**目前無進行中的派工**）
+
+## 2026-10-02（報告246；W0–W5 Codex 執行，待規劃對話獨立驗證）
+
+依報告245 順序完成 W0 → W5；本條只記錄 Codex 執行結果，不宣稱規劃對話已驗證，也不宣稱方案 B 已可套用到 KG#4。
+
+- **W0**：新增 `scripts/analysis/disposable_resync_solution_b_validation.py`、`tests/scripts/test_disposable_resync_solution_b_validation.py`、輸出 JSON；import 重用 P3／P4 安全閘門與容器函式，自訂 `EXPECTED_KG4_STARTED_AT=2026-10-02T04:10:38.389676557Z`，未呼叫舊基準 runner。focused **10 passed**。
+- **W1**：以 production `merge_triples_to_graph → merge_entity`、3 個不同 `source_doc_id` 重現 `勞動法規 → 勞動法` 標準名提升；3 個 Fact 中 2 個扁平 `subject`／`fact_text` 過時，HAS 邊存活。
+- **W2**：W1 小圖 dry-run／實際皆 `subject_changed=2`、其餘目標變更 0；統計完全相等、dry-run 不寫、第二次三目標變更 0、只改三目標屬性。邊界圖測得 subject/object/rel_type 變更 4／3／1，多邊／無邊跳過 1／2，缺 HAS 計數 2；另一 KG 完全未變。
+- **W3**：production `backfill_fact_text_embeddings` 第一次更新／假 provider encode 均 2，第二次均 0；vector 去重鍵 2→1，`split_fact_lines` BFS／Fact 1+1→1+0。
+- **W4**：3GB 臨時容器內 17,000 Fact／1,800 過時完成；dry-run **0.8504s**、套用 **0.9664s**、冪等第二次 **0.6703s**；dry-run＝實際、冪等、圖不變。
+- **W5**：`kg2-throwaway-neo4j` `stop=0`／`rm=0`，精確名稱拆除後無殘留；`kg2-neo4j` 前後均 `running` 且 StartedAt 為 `2026-10-02T04:10:38.389676557Z`，`kg4_unchanged=true`。原始證據：[報告246](docs/報告/246_G1重同步方案B臨時容器驗證執行紀錄.md)、[JSON](data/analysis/disposable_resync_solution_b_validation_20261002.json)。
+- **回歸**：原有測試基準（排除本次 10 個測試）1887 passed／0 failed；含新增測試 1897 passed／0 failed；節點卡 3 張、0 警告。
+- **誠實揭露**：三次未採用的中間結果分別暴露 async driver 收尾、裸容器索引初始化、假 provider 主客體誤合併問題；均修正後重跑，未把中間結果當結論。報告246另記錄了「驗證腳本先建／等 production vector index」這項環境補充。
+
+**狀態：W0–W5 執行完成；等待規劃對話獨立驗證與使用者後續裁示。**
 
 ## 2026-10-02（報告243；V0–V5 Codex 執行，待規劃對話獨立驗證）
 
