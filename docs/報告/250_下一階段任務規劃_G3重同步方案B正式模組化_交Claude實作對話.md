@@ -95,4 +95,16 @@ Fact 節點的扁平屬性 `subject`／`object`／`rel_type` 是建立時從實�
 
 ## 10. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成，**尚未派工**；待使用者開新 Claude 實作對話並貼上交接指令。KG#4 仍無任何寫入核准。
+✅ **G3 已於 2026-10-02 由規劃對話獨立驗證通過**（實作者＝新 Claude 實作對話，commit `46a80c9`；執行紀錄見[報告251](251_G3重同步方案B正式模組化執行紀錄.md)）。
+
+**規劃對話驗證摘要**：
+1. **範圍**：`git diff --name-status 6b18a51..HEAD` 僅 `services/fact_flat_resync.py`（新，158 行）、`tests/services/test_fact_flat_resync.py`（新）、報告251、索引一行、HANDOVER 頂部條目；既有 production 檔、既有 `disposable_*` 腳本零變動。
+2. **逐函式 `ast.dump`（去 docstring）對照原型**：`SYNC_ATTRIBUTES`／`_new_stats`／`_fact_sync_rows`／`_plan_resync_updates`／`resync_fact_flat_properties` **完全相同**；`_apply_updates` 唯一差異＝開頭新增白名單檢查（先全檢、違規 `ValueError`、零語句），其後 Cypher 與筆數檢查逐字相同（已讀碼確認）；模組內無新增函式。
+3. **等價性隨機測試（我自寫）**：原型與新模組的 `_plan_resync_updates` 餵 20,000 組隨機列（含 `None`、邊數 0／1／2／3／`None`、`edge_types` 空／單／雙／`None`、缺連結），`sync_rel_type` 兩種 → **40,000 次比對 0 不一致**。
+4. **零接線**：全 repo `*.py` 只有測試引用 `fact_flat_resync`；模組不含 `17990`／`bolt://`／`neo4j://`／`os.environ`／`core.database`／`core.config`／`dotenv`。
+5. **全量 pytest 1936 passed**（1906＋30，64 秒）、`check_node_cards.py` 3 張 0 警告；`.env` 敏感值對新檔 0 命中。
+6. **未驗證／限制**：僅假 driver，Cypher 在 Neo4j 的實際行為仍依 G1（報告246）；整合測試未做。
+
+**⚠️ 環境事件（與 G3 無關，驗證時發現）**：`kg2-neo4j` 的 StartedAt 已變為 **`2026-10-02T11:09:32.79429649Z`**（舊基準 `09:14:47.91915022Z` 失效）。`docker ps -a` 顯示 Docker 整體在約 11:09 重啟：`kg2-neo4j`（restart 策略，現 `Up`／healthy）、`n8n-n8n-1`、`dify-*` 全部同一秒重啟／停止，**n8n 與 dify 目前為 Exited**；`RestartCount=0`、`ExitCode=0`、`OOMKilled=false`，無 `throwaway` 殘留容器。實作者回報未操作 docker；原因待使用者確認（重開機／Docker Desktop 重啟？）。**之後所有新腳本須改用新基準；重啟後 KG#4 資料完整性尚未做指紋複驗（建議做一次唯讀指紋比對，對照報告249 的 `fp_*.json`）。**
+
+**下一步（待使用者同意）**：①確認新基準與 n8n／dify 是否需要重新啟動；②複驗 KG#4 指紋（唯讀）；③派「回填向量重算數與成本估算」（唯讀；以新模組＋`_verbalize_fact` 在記憶體中計算重同步後有多少 `fact_text` 會改變）；④G4 仍須再備份＋逐項同意。

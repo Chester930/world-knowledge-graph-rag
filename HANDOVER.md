@@ -7,7 +7,9 @@
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
-## 2026-10-02（報告250）：**G3 任務書已寫成，尚未派工**——[報告250](docs/報告/250_下一階段任務規劃_G3重同步方案B正式模組化_交Claude實作對話.md)
+## 2026-10-02（報告250 §10）：**G3 已實作並由規劃對話獨立驗證通過**（`46a80c9`；pytest 1936 passed；AST 對照＋4 萬次隨機等價 0 不一致；零接線）。⚠️ 驗證時發現 **Docker 整體重啟**：`kg2-neo4j` 新 StartedAt＝**`2026-10-02T11:09:32.79429649Z`**（舊基準 `09:14:47…` 失效，新腳本須改用新基準）；n8n／dify 目前 Exited；KG#4 重啟後指紋尚未複驗。詳見[報告250 §10](docs/報告/250_下一階段任務規劃_G3重同步方案B正式模組化_交Claude實作對話.md)。下一步待使用者確認後：唯讀指紋複驗 → 回填向量重算數估算 → G4（需再備份＋逐項同意）。
+
+## 2026-10-02（報告250）：**G3 任務書已寫成，尚未派工**（已被上一條取代）——[報告250](docs/報告/250_下一階段任務規劃_G3重同步方案B正式模組化_交Claude實作對話.md)
 
 使用者「同意建議」後，規劃對話寫成 G3 任務書：把 G1 驗證過的原型（`scripts/analysis/disposable_resync_solution_b_validation.py:172–285`）搬成正式模組 `services/fact_flat_resync.py`（簽名 `resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)`，Cypher 與判定邏輯逐字不改、預設 `dry_run`、零接線），以**假 driver** 單元測試（純計畫函式表格驅動、dry_run 不送寫入語句、屬性白名單、零接線與無連線字串的結構守衛）。**不連 KG#4、不啟動 docker、不改任何既有檔**；執行者＝使用者新開的 Claude 實作對話，新報告自 **251** 起；驗收由規劃對話做（含原型 vs 新模組等價性隨機測試）。KG#4 仍無任何寫入核准；G4 須再備份＋使用者逐項同意；新基準 `kg2-neo4j` StartedAt＝`2026-10-02T09:14:47.91915022Z`。
 
