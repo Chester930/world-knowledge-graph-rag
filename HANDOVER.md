@@ -23,6 +23,10 @@ Q1 `scripts/analysis/pilot_version_corpus_builder.py`：collector 歷史檔 → 
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-03（報告262 §9）：**L3′ Q1／Q2 已由規劃對話獨立驗證通過（`f724562`；pytest 2114 passed）；下一步 Q3（規劃對話起試點容器、匯入、小型試跑、抽取）**
+
+我**獨立重算**（直接讀 collector 最新 snapshot）：209 版本／111 條文章／98 相鄰對；same_hash 23／format_only 31／substantive 44，與 manifest 相同；128 個條文版本逐條比對 0 不一致；輸出與 KG#4 `original.md` 檔頭位元組相同；重跑決定性（5 檔 SHA-256 相同）；`--plan`：4 文件／128 LawArticle／128 SVO chunk、`connects:false`。裁定：衝突條文實質修改對仍入選（`is_conflict` 標記，主指標排除）、對照組全在勞基法（接受並揭露）。**重要限制**：collector `content` 無換行，與 KG#4 `original.md`（有項目換行與章標題）不同，試點抽取品質不可與 KG#4 比較；試點內部新舊版同源，時間感知驗證不受影響。Q3 前仍須確認：無其他對話佔用 Ollama／記憶體、Ollama 0.35.0（≠凍結評測 0.34.2）。報告下一編號 **264**（規劃對話）。KG#4 仍無寫入核准。
+
 ## 2026-10-03（報告262）：使用者「依照建議繼續」＝採納 D3／D5 等建議；**L3′ 試點 KG 計畫已寫成，Q1／Q2 離線前置任務已派給實作對話**
 
 [報告262](docs/報告/262_下一階段任務規劃_L3試點KG條文版本_計畫與前置任務_交Claude實作對話.md)：**D3 決定**＝條文版本身分（pcode, 正規化條號, `valid_from`）、以最新 snapshot 檔（`…093233Z`）為權威、`version_id` 不一致者（勞基法第 86 條、請假規則第 12 條）列入 `conflicts` 並排除出對照組、`valid_to` 由下一版 `valid_from` 推導（不修 collector）；**D5**＝規劃對話另起專用容器 `kg2-pilot-neo4j`（具名磁碟區 `kg2-pilot-data`、埠 28474／28687、3 GB，不碰 `kg2-neo4j`／KG#4）。**試點規模（P1 盤點）**：111 條文章、98 條多版本、109 組相鄰版本對＝23 雜湊相同／42 僅排版／**44 實質修改**；建議範圍＝44 組實質修改的舊＋新版＋各約 10 組對照，約 100 個條文版本、100–200 個 SVO chunk、抽取預估數小時（本機 `qwen2.5:7b`；Ollama 現為 **0.35.0**，凍結評測為 0.34.2，版本漂移須揭露、不與凍結基準直接比較）。**階段**：Q1 試點語料建構器、Q2 匯入偵察（`pilot_import.py --plan／--execute`，實作者不得執行）＝實作對話（離線）；Q3 起容器＋匯入＋抽取＝規劃對話；Q4 版本屬性／連動／`as_of` 原型；Q5 時間感知問題集與評測；Q6 報告與是否進 L4。實作者報告自 **263**、規劃對話下一編號 **264**。附帶小項：`relation_lifecycle.py` 模組 docstring 同步（「不比較日期」）。KG#4 仍無寫入核准。
