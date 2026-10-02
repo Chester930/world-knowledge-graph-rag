@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-10-02 17:30（**KG#4 冷備份已完成並以真實資料驗證可還原，見報告249**；`kg2-neo4j` 新基準 StartedAt＝`2026-10-02T09:14:47.91915022Z`；目前無進行中的派工）
 
+## 2026-10-02（報告253；E1/E2/E4 結構由 Claude 實作對話完成，E0/E3 實跑待規劃對話）：[報告253](docs/報告/253_回填向量重算數估算執行紀錄.md)
+
+新增 `scripts/analysis/kg4_backfill_reencode_estimate.py`（`plan_reencode` 純函式＋唯讀收集；密碼以 `--password` 傳入、不讀 `.env`）與 15 個測試。**實作對話未連 KG#4、未碰 docker、未呼叫 embedding provider**；E0／E3 連線與數字由已獲授權的規劃對話執行，報告253 §4 數字欄位待填。
+
 ## 2026-10-02（報告251；G3 R0–R5 Claude 實作對話執行，待規劃對話獨立驗證）：[報告251](docs/報告/251_G3重同步方案B正式模組化執行紀錄.md)
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**

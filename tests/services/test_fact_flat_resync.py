@@ -225,7 +225,8 @@ def test_zero_wiring():
             continue
         if "fact_flat_resync" in path.read_text(encoding="utf-8", errors="ignore"):
             hits.append(str(rel))
-    assert hits == []
+    # 報告252 §4-2 明定唯讀估算腳本引用本模組的純計畫函式（不連線、不寫入）；僅此一處例外。
+    assert hits == [str(Path("scripts") / "analysis" / "kg4_backfill_reencode_estimate.py")]
 
 
 def test_no_connection_strings_or_secrets():
