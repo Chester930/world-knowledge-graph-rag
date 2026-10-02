@@ -1,7 +1,22 @@
 # 跨 Agent 接續進度
 
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
-> **最後更新**：2026-10-02（報告241 T0／T1／T2 Codex 執行、規劃對話已獨立驗證通過；**目前無進行中的派工**）
+> **最後更新**：2026-10-02（報告243 V0–V5 Codex 執行，待規劃對話獨立驗證；**目前無進行中的派工**）
+
+## 2026-10-02（報告243；V0–V5 Codex 執行，待規劃對話獨立驗證）
+
+依報告242 順序完成 V0 → V5；本條只記錄 Codex 執行結果，不宣稱規劃對話已驗證。
+
+- **V0**：新增 `scripts/analysis/disposable_write_path_validation.py` 與 `tests/scripts/test_disposable_write_path_validation.py`；import 報告241 的安全閘門／固定容器生命週期／唯讀 `kg2-neo4j` 快照，但未呼叫舊基準 `_run_with_password`；新腳本自訂 `EXPECTED_KG4_STARTED_AT=2026-10-02T04:10:38.389676557Z`。focused 新舊測試合計 **19 passed**。
+- **V1／W1**：production `_create_fact_node` 與腳本內提案 CREATE 均可建立；兩者可被 `vector_search_facts` 找到，`backfill_fact_text_embeddings` 更新 2 筆且提案生命週期屬性保留；現行 `revoke_chunk_facts` 各刪除 1 個 Fact。H6 符合。
+- **V2／W4**：純改名與撞名均實際執行；Fact、HAS_SUBJECT／HAS_OBJECT 與生命週期屬性存活，扁平名稱過時；撞名下兩個不同扁平鍵的 Fact 都被檢索保留。H1／H2 符合；第二次 W4 執行全 0。
+- **V3／W5**：production 關係向量 backfill 實際將 1 條 `RELATED_TO` 邊改為 `APPLIES_TO`；Fact `rel_type` 仍為 `RELATED_TO`，BFS／Fact 兩行皆保留。H3／H4 符合。額外發現新邊保留 `citations_json`／`confidence` 但未複製 `verb_embedding`。
+- **V4**：驗證用名稱同步第一次修正 2 個 Fact、第二次 0；唯一關係型別條件下的 W5 `rel_type` 同步第一次 1、第二次 0。H5 符合。
+- **V5**：臨時容器 `stop=0`／`rm=0`，拆除後無 `kg2-throwaway-neo4j`；`kg2-neo4j` 前後均 `running` 且 `StartedAt=2026-10-02T04:10:38.389676557Z`，`kg4_unchanged=true`。原始證據：[報告243](docs/報告/243_P4寫入端風險驗證執行紀錄.md)、[JSON](data/analysis/disposable_write_path_validation_20261002.json)。
+- **假說總結**：H1／H2／H3／H4／H5／H6 **均符合預測**。全量 pytest `1887 passed／0 failed`（8 warnings、1 subtests passed）；`check_node_cards.py` 為 3 張、0 警告。
+- **誠實揭露**：初次 harness 執行發現 W4／W5 共用 `RELATED_TO` 導致跨情境污染；該次結果未採用，改用不同合法關係型別後完整重跑。限制仍為合成資料／單一小圖，只驗證 W1／W4／W5，不代表寫入端已可落地。
+
+**狀態：V0–V5 執行完成；等待規劃對話獨立驗證與使用者裁示。**
 
 ## 2026-10-02（報告241；T0／T1／T2 Codex 執行，待規劃對話獨立驗證）
 

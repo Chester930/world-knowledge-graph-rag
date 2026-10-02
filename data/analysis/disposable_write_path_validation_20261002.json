@@ -1,0 +1,617 @@
+{
+  "synthetic_kg_id": "c1f58fe8-4ca0-48e1-9615-1e39c63cb05e",
+  "v1": {
+    "prediction": "H6",
+    "production_create_returned": true,
+    "current": {
+      "search_returned": true,
+      "before": {
+        "fixture_id": "w1-current",
+        "subject": "W1-current-subject",
+        "rel_type": "RELATED_TO",
+        "object": "W1-current-object",
+        "fact_text": "W1 current legacy text",
+        "lifecycle_state": null,
+        "lifecycle_events_json": null,
+        "source_doc_id": "89e5a113-9087-4083-8626-5599f3bf2be3",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id"
+        ]
+      },
+      "after_backfill": {
+        "fixture_id": "w1-current",
+        "subject": "W1-current-subject",
+        "rel_type": "RELATED_TO",
+        "object": "W1-current-object",
+        "fact_text": "W1-current-subject 關聯 W1-current-object",
+        "lifecycle_state": null,
+        "lifecycle_events_json": null,
+        "source_doc_id": "89e5a113-9087-4083-8626-5599f3bf2be3",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id"
+        ]
+      },
+      "revoke": {
+        "facts_deleted": 1,
+        "edges_updated": 0,
+        "edges_deleted": 0
+      },
+      "after_revoke": null
+    },
+    "proposal": {
+      "search_returned": true,
+      "before": {
+        "fixture_id": "w1-proposal",
+        "subject": "W1-proposal-subject",
+        "rel_type": "RELATED_TO",
+        "object": "W1-proposal-object",
+        "fact_text": "W1 proposal legacy text",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "6f3ae70d-05c9-4ee0-8b18-c1795c27383d",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "after_backfill": {
+        "fixture_id": "w1-proposal",
+        "subject": "W1-proposal-subject",
+        "rel_type": "RELATED_TO",
+        "object": "W1-proposal-object",
+        "fact_text": "W1-proposal-subject RELATED_TO W1-proposal-object",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "6f3ae70d-05c9-4ee0-8b18-c1795c27383d",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "revoke": {
+        "facts_deleted": 1,
+        "edges_updated": 0,
+        "edges_deleted": 0
+      },
+      "after_revoke": null
+    },
+    "backfill_updated_count": 2,
+    "extra_attributes_preserved_through_backfill": true,
+    "matches_inference": true,
+    "unexpected_findings": [
+      "revoke_chunk_facts 仍依 production 現行行為實體刪除 Fact；額外屬性因此隨節點刪除，並非被單獨保留。"
+    ]
+  },
+  "v2": {
+    "prediction": "H1/H2",
+    "pure_rename": {
+      "stats": {
+        "renamed": 2,
+        "merged": 1,
+        "edges_moved": 1,
+        "edges_unioned": 1,
+        "edges_dropped": 0
+      },
+      "fact": {
+        "fixture_id": "w4-pure",
+        "subject": "职員A",
+        "rel_type": "RELATED_TO",
+        "object": "职務A",
+        "fact_text": "职員A RELATED_TO 职務A",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "cf342f44-025f-4a68-b43c-05886aabea6a",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "links": {
+        "flat_subject": "职員A",
+        "flat_object": "职務A",
+        "subject_target": "職員A",
+        "object_target": "職務A"
+      },
+      "old_entity_count": 0
+    },
+    "collision": {
+      "stats_first_run": {
+        "renamed": 2,
+        "merged": 1,
+        "edges_moved": 1,
+        "edges_unioned": 1,
+        "edges_dropped": 0
+      },
+      "stats_second_run": {
+        "renamed": 0,
+        "merged": 0,
+        "edges_moved": 0,
+        "edges_unioned": 0,
+        "edges_dropped": 0
+      },
+      "fact_old": {
+        "fixture_id": "w4-collision-old",
+        "subject": "职員B",
+        "rel_type": "RELATED_TO",
+        "object": "目標B",
+        "fact_text": "职員B RELATED_TO 目標B",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "f782817a-d5eb-4601-ac07-cdf7145afe9c",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "fact_new": {
+        "fixture_id": "w4-collision-new",
+        "subject": "職員B",
+        "rel_type": "RELATED_TO",
+        "object": "目標B",
+        "fact_text": "職員B RELATED_TO 目標B",
+        "lifecycle_state": "有效",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "5d72d68c-3502-414c-9802-5b7374a90186",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "links_old": {
+        "flat_subject": "职員B",
+        "flat_object": "目標B",
+        "subject_target": "職員B",
+        "object_target": "目標B"
+      },
+      "links_new": {
+        "flat_subject": "職員B",
+        "flat_object": "目標B",
+        "subject_target": "職員B",
+        "object_target": "目標B"
+      },
+      "entity_names_after": [
+        "職員B"
+      ],
+      "vector_search_returned": 2,
+      "vector_search_sources": [
+        "f782817a-d5eb-4601-ac07-cdf7145afe9c",
+        "5d72d68c-3502-414c-9802-5b7374a90186"
+      ],
+      "vector_search_keys": [
+        [
+          "职員B",
+          "RELATED_TO",
+          "目標B"
+        ],
+        [
+          "職員B",
+          "RELATED_TO",
+          "目標B"
+        ]
+      ]
+    },
+    "matches_inference": {
+      "H1": true,
+      "H2": true
+    },
+    "unexpected_findings": [
+      "第二次 W4 批次回傳全 0，純改名與撞名均具冪等性。",
+      "Fact 扁平名稱在 W4 後未自行同步；但 HAS_SUBJECT/HAS_OBJECT 已指向繁體實體。"
+    ]
+  },
+  "v3": {
+    "prediction": "H3/H4",
+    "updated_edges": 1,
+    "relation_after": {
+      "rel_type": "APPLIES_TO",
+      "citations_json": "[{\"source_doc_id\": \"f83b7055-2f11-4fa0-81b4-ce79ac03136d\", \"source_svo_chunk_index\": 1, \"verb\": \"適用\", \"confidence\": 0.9}]",
+      "confidence": 0.9,
+      "verb_embedding": null
+    },
+    "fact_after": {
+      "fixture_id": "w5-fact",
+      "subject": "W5-subject",
+      "rel_type": "RELATED_TO",
+      "object": "W5-object",
+      "fact_text": "W5-subject RELATED_TO W5-object",
+      "lifecycle_state": "候選",
+      "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+      "source_doc_id": "f83b7055-2f11-4fa0-81b4-ce79ac03136d",
+      "source_svo_chunk_index": 1,
+      "property_keys": [
+        "kg_id",
+        "source_doc_id",
+        "fact_embedding",
+        "fact_text",
+        "subject",
+        "confidence",
+        "verb",
+        "rel_type",
+        "source_svo_chunk_index",
+        "object",
+        "fixture_id",
+        "lifecycle_events_json",
+        "lifecycle_state"
+      ]
+    },
+    "bfs_lines": [
+      "- W5-subject 適用 W5-object"
+    ],
+    "fact_lines": [
+      "- W5-subject RELATED_TO W5-object"
+    ],
+    "matches_inference": {
+      "H3": true,
+      "H4": true
+    },
+    "unexpected_findings": [
+      "production backfill 新建型別邊時保留 citations_json/confidence，但未複製 verb_embedding；這不影響 H3/H4，需另列為 W5 寫入規則。"
+    ]
+  },
+  "v4": {
+    "prediction": "H5",
+    "before": {
+      "w4-pure": {
+        "fixture_id": "w4-pure",
+        "subject": "职員A",
+        "rel_type": "RELATED_TO",
+        "object": "职務A",
+        "fact_text": "职員A RELATED_TO 职務A",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "cf342f44-025f-4a68-b43c-05886aabea6a",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "w4-collision-old": {
+        "fixture_id": "w4-collision-old",
+        "subject": "职員B",
+        "rel_type": "RELATED_TO",
+        "object": "目標B",
+        "fact_text": "职員B RELATED_TO 目標B",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "f782817a-d5eb-4601-ac07-cdf7145afe9c",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "w4-collision-new": {
+        "fixture_id": "w4-collision-new",
+        "subject": "職員B",
+        "rel_type": "RELATED_TO",
+        "object": "目標B",
+        "fact_text": "職員B RELATED_TO 目標B",
+        "lifecycle_state": "有效",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "5d72d68c-3502-414c-9802-5b7374a90186",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "w5-fact": {
+        "fixture_id": "w5-fact",
+        "subject": "W5-subject",
+        "rel_type": "RELATED_TO",
+        "object": "W5-object",
+        "fact_text": "W5-subject RELATED_TO W5-object",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "f83b7055-2f11-4fa0-81b4-ce79ac03136d",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      }
+    },
+    "after_name_sync": {
+      "w4-pure": {
+        "fixture_id": "w4-pure",
+        "subject": "職員A",
+        "rel_type": "RELATED_TO",
+        "object": "職務A",
+        "fact_text": "职員A RELATED_TO 职務A",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "cf342f44-025f-4a68-b43c-05886aabea6a",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "w4-collision-old": {
+        "fixture_id": "w4-collision-old",
+        "subject": "職員B",
+        "rel_type": "RELATED_TO",
+        "object": "目標B",
+        "fact_text": "职員B RELATED_TO 目標B",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "f782817a-d5eb-4601-ac07-cdf7145afe9c",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "w4-collision-new": {
+        "fixture_id": "w4-collision-new",
+        "subject": "職員B",
+        "rel_type": "RELATED_TO",
+        "object": "目標B",
+        "fact_text": "職員B RELATED_TO 目標B",
+        "lifecycle_state": "有效",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "5d72d68c-3502-414c-9802-5b7374a90186",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      },
+      "w5-fact": {
+        "fixture_id": "w5-fact",
+        "subject": "W5-subject",
+        "rel_type": "RELATED_TO",
+        "object": "W5-object",
+        "fact_text": "W5-subject RELATED_TO W5-object",
+        "lifecycle_state": "候選",
+        "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+        "source_doc_id": "f83b7055-2f11-4fa0-81b4-ce79ac03136d",
+        "source_svo_chunk_index": 1,
+        "property_keys": [
+          "kg_id",
+          "source_doc_id",
+          "fact_embedding",
+          "fact_text",
+          "subject",
+          "confidence",
+          "verb",
+          "rel_type",
+          "source_svo_chunk_index",
+          "object",
+          "fixture_id",
+          "lifecycle_events_json",
+          "lifecycle_state"
+        ]
+      }
+    },
+    "name_sync_changed_first": 2,
+    "name_sync_changed_second": 0,
+    "rel_type_sync_changed_first": 1,
+    "rel_type_sync_changed_second": 0,
+    "w5_after_rel_type_sync": {
+      "fixture_id": "w5-fact",
+      "subject": "W5-subject",
+      "rel_type": "APPLIES_TO",
+      "object": "W5-object",
+      "fact_text": "W5-subject RELATED_TO W5-object",
+      "lifecycle_state": "候選",
+      "lifecycle_events_json": "[{\"event_type\": \"抽取完成\", \"seq\": 1}]",
+      "source_doc_id": "f83b7055-2f11-4fa0-81b4-ce79ac03136d",
+      "source_svo_chunk_index": 1,
+      "property_keys": [
+        "kg_id",
+        "source_doc_id",
+        "fact_embedding",
+        "fact_text",
+        "subject",
+        "confidence",
+        "verb",
+        "rel_type",
+        "source_svo_chunk_index",
+        "object",
+        "fixture_id",
+        "lifecycle_events_json",
+        "lifecycle_state"
+      ]
+    },
+    "matches_inference": true,
+    "limitation": "rel_type 無法只由 Fact 的 HAS_SUBJECT/HAS_OBJECT 推得；本驗證只在端點間僅有一個帶 kg_id 的關係邊時，以 collect(DISTINCT type(r))=1 的保守條件同步。",
+    "unexpected_findings": []
+  },
+  "hypotheses": {
+    "H1": true,
+    "H2": true,
+    "H3": true,
+    "H4": true,
+    "H5": true,
+    "H6": true
+  },
+  "environment_observations": [
+    "所有資料均為腳本建立的合成 Fact/Entity/Chunk；未連接受保護 KG，未啟動 Ollama、LLM 或外網。",
+    "W5 的 production backfill 依賴 Neo4j 5.26 Enterprise 關係向量索引；確認請求只由腳本內固定回覆『是』。"
+  ],
+  "limitations": [
+    "合成資料、單一小圖，不能代表真實分布或效能。",
+    "只驗證 W1/W4/W5 三個寫入點；未涵蓋 merge_triples_to_graph 全流程、抽取端、backfill_fact_nodes 回填、真實資料分布。",
+    "驗證結果不能外推為寫入端已可落地；正式欄位／事件 schema、邊狀態聚合與回填策略仍待裁示。"
+  ],
+  "kg4_baseline": {
+    "status": "running",
+    "started_at": "2026-10-02T04:10:38.389676557Z"
+  },
+  "kg4_final": {
+    "status": "running",
+    "started_at": "2026-10-02T04:10:38.389676557Z"
+  },
+  "kg4_unchanged": true,
+  "temp_teardown": {
+    "present_before": [
+      "kg2-throwaway-neo4j"
+    ],
+    "stop_exit_code": 0,
+    "rm_exit_code": 0,
+    "present_after": []
+  },
+  "temp_absent_after": true,
+  "status": "completed"
+}
