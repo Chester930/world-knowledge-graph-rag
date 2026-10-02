@@ -1,6 +1,6 @@
 """關係生命週期狀態機——純運算原型（報告230 S1；設計依據報告229 §3）。**PROVISIONAL，未接線。**
 
-純運算、無 I/O：匯入只有標準庫；不連 DB、不讀寫檔、不使用時間函式（日期只是事件上選用的字串屬性，不解析、不比較）、
+純運算、無 I/O：匯入只有標準庫；不連 DB、不讀寫檔、不使用時間函式（日期只是事件上選用的字串屬性，不解析；唯一的日期比較是檔尾 `state_as_of` 以 ISO 字串字典序判定事件是否已生效）、
 不改 `os.environ`。**所有狀態、事件、轉換都是提案（使用者尚未決定 schema），不是已定案的資料模型**，也不得寫回任何儲存資料。
 
 ⚠️ **零行為變更**：除測試與 `scripts/analysis/relation_lifecycle_demo.py` 外，沒有任何程式匯入本模組；
@@ -322,7 +322,7 @@ def explain(history: ReplayResult | Sequence[TransitionResult]) -> str:
 
 # ── 時間維度：as_of 重播（報告260 N1；新增，零接線）─────────────────────────────────
 # 註：以下以 ISO 字串（YYYY-MM-DD，與 `LifecycleEvent.effective_date` 同形狀）做字典序比較來判定事件是否已生效；
-# 這是本模組第一次「比較」日期（模組開頭的說明寫「不比較」是指上方既有函式）。仍不解析日期、不使用時間函式。
+# 這是本模組唯一比較日期之處（模組開頭 docstring 已同步說明；上方既有函式皆不比較日期）。仍不解析日期、不使用時間函式。
 AS_OF_STATUSES = ("no_events", "not_yet_effective", "replayed", "illegal")
 
 

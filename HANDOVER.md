@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-10-02 17:30（**KG#4 冷備份已完成並以真實資料驗證可還原，見報告249**；`kg2-neo4j` 新基準 StartedAt＝`2026-10-02T09:14:47.91915022Z`；目前無進行中的派工）
 
+## 2026-10-03（報告263；L3′ Q1／Q2 Claude 實作對話完成，待規劃對話獨立驗證）：[報告263](docs/報告/263_L3試點Q1語料建構器與Q2匯入偵察執行紀錄.md)
+
+Q1 `scripts/analysis/pilot_version_corpus_builder.py`：collector 歷史檔 → 試點語料（repo 之外 `D:/Users/666/Desktop/kg-runtime-pilot/ddc973d4-562c-535c-a89f-5b5bfd640d6c/`，4 份文件、128 個條文版本：實質修改 44 對＋對照 format_only／same_hash 各 10 對；衝突＝勞基法第 86 條與請假規則第 12 條；雜訊截除 4 版／25,054 字元；兩次實跑雜湊相同）。Q2 `scripts/kg/pilot_import.py`：`--plan`（離線，128 chunk）／`--execute`／`--worker`（連線，**實作者未執行**）＋偵察：既有流程大多可重用，需新寫 KG 節點指定 id、articles 解析與閘門；不確定處（虛擬歸屬須傳 `kg_folder`、已匯入判斷、worker 啟動方式）見報告263 §3.3。發現 collector 內容無換行、與 KG#4 `original.md` 的內容／章標題不同（結構逐位元組相同）。新增 50 測試，全量 pytest 2114 passed；附帶修正 `relation_lifecycle.py` docstring「不比較日期」。未連 KG#4／Neo4j／Ollama／docker／.env。
+
 ## 2026-10-02（報告261；L2 補驗 N1–N4 Claude 實作對話完成，待規劃對話重跑驗收）：[報告261](docs/報告/261_L2補驗程式與驗證腳本執行紀錄.md)
 
 `services/relation_lifecycle.py` 僅新增 `AsOfResult`／`state_as_of`／`is_retrievable_as_of`（零接線）；新增驗證腳本 `scripts/analysis/disposable_lifecycle_l2_validation.py`（S1–S5，新基準 `2026-10-02T11:09:32.79429649Z`）與 57 個測試（全量 pytest 2064 passed）。依規劃對話第一次實跑回饋已修：S1 探針移除 `fixture_id` 並改以「指名 lifecycle_state 的 UnknownPropertyKey 通知」判定；S5 單獨改 1024 維。**實作對話未執行腳本、未連 Neo4j／docker／.env**；一行指令見報告261 §7，由規劃對話重跑並以重跑結果為準。
