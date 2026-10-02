@@ -25,6 +25,10 @@ PENDING = "尚未處理"
 INDETERMINATE = "無法由現有資料判定"
 MARKS = (RESOLVED, NOT_APPLICABLE, UNKNOWN, PENDING, INDETERMINATE)
 
+# 報告258 L1：Fact 生命週期狀態的六個核心狀態字串（本地常數；不匯入 relation_lifecycle，
+# 與 `relation_lifecycle.CORE_STATES` 的一致性由 tests/services 的漂移測試守住）。
+LIFECYCLE_STATES = ("候選", "有效", "已被取代", "已終止", "爭議", "已駁回")
+
 CONCEPT_PLACEHOLDER = "概念"
 CONCEPT_SCHEMES = ("A", "B", "strict")  # A：視為未知佔位（預設）；B：視為已解決；strict：無法判定
 
@@ -220,3 +224,16 @@ def mark_entity_name_shape(name: str | None, length_threshold: int = NAME_SHAPE_
     if any(name_shape_features(name).values()):
         return NAME_SHAPE_LONG_STRONG
     return NAME_SHAPE_LONG_LENGTH_ONLY
+
+
+def mark_lifecycle_state(state: object) -> str:
+    """Fact 的 `lifecycle_state` 屬性值 → 顯示標示（報告258 L1；**只讀只顯示**，不寫回、不過濾、不排序）。
+
+    `None`／空字串／只含空白＝`PENDING`（尚未處理；目前所有 Fact 都沒有此屬性）；去空白後屬於
+    `LIFECYCLE_STATES` 六個核心狀態之一＝回傳該狀態字串；其他任何值（非字串、未知字串）＝`UNKNOWN`，不拋例外。
+    """
+    if is_blank(state):
+        return PENDING
+    if isinstance(state, str) and state.strip() in LIFECYCLE_STATES:
+        return state.strip()
+    return UNKNOWN

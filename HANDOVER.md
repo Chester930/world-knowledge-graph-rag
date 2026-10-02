@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-10-02 17:30（**KG#4 冷備份已完成並以真實資料驗證可還原，見報告249**；`kg2-neo4j` 新基準 StartedAt＝`2026-10-02T09:14:47.91915022Z`；目前無進行中的派工）
 
+## 2026-10-02（報告259；L1 T0–T7 Claude 實作對話執行，待規劃對話獨立驗證）：[報告259](docs/報告/259_L1檢索trace顯示生命週期狀態執行紀錄.md)
+
+`TRACE_SEMANTIC_MARKS` 開啟時，trace 的 fact `semantic_marks` 末尾多 `lifecycle_state`（`semantic_marks.mark_lifecycle_state`，本地常數 `LIFECYCLE_STATES`；目前全為「尚未處理」）；`vector_search_facts` 兩處 `RETURN` 多帶 `properties(node)['lifecycle_state'] AS lifecycle_state`。只讀只顯示、零接線 `relation_lifecycle`。新增 34 測試，全量 pytest 2007 passed。**需規劃對話確認**：改了一個既有測試預期（T4 多一鍵，§5-1）、守衛排除 `disposable_*`（§5-2）、`properties(node)` 的真實 Neo4j 行為與耗時（含 fact_embedding 物化疑慮）未實測。未連 KG#4／docker／.env。
+
 ## 2026-10-02（報告253；E1/E2/E4 結構由 Claude 實作對話完成，E0/E3 實跑待規劃對話）：[報告253](docs/報告/253_回填向量重算數估算執行紀錄.md)
 
 新增 `scripts/analysis/kg4_backfill_reencode_estimate.py`（`plan_reencode` 純函式＋唯讀收集；密碼以 `--password` 傳入、不讀 `.env`）與 15 個測試。**實作對話未連 KG#4、未碰 docker、未呼叫 embedding provider**；E0／E3 連線與數字由已獲授權的規劃對話執行，報告253 §4 數字欄位待填。

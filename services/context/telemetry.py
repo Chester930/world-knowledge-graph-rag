@@ -128,6 +128,10 @@ def build_retrieval_trace(
                 f.get("subject"), f.get("object"), f.get("verb"), f.get("rel_type"),
                 f.get("article_no"), fact_entries[-1]["source_doc_id"],
             )
+            # 報告258 L1：生命週期狀態顯示（只讀；triple 邊不存狀態，故不加）；附加於既有鍵之後
+            fact_entries[-1]["semantic_marks"]["lifecycle_state"] = _sm.mark_lifecycle_state(
+                f.get("lifecycle_state")
+            )
 
     triple_entries = []
     for rank, t in enumerate(triples):

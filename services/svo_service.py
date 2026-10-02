@@ -1520,6 +1520,11 @@ async def vector_search_facts(
     （檢索端已用獨立腳本確認`hybrid=True`能撈回目標事實，本參數的實際
     效果待驗證），預設 `None`，呼叫端不主動傳入前對既有行為零影響。
 
+    **`lifecycle_state`（報告258 L1，只讀）**：每筆結果多帶 Fact 的 `lifecycle_state` 屬性值
+    （目前所有 Fact 都沒有此屬性，值為 `None`），僅供 trace 顯示；不依狀態過濾或排序。兩處 `RETURN`
+    以 `properties(node)['lifecycle_state']` 取值而非 `node.lifecycle_state`：後者在資料庫完全沒有該屬性鍵
+    時，Neo4j 會對每次查詢發出 UnknownPropertyKey 通知，前者以 map 取鍵、缺鍵回傳 null，不觸發此通知。
+
     **`allowed_source_doc_ids`**：呼叫端已有明確／種子錨定的文件範圍時，
     在 over-fetch 候選（預設 top-k 的 4 倍）上先過濾來源，再做 Fact 去重與
     top-k 截斷，避免其他來源的高分結果先佔滿名額。若候選全都在範圍外，
@@ -1535,7 +1540,8 @@ async def vector_search_facts(
                node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
                node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
                node.source_doc_id AS source_doc_id,
-               node.source_svo_chunk_index AS source_svo_chunk_index, score
+               node.source_svo_chunk_index AS source_svo_chunk_index, score,
+               properties(node)['lifecycle_state'] AS lifecycle_state
         """,
         candidate_k=candidate_k,
         vector=query_vector,
@@ -1560,7 +1566,8 @@ async def vector_search_facts(
                    node.fact_text AS fact_text, node.verb AS verb, node.confidence AS confidence,
                    node.subject AS subject, node.object AS object, node.rel_type AS rel_type,
                    node.source_doc_id AS source_doc_id,
-                   node.source_svo_chunk_index AS source_svo_chunk_index, score
+                   node.source_svo_chunk_index AS source_svo_chunk_index, score,
+                   properties(node)['lifecycle_state'] AS lifecycle_state
             LIMIT $candidate_k
             """,
             q=question,
