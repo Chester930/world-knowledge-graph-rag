@@ -3,6 +3,10 @@
 > **適用對象**：Claude Code、Codex、Gemini CLI，以及其他接續本專案的 agent。此文件是目前進度的唯一權威交接來源；舊的 `HANDOVER_CODEX.md`／`HANDOVER_CLAUDE_CODE.md` 僅保留歷史脈絡。
 > **最後更新**：2026-10-02 17:30（**KG#4 冷備份已完成並以真實資料驗證可還原，見報告249**；`kg2-neo4j` 新基準 StartedAt＝`2026-10-02T09:14:47.91915022Z`；目前無進行中的派工）
 
+## 2026-10-02（報告251；G3 R0–R5 Claude 實作對話執行，待規劃對話獨立驗證）：[報告251](docs/報告/251_G3重同步方案B正式模組化執行紀錄.md)
+
+新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
+
 ## 2026-10-02（報告250）：**G3 任務書已寫成，尚未派工**——[報告250](docs/報告/250_下一階段任務規劃_G3重同步方案B正式模組化_交Claude實作對話.md)
 
 使用者「同意建議」後，規劃對話寫成 G3 任務書：把 G1 驗證過的原型（`scripts/analysis/disposable_resync_solution_b_validation.py:172–285`）搬成正式模組 `services/fact_flat_resync.py`（簽名 `resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)`，Cypher 與判定邏輯逐字不改、預設 `dry_run`、零接線），以**假 driver** 單元測試（純計畫函式表格驅動、dry_run 不送寫入語句、屬性白名單、零接線與無連線字串的結構守衛）。**不連 KG#4、不啟動 docker、不改任何既有檔**；執行者＝使用者新開的 Claude 實作對話，新報告自 **251** 起；驗收由規劃對話做（含原型 vs 新模組等價性隨機測試）。KG#4 仍無任何寫入核准；G4 須再備份＋使用者逐項同意；新基準 `kg2-neo4j` StartedAt＝`2026-10-02T09:14:47.91915022Z`。
