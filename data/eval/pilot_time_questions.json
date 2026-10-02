@@ -1,0 +1,663 @@
+{
+  "meta": {
+    "schema": "pilot_time_questions/v1",
+    "description": "L3′ 試點時間感知問題集（報告264 Q5）；題目由決定性選題規則產生、問句人工撰寫，判準在看到任何檢索結果前定稿。",
+    "selection_rule": {
+      "substantive": "依 (pcode, 條號數值, 舊版 valid_from) 排序每隔 4 對取 1 對（從第 1 對起）＋請假規則全部實質修改對；每對 2 題",
+      "controls": "format_only／same_hash 各依同樣排序每隔 3 對取 1 對、各取前 3 對；每對 1 題",
+      "as_of": "舊版 valid_from＋30 天（期望舊版）；新版 valid_from＋30 天（期望新版／對照組）"
+    },
+    "span_rule": "gold_exact_span／contrast_exact_span 皆取自 collector 原文（雜訊截除後），去空白後為逐字子字串",
+    "extra_fields": [
+      "acceptable_valid_froms（期望版本集合；對照組含兩版）",
+      "expected_role（old／new／either）"
+    ],
+    "criteria": {
+      "retrieval": {
+        "modes": [
+          "asof",
+          "naive"
+        ],
+        "top_k": 20,
+        "unit": "Fact 所屬 LawArticle（law_id＋article_no＋valid_from）",
+        "uses_generation": false
+      },
+      "hit": "回傳的 Fact 中至少 1 個屬於「目標條文的期望版本」（對照組：acceptable_valid_froms 內任一版）",
+      "leak": "回傳的 Fact 中至少 1 個屬於「目標條文的另一版」，且該版在 as_of 當時不應有效（舊版已被取代、或新版尚未生效）",
+      "primary_metrics": {
+        "population": "pair_kind＝substantive 且 is_conflict＝false",
+        "asof_leak_rate_max": 0.05,
+        "asof_hit_rate_min": "naive 的 hit 率"
+      },
+      "secondary_metrics": [
+        "naive 的 leak 率（量化現行風險）",
+        "hit 率差（asof 減 naive）"
+      ],
+      "control": "pair_kind 為 format_only／same_hash：asof 與 naive 的 hit 不應有差（不誤殺）",
+      "conflict": "is_conflict＝true 的題目另列，不計入主要指標",
+      "immutability": "判準與題目在看到任何檢索結果前定稿，之後不得調整；未達標題只記錄原因（檢索缺漏／抽取缺漏／其他）"
+    },
+    "criteria_sha256": "07648c6a7fe70024c3b767d1e772fe6960c873acd3134ee2a6306d864c08a1de",
+    "question_count": 34
+  },
+  "questions": [
+    {
+      "id": "PTQ-N0030001-2-old",
+      "question": "依勞動基準法，勞動契約是指什麼樣的契約？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 2 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "勞動契約：謂約定勞雇關係之契約",
+      "contrast_exact_span": "勞動契約：指約定勞雇關係而具有從屬性之契約",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 0,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-2-new",
+      "question": "依勞動基準法，勞動契約是指什麼樣的契約？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 2 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "勞動契約：指約定勞雇關係而具有從屬性之契約",
+      "contrast_exact_span": "勞動契約：謂約定勞雇關係之契約",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 0,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-9-old",
+      "question": "派遣事業單位與派遣勞工所訂的勞動契約，屬於定期契約還是不定期契約？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 9 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "有繼續性工作應為不定期契約",
+      "contrast_exact_span": "派遣事業單位與派遣勞工訂定之勞動契約，應為不定期契約",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 4,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-9-new",
+      "question": "派遣事業單位與派遣勞工所訂的勞動契約，屬於定期契約還是不定期契約？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 9 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "派遣事業單位與派遣勞工訂定之勞動契約，應為不定期契約",
+      "contrast_exact_span": "有繼續性工作應為不定期契約",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 4,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-21-old",
+      "question": "基本工資由哪個單位擬訂，並由哪個機關核定？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 21 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "前項基本工資，由中央主管機關擬定後，報請行政院核定之",
+      "contrast_exact_span": "前項基本工資，由中央主管機關設基本工資審議委員會擬訂後，報請行政院核定之",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 8,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-21-new",
+      "question": "基本工資由哪個單位擬訂，並由哪個機關核定？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 21 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "前項基本工資，由中央主管機關設基本工資審議委員會擬訂後，報請行政院核定之",
+      "contrast_exact_span": "前項基本工資，由中央主管機關擬定後，報請行政院核定之",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 8,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-30-old",
+      "question": "勞工每週正常工作時間不得超過多少小時？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 30 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "每週工作總時數不得超過四十八小時",
+      "contrast_exact_span": "每週不得超過四十小時",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 12,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-30-new",
+      "question": "勞工每週正常工作時間不得超過多少小時？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 30 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "每週不得超過四十小時",
+      "contrast_exact_span": "每週工作總時數不得超過四十八小時",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 12,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-37-old",
+      "question": "勞工在哪些日子應該放假，這些放假日由哪個機關規定？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 37 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "其他由中央主管機關規定應放假之日，均應休假",
+      "contrast_exact_span": "內政部所定應放假之紀念日、節日、勞動節及其他中央主管機關指定應放假日，均應休假",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 16,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-37-new",
+      "question": "勞工在哪些日子應該放假，這些放假日由哪個機關規定？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 37 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "內政部所定應放假之紀念日、節日、勞動節及其他中央主管機關指定應放假日，均應休假",
+      "contrast_exact_span": "其他由中央主管機關規定應放假之日，均應休假",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 16,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-45-old",
+      "question": "雇主在什麼情形下可以僱用未滿十五歲的人從事工作？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 45 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "經主管機關認定其工作性質及環境無礙其身心健康者，不在此限",
+      "contrast_exact_span": "經主管機關認定其工作性質及環境無礙其身心健康而許可者，不在此限",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 20,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-45-new",
+      "question": "雇主在什麼情形下可以僱用未滿十五歲的人從事工作？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 45 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "經主管機關認定其工作性質及環境無礙其身心健康而許可者，不在此限",
+      "contrast_exact_span": "經主管機關認定其工作性質及環境無礙其身心健康者，不在此限",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 20,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-53-old",
+      "question": "勞工在哪些情形下可以自請退休？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 53 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "勞工有左列情形之一者，得自請退休",
+      "contrast_exact_span": "三、工作十年以上年滿六十歲者",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 24,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-53-new",
+      "question": "勞工在哪些情形下可以自請退休？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 53 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "三、工作十年以上年滿六十歲者",
+      "contrast_exact_span": "勞工有左列情形之一者，得自請退休",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 24,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-58-old",
+      "question": "勞工請領退休金的權利可以讓與、抵銷、扣押或供擔保嗎？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 58 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "勞工請領退休金之權利，自退休之次月起，因五年間不行使而消滅",
+      "contrast_exact_span": "勞工請領退休金之權利，不得讓與、抵銷、扣押或供擔保",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 28,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-58-new",
+      "question": "勞工請領退休金的權利可以讓與、抵銷、扣押或供擔保嗎？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 58 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "勞工請領退休金之權利，不得讓與、抵銷、扣押或供擔保",
+      "contrast_exact_span": "勞工請領退休金之權利，自退休之次月起，因五年間不行使而消滅",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 28,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-72-old",
+      "question": "中央主管機關可以授權哪一級的主管機關專設勞工檢查機構？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 72 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "授權省市主管機關專設檢查機構辦理之",
+      "contrast_exact_span": "授權直轄市主管機關專設檢查機構辦理之",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 32,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-72-new",
+      "question": "中央主管機關可以授權哪一級的主管機關專設勞工檢查機構？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 72 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "授權直轄市主管機關專設檢查機構辦理之",
+      "contrast_exact_span": "授權省市主管機關專設檢查機構辦理之",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 32,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-77-old",
+      "question": "違反第四十二條、第四十五條規定的雇主，罰金最高是多少？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 77 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "科或併科二萬元以下罰金",
+      "contrast_exact_span": "科或併科新臺幣三十萬元以下罰金",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 36,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-77-new",
+      "question": "違反第四十二條、第四十五條規定的雇主，罰金最高是多少？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 77 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "科或併科新臺幣三十萬元以下罰金",
+      "contrast_exact_span": "科或併科二萬元以下罰金",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 36,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-86-old",
+      "question": "勞動基準法部分條文的施行日期是怎麼規定的？",
+      "as_of": "1984-08-29",
+      "law_id": "N0030001",
+      "article_no": "第 86 條",
+      "expected_valid_from": "1984-07-30",
+      "other_valid_from": "2024-07-31",
+      "gold_exact_span": "本法自公布日施行",
+      "contrast_exact_span": "本法中華民國一百零七年一月十日修正之條文，自一百零七年三月一日施行",
+      "pair_kind": "substantive",
+      "is_conflict": true,
+      "selection_index": 40,
+      "acceptable_valid_froms": [
+        "1984-07-30"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030001-86-new",
+      "question": "勞動基準法部分條文的施行日期是怎麼規定的？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 86 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "本法中華民國一百零七年一月十日修正之條文，自一百零七年三月一日施行",
+      "contrast_exact_span": "本法自公布日施行",
+      "pair_kind": "substantive",
+      "is_conflict": true,
+      "selection_index": 40,
+      "acceptable_valid_froms": [
+        "2024-07-31"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030006-7-old",
+      "question": "勞工為親自照顧家庭成員請事假，可以用小時為單位請假嗎？",
+      "as_of": "2023-05-31",
+      "law_id": "N0030006",
+      "article_no": "第 7 條",
+      "expected_valid_from": "2023-05-01",
+      "other_valid_from": "2025-12-09",
+      "gold_exact_span": "勞工因有事故必須親自處理者，得請事假",
+      "contrast_exact_span": "得擇定以小時為請假單位",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 41,
+      "acceptable_valid_froms": [
+        "2023-05-01"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030006-7-new",
+      "question": "勞工為親自照顧家庭成員請事假，可以用小時為單位請假嗎？",
+      "as_of": "2026-01-08",
+      "law_id": "N0030006",
+      "article_no": "第 7 條",
+      "expected_valid_from": "2025-12-09",
+      "other_valid_from": "2023-05-01",
+      "gold_exact_span": "得擇定以小時為請假單位",
+      "contrast_exact_span": "勞工因有事故必須親自處理者，得請事假",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 41,
+      "acceptable_valid_froms": [
+        "2025-12-09"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030006-9-old",
+      "question": "勞工因親自照顧家庭成員請事假，雇主可以因此扣發全勤獎金嗎？",
+      "as_of": "2023-05-31",
+      "law_id": "N0030006",
+      "article_no": "第 9 條",
+      "expected_valid_from": "2023-05-01",
+      "other_valid_from": "2025-12-09",
+      "gold_exact_span": "雇主不得因勞工請婚假、喪假、公傷病假及公假，扣發全勤獎金",
+      "contrast_exact_span": "勞工因親自照顧家庭成員，依第七條規定請事假",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 42,
+      "acceptable_valid_froms": [
+        "2023-05-01"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030006-9-new",
+      "question": "勞工因親自照顧家庭成員請事假，雇主可以因此扣發全勤獎金嗎？",
+      "as_of": "2026-01-08",
+      "law_id": "N0030006",
+      "article_no": "第 9 條",
+      "expected_valid_from": "2025-12-09",
+      "other_valid_from": "2023-05-01",
+      "gold_exact_span": "勞工因親自照顧家庭成員，依第七條規定請事假",
+      "contrast_exact_span": "雇主不得因勞工請婚假、喪假、公傷病假及公假，扣發全勤獎金",
+      "pair_kind": "substantive",
+      "is_conflict": false,
+      "selection_index": 42,
+      "acceptable_valid_froms": [
+        "2025-12-09"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030006-12-old",
+      "question": "勞工請假規則部分條文的施行日期是怎麼規定的？",
+      "as_of": "2023-05-31",
+      "law_id": "N0030006",
+      "article_no": "第 12 條",
+      "expected_valid_from": "2023-05-01",
+      "other_valid_from": "2025-12-09",
+      "gold_exact_span": "本規則自發布日施行",
+      "contrast_exact_span": "本規則中華民國一百十四年十二月九日修正發布之條文，自一百十五年一月一日施行",
+      "pair_kind": "substantive",
+      "is_conflict": true,
+      "selection_index": 43,
+      "acceptable_valid_froms": [
+        "2023-05-01"
+      ],
+      "expected_role": "old"
+    },
+    {
+      "id": "PTQ-N0030006-12-new",
+      "question": "勞工請假規則部分條文的施行日期是怎麼規定的？",
+      "as_of": "2026-01-08",
+      "law_id": "N0030006",
+      "article_no": "第 12 條",
+      "expected_valid_from": "2025-12-09",
+      "other_valid_from": "2023-05-01",
+      "gold_exact_span": "本規則中華民國一百十四年十二月九日修正發布之條文，自一百十五年一月一日施行",
+      "contrast_exact_span": "本規則自發布日施行",
+      "pair_kind": "substantive",
+      "is_conflict": true,
+      "selection_index": 43,
+      "acceptable_valid_froms": [
+        "2025-12-09"
+      ],
+      "expected_role": "new"
+    },
+    {
+      "id": "PTQ-N0030001-1-ctl-format_only",
+      "question": "勞動基準法的立法目的是什麼？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 1 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "為規定勞動條件最低標準，保障勞工權益，加強勞雇關係，促進社會與經濟發展，特制定本法",
+      "contrast_exact_span": null,
+      "pair_kind": "format_only",
+      "is_conflict": false,
+      "selection_index": 0,
+      "acceptable_valid_froms": [
+        "1984-07-30",
+        "2024-07-31"
+      ],
+      "expected_role": "either"
+    },
+    {
+      "id": "PTQ-N0030001-13-ctl-format_only",
+      "question": "雇主在什麼情況下可以在醫療期間終止勞動契約？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 13 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "但雇主因天災、事變或其他不可抗力致事業不能繼續，經報主管機關核定者，不在此限",
+      "contrast_exact_span": null,
+      "pair_kind": "format_only",
+      "is_conflict": false,
+      "selection_index": 3,
+      "acceptable_valid_froms": [
+        "1984-07-30",
+        "2024-07-31"
+      ],
+      "expected_role": "either"
+    },
+    {
+      "id": "PTQ-N0030001-20-ctl-format_only",
+      "question": "事業單位改組或轉讓時，其餘未留用的勞工應如何處理？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 20 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "其餘勞工應依第十六條規定期間預告終止契約，並應依第十七條規定發給勞工資遣費",
+      "contrast_exact_span": null,
+      "pair_kind": "format_only",
+      "is_conflict": false,
+      "selection_index": 6,
+      "acceptable_valid_froms": [
+        "1984-07-30",
+        "2024-07-31"
+      ],
+      "expected_role": "either"
+    },
+    {
+      "id": "PTQ-N0030001-5-ctl-same_hash",
+      "question": "雇主可以用強暴或脅迫的方法強制勞工勞動嗎？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 5 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "雇主不得以強暴、脅迫、拘禁或其他非法之方法，強制勞工從事勞動",
+      "contrast_exact_span": null,
+      "pair_kind": "same_hash",
+      "is_conflict": false,
+      "selection_index": 0,
+      "acceptable_valid_froms": [
+        "1984-07-30",
+        "2024-07-31"
+      ],
+      "expected_role": "either"
+    },
+    {
+      "id": "PTQ-N0030001-18-ctl-same_hash",
+      "question": "勞工在哪些情形下不得向雇主請求加發預告期間工資及資遣費？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 18 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "有左列情形之一者，勞工不得向雇主請求加發預告期間工資及資遣費",
+      "contrast_exact_span": null,
+      "pair_kind": "same_hash",
+      "is_conflict": false,
+      "selection_index": 3,
+      "acceptable_valid_froms": [
+        "1984-07-30",
+        "2024-07-31"
+      ],
+      "expected_role": "either"
+    },
+    {
+      "id": "PTQ-N0030001-26-ctl-same_hash",
+      "question": "雇主可以預扣勞工工資作為違約金嗎？",
+      "as_of": "2024-08-30",
+      "law_id": "N0030001",
+      "article_no": "第 26 條",
+      "expected_valid_from": "2024-07-31",
+      "other_valid_from": "1984-07-30",
+      "gold_exact_span": "雇主不得預扣勞工工資作為違約金或賠償費用",
+      "contrast_exact_span": null,
+      "pair_kind": "same_hash",
+      "is_conflict": false,
+      "selection_index": 6,
+      "acceptable_valid_froms": [
+        "1984-07-30",
+        "2024-07-31"
+      ],
+      "expected_role": "either"
+    }
+  ]
+}

@@ -174,6 +174,8 @@ def test_no_writes_of_lifecycle_state_anywhere():
     for rel, src in _prod_py():
         if rel.name.startswith("disposable_"):  # 既有的臨時容器驗證腳本（先前報告），非 production 路徑
             continue
+        if rel.parts[0] == "scripts" and rel.name.startswith("pilot_"):  # 報告264 Q4：L3′ 試點 KG 的實驗腳本（閘門限試點埠），非 production 路徑
+            continue
         assert "lifecycle_events_json" not in src, rel
         assert not re.search(r"SET\s+\w+\.lifecycle_state", src, re.I), rel
 
