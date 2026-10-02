@@ -1,0 +1,739 @@
+{
+ "records": 78,
+ "questions": 42,
+ "severe_entities": 311,
+ "totals": {
+  "fact:items": 2325,
+  "fact:matched": 2241,
+  "fact:exposed": 381,
+  "triple:items": 511,
+  "triple:matched": 396,
+  "fact:diverged": 168,
+  "triple:exposed": 57
+ },
+ "by_group": {
+  "pass": {
+   "questions": 12,
+   "questions_with_exposure": 12,
+   "items": 600,
+   "matched": 584,
+   "exposed": 76,
+   "gold_items": 8,
+   "gold_exposed": 0,
+   "diverged": 30,
+   "gold_diverged": 0
+  },
+  "fail": {
+   "questions": 28,
+   "questions_with_exposure": 27,
+   "items": 2002,
+   "matched": 1864,
+   "exposed": 332,
+   "gold_items": 24,
+   "gold_exposed": 2,
+   "diverged": 108,
+   "gold_diverged": 0
+  },
+  "unstable": {
+   "questions": 2,
+   "questions_with_exposure": 2,
+   "items": 234,
+   "matched": 189,
+   "exposed": 30,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 30,
+   "gold_diverged": 0
+  }
+ },
+ "per_question": {
+  "17-Q1": {
+   "group": "pass",
+   "items": 35,
+   "matched": 35,
+   "exposed": 3,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "17-Q6": {
+   "group": "fail",
+   "items": 70,
+   "matched": 56,
+   "exposed": 0,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "18-Q1": {
+   "group": "pass",
+   "items": 82,
+   "matched": 80,
+   "exposed": 16,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "18-Q2": {
+   "group": "pass",
+   "items": 40,
+   "matched": 40,
+   "exposed": 5,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "18-Q3": {
+   "group": "fail",
+   "items": 78,
+   "matched": 72,
+   "exposed": 10,
+   "gold_items": 2,
+   "gold_exposed": 2,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "18-Q4": {
+   "group": "fail",
+   "items": 72,
+   "matched": 68,
+   "exposed": 12,
+   "gold_items": 2,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "18-Q5": {
+   "group": "fail",
+   "items": 84,
+   "matched": 72,
+   "exposed": 4,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "18-Q6": {
+   "group": "pass",
+   "items": 74,
+   "matched": 72,
+   "exposed": 10,
+   "gold_items": 2,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "26-Q1": {
+   "group": "pass",
+   "items": 37,
+   "matched": 35,
+   "exposed": 1,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 1,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "26-Q5": {
+   "group": "pass",
+   "items": 39,
+   "matched": 38,
+   "exposed": 8,
+   "gold_items": 1,
+   "gold_exposed": 0,
+   "diverged": 8,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "canary-P1": {
+   "group": "fail",
+   "items": 70,
+   "matched": 68,
+   "exposed": 2,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "canary-P4": {
+   "group": "fail",
+   "items": 70,
+   "matched": 70,
+   "exposed": 14,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 4,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-COREF1": {
+   "group": "fail",
+   "items": 74,
+   "matched": 72,
+   "exposed": 8,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-COREF2": {
+   "group": "pass",
+   "items": 36,
+   "matched": 35,
+   "exposed": 5,
+   "gold_items": 1,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "57-COREF3": {
+   "group": "fail",
+   "items": 36,
+   "matched": 36,
+   "exposed": 2,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-DIST1": {
+   "group": "fail",
+   "items": 76,
+   "matched": 64,
+   "exposed": 4,
+   "gold_items": 10,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-DIST2": {
+   "group": "fail",
+   "items": 78,
+   "matched": 64,
+   "exposed": 4,
+   "gold_items": 10,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-CANARY1": {
+   "group": "pass",
+   "items": 78,
+   "matched": 76,
+   "exposed": 12,
+   "gold_items": 2,
+   "gold_exposed": 0,
+   "diverged": 4,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-CANARY2": {
+   "group": "fail",
+   "items": 70,
+   "matched": 60,
+   "exposed": 4,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR1": {
+   "group": "fail",
+   "items": 70,
+   "matched": 68,
+   "exposed": 6,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR2": {
+   "group": "fail",
+   "items": 70,
+   "matched": 68,
+   "exposed": 4,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-CANARY3": {
+   "group": "fail",
+   "items": 78,
+   "matched": 74,
+   "exposed": 4,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR3": {
+   "group": "fail",
+   "items": 74,
+   "matched": 74,
+   "exposed": 4,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR4": {
+   "group": "fail",
+   "items": 82,
+   "matched": 80,
+   "exposed": 10,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-CANARY4": {
+   "group": "pass",
+   "items": 70,
+   "matched": 70,
+   "exposed": 2,
+   "gold_items": 2,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-CANARY5": {
+   "group": "fail",
+   "items": 72,
+   "matched": 64,
+   "exposed": 26,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 18,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR5": {
+   "group": "fail",
+   "items": 80,
+   "matched": 76,
+   "exposed": 32,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 6,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "17-Q2": {
+   "group": "pass",
+   "items": 36,
+   "matched": 36,
+   "exposed": 3,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "57-AGGR6": {
+   "group": "unstable",
+   "items": 111,
+   "matched": 96,
+   "exposed": 15,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 15,
+   "gold_diverged": 0,
+   "runs": 3
+  },
+  "57-AGGR7": {
+   "group": "fail",
+   "items": 88,
+   "matched": 74,
+   "exposed": 12,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 0,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR8": {
+   "group": "fail",
+   "items": 74,
+   "matched": 70,
+   "exposed": 14,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 4,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR9": {
+   "group": "fail",
+   "items": 70,
+   "matched": 68,
+   "exposed": 24,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 6,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR10": {
+   "group": "fail",
+   "items": 70,
+   "matched": 68,
+   "exposed": 10,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 8,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR11": {
+   "group": "fail",
+   "items": 70,
+   "matched": 68,
+   "exposed": 18,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 20,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR12": {
+   "group": "pass",
+   "items": 35,
+   "matched": 35,
+   "exposed": 5,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 9,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "57-AGGR13": {
+   "group": "fail",
+   "items": 72,
+   "matched": 70,
+   "exposed": 30,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 12,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR14": {
+   "group": "fail",
+   "items": 72,
+   "matched": 68,
+   "exposed": 28,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 16,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR15": {
+   "group": "fail",
+   "items": 36,
+   "matched": 32,
+   "exposed": 6,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR16": {
+   "group": "fail",
+   "items": 74,
+   "matched": 70,
+   "exposed": 22,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR17": {
+   "group": "fail",
+   "items": 72,
+   "matched": 70,
+   "exposed": 18,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 2,
+   "gold_diverged": 0,
+   "runs": 2
+  },
+  "57-AGGR18": {
+   "group": "pass",
+   "items": 38,
+   "matched": 32,
+   "exposed": 6,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 4,
+   "gold_diverged": 0,
+   "runs": 1
+  },
+  "57-AGGR19": {
+   "group": "unstable",
+   "items": 123,
+   "matched": 93,
+   "exposed": 15,
+   "gold_items": 0,
+   "gold_exposed": 0,
+   "diverged": 15,
+   "gold_diverged": 0,
+   "runs": 3
+  }
+ },
+ "failing_question_examples": [
+  {
+   "question": "18-Q3",
+   "kind": "fact",
+   "rank": 3,
+   "text": "外國人 應於事前親自以口頭或書面敘明假別、理由及日數，向雇主請假返國。",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q3",
+   "kind": "fact",
+   "rank": 4,
+   "text": "不適用勞動基準法之外國人 於聘僱許可有效期間內向雇主請求以特別休假以外之假別返國時，應依規定辦理 勞動基準法、性別平等工作法及勞工請假規則辦理",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q3",
+   "kind": "fact",
+   "rank": 5,
+   "text": "不適用勞動基準法之外國人 於聘僱許可有效期間內向雇主請求以特別休假以外之假別返國時，應依規定辦理 性別平等工作法第十六條第五項規定",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q3",
+   "kind": "fact",
+   "rank": 30,
+   "text": "外國人 依前條辦理請假返國手續時，雇主得要求外國人提出有關證明文件。",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q3",
+   "kind": "triple",
+   "rank": 15,
+   "text": "外國人在聘僱許可有效期間內合於勞動基準法規定或勞動契約約定而取得特別休假時，得向僱主請求以特別休假返國並自行排定請假返國期日。",
+   "gold_bearing": true
+  },
+  {
+   "question": "18-Q4",
+   "kind": "fact",
+   "rank": 11,
+   "text": "中央主管機關 定之 請假應給之假期及事假以外期間內工資給付之最低標準",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q4",
+   "kind": "fact",
+   "rank": 17,
+   "text": "第一項人員之請假事宜 依 用人單位規定辦理",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q4",
+   "kind": "fact",
+   "rank": 24,
+   "text": "公立就業服務機構 得停止補助二年 不實請領或溢領",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q4",
+   "kind": "fact",
+   "rank": 28,
+   "text": "事業單位 於營業年度終了結算，如有盈餘，除繳納稅捐、彌補虧損及提列股息、公積金外，對於全年工作並無過失之勞工，應給與 獎金或分配紅利",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q4",
+   "kind": "fact",
+   "rank": 30,
+   "text": "事業單位 於營業年度終了結算，如有盈餘，除繳納稅捐、彌補虧損及提列股息、公積金外，對於全年工作並無過失之勞工，應給與獎金或分配紅利 獎金",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q4",
+   "kind": "fact",
+   "rank": 34,
+   "text": "依前款計算之剩餘月數，或工作未滿一年者 以比例計給之 資遣費",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q5",
+   "kind": "fact",
+   "rank": 39,
+   "text": "中央主管機關 定之 請假應給之假期及事假以外期間內工資給付之最低標準",
+   "gold_bearing": false
+  },
+  {
+   "question": "18-Q5",
+   "kind": "triple",
+   "rank": 21,
+   "text": "第一項津貼或補助金之期間由主管機關規定於辦法中。",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P1",
+   "kind": "fact",
+   "rank": 31,
+   "text": "事業單位 僱用 勞工人數二百人以上",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "fact",
+   "rank": 4,
+   "text": "雇主 於次月二十五日前寄送 事業單位",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "fact",
+   "rank": 9,
+   "text": "應訂定勞工健康服務計劃 每年評估成效及檢討",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "fact",
+   "rank": 12,
+   "text": "雇主每月負擔之年金保險費 不得低於 勞工每月工資百分之六",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "fact",
+   "rank": 15,
+   "text": "中央主管機關 定期於每年三月、六月、九月及十二月查核 公立就業服務機構",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "fact",
+   "rank": 18,
+   "text": "普通傷病假 雇主應予 留職停薪",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "triple",
+   "rank": 2,
+   "text": "外國人不得在中華民國境內工作未經僱主申請許可。",
+   "gold_bearing": false
+  },
+  {
+   "question": "canary-P4",
+   "kind": "triple",
+   "rank": 11,
+   "text": "事業單位得向勞工保險局申請補助。",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-COREF1",
+   "kind": "fact",
+   "rank": 15,
+   "text": "受僱者 申請 留職停薪",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-COREF1",
+   "kind": "fact",
+   "rank": 26,
+   "text": "應徵召服兵役 勞工於發生事由之日起七日內以書面向勞保局申報停止提繳其退休金 雇主",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-COREF1",
+   "kind": "fact",
+   "rank": 33,
+   "text": "未住院者 一年內合計不得超過 三十日",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-COREF1",
+   "kind": "triple",
+   "rank": 1,
+   "text": "留職停薪應向僱主提出。",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-COREF3",
+   "kind": "fact",
+   "rank": 0,
+   "text": "勞工 因親自照顧家庭成員，依第七條規定請事假 雇主不得視為缺勤而為其他不利之處分",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-DIST1",
+   "kind": "fact",
+   "rank": 36,
+   "text": "但 國民中學畢業者 不在此限",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-DIST1",
+   "kind": "fact",
+   "rank": 37,
+   "text": "不適用勞動基準法之外國人 於聘僱許可有效期間內向雇主請求以特別休假以外之假別返國時，應依規定辦理 勞動基準法、性別平等工作法及勞工請假規則辦理",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-DIST2",
+   "kind": "fact",
+   "rank": 35,
+   "text": "不適用勞動基準法之外國人 於聘僱許可有效期間內向雇主請求以特別休假以外之假別返國時，應依規定辦理 性別平等工作法第十六條第五項規定",
+   "gold_bearing": false
+  },
+  {
+   "question": "57-DIST2",
+   "kind": "fact",
+   "rank": 36,
+   "text": "不適用勞動基準法之外國人 於聘僱許可有效期間內向雇主請求以特別休假以外之假別返國時，應依規定辦理 勞動基準法、性別平等工作法及勞工請假規則辦理",
+   "gold_bearing": false
+  }
+ ],
+ "totals_before": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_after": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_stable": true,
+ "embedding_provider_called": false
+}
