@@ -225,8 +225,12 @@ def test_zero_wiring():
             continue
         if "fact_flat_resync" in path.read_text(encoding="utf-8", errors="ignore"):
             hits.append(str(rel))
-    # 報告252 §4-2 明定唯讀估算腳本引用本模組的純計畫函式（不連線、不寫入）；僅此一處例外。
-    assert hits == [str(Path("scripts") / "analysis" / "kg4_backfill_reencode_estimate.py")]
+    # 例外僅限兩支唯讀分析腳本引用本模組的純計畫函式（不連線、不寫入）：
+    # 報告252 §4-2 的重算數估算、報告254 的 1,789 筆變動審核。
+    assert sorted(hits) == sorted(
+        str(Path("scripts") / "analysis" / name)
+        for name in ("kg4_backfill_reencode_estimate.py", "kg4_resync_audit.py")
+    )
 
 
 def test_no_connection_strings_or_secrets():
