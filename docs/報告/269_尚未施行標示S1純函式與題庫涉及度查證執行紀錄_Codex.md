@@ -64,7 +64,7 @@
 - `python scripts/analysis/check_node_cards.py`：掃描 3 張節點卡，`0` 警告。
 - 全量命令：`python -m pytest -q -p no:cacheprovider`。
 - 全量結果：`2226 passed, 8 warnings, 1 subtests passed in 46.59s`；相對基準增加 26 個測試，無回歸。
-- commit／push 結果於提交後由本報告與 HANDOVER 補入。
+- 實作 commit：`06d710e`（`feat(effective-note): add offline effective note analysis`）。本報告與 HANDOVER 的收尾更新另成文件 commit；兩個 commit 一併 push 至目前分支。
 
 ## 8. 限制與偏離
 
