@@ -1,5 +1,9 @@
 # 跨 Agent 接續進度
 
+## 2026-10-04（報告274；Codex 依報告273 §8.4 停止，待規劃對話裁示）：[報告274](docs/報告/274_S2b條文層影子顯示停止紀錄_Codex.md)
+
+T0 已完成：`git pull` 為 Already up to date；基準全量 pytest `2241 passed, 8 warnings, 1 subtests passed`。讀碼發現 `chat()` 的 Fact／triple 證據不保證有 `source_svo_chunk_index`：`SVOTriple` 欄位為可空、一般 SVOGROUP chunk 恆可為 `None`，BFS citation 缺欄位也保留 `None`，既有 trace 對缺值序列化為 `None`。依報告273 §8.4 立即停止，沒有新增 repository 查詢、沒有修改 trace/router、沒有新增測試，也未執行收尾全量 pytest 或 node cards；沒有連任何資料庫／Ollama／Docker，未讀 `.env`。待規劃對話裁示如何處理缺少 chunk index 的證據後再決定是否另寫任務書。
+
 ## 2026-10-04（報告271；Codex 執行報告270 R0–R7，待規劃對話獨立驗證）：[報告271](docs/報告/271_尚未施行標示S2文件層影子顯示執行紀錄_Codex.md)
 
 完成 S2 文件層影子顯示的最小接線：`TRACE_SEMANTIC_MARKS` 開啟時，`sources.document` 有 `effective_status`／`effective_pending_dates`，retrieval trace 的 fact／triple `semantic_marks` 有 `document_effective_status`；關閉時維持既有輸出。新增 `DocumentEffectiveSummary`／`summarize_document_effective`、telemetry 選用參數、`effective_marks_kwargs`，router 僅在 `date.today()` 取得 `as_of`。新增 15 個測試；旗標關閉／開啟 router 測試使用 fake driver／provider／repo、固定日期與 SSE drain。基準 `2226 passed`；本次全量 `2241 passed, 8 warnings, 1 subtests passed`；`check_node_cards.py` 為 0 警告。只使用已保存的 16 份備註 fixture（5 `has_pending`、1 `undetermined`、10 `in_force`），**未讀取 KG#4 64 份資料**。全程未連資料庫／Ollama／Docker，未讀 `.env`；待規劃對話獨立驗證。commit SHA 見報告271與最終回報。
