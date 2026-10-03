@@ -1,0 +1,150 @@
+{
+  "as_of": "2026-10-03",
+  "frozen_42": {
+    "total_questions": 42,
+    "pending": {
+      "question_count": 1,
+      "question_ids": [
+        "57-CANARY3"
+      ],
+      "questions": [
+        {
+          "question_id": "57-CANARY3",
+          "facts": [
+            {
+              "exact_span": "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。",
+              "source_law": "N0060022_勞工健康保護規則",
+              "source_article": "第2條第1款",
+              "article_no": "2",
+              "scope": [
+                "appendix"
+              ],
+              "effective_date": [
+                "2028-01-01"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "undetermined": {
+      "question_count": 0,
+      "question_ids": [],
+      "questions": []
+    },
+    "five_doc_non_pending": {
+      "question_count": 2,
+      "question_ids": [
+        "57-AGGR1",
+        "57-AGGR2"
+      ],
+      "questions": [
+        {
+          "question_id": "57-AGGR1",
+          "facts": [
+            {
+              "exact_span": "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+              "source_law": "N0060022_勞工健康保護規則",
+              "source_article": "第19條",
+              "article_no": "19"
+            }
+          ]
+        },
+        {
+          "question_id": "57-AGGR2",
+          "facts": [
+            {
+              "exact_span": "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+              "source_law": "N0060022_勞工健康保護規則",
+              "source_article": "第19條",
+              "article_no": "19"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "all_65": {
+    "total_questions": 65,
+    "pending": {
+      "question_count": 1,
+      "question_ids": [
+        "57-CANARY3"
+      ],
+      "questions": [
+        {
+          "question_id": "57-CANARY3",
+          "facts": [
+            {
+              "exact_span": "特別危害健康作業：指符合附表一之物理性及化學性危害之作業。",
+              "source_law": "N0060022_勞工健康保護規則",
+              "source_article": "第2條第1款",
+              "article_no": "2",
+              "scope": [
+                "appendix"
+              ],
+              "effective_date": [
+                "2028-01-01"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "undetermined": {
+      "question_count": 0,
+      "question_ids": [],
+      "questions": []
+    },
+    "five_doc_non_pending": {
+      "question_count": 2,
+      "question_ids": [
+        "57-AGGR1",
+        "57-AGGR2"
+      ],
+      "questions": [
+        {
+          "question_id": "57-AGGR1",
+          "facts": [
+            {
+              "exact_span": "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+              "source_law": "N0060022_勞工健康保護規則",
+              "source_article": "第19條",
+              "article_no": "19"
+            }
+          ]
+        },
+        {
+          "question_id": "57-AGGR2",
+          "facts": [
+            {
+              "exact_span": "雇主使勞工從事特別危害健康作業，應每年或於變更其作業時，依第十六條附表十所定項目，實施特殊健康檢查。",
+              "source_law": "N0060022_勞工健康保護規則",
+              "source_article": "第19條",
+              "article_no": "19"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "method": {
+    "article_normalization": "先取第／條包住的第一個數字條號；否則保留數字前綴，去除空白；只比對 atomic_gold_facts。",
+    "source_law_mapping": "source_law 必須與 <pcode>_<名稱> 形式的 documents[].source 完整相等。",
+    "pending_sources": [
+      "N0060004_勞工作業場所容許暴露標準",
+      "N0060009_職業安全衛生設施規則",
+      "N0060010_職業安全衛生教育訓練規則",
+      "N0060014_營造安全衛生設施標準",
+      "N0060022_勞工健康保護規則"
+    ],
+    "undetermined_sources": [
+      "N0030010_勞動契約法"
+    ],
+    "frozen_42_authority": "data\\eval\\baseline_runs\\20260920_frozen\\frozen_manifest.json",
+    "frozen_42_alternate_compared": "data\\analysis\\source_ambiguity\\questions_frozen42.json",
+    "frozen_42_candidates_equal": true,
+    "gold_fact_only": true,
+    "note": "涉及度不代表檢索結果實際取到該條文。"
+  }
+}
