@@ -1,0 +1,598 @@
+{
+ "as_of": "2026-10-03",
+ "documents_with_effect_info": 16,
+ "totals": {
+  "pending_articles": 21,
+  "pending_facts": 202,
+  "undetermined_docs": 1,
+  "undetermined_facts": 135
+ },
+ "all_consistent": true,
+ "documents": [
+  {
+   "source": "N0030018_育嬰留職停薪實施辦法",
+   "effective_date": "20260101",
+   "kind": "single",
+   "default_date": "2026-01-01",
+   "consistency": {
+    "document_effective_date": "2026-01-01",
+    "parsed_max_date": "2026-01-01",
+    "consistent": true
+   },
+   "note": "一百十四年十一月二十一日修正發布第 2、9 條條文，自一百十五年一月 一日施行。",
+   "all_articles": 9,
+   "all_facts": 24,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0060022_勞工健康保護規則",
+   "effective_date": "20280101",
+   "kind": "staged",
+   "default_date": "2026-07-01",
+   "consistency": {
+    "document_effective_date": "2028-01-01",
+    "parsed_max_date": "2028-01-01",
+    "consistent": true
+   },
+   "note": "一百十五年六月二十六日修正之全文 29 條，依第 29 條規定：除第 5 條、第 6 條第 2～4 項、第 13 條第 3 項自一百十六年七月一日施行 ，及第 2 條附表一、第 16 條附表九、附表十、第 17、18、20、21 條 自一百十七年一月一日施行外，自一百十五年七月一日施行。",
+   "all_articles": 29,
+   "all_facts": 176,
+   "pending_articles": [
+    {
+     "article_no": "第 2 條",
+     "in_kg4": true,
+     "facts": 7,
+     "scopes": [
+      "appendix"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2028-01-01"
+     ]
+    },
+    {
+     "article_no": "第 5 條",
+     "in_kg4": true,
+     "facts": 6,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-07-01"
+     ]
+    },
+    {
+     "article_no": "第 6 條",
+     "in_kg4": true,
+     "facts": 6,
+     "scopes": [
+      "paragraph"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-07-01"
+     ]
+    },
+    {
+     "article_no": "第 13 條",
+     "in_kg4": true,
+     "facts": 16,
+     "scopes": [
+      "paragraph"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-07-01"
+     ]
+    },
+    {
+     "article_no": "第 16 條",
+     "in_kg4": true,
+     "facts": 10,
+     "scopes": [
+      "appendix"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2028-01-01"
+     ]
+    },
+    {
+     "article_no": "第 17 條",
+     "in_kg4": true,
+     "facts": 6,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2028-01-01"
+     ]
+    },
+    {
+     "article_no": "第 18 條",
+     "in_kg4": true,
+     "facts": 1,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2028-01-01"
+     ]
+    },
+    {
+     "article_no": "第 20 條",
+     "in_kg4": true,
+     "facts": 5,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2028-01-01"
+     ]
+    },
+    {
+     "article_no": "第 21 條",
+     "in_kg4": true,
+     "facts": 17,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2028-01-01"
+     ]
+    }
+   ],
+   "pending_article_count": 9,
+   "pending_fact_count": 74
+  },
+  {
+   "source": "N0060009_職業安全衛生設施規則",
+   "effective_date": "20270101",
+   "kind": "single",
+   "default_date": "2027-01-01",
+   "consistency": {
+    "document_effective_date": "2027-01-01",
+    "parsed_max_date": "2027-01-01",
+    "consistent": true
+   },
+   "note": "一百十五年六月三十日修正之第 21-3、57、116、185-1～185-4 條，自 一百十六年一月一日施行。",
+   "all_articles": 374,
+   "all_facts": 1829,
+   "pending_articles": [
+    {
+     "article_no": "第 21-3 條",
+     "in_kg4": true,
+     "facts": 27,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 57 條",
+     "in_kg4": true,
+     "facts": 13,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 116 條",
+     "in_kg4": true,
+     "facts": 21,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 185-1 條",
+     "in_kg4": true,
+     "facts": 12,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 185-2 條",
+     "in_kg4": true,
+     "facts": 10,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 185-3 條",
+     "in_kg4": true,
+     "facts": 13,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 185-4 條",
+     "in_kg4": true,
+     "facts": 9,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    }
+   ],
+   "pending_article_count": 7,
+   "pending_fact_count": 105
+  },
+  {
+   "source": "N0060010_職業安全衛生教育訓練規則",
+   "effective_date": "20270101",
+   "kind": "staged",
+   "default_date": "2026-07-01",
+   "consistency": {
+    "document_effective_date": "2027-01-01",
+    "parsed_max_date": "2027-01-01",
+    "consistent": true
+   },
+   "note": "一百十五年六月二十五日修正之第 1、17、18、20、40、43 條條文及第 3 條條文之附表一、第 4 條條文之附表二、第 5 條條文之附表三、第 6 條條文之附表四、第 11 條條文之附表九、第 12 條條文之附表十、第 13 條條文之附表十一、第 14 條條文之附表十二、第 35 條條文之附表 十五；增訂第 42-4 條條文，依第 43 條規定：除第 3 條條文之附表一 、第 4 條條文之附表二、第 5 條條文之附表三自一百十六年一月一日 施行外，自一百十五年七月一日施行。",
+   "all_articles": 50,
+   "all_facts": 359,
+   "pending_articles": [
+    {
+     "article_no": "第 3 條",
+     "in_kg4": true,
+     "facts": 6,
+     "scopes": [
+      "appendix"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 4 條",
+     "in_kg4": true,
+     "facts": 8,
+     "scopes": [
+      "appendix"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    },
+    {
+     "article_no": "第 5 條",
+     "in_kg4": true,
+     "facts": 5,
+     "scopes": [
+      "appendix"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    }
+   ],
+   "pending_article_count": 3,
+   "pending_fact_count": 19
+  },
+  {
+   "source": "N0090002_私立就業服務機構許可及管理辦法",
+   "effective_date": "20231216",
+   "kind": "single",
+   "default_date": "2023-12-16",
+   "consistency": {
+    "document_effective_date": "2023-12-16",
+    "parsed_max_date": "2023-12-16",
+    "consistent": true
+   },
+   "note": "一百十二年九月四日修正發布第 31-1 條條文及第 31 條條文之附表二， 自一百十二年十二月十六日施行。",
+   "all_articles": 48,
+   "all_facts": 306,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0030006_勞工請假規則",
+   "effective_date": "20260101",
+   "kind": "single",
+   "default_date": "2026-01-01",
+   "consistency": {
+    "document_effective_date": "2026-01-01",
+    "parsed_max_date": "2026-01-01",
+    "consistent": true
+   },
+   "note": "一百十四年十二月九日令修正發布第 7、9、12 條條文；增訂第 9-1 條 條文，依第 12 條規定：自一百十五年一月一日施行。",
+   "all_articles": 13,
+   "all_facts": 47,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0060002_職業安全衛生法施行細則",
+   "effective_date": "20260701",
+   "kind": "single",
+   "default_date": "2026-07-01",
+   "consistency": {
+    "document_effective_date": "2026-07-01",
+    "parsed_max_date": "2026-07-01",
+    "consistent": true
+   },
+   "note": "一百十五年六月二十六日修正之第 2、3、8、11、19、32、36、37、38、 41、46-1、51、53、54 條條文；增訂第 36-1 條條文；刪除第 5、28、 30、31、34 條條文，依第 54 條規定：自一百十五年七月一日施行。",
+   "all_articles": 49,
+   "all_facts": 195,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0060027_職業安全衛生管理辦法",
+   "effective_date": "20260701",
+   "kind": "single",
+   "default_date": "2026-07-01",
+   "consistency": {
+    "document_effective_date": "2026-07-01",
+    "parsed_max_date": "2026-07-01",
+    "consistent": true
+   },
+   "note": "一百十五年六月二十九日修正之第 1、1-1、5-1、6、11～12-7、20、27 、43、44、60、63、67、71、84、86、87、90 條條文及第 3 條條文之 附表二，依第 90 條規定：自一百十五年七月一日施行。",
+   "all_articles": 107,
+   "all_facts": 578,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0060004_勞工作業場所容許暴露標準",
+   "effective_date": "20270101",
+   "kind": "single",
+   "default_date": "2027-01-01",
+   "consistency": {
+    "document_effective_date": "2027-01-01",
+    "parsed_max_date": "2027-01-01",
+    "consistent": true
+   },
+   "note": "一百十四年四月十一日修正發布第 2 條條文之附表一編號十五、二百十 一、四百四十五及附表二，自一百十六年一月一日施行。",
+   "all_articles": 11,
+   "all_facts": 41,
+   "pending_articles": [
+    {
+     "article_no": "第 2 條",
+     "in_kg4": true,
+     "facts": 2,
+     "scopes": [
+      "appendix"
+     ],
+     "ops": [
+      "修正"
+     ],
+     "dates": [
+      "2027-01-01"
+     ]
+    }
+   ],
+   "pending_article_count": 1,
+   "pending_fact_count": 2
+  },
+  {
+   "source": "N0050022_就業保險法施行細則",
+   "effective_date": "20260101",
+   "kind": "single",
+   "default_date": "2026-01-01",
+   "consistency": {
+    "document_effective_date": "2026-01-01",
+    "parsed_max_date": "2026-01-01",
+    "consistent": true
+   },
+   "note": "一百十四年十二月二日令修正發布第 8-1、13、15、16-1、19、19-2、26 條條文，自一百十五年一月一日施行。",
+   "all_articles": 36,
+   "all_facts": 181,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0060065_女性勞工母性健康保護實施辦法",
+   "effective_date": "20240701",
+   "kind": "single",
+   "default_date": "2024-07-01",
+   "consistency": {
+    "document_effective_date": "2024-07-01",
+    "parsed_max_date": "2024-07-01",
+    "consistent": true
+   },
+   "note": "一百十三年五月三十一日修正第 3、5 條條文，自一百十三年七月一日施 行。",
+   "all_articles": 16,
+   "all_facts": 66,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0060014_營造安全衛生設施標準",
+   "effective_date": "20270701",
+   "kind": "single",
+   "default_date": "2027-07-01",
+   "consistency": {
+    "document_effective_date": "2027-07-01",
+    "parsed_max_date": "2027-07-01",
+    "consistent": true
+   },
+   "note": "一百十五年六月三十日增訂之第 11-2 條，自一百十六年七月一日施行。",
+   "all_articles": 184,
+   "all_facts": 1066,
+   "pending_articles": [
+    {
+     "article_no": "第 11-2 條",
+     "in_kg4": true,
+     "facts": 2,
+     "scopes": [
+      "article"
+     ],
+     "ops": [
+      "增訂"
+     ],
+     "dates": [
+      "2027-07-01"
+     ]
+    }
+   ],
+   "pending_article_count": 1,
+   "pending_fact_count": 2
+  },
+  {
+   "source": "N0060001_職業安全衛生法",
+   "effective_date": "20260701",
+   "kind": "single",
+   "default_date": "2026-07-01",
+   "consistency": {
+    "document_effective_date": "2026-07-01",
+    "parsed_max_date": "2026-07-01",
+    "consistent": true
+   },
+   "note": "一百十四年十二月十九日修正公布第 2、6、9、22、23、24、26、27、32 、39、40、41、43～46、48、49、51 條條文；增訂第 15-1、22-1～ 22-3、27-1、51-1 條條文及第二章之一章名，施行日期，定自一百十五 年七月一日施行。",
+   "all_articles": 61,
+   "all_facts": 484,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0030010_勞動契約法",
+   "effective_date": null,
+   "kind": "undetermined",
+   "default_date": null,
+   "consistency": {
+    "document_effective_date": null,
+    "parsed_max_date": null,
+    "consistent": true
+   },
+   "note": "施行日期以命令定之。",
+   "all_articles": 43,
+   "all_facts": 135,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0090055_中高齡者及高齡者就業促進法",
+   "effective_date": "20241204",
+   "kind": "single",
+   "default_date": "2024-12-04",
+   "consistency": {
+    "document_effective_date": "2024-12-04",
+    "parsed_max_date": "2024-12-04",
+    "consistent": true
+   },
+   "note": "一百十三年七月三十一日修正第 7、9、29、36 條條文，施行日期自一百 十三年十二月四日施行。",
+   "all_articles": 45,
+   "all_facts": 191,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  },
+  {
+   "source": "N0030014_性別平等工作法",
+   "effective_date": "20240308",
+   "kind": "single",
+   "default_date": "2024-03-08",
+   "consistency": {
+    "document_effective_date": "2024-03-08",
+    "parsed_max_date": "2024-03-08",
+    "consistent": true
+   },
+   "note": "一百十二年八月十六日修正之第 5 條第 2～4 項、第 12 條第 3、5～8 項、第 13、13-1、32-1～32-3、34、38-1～38-3 條條文，自一百十三年 三月八日施行。",
+   "all_articles": 49,
+   "all_facts": 277,
+   "pending_articles": [],
+   "pending_article_count": 0,
+   "pending_fact_count": 0
+  }
+ ],
+ "totals_before": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_after": {
+  "nodes": 57451,
+  "rels": 137873,
+  "facts": 16826,
+  "entities": 12296
+ },
+ "totals_stable": true,
+ "embedding_provider_called": false
+}
