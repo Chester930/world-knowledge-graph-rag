@@ -173,6 +173,22 @@ S3（prompt 附註與排除）、`vector_search_facts` 回傳條號、BFS 版本
 4. **報告編號**：報告 274 已被停止紀錄使用；本次**實際執行紀錄請寫報告 275**（不要覆蓋 274）。最終回報格式沿用 §9，並多一項「缺值證據的測試結果」。
 5. 其餘（T0–T7、§4 規格、§5 測試、§6 守衛、§7 驗收、§8 其餘停止條件）**不變**。
 
+## 15. 驗證紀錄（規劃對話，2026-10-04）——✅ **S2b 已獨立驗證通過**
+
+Codex 續行 commit `687de23`（執行紀錄見[報告275](275_S2b條文層影子顯示執行紀錄_Codex.md)；報告274 保留為第一次停止紀錄）。Codex 全程離線；**KG#4 端到端核對由規劃對話唯讀完成**；KG#4 仍無任何寫入核准。
+
+1. **範圍**：`git diff --name-status b6c5060..HEAD` 僅 §7 允許的檔案——4 個 production 檔（`repositories/law_document_repo.py`、`services/context/trace_marks.py`、`services/context/telemetry.py`、`routers/agent.py`）、3 個**新增**測試檔、報告 275、索引、HANDOVER；**沒有修改任何既有測試**；`core/`、`services/svo_service.py`、`services/retrieval/`、`services/context/fact_lines.py`、`services/effective_note.py` 零變動（受保護路徑變動數 0）；repository 與 `trace_marks` 的既有函式／方法零改動（只新增）。
+2. **讀碼**：兩個新 repository 方法的 Cypher 皆只讀、限定 `kg_id`、無寫入關鍵字；`keys` 空則不查詢；多條號取字面最小並 warning。`chat()` 的新增全部在 `if settings.trace_semantic_marks and payload.include_retrieval_trace:` 之內，且**僅當至少一筆證據屬 `has_pending` 文件才查詢**；整段包在 `try/except Exception`（只 `logger.warning`、不含敏感資料）；`article_effective_marks` 與規格 §4-2 逐項相符（`in_force`／`no_information`／`undetermined` 沿用文件層狀態不解析；`has_pending` 才解析並呼叫 `article_effective_status`；缺鍵／查無／文件不在對照＝`INDETERMINATE`）；`build_retrieval_trace` 新參數僅在 `include_semantic_marks=True` 且非 `None` 時於 `document_effective_status` 之後附加，`pending_*` 才附 `article_effective_from`／`article_pending_locators`。
+3. **KG#4 唯讀端到端核對（最重要；以 Codex 的同一組 Cypher 逐字取得 5 份待施行文件＋勞動契約法全部 Fact 的條號與已知條號清單，餵進 `article_effective_marks`，as_of＝2026-10-03）**：684 個證據鍵全部對得到條號（0 個鍵對應多條號）；**待施行 Fact 共 202 個、21 條條文，與報告267 的 21 條集合逐條相同**；各文件：健康保護規則 74／9、設施規則 105／7、教育訓練規則 19／3、容許暴露標準 2／1、營造標準 2／1；`pending_whole` **僅營造第 11-2 條（2 個 Fact）**，其餘 200 個為 `pending_partial`；勞動契約法 135 個 Fact 全為 `undetermined`；其餘 3,269 個全為 `in_force`；抽樣：健康保護規則第 6 條＝`pending_partial`／2027-07-01／`第2～4項`、教育訓練規則第 3 條＝`pending_partial`／2027-01-01／`附表一`、設施規則第 185-2 條（範圍展開）＝`pending_partial`／2027-01-01、第 17 條＝2028-01-01、營造第 11-2 條＝`pending_whole`／2027-07-01。
+4. **差分測試（我自寫；舊版 `git show b6c5060:services/context/telemetry.py` vs 新版）**：新參數省略時 `build_retrieval_trace` 在 4 種組合（`include_semantic_marks` 開／關 × `document_effective_status` 有／無）**0 不一致**；帶新參數時新鍵附加於既有鍵之後、既有鍵值不變、缺鍵＝`INDETERMINATE`、`pending_*` 的 `article_effective_from`／`article_pending_locators` 值正確；`include_semantic_marks=False` 時忽略新參數。（我的第一版檢查誤把既有的 `article_no` 標示鍵當成新鍵濾掉，是我的測試缺陷，已更正。）
+5. **守衛**：`date.today` 在 `services/`／`routers/`／`core/`／`repositories/`／`models/` 內仍只出現在 `routers/agent.py:1460`；全量 pytest **2257 passed**（2241＋16）、節點卡 0 警告、`.env` 敏感值對 52 個檔 0 命中；`kg2-neo4j` StartedAt 仍為新基準。
+
+**小項（不阻擋）**
+- `services/context/telemetry.py` 以 `Mapping = __import__("typing", fromlist=["Mapping"]).Mapping` 取得型別：既有測試 `tests/services/test_context_telemetry.py` 有 AST 守衛限制該模組的匯入集合（不含 `typing`），Codex 為了「不修改既有測試」而以 `__import__` 繞過。功能無害，但這是**繞過守衛字面**的寫法。建議日後經你同意把該守衛的允許集合加入 `typing`（標準庫、無副作用），再把這行改成一般的 `from typing import Mapping`。
+- 路由的 `as_of`（S2）無論旗標都會計算一次日期，無副作用。
+
+**限制（沿用）**：沒有端到端跑 `chat()`（router 層由 Codex 以假 driver／repo 測試，包含失敗隔離，我讀碼確認）；`pending_partial` 的項／附表層級只標在條文層（200 個 Fact 中僅有部分真正落在待施行的項／附表）；`no_information` 的 48／64 份文件仍無從判斷；解析器僅 16 份備註驗證；S3 尚未做。
+
 ## 14. 續行指令（使用者貼給 Codex；取代 §11 供第二次執行使用）
 
 ```text
