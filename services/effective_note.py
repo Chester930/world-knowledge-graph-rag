@@ -38,6 +38,22 @@ class ArticleEffectiveStatus:
     ops: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class DocumentEffectiveSummary:
+    """文件層施行狀態與相對 ``as_of`` 的待施行日期摘要。"""
+
+    status: str
+    pending_dates: tuple[str, ...]
+
+
+def summarize_document_effective(note: str | None, as_of: str) -> DocumentEffectiveSummary:
+    """以文件備註推導影子顯示所需的文件層摘要。"""
+    parsed = parse_effective_note(note, known_articles=())
+    status = document_effective_status(parsed, as_of)
+    pending_dates = tuple(sorted({item["effective_date"] for item in pending_items(parsed, as_of)}))
+    return DocumentEffectiveSummary(status=status, pending_dates=pending_dates)
+
+
 def _validate_as_of(as_of: str) -> None:
     if not isinstance(as_of, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", as_of):
         raise ValueError("as_of 必須是 YYYY-MM-DD 字串")
@@ -222,8 +238,8 @@ def document_effective_status(parsed: Mapping[str, Any], as_of: str) -> str:
 
 
 __all__ = [
-    "ArticleEffectiveStatus", "STATUS_IN_FORCE", "STATUS_NO_INFORMATION", "STATUS_PENDING_WHOLE",
+    "ArticleEffectiveStatus", "DocumentEffectiveSummary", "STATUS_IN_FORCE", "STATUS_NO_INFORMATION", "STATUS_PENDING_WHOLE",
     "STATUS_PENDING_PARTIAL", "STATUS_UNDETERMINED", "article_effective_status", "art_key", "cn_to_int",
     "consistency", "document_effective_status", "expand_articles", "fmt_article", "normalize",
-    "parse_effective_note", "parse_provisions", "pending_items", "roc_to_iso",
+    "parse_effective_note", "parse_provisions", "pending_items", "roc_to_iso", "summarize_document_effective",
 ]

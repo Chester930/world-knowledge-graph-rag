@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import time
+from datetime import date
 from pathlib import Path
 from typing import NamedTuple
 from uuid import UUID
@@ -56,7 +57,7 @@ from services.context.telemetry import (
     serialize_document as _serialize_document,
     serialize_sources as _serialize_sources,
 )
-from services.context.trace_marks import semantic_marks_trace_kwargs
+from services.context.trace_marks import effective_marks_kwargs, semantic_marks_trace_kwargs
 
 # P2 第四刀（報告145）：檢索範圍／過濾純函式群已抽出至 services/retrieval/scope.py；
 # 此處以原私有名稱重新匯出，維持既有引用（含腳本的 from routers.agent import …）與 agent.py 內部呼叫不變。
@@ -1434,6 +1435,10 @@ async def chat(payload: ChatRequest):
         yield f"data: {json.dumps({'token': final_answer})}\n\n"
 
         document_map = await _fetch_document_map(driver, payload.kg_id, triples, fact_results)
+        as_of = date.today().isoformat()
+        effective_sources_kwargs, effective_trace_kwargs = effective_marks_kwargs(
+            settings.trace_semantic_marks, as_of, document_map
+        )
         sources_json = json.dumps(
             _serialize_sources(
                 triples, fact_results, resolved_rel_type, document_map,
@@ -1445,9 +1450,11 @@ async def chat(payload: ChatRequest):
                             settings.trace_semantic_marks,
                             settings.trace_semantic_marks_concept_scheme,
                         ),
+                        **effective_trace_kwargs,
                     )
                     if payload.include_retrieval_trace else None
                 ),
+                **effective_sources_kwargs,
             ),
             ensure_ascii=False,
         )

@@ -1,8 +1,8 @@
 """P2 第三刀自 ``routers.agent`` 抽出的檢索遙測／來源序列化純函式群。
 
 本模組無 I/O，只依賴 ``models.knowledge_graph``、``models.law_document`` 與
-同層的 ``services.context.fact_lines``，不依賴 ``routers``、``repositories``
-或其他 ``services`` 模組。引用報告143。
+同層的 ``services.context.fact_lines``；文件層施行摘要以函式內延遲匯入
+``services.effective_note``，不依賴 ``routers``、``repositories``。引用報告143／270。
 """
 
 from models.knowledge_graph import SVOTriple
@@ -10,15 +10,25 @@ from models.law_document import LawDocument
 from services.context.fact_lines import strip_type_markers
 
 
-def serialize_document(doc: LawDocument | None) -> dict | None:
+def serialize_document(
+    doc: LawDocument | None, *, effective_as_of: str | None = None
+) -> dict | None:
     if doc is None:
         return None
-    return {
+    serialized = {
         "title": doc.title,
         "update_date": doc.update_date,
         "effective_date": doc.effective_date,
         "effective_note": doc.effective_note,
     }
+    if effective_as_of is None:
+        return serialized
+    from services.effective_note import summarize_document_effective
+
+    summary = summarize_document_effective(doc.effective_note, effective_as_of)
+    serialized["effective_status"] = summary.status
+    serialized["effective_pending_dates"] = list(summary.pending_dates)
+    return serialized
 
 
 def build_retrieval_telemetry(
@@ -51,6 +61,7 @@ def build_retrieval_trace(
     concept_scheme: str = "A",
     type_lookups: tuple[dict[str, str], dict[str, str]] | None = None,
     document_article_applicable: dict[str, bool] | None = None,
+    document_effective_status: "Mapping[str, str] | None" = None,
 ) -> dict:
     """報告62 T0：把「檢索到什麼、排第幾、有沒有進 prompt」整理成可序列化的 trace。
 
@@ -132,6 +143,10 @@ def build_retrieval_trace(
             fact_entries[-1]["semantic_marks"]["lifecycle_state"] = _sm.mark_lifecycle_state(
                 f.get("lifecycle_state")
             )
+            if document_effective_status is not None:
+                fact_entries[-1]["semantic_marks"]["document_effective_status"] = (
+                    document_effective_status.get(fact_entries[-1]["source_doc_id"]) or _sm.INDETERMINATE
+                )
 
     triple_entries = []
     for rank, t in enumerate(triples):
@@ -156,6 +171,10 @@ def build_retrieval_trace(
                 t.subject, t.object, t.verb, t.rel_type, t.source_article_no,
                 triple_entries[-1]["source_doc_id"], t.subject_type, t.object_type,
             )
+            if document_effective_status is not None:
+                triple_entries[-1]["semantic_marks"]["document_effective_status"] = (
+                    document_effective_status.get(triple_entries[-1]["source_doc_id"]) or _sm.INDETERMINATE
+                )
 
     return {"facts": fact_entries, "triples": triple_entries, "prompt_lines": prompt_lines}
 
@@ -167,6 +186,7 @@ def serialize_sources(
     document_map: dict[str, LawDocument] | None = None,
     retrieval_telemetry: dict | None = None,
     retrieval_trace: dict | None = None,
+    effective_as_of: str | None = None,
 ) -> dict:
     """把本次檢索到的原始來源（BFS 三元組 + 語意 Fact）整理成可序列化的
     結構，隨 SSE `sources` 事件一併送出——讓呼叫端（CLI 工具、之後的前端）
@@ -203,7 +223,8 @@ def serialize_sources(
                 "source_svo_chunk_file": t.source_svo_chunk_file,
                 "natural_text": t.natural_text,
                 "document": serialize_document(
-                    document_map.get(str(t.source_doc_id)) if t.source_doc_id is not None else None
+                    document_map.get(str(t.source_doc_id)) if t.source_doc_id is not None else None,
+                    effective_as_of=effective_as_of,
                 ),
             }
             for t in triples
@@ -216,7 +237,9 @@ def serialize_sources(
                 "object": f.get("object"),
                 "rel_type": f.get("rel_type"),
                 "score": f.get("score"),
-                "document": serialize_document(document_map.get(f.get("source_doc_id"))),
+                "document": serialize_document(
+                    document_map.get(f.get("source_doc_id")), effective_as_of=effective_as_of
+                ),
             }
             for f in fact_results
         ],

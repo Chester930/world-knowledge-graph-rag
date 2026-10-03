@@ -12,6 +12,7 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import Any, Mapping
 
 from core.constants import ENTITY_TYPES
 from services.semantic_marks import CONCEPT_SCHEMES, normalize_type_key
@@ -52,3 +53,23 @@ def semantic_marks_trace_kwargs(enabled: bool, concept_scheme: str) -> dict:
         "concept_scheme": concept_scheme,
         "type_lookups": load_type_lookups(),
     }
+
+
+def effective_marks_kwargs(
+    enabled: bool, as_of: str, document_map: Mapping[str, Any] | None
+) -> tuple[dict, dict]:
+    """組裝文件層施行摘要的來源／trace 選用參數；關閉時完全不運算。"""
+    if not enabled:
+        return {}, {}
+    from services.effective_note import summarize_document_effective
+
+    effective_status = {}
+    for doc_id, document in (document_map or {}).items():
+        if document is not None:
+            effective_status[doc_id] = summarize_document_effective(
+                document.effective_note, as_of
+            ).status
+    return (
+        {"effective_as_of": as_of},
+        {"document_effective_status": effective_status},
+    )

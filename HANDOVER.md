@@ -1,5 +1,9 @@
 # 跨 Agent 接續進度
 
+## 2026-10-04（報告271；Codex 執行報告270 R0–R7，待規劃對話獨立驗證）：[報告271](docs/報告/271_尚未施行標示S2文件層影子顯示執行紀錄_Codex.md)
+
+完成 S2 文件層影子顯示的最小接線：`TRACE_SEMANTIC_MARKS` 開啟時，`sources.document` 有 `effective_status`／`effective_pending_dates`，retrieval trace 的 fact／triple `semantic_marks` 有 `document_effective_status`；關閉時維持既有輸出。新增 `DocumentEffectiveSummary`／`summarize_document_effective`、telemetry 選用參數、`effective_marks_kwargs`，router 僅在 `date.today()` 取得 `as_of`。新增 15 個測試；旗標關閉／開啟 router 測試使用 fake driver／provider／repo、固定日期與 SSE drain。基準 `2226 passed`；本次全量 `2241 passed, 8 warnings, 1 subtests passed`；`check_node_cards.py` 為 0 警告。只使用已保存的 16 份備註 fixture（5 `has_pending`、1 `undetermined`、10 `in_force`），**未讀取 KG#4 64 份資料**。全程未連資料庫／Ollama／Docker，未讀 `.env`；待規劃對話獨立驗證。commit SHA 見報告271與最終回報。
+
 ## 2026-10-03（報告269；Codex 執行報告268 P0–P5，待規劃對話獨立驗證）：[報告269](docs/報告/269_尚未施行標示S1純函式與題庫涉及度查證執行紀錄_Codex.md)
 
 新增 `services/effective_note.py`（229 行、零接線、純運算）與 `tests/fixtures/kg4_effective_notes_20261003.json`、`tests/services/test_effective_note.py`；16 份真實備註與既有分析腳本逐項相等，新增測試 20 passed。新增離線查證 `scripts/analysis/frozen_bank_pending_overlap.py`、`tests/scripts/test_frozen_bank_pending_overlap.py` 與 `data/analysis/frozen_bank_pending_overlap_20261003.json`；凍結 42 題與全部 65 題各 1 題命中待施行條文（`57-CANARY3`）、0 題命中勞動契約法，另各 2 題屬 5 份文件但非待施行條文（`57-AGGR1`、`57-AGGR2`）。兩個凍結 42 題候選清單一致，採用 `data/eval/baseline_runs/20260920_frozen/frozen_manifest.json`。`check_node_cards.py` 為 0 警告；全量 pytest `2226 passed, 8 warnings, 1 subtests passed`，相對基準增加 26 個測試、無回歸。實作 commit 為 `06d710e`；本條目與報告269的收尾更新另成文件 commit，兩個 commit 一併 push 至目前分支。全程未連資料庫／Ollama／Docker，未讀 `.env`；待規劃對話獨立驗證。
