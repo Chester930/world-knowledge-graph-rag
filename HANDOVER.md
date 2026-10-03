@@ -1,5 +1,9 @@
 # 跨 Agent 接續進度
 
+## 2026-10-04（報告275；Codex 完成報告273 S2b T1–T7，待規劃對話獨立驗收）：[報告275](docs/報告/275_S2b條文層影子顯示執行紀錄_Codex.md)
+
+依報告273 §13 續行 S2b。先 `git pull`（Already up to date），基準全量 pytest `2241 passed, 8 warnings, 1 subtests passed`。新增 `LawDocumentRepository.article_nos_for_evidence(...)`／`list_article_nos(...)` 兩個限定 `kg_id` 的唯讀方法；新增純函式 `article_effective_marks(...)`；`build_retrieval_trace(...)` 新增選用 `article_effective_status`；`routers/agent.py` 新增 `_fetch_article_effective_inputs(...)` 並只在旗標開啟、trace 開啟且證據含 `has_pending` 文件時執行，查詢／計算例外只記 generic warning。旗標關閉測試確認新增 repository 呼叫為 0；缺值證據（triple chunk `None`、Fact `source_doc_id=None`、`has_pending` 查無條號）均標 `INDETERMINATE`，缺鍵不查詢、不猜測。新增 16 個測試，未修改既有測試；全量 pytest `2257 passed, 8 warnings, 1 subtests passed`；`check_node_cards.py` 為 0 警告。全程未連 KG#4／任何 Neo4j／Ollama／Docker，未讀 `.env`；報告274 保留。未執行 KG#4 唯讀端到端計數，待規劃對話獨立驗收；本條目與報告275僅記錄本地實作／測試結果。
+
 ## 2026-10-04（報告274；Codex 依報告273 §8.4 停止，待規劃對話裁示）：[報告274](docs/報告/274_S2b條文層影子顯示停止紀錄_Codex.md)
 
 T0 已完成：`git pull` 為 Already up to date；基準全量 pytest `2241 passed, 8 warnings, 1 subtests passed`。讀碼發現 `chat()` 的 Fact／triple 證據不保證有 `source_svo_chunk_index`：`SVOTriple` 欄位為可空、一般 SVOGROUP chunk 恆可為 `None`，BFS citation 缺欄位也保留 `None`，既有 trace 對缺值序列化為 `None`。依報告273 §8.4 立即停止，沒有新增 repository 查詢、沒有修改 trace/router、沒有新增測試，也未執行收尾全量 pytest 或 node cards；沒有連任何資料庫／Ollama／Docker，未讀 `.env`。待規劃對話裁示如何處理缺少 chunk index 的證據後再決定是否另寫任務書。

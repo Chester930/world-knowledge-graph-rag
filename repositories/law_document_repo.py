@@ -10,11 +10,16 @@ Project: 本專案自有的節點層設計，不是外部文獻/開源專案的�
 """
 from __future__ import annotations
 
+import logging
+from typing import Sequence
 from uuid import UUID
 
 from neo4j import AsyncDriver
 
 from models.law_document import LawArticle, LawArticleCreate, LawDocument, LawDocumentCreate
+
+
+logger = logging.getLogger(__name__)
 
 
 class LawDocumentRepository:
@@ -133,4 +138,58 @@ class LawDocumentRepository:
             )
             for record in result.records
             for props in [dict(record["a"])]
+        ]
+
+    async def article_nos_for_evidence(
+        self, kg_id: UUID, keys: Sequence[tuple[str, int]]
+    ) -> dict[tuple[str, int], str]:
+        """只讀取得 Fact 證據鍵對應的 ``LawArticle.article_no``。"""
+        query_keys = [
+            {"source_doc_id": str(source_doc_id), "chunk": int(chunk)}
+            for source_doc_id, chunk in keys
+        ]
+        if not query_keys:
+            return {}
+        result = await self.driver.execute_query(
+            """
+            UNWIND $keys AS key
+            MATCH (f:Fact {kg_id: $kg_id,
+                           source_doc_id: key.source_doc_id,
+                           source_svo_chunk_index: key.chunk})
+                  -[:SUPPORTED_BY]->(a:LawArticle {kg_id: $kg_id})
+            RETURN key.source_doc_id AS source_doc_id,
+                   key.chunk AS chunk,
+                   a.article_no AS article_no
+            """,
+            kg_id=str(kg_id),
+            keys=query_keys,
+        )
+        grouped: dict[tuple[str, int], set[str]] = {}
+        for record in result.records:
+            key = (str(record["source_doc_id"]), int(record["chunk"]))
+            article_no = record.get("article_no") if hasattr(record, "get") else record["article_no"]
+            if article_no is not None:
+                grouped.setdefault(key, set()).add(str(article_no))
+        output: dict[tuple[str, int], str] = {}
+        for key, article_nos in grouped.items():
+            if len(article_nos) > 1:
+                logger.warning("同一證據鍵對應多個條號，取字面排序最小者：%s", key)
+            output[key] = min(article_nos)
+        return output
+
+    async def list_article_nos(self, kg_id: UUID, source_doc_id: UUID) -> list[str]:
+        """只讀列出文件的條號，不取條文內容。"""
+        result = await self.driver.execute_query(
+            """
+            MATCH (a:LawArticle {kg_id: $kg_id, source_doc_id: $source_doc_id})
+            RETURN a.article_no AS article_no
+            ORDER BY a.article_no
+            """,
+            kg_id=str(kg_id),
+            source_doc_id=str(source_doc_id),
+        )
+        return [
+            str(record["article_no"])
+            for record in result.records
+            if record["article_no"] is not None
         ]

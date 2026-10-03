@@ -5,6 +5,8 @@
 ``services.effective_note``，不依賴 ``routers``、``repositories``。引用報告143／270。
 """
 
+Mapping = __import__("typing", fromlist=["Mapping"]).Mapping
+
 from models.knowledge_graph import SVOTriple
 from models.law_document import LawDocument
 from services.context.fact_lines import strip_type_markers
@@ -62,6 +64,7 @@ def build_retrieval_trace(
     type_lookups: tuple[dict[str, str], dict[str, str]] | None = None,
     document_article_applicable: dict[str, bool] | None = None,
     document_effective_status: "Mapping[str, str] | None" = None,
+    article_effective_status: "Mapping[tuple[str, int], Mapping[str, object]] | None" = None,
 ) -> dict:
     """報告62 T0：把「檢索到什麼、排第幾、有沒有進 prompt」整理成可序列化的 trace。
 
@@ -113,6 +116,22 @@ def build_retrieval_trace(
             marks["object_name_shape"] = _sm.mark_entity_name_shape(obj)
             return marks
 
+        def _append_article_mark(entry: dict, source_doc_id: str | None, chunk_index: int | None) -> None:
+            result = None
+            if article_effective_status is not None and source_doc_id is not None and chunk_index is not None:
+                try:
+                    result = article_effective_status.get((str(source_doc_id), int(chunk_index)))
+                except (TypeError, ValueError):
+                    result = None
+            status = result.get("status") if result is not None else _sm.INDETERMINATE
+            marks = entry["semantic_marks"]
+            marks["article_effective_status"] = status
+            if status in {"pending_whole", "pending_partial"}:
+                marks["article_effective_from"] = result.get("effective_from") if result is not None else None
+                marks["article_pending_locators"] = (
+                    list(result.get("locators") or []) if result is not None else []
+                )
+
     prompt_set = (
         {ln for lines in prompt_lines for ln in lines} if prompt_lines is not None else None
     )
@@ -147,6 +166,10 @@ def build_retrieval_trace(
                 fact_entries[-1]["semantic_marks"]["document_effective_status"] = (
                     document_effective_status.get(fact_entries[-1]["source_doc_id"]) or _sm.INDETERMINATE
                 )
+            if article_effective_status is not None:
+                _append_article_mark(
+                    fact_entries[-1], fact_entries[-1]["source_doc_id"], fact_entries[-1]["source_svo_chunk_index"]
+                )
 
     triple_entries = []
     for rank, t in enumerate(triples):
@@ -174,6 +197,10 @@ def build_retrieval_trace(
             if document_effective_status is not None:
                 triple_entries[-1]["semantic_marks"]["document_effective_status"] = (
                     document_effective_status.get(triple_entries[-1]["source_doc_id"]) or _sm.INDETERMINATE
+                )
+            if article_effective_status is not None:
+                _append_article_mark(
+                    triple_entries[-1], triple_entries[-1]["source_doc_id"], triple_entries[-1]["source_svo_chunk_index"]
                 )
 
     return {"facts": fact_entries, "triples": triple_entries, "prompt_lines": prompt_lines}

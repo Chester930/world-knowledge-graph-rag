@@ -57,7 +57,11 @@ from services.context.telemetry import (
     serialize_document as _serialize_document,
     serialize_sources as _serialize_sources,
 )
-from services.context.trace_marks import effective_marks_kwargs, semantic_marks_trace_kwargs
+from services.context.trace_marks import (
+    article_effective_marks,
+    effective_marks_kwargs,
+    semantic_marks_trace_kwargs,
+)
 
 # P2 第四刀（報告145）：檢索範圍／過濾純函式群已抽出至 services/retrieval/scope.py；
 # 此處以原私有名稱重新匯出，維持既有引用（含腳本的 from routers.agent import …）與 agent.py 內部呼叫不變。
@@ -402,6 +406,24 @@ async def _fetch_document_map(
     repo = LawDocumentRepository(driver)
     documents = await asyncio.gather(*(repo.get_document(kg_id, doc_id) for doc_id in doc_ids))
     return {str(doc.source_doc_id): doc for doc in documents if doc is not None}
+
+
+async def _fetch_article_effective_inputs(
+    driver: AsyncDriver,
+    kg_id: UUID,
+    evidence_keys: list[tuple[str, int]],
+    pending_doc_ids: set[str],
+) -> tuple[dict[tuple[str, int], str], dict[str, list[str]]]:
+    """查取條文層影子標示所需的條號與待施行文件已知條號。"""
+    if not evidence_keys or not pending_doc_ids:
+        return {}, {}
+    repo = LawDocumentRepository(driver)
+    article_nos = await repo.article_nos_for_evidence(kg_id, evidence_keys)
+    known_articles = {
+        doc_id: await repo.list_article_nos(kg_id, UUID(doc_id))
+        for doc_id in sorted(pending_doc_ids)
+    }
+    return article_nos, known_articles
 
 
 # ── 報告32 §9 G3 completeness guard（2026-09-08）─────────────────────────────
@@ -1439,6 +1461,65 @@ async def chat(payload: ChatRequest):
         effective_sources_kwargs, effective_trace_kwargs = effective_marks_kwargs(
             settings.trace_semantic_marks, as_of, document_map
         )
+        article_effective_trace_kwargs = {}
+        if settings.trace_semantic_marks and payload.include_retrieval_trace:
+            try:
+                document_status = effective_trace_kwargs.get("document_effective_status", {})
+                evidence_keys: list[tuple[str, int]] = []
+                evidence_key_set: set[tuple[str, int]] = set()
+                pending_doc_ids: set[str] = set()
+
+                def _collect_article_key(source_doc_id, chunk_index) -> None:
+                    if source_doc_id is None:
+                        return
+                    doc_id = str(source_doc_id)
+                    if document_status.get(doc_id) == "has_pending":
+                        pending_doc_ids.add(doc_id)
+                    if chunk_index is None:
+                        return
+                    try:
+                        key = (doc_id, int(chunk_index))
+                    except (TypeError, ValueError):
+                        return
+                    if key not in evidence_key_set:
+                        evidence_key_set.add(key)
+                        evidence_keys.append(key)
+
+                for triple in triples:
+                    _collect_article_key(triple.source_doc_id, triple.source_svo_chunk_index)
+                for fact in fact_results:
+                    _collect_article_key(
+                        fact.get("source_doc_id"), fact.get("source_svo_chunk_index")
+                    )
+
+                if pending_doc_ids:
+                    article_nos, known_articles = await _fetch_article_effective_inputs(
+                        driver, payload.kg_id, evidence_keys, pending_doc_ids
+                    )
+                    document_notes = {
+                        doc_id: document_map[doc_id].effective_note
+                        for doc_id in pending_doc_ids
+                        if doc_id in document_map
+                    }
+                    article_effective_trace_kwargs = {
+                        "article_effective_status": article_effective_marks(
+                            as_of=as_of,
+                            document_notes=document_notes,
+                            document_status=document_status,
+                            evidence_keys=[
+                                (fact.get("source_doc_id"), fact.get("source_svo_chunk_index"))
+                                for fact in fact_results
+                            ] + [
+                                (str(triple.source_doc_id) if triple.source_doc_id is not None else None,
+                                 triple.source_svo_chunk_index)
+                                for triple in triples
+                            ],
+                            article_nos=article_nos,
+                            known_articles=known_articles,
+                        )
+                    }
+            except Exception:
+                logger.warning("條文層施行標示失敗，略過本次條文層標示")
         sources_json = json.dumps(
             _serialize_sources(
                 triples, fact_results, resolved_rel_type, document_map,
@@ -1451,6 +1532,7 @@ async def chat(payload: ChatRequest):
                             settings.trace_semantic_marks_concept_scheme,
                         ),
                         **effective_trace_kwargs,
+                        **article_effective_trace_kwargs,
                     )
                     if payload.include_retrieval_trace else None
                 ),

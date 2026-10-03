@@ -12,10 +12,10 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from core.constants import ENTITY_TYPES
-from services.semantic_marks import CONCEPT_SCHEMES, normalize_type_key
+from services.semantic_marks import CONCEPT_SCHEMES, INDETERMINATE, normalize_type_key
 
 logger = logging.getLogger(__name__)
 
@@ -73,3 +73,58 @@ def effective_marks_kwargs(
         {"effective_as_of": as_of},
         {"document_effective_status": effective_status},
     )
+
+
+def article_effective_marks(
+    *,
+    as_of: str,
+    document_notes: Mapping[str, str | None],
+    document_status: Mapping[str, str],
+    evidence_keys: Sequence[tuple[str | None, int | None]],
+    article_nos: Mapping[tuple[str, int], str],
+    known_articles: Mapping[str, Sequence[str]],
+) -> dict[tuple[str, int], dict[str, Any]]:
+    """以文件備註與條號對照表推導證據的條文層影子狀態。"""
+    from services.effective_note import article_effective_status, parse_effective_note
+
+    parsed_by_doc: dict[str, Mapping[str, Any]] = {}
+    output: dict[tuple[str, int], dict[str, Any]] = {}
+
+    def _indeterminate() -> dict[str, Any]:
+        return {"status": INDETERMINATE, "effective_from": None, "locators": []}
+
+    def _normalize_known_articles(values: Sequence[str]) -> list[str]:
+        return ["".join(str(value).split()).replace("第", "").replace("條", "") for value in values]
+
+    for raw_doc_id, raw_chunk in evidence_keys:
+        if raw_doc_id is None or raw_chunk is None:
+            continue
+        doc_id = str(raw_doc_id)
+        try:
+            chunk = int(raw_chunk)
+        except (TypeError, ValueError):
+            continue
+        key = (doc_id, chunk)
+        status = document_status.get(doc_id)
+        if status is None:
+            output[key] = _indeterminate()
+            continue
+        if status != "has_pending":
+            output[key] = {"status": status, "effective_from": None, "locators": []}
+            continue
+        article_no = article_nos.get(key)
+        if not article_no:
+            output[key] = _indeterminate()
+            continue
+        if doc_id not in parsed_by_doc:
+            parsed_by_doc[doc_id] = parse_effective_note(
+                document_notes.get(doc_id),
+                known_articles=_normalize_known_articles(known_articles.get(doc_id, ())),
+            )
+        article_status = article_effective_status(parsed_by_doc[doc_id], str(article_no), as_of)
+        output[key] = {
+            "status": article_status.status,
+            "effective_from": article_status.effective_from,
+            "locators": list(article_status.locators),
+        }
+    return output
