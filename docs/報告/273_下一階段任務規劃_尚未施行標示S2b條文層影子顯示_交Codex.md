@@ -129,7 +129,7 @@ def article_effective_marks(
 1. 需要連 KG#4／`kg2-neo4j`／Neo4j／Ollama／docker／讀 `.env`；
 2. 需要改檢索、排序、截斷、prompt、生成或 `core/config.py` 才能完成；
 3. 旗標關閉時既有測試因你的改動失敗，且不是「測試鎖定了完整鍵集合」以外的原因；
-4. 讀碼發現 `chat()` 的證據不一定帶 `source_svo_chunk_index`（影響對應鍵）——如實回報影響範圍，**不要自行改檢索讓它帶**；
+4. 讀碼發現 `chat()` 的證據不一定帶 `source_svo_chunk_index`（影響對應鍵）——如實回報影響範圍，**不要自行改檢索讓它帶**；〔**已由規劃對話裁示澄清，見 §13**：型別允許 `None` 不構成停止條件〕
 5. `chat()` 現有測試手法無法在不修改既有測試的前提下覆蓋失敗隔離（說明原因與最小可行測試方式，**不要放寬守衛**）；
 6. 全量 pytest 出現非本任務造成的失敗。
 
@@ -163,4 +163,21 @@ S3（prompt 附註與排除）、`vector_search_facts` 回傳條號、BFS 版本
 
 ## 12. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成；待使用者把 §11 的交接指令貼給 Codex。KG#4 仍無任何寫入核准。
+⚠️ **2026-10-04 Codex 第一次執行在 T0 後依 §8.4 停止**（[報告274](274_S2b條文層影子顯示停止紀錄_Codex.md)：`SVOTriple.source_svo_chunk_index` 型別為 `int | None`，一般 SVOGROUP chunk 恆為 `None`）。**停止是正確且保守的**（符合「不要自行放寬守衛」）；規劃對話裁示如 §13，任務書**其餘內容不變**，請 Codex 繼續 T1–T7。KG#4 仍無任何寫入核准。
+
+## 13. 規劃對話裁示與澄清（2026-10-04；回應報告274）
+
+1. **型別允許 `None` 不構成停止條件**。§4-2／§4-3 本來就規定：證據的 `source_doc_id` 或 `source_svo_chunk_index` 為 `None`、或對應表查無該鍵 → `article_effective_status＝semantic_marks.INDETERMINATE`；**不得猜測、不得改用其他欄位、不得改檢索補欄位**。§8.4 的原意只針對「缺值普遍到使 S2b 失去意義」的情況。
+2. **真實資料的影響範圍（規劃對話對 KG#4 唯讀量測，〔事實〕）**：KG#4 全部 **16,826 個 Fact 的 `source_svo_chunk_index` 與 `source_doc_id` 皆非空（空值 0）**；全部 **16,826 筆邊引用（`citations_json`，三元組的來源）都帶 `source_svo_chunk_index`（空值 0）**；其中屬於 5 份待施行文件與勞動契約法的 **3,606 筆邊引用與 3,606 個 Fact 同樣空值 0**。〔推論，依 `SVOTriple` 欄位註解與資料形狀，未對其他 KG 實測〕`source_svo_chunk_index` 缺值只會出現在**非法規**（一般 SVOGROUP chunk）的 KG／文件，那些文件通常沒有 `Document` 節點或備註（文件層狀態為 `no_information` 或不在對照中），不會進入 `has_pending` 路徑；即使進入，也只會標 `INDETERMINATE`，不會誤標。
+3. **需補的測試**（新增，不改規格）：①三元組證據 `source_svo_chunk_index=None`、②Fact 證據 `source_doc_id=None`、③`has_pending` 文件但對照表查無該鍵——三者 `article_effective_status` 皆為 `INDETERMINATE`，且不觸發任何資料庫查詢（缺鍵者不列入查詢鍵）。
+4. **報告編號**：報告 274 已被停止紀錄使用；本次**實際執行紀錄請寫報告 275**（不要覆蓋 274）。最終回報格式沿用 §9，並多一項「缺值證據的測試結果」。
+5. 其餘（T0–T7、§4 規格、§5 測試、§6 守衛、§7 驗收、§8 其餘停止條件）**不變**。
+
+## 14. 續行指令（使用者貼給 Codex；取代 §11 供第二次執行使用）
+
+```text
+請接續「報告273 S2b 條文層影子顯示」任務（工作目錄與分支同前）。先 git pull，重新閱讀 docs/報告/273_下一階段任務規劃_尚未施行標示S2b條文層影子顯示_交Codex.md，特別是新增的 §13「規劃對話裁示與澄清」。
+你上次依 §8.4 停止是正確且保守的；規劃對話已裁示：SVOTriple.source_svo_chunk_index 型別允許 None 不構成停止條件，缺值證據一律標 INDETERMINATE（不猜測、不改檢索、不查詢）；KG#4 實測 16,826 個 Fact 與 16,826 筆邊引用的 chunk index 空值皆為 0。
+請從 T1 開始依 T1–T7 實作（T0 已完成可略過，但請重新 git pull 並確認基準 pytest 仍為 2241 passed）。硬規則不變：全程離線；旗標關閉時輸出逐位元相同且零新增資料庫查詢；只改 repositories/law_document_repo.py（僅新增方法）、services/context/trace_marks.py、services/context/telemetry.py、routers/agent.py 與新增測試；不改既有測試、不改檢索／排序／截斷／prompt／生成、不新增設定項；新增查詢只讀並以 try/except 做失敗隔離；只 git add 自己的檔案、push 本分支、不動 master。
+本次執行紀錄請寫成「報告 275」（報告 274 已是停止紀錄，不要覆蓋），並更新 HANDOVER.md 頂部條目。完成後依報告273 §9 的最終回報格式輸出（多加一項：缺值證據的測試結果），供使用者貼回規劃對話。
+```
