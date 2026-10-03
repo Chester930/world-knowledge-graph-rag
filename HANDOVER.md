@@ -31,6 +31,10 @@ Q1 `scripts/analysis/pilot_version_corpus_builder.py`：collector 歷史檔 → 
 
 新增 `services/fact_flat_resync.py`（158 行，零接線）與 `tests/services/test_fact_flat_resync.py`（30 個假 driver 測試）。`resync_fact_flat_properties(driver, kg_id, *, dry_run=True, sync_rel_type=False)` 與原型逐函式 `ast.dump` 比對（去 docstring）相同，唯一差異是 `_apply_updates` 依報告250 §4-6 新增屬性白名單檢查（`ValueError`）。全量 pytest 1936 passed（基準 1906＋30）。**未連任何 Neo4j、未操作 docker；G4（對 KG#4 套用）未做，仍須再備份＋使用者逐項同意。**
 
+## 2026-10-03（報告268 §11）：**「尚未施行」標示 S1 已由 Codex 完成並由規劃對話獨立驗證通過（`06d710e`／`03f8bd0`；pytest 2226 passed）**
+
+`services/effective_note.py`（229 行，純運算、零接線、只被測試匯入）＋狀態推導 API（`in_force`／`no_information`／`pending_whole`／`pending_partial`／`undetermined`）。我獨立驗證：用自己取出的 16 份真實備註，新模組與分析腳本輸出 16／16 相等、21 條待施行集合與報告267 一致；以自寫參考實作對狀態規則做 2 萬組隨機等價 0 不一致；錯誤處理與 `as_of` 邊界正確。**題庫涉及度**（凍結 42 題＝manifest `eligible_ids`＝`questions_frozen42.json`，兩檔相同）：只有 **1 題**（`57-CANARY3`，勞工健康保護規則第2條第1款；該條僅附表一待施行）gold 落在待施行條文、勞動契約法 0 題、同文件非待施行 2 題（`57-AGGR1`／`57-AGGR2`）——**凍結題庫幾乎不受影響，S3 不會混淆凍結基準，但也量不到 S3 效益，需另備題目**。**待使用者裁示**：①S2（影子顯示：`sources` 附 `effective_status`／`pending_provisions`、trace 標示；預設關、零行為變更；會改 production）是否進行？②S3 政策與評測題；③是否由我用官方資料核對勞動契約法現況。報告下一編號 **270**。KG#4 仍無寫入核准。
+
 ## 2026-10-03（報告268）：**「尚未施行」標示 S1 任務書已寫成，轉交 Codex 執行（待使用者把報告268 §10 的交接指令貼給 Codex）**
 
 使用者指示「轉交給 Codex 執行」。[報告268](docs/報告/268_下一階段任務規劃_尚未施行標示S1純函式模組與題庫涉及度查證_交Codex.md)：**P1** 新增 `services/effective_note.py`（把報告267 分析腳本的解析函式搬成**零接線**純運算模組；`as_of` 由呼叫端傳入、不用目前時間；新增狀態推導 API `article_effective_status`／`document_effective_status`，五種狀態 `in_force`／`no_information`／`pending_whole`／`pending_partial`／`undetermined`）；**P2** 單元測試＋16 份真實備註 fixture（21 條待施行集合、與分析腳本逐項等價、邊界與 `as_of` 推演、結構守衛）；**P3** 凍結題庫涉及度查證腳本（離線；凍結 42 題與全部 65 題的 gold fact 是否落在 21 條待施行條文或勞動契約法）；**P4** 報告 269＋索引＋HANDOVER。**Codex 全程離線**（不連 KG#4／kg2-neo4j／Neo4j／Ollama／docker／.env），**無法傳訊**：結果寫進報告 269 與 HANDOVER，並在對話最後輸出「最終回報格式」文字，由**使用者貼回規劃對話**；我再獨立驗證（自行重算 21 條集合、狀態規則隨機等價、題庫涉及度重算、零接線、pytest）。基準 HEAD `a79dd4b`／pytest 2200 passed；Codex 報告自 **269**、規劃對話下一編號 **270**。不涉及 S2／S3 與任何 KG#4 寫入；KG#4 仍無寫入核准。

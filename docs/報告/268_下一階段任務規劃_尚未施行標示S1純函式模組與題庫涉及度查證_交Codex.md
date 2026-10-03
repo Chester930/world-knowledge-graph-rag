@@ -122,4 +122,15 @@ S2（`sources`／trace 影子顯示）、S3（prompt 附註與排除）、對 KG
 
 ## 11. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成；待使用者把 §10 的交接指令貼給 Codex。KG#4 仍無任何寫入核准；本任務完全不涉及 KG#4。
+✅ **S1 已於 2026-10-03 由規劃對話獨立驗證通過**（Codex commit `06d710e`＋`03f8bd0`；執行紀錄見[報告269](269_尚未施行標示S1純函式與題庫涉及度查證執行紀錄_Codex.md)）。**本任務全程離線；KG#4 仍無任何寫入核准。**
+
+**規劃對話驗證摘要**
+1. **範圍**：`git diff --name-status 681cda2..HEAD` 僅 §6 允許的 9 個檔案（新模組 `services/effective_note.py` 229 行、2 個測試檔、1 個 fixture、題庫涉及度腳本與輸出 JSON、報告 269、索引一行、HANDOVER 頂部條目）；既有 production、既有腳本與測試、題庫與既有資料檔、規劃文件、論文、歷史報告零變動。
+2. **純運算與零接線（我自己 grep）**：模組只匯入 `re`／`dataclasses`／`datetime.date`／`typing`；不含 `today()`／`now()`／`time.time`／`open(`／`os.environ`／`neo4j`／`requests`／`httpx`；`services/`／`routers/`／`core/`／`repositories/`／`models/`／`main.py` 內**沒有任何檔案匯入它**（`effective_note` 字樣在 production 出現的是既有的 `Document.effective_note` 欄位名稱，非本模組），只有測試匯入。
+3. **獨立等價與規則驗證（我的腳本，不用 Codex 的 fixture）**：用我先前自 KG#4 唯讀取出的 16 份真實備註，新模組與報告267 分析腳本 `parse_effective_note` 輸出 **16／16 完全相等**、`pending_items` 相同；as_of＝2026-10-03 的待施行集合＝**21 條、與報告267 JSON 逐項一致**；以我**依規格字面自寫的參考實作**對狀態規則做 **20,000 組隨機等價**（含 `undetermined`／`empty`／`unparsed`、增訂／修正／刪除、三種 scope、`article_no` 三種寫法、`as_of` 邊界）→ `article_effective_status` 與 `document_effective_status` **0 不一致**；非法日期（月份 13）→ `unparsed`＋`errors`、不拋例外；`as_of` 格式錯誤（`2026/10/03`、`20261003`、空字串、`None`）→ `ValueError`；邊界：`as_of＝2027-06-30` 時營造第 11-2 條為 `pending_whole`、`as_of＝2027-07-01` 起 `in_force`（與規格「`effective_date > as_of` 才待施行」一致）。
+4. **題庫涉及度（獨立重算）**：兩個凍結清單候選檔（`frozen_manifest.json` 的 `eligible_ids` 與 `questions_frozen42.json`）**內容完全相同（42 題）**；以正確的條號擷取重算，**與 Codex 的 JSON 逐項相同**：凍結 42 題與全部 65 題都只有 **1 題**的 gold fact 落在待施行條文——`57-CANARY3` 的 `N0060022 勞工健康保護規則 第2條第1款`（該條**只有附表一**待施行，2028-01-01）；落在勞動契約法 **0 題**；同文件但條文不在待施行清單 **2 題**（`57-AGGR1`、`57-AGGR2`）。（我的第一版重算因條號正規化把「第2條第1款」誤處理成「21款」而得到不同答案，已查明是我的腳本缺陷、Codex 正確；兩者修正後一致。）
+5. 全量 pytest **2226 passed**（2200＋26）、節點卡 0 警告、`.env` 敏感值對 36 個檔 0 命中；`kg2-neo4j` StartedAt 仍為新基準。
+
+**對 S3 的意義（〔判讀〕）**：凍結題庫幾乎不受「尚未施行」處理影響（42 題中 1 題，且該題的 gold 內容是現行有效的定義款、只有附表一待施行），所以 S3 的行為變更**不會混淆凍結基準的比較**，但也**無法用凍結題庫量到它的效益**；S3 的評測需另備題目。
+
+**限制（沿用）**：解析器僅 16 份備註驗證；48／64 份文件無備註（`no_information`≠`in_force`）；項／附表層級只能標在條文層；題庫涉及度只比對 gold 的 `source_law`＋`source_article`，不代表檢索實際取到該條。
