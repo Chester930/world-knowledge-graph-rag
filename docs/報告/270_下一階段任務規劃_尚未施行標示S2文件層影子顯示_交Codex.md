@@ -140,4 +140,16 @@ Fact 目前不帶條號（`vector_search_facts` 不回傳 `article_no`），條�
 
 ## 12. 執行紀錄（僅規劃對話更新）
 
-⏳ 任務書已寫成；待使用者把 §11 的交接指令貼給 Codex。KG#4 仍無任何寫入核准。
+✅ **S2 已於 2026-10-04 由規劃對話獨立驗證通過**（Codex commit `f1bdcf1`；執行紀錄見[報告271](271_尚未施行標示S2文件層影子顯示執行紀錄_Codex.md)）。Codex 全程離線；**KG#4 的 64 份文件由規劃對話唯讀取得並驗證**；KG#4 仍無任何寫入核准。
+
+**規劃對話驗證摘要**
+1. **範圍**：`git diff --name-status 67a7dab..HEAD` 僅 §8 允許的檔案——4 個 production 檔（`services/effective_note.py`、`services/context/telemetry.py`、`services/context/trace_marks.py`、`routers/agent.py`）、3 個**新增**測試檔、報告 271、索引、HANDOVER；**沒有修改任何既有測試**；`core/`、`services/svo_service.py`、`services/retrieval/`、`services/context/fact_lines.py` 零變動；`services/effective_note.py` 只新增 `DocumentEffectiveSummary`／`summarize_document_effective` 並擴充 `__all__`（2 行被替換、其餘零刪除，既有函式與常數未動）。
+2. **讀碼**：`serialize_document(doc, *, effective_as_of=None)`（預設不改輸出；開啟時於既有四鍵之後附 `effective_status`、`effective_pending_dates`）、`serialize_sources(..., effective_as_of=None)`、`build_retrieval_trace(..., document_effective_status=None)`（僅在 `include_semantic_marks=True` 且參數非 `None` 時於 `semantic_marks` 末尾附 `document_effective_status`，查無＝`INDETERMINATE`）、`effective_marks_kwargs`（旗標關閉＝`({}, {})`、不匯入模組）、`routers/agent.py` 最小改動（兩個 `**kwargs`；`as_of` 在 router 以 `date.today()` 取得——**無論旗標都會計算這個日期，無副作用**；旗標關閉時 `effective_marks_kwargs` 回 `{}`）。與 §4 規格逐項相符。
+3. **差分測試（我自寫；舊版 `git show 67a7dab:services/context/telemetry.py` vs 新版；用 KG#4 的 64 份真實 `Document` 建構 `LawDocument`，加上隨機三元組／Fact 證據）**：`serialize_document` 旗標關閉 **64／64 逐份相同**；開啟時恰為既有四鍵＋尾端兩鍵；`serialize_sources` 關閉輸出與舊版相同、開啟＝關閉輸出＋每份文件兩鍵；`build_retrieval_trace` 關閉相同、旗標開啟但不帶新參數相同；帶新參數時只在 `semantic_marks` 末尾多 `document_effective_status`、其餘鍵值不變、值與對照表一致；`include_semantic_marks=False` 時即使帶參數也不附加；`effective_marks_kwargs(False, …)`＝`({}, {})`。
+4. **KG#4 全部 64 份 `Document` 唯讀驗證（as_of＝2026-10-03）**：`has_pending` **5**、`undetermined` **1**、`in_force` **10**、`no_information` **48**——與預期完全一致；待施行日期：勞工健康保護規則 `[2027-07-01, 2028-01-01]`、職業安全衛生設施規則 `[2027-01-01]`、教育訓練規則 `[2027-01-01]`、容許暴露標準 `[2027-01-01]`、營造標準 `[2027-07-01]`；`undetermined`＝勞動契約法。
+5. **結構守衛（我自己 grep）**：`date.today` 在 `services/`／`routers/`／`core/`／`repositories/`／`models/` 內只出現在 `routers/agent.py:1438`；`effective_note` 模組只被 `telemetry.py`（函式內）與 `trace_marks.py`（函式內）匯入，其餘只有測試；`effective_note.py` 無時鐘／I/O。
+6. 全量 pytest **2241 passed**（2226＋15）、節點卡 0 警告、`.env` 敏感值對 44 個檔 0 命中；`kg2-neo4j` StartedAt 仍為 `2026-10-02T11:09:32.79429649Z`。
+
+**小項（不阻擋，列入下次順手修）**：`build_retrieval_trace` 的新參數型別註解寫成字串 `"Mapping[str, str] | None"`，但 `telemetry.py` 沒有匯入 `Mapping`——執行時無影響（字串註解不求值），但靜態檢查工具（pyflakes／pyright）會報未定義名稱；建議以 `from typing import TYPE_CHECKING, Mapping`（或直接匯入 `Mapping`）修正。我環境沒有 pyflakes，**這點只是讀碼判斷，未用工具驗證**。
+
+**限制（沿用）**：只做**文件層**（條文層標示＝S2b，需改檢索查詢或多一次 `LawArticle` 查詢，未做）；`no_information`≠`in_force`（48／64 份文件無備註）；解析器僅 16 份備註驗證；本任務沒有端到端跑 `chat()`（router 層由 Codex 以假 driver／provider／repo 與固定日期測試覆蓋，我只讀碼與差分驗證序列化層）。
